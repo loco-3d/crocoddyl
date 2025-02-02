@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft,
-//                          University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -26,6 +24,8 @@ class ControlParametrizationModelNumDiffTpl
     : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ControlParametrizationModelBase,
+                         ControlParametrizationModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -42,7 +42,7 @@ class ControlParametrizationModelNumDiffTpl
    * @param model
    */
   explicit ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model);
-  virtual ~ControlParametrizationModelNumDiffTpl();
+  virtual ~ControlParametrizationModelNumDiffTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -52,7 +52,7 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  u      Control parameters
    */
   void calc(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-            const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+            const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the
@@ -63,14 +63,16 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  u      Control parameters
    */
   void calcDiff(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-                const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+                const Scalar t,
+                const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Create the control-parametrization data
    *
    * @return the control-parametrization data
    */
-  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData()
+      override;
 
   /**
    * @brief Get a value of the control parameters such that the control at the
@@ -81,7 +83,8 @@ class ControlParametrizationModelNumDiffTpl
    * @param[in]  w      Control values
    */
   void params(const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-              const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
+              const Scalar t,
+              const Eigen::Ref<const VectorXs>& w) const override;
 
   /**
    * @brief Convert the bounds on the control to bounds on the control
@@ -95,7 +98,7 @@ class ControlParametrizationModelNumDiffTpl
   void convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                      const Eigen::Ref<const VectorXs>& w_ub,
                      Eigen::Ref<VectorXs> u_lb,
-                     Eigen::Ref<VectorXs> u_ub) const;
+                     Eigen::Ref<VectorXs> u_ub) const override;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of
@@ -111,7 +114,7 @@ class ControlParametrizationModelNumDiffTpl
   void multiplyByJacobian(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp = setto) const override;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control
@@ -127,8 +130,10 @@ class ControlParametrizationModelNumDiffTpl
   void multiplyJacobianTransposeBy(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp = setto) const override;
 
+  template <typename NewScalar>
+  ControlParametrizationModelNumDiffTpl<NewScalar> cast() const;
   /**
    * @brief Get the model_ object
    *

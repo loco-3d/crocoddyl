@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,10 +16,6 @@ ControlParametrizationModelAbstractTpl<
     Scalar>::ControlParametrizationModelAbstractTpl(const std::size_t nw,
                                                     const std::size_t nu)
     : nw_(nw), nu_(nu) {}
-
-template <typename Scalar>
-ControlParametrizationModelAbstractTpl<
-    Scalar>::~ControlParametrizationModelAbstractTpl() {}
 
 template <typename Scalar>
 std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >

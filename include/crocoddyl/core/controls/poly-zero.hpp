@@ -37,6 +37,10 @@ template <typename _Scalar>
 class ControlParametrizationModelPolyZeroTpl
     : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ControlParametrizationModelBase,
+                         ControlParametrizationModelPolyZeroTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
@@ -52,7 +56,7 @@ class ControlParametrizationModelPolyZeroTpl
    * @param[in] nw  Dimension of control vector
    */
   explicit ControlParametrizationModelPolyZeroTpl(const std::size_t nw);
-  virtual ~ControlParametrizationModelPolyZeroTpl();
+  virtual ~ControlParametrizationModelPolyZeroTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -63,7 +67,7 @@ class ControlParametrizationModelPolyZeroTpl
    */
   virtual void calc(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the
@@ -77,14 +81,15 @@ class ControlParametrizationModelPolyZeroTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Create the control-parametrization data
    *
    * @return the control-parametrization data
    */
-  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData()
+      override;
 
   /**
    * @brief Get a value of the control parameters such that the control at the
@@ -96,7 +101,7 @@ class ControlParametrizationModelPolyZeroTpl
    */
   virtual void params(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& w) const override;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter
@@ -110,7 +115,7 @@ class ControlParametrizationModelPolyZeroTpl
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                              const Eigen::Ref<const VectorXs>& w_ub,
                              Eigen::Ref<VectorXs> u_lb,
-                             Eigen::Ref<VectorXs> u_ub) const;
+                             Eigen::Ref<VectorXs> u_ub) const override;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of
@@ -128,7 +133,7 @@ class ControlParametrizationModelPolyZeroTpl
   virtual void multiplyByJacobian(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp op = setto) const;
+      const AssignmentOp = setto) const override;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control
@@ -146,7 +151,10 @@ class ControlParametrizationModelPolyZeroTpl
   virtual void multiplyJacobianTransposeBy(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp op = setto) const;
+      const AssignmentOp = setto) const override;
+
+  template <typename NewScalar>
+  ControlParametrizationModelPolyZeroTpl<NewScalar> cast() const;
 
  protected:
   using Base::nu_;

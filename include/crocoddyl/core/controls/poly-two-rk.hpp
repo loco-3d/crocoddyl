@@ -51,6 +51,10 @@ template <typename _Scalar>
 class ControlParametrizationModelPolyTwoRKTpl
     : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ControlParametrizationModelBase,
+                         ControlParametrizationModelPolyTwoRKTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
@@ -68,7 +72,7 @@ class ControlParametrizationModelPolyTwoRKTpl
    */
   explicit ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw,
                                                    const RKType rktype);
-  virtual ~ControlParametrizationModelPolyTwoRKTpl();
+  virtual ~ControlParametrizationModelPolyTwoRKTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -79,7 +83,7 @@ class ControlParametrizationModelPolyTwoRKTpl
    */
   virtual void calc(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the
@@ -93,14 +97,15 @@ class ControlParametrizationModelPolyTwoRKTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Create the control-parametrization data
    *
    * @return the control-parametrization data
    */
-  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData()
+      override;
 
   /**
    * @brief Get a value of the control parameters u such that the control at the
@@ -112,7 +117,7 @@ class ControlParametrizationModelPolyTwoRKTpl
    */
   virtual void params(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
+      const Scalar t, const Eigen::Ref<const VectorXs>& w) const override;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter
@@ -126,7 +131,7 @@ class ControlParametrizationModelPolyTwoRKTpl
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                              const Eigen::Ref<const VectorXs>& w_ub,
                              Eigen::Ref<VectorXs> u_lb,
-                             Eigen::Ref<VectorXs> u_ub) const;
+                             Eigen::Ref<VectorXs> u_ub) const override;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of
@@ -144,7 +149,7 @@ class ControlParametrizationModelPolyTwoRKTpl
   virtual void multiplyByJacobian(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp op = setto) const;
+      const AssignmentOp = setto) const override;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control
@@ -162,7 +167,10 @@ class ControlParametrizationModelPolyTwoRKTpl
   virtual void multiplyJacobianTransposeBy(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp op = setto) const;
+      const AssignmentOp = setto) const override;
+
+  template <typename NewScalar>
+  ControlParametrizationModelPolyTwoRKTpl<NewScalar> cast() const;
 
  protected:
   using Base::nu_;
@@ -187,8 +195,7 @@ struct ControlParametrizationDataPolyTwoRKTpl
       : Base(model), tmp_t2(0.) {
     c.setZero();
   }
-
-  virtual ~ControlParametrizationDataPolyTwoRKTpl() {}
+  virtual ~ControlParametrizationDataPolyTwoRKTpl() = default;
 
   Vector3s c;     //!< Polynomial coefficients of the second-order control model
                   //!< that depends on time

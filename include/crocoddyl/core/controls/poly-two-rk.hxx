@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,10 +19,6 @@ ControlParametrizationModelPolyTwoRKTpl<
               << std::endl;
   }
 }
-
-template <typename Scalar>
-ControlParametrizationModelPolyTwoRKTpl<
-    Scalar>::~ControlParametrizationModelPolyTwoRKTpl() {}
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calc(
@@ -197,6 +194,15 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
       break;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelPolyTwoRKTpl<NewScalar>
+ControlParametrizationModelPolyTwoRKTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelPolyTwoRKTpl<NewScalar> ReturnType;
+  ReturnType ret(nw_, rktype_);
+  return ret;
 }
 
 }  // namespace crocoddyl

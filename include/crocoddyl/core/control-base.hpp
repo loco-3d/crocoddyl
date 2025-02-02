@@ -18,6 +18,14 @@
 
 namespace crocoddyl {
 
+class ControlParametrizationModelBase {
+ public:
+  virtual ~ControlParametrizationModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ControlParametrizationModelBase,
+                      ControlParametrizationModelAbstractTpl)
+};
+
 /**
  * @brief Abstract class for the control trajectory parametrization
  *
@@ -41,7 +49,8 @@ namespace crocoddyl {
  * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
-class ControlParametrizationModelAbstractTpl {
+class ControlParametrizationModelAbstractTpl
+    : public ControlParametrizationModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -60,7 +69,7 @@ class ControlParametrizationModelAbstractTpl {
    */
   ControlParametrizationModelAbstractTpl(const std::size_t nw,
                                          const std::size_t nu);
-  virtual ~ControlParametrizationModelAbstractTpl();
+  virtual ~ControlParametrizationModelAbstractTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -184,6 +193,7 @@ class ControlParametrizationModelAbstractTpl {
  protected:
   std::size_t nw_;  //!< Control dimension
   std::size_t nu_;  //!< Control parameters dimension
+  ControlParametrizationModelAbstractTpl() : nw_(0), nu_(0) {};
 };
 
 template <typename _Scalar>
@@ -204,7 +214,7 @@ struct ControlParametrizationDataAbstractTpl {
     u.setZero();
     dw_du.setZero();
   }
-  virtual ~ControlParametrizationDataAbstractTpl() {}
+  virtual ~ControlParametrizationDataAbstractTpl() = default;
 
   VectorXs w;      //!< value of the differential control
   VectorXs u;      //!< value of the control parameters

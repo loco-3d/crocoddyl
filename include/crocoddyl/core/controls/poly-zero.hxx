@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,10 +13,6 @@ template <typename Scalar>
 ControlParametrizationModelPolyZeroTpl<
     Scalar>::ControlParametrizationModelPolyZeroTpl(const std::size_t nw)
     : Base(nw, nw) {}
-
-template <typename Scalar>
-ControlParametrizationModelPolyZeroTpl<
-    Scalar>::~ControlParametrizationModelPolyZeroTpl() {}
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
@@ -157,6 +154,15 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
       break;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelPolyZeroTpl<NewScalar>
+ControlParametrizationModelPolyZeroTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelPolyZeroTpl<NewScalar> ReturnType;
+  ReturnType ret(nw_);
+  return ret;
 }
 
 }  // namespace crocoddyl

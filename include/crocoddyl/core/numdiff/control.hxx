@@ -1,10 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh, New York
-// University,
-//                          Heriot-Watt University
-// Max Planck Gesellschaft, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          New York University, Heriot-Watt University,
+//                          Max Planck Gesellschaft, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,11 +17,7 @@ ControlParametrizationModelNumDiffTpl<
     Scalar>::ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model)
     : Base(model->get_nw(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ControlParametrizationModelNumDiffTpl<
-    Scalar>::~ControlParametrizationModelNumDiffTpl() {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
@@ -40,7 +35,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
   data->w = data_nd->data_0->w;
 
   data_nd->du.setZero();
-  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
+  const Scalar uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (std::size_t i = 0; i < model_->get_nu(); ++i) {
     data_nd->du(i) += uh_jac;
     model_->calc(data_nd->data_u[i], t, u + data_nd->du);
@@ -117,6 +112,15 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
       break;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelNumDiffTpl<NewScalar>
+ControlParametrizationModelNumDiffTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

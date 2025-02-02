@@ -30,6 +30,9 @@ void exposeControlParametrizationAbstract() {
   bp::register_ptr_to_python<
       std::shared_ptr<ControlParametrizationModelAbstract> >();
 
+  typedef ControlParametrizationModelAbstractTpl_wrap<double>
+      ControlParametrizationModelAbstract_wrap;
+
   bp::class_<ControlParametrizationModelAbstract_wrap, boost::noncopyable>(
       "ControlParametrizationModelAbstract",
       "Abstract class for the control parametrization.\n\n"
