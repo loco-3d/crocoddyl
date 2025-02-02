@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,7 +16,7 @@ ActivationModelNumDiffTpl<Scalar>::ActivationModelNumDiffTpl(
     std::shared_ptr<Base> model)
     : Base(model->get_nr()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 ActivationModelNumDiffTpl<Scalar>::~ActivationModelNumDiffTpl() {}
@@ -51,7 +51,7 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(
   const std::size_t nr = model_->get_nr();
 
   // Computing the d activation(r) / dr
-  const Scalar rh_jac = e_jac_ * std::max(1., r.norm());
+  const Scalar rh_jac = e_jac_ * std::max(Scalar(1.), r.norm());
   data_nd->rp = r;
   for (unsigned int i_r = 0; i_r < nr; ++i_r) {
     data_nd->rp(i_r) += rh_jac;
@@ -69,6 +69,15 @@ template <typename Scalar>
 std::shared_ptr<ActivationDataAbstractTpl<Scalar> >
 ActivationModelNumDiffTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActivationModelNumDiffTpl<NewScalar> ActivationModelNumDiffTpl<Scalar>::cast()
+    const {
+  typedef ActivationModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

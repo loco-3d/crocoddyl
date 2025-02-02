@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
-// Oxford Copyright note valid unless otherwise stated in individual files. All
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -80,6 +81,14 @@ struct ActivationBoundsTpl {
       : lb(other.lb), ub(other.ub), beta(other.beta) {}
   ActivationBoundsTpl() : beta(Scalar(1.)) {}
 
+  template <typename NewScalar>
+  ActivationBoundsTpl<NewScalar> cast() const {
+    typedef ActivationBoundsTpl<NewScalar> ReturnType;
+    ReturnType res(lb.template cast<NewScalar>(), ub.template cast<NewScalar>(),
+                   static_cast<NewScalar>(beta));
+    return res;
+  }
+
   ActivationBoundsTpl& operator=(const ActivationBoundsTpl& other) {
     if (this != &other) {
       lb = other.lb;
@@ -87,6 +96,20 @@ struct ActivationBoundsTpl {
       beta = other.beta;
     }
     return *this;
+  }
+
+  /**
+   * @brief Print information on the activation bounds
+   */
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ActivationBoundsTpl& bounds) {
+    bounds.print(os);
+    return os;
+  }
+
+  void print(std::ostream& os) const {
+    os << "ActivationBounds {lb=" << lb.transpose() << ", ub=" << ub.transpose()
+       << ", beta=" << beta << "}";
   }
 
   VectorXs lb;
@@ -99,6 +122,8 @@ class ActivationModelQuadraticBarrierTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase,
+                         ActivationModelQuadraticBarrierTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -111,10 +136,10 @@ class ActivationModelQuadraticBarrierTpl
 
   explicit ActivationModelQuadraticBarrierTpl(const ActivationBounds& bounds)
       : Base(bounds.lb.size()), bounds_(bounds) {};
-  virtual ~ActivationModelQuadraticBarrierTpl() {};
+  virtual ~ActivationModelQuadraticBarrierTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r) {
+                    const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -130,7 +155,7 @@ class ActivationModelQuadraticBarrierTpl
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r) {
+                        const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -149,9 +174,16 @@ class ActivationModelQuadraticBarrierTpl
     }
   };
 
-  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  template <typename NewScalar>
+  ActivationModelQuadraticBarrierTpl<NewScalar> cast() const {
+    typedef ActivationModelQuadraticBarrierTpl<NewScalar> ReturnType;
+    ReturnType res(bounds_.template cast<NewScalar>());
+    return res;
+  }
 
   const ActivationBounds& get_bounds() const { return bounds_; };
   void set_bounds(const ActivationBounds& bounds) { bounds_ = bounds; };
@@ -161,7 +193,7 @@ class ActivationModelQuadraticBarrierTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const {
+  virtual void print(std::ostream& os) const override {
     os << "ActivationModelQuadraticBarrier {nr=" << nr_ << "}";
   }
 
@@ -180,6 +212,8 @@ struct ActivationDataQuadraticBarrierTpl
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::ArrayXs ArrayXs;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
@@ -193,6 +227,7 @@ struct ActivationDataQuadraticBarrierTpl
 
   ArrayXs rlb_min_;
   ArrayXs rub_max_;
+
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;
