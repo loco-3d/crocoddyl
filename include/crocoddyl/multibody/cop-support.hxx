@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,19 +12,6 @@
 #include <iostream>
 
 namespace crocoddyl {
-
-template <typename Scalar>
-CoPSupportTpl<Scalar>::CoPSupportTpl()
-    : R_(Matrix3s::Identity()),
-      box_(std::numeric_limits<Scalar>::infinity(),
-           std::numeric_limits<Scalar>::infinity()) {
-  A_.setZero();
-  ub_.setZero();
-  lb_.setZero();
-
-  // Update the inequality matrix and bounds
-  update();
-}
 
 template <typename Scalar>
 CoPSupportTpl<Scalar>::CoPSupportTpl(const Matrix3s& R, const Vector2s& box)
@@ -53,6 +41,19 @@ CoPSupportTpl<Scalar>::CoPSupportTpl(const CoPSupportTpl<Scalar>& other)
       box_(other.get_box()) {}
 
 template <typename Scalar>
+CoPSupportTpl<Scalar>::CoPSupportTpl()
+    : R_(Matrix3s::Identity()),
+      box_(std::numeric_limits<Scalar>::infinity(),
+           std::numeric_limits<Scalar>::infinity()) {
+  A_.setZero();
+  ub_.setZero();
+  lb_.setZero();
+
+  // Update the inequality matrix and bounds
+  update();
+}
+
+template <typename Scalar>
 CoPSupportTpl<Scalar>::~CoPSupportTpl() {}
 
 template <typename Scalar>
@@ -75,6 +76,15 @@ void CoPSupportTpl<Scalar>::update() {
   A_.row(1) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
   A_.row(2) << -L * R_.col(2).transpose(), R_.col(1).transpose();
   A_.row(3) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+CoPSupportTpl<NewScalar> CoPSupportTpl<Scalar>::cast() const {
+  typedef CoPSupportTpl<NewScalar> ReturnType;
+  ReturnType ret(R_.template cast<NewScalar>(),
+                 box_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,25 +12,6 @@
 #include <iostream>
 
 namespace crocoddyl {
-
-template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl()
-    : nf_(4),
-      A_(nf_ + 1, 3),
-      ub_(nf_ + 1),
-      lb_(nf_ + 1),
-      R_(Matrix3s::Identity()),
-      mu_(Scalar(0.7)),
-      inner_appr_(true),
-      min_nforce_(Scalar(0.)),
-      max_nforce_(std::numeric_limits<Scalar>::infinity()) {
-  A_.setZero();
-  ub_.setZero();
-  lb_.setZero();
-
-  // Update the inequality matrix and bounds
-  update();
-}
 
 template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu,
@@ -120,6 +102,25 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
 }
 
 template <typename Scalar>
+FrictionConeTpl<Scalar>::FrictionConeTpl()
+    : nf_(4),
+      A_(nf_ + 1, 3),
+      ub_(nf_ + 1),
+      lb_(nf_ + 1),
+      R_(Matrix3s::Identity()),
+      mu_(Scalar(0.7)),
+      inner_appr_(true),
+      min_nforce_(Scalar(0.)),
+      max_nforce_(std::numeric_limits<Scalar>::infinity()) {
+  A_.setZero();
+  ub_.setZero();
+  lb_.setZero();
+
+  // Update the inequality matrix and bounds
+  update();
+}
+
+template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl(const FrictionConeTpl<Scalar>& cone)
     : nf_(cone.get_nf()),
       A_(cone.get_A()),
@@ -144,7 +145,7 @@ void FrictionConeTpl<Scalar>::update() {
 
   // Compute the mu given the type of friction cone approximation
   Scalar mu = mu_;
-  const Scalar theta = Scalar(2) * M_PI / static_cast<Scalar>(nf_);
+  const Scalar theta = static_cast<Scalar>(2.0 * M_PI / nf_);
   if (inner_appr_) {
     mu *= cos(theta / Scalar(2.));
   }
@@ -192,6 +193,16 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu,
 
   // Update the inequality matrix and bounds
   update();
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+FrictionConeTpl<NewScalar> FrictionConeTpl<Scalar>::cast() const {
+  typedef FrictionConeTpl<NewScalar> ReturnType;
+  ReturnType ret(R_.template cast<NewScalar>(), static_cast<NewScalar>(mu_),
+                 nf_, inner_appr_, static_cast<NewScalar>(min_nforce_),
+                 static_cast<NewScalar>(max_nforce_));
+  return ret;
 }
 
 template <typename Scalar>
