@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,10 +18,7 @@ ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(
     : Base(model->get_state(), model->get_type(), model->get_nc(),
            model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calc(
@@ -46,7 +43,7 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -80,6 +77,14 @@ ContactModelNumDiffTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModelNumDiffTpl<NewScalar> ContactModelNumDiffTpl<Scalar>::cast() const {
+  typedef ContactModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

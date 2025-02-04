@@ -17,54 +17,77 @@
 namespace crocoddyl {
 namespace python {
 
-class ContactModelAbstract_wrap : public ContactModelAbstract,
-                                  public bp::wrapper<ContactModelAbstract> {
+template <typename Scalar>
+class ContactModelAbstractTpl_wrap
+    : public ContactModelAbstractTpl<Scalar>,
+      public bp::wrapper<ContactModelAbstractTpl<Scalar>> {
  public:
-  ContactModelAbstract_wrap(std::shared_ptr<StateMultibody> state,
-                            const pinocchio::ReferenceFrame type,
-                            std::size_t nc, std::size_t nu)
-      : ContactModelAbstract(state, type, nc, nu) {}
-  ContactModelAbstract_wrap(std::shared_ptr<StateMultibody> state,
-                            const pinocchio::ReferenceFrame type,
-                            std::size_t nc)
-      : ContactModelAbstract(state, type, nc) {}
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModelAbstractTpl_wrap)
 
-  void calc(const std::shared_ptr<ContactDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x) {
+  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar> ContactModel;
+  typedef typename crocoddyl::ContactDataAbstractTpl<Scalar> ContactData;
+  typedef typename ContactModel::VectorXs VectorXs;
+  typedef typename ContactModel::StateMultibody State;
+  using ContactModel::nc_;
+  using ContactModel::nu_;
+  using ContactModel::state_;
+  using ContactModel::type_;
+
+  ContactModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                               const pinocchio::ReferenceFrame type,
+                               std::size_t nc, std::size_t nu)
+      : ContactModel(state, type, nc, nu) {}
+  ContactModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                               const pinocchio::ReferenceFrame type,
+                               std::size_t nc)
+      : ContactModel(state, type, nc) {}
+
+  void calc(const std::shared_ptr<ContactData>& data,
+            const Eigen::Ref<const VectorXs>& x) override {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(),
                   "x has wrong dimension");
-    return bp::call<void>(this->get_override("calc").ptr(), data,
-                          (Eigen::VectorXd)x);
+    return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x);
   }
 
-  void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x) {
+  void calcDiff(const std::shared_ptr<ContactData>& data,
+                const Eigen::Ref<const VectorXs>& x) override {
     assert_pretty(static_cast<std::size_t>(x.size()) == state_->get_nx(),
                   "x has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                          (Eigen::VectorXd)x);
+                          (VectorXs)x);
   }
 
-  void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
-                   const Eigen::VectorXd& force) {
+  void updateForce(const std::shared_ptr<ContactData>& data,
+                   const VectorXs& force) override {
     assert_pretty(static_cast<std::size_t>(force.size()) == nc_,
                   "force has wrong dimension");
     return bp::call<void>(this->get_override("updateForce").ptr(), data, force);
   }
 
-  std::shared_ptr<ContactDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data) {
+  std::shared_ptr<ContactData> createData(
+      pinocchio::DataTpl<Scalar>* const data) override {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<std::shared_ptr<ContactDataAbstract> >(createData.ptr(),
-                                                             boost::ref(data));
+      return bp::call<std::shared_ptr<ContactData>>(createData.ptr(),
+                                                    boost::ref(data));
     }
-    return ContactModelAbstract::createData(data);
+    return ContactModel::createData(data);
   }
 
-  std::shared_ptr<ContactDataAbstract> default_createData(
+  std::shared_ptr<ContactData> default_createData(
       pinocchio::DataTpl<Scalar>* const data) {
-    return this->ContactModelAbstract::createData(data);
+    return this->ContactModel::createData(data);
+  }
+
+  template <typename NewScalar>
+  ContactModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef ContactModelAbstractTpl_wrap<NewScalar> ReturnType;
+    typedef StateMultibodyTpl<NewScalar> StateType;
+    ReturnType ret(
+        std::make_shared<StateType>(state_->template cast<NewScalar>()), type_,
+        nc_, nu_);
+    return ret;
   }
 };
 

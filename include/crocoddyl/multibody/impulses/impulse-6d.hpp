@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,6 +22,7 @@ template <typename _Scalar>
 class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ImpulseModelBase, ImpulseModel6DTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -45,7 +46,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
   ImpulseModel6DTpl(
       std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
       const pinocchio::ReferenceFrame type = pinocchio::ReferenceFrame::LOCAL);
-  virtual ~ImpulseModel6DTpl();
+  virtual ~ImpulseModel6DTpl() = default;
 
   /**
    * @brief Compute the 3d impulse Jacobian
@@ -54,7 +55,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ImpulseDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the 3d impulse holonomic constraint
@@ -63,7 +64,7 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -72,20 +73,32 @@ class ImpulseModel6DTpl : public ImpulseModelAbstractTpl<_Scalar> {
    * @param[in] force  3d impulse
    */
   virtual void updateForce(const std::shared_ptr<ImpulseDataAbstract>& data,
-                           const VectorXs& force);
+                           const VectorXs& force) override;
 
   /**
    * @brief Create the 3d impulse data
    */
   virtual std::shared_ptr<ImpulseDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data);
+      pinocchio::DataTpl<Scalar>* const data) override;
+
+  /**
+   * @brief Cast the impulse-6d model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ImpulseModel6DTpl<NewScalar> An impulse model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ImpulseModel6DTpl<NewScalar> cast() const;
 
   /**
    * @brief Print relevant information of the 6d impulse model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::id_;
@@ -133,6 +146,7 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     fw_skew.setZero();
     fJf_df.setZero();
   }
+  virtual ~ImpulseData6DTpl() = default;
 
   using Base::df_dx;
   using Base::dv0_dq;

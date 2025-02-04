@@ -20,6 +20,8 @@ namespace python {
 void exposeImpulseAbstract() {
   bp::register_ptr_to_python<std::shared_ptr<ImpulseModelAbstract> >();
 
+  typedef ImpulseModelAbstractTpl_wrap<double> ImpulseModelAbstract_wrap;
+
   bp::class_<ImpulseModelAbstract_wrap, boost::noncopyable>(
       "ImpulseModelAbstract",
       "Abstract impulse model.\n\n"

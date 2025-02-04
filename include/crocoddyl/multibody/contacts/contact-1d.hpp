@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -25,6 +25,7 @@ template <typename _Scalar>
 class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModel1DTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -92,7 +93,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
       ContactModel1DTpl(std::shared_ptr<StateMultibody> state,
                         const pinocchio::FrameIndex id, const Scalar xref,
                         const Vector2s& gains = Vector2s::Zero());)
-  virtual ~ContactModel1DTpl();
+  virtual ~ContactModel1DTpl() = default;
 
   /**
    * @brief Compute the 1d contact Jacobian and drift
@@ -102,7 +103,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the 1d contact holonomic constraint
@@ -112,7 +113,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -121,13 +122,25 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] force  1d force
    */
   virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
-                           const VectorXs& force);
+                           const VectorXs& force) override;
 
   /**
    * @brief Create the 1d contact data
    */
   virtual std::shared_ptr<ContactDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data);
+      pinocchio::DataTpl<Scalar>* const data) override;
+
+  /**
+   * @brief Cast the contact-1d model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ContactModel1DTpl<NewScalar> A contact model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ContactModel1DTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference frame translation
@@ -159,7 +172,7 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::id_;
@@ -229,6 +242,7 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
     oRf.setZero();
     fJf_df.setZero();
   }
+  virtual ~ContactData1DTpl() = default;
 
   using Base::a0;
   using Base::da0_dx;

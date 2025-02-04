@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -26,9 +26,6 @@ ImpulseModelAbstractTpl<Scalar>::ImpulseModelAbstractTpl(
                "this assumes is pinocchio::LOCAL."
             << std::endl;
 }
-
-template <typename Scalar>
-ImpulseModelAbstractTpl<Scalar>::~ImpulseModelAbstractTpl() {}
 
 template <typename Scalar>
 void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(

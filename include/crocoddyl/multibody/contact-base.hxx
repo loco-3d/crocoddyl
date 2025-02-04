@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -50,9 +50,6 @@ ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
                "this assumes is pinocchio::LOCAL."
             << std::endl;
 }
-
-template <typename Scalar>
-ContactModelAbstractTpl<Scalar>::~ContactModelAbstractTpl() {}
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::updateForceDiff(

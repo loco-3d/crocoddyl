@@ -19,6 +19,8 @@ namespace python {
 void exposeContactAbstract() {
   bp::register_ptr_to_python<std::shared_ptr<ContactModelAbstract> >();
 
+  typedef ContactModelAbstractTpl_wrap<double> ContactModelAbstract_wrap;
+
   bp::class_<ContactModelAbstract_wrap, boost::noncopyable>(
       "ContactModelAbstract",
       "Abstract rigid contact model.\n\n"
