@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -66,9 +66,6 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
   }
 }
-
-template <typename Scalar>
-IntegratedActionModelAbstractTpl<Scalar>::~IntegratedActionModelAbstractTpl() {}
 
 template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >

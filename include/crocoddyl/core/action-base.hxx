@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -37,9 +37,6 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
       u_ub_(MathBase::VectorXs::Constant(
           nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
-
-template <typename Scalar>
-ActionModelAbstractTpl<Scalar>::~ActionModelAbstractTpl() {}
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::calc(

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -19,7 +19,7 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       impulses_(impulses),
       costs_(costs),
       constraints_(nullptr),
-      pinocchio_(*state->get_pinocchio().get()),
+      pinocchio_(state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       r_coeff_(r_coeff),
@@ -42,7 +42,7 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       impulses_(impulses),
       costs_(costs),
       constraints_(constraints),
-      pinocchio_(*state->get_pinocchio().get()),
+      pinocchio_(state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       r_coeff_(r_coeff),
@@ -51,9 +51,6 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
       gravity_(state->get_pinocchio()->gravity) {
   init();
 }
-
-template <typename Scalar>
-ActionModelImpulseFwdDynamicsTpl<Scalar>::~ActionModelImpulseFwdDynamicsTpl() {}
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::init() {
@@ -144,6 +141,36 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+ActionModelImpulseFwdDynamicsTpl<NewScalar>
+ActionModelImpulseFwdDynamicsTpl<Scalar>::cast() const {
+  typedef ActionModelImpulseFwdDynamicsTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ImpulseModelMultipleTpl<NewScalar> ImpulseType;
+  typedef CostModelSumTpl<NewScalar> CostType;
+  typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
+  if (constraints_) {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        std::make_shared<ImpulseType>(impulses_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>()),
+        static_cast<NewScalar>(r_coeff_),
+        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+    return ret;
+  } else {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        std::make_shared<ImpulseType>(impulses_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        static_cast<NewScalar>(r_coeff_),
+        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+    return ret;
+  }
+}
+
+template <typename Scalar>
 bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(
     const std::shared_ptr<ActionDataAbstract>& data) {
   std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
@@ -180,8 +207,8 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(
 
   // Computing the forward dynamics with the holonomic constraints defined by
   // the contact model
-  pinocchio::computeAllTerms(pinocchio_, data->pinocchio, q, v);
-  pinocchio::computeCentroidalMomentum(pinocchio_, data->pinocchio);
+  pinocchio::computeAllTerms(*pinocchio_, data->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(*pinocchio_, data->pinocchio);
 
   if (!with_armature_) {
     data->pinocchio.M.diagonal() += armature_;
@@ -199,7 +226,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalc(
   }
 #endif
 
-  pinocchio::impulseDynamics(pinocchio_, data->pinocchio, v,
+  pinocchio::impulseDynamics(*pinocchio_, data->pinocchio, v,
                              data->multibody.impulses->Jc.topRows(nc), r_coeff_,
                              JMinvJt_damping_);
   data->xnext.head(nq) = q;
@@ -229,17 +256,17 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::initCalcDiff(
   // recursively: https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408. Therefore,
   // it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
   data->Kinv.resize(nv + nc, nv + nc);
-  pinocchio::computeRNEADerivatives(pinocchio_, data->pinocchio, q, data->vnone,
-                                    data->pinocchio.dq_after - v,
+  pinocchio::computeRNEADerivatives(*pinocchio_, data->pinocchio, q,
+                                    data->vnone, data->pinocchio.dq_after - v,
                                     data->multibody.impulses->fext);
-  pinocchio::computeGeneralizedGravityDerivatives(pinocchio_, data->pinocchio,
+  pinocchio::computeGeneralizedGravityDerivatives(*pinocchio_, data->pinocchio,
                                                   q, data->dgrav_dq);
   pinocchio::getKKTContactDynamicMatrixInverse(
-      pinocchio_, data->pinocchio, data->multibody.impulses->Jc.topRows(nc),
+      *pinocchio_, data->pinocchio, data->multibody.impulses->Jc.topRows(nc),
       data->Kinv);
 
   pinocchio::computeForwardKinematicsDerivatives(
-      pinocchio_, data->pinocchio, q, data->pinocchio.dq_after, data->vnone);
+      *pinocchio_, data->pinocchio, q, data->pinocchio.dq_after, data->vnone);
   impulses_->calcDiff(data->multibody.impulses, x);
   impulses_->updateRneaDiff(data->multibody.impulses, data->pinocchio);
 
@@ -341,7 +368,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::print(std::ostream& os) const {
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>&
 ActionModelImpulseFwdDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
+  return *pinocchio_;
 }
 
 template <typename Scalar>

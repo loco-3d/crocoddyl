@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -36,9 +36,6 @@ IntegratedActionModelRK4Tpl<Scalar>::IntegratedActionModelRK4Tpl(
       << "Deprecated IntegratedActionModelRK4: Use IntegratedActionModelRK"
       << std::endl;
 }
-
-template <typename Scalar>
-IntegratedActionModelRK4Tpl<Scalar>::~IntegratedActionModelRK4Tpl() {}
 
 template <typename Scalar>
 void IntegratedActionModelRK4Tpl<Scalar>::calc(
@@ -315,6 +312,21 @@ template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 IntegratedActionModelRK4Tpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelAbstractTpl<NewScalar> IntegratedActionModelRK4Tpl<Scalar>::cast()
+    const {
+  typedef IntegratedActionModelRK4Tpl<NewScalar> ReturnType;
+  typedef DifferentialActionModelAbstractTpl<NewScalar> DifferentialType;
+  typedef ControlParametrizationModelAbstractTpl<NewScalar> ControlType;
+  ReturnType ret(
+      std::make_shared<DifferentialType>(
+          differential_->template cast<NewScalar>()),
+      std::make_shared<ControlType>(control_->template cast<NewScalar>()),
+      static_cast<NewScalar>(time_step_), with_cost_residual_);
+  return ret;
 }
 
 template <typename Scalar>

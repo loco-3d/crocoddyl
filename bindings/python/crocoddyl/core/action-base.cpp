@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,6 +16,9 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps,
+                                       ActionModelAbstract::quasiStatic_x, 2, 4)
+
 void exposeActionAbstract() {
   // Register custom converters between std::vector and Python list
   typedef std::shared_ptr<ActionModelAbstract> ActionModelPtr;
@@ -26,6 +29,8 @@ void exposeActionAbstract() {
       "StdVec_ActionData");
 
   bp::register_ptr_to_python<std::shared_ptr<ActionModelAbstract> >();
+
+  typedef ActionModelAbstractTpl_wrap<double> ActionModelAbstract_wrap;
 
   bp::class_<ActionModelAbstract_wrap, boost::noncopyable>(
       "ActionModelAbstract",

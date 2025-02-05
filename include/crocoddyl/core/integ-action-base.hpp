@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -83,44 +83,44 @@ class IntegratedActionModelAbstractTpl
       std::shared_ptr<DifferentialActionModelAbstract> model,
       const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
-  virtual ~IntegratedActionModelAbstractTpl();
+  virtual ~IntegratedActionModelAbstractTpl() = default;
 
   /**
    * @brief Create the integrator data
    *
    * @return the sympletic integrator data
    */
-  virtual std::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData() override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of inequality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the differential action model associated to this integrated
@@ -159,6 +159,12 @@ class IntegratedActionModelAbstractTpl
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
 
+  IntegratedActionModelAbstractTpl()
+      : differential_(nullptr),
+        control_(nullptr),
+        time_step_(0),
+        time_step2_(0),
+        with_cost_residual_(false) {}
   void init();
 
   std::shared_ptr<DifferentialActionModelAbstract>
@@ -185,7 +191,7 @@ struct IntegratedActionDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   explicit IntegratedActionDataAbstractTpl(Model<Scalar>* const model)
       : Base(model) {}
-  virtual ~IntegratedActionDataAbstractTpl() {}
+  virtual ~IntegratedActionDataAbstractTpl() = default;
 
   using Base::cost;
   using Base::Fu;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
 //                     University of Oxford, University of Trento,
 //                     Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -18,6 +18,9 @@ namespace python {
 
 void exposeIntegratedActionAbstract() {
   bp::register_ptr_to_python<std::shared_ptr<IntegratedActionModelAbstract> >();
+
+  typedef IntegratedActionModelAbstractTpl_wrap<double>
+      IntegratedActionModelAbstract_wrap;
 
   bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable,
              bp::bases<ActionModelAbstract> >(

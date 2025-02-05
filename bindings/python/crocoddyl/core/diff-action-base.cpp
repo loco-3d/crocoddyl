@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,6 +17,10 @@
 namespace crocoddyl {
 namespace python {
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+    DifferentialActionModel_quasiStatic_wraps,
+    DifferentialActionModelAbstract::quasiStatic_x, 2, 4)
+
 void exposeDifferentialActionAbstract() {
   // Register custom converters between std::vector and Python list
   typedef std::shared_ptr<DifferentialActionModelAbstract>
@@ -30,6 +34,9 @@ void exposeDifferentialActionAbstract() {
 
   bp::register_ptr_to_python<
       std::shared_ptr<DifferentialActionModelAbstract> >();
+
+  typedef DifferentialActionModelAbstractTpl_wrap<double>
+      DifferentialActionModelAbstract_wrap;
 
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
       "DifferentialActionModelAbstract",

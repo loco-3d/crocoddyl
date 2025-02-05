@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
       costs_(costs),
       constraints_(
           std::make_shared<ConstraintModelManager>(state, state->get_nv())),
-      pinocchio_(*state->get_pinocchio().get()) {
+      pinocchio_(state->get_pinocchio().get()) {
   init(state);
 }
 
@@ -45,7 +45,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
       actuation_(actuation),
       costs_(costs),
       constraints_(constraints),
-      pinocchio_(*state->get_pinocchio().get()) {
+      pinocchio_(state->get_pinocchio().get()) {
   init(state);
 }
 
@@ -83,10 +83,6 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(
 }
 
 template <typename Scalar>
-DifferentialActionModelFreeInvDynamicsTpl<
-    Scalar>::~DifferentialActionModelFreeInvDynamicsTpl() {}
-
-template <typename Scalar>
 void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
     const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
@@ -108,8 +104,8 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
       x.tail(nv);
 
   d->xout = u;
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, u);
-  pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
+  pinocchio::rnea(*pinocchio_, d->pinocchio, q, v, u);
+  pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
   actuation_->commands(d->multibody.actuation, x, d->pinocchio.tau);
   d->multibody.joint->a = u;
   d->multibody.joint->tau = d->multibody.actuation->u;
@@ -136,7 +132,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
@@ -165,7 +161,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(nv);
 
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, u);
+  pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, u);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
       d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>()
           .transpose();
@@ -201,6 +197,31 @@ template <typename Scalar>
 std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+DifferentialActionModelFreeInvDynamicsTpl<NewScalar>
+DifferentialActionModelFreeInvDynamicsTpl<Scalar>::cast() const {
+  typedef DifferentialActionModelFreeInvDynamicsTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef CostModelSumTpl<NewScalar> CostType;
+  typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
+  if (constraints_) {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>()));
+    return ret;
+  } else {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()));
+    return ret;
+  }
 }
 
 template <typename Scalar>
@@ -308,7 +329,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_constraints() const {
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>&
 DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
+  return *pinocchio_;
 }
 
 }  // namespace crocoddyl

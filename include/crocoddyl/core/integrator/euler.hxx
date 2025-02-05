@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Pisa,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -28,9 +28,6 @@ IntegratedActionModelEulerTpl<Scalar>::IntegratedActionModelEulerTpl(
     std::shared_ptr<DifferentialActionModelAbstract> model,
     const Scalar time_step, const bool with_cost_residual)
     : Base(model, time_step, with_cost_residual) {}
-
-template <typename Scalar>
-IntegratedActionModelEulerTpl<Scalar>::~IntegratedActionModelEulerTpl() {}
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::calc(
@@ -163,6 +160,23 @@ IntegratedActionModelEulerTpl<Scalar>::createData() {
                  "control parametrization larger than PolyZero"
               << std::endl;
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+IntegratedActionModelEulerTpl<NewScalar>
+IntegratedActionModelEulerTpl<Scalar>::cast() const {
+  typedef IntegratedActionModelEulerTpl<NewScalar> ReturnType;
+  if (control_) {
+    ReturnType ret(differential_->template cast<NewScalar>(),
+                   control_->template cast<NewScalar>(),
+                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  } else {
+    ReturnType ret(differential_->template cast<NewScalar>(),
+                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  }
 }
 
 template <typename Scalar>

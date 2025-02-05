@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -35,10 +35,6 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
-
-template <typename Scalar>
-DifferentialActionModelAbstractTpl<
-    Scalar>::~DifferentialActionModelAbstractTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calc(

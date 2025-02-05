@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,6 +45,8 @@ class DifferentialActionModelContactInvDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelContactInvDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -94,7 +96,7 @@ class DifferentialActionModelContactInvDynamicsTpl
       std::shared_ptr<ContactModelMultiple> contacts,
       std::shared_ptr<CostModelSum> costs,
       std::shared_ptr<ConstraintModelManager> constraints);
-  virtual ~DifferentialActionModelContactInvDynamicsTpl();
+  virtual ~DifferentialActionModelContactInvDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, cost value and constraint residuals
@@ -108,7 +110,7 @@ class DifferentialActionModelContactInvDynamicsTpl
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const
@@ -116,7 +118,7 @@ class DifferentialActionModelContactInvDynamicsTpl
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the dynamics, cost and constraint
@@ -133,7 +135,8 @@ class DifferentialActionModelContactInvDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
@@ -142,21 +145,33 @@ class DifferentialActionModelContactInvDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the contact inverse-dynamics data
    *
    * @return contact inverse-dynamics data
    */
-  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the contact-invdyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelContactInvDynamicsTpl<NewScalar> A
+   * differential-action model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelContactInvDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Checks that a specific data belongs to the contact inverse-dynamics
    * model
    */
   virtual bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief Computes the quasic static commands
@@ -174,37 +189,38 @@ class DifferentialActionModelContactInvDynamicsTpl
   virtual void quasiStatic(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the actuation model
@@ -235,7 +251,7 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @brief Print relevant information of the contact inverse-dynamics model
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -251,7 +267,7 @@ class DifferentialActionModelContactInvDynamicsTpl
   std::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
   std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
 
  public:
   /**
@@ -295,7 +311,7 @@ class DifferentialActionModelContactInvDynamicsTpl
                true),
           na_(nu),
           nc_(nc) {}
-    virtual ~ResidualModelActuation() {}
+    virtual ~ResidualModelActuation() = default;
 
     /**
      * @brief Compute the actuation residual
@@ -382,6 +398,30 @@ class DifferentialActionModelContactInvDynamicsTpl
     }
 
     /**
+     * @brief Cast the actuation-residual model to a different scalar type.
+     *
+     * It is useful for operations requiring different precision or scalar
+     * types.
+     *
+     * @tparam NewScalar The new scalar type to cast to.
+     * @return
+     * DifferentialActionModelContactInvDynamicsTpl<NewScalar>::ResidualModelActuation
+     * A residual model with the new scalar type.
+     */
+    template <typename NewScalar>
+    typename DifferentialActionModelContactInvDynamicsTpl<
+        NewScalar>::ResidualModelActuation
+    cast() const {
+      typedef typename DifferentialActionModelContactInvDynamicsTpl<
+          NewScalar>::ResidualModelActuation ReturnType;
+      typedef StateMultibodyTpl<NewScalar> StateType;
+      ReturnType ret(std::static_pointer_cast<StateType>(
+                         state_->template cast<NewScalar>()),
+                     na_, nc_);
+      return ret;
+    }
+
+    /**
      * @brief Print relevant information of the actuation residual model
      *
      * @param[out] os  Output stream object
@@ -446,8 +486,9 @@ class DifferentialActionModelContactInvDynamicsTpl
                          const std::size_t nc)
         : Base(state, nr, state->get_nv() + nc, true, true, true),
           id_(id),
-          frame_name_(state->get_pinocchio()->frames[id].name) {}
-    virtual ~ResidualModelContact() {}
+          frame_name_(state->get_pinocchio()->frames[id].name),
+          nc_(nc) {}
+    virtual ~ResidualModelContact() = default;
 
     /**
      * @brief Compute the contact-acceleration residual
@@ -513,6 +554,30 @@ class DifferentialActionModelContactInvDynamicsTpl
     }
 
     /**
+     * @brief Cast the contact-residual model to a different scalar type.
+     *
+     * It is useful for operations requiring different precision or scalar
+     * types.
+     *
+     * @tparam NewScalar The new scalar type to cast to.
+     * @return typename
+     * DifferentialActionModelContactInvDynamicsTpl<NewScalar>::ResidualModelContact
+     * A residual model with the new scalar type.
+     */
+    template <typename NewScalar>
+    typename DifferentialActionModelContactInvDynamicsTpl<
+        NewScalar>::ResidualModelContact
+    cast() const {
+      typedef typename DifferentialActionModelContactInvDynamicsTpl<
+          NewScalar>::ResidualModelContact ReturnType;
+      typedef StateMultibodyTpl<NewScalar> StateType;
+      ReturnType ret(std::static_pointer_cast<StateType>(
+                         state_->template cast<NewScalar>()),
+                     id_, nr_, nc_);
+      return ret;
+    }
+
+    /**
      * @brief Print relevant information of the contact-acceleration residual
      * model
      *
@@ -531,6 +596,7 @@ class DifferentialActionModelContactInvDynamicsTpl
    private:
     pinocchio::FrameIndex id_;  //!< Reference frame id
     std::string frame_name_;    //!< Reference frame name
+    std::size_t nc_;            //!< Dimension of all contacts
   };
 };
 template <typename _Scalar>
@@ -606,6 +672,7 @@ struct DifferentialActionDataContactInvDynamicsTpl
     tmp_rstatic.setZero();
     tmp_Jstatic.setZero();
   }
+  virtual ~DifferentialActionDataContactInvDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;                //!< Pinocchio data
   DataCollectorJointActMultibodyInContact multibody;   //!< Multibody data
@@ -662,6 +729,7 @@ struct DifferentialActionDataContactInvDynamicsTpl
       dtau_dx.setZero();
       dtau_du.setZero();
     }
+    virtual ~ResidualDataActuation() = default;
 
     pinocchio::DataTpl<Scalar>* pinocchio;             //!< Pinocchio data
     std::shared_ptr<ActuationDataAbstract> actuation;  //!< Actuation data
@@ -707,6 +775,7 @@ struct DifferentialActionDataContactInvDynamicsTpl
         }
       }
     }
+    virtual ~ResidualDataContact() = default;
 
     ContactDataAbstractTpl<Scalar>* contact;  //!< Contact force data
     using Base::r;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, IRI: CSIC-UPC, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -81,7 +81,7 @@ class IntegratedActionModelRK4Tpl
                  std::shared_ptr<DifferentialActionModelAbstract> model,
                  const Scalar time_step = Scalar(1e-3),
                  const bool with_cost_residual = true);)
-  virtual ~IntegratedActionModelRK4Tpl();
+  virtual ~IntegratedActionModelRK4Tpl() = default;
 
   /**
    * @brief Integrate the differential action model using RK4 scheme
@@ -137,6 +137,18 @@ class IntegratedActionModelRK4Tpl
    * @return the RK4 integrator data
    */
   virtual std::shared_ptr<ActionDataAbstract> createData();
+
+  /**
+   * @brief Cast the integrated-action model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ActionModelAbstractTpl<NewScalar> An action model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ActionModelAbstractTpl<NewScalar> cast() const;
 
   /**
    * @brief Checks that a specific data belongs to this model
@@ -250,7 +262,7 @@ struct IntegratedActionDataRK4Tpl
     dyi_dx[0].diagonal().setOnes();
     dki_dx[0].topRightCorner(nv, nv).diagonal().setOnes();
   }
-  virtual ~IntegratedActionDataRK4Tpl() {}
+  virtual ~IntegratedActionDataRK4Tpl() = default;
 
   std::vector<std::shared_ptr<DifferentialActionDataAbstract> >
       differential;  //!< List of differential model data

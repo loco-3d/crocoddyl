@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -88,9 +88,6 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
           copy.get_G(), copy.get_H(), copy.get_f(), copy.get_q(), copy.get_r(),
           copy.get_g(), copy.get_h());
 }
-
-template <typename Scalar>
-ActionModelLQRTpl<Scalar>::~ActionModelLQRTpl() {}
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calc(
@@ -220,6 +217,19 @@ template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar>>
 ActionModelLQRTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelLQRTpl<NewScalar> ActionModelLQRTpl<Scalar>::cast() const {
+  typedef ActionModelLQRTpl<NewScalar> ReturnType;
+  ReturnType ret(A_.template cast<NewScalar>(), B_.template cast<NewScalar>(),
+                 Q_.template cast<NewScalar>(), R_.template cast<NewScalar>(),
+                 N_.template cast<NewScalar>(), G_.template cast<NewScalar>(),
+                 H_.template cast<NewScalar>(), f_.template cast<NewScalar>(),
+                 q_.template cast<NewScalar>(), r_.template cast<NewScalar>(),
+                 g_.template cast<NewScalar>(), h_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

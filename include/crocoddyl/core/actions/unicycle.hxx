@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,9 +17,6 @@ ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
       dt_(Scalar(0.1)) {
   cost_weights_ << Scalar(10.), Scalar(1.);
 }
-
-template <typename Scalar>
-ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
@@ -113,6 +110,14 @@ template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelUnicycleTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelUnicycleTpl<NewScalar> ActionModelUnicycleTpl<Scalar>::cast() const {
+  typedef ActionModelUnicycleTpl<NewScalar> ReturnType;
+  ReturnType ret;
+  return ret;
 }
 
 template <typename Scalar>

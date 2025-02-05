@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -69,6 +69,7 @@ class ActionModelImpulseFwdDynamicsTpl
     : public ActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelImpulseFwdDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> Base;
@@ -132,7 +133,7 @@ class ActionModelImpulseFwdDynamicsTpl
       const Scalar r_coeff = Scalar(0.),
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
-  virtual ~ActionModelImpulseFwdDynamicsTpl();
+  virtual ~ActionModelImpulseFwdDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, and cost value
@@ -145,7 +146,7 @@ class ActionModelImpulseFwdDynamicsTpl
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the total cost value for nodes that depends only on the
@@ -160,7 +161,7 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the impulse dynamics, and cost function
@@ -171,7 +172,7 @@ class ActionModelImpulseFwdDynamicsTpl
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the cost functions with respect to the
@@ -185,20 +186,33 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the impulse forward-dynamics data
    *
    * @return impulse forward-dynamics data
    */
-  virtual std::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the impulse-fwddyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ActionModelImpulseFwdDynamicsTpl<NewScalar> An action model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ActionModelImpulseFwdDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Check that the given data belongs to the impulse forward-dynamics
    * data
    */
-  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(
+      const std::shared_ptr<ActionDataAbstract>& data) override;
 
   /**
    * @brief @copydoc Base::quasiStatic()
@@ -207,37 +221,37 @@ class ActionModelImpulseFwdDynamicsTpl
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
-                           const Scalar tol = Scalar(1e-9));
+                           const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the impulse model
@@ -296,7 +310,7 @@ class ActionModelImpulseFwdDynamicsTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -310,7 +324,7 @@ class ActionModelImpulseFwdDynamicsTpl
   std::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
   std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
   bool with_armature_;      //!< Indicate if we have defined an armature
   VectorXs armature_;       //!< Armature vector
   Scalar r_coeff_;          //!< Restitution coefficient
@@ -354,6 +368,7 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
     df_dx.setZero();
     dgrav_dq.setZero();
   }
+  virtual ~ActionDataImpulseFwdDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorMultibodyInImpulseTpl<Scalar> multibody;

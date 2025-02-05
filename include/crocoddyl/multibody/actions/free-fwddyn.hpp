@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -60,6 +60,8 @@ class DifferentialActionModelFreeFwdDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelFreeFwdDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -79,7 +81,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
       std::shared_ptr<ActuationModelAbstract> actuation,
       std::shared_ptr<CostModelSum> costs,
       std::shared_ptr<ConstraintModelManager> constraints = nullptr);
-  virtual ~DifferentialActionModelFreeFwdDynamicsTpl();
+  virtual ~DifferentialActionModelFreeFwdDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, and cost value
@@ -92,7 +94,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const
@@ -100,7 +102,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
@@ -111,7 +113,8 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
@@ -120,20 +123,32 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the free forward-dynamics data
    *
    * @return free forward-dynamics data
    */
-  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the free-fwddyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelFreeFwdDynamicsTpl<NewScalar> A
+   * differential-action model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelFreeFwdDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Check that the given data belongs to the free forward-dynamics data
    */
   virtual bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief @copydoc Base::quasiStatic()
@@ -141,37 +156,38 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   virtual void quasiStatic(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the actuation model
@@ -208,7 +224,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -220,7 +236,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
   std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
   bool without_armature_;  //!< Indicate if we have defined an armature
   VectorXs armature_;      //!< Armature vector
 };
@@ -262,6 +278,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
     dtau_dx.setZero();
     tmp_xstatic.setZero();
   }
+  virtual ~DifferentialActionDataFreeFwdDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorJointActMultibody multibody;

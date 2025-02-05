@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -20,15 +20,12 @@ ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(
            model->get_ng(), model->get_nh(), model->get_ng_T(),
            model->get_nh_T()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())),
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
-  e_hess_ = std::sqrt(2.0 * e_jac_);
+  e_hess_ = std::sqrt(Scalar(2.0) * e_jac_);
   this->set_u_lb(model_->get_u_lb());
   this->set_u_ub(model_->get_u_ub());
 }
-
-template <typename Scalar>
-ActionModelNumDiffTpl<Scalar>::~ActionModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calc(
@@ -107,7 +104,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -127,7 +124,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   data->Fx /= d->xh_jac;
 
   // Computing the d action(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
@@ -147,7 +144,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
 
 #ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
-  d->xh_hess = e_hess_ * std::max(1., d->x_norm);
+  d->xh_hess = e_hess_ * std::max(Scalar(1.), d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = d->xh_hess;
@@ -180,7 +177,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   }
 
   // Computing the d^2 cost(x,u) / du^2
-  d->uh_hess = e_hess_ * std::max(1., u.norm());
+  d->uh_hess = e_hess_ * std::max(Scalar(1.), u.norm());
   d->uh_hess_pow2 = d->uh_hess * d->uh_hess;
   for (std::size_t iu = 0; iu < nu; ++iu) {
     d->du(iu) = d->uh_hess;
@@ -209,7 +206,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   }
 
   // Computing the d^2 cost(x,u) / dxu
-  d->xuh_hess_pow2 = 4. * d->xh_hess * d->uh_hess;
+  d->xuh_hess_pow2 = Scalar(4.) * d->xh_hess * d->uh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     for (std::size_t ju = 0; ju < nu; ++ju) {
       d->dx(ix) = d->xh_hess;
@@ -264,7 +261,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -282,7 +279,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
 
 #ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
-  d->xh_hess = e_hess_ * std::max(1., d->x_norm);
+  d->xh_hess = e_hess_ * std::max(Scalar(1.), d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     // We can apply the same formulas for finite difference as above
@@ -334,6 +331,14 @@ void ActionModelNumDiffTpl<Scalar>::quasiStatic(
     const Scalar tol) {
   Data* d = static_cast<Data*>(data.get());
   model_->quasiStatic(d->data_0, u, x, maxiter, tol);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelNumDiffTpl<NewScalar> ActionModelNumDiffTpl<Scalar>::cast() const {
+  typedef ActionModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>
