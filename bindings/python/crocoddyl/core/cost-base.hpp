@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,54 +17,67 @@
 namespace crocoddyl {
 namespace python {
 
-class CostModelAbstract_wrap : public CostModelAbstract,
-                               public bp::wrapper<CostModelAbstract> {
+template <typename Scalar>
+class CostModelAbstractTpl_wrap
+    : public CostModelAbstractTpl<Scalar>,
+      public bp::wrapper<CostModelAbstractTpl<Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  using CostModelAbstract::nu_;
-  using CostModelAbstract::unone_;
+  CROCODDYL_DERIVED_CAST(CostModelBase, CostModelAbstractTpl_wrap)
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         std::shared_ptr<ActivationModelAbstract> activation,
-                         std::shared_ptr<ResidualModelAbstract> residual)
-      : CostModelAbstract(state, activation, residual) {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModel;
+  typedef typename crocoddyl::CostDataAbstractTpl<Scalar> CostData;
+  typedef typename CostModel::StateAbstract State;
+  typedef typename CostModel::ActivationModelAbstract ActivationModel;
+  typedef typename CostModel::ResidualModelAbstract ResidualModel;
+  typedef typename CostModel::DataCollectorAbstract DataCollector;
+  typedef typename CostModel::VectorXs VectorXs;
+  using CostModel::activation_;
+  using CostModel::nu_;
+  using CostModel::residual_;
+  using CostModel::state_;
+  using CostModel::unone_;
+
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                            std::shared_ptr<ActivationModel> activation,
+                            std::shared_ptr<ResidualModel> residual)
+      : CostModel(state, activation, residual), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         std::shared_ptr<ActivationModelAbstract> activation,
-                         const std::size_t nu)
-      : CostModelAbstract(state, activation, nu) {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                            std::shared_ptr<ActivationModel> activation,
+                            const std::size_t nu)
+      : CostModel(state, activation, nu), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu);
   }
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         std::shared_ptr<ActivationModelAbstract> activation)
-      : CostModelAbstract(state, activation) {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                            std::shared_ptr<ActivationModel> activation)
+      : CostModel(state, activation), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         std::shared_ptr<ResidualModelAbstract> residual)
-      : CostModelAbstract(state, residual) {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                            std::shared_ptr<ResidualModel> residual)
+      : CostModel(state, residual), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         const std::size_t nr, const std::size_t nu)
-      : CostModelAbstract(state, nr, nu), bp::wrapper<CostModelAbstract>() {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state, const std::size_t nr,
+                            const std::size_t nu)
+      : CostModel(state, nr, nu), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu);
   }
 
-  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                         const std::size_t nr)
-      : CostModelAbstract(state, nr), bp::wrapper<CostModelAbstract>() {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  CostModelAbstractTpl_wrap(std::shared_ptr<State> state, const std::size_t nr)
+      : CostModel(state, nr), bp::wrapper<CostModel>() {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  void calc(const std::shared_ptr<CostDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calc(const std::shared_ptr<CostData>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -75,18 +88,18 @@ class CostModelAbstract_wrap : public CostModelAbstract,
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
-      return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+      return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x,
+                            (VectorXs)u);
     }
   }
 
-  void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calcDiff(const std::shared_ptr<CostData>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -97,28 +110,41 @@ class CostModelAbstract_wrap : public CostModelAbstract,
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+                            (VectorXs)x, (VectorXs)u);
     }
   }
 
-  std::shared_ptr<CostDataAbstract> createData(
-      DataCollectorAbstract* const data) {
+  std::shared_ptr<CostData> createData(DataCollector* const data) override {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<std::shared_ptr<CostDataAbstract> >(createData.ptr(),
-                                                          boost::ref(data));
+      return bp::call<std::shared_ptr<CostData>>(createData.ptr(),
+                                                 boost::ref(data));
     }
-    return CostModelAbstract::createData(data);
+    return CostModel::createData(data);
   }
 
-  std::shared_ptr<CostDataAbstract> default_createData(
-      DataCollectorAbstract* const data) {
-    return this->CostModelAbstract::createData(data);
+  std::shared_ptr<CostData> default_createData(DataCollector* const data) {
+    return this->CostModel::createData(data);
+  }
+
+  template <typename NewScalar>
+  CostModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef CostModelAbstractTpl_wrap<NewScalar> ReturnType;
+    if (residual_) {
+      ReturnType ret(state_->template cast<NewScalar>(),
+                     activation_->template cast<NewScalar>(),
+                     residual_->template cast<NewScalar>());
+      return ret;
+    } else {
+      ReturnType ret(state_->template cast<NewScalar>(),
+                     activation_->template cast<NewScalar>(), nu_);
+      return ret;
+    }
   }
 };
 

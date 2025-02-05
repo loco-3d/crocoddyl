@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York
-// University,
-//                          Max Planck Gesellschaft,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -34,6 +32,7 @@ template <typename _Scalar>
 class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(CostModelBase, CostModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
@@ -57,35 +56,35 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff cost model
    */
-  virtual ~CostModelNumDiffTpl();
+  virtual ~CostModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc Base::calc()
    */
   virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const std::shared_ptr<CostDataAbstract>& data,
    * const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const std::shared_ptr<CostDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create a numdiff cost data
@@ -94,7 +93,19 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @return the numdiff cost data
    */
   virtual std::shared_ptr<CostDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the cost numdiff model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CostModelNumDiffTpl<NewScalar> A cost model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  CostModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original cost model

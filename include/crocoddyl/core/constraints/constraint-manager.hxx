@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -335,6 +335,23 @@ ConstraintModelManagerTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<ConstraintDataManager>(
       Eigen::aligned_allocator<ConstraintDataManager>(), this, data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ConstraintModelManagerTpl<NewScalar> ConstraintModelManagerTpl<Scalar>::cast()
+    const {
+  typedef ConstraintModelManagerTpl<NewScalar> ReturnType;
+  typedef ConstraintItemTpl<NewScalar> ConstraintType;
+  ReturnType ret(state_->template cast<NewScalar>(), nu_);
+  typename ConstraintModelContainer::const_iterator it_m, end_m;
+  for (it_m = constraints_.begin(), end_m = constraints_.end(); it_m != end_m;
+       ++it_m) {
+    const std::string name = it_m->first;
+    const ConstraintType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addConstraint(name, m_i.constraint, m_i.active);
+  }
+  return ret;
 }
 
 template <typename Scalar>

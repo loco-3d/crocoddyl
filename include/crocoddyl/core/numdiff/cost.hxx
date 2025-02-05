@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,10 +17,7 @@ CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(
     const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_activation(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calc(
@@ -64,7 +61,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -81,7 +78,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
   }
 
   // Computing the d cost(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     d->up = u + d->du;
@@ -126,7 +123,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
   assertStableStateFD(x);
 
   // Computing the d cost(x,u) / dx
-  d->xh_jac = e_jac_ * std::max(1., x.norm());
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), x.norm());
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -155,6 +152,14 @@ std::shared_ptr<CostDataAbstractTpl<Scalar> >
 CostModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+CostModelNumDiffTpl<NewScalar> CostModelNumDiffTpl<Scalar>::cast() const {
+  typedef CostModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

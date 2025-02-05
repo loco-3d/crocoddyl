@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,8 @@ void exposeConstraintAbstract() {
       .value("Equality", Equality)
       .value("Both", Both)
       .export_values();
+
+  typedef ConstraintModelAbstractTpl_wrap<double> ConstraintModelAbstract_wrap;
 
   bp::class_<ConstraintModelAbstract_wrap, boost::noncopyable>(
       "ConstraintModelAbstract",

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,40 +16,56 @@
 namespace crocoddyl {
 namespace python {
 
-class ConstraintModelAbstract_wrap
-    : public ConstraintModelAbstract,
-      public bp::wrapper<ConstraintModelAbstract> {
+template <typename Scalar>
+class ConstraintModelAbstractTpl_wrap
+    : public ConstraintModelAbstractTpl<Scalar>,
+      public bp::wrapper<ConstraintModelAbstractTpl<Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  using ConstraintModelAbstract::nu_;
-  using ConstraintModelAbstract::unone_;
+  CROCODDYL_DERIVED_CAST(ConstraintModelBase, ConstraintModelAbstractTpl_wrap)
 
-  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                               std::shared_ptr<ResidualModelAbstract> residual,
-                               const std::size_t ng, const std::size_t nh)
-      : ConstraintModelAbstract(state, residual, ng, nh),
-        bp::wrapper<ConstraintModelAbstract>() {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  typedef typename crocoddyl::ConstraintModelAbstractTpl<Scalar>
+      ConstraintModel;
+  typedef typename crocoddyl::ConstraintDataAbstractTpl<Scalar> ConstraintData;
+  typedef typename ConstraintModel::StateAbstract State;
+  typedef typename ConstraintModel::ResidualModelAbstract ResidualModel;
+  typedef typename ConstraintModel::DataCollectorAbstract DataCollector;
+  typedef typename ConstraintModel::VectorXs VectorXs;
+  using ConstraintModel::ng_;
+  using ConstraintModel::nh_;
+  using ConstraintModel::nu_;
+  using ConstraintModel::residual_;
+  using ConstraintModel::state_;
+  using ConstraintModel::T_constraint_;
+  using ConstraintModel::unone_;
+
+  ConstraintModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                                  std::shared_ptr<ResidualModel> residual,
+                                  const std::size_t ng, const std::size_t nh)
+      : ConstraintModel(state, residual, ng, nh),
+        bp::wrapper<ConstraintModel>() {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                               const std::size_t nu, const std::size_t ng,
-                               const std::size_t nh, const bool T_const = true)
-      : ConstraintModelAbstract(state, nu, ng, nh, T_const),
-        bp::wrapper<ConstraintModelAbstract>() {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  ConstraintModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                                  const std::size_t nu, const std::size_t ng,
+                                  const std::size_t nh,
+                                  const bool T_const = true)
+      : ConstraintModel(state, nu, ng, nh, T_const),
+        bp::wrapper<ConstraintModel>() {
+    unone_ = NAN * VectorXs::Ones(nu);
   }
 
-  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                               const std::size_t ng, const std::size_t nh,
-                               const bool T_const = true)
-      : ConstraintModelAbstract(state, ng, nh, T_const) {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu_);
+  ConstraintModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                                  const std::size_t ng, const std::size_t nh,
+                                  const bool T_const = true)
+      : ConstraintModel(state, ng, nh, T_const) {
+    unone_ = NAN * VectorXs::Ones(nu_);
   }
 
-  void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calc(const std::shared_ptr<ConstraintData>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -60,18 +76,18 @@ class ConstraintModelAbstract_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
-      return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+      return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x,
+                            (VectorXs)u);
     }
   }
 
-  void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calcDiff(const std::shared_ptr<ConstraintData>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -82,27 +98,41 @@ class ConstraintModelAbstract_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+                            (VectorXs)x, (VectorXs)u);
     }
   }
 
-  std::shared_ptr<ConstraintDataAbstract> createData(
-      DataCollectorAbstract* const data) {
+  std::shared_ptr<ConstraintData> createData(
+      DataCollector* const data) override {
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<std::shared_ptr<ConstraintDataAbstract> >(
-          createData.ptr(), boost::ref(data));
+      return bp::call<std::shared_ptr<ConstraintData>>(createData.ptr(),
+                                                       boost::ref(data));
     }
-    return ConstraintModelAbstract::createData(data);
+    return ConstraintModel::createData(data);
   }
 
-  std::shared_ptr<ConstraintDataAbstract> default_createData(
-      DataCollectorAbstract* const data) {
-    return this->ConstraintModelAbstract::createData(data);
+  std::shared_ptr<ConstraintData> default_createData(
+      DataCollector* const data) {
+    return this->ConstraintModel::createData(data);
+  }
+
+  template <typename NewScalar>
+  ConstraintModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef ConstraintModelAbstractTpl_wrap<NewScalar> ReturnType;
+    if (residual_) {
+      ReturnType ret(state_->template cast<NewScalar>(),
+                     residual_->template cast<NewScalar>(), ng_, nh_);
+      return ret;
+    } else {
+      ReturnType ret(state_->template cast<NewScalar>(), nu_, ng_, nh_,
+                     T_constraint_);
+      return ret;
+    }
   }
 };
 

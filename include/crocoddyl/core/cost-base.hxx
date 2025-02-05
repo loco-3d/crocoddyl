@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,9 +77,6 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       residual_(std::make_shared<ResidualModelAbstract>(state, nr)),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
-
-template <typename Scalar>
-CostModelAbstractTpl<Scalar>::~CostModelAbstractTpl() {}
 
 template <typename Scalar>
 void CostModelAbstractTpl<Scalar>::calc(

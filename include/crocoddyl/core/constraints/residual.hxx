@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,9 +55,6 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     T_constraint_ = false;
   }
 }
-
-template <typename Scalar>
-ConstraintModelResidualTpl<Scalar>::~ConstraintModelResidualTpl() {}
 
 template <typename Scalar>
 void ConstraintModelResidualTpl<Scalar>::calc(
@@ -168,6 +165,17 @@ void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
     case ConstraintType::Both:  // this condition is not supported and possible
       break;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ConstraintModelResidualTpl<NewScalar> ConstraintModelResidualTpl<Scalar>::cast()
+    const {
+  typedef ConstraintModelResidualTpl<NewScalar> ReturnType;
+  ReturnType ret(
+      state_->template cast<NewScalar>(), residual_->template cast<NewScalar>(),
+      lb_.template cast<NewScalar>(), ub_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

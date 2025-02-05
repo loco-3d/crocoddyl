@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,9 +85,6 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
-ConstraintModelAbstractTpl<Scalar>::~ConstraintModelAbstractTpl() {}
-
-template <typename Scalar>
 void ConstraintModelAbstractTpl<Scalar>::calc(
     const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
@@ -118,7 +115,7 @@ void ConstraintModelAbstractTpl<Scalar>::update_bounds(const VectorXs& lower,
         "Invalid argument: the dimension of the lower/upper bound is not the "
         "same to ng.")
   }
-  if (((upper - lower).array() <= 0.).any()) {
+  if (((upper - lower).array() <= Scalar(0.)).any()) {
     throw_pretty(
         "Invalid argument: the upper bound is not higher than the lower bound.")
   }
