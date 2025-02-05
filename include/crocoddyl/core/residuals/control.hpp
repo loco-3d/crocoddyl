@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -35,11 +35,14 @@ template <typename _Scalar>
 class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelControlTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualModelAbstractTpl<Scalar> Base;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
+  typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -76,7 +79,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   explicit ResidualModelControlTpl(
       std::shared_ptr<typename Base::StateAbstract> state);
-  virtual ~ResidualModelControlTpl();
+  virtual ~ResidualModelControlTpl() = default;
 
   /**
    * @brief Compute the control residual
@@ -87,14 +90,14 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the control residual
@@ -105,13 +108,13 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Create the control residual data
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
 
   /**
    * @brief Compute the derivative of the control-cost function
@@ -129,7 +132,19 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
       const std::shared_ptr<CostDataAbstract>& cdata,
       const std::shared_ptr<ResidualDataAbstract>& rdata,
       const std::shared_ptr<ActivationDataAbstract>& adata,
-      const bool update_u = true);
+      const bool update_u = true) override;
+
+  /**
+   * @brief Cast the control residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelControlTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelControlTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference control vector
@@ -146,7 +161,7 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;

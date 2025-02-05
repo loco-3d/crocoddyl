@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ template <typename _Scalar>
 class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelPairCollisionTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -71,7 +73,7 @@ class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
                                 const pinocchio::PairIndex pair_id,
                                 const pinocchio::JointIndex joint_id);
 
-  virtual ~ResidualModelPairCollisionTpl();
+  virtual ~ResidualModelPairCollisionTpl() = default;
 
   /**
    * @brief Compute the pair collision residual
@@ -82,7 +84,7 @@ class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract> &data,
                     const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
+                    const Eigen::Ref<const VectorXs> &u) override;
 
   /**
    * @brief Compute the derivatives of the pair collision residual
@@ -93,10 +95,22 @@ class ResidualModelPairCollisionTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract> &data,
                         const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u);
+                        const Eigen::Ref<const VectorXs> &u) override;
 
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract *const data);
+      DataCollectorAbstract *const data) override;
+
+  /**
+   * @brief Cast the pair-collision residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelPairCollisionTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelPairCollisionTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the Pinocchio geometry model
@@ -161,6 +175,8 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
+  virtual ~ResidualDataPairCollisionTpl() = default;
+
   pinocchio::GeometryData geometry;       //!< Pinocchio geometry data
   pinocchio::DataTpl<Scalar> *pinocchio;  //!< Pinocchio data
   Matrix6xs J;                            //!< Jacobian at the collision joint

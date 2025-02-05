@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,9 +22,6 @@ template <typename Scalar>
 ResidualModelCoMPositionTpl<Scalar>::ResidualModelCoMPositionTpl(
     std::shared_ptr<StateMultibody> state, const Vector3s& cref)
     : Base(state, 3, true, false, false), cref_(cref) {}
-
-template <typename Scalar>
-ResidualModelCoMPositionTpl<Scalar>::~ResidualModelCoMPositionTpl() {}
 
 template <typename Scalar>
 void ResidualModelCoMPositionTpl<Scalar>::calc(
@@ -51,6 +49,18 @@ ResidualModelCoMPositionTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelCoMPositionTpl<NewScalar>
+ResidualModelCoMPositionTpl<Scalar>::cast() const {
+  typedef ResidualModelCoMPositionTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      cref_.template cast<NewScalar>(), nu_);
+  return ret;
 }
 
 template <typename Scalar>

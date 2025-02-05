@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,9 +34,6 @@ ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
       q_dependent_(q_dependent),
       v_dependent_(v_dependent),
       u_dependent_(u_dependent) {}
-
-template <typename Scalar>
-ResidualModelAbstractTpl<Scalar>::~ResidualModelAbstractTpl() {}
 
 template <typename Scalar>
 void ResidualModelAbstractTpl<Scalar>::calc(

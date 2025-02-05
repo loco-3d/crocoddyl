@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,10 +16,7 @@ ResidualModelNumDiffTpl<Scalar>::ResidualModelNumDiffTpl(
     const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_nr(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ResidualModelNumDiffTpl<Scalar>::~ResidualModelNumDiffTpl() {}
+      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calc(
@@ -55,7 +52,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -69,7 +66,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
   }
 
   // Computing the d residual(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     d->up = u + d->du;
@@ -112,6 +109,15 @@ std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelNumDiffTpl<NewScalar> ResidualModelNumDiffTpl<Scalar>::cast()
+    const {
+  typedef ResidualModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>

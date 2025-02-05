@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,10 +44,6 @@ ResidualModelContactWrenchConeTpl<Scalar>::ResidualModelContactWrenchConeTpl(
         << "the frame index is wrong (it does not exist in the robot)");
   }
 }
-
-template <typename Scalar>
-ResidualModelContactWrenchConeTpl<
-    Scalar>::~ResidualModelContactWrenchConeTpl() {}
 
 template <typename Scalar>
 void ResidualModelContactWrenchConeTpl<Scalar>::calc(
@@ -106,6 +102,18 @@ void ResidualModelContactWrenchConeTpl<Scalar>::updateJacobians(
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
   update_jacobians_ = false;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelContactWrenchConeTpl<NewScalar>
+ResidualModelContactWrenchConeTpl<Scalar>::cast() const {
+  typedef ResidualModelContactWrenchConeTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      id_, fref_.template cast<NewScalar>(), nu_, fwddyn_);
+  return ret;
 }
 
 template <typename Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2022-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@ ResidualModelJointEffortTpl<Scalar>::ResidualModelJointEffortTpl(
     const std::size_t nu, const bool fwddyn)
     : Base(state, actuation->get_nu(), nu, fwddyn ? false : true,
            fwddyn ? false : true, true),
+      actuation_(actuation),
       uref_(uref),
       fwddyn_(fwddyn) {
   if (nu_ == 0) {
@@ -55,9 +56,6 @@ ResidualModelJointEffortTpl<Scalar>::ResidualModelJointEffortTpl(
     std::shared_ptr<ActuationModelAbstract> actuation)
     : Base(state, actuation->get_nu(), state->get_nv(), true, true, true),
       uref_(VectorXs::Zero(actuation->get_nu())) {}
-
-template <typename Scalar>
-ResidualModelJointEffortTpl<Scalar>::~ResidualModelJointEffortTpl() {}
 
 template <typename Scalar>
 void ResidualModelJointEffortTpl<Scalar>::calc(
@@ -110,6 +108,17 @@ ResidualModelJointEffortTpl<Scalar>::createData(
   std::shared_ptr<ResidualDataAbstract> d =
       std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
   return d;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelJointEffortTpl<NewScalar>
+ResidualModelJointEffortTpl<Scalar>::cast() const {
+  typedef ResidualModelJointEffortTpl<NewScalar> ReturnType;
+  ReturnType ret(state_->template cast<NewScalar>(),
+                 actuation_->template cast<NewScalar>(),
+                 uref_.template cast<NewScalar>(), nu_, fwddyn_);
+  return ret;
 }
 
 template <typename Scalar>

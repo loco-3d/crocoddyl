@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,10 +28,6 @@ ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
     : Base(state, 6, true, true, false),
       href_(href),
       pin_model_(state->get_pinocchio()) {}
-
-template <typename Scalar>
-ResidualModelCentroidalMomentumTpl<
-    Scalar>::~ResidualModelCentroidalMomentumTpl() {}
 
 template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calc(
@@ -59,6 +56,18 @@ ResidualModelCentroidalMomentumTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelCentroidalMomentumTpl<NewScalar>
+ResidualModelCentroidalMomentumTpl<Scalar>::cast() const {
+  typedef ResidualModelCentroidalMomentumTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      href_.template cast<NewScalar>(), nu_);
+  return ret;
 }
 
 template <typename Scalar>

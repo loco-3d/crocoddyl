@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,9 +40,6 @@ ResidualModelPairCollisionTpl<Scalar>::ResidualModelPairCollisionTpl(
         << "the joint index is wrong (it does not exist in the robot)");
   }
 }
-
-template <typename Scalar>
-ResidualModelPairCollisionTpl<Scalar>::~ResidualModelPairCollisionTpl() {}
 
 template <typename Scalar>
 void ResidualModelPairCollisionTpl<Scalar>::calc(
@@ -83,6 +81,18 @@ void ResidualModelPairCollisionTpl<Scalar>::calcDiff(
 
   // compute the residual derivatives
   d->Rx.topLeftCorner(3, nv) = d->J.template topRows<3>();
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelAbstractTpl<NewScalar>
+ResidualModelPairCollisionTpl<Scalar>::cast() const {
+  typedef ResidualModelPairCollisionTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), nu_,
+      geom_model_, pair_id_, joint_id_);
+  return ret;
 }
 
 template <typename Scalar>

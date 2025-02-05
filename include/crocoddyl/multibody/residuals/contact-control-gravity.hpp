@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -41,6 +41,7 @@ class ResidualModelContactControlGravTpl
     : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelContactControlGravTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -71,7 +72,7 @@ class ResidualModelContactControlGravTpl
    */
   explicit ResidualModelContactControlGravTpl(
       std::shared_ptr<StateMultibody> state);
-  virtual ~ResidualModelContactControlGravTpl();
+  virtual ~ResidualModelContactControlGravTpl() = default;
 
   /**
    * @brief Compute the contact control gravity contact residual
@@ -82,7 +83,7 @@ class ResidualModelContactControlGravTpl
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the residual vector for nodes that depends only on the state
@@ -95,7 +96,7 @@ class ResidualModelContactControlGravTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the Jacobians of the contact control gravity contact
@@ -107,7 +108,7 @@ class ResidualModelContactControlGravTpl
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the Jacobian of the residual functions with respect to the
@@ -121,20 +122,33 @@ class ResidualModelContactControlGravTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the contact-control-gravity residual data
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the contact-control-gravity residual model to a different
+   * scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelContactControlGravTpl<NewScalar> A residual model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelContactControlGravTpl<NewScalar> cast() const;
 
   /**
    * @brief Print relevant information of the contact-control-grav residual
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;
@@ -177,6 +191,7 @@ struct ResidualDataContactControlGravTpl
     fext = d->contacts->fext;
     actuation = d->actuation;
   }
+  virtual ~ResidualDataContactControlGravTpl() = default;
 
   PinocchioData pinocchio;  //!< Pinocchio data
   std::shared_ptr<ActuationDataAbstractTpl<Scalar> >

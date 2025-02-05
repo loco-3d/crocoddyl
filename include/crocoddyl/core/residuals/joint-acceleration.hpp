@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, Heriot-Watt University
+// Copyright (C) 2022-2025, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,7 @@ class ResidualModelJointAccelerationTpl
     : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelJointAccelerationTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -94,7 +95,7 @@ class ResidualModelJointAccelerationTpl
    */
   ResidualModelJointAccelerationTpl(std::shared_ptr<StateAbstract> state);
 
-  virtual ~ResidualModelJointAccelerationTpl();
+  virtual ~ResidualModelJointAccelerationTpl() = default;
 
   /**
    * @brief Compute the joint-acceleration residual
@@ -105,14 +106,14 @@ class ResidualModelJointAccelerationTpl
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the joint-acceleration residual
@@ -123,13 +124,26 @@ class ResidualModelJointAccelerationTpl
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Create the joint-acceleration residual data
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the joint-acceleration residual model to a different scalar
+   * type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelJointAccelerationTpl<NewScalar> A residual model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelJointAccelerationTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference joint-acceleration vector
@@ -146,7 +160,7 @@ class ResidualModelJointAccelerationTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nr_;
@@ -181,6 +195,7 @@ struct ResidualDataJointAccelerationTpl
     }
     joint = d->joint;
   }
+  virtual ~ResidualDataJointAccelerationTpl() = default;
 
   std::shared_ptr<JointDataAbstractTpl<Scalar> > joint;  //!< Joint data
   using Base::r;

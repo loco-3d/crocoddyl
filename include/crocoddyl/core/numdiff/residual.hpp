@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,7 @@ template <typename _Scalar>
 class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
@@ -52,28 +53,28 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff residual model
    */
-  virtual ~ResidualModelNumDiffTpl();
+  virtual ~ResidualModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc Base::calc()
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
@@ -81,13 +82,16 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * VectorXs>& x)
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::createData()
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  template <typename NewScalar>
+  ResidualModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original residual model

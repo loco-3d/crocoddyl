@@ -270,6 +270,9 @@ class DifferentialActionModelContactInvDynamicsTpl
   class ResidualModelActuation : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    CROCODDYL_INNER_DERIVED_CAST(ResidualModelBase,
+                                 DifferentialActionModelContactInvDynamicsTpl,
+                                 ResidualModelActuation)
 
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
@@ -303,7 +306,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      */
     virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                       const Eigen::Ref<const VectorXs>&,
-                      const Eigen::Ref<const VectorXs>&) {
+                      const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataActuation* d =
           static_cast<typename Data::ResidualDataActuation*>(data.get());
       // Update the under-actuation set and residual
@@ -322,7 +325,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * data, const Eigen::Ref<const VectorXs>& x)
      */
     virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                      const Eigen::Ref<const VectorXs>&) {
+                      const Eigen::Ref<const VectorXs>&) override {
       data->r.setZero();
     }
 
@@ -335,7 +338,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      */
     virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                           const Eigen::Ref<const VectorXs>&,
-                          const Eigen::Ref<const VectorXs>&) {
+                          const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataActuation* d =
           static_cast<typename Data::ResidualDataActuation*>(data.get());
       std::size_t nrow = 0;
@@ -361,7 +364,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * VectorXs>& x)
      */
     virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                          const Eigen::Ref<const VectorXs>&) {
+                          const Eigen::Ref<const VectorXs>&) override {
       data->Rx.setZero();
       data->Ru.setZero();
     }
@@ -372,7 +375,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @return Actuation residual data
      */
     virtual std::shared_ptr<ResidualDataAbstract> createData(
-        DataCollectorAbstract* const data) {
+        DataCollectorAbstract* const data) override {
       return std::allocate_shared<typename Data::ResidualDataActuation>(
           Eigen::aligned_allocator<typename Data::ResidualDataActuation>(),
           this, data);
@@ -383,7 +386,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      *
      * @param[out] os  Output stream object
      */
-    virtual void print(std::ostream& os) const {
+    virtual void print(std::ostream& os) const override {
       os << "ResidualModelActuation {nx=" << state_->get_nx()
          << ", ndx=" << state_->get_ndx() << ", nu=" << nu_ << ", na=" << na_
          << "}";
@@ -417,6 +420,9 @@ class DifferentialActionModelContactInvDynamicsTpl
   class ResidualModelContact : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    CROCODDYL_INNER_DERIVED_CAST(ResidualModelBase,
+                                 DifferentialActionModelContactInvDynamicsTpl,
+                                 ResidualModelContact)
 
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
@@ -452,7 +458,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      */
     void calc(const std::shared_ptr<ResidualDataAbstract>& data,
               const Eigen::Ref<const VectorXs>&,
-              const Eigen::Ref<const VectorXs>&) {
+              const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataContact* d =
           static_cast<typename Data::ResidualDataContact*>(data.get());
       d->r = d->contact->a0;
@@ -463,7 +469,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * data, const Eigen::Ref<const VectorXs>& x)
      */
     virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                      const Eigen::Ref<const VectorXs>&) {
+                      const Eigen::Ref<const VectorXs>&) override {
       data->r.setZero();
     }
 
@@ -476,7 +482,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      */
     void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                   const Eigen::Ref<const VectorXs>&,
-                  const Eigen::Ref<const VectorXs>&) {
+                  const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataContact* d =
           static_cast<typename Data::ResidualDataContact*>(data.get());
       d->Rx = d->contact->da0_dx;
@@ -489,7 +495,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * VectorXs>& x)
      */
     virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                          const Eigen::Ref<const VectorXs>&) {
+                          const Eigen::Ref<const VectorXs>&) override {
       data->Rx.setZero();
       data->Ru.setZero();
     }
@@ -500,7 +506,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @return contact-acceleration residual data
      */
     virtual std::shared_ptr<ResidualDataAbstract> createData(
-        DataCollectorAbstract* const data) {
+        DataCollectorAbstract* const data) override {
       return std::allocate_shared<typename Data::ResidualDataContact>(
           Eigen::aligned_allocator<typename Data::ResidualDataContact>(), this,
           data, id_);
@@ -512,7 +518,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      *
      * @param[out] os  Output stream object
      */
-    virtual void print(std::ostream& os) const {
+    virtual void print(std::ostream& os) const override {
       os << "ResidualModelContact {frame=" << frame_name_ << ", nr=" << nr_
          << "}";
     }

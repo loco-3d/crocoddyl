@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,9 +19,6 @@ ResidualModelImpulseCoMTpl<Scalar>::ResidualModelImpulseCoMTpl(
     std::shared_ptr<StateMultibody> state)
     : Base(state, 3, 0, true, true, false),
       pin_model_(state->get_pinocchio()) {}
-
-template <typename Scalar>
-ResidualModelImpulseCoMTpl<Scalar>::~ResidualModelImpulseCoMTpl() {}
 
 template <typename Scalar>
 void ResidualModelImpulseCoMTpl<Scalar>::calc(
@@ -68,6 +66,17 @@ ResidualModelImpulseCoMTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelImpulseCoMTpl<NewScalar> ResidualModelImpulseCoMTpl<Scalar>::cast()
+    const {
+  typedef ResidualModelImpulseCoMTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()));
+  return ret;
 }
 
 template <typename Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,13 @@
 #include "crocoddyl/core/state-base.hpp"
 
 namespace crocoddyl {
+
+class ResidualModelBase {
+ public:
+  virtual ~ResidualModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ResidualModelBase, ResidualModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for residual models
@@ -41,7 +48,7 @@ namespace crocoddyl {
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ResidualModelAbstractTpl {
+class ResidualModelAbstractTpl : public ResidualModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -93,7 +100,7 @@ class ResidualModelAbstractTpl {
                            const std::size_t nr, const bool q_dependent = true,
                            const bool v_dependent = true,
                            const bool u_dependent = true);
-  virtual ~ResidualModelAbstractTpl();
+  virtual ~ResidualModelAbstractTpl() = default;
 
   /**
    * @brief Compute the residual vector
@@ -232,6 +239,13 @@ class ResidualModelAbstractTpl {
                       //!< on v
   bool u_dependent_;  //!< Label that indicates if the residual function depends
                       //!< on u
+  ResidualModelAbstractTpl()
+      : state_(nullptr),
+        nr_(0),
+        nu_(0),
+        q_dependent_(false),
+        v_dependent_(false),
+        u_dependent_(false) {};
 };
 
 template <typename _Scalar>
@@ -259,7 +273,7 @@ struct ResidualDataAbstractTpl {
     Arr_Rx.setZero();
     Arr_Ru.setZero();
   }
-  virtual ~ResidualDataAbstractTpl() {}
+  virtual ~ResidualDataAbstractTpl() = default;
 
   DataCollectorAbstract* shared;  //!< Shared data allocated by the action model
   VectorXs r;                     //!< Residual vector

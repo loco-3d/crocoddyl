@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,9 +48,6 @@ ResidualModelFrameRotationTpl<Scalar>::ResidualModelFrameRotationTpl(
 }
 
 template <typename Scalar>
-ResidualModelFrameRotationTpl<Scalar>::~ResidualModelFrameRotationTpl() {}
-
-template <typename Scalar>
 void ResidualModelFrameRotationTpl<Scalar>::calc(
     const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
@@ -83,6 +81,18 @@ ResidualModelFrameRotationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelFrameRotationTpl<NewScalar>
+ResidualModelFrameRotationTpl<Scalar>::cast() const {
+  typedef ResidualModelFrameRotationTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      id_, Rref_.template cast<NewScalar>(), nu_);
+  return ret;
 }
 
 template <typename Scalar>

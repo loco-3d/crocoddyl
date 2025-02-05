@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,9 +28,6 @@ ResidualModelControlGravTpl<Scalar>::ResidualModelControlGravTpl(
     std::shared_ptr<StateMultibody> state)
     : Base(state, state->get_nv(), state->get_nv(), true, false),
       pin_model_(*state->get_pinocchio()) {}
-
-template <typename Scalar>
-ResidualModelControlGravTpl<Scalar>::~ResidualModelControlGravTpl() {}
 
 template <typename Scalar>
 void ResidualModelControlGravTpl<Scalar>::calc(
@@ -94,6 +91,18 @@ ResidualModelControlGravTpl<Scalar>::createData(
     DataCollectorAbstract *const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelControlGravTpl<NewScalar>
+ResidualModelControlGravTpl<Scalar>::cast() const {
+  typedef ResidualModelControlGravTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      nu_);
+  return ret;
 }
 
 template <typename Scalar>
