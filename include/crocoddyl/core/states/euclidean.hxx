@@ -185,4 +185,9 @@ StateVectorTpl<NewScalar> StateVectorTpl<Scalar>::cast() const {
   return res;
 }
 
+template <typename Scalar>
+void StateVectorTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateVector {nx=" << nx_ << "}";
+}
+
 }  // namespace crocoddyl

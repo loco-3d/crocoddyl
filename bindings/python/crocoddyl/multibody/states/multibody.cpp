@@ -123,6 +123,7 @@ struct StateMultibodyVisitor
           [bp::with_custodian_and_ward<1, 2>()])                             \
       .def(StateMultibodyVisitor<State>())                                   \
       .def(CastVisitor<State>())                                             \
+      .def(PrintableVisitor<State>())                                        \
       .def(CopyableVisitor<State>());
 
 void exposeStateMultibody() {

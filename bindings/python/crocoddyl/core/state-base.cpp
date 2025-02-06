@@ -134,6 +134,7 @@ struct StateAbstractVisitor
       "(Tx M). Therefore the points x, x0 and x1 belong to the manifold M; "   \
       "and dx or x1 [-] x0 lie on its tangential space")                       \
       .def(StateAbstractVisitor<State_wrap>())                                 \
+      .def(PrintableVisitor<State_wrap>())                                     \
       .def(CopyableVisitor<State_wrap>());
 
 void exposeStateAbstract() {

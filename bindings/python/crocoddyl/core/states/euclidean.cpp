@@ -108,6 +108,7 @@ struct StateVectorVisitor : public bp::def_visitor<StateVectorVisitor<State>> {
                             ":param nx: dimension of state"))                  \
       .def(StateVectorVisitor<State>())                                        \
       .def(CastVisitor<State>())                                               \
+      .def(PrintableVisitor<State>())                                          \
       .def(CopyableVisitor<State>());
 
 void exposeStateEuclidean() {

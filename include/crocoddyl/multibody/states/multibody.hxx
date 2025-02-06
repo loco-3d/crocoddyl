@@ -300,4 +300,10 @@ StateMultibodyTpl<NewScalar> StateMultibodyTpl<Scalar>::cast() const {
   return res;
 }
 
+template <typename Scalar>
+void StateMultibodyTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateMultibody {nx=" << nx_ << ", ndx=" << ndx_
+     << ", pinocchio=" << *pinocchio_.get() << "}";
+}
+
 }  // namespace crocoddyl
