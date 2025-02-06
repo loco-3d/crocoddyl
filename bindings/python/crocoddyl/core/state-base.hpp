@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,8 +20,9 @@
 namespace crocoddyl {
 namespace python {
 
-class StateAbstract_wrap : public StateAbstract,
-                           public bp::wrapper<StateAbstract> {
+template <typename Scalar>
+class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
+                              public bp::wrapper<StateAbstractTpl<Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(StateBase, StateAbstractTpl_wrap)
@@ -39,6 +41,7 @@ class StateAbstract_wrap : public StateAbstract,
       : State(nx, ndx), bp::wrapper<State>() {
     enableMultithreading() = false;
   }
+  explicit StateAbstractTpl_wrap() {}
 
   VectorXs zero() const override {
     return bp::call<VectorXs>(this->get_override("zero").ptr());
@@ -48,8 +51,8 @@ class StateAbstract_wrap : public StateAbstract,
     return bp::call<VectorXs>(this->get_override("rand").ptr());
   }
 
-  Eigen::VectorXd diff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                            const Eigen::Ref<const Eigen::VectorXd>& x1) const {
+  VectorXs diff_wrap(const Eigen::Ref<const VectorXs>& x0,
+                     const Eigen::Ref<const VectorXs>& x1) const {
     if (static_cast<std::size_t>(x0.size()) != nx_) {
       throw_pretty(
           "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -60,8 +63,8 @@ class StateAbstract_wrap : public StateAbstract,
           "Invalid argument: " << "x1 has wrong dimension (it should be " +
                                       std::to_string(nx_) + ")");
     }
-    return bp::call<Eigen::VectorXd>(this->get_override("diff").ptr(),
-                                     (Eigen::VectorXd)x0, (Eigen::VectorXd)x1);
+    return bp::call<VectorXs>(this->get_override("diff").ptr(), (VectorXs)x0,
+                              (VectorXs)x1);
   }
 
   void diff(const Eigen::Ref<const VectorXs>& x0,
@@ -70,9 +73,8 @@ class StateAbstract_wrap : public StateAbstract,
     dxout = diff_wrap(x0, x1);
   }
 
-  Eigen::VectorXd integrate_wrap(
-      const Eigen::Ref<const Eigen::VectorXd>& x,
-      const Eigen::Ref<const Eigen::VectorXd>& dx) const {
+  VectorXs integrate_wrap(const Eigen::Ref<const VectorXs>& x,
+                          const Eigen::Ref<const VectorXs>& dx) const {
     if (static_cast<std::size_t>(x.size()) != nx_) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -83,8 +85,8 @@ class StateAbstract_wrap : public StateAbstract,
           "Invalid argument: " << "dx has wrong dimension (it should be " +
                                       std::to_string(ndx_) + ")");
     }
-    return bp::call<Eigen::VectorXd>(this->get_override("integrate").ptr(),
-                                     (Eigen::VectorXd)x, (Eigen::VectorXd)dx);
+    return bp::call<VectorXs>(this->get_override("integrate").ptr(),
+                              (VectorXs)x, (VectorXs)dx);
   }
 
   void integrate(const Eigen::Ref<const VectorXs>& x,
@@ -100,28 +102,28 @@ class StateAbstract_wrap : public StateAbstract,
     bp::list res = Jdiff_wrap(x0, x1, firstsecond);
     switch (firstsecond) {
       case first: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jfirst.derived() = bp::extract<MatrixXs>(res[0])();
         break;
       }
       case second: {
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+        Jsecond.derived() = bp::extract<MatrixXs>(res[0])();
         break;
       }
       case both: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
+        Jfirst.derived() = bp::extract<MatrixXs>(res[0])();
+        Jsecond.derived() = bp::extract<MatrixXs>(res[1])();
         break;
       }
       default: {
-        Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
-        Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[1])();
+        Jfirst.derived() = bp::extract<MatrixXs>(res[0])();
+        Jsecond.derived() = bp::extract<MatrixXs>(res[1])();
         break;
       }
     }
   }
 
-  bp::list Jdiff_wrap(const Eigen::Ref<const Eigen::VectorXd>& x0,
-                      const Eigen::Ref<const Eigen::VectorXd>& x1,
+  bp::list Jdiff_wrap(const Eigen::Ref<const VectorXs>& x0,
+                      const Eigen::Ref<const VectorXs>& x1,
                       const Jcomponent firstsecond) const {
     assert_pretty(
         is_a_Jcomponent(firstsecond),
@@ -140,29 +142,27 @@ class StateAbstract_wrap : public StateAbstract,
     bp::list Jacs;
     switch (firstsecond) {
       case first: {
-        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(
-            this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
-            (Eigen::VectorXd)x1, firstsecond);
+        MatrixXs J =
+            bp::call<MatrixXs>(this->get_override("Jdiff").ptr(), (VectorXs)x0,
+                               (VectorXs)x1, firstsecond);
         Jacs.append(J);
         break;
       }
       case second: {
-        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(
-            this->get_override("Jdiff").ptr(), (Eigen::VectorXd)x0,
-            (Eigen::VectorXd)x1, firstsecond);
+        MatrixXs J =
+            bp::call<MatrixXs>(this->get_override("Jdiff").ptr(), (VectorXs)x0,
+                               (VectorXs)x1, firstsecond);
         Jacs.append(J);
         break;
       }
       case both: {
         Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(),
-                                  (Eigen::VectorXd)x0, (Eigen::VectorXd)x1,
-                                  firstsecond);
+                                  (VectorXs)x0, (VectorXs)x1, firstsecond);
         break;
       }
       default: {
         Jacs = bp::call<bp::list>(this->get_override("Jdiff").ptr(),
-                                  (Eigen::VectorXd)x0, (Eigen::VectorXd)x1,
-                                  firstsecond);
+                                  (VectorXs)x0, (VectorXs)x1, firstsecond);
         break;
       }
     }
@@ -185,15 +185,15 @@ class StateAbstract_wrap : public StateAbstract,
       }
       switch (op) {
         case setto: {
-          Jfirst.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+          Jfirst.derived() = bp::extract<MatrixXs>(res[0])();
           break;
         }
         case addto: {
-          Jfirst.derived() += bp::extract<Eigen::MatrixXd>(res[0])();
+          Jfirst.derived() += bp::extract<MatrixXs>(res[0])();
           break;
         }
         case rmfrom: {
-          Jfirst.derived() -= bp::extract<Eigen::MatrixXd>(res[0])();
+          Jfirst.derived() -= bp::extract<MatrixXs>(res[0])();
           break;
         }
         default: {
@@ -213,15 +213,15 @@ class StateAbstract_wrap : public StateAbstract,
       }
       switch (op) {
         case setto: {
-          Jsecond.derived() = bp::extract<Eigen::MatrixXd>(res[0])();
+          Jsecond.derived() = bp::extract<MatrixXs>(res[0])();
           break;
         }
         case addto: {
-          Jsecond.derived() += bp::extract<Eigen::MatrixXd>(res[0])();
+          Jsecond.derived() += bp::extract<MatrixXs>(res[0])();
           break;
         }
         case rmfrom: {
-          Jsecond.derived() -= bp::extract<Eigen::MatrixXd>(res[0])();
+          Jsecond.derived() -= bp::extract<MatrixXs>(res[0])();
           break;
         }
         default: {
@@ -233,8 +233,8 @@ class StateAbstract_wrap : public StateAbstract,
     }
   }
 
-  bp::list Jintegrate_wrap(const Eigen::Ref<const Eigen::VectorXd>& x,
-                           const Eigen::Ref<const Eigen::VectorXd>& dx,
+  bp::list Jintegrate_wrap(const Eigen::Ref<const VectorXs>& x,
+                           const Eigen::Ref<const VectorXs>& dx,
                            const Jcomponent firstsecond) const {
     assert_pretty(
         is_a_Jcomponent(firstsecond),
@@ -253,29 +253,25 @@ class StateAbstract_wrap : public StateAbstract,
     bp::list Jacs;
     switch (firstsecond) {
       case first: {
-        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(
-            this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-            (Eigen::VectorXd)dx, firstsecond);
+        MatrixXs J = bp::call<MatrixXs>(this->get_override("Jintegrate").ptr(),
+                                        (VectorXs)x, (VectorXs)dx, firstsecond);
         Jacs.append(J);
         break;
       }
       case second: {
-        Eigen::MatrixXd J = bp::call<Eigen::MatrixXd>(
-            this->get_override("Jintegrate").ptr(), (Eigen::VectorXd)x,
-            (Eigen::VectorXd)dx, firstsecond);
+        MatrixXs J = bp::call<MatrixXs>(this->get_override("Jintegrate").ptr(),
+                                        (VectorXs)x, (VectorXs)dx, firstsecond);
         Jacs.append(J);
         break;
       }
       case both: {
         Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(),
-                                  (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
-                                  firstsecond);
+                                  (VectorXs)x, (VectorXs)dx, firstsecond);
         break;
       }
       default: {
         Jacs = bp::call<bp::list>(this->get_override("Jintegrate").ptr(),
-                                  (Eigen::VectorXd)x, (Eigen::VectorXd)dx,
-                                  firstsecond);
+                                  (VectorXs)x, (VectorXs)dx, firstsecond);
         break;
       }
     }
@@ -289,10 +285,10 @@ class StateAbstract_wrap : public StateAbstract,
     Jin = JintegrateTransport_wrap(x, dx, Jin, firstsecond);
   }
 
-  Eigen::MatrixXd JintegrateTransport_wrap(
-      const Eigen::Ref<const Eigen::VectorXd>& x,
-      const Eigen::Ref<const Eigen::VectorXd>& dx,
-      Eigen::Ref<Eigen::MatrixXd> Jin, const Jcomponent firstsecond) const {
+  MatrixXs JintegrateTransport_wrap(const Eigen::Ref<const VectorXs>& x,
+                                    const Eigen::Ref<const VectorXs>& dx,
+                                    Eigen::Ref<MatrixXs> Jin,
+                                    const Jcomponent firstsecond) const {
     assert_pretty(
         is_a_Jcomponent(firstsecond),
         ("firstsecond must be one of the Jcomponent {both, first, second}"));
@@ -306,9 +302,9 @@ class StateAbstract_wrap : public StateAbstract,
           "Invalid argument: " << "dx has wrong dimension (it should be " +
                                       std::to_string(ndx_) + ")");
     }
-    return bp::call<Eigen::MatrixXd>(
-        this->get_override("JintegrateTransport").ptr(), (Eigen::VectorXd)x,
-        (Eigen::VectorXd)dx, (Eigen::MatrixXd)Jin, firstsecond);
+    return bp::call<MatrixXs>(this->get_override("JintegrateTransport").ptr(),
+                              (VectorXs)x, (VectorXs)dx, (MatrixXs)Jin,
+                              firstsecond);
   }
 
   template <typename NewScalar>
