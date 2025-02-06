@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,8 +181,8 @@ void print_benchmark(RobotEENames robot) {
   Eigen::ArrayXd stddev(CROCODDYL_WITH_NTHREADS);
 
   /*******************************************************************************/
-  /****************************** ACTION MODEL TIMINGS
-   * ***************************/
+  /************************** ACTION MODEL TIMINGS
+   * ******************************/
   std::cout << "Without Code Generation:" << std::endl;
   problem->calc(xs, us);
   // calcDiff timings
@@ -238,8 +239,8 @@ void print_benchmark(RobotEENames robot) {
   }
 
   /*******************************************************************************/
-  /******************* DDP BACKWARD AND FORWARD PASSES TIMINGS
-   * *******************/
+  /******************* DDP BACKWARD AND FORWARD PASSES
+   * TIMINGS*******************/
   // Backward pass timings
   ddp.calcDiff();
   duration.setZero();
