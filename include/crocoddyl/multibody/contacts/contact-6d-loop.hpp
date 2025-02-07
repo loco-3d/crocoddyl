@@ -58,7 +58,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
       boost::shared_ptr<StateMultibody> state, const int joint1_id,
       const SE3 &joint1_placement, const int joint2_id,
       const SE3 &joint2_placement,
-      const pinocchio::ReferenceFrame type const std::size_t nu,
+      const pinocchio::ReferenceFrame type, 
+      const std::size_t nu,
       const Vector2s &gains = Vector2s::Zero());
 
   /**
@@ -78,8 +79,8 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   ContactModel6DLoopTpl(boost::shared_ptr<StateMultibody> state,
                         const int joint1_id, const SE3 &joint1_placement,
                         const int joint2_id, const SE3 &joint2_placement,
-                        const pinocchio::ReferenceFrame type const Vector2s
-                            &gains = Vector2s::Zero());
+                        const pinocchio::ReferenceFrame type, 
+                        const Vector2s &gains = Vector2s::Zero());
 
   virtual ~ContactModel6DLoopTpl();
 
