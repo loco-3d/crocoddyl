@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,9 +17,10 @@
 namespace crocoddyl {
 namespace python {
 
-class ActivationModelAbstract_wrap
-    : public ActivationModelAbstract,
-      public bp::wrapper<ActivationModelAbstract> {
+template <typename Scalar>
+class ActivationModelAbstractTpl_wrap
+    : public ActivationModelAbstractTpl<Scalar>,
+      public bp::wrapper<ActivationModelAbstractTpl<Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModelAbstractTpl_wrap)
@@ -39,8 +41,7 @@ class ActivationModelAbstract_wrap
           "Invalid argument: " << "r has wrong dimension (it should be " +
                                       std::to_string(nr_) + ")");
     }
-    return bp::call<void>(this->get_override("calc").ptr(), data,
-                          (Eigen::VectorXd)r);
+    return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)r);
   }
 
   void calcDiff(const std::shared_ptr<ActivationData>& data,
@@ -51,20 +52,19 @@ class ActivationModelAbstract_wrap
                                       std::to_string(nr_) + ")");
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                          (Eigen::VectorXd)r);
+                          (VectorXs)r);
   }
 
   std::shared_ptr<ActivationData> createData() override {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<std::shared_ptr<ActivationDataAbstract> >(
-          createData.ptr());
+      return bp::call<std::shared_ptr<ActivationData>>(createData.ptr());
     }
-    return ActivationModelAbstract::createData();
+    return ActivationModel::createData();
   }
 
-  std::shared_ptr<ActivationDataAbstract> default_createData() {
-    return this->ActivationModelAbstract::createData();
+  std::shared_ptr<ActivationData> default_createData() {
+    return this->ActivationModel::createData();
   }
 
   template <typename NewScalar>

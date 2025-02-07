@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,56 +11,81 @@
 
 #include "python/crocoddyl/core/activation-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationSmooth1Norm() {
-  boost::python::register_ptr_to_python<
-      std::shared_ptr<ActivationModelSmooth1Norm> >();
-
-  bp::class_<ActivationModelSmooth1Norm, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelSmooth1Norm",
-      "Smooth-absolute activation model.\n\n"
-      "It describes a smooth representation of an absolute activation "
-      "(1-norm), i.e.\n"
-      "sum^nr_{i=0} sqrt{eps + ||ri||^2}, where ri is the scalar residual for "
-      "the i constraints,\n."
-      "and nr is the dimension of the residual vector.",
-      bp::init<std::size_t, bp::optional<double> >(
-          bp::args("self", "nr", "eps"),
-          "Initialize the activation model.\n\n"
-          ":param nr: dimension of the residual vector\n"
-          ":param eps: smoothing factor (default: 1.)"))
-      .def("calc", &ActivationModelSmooth1Norm::calc,
-           bp::args("self", "data", "r"),
+template <typename Model>
+struct ActivationModelSmooth1NormVisitor
+    : public bp::def_visitor<ActivationModelSmooth1NormVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "r"),
            "Compute the smooth-abs function.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelSmooth1Norm::calcDiff,
-           bp::args("self", "data", "r"),
-           "Compute the derivatives of a smooth-abs function.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: activation data\n"
-           ":param r: residual vector \n")
-      .def("createData", &ActivationModelSmooth1Norm::createData,
-           bp::args("self"), "Create the smooth-abs activation data.\n\n")
-      .def(CopyableVisitor<ActivationModelSmooth1Norm>());
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "r"),
+             "Compute the derivatives of a smooth-abs function.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: activation data\n"
+             ":param r: residual vector \n")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the smooth-abs activation data.\n\n");
+  }
+};
 
-  bp::register_ptr_to_python<std::shared_ptr<ActivationDataSmooth1Norm> >();
+template <typename Data>
+struct ActivationDataSmooth1NormVisitor
+    : public bp::def_visitor<ActivationDataSmooth1NormVisitor<Data>> {
+  typedef typename Data::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
+        "sqrt{eps + ||ri||^2} value");
+  }
+};
 
-  bp::class_<ActivationDataSmooth1Norm, bp::bases<ActivationDataAbstract> >(
-      "ActivationDataSmooth1Norm", "Data for smooth-abs activation.\n\n",
-      bp::init<ActivationModelSmooth1Norm*>(
-          bp::args("self", "model"),
-          "Create smooth-abs activation data.\n\n"
-          ":param model: smooth-abs activation model"))
-      .add_property("a",
-                    bp::make_getter(&ActivationDataSmooth1Norm::a,
-                                    bp::return_internal_reference<>()),
-                    "sqrt{eps + ||ri||^2} value")
-      .def(CopyableVisitor<ActivationDataSmooth1Norm>());
+#define CROCODDYL_ACTIVATION_MODEL_SMOOTH1NORM_PYTHON_BINDINGS(Scalar)         \
+  typedef ActivationModelSmooth1NormTpl<Scalar> Model;                         \
+  typedef ActivationModelAbstractTpl<Scalar> ModelBase;                        \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ActivationModelSmooth1Norm",                                            \
+      "Smooth-absolute activation model.\n\n"                                  \
+      "It describes a smooth representation of an absolute activation "        \
+      "(1-norm), i.e., sum^nr_{i=0} sqrt{eps + ||ri||^2}, where ri is the "    \
+      "scalar residual for the i constraints, and nr is the dimension of the " \
+      "residual vector.",                                                      \
+      bp::init<std::size_t, bp::optional<Scalar>>(                             \
+          bp::args("self", "nr", "eps"),                                       \
+          "Initialize the activation model.\n\n"                               \
+          ":param nr: dimension of the residual vector\n"                      \
+          ":param eps: smoothing factor (default: 1.)"))                       \
+      .def(ActivationModelSmooth1NormVisitor<Model>())                         \
+      .def(CastVisitor<Model>())                                               \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTIVATION_DATA_SMOOTH1NORM_PYTHON_BINDINGS(Scalar)     \
+  typedef ActivationDataSmooth1NormTpl<Scalar> Data;                      \
+  typedef ActivationDataAbstractTpl<Scalar> DataBase;                     \
+  typedef ActivationModelSmooth1NormTpl<Scalar> Model;                    \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                    \
+  bp::class_<Data, bp::bases<DataBase>>(                                  \
+      "ActivationDataSmooth1Norm", "Data for smooth-abs activation.\n\n", \
+      bp::init<Model*>(bp::args("self", "model"),                         \
+                       "Create smooth-abs activation data.\n\n"           \
+                       ":param model: smooth-abs activation model"))      \
+      .def(ActivationDataSmooth1NormVisitor<Data>())                      \
+      .def(CopyableVisitor<Data>());
+
+void exposeActivationSmooth1Norm() {
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_ACTIVATION_MODEL_SMOOTH1NORM_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_ACTIVATION_DATA_SMOOTH1NORM_PYTHON_BINDINGS)
 }
 
 }  // namespace python

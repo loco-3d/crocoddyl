@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,41 +11,53 @@
 
 #include "python/crocoddyl/core/activation-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationSmooth2Norm() {
-  boost::python::register_ptr_to_python<
-      std::shared_ptr<ActivationModelSmooth2Norm> >();
-
-  bp::class_<ActivationModelSmooth2Norm, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelSmooth2Norm",
-      "Smooth-2Norm activation model.\n\n"
-      "It describes a smooth representation of a 2-norm, i.e.\n"
-      "sqrt{eps + sum^nr_{i=0} ||ri||^2}, where ri is the scalar residual for "
-      "the i constraints,\n."
-      "and nr is the dimension of the residual vector.",
-      bp::init<std::size_t, bp::optional<double> >(
-          bp::args("self", "nr", "eps"),
-          "Initialize the activation model.\n\n"
-          ":param nr: dimension of the residual vector\n"
-          ":param eps: smoothing factor (default: 1.)"))
-      .def("calc", &ActivationModelSmooth2Norm::calc,
-           bp::args("self", "data", "r"),
+template <typename Model>
+struct ActivationModelSmooth2NormVisitor
+    : public bp::def_visitor<ActivationModelSmooth2NormVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "r"),
            "Compute the smooth-2norm function.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelSmooth2Norm::calcDiff,
-           bp::args("self", "data", "r"),
-           "Compute the derivatives of a smooth-2norm function.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: activation data\n"
-           ":param r: residual vector \n")
-      .def("createData", &ActivationModelSmooth2Norm::createData,
-           bp::args("self"), "Create the smooth-2norm activation data.\n\n")
-      .def(CopyableVisitor<ActivationModelSmooth2Norm>());
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "r"),
+             "Compute the derivatives of a smooth-2norm function.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: activation data\n"
+             ":param r: residual vector \n")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the smooth-2norm activation data.\n\n");
+  }
+};
+
+#define CROCODDYL_ACTIVATION_MODEL_SMOOTH2NORM_PYTHON_BINDINGS(Scalar)      \
+  typedef ActivationModelSmooth2NormTpl<Scalar> Model;                      \
+  typedef ActivationModelAbstractTpl<Scalar> ModelBase;                     \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model, bp::bases<ModelBase>>(                                  \
+      "ActivationModelSmooth2Norm",                                         \
+      "Smooth-2Norm activation model.\n\n"                                  \
+      "It describes a smooth representation of a 2-norm, i.e., sqrt{eps + " \
+      "sum^nr_{i=0} ||ri||^2}, where ri is the scalar residual for the i "  \
+      "constraints, and nr is the dimension of the residual vector.",       \
+      bp::init<std::size_t, bp::optional<Scalar>>(                          \
+          bp::args("self", "nr", "eps"),                                    \
+          "Initialize the activation model.\n\n"                            \
+          ":param nr: dimension of the residual vector\n"                   \
+          ":param eps: smoothing factor (default: 1.)"))                    \
+      .def(ActivationModelSmooth2NormVisitor<Model>())                      \
+      .def(CastVisitor<Model>())                                            \
+      .def(PrintableVisitor<Model>())                                       \
+      .def(CopyableVisitor<Model>());
+
+void exposeActivationSmooth2Norm() {
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_ACTIVATION_MODEL_SMOOTH2NORM_PYTHON_BINDINGS)
 }
 
 }  // namespace python
