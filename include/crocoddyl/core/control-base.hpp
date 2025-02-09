@@ -183,6 +183,7 @@ class ControlParametrizationModelAbstractTpl
   /**
    * @brief Print information on the control model
    */
+  template <class Scalar>
   friend std::ostream& operator<<(
       std::ostream& os,
       const ControlParametrizationModelAbstractTpl<Scalar>& model);

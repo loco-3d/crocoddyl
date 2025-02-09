@@ -39,7 +39,7 @@ class ControlParametrizationModelAbstractTpl_wrap
   ControlParametrizationModelAbstractTpl_wrap(std::size_t nw, std::size_t nu)
       : ControlParamModel(nw, nu), bp::wrapper<ControlParamModel>() {}
 
-  void calc(const std::shared_ptr<ControlParamData>& data, Scalar t,
+  void calc(const std::shared_ptr<ControlParamData>& data, const Scalar t,
             const Eigen::Ref<const VectorXs>& u) const override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
@@ -50,7 +50,7 @@ class ControlParametrizationModelAbstractTpl_wrap
                           (VectorXs)u);
   }
 
-  void calcDiff(const std::shared_ptr<ControlParamData>& data, Scalar t,
+  void calcDiff(const std::shared_ptr<ControlParamData>& data, const Scalar t,
                 const Eigen::Ref<const VectorXs>& u) const override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
@@ -61,7 +61,7 @@ class ControlParametrizationModelAbstractTpl_wrap
                           (VectorXs)u);
   }
 
-  void params(const std::shared_ptr<ControlParamData>& data, Scalar t,
+  void params(const std::shared_ptr<ControlParamData>& data, const Scalar t,
               const Eigen::Ref<const VectorXs>& w) const override {
     if (static_cast<std::size_t>(w.size()) != nw_) {
       throw_pretty(

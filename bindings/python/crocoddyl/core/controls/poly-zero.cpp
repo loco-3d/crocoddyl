@@ -16,94 +16,103 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeControlParametrizationPolyZero() {
-  bp::register_ptr_to_python<
-      std::shared_ptr<ControlParametrizationModelPolyZero> >();
+template <typename Model>
+struct ControlParametrizationModelPolyZeroVisitor
+    : public bp::def_visitor<
+          ControlParametrizationModelPolyZeroVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::ControlParametrizationDataAbstract Data;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(
+               const std::shared_ptr<Data>&, const Scalar,
+               const Eigen::Ref<const VectorXs>&) const>(&Model::calc),
+           bp::args("self", "data", "t", "u"),
+           "Compute the control value.\n\n"
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param u: control parameters (dim control.nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Scalar,
+                 const Eigen::Ref<const VectorXs>&) const>(&Model::calcDiff),
+             bp::args("self", "data", "t", "u"),
+             "Compute the Jacobian of the control value with respect to the "
+             "control parameters.\n"
+             "It assumes that calc has been run first.\n\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param u: control parameters (dim control.nu)")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the poly-zero data.")
+        .def("params",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Scalar,
+                 const Eigen::Ref<const VectorXs>&) const>(&Model::params),
+             bp::args("self", "data", "t", "u"),
+             "Compute the control parameters.\n\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param w: control value (dim control.nw)")
+        .def("convertBounds", &Model::convertBounds,
+             bp::args("self", "u_lb", "u_ub"),
+             "Convert the bounds on the control to bounds on the control "
+             "parameters.\n\n"
+             ":param w_lb: lower bounds on w (dim control.nw)\n"
+             ":param w_ub: upper bounds on w (dim control.nw)\n"
+             ":return p_lb, p_ub: lower and upper bounds on the control "
+             "parameters (dim control.nu)")
+        .def(
+            "multiplyByJacobian", &Model::multiplyByJacobian_J,
+            bp::args("self", "data", "A"),
+            "Compute the product between the given matrix A and the derivative "
+            "of the control with respect to the "
+            "parameters.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: control-parametrization data\n"
+            ":param A: matrix to multiply (dim na x control.nw)\n"
+            ":return Product between A and the partial derivative of the value "
+            "function (dim na x control.nu)")
+        .def("multiplyJacobianTransposeBy",
+             &Model::multiplyJacobianTransposeBy_J,
+             bp::args("self", "data", "A"),
+             "Compute the product between the transpose of the derivative of "
+             "the "
+             "control with respect to the parameters\n"
+             "and a given matrix A.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: control-parametrization data\n"
+             ":param A: matrix to multiply (dim control.nw x na)\n"
+             ":return Product between the partial derivative of the value "
+             "function (transposed) and A (dim control.nu x "
+             "na)");
+  }
+};
 
-  bp::class_<ControlParametrizationModelPolyZero,
-             bp::bases<ControlParametrizationModelAbstract> >(
-      "ControlParametrizationModelPolyZero",
-      "Constant control.\n\n"
-      "This control is a constant."
-      "The parameter vector corresponds to the constant value of the "
-      "differential control w, that is w=p.",
-      bp::init<std::size_t>(
-          bp::args("self", "nw"),
-          "Initialize the control dimensions.\n\n"
-          ":param nw: dimension of differential control space"))
-      .def<void (ControlParametrizationModelPolyZero::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "calc", &ControlParametrizationModelPolyZero::calc,
-          bp::args("self", "data", "t", "u"),
-          "Compute the control value.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param u: control parameters (dim control.nu)")
-      .def<void (ControlParametrizationModelPolyZero::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "calcDiff", &ControlParametrizationModelPolyZero::calcDiff,
-          bp::args("self", "data", "t", "u"),
-          "Compute the Jacobian of the control value with respect to the "
-          "control parameters.\n"
-          "It assumes that calc has been run first.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param u: control parameters (dim control.nu)")
-      .def("createData", &ControlParametrizationModelPolyZero::createData,
-           bp::args("self"), "Create the poly-zero data.")
-      .def<void (ControlParametrizationModelPolyZero::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "params", &ControlParametrizationModelPolyZero::params,
-          bp::args("self", "data", "t", "u"),
-          "Compute the control parameters.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param w: control value (dim control.nw)")
-      .def("convertBounds", &ControlParametrizationModelPolyZero::convertBounds,
-           bp::args("self", "u_lb", "u_ub"),
-           "Convert the bounds on the control to bounds on the control "
-           "parameters.\n\n"
-           ":param w_lb: lower bounds on w (dim control.nw)\n"
-           ":param w_ub: upper bounds on w (dim control.nw)\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control "
-           "parameters (dim control.nu)")
-      .def("multiplyByJacobian",
-           &ControlParametrizationModelPolyZero::multiplyByJacobian_J,
-           ControlParametrizationModelAbstract_multiplyByJacobian_J_wrap(
-               bp::args("self", "data", "A", "op"),
-               "Compute the product between the given matrix A and the "
-               "derivative "
-               "of the control with respect to the "
-               "parameters.\n\n"
-               "It assumes that calc has been run first.\n"
-               ":param data: control-parametrization data\n"
-               ":param A: matrix to multiply (dim na x control.nw)\n"
-               ":op assignment operator which sets, adds, or removes the given "
-               "results\n"
-               ":return Product between A and the partial derivative of the "
-               "value "
-               "function (dim na x control.nu)"))
-      .def(
-          "multiplyJacobianTransposeBy",
-          &ControlParametrizationModelPolyZero::multiplyJacobianTransposeBy_J,
-          ControlParametrizationModelAbstract_multiplyJacobianTransposeBy_J_wrap(
-              bp::args("self", "data", "A", "op"),
-              "Compute the product between the transpose of the derivative of "
-              "the "
-              "control with respect to the parameters\n"
-              "and a given matrix A.\n\n"
-              "It assumes that calc has been run first.\n"
-              ":param data: control-parametrization data\n"
-              ":param A: matrix to multiply (dim control.nw x na)\n"
-              ":op assignment operator which sets, adds, or removes the given "
-              "results\n"
-              ":return Product between the partial derivative of the value "
-              "function (transposed) and A (dim control.nu x "
-              "na)"))
-      .def(CopyableVisitor<ControlParametrizationModelPolyZero>());
+#define CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_POLYZERO_PYTHON_BINDINGS(    \
+    Scalar)                                                                  \
+  typedef ControlParametrizationModelPolyZeroTpl<Scalar> Model;              \
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ModelBase;          \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ControlParametrizationModelPolyZero",                                 \
+      "Constant control.\n\n"                                                \
+      "This control is a constant. The parameter vector corresponds to the " \
+      "constant value of the differential control w, that is w=p.",          \
+      bp::init<std::size_t>(                                                 \
+          bp::args("self", "nw"),                                            \
+          "Initialize the control dimensions.\n\n"                           \
+          ":param nw: dimension of differential control space"))             \
+      .def(ControlParametrizationModelPolyZeroVisitor<Model>())              \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+void exposeControlParametrizationPolyZero() {
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_POLYZERO_PYTHON_BINDINGS)
 }
 
 }  // namespace python
