@@ -128,7 +128,7 @@ void FrictionConeTpl<Scalar>::update(const Vector3s& normal, const Scalar mu,
                                      const bool inner_appr,
                                      const Scalar min_nforce,
                                      const Scalar max_nforce) {
-  Eigen::Vector3d nsurf = normal;
+  Vector3s nsurf = normal;
   // Sanity checks
   if (!nsurf.isUnitary()) {
     nsurf /= normal.norm();
