@@ -16,35 +16,48 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeSquashingSmoothSat() {
-  bp::register_ptr_to_python<std::shared_ptr<SquashingModelSmoothSat> >();
-
-  bp::class_<SquashingModelSmoothSat, bp::bases<SquashingModelAbstract> >(
-      "SquashingModelSmoothSat", "Smooth Sat squashing model",
-      bp::init<Eigen::VectorXd, Eigen::VectorXd, std::size_t>(
-          bp::args("self", "u_lb", "u_ub", "ns"),
-          "Initialize the squashing model. \n\n"
-          ":param u_lb: output lower bound"
-          ":param u_ub: output upper bound"
-          ":param ns: dimension of the input vector"))
-      .def("calc", &SquashingModelSmoothSat::calc,
-           bp::args("self", "data", "s"),
+template <typename Model>
+struct SquashingSmoothSatVisitor
+    : public bp::def_visitor<SquashingSmoothSatVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "s"),
            "Compute the squashing value for a given value of s, "
            "component-wise. \n\n"
            ":param data: squashing data\n"
            ":param s: control input")
-      .def("calcDiff", &SquashingModelSmoothSat::calcDiff,
-           bp::args("self", "data", "s"),
-           "Compute the derivative of the squashing function.\n\n"
-           ":param data: squashing data\n"
-           ":param s: squashing input.")
-      .def("createData", &SquashingModelSmoothSat::createData, bp::args("self"),
-           "Create the squashing data.\n\n")
-      .add_property("smooth",
-                    bp::make_function(&SquashingModelSmoothSat::get_smooth),
-                    bp::make_function(&SquashingModelSmoothSat::set_smooth),
-                    "Smoothness parameter of the smooth sat. function")
-      .def(CopyableVisitor<SquashingModelSmoothSat>());
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "s"),
+             "Compute the derivative of the squashing function.\n\n"
+             ":param data: squashing data\n"
+             ":param s: squashing input.")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the squashing data.\n\n")
+        .add_property("smooth", bp::make_function(&Model::get_smooth),
+                      bp::make_function(&Model::set_smooth),
+                      "Smoothness parameter of the smooth sat. function");
+  }
+};
+
+#define CROCODDYL_SQUASHING_SMOOTH_SAT_PYTHON_BINDINGS(Scalar) \
+  typedef SquashingModelSmoothSatTpl<Scalar> Model;            \
+  typedef SquashingModelAbstractTpl<Scalar> ModelBase;         \
+  typedef Model::VectorXs VectorXs;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();        \
+  bp::class_<Model, bp::bases<ModelBase>>(                     \
+      "SquashingModelSmoothSat", "Smooth Sat squashing model", \
+      bp::init<VectorXs, VectorXs, std::size_t>(               \
+          bp::args("self", "u_lb", "u_ub", "ns"),              \
+          "Initialize the squashing model.\n\n"                \
+          ":param u_lb: output lower bound\n"                  \
+          ":param u_ub: output upper bound\n"                  \
+          ":param ns: dimension of the input vector"))         \
+      .def(SquashingSmoothSatVisitor<Model>())                 \
+      .def(CastVisitor<Model>())                               \
+      .def(PrintableVisitor<Model>())                          \
+      .def(CopyableVisitor<Model>());
+
+void exposeSquashingSmoothSat() {
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_SQUASHING_SMOOTH_SAT_PYTHON_BINDINGS)
 }
 
 }  // namespace python

@@ -55,6 +55,13 @@ class SquashingModelAbstractTpl : public SquashingModelBase {
   }
 
   /**
+   * @brief Print information on the actuation model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(
+      std::ostream& os, const SquashingModelAbstractTpl<Scalar>& model);
+
+  /**
    * @brief Print relevant information of the squashing model
    *
    * @param[out] os  Output stream object
@@ -102,6 +109,13 @@ struct SquashingDataAbstractTpl {
   VectorXs u;
   MatrixXs du_ds;
 };
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os,
+                         const SquashingModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
+}
 
 }  // namespace crocoddyl
 

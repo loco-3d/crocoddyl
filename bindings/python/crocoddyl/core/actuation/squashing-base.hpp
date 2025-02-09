@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,26 +16,42 @@
 namespace crocoddyl {
 namespace python {
 
-class SquashingModelAbstract_wrap : public SquashingModelAbstract,
-                                    public bp::wrapper<SquashingModelAbstract> {
+template <typename Scalar>
+class SquashingModelAbstractTpl_wrap
+    : public SquashingModelAbstractTpl<Scalar>,
+      public bp::wrapper<SquashingModelAbstractTpl<Scalar>> {
  public:
-  SquashingModelAbstract_wrap(const std::size_t ns)
-      : SquashingModelAbstract(ns), bp::wrapper<SquashingModelAbstract>() {}
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(SquashingModelBase, SquashingModelAbstractTpl_wrap)
 
-  void calc(const std::shared_ptr<SquashingDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& s) {
+  typedef typename crocoddyl::SquashingModelAbstractTpl<Scalar> SquashingModel;
+  typedef typename crocoddyl::SquashingDataAbstractTpl<Scalar> SquashingData;
+  typedef typename SquashingModel::VectorXs VectorXs;
+  using SquashingModel::ns_;
+
+  SquashingModelAbstractTpl_wrap(const std::size_t ns)
+      : SquashingModel(ns), bp::wrapper<SquashingModel>() {}
+
+  void calc(const std::shared_ptr<SquashingData>& data,
+            const Eigen::Ref<const VectorXs>& s) override {
     assert_pretty(static_cast<std::size_t>(s.size()) == ns_,
                   "s has wrong dimension");
-    return bp::call<void>(this->get_override("calc").ptr(), data,
-                          (Eigen::VectorXd)s);
+    return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)s);
   }
 
-  void calcDiff(const std::shared_ptr<SquashingDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& s) {
+  void calcDiff(const std::shared_ptr<SquashingData>& data,
+                const Eigen::Ref<const VectorXs>& s) override {
     assert_pretty(static_cast<std::size_t>(s.size()) == ns_,
                   "s has wrong dimension");
     return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                          (Eigen::VectorXd)s);
+                          (VectorXs)s);
+  }
+
+  template <typename NewScalar>
+  SquashingModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef SquashingModelAbstractTpl_wrap<NewScalar> ReturnType;
+    ReturnType ret(ns_);
+    return ret;
   }
 };
 
