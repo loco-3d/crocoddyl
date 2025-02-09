@@ -172,6 +172,8 @@ class ControlParametrizationModelPolyTwoRKTpl
   template <typename NewScalar>
   ControlParametrizationModelPolyTwoRKTpl<NewScalar> cast() const;
 
+  virtual void print(std::ostream& os) const override;
+
  protected:
   using Base::nu_;
   using Base::nw_;

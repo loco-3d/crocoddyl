@@ -161,6 +161,8 @@ class ControlParametrizationModelPolyOneTpl
   template <typename NewScalar>
   ControlParametrizationModelPolyOneTpl<NewScalar> cast() const;
 
+  virtual void print(std::ostream& os) const override;
+
  protected:
   using Base::nu_;
   using Base::nw_;

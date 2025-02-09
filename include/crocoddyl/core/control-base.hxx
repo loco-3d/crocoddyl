@@ -7,6 +7,7 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <boost/core/demangle.hpp>
 #include <boost/make_shared.hpp>
 
 namespace crocoddyl {
@@ -48,6 +49,20 @@ ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
   MatrixXs JTA(nu_, A.cols());
   multiplyJacobianTransposeBy(data, A, JTA, op);
   return JTA;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(
+    std::ostream& os,
+    const ControlParametrizationModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelAbstractTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

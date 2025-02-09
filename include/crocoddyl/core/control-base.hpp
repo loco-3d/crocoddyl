@@ -181,6 +181,20 @@ class ControlParametrizationModelAbstractTpl
       const std::shared_ptr<ControlParametrizationDataAbstract>& data);
 
   /**
+   * @brief Print information on the control model
+   */
+  friend std::ostream& operator<<(
+      std::ostream& os,
+      const ControlParametrizationModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the control model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
+
+  /**
    * @brief Return the dimension of the control inputs
    */
   std::size_t get_nw() const;

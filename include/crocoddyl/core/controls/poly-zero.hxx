@@ -165,4 +165,10 @@ ControlParametrizationModelPolyZeroTpl<Scalar>::cast() const {
   return ret;
 }
 
+template <typename Scalar>
+void ControlParametrizationModelPolyZeroTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << "ControlParametrizationModelPolyZero {nw=" << nw_ << "}";
+}
+
 }  // namespace crocoddyl

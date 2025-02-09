@@ -156,6 +156,8 @@ class ControlParametrizationModelPolyZeroTpl
   template <typename NewScalar>
   ControlParametrizationModelPolyZeroTpl<NewScalar> cast() const;
 
+  virtual void print(std::ostream& os) const override;
+
  protected:
   using Base::nu_;
   using Base::nw_;

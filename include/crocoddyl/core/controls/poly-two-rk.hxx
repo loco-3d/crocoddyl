@@ -205,4 +205,21 @@ ControlParametrizationModelPolyTwoRKTpl<Scalar>::cast() const {
   return ret;
 }
 
+template <typename Scalar>
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << "ControlParametrizationModelPolyTwoRK {nw=" << nw_;
+  switch (rktype_) {
+    case two:
+      os << ", rktype=two}";
+      break;
+    case three:
+      os << ", rktype=three}";
+      break;
+    case four:
+      os << ", rktype=four}";
+      break;
+  }
+}
+
 }  // namespace crocoddyl
