@@ -53,55 +53,6 @@ FrictionConeTpl<Scalar>::FrictionConeTpl(const Matrix3s& R, const Scalar mu,
 }
 
 template <typename Scalar>
-FrictionConeTpl<Scalar>::FrictionConeTpl(const Vector3s& nsurf, const Scalar mu,
-                                         std::size_t nf, const bool inner_appr,
-                                         const Scalar min_nforce,
-                                         const Scalar max_nforce)
-    : nf_(nf),
-      R_(Quaternions::FromTwoVectors(nsurf, Vector3s::UnitZ())
-             .toRotationMatrix()),
-      mu_(mu),
-      inner_appr_(inner_appr),
-      min_nforce_(min_nforce),
-      max_nforce_(max_nforce) {
-  if (nf_ % 2 != 0) {
-    nf_ = 4;
-    std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
-  }
-  Eigen::Vector3d normal = nsurf;
-  if (!nsurf.isUnitary()) {
-    normal /= nsurf.norm();
-    std::cerr
-        << "Warning: normal is not an unitary vector, then we normalized it"
-        << std::endl;
-  }
-  if (mu < Scalar(0.)) {
-    mu_ = Scalar(1.);
-    std::cerr << "Warning: mu has to be a positive value, set to 1."
-              << std::endl;
-  }
-  if (min_nforce < Scalar(0.)) {
-    min_nforce_ = Scalar(0.);
-    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
-              << std::endl;
-  }
-  if (max_nforce < Scalar(0.)) {
-    max_nforce_ = std::numeric_limits<Scalar>::infinity();
-    std::cerr << "Warning: max_nforce has to be a positive value, set to "
-                 "infinity value"
-              << std::endl;
-  }
-  A_ = MatrixX3s::Zero(nf_ + 1, 3);
-  ub_ = VectorXs::Zero(nf_ + 1);
-  lb_ = VectorXs::Zero(nf_ + 1);
-  R_ =
-      Quaternions::FromTwoVectors(normal, Vector3s::UnitZ()).toRotationMatrix();
-
-  // Update the inequality matrix and bounds
-  update();
-}
-
-template <typename Scalar>
 FrictionConeTpl<Scalar>::FrictionConeTpl()
     : nf_(4),
       A_(nf_ + 1, 3),

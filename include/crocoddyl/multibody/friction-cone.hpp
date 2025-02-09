@@ -55,12 +55,6 @@ class FrictionConeTpl {
       const Matrix3s& R, const Scalar mu, std::size_t nf = 4,
       const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
       const Scalar max_nforce = std::numeric_limits<Scalar>::infinity());
-  DEPRECATED("Use constructor based on rotation matrix.",
-             FrictionConeTpl(const Vector3s& normal, const Scalar mu,
-                             std::size_t nf = 4, const bool inner_appr = true,
-                             const Scalar min_nforce = Scalar(0.),
-                             const Scalar max_nforce =
-                                 std::numeric_limits<Scalar>::infinity());)
 
   /**
    * @brief Initialize the wrench cone
