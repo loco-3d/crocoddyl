@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [2.2.0] - 1980-01-01
+
 * Changed return policy in std::vector of Eigen's vector and matrices to be compliant with Pinocchio in https://github.com/loco-3d/crocoddyl/pull/1338
 * Prevent users to improperly setting residual references in https://github.com/loco-3d/crocoddyl/pull/1332
 * Fixed the inequality constraints' feasibility computation by incorporating bounds into the calculation in https://github.com/loco-3d/crocoddyl/pull/1307
@@ -311,7 +313,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...v2.1.0
 [2.0.2]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/loco-3d/crocoddyl/compare/v2.0.0...v2.0.1
