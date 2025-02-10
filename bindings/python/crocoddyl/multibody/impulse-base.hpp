@@ -79,7 +79,7 @@ class ImpulseModelAbstractTpl_wrap
 
   std::shared_ptr<ImpulseData> default_createData(
       pinocchio::DataTpl<Scalar>* const data) {
-    return this->ImpulseModelAbstract::createData(data);
+    return this->ImpulseModel::createData(data);
   }
 
   template <typename NewScalar>
