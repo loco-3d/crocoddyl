@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,11 +136,11 @@ class ControlParametrizationModelAbstractTpl {
   virtual void multiplyByJacobian(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const = 0;
+      const AssignmentOp op = setto) const = 0;
 
   virtual MatrixXs multiplyByJacobian_J(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
+      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op = setto) const;
 
   /**
    * @brief Compute the product between the transpose of the derivative of the
@@ -158,11 +159,11 @@ class ControlParametrizationModelAbstractTpl {
   virtual void multiplyJacobianTransposeBy(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const = 0;
+      const AssignmentOp op = setto) const = 0;
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(
       const std::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
+      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op = setto) const;
 
   /**
    * @brief Checks that a specific data belongs to this model

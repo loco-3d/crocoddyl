@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -79,27 +79,36 @@ void exposeControlParametrizationPolyTwoRK() {
            "parameters (dim control.nu)")
       .def("multiplyByJacobian",
            &ControlParametrizationModelPolyTwoRK::multiplyByJacobian_J,
-           bp::args("self", "data", "A"),
-           "Compute the product between the given matrix A and the derivative "
-           "of the control with respect to the "
-           "parameters.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: poly-two-rk data\n"
-           ":param A: matrix to multiply (dim na x control.nw)\n"
-           ":return Product between A and the partial derivative of the "
-           "control (dim na x control.nu)")
-      .def("multiplyJacobianTransposeBy",
-           &ControlParametrizationModelPolyTwoRK::multiplyJacobianTransposeBy_J,
-           bp::args("self", "data", "A"),
-           "Compute the product between the transpose of the derivative of the "
-           "control with respect to the parameters\n"
-           "and a given matrix A.\n\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: poly-two-rk data\n"
-           ":param A: matrix to multiply (dim control.nw x na)\n"
-           ":return Product between the partial derivative of the control "
-           "(transposed) and A (dim control.nu x "
-           "na)")
+           ControlParametrizationModelAbstract_multiplyByJacobian_J_wrap(
+               bp::args("self", "data", "A", "op"),
+               "Compute the product between the given matrix A and the "
+               "derivative "
+               "of the control with respect to the "
+               "parameters.\n\n"
+               "It assumes that calc has been run first.\n"
+               ":param data: poly-two-rk data\n"
+               ":param A: matrix to multiply (dim na x control.nw)\n"
+               ":op assignment operator which sets, adds, or removes the given "
+               "results\n"
+               ":return Product between A and the partial derivative of the "
+               "control (dim na x control.nu)"))
+      .def(
+          "multiplyJacobianTransposeBy",
+          &ControlParametrizationModelPolyTwoRK::multiplyJacobianTransposeBy_J,
+          ControlParametrizationModelAbstract_multiplyJacobianTransposeBy_J_wrap(
+              bp::args("self", "data", "A", "op"),
+              "Compute the product between the transpose of the derivative of "
+              "the "
+              "control with respect to the parameters\n"
+              "and a given matrix A.\n\n"
+              "It assumes that calc has been run first.\n"
+              ":param data: poly-two-rk data\n"
+              ":param A: matrix to multiply (dim control.nw x na)\n"
+              ":op assignment operator which sets, adds, or removes the given "
+              "results\n"
+              ":return Product between the partial derivative of the control "
+              "(transposed) and A (dim control.nu x "
+              "na)"))
       .def(CopyableVisitor<ControlParametrizationModelPolyTwoRK>());
 
   boost::python::register_ptr_to_python<
