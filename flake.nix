@@ -39,7 +39,10 @@
             type = "app";
             program = pkgs.python3.withPackages (_: [ self'.packages.default ]);
           };
-          devShells.default = pkgs.mkShell { inputsFrom = [ self'.packages.default ]; };
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [ self'.packages.default ];
+            packages = [ (pkgs.python3.withPackages (p: [p.tomlkit])) ]; # for "make release"
+          };
           packages = {
             # expose patched pinocchio to dependent packages
             inherit (pkgs) pinocchio;
