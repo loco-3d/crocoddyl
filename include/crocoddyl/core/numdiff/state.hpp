@@ -11,7 +11,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 #define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 
 #include "crocoddyl/core/fwd.hpp"

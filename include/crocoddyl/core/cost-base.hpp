@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_CORE_COST_BASE_HPP_
 #define CROCODDYL_CORE_COST_BASE_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 
 #include "crocoddyl/core/activation-base.hpp"

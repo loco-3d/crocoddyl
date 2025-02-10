@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_CONTROL_HPP_
 #define CROCODDYL_CORE_NUMDIFF_CONTROL_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <vector>
 

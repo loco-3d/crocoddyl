@@ -11,7 +11,6 @@
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
 #include <boost/core/demangle.hpp>
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <stdexcept>
 
