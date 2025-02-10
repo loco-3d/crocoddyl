@@ -157,11 +157,12 @@ void WrenchConeTpl<Scalar>::update() {
     Scalar theta_i = theta * static_cast<Scalar>(i);
     Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
     Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
-    A_.row(2 * i).head(3) = (mu_nsurf + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1).head(3) =
+    A_.row(2 * i).template head<3>() =
+        (mu_nsurf + tsurf_i).transpose() * R_.transpose();
+    A_.row(2 * i + 1).template head<3>() =
         (mu_nsurf - tsurf_i).transpose() * R_.transpose();
   }
-  A_.row(nf_).head(3) = R_.col(2).transpose();
+  A_.row(nf_).template head<3>() = R_.col(2).transpose();
   lb_(nf_) = min_nforce_;
   ub_(nf_) = max_nforce_;
 

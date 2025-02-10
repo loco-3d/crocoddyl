@@ -95,8 +95,8 @@ void test_A_matrix_with_rotation_change() {
   crocoddyl::CoPSupport support_2(R, box);
 
   for (std::size_t i = 0; i < 4; ++i) {
-    BOOST_CHECK((support_1.get_A().row(i).head(3) -
-                 support_2.get_A().row(i).head(3) * R)
+    BOOST_CHECK((support_1.get_A().row(i).head<3>() -
+                 support_2.get_A().row(i).head<3>() * R)
                     .isZero(1e-9));
   }
 }
@@ -119,7 +119,7 @@ void test_cop_within_the_support_region() {
   // Compute the activation value with a force along the contact normal
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = random_real_in_range(0., 100.) * R.col(2);
+  wrench.template head<3>() = random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = support.get_A() * wrench;
   activation.calc(data, r);
   BOOST_CHECK(data->a_value == 0.);

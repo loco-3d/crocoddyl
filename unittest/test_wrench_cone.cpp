@@ -179,7 +179,7 @@ void test_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = random_real_in_range(0., 100.) * R.col(2);
+  wrench.head<3>() = random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -207,7 +207,7 @@ void test_negative_force_along_wrench_cone_normal() {
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * R.col(2);
+  wrench.head<3>() = -random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -241,7 +241,7 @@ void test_force_parallel_to_wrench_cone_normal() {
 
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * Eigen::Vector3d::UnitX();
+  wrench.head<3>() = -random_real_in_range(0., 100.) * Eigen::Vector3d::UnitX();
   Eigen::VectorXd r = cone.get_A() * wrench;
 
   // The activation value has to be positive since the force is outside the
