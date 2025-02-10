@@ -40,7 +40,7 @@ class ControlFactory {
   explicit ControlFactory();
   ~ControlFactory();
 
-  boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> create(
+  std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> create(
       ControlTypes::Type control_type, const std::size_t nu) const;
 };
 

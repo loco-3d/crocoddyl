@@ -29,34 +29,33 @@ class ImpulseModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+  ImpulseModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
                           const std::size_t nc);
 
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+      ImpulseModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc);)
   virtual ~ImpulseModelAbstractTpl();
 
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ImpulseDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x) = 0;
 
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ImpulseDataAbstract>& data,
                            const VectorXs& force) = 0;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  void updateForceDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
                        const MatrixXs& df_dx) const;
-  void setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const;
-  void setZeroForceDiff(
-      const boost::shared_ptr<ImpulseDataAbstract>& data) const;
+  void setZeroForce(const std::shared_ptr<ImpulseDataAbstract>& data) const;
+  void setZeroForceDiff(const std::shared_ptr<ImpulseDataAbstract>& data) const;
 
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(
+  virtual std::shared_ptr<ImpulseDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::shared_ptr<StateMultibody>& get_state() const;
   std::size_t get_nc() const;
   DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
   std::size_t get_nu() const;
@@ -96,7 +95,7 @@ class ImpulseModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  boost::shared_ptr<StateMultibody> state_;
+  std::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
   pinocchio::ReferenceFrame type_;  //!< Type of contact

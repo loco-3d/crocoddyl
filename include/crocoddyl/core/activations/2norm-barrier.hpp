@@ -77,14 +77,14 @@ class ActivationModel2NormBarrierTpl
    * @param[in] data  2-norm barrier activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
                                       std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
     d->d = r.norm();
     if (d->d < alpha_) {
@@ -100,14 +100,14 @@ class ActivationModel2NormBarrierTpl
    * @param[in] data  2-norm barrier activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
                                       std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
     if (d->d < alpha_) {
       data->Ar = (d->d - alpha_) / d->d * r;
@@ -130,8 +130,8 @@ class ActivationModel2NormBarrierTpl
    *
    * @return the activation data
    */
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+    return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
   /**

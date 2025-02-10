@@ -32,18 +32,18 @@ class ActionModelUnicycleTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelUnicycleTpl();
   virtual ~ActionModelUnicycleTpl();
 
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual std::shared_ptr<ActionDataAbstract> createData();
+  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
 
   const Vector2s& get_cost_weights() const;
   void set_cost_weights(const Vector2s& weights);

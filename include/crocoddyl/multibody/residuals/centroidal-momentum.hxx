@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s& href,
+    std::shared_ptr<StateMultibody> state, const Vector6s& href,
     const std::size_t nu)
     : Base(state, 6, nu, true, true, false),
       href_(href),
@@ -23,7 +23,7 @@ ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s& href)
+    std::shared_ptr<StateMultibody> state, const Vector6s& href)
     : Base(state, 6, true, true, false),
       href_(href),
       pin_model_(state->get_pinocchio()) {}
@@ -34,7 +34,7 @@ ResidualModelCentroidalMomentumTpl<
 
 template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the residual residual give the reference centroidal momentum
   Data* d = static_cast<Data*>(data.get());
@@ -43,7 +43,7 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   const std::size_t& nv = state_->get_nv();
@@ -54,11 +54,11 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelCentroidalMomentumTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

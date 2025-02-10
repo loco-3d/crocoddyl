@@ -28,7 +28,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
   using ActionModelAbstract::nu_;
   using ActionModelAbstract::unone_;
 
-  ActionModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ActionModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                            const std::size_t nu, const std::size_t nr = 1,
                            const std::size_t ng = 0, const std::size_t nh = 0,
                            const std::size_t ng_T = 0,
@@ -38,7 +38,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calc(const std::shared_ptr<ActionDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -60,7 +60,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
     }
   }
 
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -82,19 +82,19 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
     }
   }
 
-  boost::shared_ptr<ActionDataAbstract> createData() {
+  std::shared_ptr<ActionDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ActionDataAbstract> >(createData.ptr());
+      return bp::call<std::shared_ptr<ActionDataAbstract> >(createData.ptr());
     }
     return ActionModelAbstract::createData();
   }
 
-  boost::shared_ptr<ActionDataAbstract> default_createData() {
+  std::shared_ptr<ActionDataAbstract> default_createData() {
     return this->ActionModelAbstract::createData();
   }
 
-  void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                    Eigen::Ref<Eigen::VectorXd> u,
                    const Eigen::Ref<const Eigen::VectorXd>& x,
                    const std::size_t maxiter, const double tol) {
@@ -112,7 +112,7 @@ class ActionModelAbstract_wrap : public ActionModelAbstract,
     return ActionModelAbstract::quasiStatic(data, u, x, maxiter, tol);
   }
 
-  void default_quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  void default_quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<Eigen::VectorXd> u,
                            const Eigen::Ref<const Eigen::VectorXd>& x,
                            const std::size_t maxiter, const double tol) {

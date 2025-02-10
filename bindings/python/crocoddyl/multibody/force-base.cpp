@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeForceAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ForceDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ForceDataAbstract> >();
 
   bp::class_<ForceDataAbstract>(
       "ForceDataAbstract", "Abstract class for force datas.\n\n",

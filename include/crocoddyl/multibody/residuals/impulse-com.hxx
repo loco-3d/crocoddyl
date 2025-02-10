@@ -15,7 +15,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelImpulseCoMTpl<Scalar>::ResidualModelImpulseCoMTpl(
-    boost::shared_ptr<StateMultibody> state)
+    std::shared_ptr<StateMultibody> state)
     : Base(state, 3, 0, true, true, false),
       pin_model_(state->get_pinocchio()) {}
 
@@ -24,7 +24,7 @@ ResidualModelImpulseCoMTpl<Scalar>::~ResidualModelImpulseCoMTpl() {}
 
 template <typename Scalar>
 void ResidualModelImpulseCoMTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   // Compute the residual residual give the reference CoM position
   Data* d = static_cast<Data*>(data.get());
@@ -42,7 +42,7 @@ void ResidualModelImpulseCoMTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelImpulseCoMTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -63,11 +63,11 @@ void ResidualModelImpulseCoMTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelImpulseCoMTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

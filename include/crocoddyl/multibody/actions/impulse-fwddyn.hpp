@@ -100,9 +100,9 @@ class ActionModelImpulseFwdDynamicsTpl
    * derivatives (default false)
    */
   ActionModelImpulseFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ImpulseModelMultiple> impulses,
-      boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ImpulseModelMultiple> impulses,
+      std::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
 
@@ -125,10 +125,10 @@ class ActionModelImpulseFwdDynamicsTpl
    * derivatives (default false)
    */
   ActionModelImpulseFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ImpulseModelMultiple> impulses,
-      boost::shared_ptr<CostModelSum> costs,
-      boost::shared_ptr<ConstraintModelManager> constraints,
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ImpulseModelMultiple> impulses,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints,
       const Scalar r_coeff = Scalar(0.),
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
@@ -143,7 +143,7 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -159,7 +159,7 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] data  Impulse forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -169,7 +169,7 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -184,7 +184,7 @@ class ActionModelImpulseFwdDynamicsTpl
    * @param[in] data  Impulse forward-dynamics data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -192,18 +192,18 @@ class ActionModelImpulseFwdDynamicsTpl
    *
    * @return impulse forward-dynamics data
    */
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Check that the given data belongs to the impulse forward-dynamics
    * data
    */
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief @copydoc Base::quasiStatic()
    */
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
@@ -242,17 +242,17 @@ class ActionModelImpulseFwdDynamicsTpl
   /**
    * @brief Return the impulse model
    */
-  const boost::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
+  const std::shared_ptr<ImpulseModelMultiple>& get_impulses() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const std::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model manager
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -307,10 +307,10 @@ class ActionModelImpulseFwdDynamicsTpl
   void init();
   void initCalc(Data* data, const Eigen::Ref<const VectorXs>& x);
   void initCalcDiff(Data* data, const Eigen::Ref<const VectorXs>& x);
-  boost::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
-  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
-  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  std::shared_ptr<ImpulseModelMultiple> impulses_;       //!< Impulse model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
   bool with_armature_;      //!< Indicate if we have defined an armature
   VectorXs armature_;       //!< Armature vector
   Scalar r_coeff_;          //!< Restitution coefficient
@@ -357,8 +357,8 @@ struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorMultibodyInImpulseTpl<Scalar> multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  std::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  std::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   VectorXs vnone;
   MatrixXs Kinv;
   MatrixXs df_dx;

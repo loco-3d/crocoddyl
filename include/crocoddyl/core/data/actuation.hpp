@@ -9,7 +9,7 @@
 #ifndef CROCODDYL_CORE_DATA_ACTUATION_HPP_
 #define CROCODDYL_CORE_DATA_ACTUATION_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
@@ -22,11 +22,11 @@ struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorActuationTpl(
-      boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
+      std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation)
       : DataCollectorAbstractTpl<Scalar>(), actuation(actuation) {}
   virtual ~DataCollectorActuationTpl() {}
 
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
+  std::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation;
 };
 
 }  // namespace crocoddyl

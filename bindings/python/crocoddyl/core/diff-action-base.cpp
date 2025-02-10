@@ -19,9 +19,9 @@ namespace python {
 
 void exposeDifferentialActionAbstract() {
   // Register custom converters between std::vector and Python list
-  typedef boost::shared_ptr<DifferentialActionModelAbstract>
+  typedef std::shared_ptr<DifferentialActionModelAbstract>
       DifferentialActionModelPtr;
-  typedef boost::shared_ptr<DifferentialActionDataAbstract>
+  typedef std::shared_ptr<DifferentialActionDataAbstract>
       DifferentialActionDataPtr;
   StdVectorPythonVisitor<std::vector<DifferentialActionModelPtr>, true>::expose(
       "StdVec_DiffActionModel");
@@ -29,7 +29,7 @@ void exposeDifferentialActionAbstract() {
       "StdVec_DiffActionData");
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionModelAbstract> >();
+      std::shared_ptr<DifferentialActionModelAbstract> >();
 
   bp::class_<DifferentialActionModelAbstract_wrap, boost::noncopyable>(
       "DifferentialActionModelAbstract",
@@ -43,7 +43,7 @@ void exposeDifferentialActionAbstract() {
       "dynamics, cost functions, constraints and their derivatives. These "
       "computations are\n"
       "mainly carried out inside calc() and calcDiff(), respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t,
+      bp::init<std::shared_ptr<StateAbstract>, std::size_t,
                bp::optional<std::size_t, std::size_t, std::size_t, std::size_t,
                             std::size_t> >(
           bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T"),
@@ -63,7 +63,7 @@ void exposeDifferentialActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc,
           bp::args("self", "data", "x"),
@@ -90,7 +90,7 @@ void exposeDifferentialActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (DifferentialActionModelAbstract::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -187,7 +187,7 @@ void exposeDifferentialActionAbstract() {
       .def(PrintableVisitor<DifferentialActionModelAbstract>());
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataAbstract> >();
+      std::shared_ptr<DifferentialActionDataAbstract> >();
 
   bp::class_<DifferentialActionDataAbstract>(
       "DifferentialActionDataAbstract",

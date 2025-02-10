@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeCoPSupport() {
-  bp::register_ptr_to_python<boost::shared_ptr<CoPSupport> >();
+  bp::register_ptr_to_python<std::shared_ptr<CoPSupport> >();
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
                              // been removed in a future release

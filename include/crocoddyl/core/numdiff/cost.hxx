@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelNumDiffTpl<Scalar>::CostModelNumDiffTpl(
-    const boost::shared_ptr<Base>& model)
+    const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_activation(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -24,7 +24,7 @@ CostModelNumDiffTpl<Scalar>::~CostModelNumDiffTpl() {}
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
   d->data_0->cost = 0.0;
@@ -35,7 +35,7 @@ void CostModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
   d->data_0->cost = 0.0;
@@ -46,7 +46,7 @@ void CostModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -111,7 +111,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -151,14 +151,14 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> >
+std::shared_ptr<CostDataAbstractTpl<Scalar> >
 CostModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelAbstractTpl<Scalar> >&
+const std::shared_ptr<CostModelAbstractTpl<Scalar> >&
 CostModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

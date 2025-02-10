@@ -16,7 +16,7 @@
 
 namespace crocoddyl {
 
-SolverFDDP::SolverFDDP(boost::shared_ptr<ShootingProblem> problem)
+SolverFDDP::SolverFDDP(std::shared_ptr<ShootingProblem> problem)
     : SolverDDP(problem), dg_(0), dq_(0), dv_(0), th_acceptnegstep_(2) {}
 
 SolverFDDP::~SolverFDDP() {}
@@ -134,7 +134,7 @@ const Eigen::Vector2d& SolverFDDP::expectedImprovement() {
                                                      dx_.back());
     fTVxx_p_.noalias() = Vxx_.back() * dx_.back();
     dv_ -= fs_.back().dot(fTVxx_p_);
-    const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
         problem_->get_runningModels();
 
     for (std::size_t t = 0; t < T; ++t) {
@@ -157,7 +157,7 @@ void SolverFDDP::updateExpectedImprovement() {
     fTVxx_p_.noalias() = Vxx_.back() * fs_.back();
     dq_ += fs_.back().dot(fTVxx_p_);
   }
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nu = models[t]->get_nu();
@@ -182,14 +182,14 @@ void SolverFDDP::forwardPass(const double steplength) {
   cost_try_ = 0.;
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t nu = m->get_nu();
 
       xs_try_[t] = xnext_;
@@ -213,10 +213,9 @@ void SolverFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m =
+    const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d =
-        problem_->get_terminalData();
+    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
     xs_try_.back() = xnext_;
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
@@ -227,8 +226,8 @@ void SolverFDDP::forwardPass(const double steplength) {
     }
   } else {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& m = models[t];
+      const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t nu = m->get_nu();
       m->get_state()->integrate(xnext_, fs_[t] * (steplength - 1), xs_try_[t]);
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
@@ -251,10 +250,9 @@ void SolverFDDP::forwardPass(const double steplength) {
       }
     }
 
-    const boost::shared_ptr<ActionModelAbstract>& m =
+    const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& d =
-        problem_->get_terminalData();
+    const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
     m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1),
                               xs_try_.back());
     m->calc(d, xs_try_.back());

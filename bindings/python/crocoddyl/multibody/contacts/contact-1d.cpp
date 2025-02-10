@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeContact1D() {
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModel1D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactModel1D> >();
 
   bp::class_<ContactModel1D, bp::bases<ContactModelAbstract> >(
       "ContactModel1D",
@@ -28,7 +28,7 @@ void exposeContact1D() {
       "The calc and calcDiff functions compute the contact Jacobian and drift "
       "(holonomic constraint) or\n"
       "the derivatives of the holonomic constraint, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex, double,
                pinocchio::ReferenceFrame, Eigen::Matrix3d, std::size_t,
                bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "rotation", "nu",
@@ -42,7 +42,7 @@ void exposeContact1D() {
           ":param nu: dimension of control vector\n"
           ":param gains: gains of the contact model (default "
           "np.matrix([0.,0.]))"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     double, pinocchio::ReferenceFrame,
                     bp::optional<Eigen::Vector2d> >(
           bp::args("self", "state", "id", "xref", "type", "gains"),
@@ -99,7 +99,7 @@ void exposeContact1D() {
           "contact gains")
       .def(CopyableVisitor<ContactModel1D>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactData1D> >();
+  bp::register_ptr_to_python<std::shared_ptr<ContactData1D> >();
 
   bp::class_<ContactData1D, bp::bases<ContactDataAbstract> >(
       "ContactData1D", "Data for 1D contact.\n\n",

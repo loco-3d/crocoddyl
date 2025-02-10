@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeWrenchCone() {
-  bp::register_ptr_to_python<boost::shared_ptr<WrenchCone> >();
+  bp::register_ptr_to_python<std::shared_ptr<WrenchCone> >();
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
                              // been removed in a future release

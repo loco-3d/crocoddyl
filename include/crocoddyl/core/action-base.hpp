@@ -11,7 +11,7 @@
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
@@ -113,7 +113,7 @@ class ActionModelAbstractTpl {
    * @param[in] ng_T   Number of inequality terminal constraints (default 0)
    * @param[in] nh_T   Number of equality terminal constraints (default 0)
    */
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+  ActionModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t nu, const std::size_t nr = 0,
                          const std::size_t ng = 0, const std::size_t nh = 0,
                          const std::size_t ng_T = 0,
@@ -127,7 +127,7 @@ class ActionModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -142,7 +142,7 @@ class ActionModelAbstractTpl {
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -157,7 +157,7 @@ class ActionModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -172,7 +172,7 @@ class ActionModelAbstractTpl {
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -180,12 +180,12 @@ class ActionModelAbstractTpl {
    *
    * @return the action data
    */
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
@@ -200,7 +200,7 @@ class ActionModelAbstractTpl {
    * @param[in] maxiter Maximum allowed number of iterations
    * @param[in] tol     Tolerance
    */
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
@@ -217,7 +217,7 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    * @return Quasic static commands
    */
-  VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data,
+  VectorXs quasiStatic_x(const std::shared_ptr<ActionDataAbstract>& data,
                          const VectorXs& x, const std::size_t maxiter = 100,
                          const Scalar tol = Scalar(1e-9));
 
@@ -254,7 +254,7 @@ class ActionModelAbstractTpl {
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the lower bound of the inequality constraints
@@ -322,8 +322,8 @@ class ActionModelAbstractTpl {
   std::size_t nh_;    //!< Number of equality constraints
   std::size_t ng_T_;  //!< Number of inequality terminal constraints
   std::size_t nh_T_;  //!< Number of equality terminal constraints
-  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  VectorXs unone_;                          //!< Neutral state
+  std::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  VectorXs unone_;                        //!< Neutral state
   VectorXs g_lb_;            //!< Lower bound of the inequality constraints
   VectorXs g_ub_;            //!< Lower bound of the inequality constraints
   VectorXs u_lb_;            //!< Lower control limits

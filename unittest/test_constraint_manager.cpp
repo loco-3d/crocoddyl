@@ -38,7 +38,7 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // add an active constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_1 =
+  std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_1 =
       create_random_constraint(state_type);
   model.addConstraint("random_constraint_1", rand_constraint_1);
   std::size_t ng = rand_constraint_1->get_ng();
@@ -51,7 +51,7 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // add an inactive constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 =
+  std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_2 =
       create_random_constraint(state_type);
   model.addConstraint("random_constraint_2", rand_constraint_2, false);
   BOOST_CHECK(model.get_ng() == ng);
@@ -92,7 +92,7 @@ void test_addConstraint_error_message(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // create an constraint object
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
+  std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
       create_random_constraint(state_type);
 
   // add twice the same constraint object to the container
@@ -127,7 +127,7 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
 
   // add an active constraint
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
+  std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
       create_random_constraint(state_type);
   model.addConstraint("random_constraint", rand_constraint);
   std::size_t ng = rand_constraint->get_ng();
@@ -172,19 +172,19 @@ void test_calc(StateModelTypes::Type state_type) {
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some constraint objects
-  std::vector<boost::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
-    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
+    const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
         create_random_constraint(state_type);
     model.addConstraint(os.str(), m, 1.);
     models.push_back(m);
@@ -192,7 +192,7 @@ void test_calc(StateModelTypes::Type state_type) {
   }
 
   // create the data of the constraint sum
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataManager>& data =
       model.createData(&shared_data);
 
   // compute the constraint sum data for the case when all constraints are
@@ -226,19 +226,19 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some constraint objects
-  std::vector<boost::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
-    const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
+    const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& m =
         create_random_constraint(state_type);
     model.addConstraint(os.str(), m, 1.);
     models.push_back(m);
@@ -246,7 +246,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   }
 
   // create the data of the constraint sum
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataManager>& data =
       model.createData(&shared_data);
 
   // compute the constraint sum data for the case when all constraints are
@@ -334,8 +334,8 @@ void test_get_constraints(StateModelTypes::Type state_type) {
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model.get_state());
   pinocchio::Data pinocchio_data(*state->get_pinocchio().get());
 
   // create and add some contact objects
@@ -365,11 +365,11 @@ void test_get_constraints(StateModelTypes::Type state_type) {
 void test_shareMemory(StateModelTypes::Type state_type) {
   // setup the test
   StateModelFactory state_factory;
-  const boost::shared_ptr<crocoddyl::StateAbstract> state =
+  const std::shared_ptr<crocoddyl::StateAbstract> state =
       state_factory.create(state_type);
   crocoddyl::ConstraintModelManager constraint_model(state);
   crocoddyl::DataCollectorAbstract shared_data;
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& constraint_data =
+  const std::shared_ptr<crocoddyl::ConstraintDataManager>& constraint_data =
       constraint_model.createData(&shared_data);
 
   std::size_t ng = state->get_ndx();
@@ -377,7 +377,7 @@ void test_shareMemory(StateModelTypes::Type state_type) {
   const std::size_t ndx = state->get_ndx();
   const std::size_t nu = constraint_model.get_nu();
   crocoddyl::ActionModelLQR action_model(ndx, nu);
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& action_data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& action_data =
       action_model.createData();
 
   action_data->h.resize(nh);

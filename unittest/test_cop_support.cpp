@@ -113,7 +113,7 @@ void test_cop_within_the_support_region() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(support.get_lb(), support.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
       activation.createData();
 
   // Compute the activation value with a force along the contact normal

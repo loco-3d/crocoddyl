@@ -18,9 +18,9 @@ namespace python {
 
 void exposeControlParametrizationAbstract() {
   // Register custom converters between std::vector and Python list
-  typedef boost::shared_ptr<ControlParametrizationModelAbstract>
+  typedef std::shared_ptr<ControlParametrizationModelAbstract>
       ControlParametrizationModelPtr;
-  typedef boost::shared_ptr<ControlParametrizationDataAbstract>
+  typedef std::shared_ptr<ControlParametrizationDataAbstract>
       ControlParametrizationDataPtr;
   StdVectorPythonVisitor<std::vector<ControlParametrizationModelPtr>,
                          true>::expose("StdVec_ControlParametrizationModel");
@@ -28,7 +28,7 @@ void exposeControlParametrizationAbstract() {
                          true>::expose("StdVec_ControlParametrizationData");
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationModelAbstract> >();
+      std::shared_ptr<ControlParametrizationModelAbstract> >();
 
   bp::class_<ControlParametrizationModelAbstract_wrap, boost::noncopyable>(
       "ControlParametrizationModelAbstract",
@@ -119,7 +119,7 @@ void exposeControlParametrizationAbstract() {
           "dimension of the control parameters");
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<ControlParametrizationDataAbstract> >();
+      std::shared_ptr<ControlParametrizationDataAbstract> >();
 
   bp::class_<ControlParametrizationDataAbstract>(
       "ControlParametrizationDataAbstract",

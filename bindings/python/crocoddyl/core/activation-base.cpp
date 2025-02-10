@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActivationAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActivationModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActivationModelAbstract> >();
 
   bp::class_<ActivationModelAbstract_wrap, boost::noncopyable>(
       "ActivationModelAbstract",
@@ -49,7 +49,7 @@ void exposeActivationAbstract() {
                     "dimension of cost-residual vector")
       .def(PrintableVisitor<ActivationModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActivationDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActivationDataAbstract> >();
 
   bp::class_<ActivationDataAbstract>(
       "ActivationDataAbstract", "Abstract class for activation data.\n\n",

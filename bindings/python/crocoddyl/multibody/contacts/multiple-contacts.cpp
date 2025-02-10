@@ -27,8 +27,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ContactModelMultiple_addContact_wrap,
 
 void exposeContactMultiple() {
   // Register custom converters between std::map and Python dict
-  typedef boost::shared_ptr<ContactItem> ContactItemPtr;
-  typedef boost::shared_ptr<ContactDataAbstract> ContactDataPtr;
+  typedef std::shared_ptr<ContactItem> ContactItemPtr;
+  typedef std::shared_ptr<ContactDataAbstract> ContactDataPtr;
   StdMapPythonVisitor<
       std::string, ContactItemPtr, std::less<std::string>,
       std::allocator<std::pair<const std::string, ContactItemPtr>>,
@@ -38,11 +38,11 @@ void exposeContactMultiple() {
       std::allocator<std::pair<const std::string, ContactDataPtr>>,
       true>::expose("StdMap_ContactData");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactItem>>();
+  bp::register_ptr_to_python<std::shared_ptr<ContactItem>>();
 
   bp::class_<ContactItem>(
       "ContactItem", "Describe a contact item.\n\n",
-      bp::init<std::string, boost::shared_ptr<ContactModelAbstract>,
+      bp::init<std::string, std::shared_ptr<ContactModelAbstract>,
                bp::optional<bool>>(
           bp::args("self", "name", "contact", "active"),
           "Initialize the contact item.\n\n"
@@ -59,11 +59,11 @@ void exposeContactMultiple() {
       .def(CopyableVisitor<ContactItem>())
       .def(PrintableVisitor<ContactItem>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactModelMultiple>>();
+  bp::register_ptr_to_python<std::shared_ptr<ContactModelMultiple>>();
 
   bp::class_<ContactModelMultiple>(
       "ContactModelMultiple",
-      bp::init<boost::shared_ptr<StateMultibody>, bp::optional<std::size_t>>(
+      bp::init<std::shared_ptr<StateMultibody>, bp::optional<std::size_t>>(
           bp::args("self", "state", "nu"),
           "Initialize the multiple contact model.\n\n"
           ":param state: state of the multibody system\n"
@@ -181,7 +181,7 @@ void exposeContactMultiple() {
       .def(CopyableVisitor<ContactModelMultiple>())
       .def(PrintableVisitor<ContactModelMultiple>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ContactDataMultiple>>();
+  bp::register_ptr_to_python<std::shared_ptr<ContactDataMultiple>>();
 
   bp::class_<ContactDataMultiple>(
       "ContactDataMultiple", "Data class for multiple contacts.\n\n",

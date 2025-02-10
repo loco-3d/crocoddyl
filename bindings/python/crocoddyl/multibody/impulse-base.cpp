@@ -18,7 +18,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeImpulseAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseModelAbstract> >();
 
   bp::class_<ImpulseModelAbstract_wrap, boost::noncopyable>(
       "ImpulseModelAbstract",
@@ -26,13 +26,13 @@ void exposeImpulseAbstract() {
       "It defines a template for impulse models.\n"
       "The calc and calcDiff functions compute the impulse Jacobian\n"
       "the derivatives respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::ReferenceFrame,
                std::size_t>(bp::args("self", "state", "type", "nc"),
                             "Initialize the impulse model.\n\n"
                             ":param state: state of the multibody system\n"
                             ":param type: type of impulse\n"
                             ":param nc: dimension of impulse model"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateMultibody>, std::size_t>(
           bp::args("self", "state", "nc"),
           "Initialize the impulse model.\n\n"
           ":param state: state of the multibody system\n"
@@ -96,7 +96,7 @@ void exposeImpulseAbstract() {
       .def(CopyableVisitor<ImpulseModelAbstract_wrap>())
       .def(PrintableVisitor<ImpulseModelAbstract>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ImpulseDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ImpulseDataAbstract> >();
 
   bp::class_<ImpulseDataAbstract, bp::bases<ForceDataAbstract> >(
       "ImpulseDataAbstract", "Abstract class for impulse data.\n\n",

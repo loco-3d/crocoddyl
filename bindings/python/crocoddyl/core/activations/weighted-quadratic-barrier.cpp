@@ -17,7 +17,7 @@ namespace python {
 
 void exposeActivationWeightedQuadraticBarrier() {
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelWeightedQuadraticBarrier> >();
+      std::shared_ptr<ActivationModelWeightedQuadraticBarrier> >();
 
   bp::class_<ActivationModelWeightedQuadraticBarrier,
              bp::bases<ActivationModelAbstract> >(

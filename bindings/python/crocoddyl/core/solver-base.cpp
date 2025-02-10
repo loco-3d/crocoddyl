@@ -18,7 +18,7 @@ namespace python {
 
 void exposeSolverAbstract() {
   // Register custom converters between std::vector and Python list
-  typedef boost::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
+  typedef std::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
   StdVectorPythonVisitor<std::vector<CallbackAbstractPtr>, true>::expose(
       "StdVec_Callback");
 
@@ -45,7 +45,7 @@ void exposeSolverAbstract() {
       "iterate. It also describes the globalization strategy (i.e. "
       "regularization) of the\n"
       "numerical optimization.",
-      bp::init<boost::shared_ptr<ShootingProblem> >(
+      bp::init<std::shared_ptr<ShootingProblem> >(
           bp::args("self", "problem"),
           "Initialize the solver model.\n\n"
           ":param problem: shooting problem"))

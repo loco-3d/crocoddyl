@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(
-    const boost::shared_ptr<Base>& model)
+    const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_type(), model->get_nc(),
            model->get_nu()),
       model_(model),
@@ -25,18 +25,18 @@ ContactModelNumDiffTpl<Scalar>::~ContactModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
   model_->calc(d->data_0, x);
   d->a0 = d->data_0->a0;
 }
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
   const VectorXs& a0 = d->a0;
 
@@ -62,28 +62,28 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != model_->get_nc()) {
     throw_pretty("Invalid argument: "
                  << "lambda has wrong dimension (it should be "
                  << model_->get_nc() << ")");
   }
 
-  boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
   model_->updateForce(d->data_0, force);
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModelNumDiffTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ContactModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ContactModelAbstractTpl<Scalar> >&
 ContactModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

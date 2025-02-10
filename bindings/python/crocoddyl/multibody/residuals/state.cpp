@@ -15,39 +15,39 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualState() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelState> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelState> >();
 
   bp::class_<ResidualModelState, bp::bases<ResidualModelAbstract> >(
       "ResidualModelState",
       "This cost function defines a residual vector as r = x - xref, with x "
       "and xref as the current and reference\n"
       "state, respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd, std::size_t>(
+      bp::init<std::shared_ptr<StateAbstract>, Eigen::VectorXd, std::size_t>(
           bp::args("self", "state", "xref", "nu"),
           "Initialize the state cost model.\n\n"
           ":param state: state description\n"
           ":param xref: reference state (default state.zero())\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, Eigen::VectorXd>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "xref"),
           "Initialize the state cost model.\n\n"
           "The default nu value is obtained from state.nv.\n"
           ":param state: state description\n"
           ":param xref: reference state"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the state cost model.\n\n"
           "The default reference state is obtained from state.zero().\n"
           ":param state: state description\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
           "Initialize the state cost model.\n\n"
           "The default reference state is obtained from state.zero(), and nu "
           "from state.nv.\n"
           ":param state: state description"))
       .def<void (ResidualModelState::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelState::calc, bp::args("self", "data", "x", "u"),
@@ -56,11 +56,11 @@ void exposeResidualState() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelState::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelState::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelState::calcDiff,
@@ -71,7 +71,7 @@ void exposeResidualState() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelState::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))

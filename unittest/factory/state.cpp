@@ -57,38 +57,38 @@ std::ostream& operator<<(std::ostream& os, StateModelTypes::Type type) {
 StateModelFactory::StateModelFactory() {}
 StateModelFactory::~StateModelFactory() {}
 
-boost::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(
+std::shared_ptr<crocoddyl::StateAbstract> StateModelFactory::create(
     StateModelTypes::Type state_type) const {
-  boost::shared_ptr<pinocchio::Model> model;
-  boost::shared_ptr<crocoddyl::StateAbstract> state;
+  std::shared_ptr<pinocchio::Model> model;
+  std::shared_ptr<crocoddyl::StateAbstract> state;
   switch (state_type) {
     case StateModelTypes::StateVector:
-      state = boost::make_shared<crocoddyl::StateVector>(80);
+      state = std::make_shared<crocoddyl::StateVector>(80);
       break;
     case StateModelTypes::StateMultibody_Hector:
       model = PinocchioModelFactory(PinocchioModelTypes::Hector).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibody_TalosArm:
       model = PinocchioModelFactory(PinocchioModelTypes::TalosArm).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibodyContact2D_TalosArm:
       model = PinocchioModelFactory(PinocchioModelTypes::TalosArm).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibody_HyQ:
       model = PinocchioModelFactory(PinocchioModelTypes::HyQ).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibody_Talos:
       model = PinocchioModelFactory(PinocchioModelTypes::Talos).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     case StateModelTypes::StateMultibody_RandomHumanoid:
       model =
           PinocchioModelFactory(PinocchioModelTypes::RandomHumanoid).create();
-      state = boost::make_shared<crocoddyl::StateMultibody>(model);
+      state = std::make_shared<crocoddyl::StateMultibody>(model);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong StateModelTypes::Type given");

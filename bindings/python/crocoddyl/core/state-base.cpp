@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeStateAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<StateAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<StateAbstract> >();
 
   bp::enum_<Jcomponent>("Jcomponent")
       .value("both", both)

@@ -24,45 +24,45 @@ class CostModelAbstract_wrap : public CostModelAbstract,
   using CostModelAbstract::nu_;
   using CostModelAbstract::unone_;
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation,
-                         boost::shared_ptr<ResidualModelAbstract> residual)
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
+                         std::shared_ptr<ActivationModelAbstract> activation,
+                         std::shared_ptr<ResidualModelAbstract> residual)
       : CostModelAbstract(state, activation, residual) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation,
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
+                         std::shared_ptr<ActivationModelAbstract> activation,
                          const std::size_t nu)
       : CostModelAbstract(state, activation, nu) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                         boost::shared_ptr<ActivationModelAbstract> activation)
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
+                         std::shared_ptr<ActivationModelAbstract> activation)
       : CostModelAbstract(state, activation) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
-                         boost::shared_ptr<ResidualModelAbstract> residual)
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
+                         std::shared_ptr<ResidualModelAbstract> residual)
       : CostModelAbstract(state, residual) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                          const std::size_t nr, const std::size_t nu)
       : CostModelAbstract(state, nr, nu), bp::wrapper<CostModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  CostModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  CostModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                          const std::size_t nr)
       : CostModelAbstract(state, nr), bp::wrapper<CostModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  void calc(const boost::shared_ptr<CostDataAbstract>& data,
+  void calc(const std::shared_ptr<CostDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -84,7 +84,7 @@ class CostModelAbstract_wrap : public CostModelAbstract,
     }
   }
 
-  void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -106,17 +106,17 @@ class CostModelAbstract_wrap : public CostModelAbstract,
     }
   }
 
-  boost::shared_ptr<CostDataAbstract> createData(
+  std::shared_ptr<CostDataAbstract> createData(
       DataCollectorAbstract* const data) {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<CostDataAbstract> >(createData.ptr(),
-                                                            boost::ref(data));
+      return bp::call<std::shared_ptr<CostDataAbstract> >(createData.ptr(),
+                                                          boost::ref(data));
     }
     return CostModelAbstract::createData(data);
   }
 
-  boost::shared_ptr<CostDataAbstract> default_createData(
+  std::shared_ptr<CostDataAbstract> default_createData(
       DataCollectorAbstract* const data) {
     return this->CostModelAbstract::createData(data);
   }

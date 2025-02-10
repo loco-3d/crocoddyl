@@ -20,7 +20,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIntro_trySteps,
                                        SolverIntro::tryStep, 0, 1)
 
 void exposeSolverIntro() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverIntro> >();
+  bp::register_ptr_to_python<std::shared_ptr<SolverIntro> >();
 
   bp::enum_<EqualitySolverType>("EqualitySolverType")
       .value("LuNull", LuNull)
@@ -29,7 +29,7 @@ void exposeSolverIntro() {
       .export_values();
 
   bp::class_<SolverIntro, bp::bases<SolverFDDP> >(
-      "SolverIntro", bp::init<boost::shared_ptr<ShootingProblem> >(
+      "SolverIntro", bp::init<std::shared_ptr<ShootingProblem> >(
                          bp::args("self", "problem"),
                          "Initialize the vector dimension.\n\n"
                          ":param problem: shooting problem."))

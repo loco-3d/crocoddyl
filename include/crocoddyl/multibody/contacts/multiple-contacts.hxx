@@ -11,7 +11,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(
-    boost::shared_ptr<StateMultibody> state, const std::size_t nu)
+    std::shared_ptr<StateMultibody> state, const std::size_t nu)
     : state_(state),
       nc_(0),
       nc_total_(0),
@@ -20,7 +20,7 @@ ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(
 
 template <typename Scalar>
 ContactModelMultipleTpl<Scalar>::ContactModelMultipleTpl(
-    boost::shared_ptr<StateMultibody> state)
+    std::shared_ptr<StateMultibody> state)
     : state_(state),
       nc_(0),
       nc_total_(0),
@@ -32,7 +32,7 @@ ContactModelMultipleTpl<Scalar>::~ContactModelMultipleTpl() {}
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::addContact(
-    const std::string& name, boost::shared_ptr<ContactModelAbstract> contact,
+    const std::string& name, std::shared_ptr<ContactModelAbstract> contact,
     const bool active) {
   if (contact->get_nu() != nu_) {
     throw_pretty("Invalid argument: "
@@ -42,7 +42,7 @@ void ContactModelMultipleTpl<Scalar>::addContact(
   }
   std::pair<typename ContactModelContainer::iterator, bool> ret =
       contacts_.insert(std::make_pair(
-          name, boost::make_shared<ContactItem>(name, contact, active)));
+          name, std::make_shared<ContactItem>(name, contact, active)));
   if (ret.second == false) {
     std::cerr << "Warning: we couldn't add the " << name
               << " contact item, it already existed." << std::endl;
@@ -95,7 +95,7 @@ void ContactModelMultipleTpl<Scalar>::changeContactStatus(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataMultiple>& data,
+    const std::shared_ptr<ContactDataMultiple>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (data->contacts.size() != contacts_.size()) {
     throw_pretty("Invalid argument: "
@@ -110,10 +110,10 @@ void ContactModelMultipleTpl<Scalar>::calc(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
       const std::size_t nc_i = m_i->contact->get_nc();
       if (m_i->active) {
-        const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+        const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
         assert_pretty(
             it_m->first == it_d->first,
             "it doesn't match the contact name between model and data ("
@@ -131,9 +131,9 @@ void ContactModelMultipleTpl<Scalar>::calc(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
       if (m_i->active) {
-        const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+        const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
         assert_pretty(
             it_m->first == it_d->first,
             "it doesn't match the contact name between model and data ("
@@ -151,7 +151,7 @@ void ContactModelMultipleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataMultiple>& data,
+    const std::shared_ptr<ContactDataMultiple>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (data->contacts.size() != contacts_.size()) {
     throw_pretty("Invalid argument: "
@@ -166,14 +166,14 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
       const std::size_t nc_i = m_i->contact->get_nc();
       if (m_i->active) {
         assert_pretty(
             it_m->first == it_d->first,
             "it doesn't match the contact name between model and data ("
                 << it_m->first << " != " << it_d->first << ")");
-        const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+        const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
 
         m_i->contact->calcDiff(d_i, x);
         data->da0_dx.block(nc, 0, nc_i, ndx) = d_i->da0_dx;
@@ -186,9 +186,9 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
       if (m_i->active) {
-        const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+        const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
         assert_pretty(
             it_m->first == it_d->first,
             "it doesn't match the contact name between model and data ("
@@ -205,7 +205,7 @@ void ContactModelMultipleTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateAcceleration(
-    const boost::shared_ptr<ContactDataMultiple>& data,
+    const std::shared_ptr<ContactDataMultiple>& data,
     const VectorXs& dv) const {
   if (static_cast<std::size_t>(dv.size()) != state_->get_nv()) {
     throw_pretty(
@@ -217,7 +217,7 @@ void ContactModelMultipleTpl<Scalar>::updateAcceleration(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataMultiple>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataMultiple>& data, const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) !=
       (compute_all_contacts_ ? nc_total_ : nc_)) {
     throw_pretty(
@@ -241,8 +241,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the contact name between data and model");
       const std::size_t nc_i = m_i->contact->get_nc();
@@ -267,8 +267,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the contact name between data and model");
       if (m_i->active) {
@@ -294,7 +294,7 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateAccelerationDiff(
-    const boost::shared_ptr<ContactDataMultiple>& data,
+    const std::shared_ptr<ContactDataMultiple>& data,
     const MatrixXs& ddv_dx) const {
   if (static_cast<std::size_t>(ddv_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(ddv_dx.cols()) != state_->get_ndx()) {
@@ -308,7 +308,7 @@ void ContactModelMultipleTpl<Scalar>::updateAccelerationDiff(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateForceDiff(
-    const boost::shared_ptr<ContactDataMultiple>& data, const MatrixXs& df_dx,
+    const std::shared_ptr<ContactDataMultiple>& data, const MatrixXs& df_dx,
     const MatrixXs& df_du) const {
   const std::size_t ndx = state_->get_ndx();
   if (static_cast<std::size_t>(df_dx.rows()) !=
@@ -341,8 +341,8 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the contact name between data and model");
       const std::size_t nc_i = m_i->contact->get_nc();
@@ -361,8 +361,8 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(
     for (it_m = contacts_.begin(), end_m = contacts_.end(),
         it_d = data->contacts.begin(), end_d = data->contacts.end();
          it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-      const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-      const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ContactItem>& m_i = it_m->second;
+      const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the contact name between data and model");
       if (m_i->active) {
@@ -382,7 +382,7 @@ void ContactModelMultipleTpl<Scalar>::updateForceDiff(
 
 template <typename Scalar>
 void ContactModelMultipleTpl<Scalar>::updateRneaDiff(
-    const boost::shared_ptr<ContactDataMultiple>& data,
+    const std::shared_ptr<ContactDataMultiple>& data,
     pinocchio::DataTpl<Scalar>& pinocchio) const {
   if (static_cast<std::size_t>(data->contacts.size()) !=
       this->get_contacts().size()) {
@@ -394,8 +394,8 @@ void ContactModelMultipleTpl<Scalar>::updateRneaDiff(
   for (it_m = contacts_.begin(), end_m = contacts_.end(),
       it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ContactItem>& m_i = it_m->second;
-    const boost::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
+    const std::shared_ptr<ContactItem>& m_i = it_m->second;
+    const std::shared_ptr<ContactDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first,
                   "it doesn't match the contact name between data and model");
     if (m_i->active) {
@@ -412,15 +412,15 @@ void ContactModelMultipleTpl<Scalar>::updateRneaDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataMultipleTpl<Scalar> >
+std::shared_ptr<ContactDataMultipleTpl<Scalar> >
 ContactModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<ContactDataMultiple>(
+  return std::allocate_shared<ContactDataMultiple>(
       Eigen::aligned_allocator<ContactDataMultiple>(), this, data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >&
+const std::shared_ptr<StateMultibodyTpl<Scalar> >&
 ContactModelMultipleTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -490,7 +490,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Active:" << std::endl;
   for (std::set<std::string>::const_iterator it = active.begin();
        it != active.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
         model.get_contacts().find(*it)->second;
     if (it != --active.end()) {
@@ -502,7 +502,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Inactive:" << std::endl;
   for (std::set<std::string>::const_iterator it = inactive.begin();
        it != inactive.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ContactModelMultipleTpl<Scalar>::ContactItem>& contact_item =
         model.get_contacts().find(*it)->second;
     if (it != --inactive.end()) {

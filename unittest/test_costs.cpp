@@ -25,7 +25,7 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type,
                               ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
   // Run the print function
@@ -33,12 +33,12 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type,
   tmp << *model;
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
   data->cost = nan("");
 
@@ -61,21 +61,21 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type,
                                ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -101,21 +101,21 @@ void test_partial_derivatives_against_numdiff(
 
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -175,12 +175,12 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type,
                                  ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
@@ -208,22 +208,22 @@ void test_partial_derivatives_in_cost_sum(
     ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
   cost_sum.addCost("myCost", model, 1.);
-  const boost::shared_ptr<crocoddyl::CostDataSum>& data_sum =
+  const std::shared_ptr<crocoddyl::CostDataSum>& data_sum =
       cost_sum.createData(&shared_data);
 
   // Generating random values for the state and control

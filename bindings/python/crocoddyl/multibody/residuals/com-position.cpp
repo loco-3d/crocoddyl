@@ -15,27 +15,27 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualCoMPosition() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelCoMPosition> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelCoMPosition> >();
 
   bp::class_<ResidualModelCoMPosition, bp::bases<ResidualModelAbstract> >(
       "ResidualModelCoMPosition",
       "This residual function defines the CoM tracking as r = c - cref, with c "
       "and cref as the current and reference "
       "CoM position, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, Eigen::Vector3d, std::size_t>(
+      bp::init<std::shared_ptr<StateMultibody>, Eigen::Vector3d, std::size_t>(
           bp::args("self", "state", "cref", "nu"),
           "Initialize the CoM position residual model.\n\n"
           ":param state: state of the multibody system\n"
           ":param cref: reference CoM position\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, Eigen::Vector3d>(
+      .def(bp::init<std::shared_ptr<StateMultibody>, Eigen::Vector3d>(
           bp::args("self", "state", "cref"),
           "Initialize the CoM position residual model.\n\n"
           "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system\n"
           ":param cref: reference CoM position"))
       .def<void (ResidualModelCoMPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelCoMPosition::calc,
@@ -45,11 +45,11 @@ void exposeResidualCoMPosition() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelCoMPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelCoMPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelCoMPosition::calcDiff,
@@ -60,7 +60,7 @@ void exposeResidualCoMPosition() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelCoMPosition::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -80,7 +80,7 @@ void exposeResidualCoMPosition() {
                     "reference CoM position")
       .def(CopyableVisitor<ResidualModelCoMPosition>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataCoMPosition> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataCoMPosition> >();
 
   bp::class_<ResidualDataCoMPosition, bp::bases<ResidualDataAbstract> >(
       "ResidualDataCoMPosition", "Data for CoM position residual.\n\n",

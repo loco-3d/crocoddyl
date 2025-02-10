@@ -74,10 +74,10 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] costs      Cost model
    */
   DifferentialActionModelContactInvDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<ContactModelMultiple> contacts,
-      boost::shared_ptr<CostModelSum> costs);
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<ContactModelMultiple> contacts,
+      std::shared_ptr<CostModelSum> costs);
 
   /**
    * @brief Initialize the contact inverse-dynamics action model
@@ -89,11 +89,11 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] constraints  Constraints model
    */
   DifferentialActionModelContactInvDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<ContactModelMultiple> contacts,
-      boost::shared_ptr<CostModelSum> costs,
-      boost::shared_ptr<ConstraintModelManager> constraints);
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<ContactModelMultiple> contacts,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints);
   virtual ~DifferentialActionModelContactInvDynamicsTpl();
 
   /**
@@ -106,18 +106,17 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calc(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the dynamics, cost and constraint
@@ -133,16 +132,16 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -150,14 +149,14 @@ class DifferentialActionModelContactInvDynamicsTpl
    *
    * @return contact inverse-dynamics data
    */
-  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
 
   /**
    * @brief Checks that a specific data belongs to the contact inverse-dynamics
    * model
    */
   virtual bool checkData(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
@@ -173,7 +172,7 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] tol      Tolerance (default 1e-9)
    */
   virtual void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
       const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
@@ -210,22 +209,22 @@ class DifferentialActionModelContactInvDynamicsTpl
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const;
 
   /**
    * @brief Return the contact model
    */
-  const boost::shared_ptr<ContactModelMultiple>& get_contacts() const;
+  const std::shared_ptr<ContactModelMultiple>& get_contacts() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const std::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model manager
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -247,12 +246,12 @@ class DifferentialActionModelContactInvDynamicsTpl
   using Base::state_;  //!< Model of the state
 
  private:
-  void init(const boost::shared_ptr<StateMultibody>& state);
-  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
-  boost::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
-  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
-  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  void init(const std::shared_ptr<StateMultibody>& state);
+  std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  std::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
 
  public:
   /**
@@ -287,7 +286,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] nu     Dimension of the joint torques
      * @param[in] nc     Dimension of all the contacts
      */
-    ResidualModelActuation(boost::shared_ptr<StateMultibody> state,
+    ResidualModelActuation(std::shared_ptr<StateMultibody> state,
                            const std::size_t nu, const std::size_t nc)
         : Base(state, state->get_nv() - nu, state->get_nv() + nc, true, true,
                true),
@@ -302,7 +301,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                       const Eigen::Ref<const VectorXs>&,
                       const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataActuation* d =
@@ -319,10 +318,10 @@ class DifferentialActionModelContactInvDynamicsTpl
     }
 
     /**
-     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+     * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
      * data, const Eigen::Ref<const VectorXs>& x)
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                       const Eigen::Ref<const VectorXs>&) {
       data->r.setZero();
     }
@@ -334,7 +333,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                           const Eigen::Ref<const VectorXs>&,
                           const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataActuation* d =
@@ -358,10 +357,10 @@ class DifferentialActionModelContactInvDynamicsTpl
 
     /**
      * @brief @copydoc Base::calcDiff(const
-     * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * std::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
      * VectorXs>& x)
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                           const Eigen::Ref<const VectorXs>&) {
       data->Rx.setZero();
       data->Ru.setZero();
@@ -372,9 +371,9 @@ class DifferentialActionModelContactInvDynamicsTpl
      *
      * @return Actuation residual data
      */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(
+    virtual std::shared_ptr<ResidualDataAbstract> createData(
         DataCollectorAbstract* const data) {
-      return boost::allocate_shared<typename Data::ResidualDataActuation>(
+      return std::allocate_shared<typename Data::ResidualDataActuation>(
           Eigen::aligned_allocator<typename Data::ResidualDataActuation>(),
           this, data);
     }
@@ -436,7 +435,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] nr     Dimension of the contact-acceleration residual
      * @param[in] nc     Dimension of all contacts
      */
-    ResidualModelContact(boost::shared_ptr<StateMultibody> state,
+    ResidualModelContact(std::shared_ptr<StateMultibody> state,
                          const pinocchio::FrameIndex id, const std::size_t nr,
                          const std::size_t nc)
         : Base(state, nr, state->get_nv() + nc, true, true, true),
@@ -451,7 +450,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nv+nu}\f$
      */
-    void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+    void calc(const std::shared_ptr<ResidualDataAbstract>& data,
               const Eigen::Ref<const VectorXs>&,
               const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataContact* d =
@@ -460,10 +459,10 @@ class DifferentialActionModelContactInvDynamicsTpl
     }
 
     /**
-     * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+     * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
      * data, const Eigen::Ref<const VectorXs>& x)
      */
-    virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                       const Eigen::Ref<const VectorXs>&) {
       data->r.setZero();
     }
@@ -475,7 +474,7 @@ class DifferentialActionModelContactInvDynamicsTpl
      * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
      * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
      */
-    void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+    void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                   const Eigen::Ref<const VectorXs>&,
                   const Eigen::Ref<const VectorXs>&) {
       typename Data::ResidualDataContact* d =
@@ -486,10 +485,10 @@ class DifferentialActionModelContactInvDynamicsTpl
 
     /**
      * @brief @copydoc Base::calcDiff(const
-     * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+     * std::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
      * VectorXs>& x)
      */
-    virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+    virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                           const Eigen::Ref<const VectorXs>&) {
       data->Rx.setZero();
       data->Ru.setZero();
@@ -500,9 +499,9 @@ class DifferentialActionModelContactInvDynamicsTpl
      *
      * @return contact-acceleration residual data
      */
-    virtual boost::shared_ptr<ResidualDataAbstract> createData(
+    virtual std::shared_ptr<ResidualDataAbstract> createData(
         DataCollectorAbstract* const data) {
-      return boost::allocate_shared<typename Data::ResidualDataContact>(
+      return std::allocate_shared<typename Data::ResidualDataContact>(
           Eigen::aligned_allocator<typename Data::ResidualDataContact>(), this,
           data, id_);
     }
@@ -551,7 +550,7 @@ struct DifferentialActionDataContactInvDynamicsTpl
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(
             &pinocchio, model->get_actuation()->createData(),
-            boost::make_shared<JointDataAbstract>(
+            std::make_shared<JointDataAbstract>(
                 model->get_state(), model->get_actuation(), model->get_nu()),
             model->get_contacts()->createData(&pinocchio)),
         tmp_xstatic(model->get_state()->get_nx()),
@@ -586,10 +585,10 @@ struct DifferentialActionDataContactInvDynamicsTpl
     tmp_Jstatic.setZero();
   }
 
-  pinocchio::DataTpl<Scalar> pinocchio;                  //!< Pinocchio data
-  DataCollectorJointActMultibodyInContact multibody;     //!< Multibody data
-  boost::shared_ptr<CostDataSum> costs;                  //!< Costs data
-  boost::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
+  pinocchio::DataTpl<Scalar> pinocchio;                //!< Pinocchio data
+  DataCollectorJointActMultibodyInContact multibody;   //!< Multibody data
+  std::shared_ptr<CostDataSum> costs;                  //!< Costs data
+  std::shared_ptr<ConstraintDataManager> constraints;  //!< Constraints data
   VectorXs
       tmp_xstatic;  //!< State point used for computing the quasi-static input
   VectorXs
@@ -642,9 +641,9 @@ struct DifferentialActionDataContactInvDynamicsTpl
       dtau_du.setZero();
     }
 
-    pinocchio::DataTpl<Scalar>* pinocchio;               //!< Pinocchio data
-    boost::shared_ptr<ActuationDataAbstract> actuation;  //!< Actuation data
-    boost::shared_ptr<ContactDataMultiple> contact;      //!< Contact data
+    pinocchio::DataTpl<Scalar>* pinocchio;             //!< Pinocchio data
+    std::shared_ptr<ActuationDataAbstract> actuation;  //!< Actuation data
+    std::shared_ptr<ContactDataMultiple> contact;      //!< Contact data
     MatrixXs dtau_dx;
     MatrixXs dtau_du;
     using Base::r;

@@ -75,10 +75,10 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   DifferentialActionModelFreeFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<CostModelSum> costs,
-      boost::shared_ptr<ConstraintModelManager> constraints = nullptr);
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr);
   virtual ~DifferentialActionModelFreeFwdDynamicsTpl();
 
   /**
@@ -90,18 +90,17 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calc(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
@@ -111,16 +110,16 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -128,19 +127,19 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    *
    * @return free forward-dynamics data
    */
-  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
 
   /**
    * @brief Check that the given data belongs to the free forward-dynamics data
    */
   virtual bool checkData(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data);
 
   /**
    * @brief @copydoc Base::quasiStatic()
    */
   virtual void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
       const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
@@ -177,17 +176,17 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const std::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model manager
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -218,10 +217,10 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
-  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
-  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
   bool without_armature_;  //!< Indicate if we have defined an armature
   VectorXs armature_;      //!< Armature vector
 };
@@ -245,7 +244,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(
             &pinocchio, model->get_actuation()->createData(),
-            boost::make_shared<JointDataAbstract>(
+            std::make_shared<JointDataAbstract>(
                 model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
@@ -266,8 +265,8 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorJointActMultibody multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  std::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  std::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Minv;
   VectorXs u_drift;
   MatrixXs dtau_dx;

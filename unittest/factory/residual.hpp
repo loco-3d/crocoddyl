@@ -56,12 +56,12 @@ class ResidualModelFactory {
   explicit ResidualModelFactory();
   ~ResidualModelFactory();
 
-  boost::shared_ptr<crocoddyl::ResidualModelAbstract> create(
+  std::shared_ptr<crocoddyl::ResidualModelAbstract> create(
       ResidualModelTypes::Type residual_type, StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
+std::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
     StateModelTypes::Type state_type);
 
 }  // namespace unittest

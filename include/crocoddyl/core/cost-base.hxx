@@ -12,9 +12,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    boost::shared_ptr<ResidualModelAbstract> residual)
+    std::shared_ptr<StateAbstract> state,
+    std::shared_ptr<ActivationModelAbstract> activation,
+    std::shared_ptr<ResidualModelAbstract> residual)
     : state_(state),
       activation_(activation),
       residual_(residual),
@@ -28,52 +28,52 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state,
-    boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu)
+    std::shared_ptr<StateAbstract> state,
+    std::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu)
     : state_(state),
       activation_(activation),
-      residual_(boost::make_shared<ResidualModelAbstract>(
+      residual_(std::make_shared<ResidualModelAbstract>(
           state, activation->get_nr(), nu)),
       nu_(nu),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state,
-    boost::shared_ptr<ActivationModelAbstract> activation)
+    std::shared_ptr<StateAbstract> state,
+    std::shared_ptr<ActivationModelAbstract> activation)
     : state_(state),
       activation_(activation),
-      residual_(boost::make_shared<ResidualModelAbstract>(
-          state, activation->get_nr())),
+      residual_(
+          std::make_shared<ResidualModelAbstract>(state, activation->get_nr())),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state,
-    boost::shared_ptr<ResidualModelAbstract> residual)
+    std::shared_ptr<StateAbstract> state,
+    std::shared_ptr<ResidualModelAbstract> residual)
     : state_(state),
-      activation_(boost::make_shared<ActivationModelQuad>(residual->get_nr())),
+      activation_(std::make_shared<ActivationModelQuad>(residual->get_nr())),
       residual_(residual),
       nu_(residual->get_nu()),
       unone_(VectorXs::Zero(residual->get_nu())) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nr,
+    std::shared_ptr<StateAbstract> state, const std::size_t nr,
     const std::size_t nu)
     : state_(state),
-      activation_(boost::make_shared<ActivationModelQuad>(nr)),
-      residual_(boost::make_shared<ResidualModelAbstract>(state, nr, nu)),
+      activation_(std::make_shared<ActivationModelQuad>(nr)),
+      residual_(std::make_shared<ResidualModelAbstract>(state, nr, nu)),
       nu_(nu),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nr)
+    std::shared_ptr<StateAbstract> state, const std::size_t nr)
     : state_(state),
-      activation_(boost::make_shared<ActivationModelQuad>(nr)),
-      residual_(boost::make_shared<ResidualModelAbstract>(state, nr)),
+      activation_(std::make_shared<ActivationModelQuad>(nr)),
+      residual_(std::make_shared<ResidualModelAbstract>(state, nr)),
       nu_(state->get_nv()),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
@@ -82,22 +82,22 @@ CostModelAbstractTpl<Scalar>::~CostModelAbstractTpl() {}
 
 template <typename Scalar>
 void CostModelAbstractTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
 void CostModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> >
+std::shared_ptr<CostDataAbstractTpl<Scalar> >
 CostModelAbstractTpl<Scalar>::createData(DataCollectorAbstract* const data) {
-  return boost::allocate_shared<CostDataAbstract>(
+  return std::allocate_shared<CostDataAbstract>(
       Eigen::aligned_allocator<CostDataAbstract>(), this, data);
 }
 
@@ -107,19 +107,19 @@ void CostModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >&
+const std::shared_ptr<StateAbstractTpl<Scalar> >&
 CostModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActivationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ActivationModelAbstractTpl<Scalar> >&
 CostModelAbstractTpl<Scalar>::get_activation() const {
   return activation_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
 CostModelAbstractTpl<Scalar>::get_residual() const {
   return residual_;
 }

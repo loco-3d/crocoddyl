@@ -45,28 +45,27 @@ std::ostream& operator<<(std::ostream& os, ControlTypes::Type type) {
 ControlFactory::ControlFactory() {}
 ControlFactory::~ControlFactory() {}
 
-boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>
+std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>
 ControlFactory::create(ControlTypes::Type control_type,
                        const std::size_t nu) const {
-  boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> control;
+  std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> control;
   switch (control_type) {
     case ControlTypes::PolyZero:
       control =
-          boost::make_shared<crocoddyl::ControlParametrizationModelPolyZero>(
-              nu);
+          std::make_shared<crocoddyl::ControlParametrizationModelPolyZero>(nu);
       break;
     case ControlTypes::PolyOne:
       control =
-          boost::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
+          std::make_shared<crocoddyl::ControlParametrizationModelPolyOne>(nu);
       break;
     case ControlTypes::PolyTwoRK3:
       control =
-          boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
+          std::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
               nu, RKType::three);
       break;
     case ControlTypes::PolyTwoRK4:
       control =
-          boost::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
+          std::make_shared<crocoddyl::ControlParametrizationModelPolyTwoRK>(
               nu, RKType::four);
       break;
     default:

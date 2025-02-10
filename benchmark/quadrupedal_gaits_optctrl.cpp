@@ -41,13 +41,13 @@ int main(int argc, char* argv[]) {
   const unsigned int stepKnots(25), supportKnots(2);
 
   // DDP Solver
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
+  std::shared_ptr<crocoddyl::ShootingProblem> problem =
       gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots,
                                 supportKnots);
   crocoddyl::SolverFDDP solver(problem);
   if (CALLBACKS) {
-    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
-    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
+    std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());
     solver.setCallbacks(cbs);
   }
 

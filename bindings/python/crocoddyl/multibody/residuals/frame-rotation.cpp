@@ -16,14 +16,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualFrameRotation() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelFrameRotation> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelFrameRotation> >();
 
   bp::class_<ResidualModelFrameRotation, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameRotation",
       "This residual function is defined as r = R - Rref, with R and Rref as "
       "the current and reference\n"
       "frame rotations, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                Eigen::Matrix3d, std::size_t>(
           bp::args("self", "state", "id", "Rref", "nu"),
           "Initialize the frame rotation residual model.\n\n"
@@ -31,7 +31,7 @@ void exposeResidualFrameRotation() {
           ":param id: reference frame id\n"
           ":param Rref: reference frame rotation\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     Eigen::Matrix3d>(
           bp::args("self", "state", "id", "Rref"),
           "Initialize the frame rotation residual model.\n\n"
@@ -40,7 +40,7 @@ void exposeResidualFrameRotation() {
           ":param id: reference frame id\n"
           ":param Rref: reference frame rotation"))
       .def<void (ResidualModelFrameRotation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelFrameRotation::calc,
@@ -50,11 +50,11 @@ void exposeResidualFrameRotation() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameRotation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelFrameRotation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelFrameRotation::calcDiff,
@@ -65,7 +65,7 @@ void exposeResidualFrameRotation() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameRotation::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -88,7 +88,7 @@ void exposeResidualFrameRotation() {
                     "reference frame rotation")
       .def(CopyableVisitor<ResidualModelFrameRotation>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFrameRotation> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataFrameRotation> >();
 
   bp::class_<ResidualDataFrameRotation, bp::bases<ResidualDataAbstract> >(
       "ResidualDataFrameRotation", "Data for frame rotation residual.\n\n",

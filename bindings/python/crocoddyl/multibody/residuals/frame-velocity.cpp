@@ -15,15 +15,15 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualFrameVelocity() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelFrameVelocity> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelFrameVelocity> >();
 
   bp::class_<ResidualModelFrameVelocity, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFrameVelocity",
       "This residual function defines r = v - vref, with v and vref as the "
       "current and reference\n"
       "frame velocities, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t,
-               pinocchio::Motion, pinocchio::ReferenceFrame, std::size_t>(
+      bp::init<std::shared_ptr<StateMultibody>, std::size_t, pinocchio::Motion,
+               pinocchio::ReferenceFrame, std::size_t>(
           bp::args("self", "state", "id", "velocity", "type", "nu"),
           "Initialize the frame velocity residual model.\n\n"
           ":param state: state of the multibody system\n"
@@ -32,7 +32,7 @@ void exposeResidualFrameVelocity() {
           ":param velocity: reference velocity\n"
           ":param type: reference type of velocity\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     pinocchio::Motion, pinocchio::ReferenceFrame>(
           bp::args("self", "state", "id", "velocity", "type"),
           "Initialize the frame velocity residual model.\n\n"
@@ -42,7 +42,7 @@ void exposeResidualFrameVelocity() {
           ":param velocity: reference velocity\n"
           ":param type: reference type of velocity"))
       .def<void (ResidualModelFrameVelocity::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelFrameVelocity::calc,
@@ -52,11 +52,11 @@ void exposeResidualFrameVelocity() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameVelocity::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelFrameVelocity::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelFrameVelocity::calcDiff,
@@ -67,7 +67,7 @@ void exposeResidualFrameVelocity() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFrameVelocity::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -92,7 +92,7 @@ void exposeResidualFrameVelocity() {
                     "reference type of velocity")
       .def(CopyableVisitor<ResidualModelFrameVelocity>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFrameVelocity> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataFrameVelocity> >();
 
   bp::class_<ResidualDataFrameVelocity, bp::bases<ResidualDataAbstract> >(
       "ResidualDataFrameVelocity", "Data for frame velocity residual.\n\n",

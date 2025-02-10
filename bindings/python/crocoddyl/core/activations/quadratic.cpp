@@ -18,7 +18,7 @@ namespace python {
 
 void exposeActivationQuad() {
   boost::python::register_ptr_to_python<
-      boost::shared_ptr<ActivationModelQuad> >();
+      std::shared_ptr<ActivationModelQuad> >();
 
   bp::class_<ActivationModelQuad, bp::bases<ActivationModelAbstract> >(
       "ActivationModelQuad",

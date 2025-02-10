@@ -149,9 +149,8 @@ class ActuationModelFloatingBaseThrustersTpl
    * @param[in] state      State of the dynamical system
    * @param[in] thrusters  Vector of thrusters
    */
-  ActuationModelFloatingBaseThrustersTpl(
-      boost::shared_ptr<StateMultibody> state,
-      const std::vector<Thruster>& thrusters)
+  ActuationModelFloatingBaseThrustersTpl(std::shared_ptr<StateMultibody> state,
+                                         const std::vector<Thruster>& thrusters)
       : Base(state,
              state->get_nv() -
                  state->get_pinocchio()
@@ -190,7 +189,7 @@ class ActuationModelFloatingBaseThrustersTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<Data>& data,
+  virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>&,
                     const Eigen::Ref<const VectorXs>& u) {
     if (static_cast<std::size_t>(u.size()) != nu_) {
@@ -213,11 +212,11 @@ class ActuationModelFloatingBaseThrustersTpl
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
 #ifndef NDEBUG
-  virtual void calcDiff(const boost::shared_ptr<Data>& data,
+  virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void calcDiff(const boost::shared_ptr<Data>&,
+  virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -226,18 +225,18 @@ class ActuationModelFloatingBaseThrustersTpl
                   "dtau_du has wrong value");
   }
 
-  virtual void commands(const boost::shared_ptr<Data>& data,
+  virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
                         const Eigen::Ref<const VectorXs>& tau) {
     data->u.noalias() = data->Mtau * tau;
   }
 
 #ifndef NDEBUG
-  virtual void torqueTransform(const boost::shared_ptr<Data>& data,
+  virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #else
-  virtual void torqueTransform(const boost::shared_ptr<Data>&,
+  virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
                                const Eigen::Ref<const VectorXs>&) {
 #endif
@@ -250,9 +249,9 @@ class ActuationModelFloatingBaseThrustersTpl
    *
    * @return the actuation data
    */
-  virtual boost::shared_ptr<Data> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  virtual std::shared_ptr<Data> createData() {
+    std::shared_ptr<Data> data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     updateData(data);
     return data;
   }
@@ -331,7 +330,7 @@ class ActuationModelFloatingBaseThrustersTpl
   using Base::state_;
 
  private:
-  void updateData(const boost::shared_ptr<Data>& data) {
+  void updateData(const std::shared_ptr<Data>& data) {
     data->dtau_du = W_thrust_;
     data->Mtau = Mtau_;
     const std::size_t nv = state_->get_nv();

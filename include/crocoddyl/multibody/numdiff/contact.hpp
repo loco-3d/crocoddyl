@@ -37,7 +37,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param model
    */
-  explicit ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model);
+  explicit ContactModelNumDiffTpl(const std::shared_ptr<Base>& model);
 
   /**
    * @brief Default destructor of the ContactModelNumDiff object
@@ -47,34 +47,34 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc ContactModelAbstract::calc()
    */
-  void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+  void calc(const std::shared_ptr<ContactDataAbstract>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc ContactModelAbstract::calcDiff()
    */
-  void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc ContactModelAbstract::updateForce()
    */
-  void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+  void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
                    const VectorXs& force);
 
   /**
    * @brief Create a Data object
    *
    * @param data is the Pinocchio data
-   * @return boost::shared_ptr<ContactModelAbstract>
+   * @return std::shared_ptr<ContactModelAbstract>
    */
-  boost::shared_ptr<ContactDataAbstract> createData(
+  std::shared_ptr<ContactDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the acton model that we use to numerical differentiate
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used in the numerical
@@ -102,7 +102,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   using Base::nu_;
   using Base::state_;
 
-  boost::shared_ptr<Base> model_;  //!<  contact model to differentiate
+  std::shared_ptr<Base> model_;  //!<  contact model to differentiate
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
   std::vector<ReevaluationFunction>
@@ -161,8 +161,8 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   VectorXs dx;  //!< State disturbance.
   VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
                 //!< \int x dx_i \f$".
-  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation.
 };
 

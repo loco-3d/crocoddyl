@@ -11,7 +11,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     Scalar xref, const pinocchio::ReferenceFrame type, const Matrix3s& rotation,
     const std::size_t nu, const Vector2s& gains)
     : Base(state, type, 1, nu), xref_(xref), Raxis_(rotation), gains_(gains) {
@@ -20,7 +20,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     Scalar xref, const pinocchio::ReferenceFrame type, const Vector2s& gains)
     : Base(state, type, 1), xref_(xref), gains_(gains) {
   id_ = id;
@@ -33,7 +33,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     Scalar xref, const std::size_t nu, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, nu),
       xref_(xref),
@@ -47,7 +47,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     Scalar xref, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1),
       xref_(xref),
@@ -66,7 +66,7 @@ ContactModel1DTpl<Scalar>::~ContactModel1DTpl() {}
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio,
@@ -106,7 +106,7 @@ void ContactModel1DTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 #if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
@@ -182,7 +182,7 @@ void ContactModel1DTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 1) {
     throw_pretty(
         "Invalid argument: " << "lambda has wrong dimension (it should be 1)");
@@ -214,10 +214,10 @@ void ContactModel1DTpl<Scalar>::updateForce(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel1DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

@@ -53,7 +53,7 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of control vector
    */
-  ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelControlGravTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nu);
 
   /**
@@ -63,7 +63,7 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[in] state       State of the multibody system
    */
-  ResidualModelControlGravTpl(boost::shared_ptr<StateMultibody> state);
+  ResidualModelControlGravTpl(std::shared_ptr<StateMultibody> state);
   virtual ~ResidualModelControlGravTpl();
 
   /**
@@ -73,15 +73,15 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract> &data,
                     const Eigen::Ref<const VectorXs> &x,
                     const Eigen::Ref<const VectorXs> &u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract> &data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract> &data,
                     const Eigen::Ref<const VectorXs> &x);
 
   /**
@@ -91,19 +91,19 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract> &data,
                         const Eigen::Ref<const VectorXs> &x,
                         const Eigen::Ref<const VectorXs> &u);
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract> &data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract> &data,
                         const Eigen::Ref<const VectorXs> &x);
 
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract *const data);
 
   /**
@@ -154,7 +154,7 @@ struct ResidualDataControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
   }
 
   PinocchioData pinocchio;  //!< Pinocchio data
-  boost::shared_ptr<ActuationDataAbstractTpl<Scalar> >
+  std::shared_ptr<ActuationDataAbstractTpl<Scalar> >
       actuation;  //!< Actuation data
   using Base::r;
   using Base::Ru;

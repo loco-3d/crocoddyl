@@ -48,7 +48,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
 
   virtual ~SquashingModelSmoothSatTpl() {};
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) {
     // Squashing function used: "Smooth abs":
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u -
@@ -59,7 +59,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
                u_lb_.array() + u_ub_.array());
   }
 
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<SquashingDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& s) {
     data->du_ds.diagonal() =
         Scalar(0.5) *

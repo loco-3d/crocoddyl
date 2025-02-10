@@ -20,7 +20,7 @@ void exposeDifferentialActionContactInvDynamics() {
   bp::scope().attr("no") = 0;
   {
     bp::register_ptr_to_python<
-        boost::shared_ptr<DifferentialActionModelContactInvDynamics> >();
+        std::shared_ptr<DifferentialActionModelContactInvDynamics> >();
     bp::scope model_outer =
         bp::class_<DifferentialActionModelContactInvDynamics,
                    bp::bases<DifferentialActionModelAbstract> >(
@@ -34,11 +34,11 @@ void exposeDifferentialActionContactInvDynamics() {
             "On the other hand, the stack of cost and constraint functions are "
             "implemented in\n"
             "ConstraintModelManager() and CostModelSum(), respectively.",
-            bp::init<boost::shared_ptr<StateMultibody>,
-                     boost::shared_ptr<ActuationModelAbstract>,
-                     boost::shared_ptr<ContactModelMultiple>,
-                     boost::shared_ptr<CostModelSum>,
-                     bp::optional<boost::shared_ptr<ConstraintModelManager> > >(
+            bp::init<std::shared_ptr<StateMultibody>,
+                     std::shared_ptr<ActuationModelAbstract>,
+                     std::shared_ptr<ContactModelMultiple>,
+                     std::shared_ptr<CostModelSum>,
+                     bp::optional<std::shared_ptr<ConstraintModelManager> > >(
                 bp::args("self", "state", "actuation", "contacts", "costs",
                          "constraints"),
                 "Initialize the inverse-dynamics action model for system with "
@@ -52,7 +52,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 ":param costs: stack of cost functions\n"
                 ":param constraints: stack of constraint functions"))
             .def<void (DifferentialActionModelContactInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelContactInvDynamics::calc,
@@ -62,12 +62,12 @@ void exposeDifferentialActionContactInvDynamics() {
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calc", &DifferentialActionModelAbstract::calc,
                 bp::args("self", "data", "x"))
             .def<void (DifferentialActionModelContactInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff",
@@ -86,7 +86,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 ":param x: state point (dim. state.nx)\n"
                 ":param u: control input (dim. nu)")
             .def<void (DifferentialActionModelContactInvDynamics::*)(
-                const boost::shared_ptr<DifferentialActionDataAbstract>&,
+                const std::shared_ptr<DifferentialActionDataAbstract>&,
                 const Eigen::Ref<const Eigen::VectorXd>&)>(
                 "calcDiff", &DifferentialActionModelAbstract::calcDiff,
                 bp::args("self", "data", "x"))
@@ -121,7 +121,7 @@ void exposeDifferentialActionContactInvDynamics() {
                 "constraint model manager")
             .def(CopyableVisitor<DifferentialActionModelContactInvDynamics>());
 
-    bp::register_ptr_to_python<boost::shared_ptr<
+    bp::register_ptr_to_python<std::shared_ptr<
         DifferentialActionModelContactInvDynamics::ResidualModelActuation> >();
 
     bp::class_<
@@ -133,14 +133,14 @@ void exposeDifferentialActionContactInvDynamics() {
         "joints) to be zero. We compute these torques and their derivatives "
         "using RNEA inside \n"
         "DifferentialActionModelContactInvDynamics.",
-        bp::init<boost::shared_ptr<StateMultibody>, std::size_t, std::size_t>(
+        bp::init<std::shared_ptr<StateMultibody>, std::size_t, std::size_t>(
             bp::args("self", "state", "nu", "nc"),
             "Initialize the actuation residual model.\n\n"
             ":param nu: dimension of control vector\n"
             ":param nc: number of the contacts"))
         .def<void (DifferentialActionModelContactInvDynamics::
                        ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc",
@@ -153,12 +153,12 @@ void exposeDifferentialActionContactInvDynamics() {
             ":param u: control input (dim. nu)")
         .def<void (DifferentialActionModelContactInvDynamics::
                        ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
         .def<void (DifferentialActionModelContactInvDynamics::
                        ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff",
@@ -172,7 +172,7 @@ void exposeDifferentialActionContactInvDynamics() {
             ":param u: control input (dim. nu)\n")
         .def<void (DifferentialActionModelContactInvDynamics::
                        ResidualModelActuation::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff,
             bp::args("self", "data", "x"))
@@ -190,7 +190,7 @@ void exposeDifferentialActionContactInvDynamics() {
         .def(CopyableVisitor<DifferentialActionModelContactInvDynamics::
                                  ResidualModelActuation>());
 
-    bp::register_ptr_to_python<boost::shared_ptr<
+    bp::register_ptr_to_python<std::shared_ptr<
         DifferentialActionModelContactInvDynamics::ResidualModelContact> >();
 
     bp::class_<DifferentialActionModelContactInvDynamics::ResidualModelContact,
@@ -200,7 +200,7 @@ void exposeDifferentialActionContactInvDynamics() {
         "where a0 is the desired\n"
         "contact acceleration which also considers the Baumgarte "
         "stabilization.",
-        bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+        bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                  std::size_t, std::size_t>(
             bp::args("self", "state", "id", "nr", "nc"),
             "Initialize the contact-acceleration residual model.\n\n"
@@ -209,7 +209,7 @@ void exposeDifferentialActionContactInvDynamics() {
             ":param nc: dimension of contact vector"))
         .def<void (
             DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc",
@@ -222,12 +222,12 @@ void exposeDifferentialActionContactInvDynamics() {
             ":param u: control input")
         .def<void (
             DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
         .def<void (
             DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff",
@@ -241,7 +241,7 @@ void exposeDifferentialActionContactInvDynamics() {
             ":param u: control input\n")
         .def<void (
             DifferentialActionModelContactInvDynamics::ResidualModelContact::*)(
-            const boost::shared_ptr<ResidualDataAbstract>&,
+            const std::shared_ptr<ResidualDataAbstract>&,
             const Eigen::Ref<const Eigen::VectorXd>&)>(
             "calcDiff", &ResidualModelAbstract::calcDiff,
             bp::args("self", "data", "x"))
@@ -262,7 +262,7 @@ void exposeDifferentialActionContactInvDynamics() {
   }
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataContactInvDynamics> >();
+      std::shared_ptr<DifferentialActionDataContactInvDynamics> >();
 
   bp::scope data_outer =
       bp::class_<DifferentialActionDataContactInvDynamics,
@@ -300,7 +300,7 @@ void exposeDifferentialActionContactInvDynamics() {
               "constraint data")
           .def(CopyableVisitor<DifferentialActionDataContactInvDynamics>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<
+  bp::register_ptr_to_python<std::shared_ptr<
       DifferentialActionDataContactInvDynamics::ResidualDataActuation> >();
 
   bp::class_<DifferentialActionDataContactInvDynamics::ResidualDataActuation,
@@ -315,7 +315,7 @@ void exposeDifferentialActionContactInvDynamics() {
           ":param data: shared data")[bp::with_custodian_and_ward<
           1, 2, bp::with_custodian_and_ward<1, 3> >()]);
 
-  bp::register_ptr_to_python<boost::shared_ptr<
+  bp::register_ptr_to_python<std::shared_ptr<
       DifferentialActionDataContactInvDynamics::ResidualDataContact> >();
 
   bp::class_<DifferentialActionDataContactInvDynamics::ResidualDataContact,

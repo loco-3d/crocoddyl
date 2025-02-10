@@ -19,7 +19,7 @@ ControlParametrizationModelPolyOneTpl<
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty(
@@ -34,7 +34,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>&) const {
   Data* d = static_cast<Data*>(data.get());
   data->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
@@ -42,14 +42,14 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelPolyOneTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty(
@@ -93,7 +93,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::convertBounds(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
@@ -129,7 +129,7 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyByJacobian(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),

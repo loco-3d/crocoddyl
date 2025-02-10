@@ -16,12 +16,11 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActuationFull() {
-  bp::register_ptr_to_python<
-      boost::shared_ptr<crocoddyl::ActuationModelFull> >();
+  bp::register_ptr_to_python<std::shared_ptr<crocoddyl::ActuationModelFull> >();
 
   bp::class_<ActuationModelFull, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFull", "Full actuation models.",
-      bp::init<boost::shared_ptr<StateAbstract> >(
+      bp::init<std::shared_ptr<StateAbstract> >(
           bp::args("self", "state"),
           "Initialize the full actuation model.\n\n"
           ":param state: state of dynamical system"))
