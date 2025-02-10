@@ -12,8 +12,8 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const pinocchio::ReferenceFrame type, const Matrix3s& rotation,
-    const std::size_t nu, const Vector2s& gains)
+    const Scalar xref, const pinocchio::ReferenceFrame type,
+    const Matrix3s& rotation, const std::size_t nu, const Vector2s& gains)
     : Base(state, type, 1, nu), xref_(xref), Raxis_(rotation), gains_(gains) {
   id_ = id;
 }
@@ -21,7 +21,8 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const pinocchio::ReferenceFrame type, const Vector2s& gains)
+    const Scalar xref, const pinocchio::ReferenceFrame type,
+    const Vector2s& gains)
     : Base(state, type, 1), xref_(xref), gains_(gains) {
   id_ = id;
   Raxis_ = Matrix3s::Identity();
@@ -34,7 +35,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const std::size_t nu, const Vector2s& gains)
+    const Scalar xref, const std::size_t nu, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, nu),
       xref_(xref),
       gains_(gains) {
@@ -48,7 +49,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const Vector2s& gains)
+    const Scalar xref, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1),
       xref_(xref),
       gains_(gains) {
@@ -79,13 +80,13 @@ void ContactModel1DTpl<Scalar>::calc(
           .linear();
 
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-  if (gains_[0] != 0.) {
+  if (gains_[0] != Scalar(0.)) {
     d->dp = d->pinocchio->oMf[id_].translation() -
             (xref_ * Raxis_ * Vector3s::UnitZ());
     d->dp_local.noalias() = oRf.transpose() * d->dp;
     d->a0_local += gains_[0] * d->dp_local;
   }
-  if (gains_[1] != 0.) {
+  if (gains_[1] != Scalar(0.)) {
     d->a0_local += gains_[1] * d->v.linear();
   }
   switch (type_) {
@@ -134,14 +135,14 @@ void ContactModel1DTpl<Scalar>::calcDiff(
       d->vv_skew * d->fJf.template bottomRows<3>();
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
 
-  if (gains_[0] != 0.) {
+  if (gains_[0] != Scalar(0.)) {
     pinocchio::skew(d->dp_local, d->dp_skew);
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[0] * d->fJf.template topRows<3>();
   }
-  if (gains_[1] != 0.) {
+  if (gains_[1] != Scalar(0.)) {
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[1] * d->fXjdv_dq.template topRows<3>();
     d->da0_local_dx.rightCols(nv).noalias() +=
@@ -159,10 +160,10 @@ void ContactModel1DTpl<Scalar>::calcDiff(
                         *state_->get_pinocchio().get(), *d->pinocchio, id_,
                         pinocchio::LOCAL)
                         .linear();
-      if (gains_[0] != 0.) {
+      if (gains_[0] != Scalar(0.)) {
         d->a0_local += gains_[0] * d->dp_local;
       }
-      if (gains_[1] != 0.) {
+      if (gains_[1] != Scalar(0.)) {
         d->a0_local += gains_[1] * d->v.linear();
       }
       d->a0[0] = (Raxis_ * oRf * d->a0_local)[2];
