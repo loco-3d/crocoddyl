@@ -17,7 +17,10 @@
             type = "app";
             program = pkgs.python3.withPackages (_: [ self'.packages.default ]);
           };
-          devShells.default = pkgs.mkShell { inputsFrom = [ self'.packages.default ]; };
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [ self'.packages.default ];
+            packages = [ (pkgs.python3.withPackages (p: [p.tomlkit])) ]; # for "make release"
+          };
           packages = {
             default = self'.packages.crocoddyl;
             crocoddyl = pkgs.python3Packages.crocoddyl.overrideAttrs (_: {
