@@ -31,6 +31,7 @@ void ImpulseModel3DTpl<Scalar>::calc(
     const boost::shared_ptr<ImpulseDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
   pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(),
                                           *d->pinocchio, id_);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
@@ -53,18 +54,18 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ImpulseDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
-
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
 #if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parentJoint;
+      state_->get_pinocchio()->frames[fdata.frame].parentJoint;
 #else
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
+      state_->get_pinocchio()->frames[fdata.frame].parent;
 #endif
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
-  d->dv0_local_dq.noalias() = d->fXj.template topRows<3>() * d->v_partial_dq;
+  d->dv0_local_dq.noalias() = fdata.fXj.template topRows<3>() * d->v_partial_dq;
 
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
@@ -94,11 +95,12 @@ void ImpulseModel3DTpl<Scalar>::updateForce(
         "Invalid argument: " << "lambda has wrong dimension (it should be 3)");
   }
   Data* d = static_cast<Data*>(data.get());
-  data->f.linear() = force;
-  data->f.angular().setZero();
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
+  fdata.f.linear() = force;
+  fdata.f.angular().setZero();
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->fext = d->jMf.act(data->f);
+      fdata.fext = fdata.jMf.act(fdata.f);
       data->dtau_dq.setZero();
       break;
     case pinocchio::ReferenceFrame::WORLD:
@@ -106,7 +108,7 @@ void ImpulseModel3DTpl<Scalar>::updateForce(
       const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
       d->f_local.linear().noalias() = oRf.transpose() * force;
       d->f_local.angular().setZero();
-      data->fext = data->jMf.act(d->f_local);
+      fdata.fext = fdata.jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
       data->dtau_dq.noalias() =

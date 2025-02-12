@@ -116,10 +116,12 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()),
         fJf_df(3, model->get_state()->get_nv()) {
-    frame = model->get_id();
-    jMf =
-        model->get_state()->get_pinocchio()->frames[model->get_id()].placement;
-    fXj = jMf.inverse().toActionMatrix();
+    // There is only one element in the force_datas vector
+    ForceDataAbstract& fdata = force_datas[0];
+    fdata.frame = model->get_id();
+    fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
+    fdata.fXj = fdata.jMf.inverse().toActionMatrix();
+
     v0.setZero();
     dv0_local_dq.setZero();
     fJf.setZero();
@@ -133,12 +135,9 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
 
   using Base::df_dx;
   using Base::dv0_dq;
-  using Base::f;
-  using Base::frame;
-  using Base::fXj;
   using Base::Jc;
-  using Base::jMf;
   using Base::pinocchio;
+  using Base::force_datas;
 
   Vector3s v0;
   Force f_local;

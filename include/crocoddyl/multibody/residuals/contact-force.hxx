@@ -68,13 +68,13 @@ void ResidualModelContactForceTpl<Scalar>::calc(
   // We transform the force to the contact frame
   switch (d->contact_type) {
     case Contact1D:
-      data->r = ((d->contact->f - fref_).linear()).row(2);
+      data->r = ((d->contact->force_datas[0].f - fref_).linear()).row(2);
       break;
     case Contact3D:
-      data->r = (d->contact->f - fref_).linear();
+      data->r = (d->contact->force_datas[0].f - fref_).linear();
       break;
     case Contact6D:
-      data->r = (d->contact->f - fref_).toVector();
+      data->r = (d->contact->force_datas[0].f - fref_).toVector();
       break;
     default:
       break;

@@ -37,7 +37,7 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param model
    */
-  explicit ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model);
+  explicit ContactModelNumDiffTpl(const boost::shared_ptr<Base>& model, const int nf);
 
   /**
    * @brief Default destructor of the ContactModelNumDiff object
@@ -135,7 +135,7 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   explicit ContactDataNumDiffTpl(Model<Scalar>* const model,
                                  pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
+      : Base(model, data, 1),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()) {
     dx.setZero();
@@ -152,7 +152,6 @@ struct ContactDataNumDiffTpl : public ContactDataAbstractTpl<_Scalar> {
 
   using Base::a0;
   using Base::da0_dx;
-  using Base::f;
   using Base::pinocchio;
 
   Scalar x_norm;  //!< Norm of the state vector

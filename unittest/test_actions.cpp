@@ -84,7 +84,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
   BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(tol));
   BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_REQUIRE((data->Lx - data_num_diff->Lx).isZero(tol));
   BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));

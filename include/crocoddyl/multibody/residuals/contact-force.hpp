@@ -276,62 +276,67 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
       for (typename ContactModelMultiple::ContactDataContainer::iterator it =
                d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
-        if (it->second->frame == id) {
-          ContactData1DTpl<Scalar>* d1d =
-              dynamic_cast<ContactData1DTpl<Scalar>*>(it->second.get());
-          if (d1d != NULL) {
-            contact_type = Contact1D;
-            found_contact = true;
-            contact = it->second;
+        if (it->second->nf == 1) {
+          if (it->second->force_datas[0].frame ==
+              id) {  // TODO(jfoster): outer if enforces 1 force data
+            ContactData1DTpl<Scalar>* d1d =
+                dynamic_cast<ContactData1DTpl<Scalar>*>(it->second.get());
+            if (d1d != NULL) {
+              contact_type = Contact1D;
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
+            ContactData3DTpl<Scalar>* d3d =
+                dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
+            if (d3d != NULL) {
+              contact_type = Contact3D;
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
+            ContactData6DTpl<Scalar>* d6d =
+                dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
+            if (d6d != NULL) {
+              contact_type = Contact6D;
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
+            throw_pretty(
+                "Domain error: there isn't defined at least a 3d contact for " +
+                frame_name);
             break;
           }
-          ContactData3DTpl<Scalar>* d3d =
-              dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
-          if (d3d != NULL) {
-            contact_type = Contact3D;
-            found_contact = true;
-            contact = it->second;
-            break;
-          }
-          ContactData6DTpl<Scalar>* d6d =
-              dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
-          if (d6d != NULL) {
-            contact_type = Contact6D;
-            found_contact = true;
-            contact = it->second;
-            break;
-          }
-          throw_pretty(
-              "Domain error: there isn't defined at least a 3d contact for " +
-              frame_name);
-          break;
         }
       }
     } else {
       for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
            it != d2->impulses->impulses.end(); ++it) {
-        if (it->second->frame == id) {
-          ImpulseData3DTpl<Scalar>* d3d =
-              dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-          if (d3d != NULL) {
-            contact_type = Contact3D;
-            found_contact = true;
-            contact = it->second;
+        if (it->second->nf == 1) {
+          if (it->second->force_datas[0].frame == id) { // TODO(jfoster): outer if enforces 1 force data
+            ImpulseData3DTpl<Scalar>* d3d =
+                dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
+            if (d3d != NULL) {
+              contact_type = Contact3D;
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
+            ImpulseData6DTpl<Scalar>* d6d =
+                dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
+            if (d6d != NULL) {
+              contact_type = Contact6D;
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
+            throw_pretty(
+                "Domain error: there isn't defined at least a 3d impulse for " +
+                frame_name);
             break;
           }
-          ImpulseData6DTpl<Scalar>* d6d =
-              dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-          if (d6d != NULL) {
-            contact_type = Contact6D;
-            found_contact = true;
-            contact = it->second;
-            break;
-          }
-          throw_pretty(
-              "Domain error: there isn't defined at least a 3d impulse for " +
-              frame_name);
-          break;
         }
       }
     }
@@ -342,7 +347,7 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
     }
   }
 
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> >
+  boost::shared_ptr<InteractionDataAbstractTpl<Scalar> >
       contact;               //!< Contact force data
   ContactType contact_type;  //!< Type of contact (3D / 6D)
   using Base::r;

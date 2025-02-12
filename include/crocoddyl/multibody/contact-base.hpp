@@ -42,10 +42,11 @@ class ContactModelAbstractTpl {
    */
   ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
-                          const std::size_t nc, const std::size_t nu);
+                          const std::size_t nf, const std::size_t nc,
+                          const std::size_t nu);
   ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
-                          const std::size_t nc);
+                          const std::size_t nf, const std::size_t nc);
 
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
@@ -124,6 +125,8 @@ class ContactModelAbstractTpl {
    */
   const boost::shared_ptr<StateMultibody>& get_state() const;
 
+  std::size_t get_nf() const;
+
   /**
    * @brief Return the dimension of the contact
    */
@@ -172,47 +175,52 @@ class ContactModelAbstractTpl {
   boost::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;
-  pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
-  pinocchio::ReferenceFrame type_;  //!< Type of contact
+  std::size_t nf_;
+  std::vector<pinocchio::FrameIndex>
+      id_;  //!< Reference frame id of the contact
+  std::vector<pinocchio::ReferenceFrame> type_;  //!< Type of contact
 };
 
 template <typename _Scalar>
-struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
+struct ContactDataAbstractTpl : public InteractionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
-  typedef ForceDataAbstractTpl<Scalar> Base;
+  typedef ForceDataAbstractTpl<Scalar> ForceData;
+  typedef typename pinocchio::DataTpl<Scalar> PinocchioData;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename pinocchio::SE3Tpl<Scalar> SE3;
 
   template <template <typename Scalar> class Model>
   ContactDataAbstractTpl(Model<Scalar>* const model,
-                         pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
-        fXj(jMf.inverse().toActionMatrix()),
+                         pinocchio::DataTpl<Scalar>* const data, const int nf)
+      : InteractionDataAbstractTpl<Scalar>(model, data, nf),
+        pinocchio(data),
         a0(model->get_nc()),
         da0_dx(model->get_nc(), model->get_state()->get_ndx()),
-        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
+        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Jc(model->get_nc(), model->get_state()->get_nv()) {
     a0.setZero();
     da0_dx.setZero();
     dtau_dq.setZero();
+    Jc.setZero();
   }
   virtual ~ContactDataAbstractTpl() {}
 
-  using Base::df_du;
-  using Base::df_dx;
-  using Base::f;
-  using Base::frame;
-  using Base::Jc;
-  using Base::jMf;
-  using Base::pinocchio;
+  PinocchioData* pinocchio;  //!< Pinocchio data
 
-  typename SE3::ActionMatrixType fXj;
+  using InteractionDataAbstractTpl<Scalar>::nf;
+  using InteractionDataAbstractTpl<Scalar>::force_datas;
+  using InteractionDataAbstractTpl<Scalar>::df_dx;
+  using InteractionDataAbstractTpl<Scalar>::df_du;
+
   VectorXs a0;
   MatrixXs da0_dx;
   MatrixXs dtau_dq;
+
+  MatrixXs Jc;  //!< Contact Jacobian
 };
 
 }  // namespace crocoddyl

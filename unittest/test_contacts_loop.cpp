@@ -74,7 +74,7 @@ void test_calc_fetch_jacobians(ContactLoopModelTypes::Type contact_type,
     BOOST_CHECK(!data->a0.isZero());
   }
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
 }
@@ -112,7 +112,7 @@ void test_calc_diff_fetch_derivatives(ContactLoopModelTypes::Type contact_type,
     BOOST_CHECK(!data->a0.isZero());
     BOOST_CHECK(!data->da0_dx.isZero());
   }
-  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
 }
@@ -141,8 +141,8 @@ void test_update_force(ContactLoopModelTypes::Type contact_type,
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(!data->f.toVector().isZero());
-  BOOST_CHECK(!data->fext.toVector().isZero());
+  BOOST_CHECK(!data->force_datas[0].f.toVector().isZero());
+  BOOST_CHECK(!data->force_datas[0].fext.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
 }
@@ -174,8 +174,8 @@ void test_update_force_diff(ContactLoopModelTypes::Type contact_type,
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->a0.isZero());
   BOOST_CHECK(data->da0_dx.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
-  BOOST_CHECK(data->fext.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].fext.toVector().isZero());
   BOOST_CHECK(!data->df_dx.isZero());
   BOOST_CHECK(!data->df_du.isZero());
 }
@@ -199,7 +199,7 @@ void test_partial_derivatives_against_numdiff(
       model->createData(&pinocchio_data);
 
   // Create the equivalent num diff model and data.
-  crocoddyl::ContactModelNumDiff model_num_diff(model);
+  crocoddyl::ContactModelNumDiff model_num_diff(model, model->get_nf());
   const boost::shared_ptr<crocoddyl::ContactDataAbstract>& data_num_diff =
       model_num_diff.createData(&pinocchio_data);
 

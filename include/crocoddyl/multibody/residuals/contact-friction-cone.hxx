@@ -61,7 +61,7 @@ void ResidualModelContactFrictionConeTpl<Scalar>::calc(
 
   // Compute the residual of the friction cone. Note that we need to transform
   // the force to the contact frame
-  data->r.noalias() = fref_.get_A() * d->contact->f.linear();
+  data->r.noalias() = fref_.get_A() * d->contact->force_datas[0].f.linear();
 }
 
 template <typename Scalar>
@@ -104,7 +104,7 @@ void ResidualModelContactFrictionConeTpl<Scalar>::updateJacobians(
     const boost::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
-  const MatrixXs& df_dx = d->contact->df_dx;
+  const MatrixXs& df_dx = d->contact->df_dx;  // TODO(jfoster): we've ensured only 1 data force
   const MatrixXs& df_du = d->contact->df_du;
   const MatrixX3s& A = fref_.get_A();
   switch (d->contact_type) {

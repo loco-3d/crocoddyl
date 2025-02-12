@@ -22,37 +22,55 @@ struct ForceDataAbstractTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
-  typedef MathBaseTpl<Scalar> MathBase;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename pinocchio::DataTpl<Scalar> PinocchioData;
+
   typedef typename pinocchio::SE3Tpl<Scalar> SE3;
   typedef typename pinocchio::ForceTpl<Scalar> Force;
 
   template <template <typename Scalar> class Model>
-  ForceDataAbstractTpl(Model<Scalar>* const model, PinocchioData* const data)
-      : pinocchio(data),
-        frame(0),
+  ForceDataAbstractTpl(Model<Scalar>* const model)
+      : frame(0),
         type(model->get_type()),
         jMf(SE3::Identity()),
-        Jc(model->get_nc(), model->get_state()->get_nv()),
+        fXj(jMf.inverse().toActionMatrix()),
         f(Force::Zero()),
-        fext(Force::Zero()),
+        fext(Force::Zero()) {}
+  virtual ~ForceDataAbstractTpl() {}
+
+  pinocchio::FrameIndex frame;     //!< Frame index of the contact frame
+  pinocchio::ReferenceFrame type;  //!< Type of contact
+  SE3 jMf;  //!< Local frame placement of the contact frame
+  typename SE3::ActionMatrixType fXj;  //<! Action matrix that transforms the
+                                       // contact force to the joint torques
+  Force f;     //!< Contact force expressed in the coordinate defined by type
+  Force fext;  //!< External spatial force at the parent joint level
+};
+
+template <typename _Scalar>
+struct InteractionDataAbstractTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Model>
+  InteractionDataAbstractTpl(Model<Scalar>* const model,
+                             pinocchio::DataTpl<Scalar>* const data,
+                             const int nf)
+      : nf(nf),
+        force_datas(nf, ForceDataAbstractTpl<Scalar>(model)),
         df_dx(model->get_nc(), model->get_state()->get_ndx()),
         df_du(model->get_nc(), model->get_nu()) {
-    Jc.setZero();
     df_dx.setZero();
     df_du.setZero();
   }
-  virtual ~ForceDataAbstractTpl() {}
 
-  PinocchioData* pinocchio;        //!< Pinocchio data
-  pinocchio::FrameIndex frame;     //!< Frame index of the contact frame
-  pinocchio::ReferenceFrame type;  //!< Type of contact
-  SE3 jMf;      //!< Local frame placement of the contact frame
-  MatrixXs Jc;  //!< Contact Jacobian
-  Force f;      //!< Contact force expressed in the coordinate defined by type
-  Force fext;   //!< External spatial force at the parent joint level
+  virtual ~InteractionDataAbstractTpl() {}
+
+  std::size_t nf;
+  std::vector<ForceDataAbstract> force_datas;
+
   MatrixXs df_dx;  //!< Jacobian of the contact forces expressed in the
                    //!< coordinate defined by type
   MatrixXs df_du;  //!< Jacobian of the contact forces expressed in the

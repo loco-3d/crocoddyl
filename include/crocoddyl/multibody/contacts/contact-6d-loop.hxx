@@ -23,7 +23,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     const SE3 &joint2_placement,
     const pinocchio::ReferenceFrame type, const std::size_t nu,
     const Vector2s &gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6, nu),
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
@@ -47,7 +47,7 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     const SE3 &joint1_placement, const int joint2_id,
     const SE3 &joint2_placement,
     const pinocchio::ReferenceFrame type, const Vector2s &gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6),
       joint1_id_(joint1_id),
       joint2_id_(joint2_id),
       joint1_placement_(joint1_placement),
@@ -185,10 +185,11 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
                  << force.size() << ")");
   }
   Data *d = static_cast<Data *>(data.get());
-  d->f = pinocchio::ForceTpl<Scalar>(-force);
-  d->fext = joint1_placement_.act(d->f);
-  d->joint1_f = -joint1_placement_.act(d->f);
-  d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->f);
+  // TODO(jfoster): remove all of this indexing on the first elelemt of force_datas
+  d->force_datas[0].f = pinocchio::ForceTpl<Scalar>(-force);
+  d->force_datas[0].fext = joint1_placement_.act(d->force_datas[0].f);
+  d->joint1_f = -joint1_placement_.act(d->force_datas[0].f);
+  d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->force_datas[0].f);
 
   Matrix6s f_cross = Matrix6s::Zero(6, 6);
   f_cross.template topRightCorner<3, 3>() =
@@ -229,10 +230,11 @@ ContactModel6DLoopTpl<Scalar>::createData(
                                       data);
 }
 
+// TODO(jfoster): fix this so it isn't just indexing the first id
 template <typename Scalar>
 void ContactModel6DLoopTpl<Scalar>::print(std::ostream &os) const {
-  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_].name
-     << ", type=" << type_ << "}";
+  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_[0]].name
+     << ", type=" << type_[0] << "}";
 }
 
 template <typename Scalar>

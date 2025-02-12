@@ -453,7 +453,7 @@ void test_updateForce() {
   crocoddyl::ImpulseModelMultiple::ImpulseDataContainer::iterator it_d, end_d;
   for (it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_d != end_d; ++it_d) {
-    BOOST_CHECK(!it_d->second->f.toVector().isZero());
+    BOOST_CHECK(!it_d->second->force_datas[0].f.toVector().isZero());  // TODO(jfoster): need to modify test logic to go through all forces (even though there should only be one for all impulses)
   }
 }
 

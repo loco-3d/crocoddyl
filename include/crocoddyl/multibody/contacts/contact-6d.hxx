@@ -21,8 +21,9 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const pinocchio::ReferenceFrame type, const std::size_t nu,
     const Vector2s& gains)
-    : Base(state, type, 6, nu), pref_(pref), gains_(gains) {
-  id_ = id;
+    : Base(state, type, 1, 6, nu), pref_(pref), gains_(gains) {
+  id_[0] = id;
+  type_[0] = type;
 }
 
 template <typename Scalar>
@@ -30,8 +31,9 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const pinocchio::ReferenceFrame type,
     const Vector2s& gains)
-    : Base(state, type, 6), pref_(pref), gains_(gains) {
-  id_ = id;
+    : Base(state, type, 1, 6), pref_(pref), gains_(gains) {
+  id_[0] = id;
+  type_[0] = type;
 }
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
@@ -42,10 +44,10 @@ template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, 6, nu),
       pref_(pref),
       gains_(gains) {
-  id_ = id;
+  id_[0] = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, "
                "this assumes is pinocchio::LOCAL."
             << std::endl;
@@ -55,10 +57,10 @@ template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 6),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, 6),
       pref_(pref),
       gains_(gains) {
-  id_ = id;
+  id_[0] = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, "
                "this assumes is pinocchio::LOCAL."
             << std::endl;
@@ -74,30 +76,31 @@ void ContactModel6DTpl<Scalar>::calc(
     const boost::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
   pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(),
-                                          *d->pinocchio, id_);
+                                          *d->pinocchio, id_[0]);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              id_, pinocchio::LOCAL, d->fJf);
+                              id_[0], pinocchio::LOCAL, d->fJf);
   d->a0_local = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(),
-                                                *d->pinocchio, id_);
+                                                *d->pinocchio, id_[0]);
 
   if (gains_[0] != 0.) {
-    d->rMf = pref_.actInv(d->pinocchio->oMf[id_]);
+    d->rMf = pref_.actInv(d->pinocchio->oMf[id_[0]]);
     d->a0_local += gains_[0] * pinocchio::log6(d->rMf);
   }
   if (gains_[1] != 0.) {
     d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(),
-                                       *d->pinocchio, id_);
+                                       *d->pinocchio, id_[0]);
     d->a0_local += gains_[1] * d->v;
   }
-  switch (type_) {
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
       data->Jc = d->fJf;
       data->a0 = d->a0_local.toVector();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      d->lwaMl.rotation(d->pinocchio->oMf[id_].rotation());
+      d->lwaMl.rotation(d->pinocchio->oMf[id_[0]].rotation());
       data->Jc.noalias() = d->lwaMl.toActionMatrix() * d->fJf;
       data->a0.noalias() = d->lwaMl.act(d->a0_local).toVector();
       break;
@@ -109,19 +112,20 @@ void ContactModel6DTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
 #if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parentJoint;
+      state_->get_pinocchio()->frames[fdata.frame].parentJoint;
 #else
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
+      state_->get_pinocchio()->frames[fdata.frame].parent;
 #endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
   const std::size_t nv = state_->get_nv();
-  d->da0_local_dx.leftCols(nv).noalias() = d->fXj * d->a_partial_dq;
-  d->da0_local_dx.rightCols(nv).noalias() = d->fXj * d->a_partial_dv;
+  d->da0_local_dx.leftCols(nv).noalias() = fdata.fXj * d->a_partial_dq;
+  d->da0_local_dx.rightCols(nv).noalias() = fdata.fXj * d->a_partial_dv;
 
   if (gains_[0] != 0.) {
     pinocchio::Jlog6(d->rMf, d->rMf_Jlog6);
@@ -129,10 +133,10 @@ void ContactModel6DTpl<Scalar>::calcDiff(
   }
   if (gains_[1] != 0.) {
     d->da0_local_dx.leftCols(nv).noalias() +=
-        gains_[1] * d->fXj * d->v_partial_dq;
+        gains_[1] * fdata.fXj * d->v_partial_dq;
     d->da0_local_dx.rightCols(nv).noalias() += gains_[1] * d->fJf;
   }
-  switch (type_) {
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
       d->da0_dx = d->da0_local_dx;
       break;
@@ -141,7 +145,7 @@ void ContactModel6DTpl<Scalar>::calcDiff(
       // Recalculate the constrained accelerations after imposing contact
       // constraints. This is necessary for the forward-dynamics case.
       d->a0_local = pinocchio::getFrameAcceleration(
-          *state_->get_pinocchio().get(), *d->pinocchio, id_);
+          *state_->get_pinocchio().get(), *d->pinocchio, id_[0]);
       if (gains_[0] != 0.) {
         d->a0_local += gains_[0] * pinocchio::log6(d->rMf);
       }
@@ -150,7 +154,7 @@ void ContactModel6DTpl<Scalar>::calcDiff(
       }
       data->a0.noalias() = d->lwaMl.act(d->a0_local).toVector();
 
-      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_[0]].rotation();
       pinocchio::skew(d->a0.template head<3>(), d->av_skew);
       pinocchio::skew(d->a0.template tail<3>(), d->aw_skew);
       d->av_world_skew.noalias() = d->av_skew * oRf;
@@ -172,16 +176,17 @@ void ContactModel6DTpl<Scalar>::updateForce(
         "Invalid argument: " << "lambda has wrong dimension (it should be 6)");
   }
   Data* d = static_cast<Data*>(data.get());
-  data->f = pinocchio::ForceTpl<Scalar>(force);
-  switch (type_) {
+  ForceDataAbstract& fdata = d->force_datas[0]; // there's only one force data
+  fdata.f = pinocchio::ForceTpl<Scalar>(force);
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->fext = data->jMf.act(data->f);
+      fdata.fext = fdata.jMf.act(fdata.f);
       data->dtau_dq.setZero();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      d->f_local = d->lwaMl.actInv(data->f);
-      data->fext = data->jMf.act(d->f_local);
+      d->f_local = d->lwaMl.actInv(fdata.f);
+      fdata.fext = fdata.jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->fv_skew);
       pinocchio::skew(d->f_local.angular(), d->fw_skew);
       d->fJf_df.template topRows<3>().noalias() =
@@ -202,8 +207,8 @@ ContactModel6DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
 
 template <typename Scalar>
 void ContactModel6DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_].name
-     << ", type=" << type_ << "}";
+  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_[0]].name
+     << ", type=" << type_[0] << "}";
 }
 
 template <typename Scalar>

@@ -70,7 +70,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   // Check that only the Jacobian has been filled
   BOOST_CHECK(!data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
 }
 
@@ -111,7 +111,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   } else {
     BOOST_CHECK(!data->dv0_dq.isZero());
   }
-  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
 }
 
@@ -139,7 +139,7 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   // 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(!data->f.toVector().isZero());
+  BOOST_CHECK(!data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
 }
 
@@ -166,7 +166,7 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   // 0
   BOOST_CHECK(data->Jc.isZero());
   BOOST_CHECK(data->dv0_dq.isZero());
-  BOOST_CHECK(data->f.toVector().isZero());
+  BOOST_CHECK(data->force_datas[0].f.toVector().isZero());
   BOOST_CHECK(!data->df_dx.isZero());
 }
 

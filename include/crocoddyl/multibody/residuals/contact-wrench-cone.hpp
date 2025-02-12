@@ -268,56 +268,60 @@ struct ResidualDataContactWrenchConeTpl
       for (typename ContactModelMultiple::ContactDataContainer::iterator it =
                d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
-        if (it->second->frame == id) {
-          ContactData3DTpl<Scalar>* d3d =
-              dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
-          if (d3d != NULL) {
-            found_contact = true;
-            contact = it->second;
+        if (it->second->nf == 1) {
+          if (it->second->force_datas[0].frame == id) { // TODO(jfoster): outer if enforces 1 force data
+            ContactData3DTpl<Scalar>* d3d =
+                dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
+            if (d3d != NULL) {
+              found_contact = true;
+              contact = it->second;
+              throw_pretty(
+                  "Domain error: there isn't defined at least a 6d contact for " +
+                  frame_name);
+              break;
+            }
+            ContactData6DTpl<Scalar>* d6d =
+                dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
+            if (d6d != NULL) {
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
             throw_pretty(
                 "Domain error: there isn't defined at least a 6d contact for " +
                 frame_name);
             break;
           }
-          ContactData6DTpl<Scalar>* d6d =
-              dynamic_cast<ContactData6DTpl<Scalar>*>(it->second.get());
-          if (d6d != NULL) {
-            found_contact = true;
-            contact = it->second;
-            break;
-          }
-          throw_pretty(
-              "Domain error: there isn't defined at least a 6d contact for " +
-              frame_name);
-          break;
         }
       }
     } else {
       for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
            it != d2->impulses->impulses.end(); ++it) {
-        if (it->second->frame == id) {
-          ImpulseData3DTpl<Scalar>* d3d =
-              dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
-          if (d3d != NULL) {
-            found_contact = true;
-            contact = it->second;
+        if (it->second->nf == 1) {
+          if (it->second->force_datas[0].frame == id) { // TODO(jfoster): outer if enforces 1 force data
+            ImpulseData3DTpl<Scalar>* d3d =
+                dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
+            if (d3d != NULL) {
+              found_contact = true;
+              contact = it->second;
+              throw_pretty(
+                  "Domain error: there isn't defined at least a 6d contact for " +
+                  frame_name);
+              break;
+            }
+            ImpulseData6DTpl<Scalar>* d6d =
+                dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
+            if (d6d != NULL) {
+              found_contact = true;
+              contact = it->second;
+              break;
+            }
             throw_pretty(
                 "Domain error: there isn't defined at least a 6d contact for " +
                 frame_name);
             break;
           }
-          ImpulseData6DTpl<Scalar>* d6d =
-              dynamic_cast<ImpulseData6DTpl<Scalar>*>(it->second.get());
-          if (d6d != NULL) {
-            found_contact = true;
-            contact = it->second;
-            break;
-          }
-          throw_pretty(
-              "Domain error: there isn't defined at least a 6d contact for " +
-              frame_name);
-          break;
         }
       }
     }
@@ -327,7 +331,7 @@ struct ResidualDataContactWrenchConeTpl
     }
   }
 
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> >
+  boost::shared_ptr<InteractionDataAbstractTpl<Scalar> >
       contact;  //!< Contact force data
   using Base::r;
   using Base::Ru;

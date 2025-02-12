@@ -472,7 +472,7 @@ void test_updateForce() {
   crocoddyl::ContactModelMultiple::ContactDataContainer::iterator it_d, end_d;
   for (it_d = data->contacts.begin(), end_d = data->contacts.end();
        it_d != end_d; ++it_d) {
-    BOOST_CHECK(!it_d->second->f.toVector().isZero());
+    BOOST_CHECK(!it_d->second->force_datas[0].f.toVector().isZero());  // TODO(jfoster): need to modify test logic to go through all forces (should only ever be more than one for loop model)
   }
 }
 

@@ -15,15 +15,17 @@ namespace crocoddyl {
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
     boost::shared_ptr<StateMultibody> state,
-    const pinocchio::ReferenceFrame type, const std::size_t nc,
+    const pinocchio::ReferenceFrame type,
+    const std::size_t nf,
+    const std::size_t nc,
     const std::size_t nu)
-    : state_(state), nc_(nc), nu_(nu), id_(0), type_(type) {}
+    : state_(state), nc_(nc), nu_(nu), nf_(nf), id_(nf, 0), type_(nf, type) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
     boost::shared_ptr<StateMultibody> state,
-    const pinocchio::ReferenceFrame type, const std::size_t nc)
-    : state_(state), nc_(nc), nu_(state->get_nv()), id_(0), type_(type) {}
+    const pinocchio::ReferenceFrame type, const std::size_t nf, const std::size_t nc)
+    : state_(state), nc_(nc), nu_(state->get_nv()), nf_(nf), id_(nf,0), type_(nf, type) {}
 
 template <typename Scalar>
 ContactModelAbstractTpl<Scalar>::ContactModelAbstractTpl(
@@ -74,8 +76,11 @@ void ContactModelAbstractTpl<Scalar>::updateForceDiff(
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::setZeroForce(
     const boost::shared_ptr<ContactDataAbstract>& data) const {
-  data->f.setZero();
-  data->fext.setZero();
+  for (int i = 0; i < nf_; ++i)
+  {
+    data->force_datas[i].f.setZero();
+    data->force_datas[i].fext.setZero();
+  }
 }
 
 template <typename Scalar>
@@ -90,7 +95,7 @@ boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModelAbstractTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return boost::allocate_shared<ContactDataAbstract>(
-      Eigen::aligned_allocator<ContactDataAbstract>(), this, data);
+      Eigen::aligned_allocator<ContactDataAbstract>(), this, data, nf_);
 }
 
 template <typename Scalar>
@@ -105,6 +110,11 @@ ContactModelAbstractTpl<Scalar>::get_state() const {
 }
 
 template <typename Scalar>
+std::size_t ContactModelAbstractTpl<Scalar>::get_nf() const {
+  return nf_;
+}
+
+template <typename Scalar>
 std::size_t ContactModelAbstractTpl<Scalar>::get_nc() const {
   return nc_;
 }
@@ -116,23 +126,23 @@ std::size_t ContactModelAbstractTpl<Scalar>::get_nu() const {
 
 template <typename Scalar>
 pinocchio::FrameIndex ContactModelAbstractTpl<Scalar>::get_id() const {
-  return id_;
+  return id_[0]; // TODO(jfoster): index properly
 }
 
 template <typename Scalar>
 pinocchio::ReferenceFrame ContactModelAbstractTpl<Scalar>::get_type() const {
-  return type_;
+  return type_[0]; // TODO(jfoster): index properly
 }
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::set_id(const pinocchio::FrameIndex id) {
-  id_ = id;
+  id_[0] = id; // TODO(jfoster): index properly
 }
 
 template <typename Scalar>
 void ContactModelAbstractTpl<Scalar>::set_type(
     const pinocchio::ReferenceFrame type) {
-  type_ = type;
+  type_[0] = type; // TODO(jfoster): index properly
 }
 
 template <class Scalar>

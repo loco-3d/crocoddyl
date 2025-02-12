@@ -14,8 +14,9 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector3s& xref, const pinocchio::ReferenceFrame type,
     const std::size_t nu, const Vector2s& gains)
-    : Base(state, type, 3, nu), xref_(xref), gains_(gains) {
-  id_ = id;
+    : Base(state, type, 1, 3, nu), xref_(xref), gains_(gains) {
+  id_[0] = id;
+  type_[0] = type;
 }
 
 template <typename Scalar>
@@ -23,8 +24,9 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector3s& xref, const pinocchio::ReferenceFrame type,
     const Vector2s& gains)
-    : Base(state, type, 3), xref_(xref), gains_(gains) {
-  id_ = id;
+    : Base(state, type, 1, 3), xref_(xref), gains_(gains) {
+  id_[0] = id;
+  type_[0] = type;
 }
 
 #pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
@@ -35,10 +37,10 @@ template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector3s& xref, const std::size_t nu, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3, nu),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, 3, nu),
       xref_(xref),
       gains_(gains) {
-  id_ = id;
+  id_[0] = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, "
                "this assumes is pinocchio::LOCAL."
             << std::endl;
@@ -48,10 +50,10 @@ template <typename Scalar>
 ContactModel3DTpl<Scalar>::ContactModel3DTpl(
     boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector3s& xref, const Vector2s& gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 3),
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, 3),
       xref_(xref),
       gains_(gains) {
-  id_ = id;
+  id_[0] = id;
   std::cerr << "Deprecated: Use constructor that passes the type of contact, "
                "this assumes is pinocchio::LOCAL."
             << std::endl;
@@ -67,27 +69,29 @@ void ContactModel3DTpl<Scalar>::calc(
     const boost::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio,
-                                  id_);
+  ForceDataAbstract& fdata = d->force_datas[0];  // there's only one force data
+  pinocchio::updateFramePlacement(*state_->get_pinocchio().get(),
+                                  *d->pinocchio, id_[0]);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              id_, pinocchio::LOCAL, d->fJf);
+                              id_[0], pinocchio::LOCAL, d->fJf);
   d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(),
-                                     *d->pinocchio, id_);
-  d->a0_local =
-      pinocchio::getFrameClassicalAcceleration(
-          *state_->get_pinocchio().get(), *d->pinocchio, id_, pinocchio::LOCAL)
-          .linear();
+                                     *d->pinocchio, id_[0]);
+  d->a0_local = pinocchio::getFrameClassicalAcceleration(
+                    *state_->get_pinocchio().get(), *d->pinocchio, id_[0],
+                    pinocchio::LOCAL)
+                    .linear();
 
-  const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+  const Eigen::Ref<const Matrix3s> oRf =
+      d->pinocchio->oMf[id_[0]].rotation();
   if (gains_[0] != 0.) {
-    d->dp = d->pinocchio->oMf[id_].translation() - xref_;
+    d->dp = d->pinocchio->oMf[id_[0]].translation() - xref_;
     d->dp_local.noalias() = oRf.transpose() * d->dp;
     d->a0_local += gains_[0] * d->dp_local;
   }
   if (gains_[1] != 0.) {
     d->a0_local += gains_[1] * d->v.linear();
   }
-  switch (type_) {
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
       d->Jc = d->fJf.template topRows<3>();
       d->a0 = d->a0_local;
@@ -105,12 +109,13 @@ void ContactModel3DTpl<Scalar>::calcDiff(
     const boost::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+  ForceDataAbstract& fdata = d->force_datas[0];  // there's only one force data
 #if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parentJoint;
+      state_->get_pinocchio()->frames[fdata.frame].parentJoint;
 #else
   const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
+      state_->get_pinocchio()->frames[fdata.frame].parent;
 #endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
@@ -118,9 +123,9 @@ void ContactModel3DTpl<Scalar>::calcDiff(
   const std::size_t nv = state_->get_nv();
   pinocchio::skew(d->v.linear(), d->vv_skew);
   pinocchio::skew(d->v.angular(), d->vw_skew);
-  d->fXjdv_dq.noalias() = d->fXj * d->v_partial_dq;
-  d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
-  d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
+  d->fXjdv_dq.noalias() = fdata.fXj * d->v_partial_dq;
+  d->fXjda_dq.noalias() = fdata.fXj * d->a_partial_dq;
+  d->fXjda_dv.noalias() = fdata.fXj * d->a_partial_dv;
   d->da0_local_dx.leftCols(nv) = d->fXjda_dq.template topRows<3>();
   d->da0_local_dx.leftCols(nv).noalias() +=
       d->vw_skew * d->fXjdv_dq.template topRows<3>();
@@ -131,7 +136,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(
       d->vw_skew * d->fJf.template topRows<3>();
   d->da0_local_dx.rightCols(nv).noalias() -=
       d->vv_skew * d->fJf.template bottomRows<3>();
-  const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+  const Eigen::Ref<const Matrix3s> oRf =
+      d->pinocchio->oMf[id_[0]].rotation();
 
   if (gains_[0] != 0.) {
     pinocchio::skew(d->dp_local, d->dp_skew);
@@ -146,7 +152,7 @@ void ContactModel3DTpl<Scalar>::calcDiff(
     d->da0_local_dx.rightCols(nv).noalias() +=
         gains_[1] * d->fJf.template topRows<3>();
   }
-  switch (type_) {
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
       d->da0_dx = d->da0_local_dx;
       break;
@@ -155,8 +161,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(
       // Recalculate the constrained accelerations after imposing contact
       // constraints. This is necessary for the forward-dynamics case.
       d->a0_local = pinocchio::getFrameClassicalAcceleration(
-                        *state_->get_pinocchio().get(), *d->pinocchio, id_,
-                        pinocchio::LOCAL)
+                        *state_->get_pinocchio().get(), *d->pinocchio,
+                        id_[0], pinocchio::LOCAL)
                         .linear();
       if (gains_[0] != 0.) {
         d->a0_local += gains_[0] * d->dp_local;
@@ -183,19 +189,21 @@ void ContactModel3DTpl<Scalar>::updateForce(
         "Invalid argument: " << "lambda has wrong dimension (it should be 3)");
   }
   Data* d = static_cast<Data*>(data.get());
-  data->f.linear() = force;
-  data->f.angular().setZero();
-  switch (type_) {
+  ForceDataAbstract& fdata = d->force_datas[0];  // there's only one force data
+  fdata.f.linear() = force;
+  fdata.f.angular().setZero();
+  switch (type_[0]) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->fext = d->jMf.act(data->f);
+      fdata.fext = fdata.jMf.act(fdata.f);
       data->dtau_dq.setZero();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
-      const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
+      const Eigen::Ref<const Matrix3s> oRf =
+          d->pinocchio->oMf[id_[0]].rotation();
       d->f_local.linear().noalias() = oRf.transpose() * force;
       d->f_local.angular().setZero();
-      data->fext = data->jMf.act(d->f_local);
+      fdata.fext = fdata.jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
       d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
       data->dtau_dq.noalias() =
@@ -213,8 +221,8 @@ ContactModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
 
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::print(std::ostream& os) const {
-  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_].name
-     << ", type=" << type_ << "}";
+  os << "ContactModel3D {frame=" << state_->get_pinocchio()->frames[id_[0]].name
+     << ", type=" << type_[0] << "}";
 }
 
 template <typename Scalar>

@@ -103,11 +103,13 @@ class ImpulseModelAbstractTpl {
 };
 
 template <typename _Scalar>
-struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
+struct ImpulseDataAbstractTpl : public InteractionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename pinocchio::DataTpl<Scalar> PinocchioData;
+
   typedef ForceDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -116,24 +118,31 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model,
                          pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
+      : InteractionDataAbstractTpl<Scalar>(model, data, 1),
+        pinocchio(data),
         dv0_dq(model->get_nc(), model->get_state()->get_nv()),
-        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()) {
+        dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
+        Jc(model->get_nc(), model->get_state()->get_nv()),
+        df_dx(model->get_nc(), model->get_state()->get_ndx()) {
     dv0_dq.setZero();
     dtau_dq.setZero();
+    Jc.setZero();
+    df_dx.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 
-  using Base::df_dx;
-  using Base::f;
-  using Base::frame;
-  using Base::Jc;
-  using Base::jMf;
-  using Base::pinocchio;
+  PinocchioData* pinocchio;  //!< Pinocchio data
 
-  typename SE3::ActionMatrixType fXj;
+  using InteractionDataAbstractTpl<Scalar>::nf;
+  using InteractionDataAbstractTpl<Scalar>::force_datas;
+
   MatrixXs dv0_dq;
   MatrixXs dtau_dq;
+
+  MatrixXs Jc;  //!< Contact Jacobian
+
+  MatrixXs df_dx;  //!< Jacobian of the contact forces expressed in the
+                   //!< coordinate defined by type
 };
 
 }  // namespace crocoddyl

@@ -679,10 +679,13 @@ struct DifferentialActionDataContactInvDynamicsTpl
       for (it = d->contacts->contacts.begin(),
           end = d->contacts->contacts.end();
            it != end; ++it) {
-        if (id == it->second->frame) {  // TODO(cmastalli): use model->get_id()
-                                        // and avoid to pass id in constructor
-          contact = it->second.get();
-          break;
+        if (it->second->nf == 1) {
+          if (id == // TODO(foster): not sure this checking if nf == 1 logic is correct
+              it->second->force_datas[0].frame) {  // TODO(cmastalli): use model->get_id()
+                                    // and avoid to pass id in constructor
+            contact = it->second.get();
+            break;
+          }
         }
       }
     }

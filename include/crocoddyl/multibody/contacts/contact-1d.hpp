@@ -192,7 +192,7 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ContactData1DTpl(Model<Scalar>* const model,
                    pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
+      : Base(model, data, 1),
         v(Motion::Zero()),
         f_local(Force::Zero()),
         da0_local_dx(3, model->get_state()->get_ndx()),
@@ -205,9 +205,12 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()),
         fJf_df(3, model->get_state()->get_nv()) {
-    frame = model->get_id();
-    jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
-    fXj = jMf.inverse().toActionMatrix();
+    // There is only one element in the force_datas vector
+    ForceDataAbstract& fdata = force_datas[0];
+    fdata.frame = model->get_id();
+    fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
+    fdata.fXj = fdata.jMf.inverse().toActionMatrix();
+
     a0_local.setZero();
     dp.setZero();
     dp_local.setZero();
@@ -226,20 +229,14 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
     fXjdv_dq.setZero();
     fXjda_dq.setZero();
     fXjda_dv.setZero();
-    oRf.setZero();
     fJf_df.setZero();
   }
 
   using Base::a0;
   using Base::da0_dx;
-  using Base::df_du;
-  using Base::df_dx;
-  using Base::f;
-  using Base::frame;
-  using Base::fXj;
   using Base::Jc;
-  using Base::jMf;
   using Base::pinocchio;
+  using Base::force_datas;
 
   Motion v;
   Vector3s a0_local;
@@ -261,7 +258,6 @@ struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs fXjdv_dq;
   Matrix6xs fXjda_dq;
   Matrix6xs fXjda_dv;
-  Matrix2s oRf;
   Matrix3xs fJf_df;
 };
 

@@ -43,7 +43,7 @@ void ResidualModelContactCoPPositionTpl<Scalar>::calc(
   Data* d = static_cast<Data*>(data.get());
 
   // Compute the residual residual r =  A * f
-  data->r.noalias() = cref_.get_A() * d->contact->f.toVector();
+  data->r.noalias() = cref_.get_A() * d->contact->force_datas[0].f.toVector();
 }
 
 template <typename Scalar>

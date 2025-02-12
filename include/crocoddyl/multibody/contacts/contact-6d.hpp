@@ -178,7 +178,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ContactData6DTpl(Model<Scalar>* const model,
                    pinocchio::DataTpl<Scalar>* const data)
-      : Base(model, data),
+      : Base(model, data, 1),
         rMf(SE3::Identity()),
         lwaMl(SE3::Identity()),
         v(Motion::Zero()),
@@ -191,9 +191,12 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
         a_partial_dv(6, model->get_state()->get_nv()),
         a_partial_da(6, model->get_state()->get_nv()),
         fJf_df(6, model->get_state()->get_nv()) {
-    frame = model->get_id();
-    jMf = model->get_state()->get_pinocchio()->frames[frame].placement;
-    fXj = jMf.inverse().toActionMatrix();
+    // There is only one element in the force_datas vector
+    ForceDataAbstract& fdata = force_datas[0];
+    fdata.frame = model->get_id();
+    fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
+    fdata.fXj = fdata.jMf.inverse().toActionMatrix();
+
     da0_local_dx.setZero();
     fJf.setZero();
     v_partial_dq.setZero();
@@ -212,14 +215,9 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
 
   using Base::a0;
   using Base::da0_dx;
-  using Base::df_du;
-  using Base::df_dx;
-  using Base::f;
-  using Base::frame;
-  using Base::fXj;
   using Base::Jc;
-  using Base::jMf;
   using Base::pinocchio;
+  using Base::force_datas;
 
   SE3 rMf;
   SE3 lwaMl;
@@ -227,7 +225,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   Motion a0_local;
   Force f_local;
   Matrix6xs da0_local_dx;
-  MatrixXs fJf;
+  Matrix6xs fJf;
   Matrix6xs v_partial_dq;
   Matrix6xs a_partial_dq;
   Matrix6xs a_partial_dv;

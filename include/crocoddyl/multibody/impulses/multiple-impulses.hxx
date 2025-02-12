@@ -184,12 +184,13 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(
       m_i->impulse->updateForce(d_i, force_i);
 #if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
       const pinocchio::JointIndex joint =
-          state_->get_pinocchio()->frames[d_i->frame].parentJoint;
+          state_->get_pinocchio()->frames[d_i->force_datas[0].frame].parentJoint; // TODO(jfoster): clean up force_data indexing and merge logic with 6D loop above
 #else
       const pinocchio::JointIndex joint =
-          state_->get_pinocchio()->frames[d_i->frame].parent;
+          state_->get_pinocchio()->frames[d_i->force_datas[0].frame].parent; // TODO(jfoster): clean up force_data indexing and merge logic with 6D loop above
+
 #endif
-      data->fext[joint] = d_i->fext;
+      data->fext[joint] = d_i->force_datas[0].fext;  // TODO(jfoster): clean up force_data indexing and merge logic with 6D loop above
       nc += nc_i;
     } else {
       m_i->impulse->setZeroForce(d_i);

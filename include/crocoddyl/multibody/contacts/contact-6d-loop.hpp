@@ -231,7 +231,7 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ContactData6DLoopTpl(Model<Scalar> *const model,
                        pinocchio::DataTpl<Scalar> *const data)
-      : Base(model, data),
+      : Base(model, data, 2),
         v1_partial_dq(6, model->get_state()->get_nv()),
         f1_v1_partial_dq(6, model->get_state()->get_nv()),
         a1_partial_dq(6, model->get_state()->get_nv()),
@@ -299,26 +299,39 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
 
   using Base::a0;
   using Base::da0_dx;
-  using Base::df_du;
-  using Base::df_dx;
-  using Base::dtau_dq;
-  using Base::f;
-  using Base::Jc;
-  using Base::pinocchio;
+  using Base::force_datas;
 
+  // Joint 1 quantities
   Matrix6xs v1_partial_dq;
-  Matrix6xs f1_v1_partial_dq;
   Matrix6xs a1_partial_dq;
   Matrix6xs a1_partial_dv;
+  Matrix6xs f1_v1_partial_dq;
+  SE3 oMf1;   // Placement of the first contact frame in the world frame
+  Matrix6xs f1Jf1;
+  Matrix6xs j1Jj1;
+  SE3ActionMatrix f1Xj1;
+  Motion f1vf1;
+  Motion f1af1;
+  Force joint1_f;
+
+  // Joint 2 quantities
   Matrix6xs v2_partial_dq;
-  Matrix6xs f2_v2_partial_dq;
-  Matrix6xs f1_v2_partial_dq;
   Matrix6xs a2_partial_dq;
+  Matrix6xs a2_partial_dv;
+  Matrix6xs f2_v2_partial_dq;
   Matrix6xs f2_a2_partial_dq;
   Matrix6xs f2_a2_partial_dv;
-  Matrix6xs a2_partial_dv;
-  Matrix6xs __partial_da;
+  SE3 oMf2;   // Placement of the second contact frame in the world frame
+  Matrix6xs j2Jj2;
+  Matrix6xs f2Jf2;
+  SE3ActionMatrix f2Xj2;
+  Motion f2vf2;
+  Motion f2af2;
+  Force joint2_f;
 
+
+  Matrix6xs f1_v2_partial_dq;
+  Matrix6xs __partial_da;
   Matrix6xs da0_dq_t1;
   Matrix6xs da0_dq_t2;
   Matrix6xs da0_dq_t2_tmp;
@@ -329,31 +342,16 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   Matrix6xs dvel_dq;
   MatrixXs dtau_dq_tmp;
   // Placement related data
-  SE3 oMf1;   // Placement of the first contact frame in the world frame
-  SE3 oMf2;   // Placement of the second contact frame in the world frame
   SE3 f1Mf2;  // Relative placement of the contact frames in the first contact
               // frame
-  SE3ActionMatrix f1Xj1;
-  SE3ActionMatrix f2Xj2;
   SE3ActionMatrix f1Xf2;
   // Jacobian related data
-  Matrix6xs f1Jf1;
-  Matrix6xs f2Jf2;
   Matrix6xs f1Jf2;
-  Matrix6xs j1Jj1;
-  Matrix6xs j2Jj2;
   Matrix6xs j2Jj1;
   // Velocity related data
-  Motion f1vf1;
-  Motion f2vf2;
   Motion f1vf2;
   // Acceleration related data
-  Motion f1af1;
-  Motion f2af2;
   Motion f1af2;
-  // Force related data
-  Force joint1_f;
-  Force joint2_f;
 };
 
 }  // namespace crocoddyl
