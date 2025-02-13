@@ -53,7 +53,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(std::make_shared<ResidualModelAbstract>(state, ng + nh, nu)),
+      residual_(nullptr),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),
@@ -72,7 +72,7 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(std::make_shared<ResidualModelAbstract>(state, ng + nh)),
+      residual_(nullptr),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),

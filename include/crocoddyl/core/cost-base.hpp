@@ -300,7 +300,8 @@ struct CostDataAbstractTpl {
                       DataCollectorAbstract* const data)
       : shared(data),
         activation(model->get_activation()->createData()),
-        residual(model->get_residual()->createData(data)),
+        residual(model->get_residual() ? model->get_residual()->createData(data)
+                                       : nullptr),
         cost(Scalar(0.)),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
