@@ -142,26 +142,10 @@ class ContactModel6DLoopTpl : public ContactModelAbstractTpl<_Scalar> {
   const Vector2s &get_gains() const;
 
   /**
-   * @brief Set the first contact frame parent joint
-   */
-  void set_joint1_id(const int joint1_id);
-
-  /**
    * @brief Set the first contact frame placement with respect to the parent
    * joint
    */
-  void set_joint1_placement(const SE3 &joint1_placement);
-
-  /**
-   * @brief Set the second contact frame parent joint
-   */
-  void set_joint2_id(const int joint2_id);
-
-  /**
-   * @brief Set the second contact frame placement with respect to the parent
-   * joint
-   */
-  void set_joint2_placement(const SE3 &joint2_placement);
+  void set_placement(const int force_index, const SE3& placement);
 
   /**
    * @brief Set the Baumgarte stabilization gains

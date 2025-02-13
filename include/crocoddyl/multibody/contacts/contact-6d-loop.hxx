@@ -128,9 +128,9 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     ForceDataAbstractTpl<Scalar> &fdata_i = d->force_datas[i];
 
     pinocchio::getJointAccelerationDerivatives(
-        *state_->get_pinocchio().get(), *d->pinocchio, fdata_i.frame, pinocchio::LOCAL,
-        fdata_i.v_partial_dq, fdata_i.a_partial_dq, fdata_i.a_partial_dv,
-        fdata_i.a_partial_da);
+        *state_->get_pinocchio().get(), *d->pinocchio, fdata_i.frame,
+        pinocchio::LOCAL, fdata_i.v_partial_dq, fdata_i.a_partial_dq,
+        fdata_i.a_partial_dv, fdata_i.a_partial_da);
   }
 
   d->da0_dq_t1.noalias() =
@@ -235,7 +235,9 @@ ContactModel6DLoopTpl<Scalar>::createData(
 
 template <typename Scalar>
 void ContactModel6DLoopTpl<Scalar>::print(std::ostream &os) const {
-  os << "ContactModel6D {frame 1 = " << state_->get_pinocchio()->frames[id_[0]].name << ", frame 2 = " << state_->get_pinocchio()->frames[id_[1]].name
+  os << "ContactModel6D {frame 1 = "
+     << state_->get_pinocchio()->frames[id_[0]].name
+     << ", frame 2 = " << state_->get_pinocchio()->frames[id_[1]].name
      << ", type = " << type_ << ", gains = " << gains_.transpose() << "}";
 }
 
@@ -255,6 +257,13 @@ template <typename Scalar>
 void ContactModel6DLoopTpl<Scalar>::set_gains(
     const typename MathBaseTpl<Scalar>::Vector2s &gains) {
   gains_ = gains;
+}
+
+template <typename Scalar>
+void ContactModel6DLoopTpl<Scalar>::set_placement(
+    const int force_index,
+    const typename pinocchio::SE3Tpl<Scalar> &placement) {
+  placements_[force_index] = placement;
 }
 
 }  // namespace crocoddyl
