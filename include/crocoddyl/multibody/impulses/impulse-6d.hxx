@@ -34,15 +34,15 @@ void ImpulseModel6DTpl<Scalar>::calc(
   pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(),
                                           *d->pinocchio, id_);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              id_, pinocchio::LOCAL, d->fJf);
+                              id_, pinocchio::LOCAL, fdata.fJf);
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->Jc = d->fJf;
+      data->Jc = fdata.fJf;
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       d->lwaMl.rotation(d->pinocchio->oMf[id_].rotation());
-      data->Jc.noalias() = d->lwaMl.toActionMatrix() * d->fJf;
+      data->Jc.noalias() = d->lwaMl.toActionMatrix() * fdata.fJf;
       break;
   }
 }
@@ -62,8 +62,8 @@ void ImpulseModel6DTpl<Scalar>::calcDiff(
 #endif
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
-                                         d->v_partial_dq, d->v_partial_dv);
-  d->dv0_local_dq.noalias() = fdata.fXj * d->v_partial_dq;
+                                         fdata.v_partial_dq, fdata.v_partial_dv);
+  d->dv0_local_dq.noalias() = fdata.fXj * fdata.v_partial_dq;
 
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
@@ -80,9 +80,9 @@ void ImpulseModel6DTpl<Scalar>::calcDiff(
       d->vw_world_skew.noalias() = d->vw_skew * oRf;
       data->dv0_dq.noalias() = d->lwaMl.toActionMatrix() * d->dv0_local_dq;
       d->dv0_dq.template topRows<3>().noalias() -=
-          d->vv_world_skew * d->fJf.template bottomRows<3>();
+          d->vv_world_skew * fdata.fJf.template bottomRows<3>();
       d->dv0_dq.template bottomRows<3>().noalias() -=
-          d->vw_world_skew * d->fJf.template bottomRows<3>();
+          d->vw_world_skew * fdata.fJf.template bottomRows<3>();
       break;
   }
 }
@@ -109,10 +109,10 @@ void ImpulseModel6DTpl<Scalar>::updateForce(
       pinocchio::skew(d->f_local.linear(), d->fv_skew);
       pinocchio::skew(d->f_local.angular(), d->fw_skew);
       d->fJf_df.template topRows<3>().noalias() =
-          d->fv_skew * d->fJf.template bottomRows<3>();
+          d->fv_skew * fdata.fJf.template bottomRows<3>();
       d->fJf_df.template bottomRows<3>().noalias() =
-          d->fw_skew * d->fJf.template bottomRows<3>();
-      d->dtau_dq.noalias() = -d->fJf.transpose() * d->fJf_df;
+          d->fw_skew * fdata.fJf.template bottomRows<3>();
+      d->dtau_dq.noalias() = -fdata.fJf.transpose() * d->fJf_df;
       break;
   }
 }

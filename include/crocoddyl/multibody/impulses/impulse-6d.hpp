@@ -114,9 +114,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
         v0(Motion::Zero()),
         f_local(Force::Zero()),
         dv0_local_dq(6, model->get_state()->get_nv()),
-        fJf(6, model->get_state()->get_nv()),
-        v_partial_dq(6, model->get_state()->get_nv()),
-        v_partial_dv(6, model->get_state()->get_nv()),
         fJf_df(6, model->get_state()->get_nv()) {
     // There is only one element in the force_datas vector
     ForceDataAbstract& fdata = force_datas[0];
@@ -124,9 +121,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
     fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
     fdata.fXj = fdata.jMf.inverse().toActionMatrix();
 
-    fJf.setZero();
-    v_partial_dq.setZero();
-    v_partial_dv.setZero();
     vv_skew.setZero();
     vw_skew.setZero();
     vv_world_skew.setZero();
@@ -146,9 +140,6 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   Motion v0;
   Force f_local;
   Matrix6xs dv0_local_dq;
-  Matrix6xs fJf;
-  Matrix6xs v_partial_dq;
-  Matrix6xs v_partial_dv;
   Matrix3s vv_skew;
   Matrix3s vw_skew;
   Matrix3s vv_world_skew;

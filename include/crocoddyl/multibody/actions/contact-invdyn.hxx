@@ -106,7 +106,8 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
          ++it_m) {
       const boost::shared_ptr<ContactItem>& contact = it_m->second;
       const std::string name = contact->name;
-      const pinocchio::FrameIndex id = contact->contact->get_id();
+      // TODO(jfoster): should this be generalised to account for loops? How would that work? Just indexing the first force for now
+      const pinocchio::FrameIndex id = contact->contact->get_id(0);
       const std::size_t nc_i = contact->contact->get_nc();
       const bool active = contact->active;
       constraints_->addConstraint(

@@ -20,15 +20,9 @@ template <typename Scalar>
 ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     boost::shared_ptr<StateMultibody> state, const int joint1_id,
     const SE3 &joint1_placement, const int joint2_id,
-    const SE3 &joint2_placement,
-    const pinocchio::ReferenceFrame type, const std::size_t nu,
-    const Vector2s &gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6, nu),
-      joint1_id_(joint1_id),
-      joint2_id_(joint2_id),
-      joint1_placement_(joint1_placement),
-      joint2_placement_(joint2_placement),
-      gains_(gains) {
+    const SE3 &joint2_placement, const pinocchio::ReferenceFrame type,
+    const std::size_t nu, const Vector2s &gains)
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6, nu), gains_(gains) {
   if (type != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
                  "for 6D loop contacts"
@@ -39,20 +33,21 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
                  "you should use crocoddyl::ContactModel6D instead"
               << std::endl;
   }
+
+  id_[0] = joint1_id;
+  id_[1] = joint2_id;
+  placements_[0] = joint1_placement;
+  placements_[1] = joint2_placement;
+  type_ = type;
 }
 
 template <typename Scalar>
 ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
     boost::shared_ptr<StateMultibody> state, const int joint1_id,
     const SE3 &joint1_placement, const int joint2_id,
-    const SE3 &joint2_placement,
-    const pinocchio::ReferenceFrame type, const Vector2s &gains)
-    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6),
-      joint1_id_(joint1_id),
-      joint2_id_(joint2_id),
-      joint1_placement_(joint1_placement),
-      joint2_placement_(joint2_placement),
-      gains_(gains) {
+    const SE3 &joint2_placement, const pinocchio::ReferenceFrame type,
+    const Vector2s &gains)
+    : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, 6), gains_(gains) {
   if (type != pinocchio::ReferenceFrame::LOCAL) {
     std::cerr << "Warning: Only reference frame pinocchio::LOCAL is supported "
                  "for 6D loop contacts"
@@ -63,6 +58,12 @@ ContactModel6DLoopTpl<Scalar>::ContactModel6DLoopTpl(
                  "you should use crocoddyl::ContactModel6D instead"
               << std::endl;
   }
+
+  id_[0].frame = joint1_id;
+  id_[1].frame = joint2_id;
+  placements_[0].jMf = joint1_placement;
+  placements_[1].jMf = joint2_placement;
+  type_ = type;
 }
 
 template <typename Scalar>
@@ -73,37 +74,38 @@ void ContactModel6DLoopTpl<Scalar>::calc(
     const boost::shared_ptr<ContactDataAbstract> &data,
     const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
-  pinocchio::getJointJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              joint1_id_, pinocchio::LOCAL, d->j1Jj1);
-  pinocchio::getJointJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              joint2_id_, pinocchio::LOCAL, d->j2Jj2);
-  d->f1Jf1.noalias() = d->f1Xj1 * d->j1Jj1;
-  d->f2Jf2.noalias() = d->f2Xj2 * d->j2Jj2;
+  ForceDataAbstractTpl<Scalar> &fdata_1 = d->force_datas[0];
+  ForceDataAbstractTpl<Scalar> &fdata_2 = d->force_datas[1];
 
-  d->oMf1 = d->pinocchio->oMi[joint1_id_].act(joint1_placement_);
-  d->oMf2 = d->pinocchio->oMi[joint2_id_].act(joint2_placement_);
-  d->f1Mf2 = d->oMf1.actInv(d->oMf2);
+  for (int i = 0; i < nf_; ++i) {
+    ForceDataAbstractTpl<Scalar> &fdata_i = d->force_datas[i];
+    pinocchio::getJointJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
+                                fdata_i.frame, pinocchio::LOCAL, fdata_i.jJj);
+    fdata_i.fJf.noalias() = fdata_i.fXj * fdata_i.jJj;
+    fdata_i.oMf = d->pinocchio->oMi[id_[i]].act(fdata_i.jMf);
+  }
+
+  d->f1Mf2 = fdata_1.oMf.actInv(fdata_2.oMf);
   d->f1Xf2.noalias() = d->f1Mf2.toActionMatrix();
+  d->Jc.noalias() = fdata_1.fJf - d->f1Xf2 * fdata_2.fJf;
 
-  d->Jc.noalias() = d->f1Jf1 - d->f1Xf2 * d->f2Jf2;
   // Compute the acceleration drift
-  if (joint1_id_ > 0) {
-    d->f1vf1 = joint1_placement_.actInv(d->pinocchio->v[joint1_id_]);
-    d->f1af1 = joint1_placement_.actInv(d->pinocchio->a[joint1_id_]);
+  for (int i = 0; i < nf_; ++i) {
+    ForceDataAbstractTpl<Scalar> &fdata_i = d->force_datas[i];
+    fdata_i.fvf = fdata_i.jMf.actInv(d->pinocchio->v[id_[i]]);
+    fdata_i.faf = fdata_i.jMf.actInv(d->pinocchio->a[id_[i]]);
   }
-  if (joint2_id_ > 0) {
-    d->f2vf2 = joint2_placement_.actInv(d->pinocchio->v[joint2_id_]);
-    d->f2af2 = joint2_placement_.actInv(d->pinocchio->a[joint2_id_]);
-    d->f1vf2 = d->f1Mf2.act(d->f2vf2);
-    d->f1af2 = d->f1Mf2.act(d->f2af2);
-  }
-  d->a0.noalias() = (d->f1af1 - d->f1af2 + d->f1vf1.cross(d->f1vf2)).toVector();
+  d->f1vf2 = d->f1Mf2.act(fdata_2.fvf);
+  d->f1af2 = d->f1Mf2.act(fdata_2.faf);
+
+  d->a0.noalias() =
+      (fdata_1.faf - d->f1af2 + fdata_1.fvf.cross(d->f1vf2)).toVector();
 
   if (std::abs<Scalar>(gains_[0]) > std::numeric_limits<Scalar>::epsilon()) {
     d->a0.noalias() -= gains_[0] * pinocchio::log6(d->f1Mf2).toVector();
   }
   if (std::abs<Scalar>(gains_[1]) > std::numeric_limits<Scalar>::epsilon()) {
-    d->a0.noalias() += gains_[1] * (d->f1vf1 - d->f1vf2).toVector();
+    d->a0.noalias() += gains_[1] * (fdata_1.fvf - d->f1vf2).toVector();
   }
 }
 
@@ -113,64 +115,65 @@ void ContactModel6DLoopTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs> &) {
   Data *d = static_cast<Data *>(data.get());
   const std::size_t nv = state_->get_nv();
-  if (joint1_id_ > 0) {
-    d->f1af1 = joint1_placement_.actInv(d->pinocchio->a[joint1_id_]);
-  }
-  if (joint2_id_ > 0) {
-    d->f2af2 = joint2_placement_.actInv(d->pinocchio->a[joint2_id_]);
-    d->f1af2 = d->f1Mf2.act(d->f2af2);
-  }
+  ForceDataAbstractTpl<Scalar> &fdata_1 = d->force_datas[0];
+  ForceDataAbstractTpl<Scalar> &fdata_2 = d->force_datas[1];
 
-  pinocchio::getJointAccelerationDerivatives(
-      *state_->get_pinocchio().get(), *d->pinocchio, joint1_id_,
-      pinocchio::LOCAL, d->v1_partial_dq, d->a1_partial_dq, d->a1_partial_dv,
-      d->__partial_da);
-  pinocchio::getJointAccelerationDerivatives(
-      *state_->get_pinocchio().get(), *d->pinocchio, joint2_id_,
-      pinocchio::LOCAL, d->v2_partial_dq, d->a2_partial_dq, d->a2_partial_dv,
-      d->__partial_da);
+  for (int i = 0; i < nf_; ++i) {
+    ForceDataAbstractTpl<Scalar> &fdata_i = d->force_datas[i];
+    fdata_i.faf = fdata_i.jMf.actInv(d->pinocchio->a[id_[i]]);
+  }
+  d->f1af2 = d->f1Mf2.act(d->force_datas[1].faf);
+
+  for (int i = 0; i < nf_; ++i) {
+    ForceDataAbstractTpl<Scalar> &fdata_i = d->force_datas[i];
+
+    pinocchio::getJointAccelerationDerivatives(
+        *state_->get_pinocchio().get(), *d->pinocchio, fdata_i.frame, pinocchio::LOCAL,
+        fdata_i.v_partial_dq, fdata_i.a_partial_dq, fdata_i.a_partial_dv,
+        fdata_i.a_partial_da);
+  }
 
   d->da0_dq_t1.noalias() =
-      joint1_placement_.toActionMatrixInverse() * d->a1_partial_dq;
+      fdata_1.jMf.toActionMatrixInverse() * fdata_1.a_partial_dq;
 
   d->da0_dq_t2.noalias() = d->f1af2.toActionMatrix() * d->Jc;
-  d->f2_a2_partial_dq.noalias() =
-      joint2_placement_.toActionMatrixInverse() * d->a2_partial_dq;
-  d->da0_dq_t2.noalias() += d->f1Xf2 * d->f2_a2_partial_dq;
+  fdata_2.f_a_partial_dq.noalias() =
+      fdata_2.jMf.toActionMatrixInverse() * fdata_2.a_partial_dq;
+  d->da0_dq_t2.noalias() += d->f1Xf2 * fdata_2.f_a_partial_dq;
 
-  d->f1_v1_partial_dq.noalias() =
-      joint1_placement_.toActionMatrixInverse() * d->v1_partial_dq;
-  d->da0_dq_t3.noalias() = -d->f1vf2.toActionMatrix() * d->f1_v1_partial_dq;
+  fdata_1.f_v_partial_dq.noalias() =
+      fdata_1.jMf.toActionMatrixInverse() * fdata_1.v_partial_dq;
+  d->da0_dq_t3.noalias() = -d->f1vf2.toActionMatrix() * fdata_1.f_v_partial_dq;
   d->da0_dq_t3_tmp.noalias() = d->f1vf2.toActionMatrix() * d->Jc;
-  d->da0_dq_t3.noalias() += d->f1vf1.toActionMatrix() * d->da0_dq_t3_tmp;
+  d->da0_dq_t3.noalias() += fdata_1.fvf.toActionMatrix() * d->da0_dq_t3_tmp;
   d->da0_dq_t3_tmp.noalias() =
-      joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq;
+      fdata_2.jMf.toActionMatrixInverse() * fdata_2.v_partial_dq;
   d->da0_dq_t3.noalias() +=
-      d->f1vf1.toActionMatrix() * d->f1Xf2 * d->da0_dq_t3_tmp;
+      fdata_1.fvf.toActionMatrix() * d->f1Xf2 * d->da0_dq_t3_tmp;
   d->da0_dx.leftCols(nv).noalias() = d->da0_dq_t1 - d->da0_dq_t2 + d->da0_dq_t3;
 
-  d->f2_a2_partial_dv.noalias() =
-      joint2_placement_.toActionMatrixInverse() * d->a2_partial_dv;
-  d->f1Jf2.noalias() = d->f1Xf2 * d->f2Jf2;
+  fdata_2.f_a_partial_dv.noalias() =
+      fdata_2.jMf.toActionMatrixInverse() * fdata_2.a_partial_dv;
+  d->f1Jf2.noalias() = d->f1Xf2 * fdata_2.fJf;
   d->da0_dx.rightCols(nv).noalias() =
-      joint1_placement_.toActionMatrixInverse() * d->a1_partial_dv;
-  d->da0_dx.rightCols(nv).noalias() -= d->f1Xf2 * d->f2_a2_partial_dv;
-  d->da0_dx.rightCols(nv).noalias() -= d->f1vf2.toActionMatrix() * d->f1Jf1;
-  d->da0_dx.rightCols(nv).noalias() += d->f1vf1.toActionMatrix() * d->f1Jf2;
+      fdata_1.jMf.toActionMatrixInverse() * fdata_1.a_partial_dv;
+  d->da0_dx.rightCols(nv).noalias() -= d->f1Xf2 * fdata_2.f_a_partial_dv;
+  d->da0_dx.rightCols(nv).noalias() -= d->f1vf2.toActionMatrix() * fdata_1.fJf;
+  d->da0_dx.rightCols(nv).noalias() += fdata_1.fvf.toActionMatrix() * d->f1Jf2;
 
   if (std::abs<Scalar>(gains_[0]) > std::numeric_limits<Scalar>::epsilon()) {
     Matrix6s f1Mf2_log6;
     pinocchio::Jlog6(d->f1Mf2, f1Mf2_log6);
-    d->dpos_dq.noalias() =
-        d->oMf2.toActionMatrixInverse() * d->oMf1.toActionMatrix() * d->f1Jf1;
-    d->dpos_dq.noalias() -= d->f2Jf2;
+    d->dpos_dq.noalias() = fdata_2.oMf.toActionMatrixInverse() *
+                           fdata_1.oMf.toActionMatrix() * fdata_1.fJf;
+    d->dpos_dq.noalias() -= fdata_2.fJf;
     d->da0_dx.leftCols(nv).noalias() += gains_[0] * f1Mf2_log6 * d->dpos_dq;
   }
   if (std::abs<Scalar>(gains_[1]) > std::numeric_limits<Scalar>::epsilon()) {
-    d->f2_v2_partial_dq.noalias() =
-        joint2_placement_.toActionMatrixInverse() * d->v2_partial_dq;
-    d->f1_v2_partial_dq.noalias() = d->f1Xf2 * d->f2_v2_partial_dq;
-    d->dvel_dq.noalias() = d->f1_v1_partial_dq - d->f1_v2_partial_dq;
+    fdata_2.f_v_partial_dq.noalias() =
+        fdata_2.jMf.toActionMatrixInverse() * fdata_2.v_partial_dq;
+    d->f1_v2_partial_dq.noalias() = d->f1Xf2 * fdata_2.f_v_partial_dq;
+    d->dvel_dq.noalias() = fdata_1.f_v_partial_dq - d->f1_v2_partial_dq;
     d->dvel_dq.noalias() -= d->f1vf2.toActionMatrix() * d->Jc;
     d->da0_dx.leftCols(nv).noalias() += gains_[1] * d->dvel_dq;
     d->da0_dx.rightCols(nv).noalias() += gains_[1] * d->Jc;
@@ -185,25 +188,25 @@ void ContactModel6DLoopTpl<Scalar>::updateForce(
                  << force.size() << ")");
   }
   Data *d = static_cast<Data *>(data.get());
-  // TODO(jfoster): remove all of this indexing on the first elelemt of force_datas
-  d->force_datas[0].f = pinocchio::ForceTpl<Scalar>(-force);
-  d->force_datas[0].fext = joint1_placement_.act(d->force_datas[0].f);
-  d->joint1_f = -joint1_placement_.act(d->force_datas[0].f);
-  d->joint2_f = (joint2_placement_ * d->f1Mf2.inverse()).act(d->force_datas[0].f);
+  ForceDataAbstractTpl<Scalar> &fdata_1 = d->force_datas[0];
+  ForceDataAbstractTpl<Scalar> &fdata_2 = d->force_datas[1];
+
+  fdata_1.f = pinocchio::ForceTpl<Scalar>(-force);
+  fdata_1.fext = fdata_1.jMf.act(fdata_1.f);
+  fdata_2.f = -fdata_1.jMf.act(fdata_1.f);
+  fdata_2.fext = (fdata_2.jMf * d->f1Mf2.inverse()).act(fdata_1.f);
 
   Matrix6s f_cross = Matrix6s::Zero(6, 6);
-  f_cross.template topRightCorner<3, 3>() =
-      pinocchio::skew(d->joint2_f.linear());
+  f_cross.template topRightCorner<3, 3>() = pinocchio::skew(fdata_2.f.linear());
   f_cross.template bottomLeftCorner<3, 3>() =
-      pinocchio::skew(d->joint2_f.linear());
+      pinocchio::skew(fdata_2.f.linear());
   f_cross.template bottomRightCorner<3, 3>() =
-      pinocchio::skew(d->joint2_f.angular());
+      pinocchio::skew(fdata_2.f.angular());
 
-  SE3 j2Mj1 =
-      joint2_placement_.act(d->f1Mf2.actInv(joint1_placement_.inverse()));
-  d->j2Jj1.noalias() = j2Mj1.toActionMatrix() * d->j1Jj1;
-  d->dtau_dq_tmp.noalias() = -f_cross * (d->j2Jj2 - d->j2Jj1);
-  d->dtau_dq.noalias() = d->j2Jj2.transpose() * d->dtau_dq_tmp;
+  SE3 j2Mj1 = fdata_2.jMf.act(d->f1Mf2.actInv(fdata_1.jMf.inverse()));
+  d->j2Jj1.noalias() = j2Mj1.toActionMatrix() * fdata_1.jJj;
+  d->dtau_dq_tmp.noalias() = -f_cross * (fdata_2.jJj - d->j2Jj1);
+  d->dtau_dq.noalias() = fdata_2.jJj.transpose() * d->dtau_dq_tmp;
 }
 
 template <typename Scalar>
@@ -230,61 +233,22 @@ ContactModel6DLoopTpl<Scalar>::createData(
                                       data);
 }
 
-// TODO(jfoster): fix this so it isn't just indexing the first id
 template <typename Scalar>
 void ContactModel6DLoopTpl<Scalar>::print(std::ostream &os) const {
-  os << "ContactModel6D {frame=" << state_->get_pinocchio()->frames[id_[0]].name
-     << ", type=" << type_[0] << "}";
-}
-
-template <typename Scalar>
-const int ContactModel6DLoopTpl<Scalar>::get_joint1_id() const {
-  return joint1_id_;
-}
-
-template <typename Scalar>
-const int ContactModel6DLoopTpl<Scalar>::get_joint2_id() const {
-  return joint2_id_;
+  os << "ContactModel6D {frame 1 = " << state_->get_pinocchio()->frames[id_[0]].name << ", frame 2 = " << state_->get_pinocchio()->frames[id_[1]].name
+     << ", type = " << type_ << ", gains = " << gains_.transpose() << "}";
 }
 
 template <typename Scalar>
 const typename pinocchio::SE3Tpl<Scalar> &
-ContactModel6DLoopTpl<Scalar>::get_joint1_placement() const {
-  return joint1_placement_;
-}
-
-template <typename Scalar>
-const typename pinocchio::SE3Tpl<Scalar> &
-ContactModel6DLoopTpl<Scalar>::get_joint2_placement() const {
-  return joint2_placement_;
+ContactModel6DLoopTpl<Scalar>::get_placement(const int force_index) const {
+  return placements_[force_index];
 }
 
 template <typename Scalar>
 const typename MathBaseTpl<Scalar>::Vector2s &
 ContactModel6DLoopTpl<Scalar>::get_gains() const {
   return gains_;
-}
-
-template <typename Scalar>
-void ContactModel6DLoopTpl<Scalar>::set_joint1_id(const int joint1_id) {
-  joint1_id_ = joint1_id;
-}
-
-template <typename Scalar>
-void ContactModel6DLoopTpl<Scalar>::set_joint2_id(const int joint2_id) {
-  joint2_id_ = joint2_id;
-}
-
-template <typename Scalar>
-void ContactModel6DLoopTpl<Scalar>::set_joint1_placement(
-    const typename pinocchio::SE3Tpl<Scalar> &joint1_placement) {
-  joint1_placement_ = joint1_placement;
-}
-
-template <typename Scalar>
-void ContactModel6DLoopTpl<Scalar>::set_joint2_placement(
-    const typename pinocchio::SE3Tpl<Scalar> &joint2_placement) {
-  joint2_placement_ = joint2_placement;
 }
 
 template <typename Scalar>

@@ -112,9 +112,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
       : Base(model, data),
         f_local(Force::Zero()),
         dv0_local_dq(3, model->get_state()->get_nv()),
-        fJf(6, model->get_state()->get_nv()),
-        v_partial_dq(6, model->get_state()->get_nv()),
-        v_partial_dv(6, model->get_state()->get_nv()),
         fJf_df(3, model->get_state()->get_nv()) {
     // There is only one element in the force_datas vector
     ForceDataAbstract& fdata = force_datas[0];
@@ -124,9 +121,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
 
     v0.setZero();
     dv0_local_dq.setZero();
-    fJf.setZero();
-    v_partial_dq.setZero();
-    v_partial_dv.setZero();
     v0_skew.setZero();
     v0_world_skew.setZero();
     f_skew.setZero();
@@ -142,9 +136,6 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   Vector3s v0;
   Force f_local;
   Matrix3xs dv0_local_dq;
-  Matrix6xs fJf;
-  Matrix6xs v_partial_dq;
-  Matrix6xs v_partial_dv;
   Matrix3s v0_skew;
   Matrix3s v0_world_skew;
   Matrix3s f_skew;

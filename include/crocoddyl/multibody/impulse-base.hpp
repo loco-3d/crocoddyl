@@ -61,6 +61,8 @@ class ImpulseModelAbstractTpl {
   DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
   std::size_t get_nu() const;
 
+  std::size_t get_nf() const;
+
   /**
    * @brief Return the reference frame id
    */
@@ -118,16 +120,14 @@ struct ImpulseDataAbstractTpl : public InteractionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ImpulseDataAbstractTpl(Model<Scalar>* const model,
                          pinocchio::DataTpl<Scalar>* const data)
-      : InteractionDataAbstractTpl<Scalar>(model, data, 1),
+      : InteractionDataAbstractTpl<Scalar>(model, 1),
         pinocchio(data),
         dv0_dq(model->get_nc(), model->get_state()->get_nv()),
         dtau_dq(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        Jc(model->get_nc(), model->get_state()->get_nv()),
-        df_dx(model->get_nc(), model->get_state()->get_ndx()) {
+        Jc(model->get_nc(), model->get_state()->get_nv()) {
     dv0_dq.setZero();
     dtau_dq.setZero();
     Jc.setZero();
-    df_dx.setZero();
   }
   virtual ~ImpulseDataAbstractTpl() {}
 
@@ -135,14 +135,12 @@ struct ImpulseDataAbstractTpl : public InteractionDataAbstractTpl<_Scalar> {
 
   using InteractionDataAbstractTpl<Scalar>::nf;
   using InteractionDataAbstractTpl<Scalar>::force_datas;
+  using InteractionDataAbstractTpl<Scalar>::df_dx;
 
   MatrixXs dv0_dq;
   MatrixXs dtau_dq;
 
   MatrixXs Jc;  //!< Contact Jacobian
-
-  MatrixXs df_dx;  //!< Jacobian of the contact forces expressed in the
-                   //!< coordinate defined by type
 };
 
 }  // namespace crocoddyl

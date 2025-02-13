@@ -35,16 +35,16 @@ void ImpulseModel3DTpl<Scalar>::calc(
   pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(),
                                           *d->pinocchio, id_);
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio,
-                              id_, pinocchio::LOCAL, d->fJf);
+                              id_, pinocchio::LOCAL, fdata.fJf);
 
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      data->Jc = d->fJf.template topRows<3>();
+      data->Jc = fdata.fJf.template topRows<3>();
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       data->Jc.noalias() =
-          d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
+          d->pinocchio->oMf[id_].rotation() * fdata.fJf.template topRows<3>();
       break;
   }
 }
@@ -64,8 +64,8 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(
 #endif
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
-                                         d->v_partial_dq, d->v_partial_dv);
-  d->dv0_local_dq.noalias() = fdata.fXj.template topRows<3>() * d->v_partial_dq;
+                                         fdata.v_partial_dq, fdata.v_partial_dv);
+  d->dv0_local_dq.noalias() = fdata.fXj.template topRows<3>() * fdata.v_partial_dq;
 
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
@@ -82,7 +82,7 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(
       d->v0_world_skew.noalias() = d->v0_skew * oRf;
       data->dv0_dq.noalias() = oRf * d->dv0_local_dq;
       data->dv0_dq.noalias() -=
-          d->v0_world_skew * d->fJf.template bottomRows<3>();
+          d->v0_world_skew * fdata.fJf.template bottomRows<3>();
       break;
   }
 }
@@ -110,9 +110,9 @@ void ImpulseModel3DTpl<Scalar>::updateForce(
       d->f_local.angular().setZero();
       fdata.fext = fdata.jMf.act(d->f_local);
       pinocchio::skew(d->f_local.linear(), d->f_skew);
-      d->fJf_df.noalias() = d->f_skew * d->fJf.template bottomRows<3>();
+      d->fJf_df.noalias() = d->f_skew * fdata.fJf.template bottomRows<3>();
       data->dtau_dq.noalias() =
-          -d->fJf.template topRows<3>().transpose() * d->fJf_df;
+          -fdata.fJf.template topRows<3>().transpose() * d->fJf_df;
       break;
   }
 }

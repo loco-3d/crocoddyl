@@ -28,7 +28,7 @@ void test_construct_data(ContactLoopModelTypes::Type contact_type,
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Identity(), 2,
                      pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
 
   // Run the print function
@@ -188,7 +188,7 @@ void test_partial_derivatives_against_numdiff(
   // create the model
   ContactLoopModelFactory factory;
   boost::shared_ptr<crocoddyl::ContactModelAbstract> model =
-      factory.create(contact_type, model_type, 0, pinocchio::SE3::Identity(), 0,
+      factory.create(contact_type, model_type, 1, pinocchio::SE3::Identity(), 2,
                      pinocchio::SE3::Identity(), Eigen::Vector2d::Random());
 
   // create the corresponding data object

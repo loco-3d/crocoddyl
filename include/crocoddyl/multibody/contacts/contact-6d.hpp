@@ -185,24 +185,14 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
         a0_local(Motion::Zero()),
         f_local(Force::Zero()),
         da0_local_dx(6, model->get_state()->get_ndx()),
-        fJf(6, model->get_state()->get_nv()),
-        v_partial_dq(6, model->get_state()->get_nv()),
-        a_partial_dq(6, model->get_state()->get_nv()),
-        a_partial_dv(6, model->get_state()->get_nv()),
-        a_partial_da(6, model->get_state()->get_nv()),
         fJf_df(6, model->get_state()->get_nv()) {
     // There is only one element in the force_datas vector
     ForceDataAbstract& fdata = force_datas[0];
-    fdata.frame = model->get_id();
+    fdata.frame = model->get_id(0);
     fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
     fdata.fXj = fdata.jMf.inverse().toActionMatrix();
 
     da0_local_dx.setZero();
-    fJf.setZero();
-    v_partial_dq.setZero();
-    a_partial_dq.setZero();
-    a_partial_dv.setZero();
-    a_partial_da.setZero();
     av_world_skew.setZero();
     aw_world_skew.setZero();
     av_skew.setZero();
@@ -225,11 +215,6 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
   Motion a0_local;
   Force f_local;
   Matrix6xs da0_local_dx;
-  Matrix6xs fJf;
-  Matrix6xs v_partial_dq;
-  Matrix6xs a_partial_dq;
-  Matrix6xs a_partial_dv;
-  Matrix6xs a_partial_da;
   Matrix3s av_world_skew;
   Matrix3s aw_world_skew;
   Matrix3s av_skew;

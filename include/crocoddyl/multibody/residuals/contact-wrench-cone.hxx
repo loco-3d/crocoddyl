@@ -57,7 +57,7 @@ void ResidualModelContactWrenchConeTpl<Scalar>::calc(
 
   // Compute the residual of the wrench cone. Note that we need to transform the
   // wrench to the contact frame
-  data->r.noalias() = fref_.get_A() * d->contact->force_datas[0].f.toVector(); // TODO(jfoster): We know there's only 1 force data
+  data->r.noalias() = fref_.get_A() * d->contact->force_datas[0].f.toVector();
 }
 
 template <typename Scalar>

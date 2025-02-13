@@ -283,7 +283,7 @@ struct ResidualDataContactCoPPositionTpl
                d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
         if (it->second->nf == 1) {
-          if (it->second->force_datas[0].frame == id) { // TODO(jfoster): outer if enforces 1 force data
+          if (it->second->force_datas[0].frame == id) {
             ContactData3DTpl<Scalar>* d3d =
                 dynamic_cast<ContactData3DTpl<Scalar>*>(it->second.get());
             if (d3d != NULL) {
@@ -307,12 +307,18 @@ struct ResidualDataContactCoPPositionTpl
             break;
           }
         }
+        else {
+          throw_pretty(
+              "Domain error: the contact cop position residual isn't defined "
+              "for contact models with more than one force (nf > 1)");
+        }
       }
     } else {
       for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
            it != d2->impulses->impulses.end(); ++it) {
-            if (it->second->force_datas[0].frame == id) { // TODO(jfoster): outer if enforces 1 force data
+        if (it->second->nf == 1) {
+          if (it->second->force_datas[0].frame == id) {
             ImpulseData3DTpl<Scalar>* d3d =
                 dynamic_cast<ImpulseData3DTpl<Scalar>*>(it->second.get());
             if (d3d != NULL) {
@@ -335,6 +341,12 @@ struct ResidualDataContactCoPPositionTpl
                 frame_name);
             break;
           }
+        }
+        else {
+          throw_pretty(
+              "Domain error: the contact cop position residual isn't defined "
+              "for impulse models with more than one force (nf > 1)");
+        }
       }
     }
     if (!found_contact) {

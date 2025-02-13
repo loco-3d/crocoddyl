@@ -140,12 +140,12 @@ class ContactModelAbstractTpl {
   /**
    * @brief Return the reference frame id
    */
-  pinocchio::FrameIndex get_id() const;
+  pinocchio::FrameIndex get_id(const int force_index) const;
 
   /**
    * @brief Modify the reference frame id
    */
-  void set_id(const pinocchio::FrameIndex id);
+  void set_id(const int force_index, const pinocchio::FrameIndex id);
 
   /**
    * @brief Modify the type of contact
@@ -178,7 +178,9 @@ class ContactModelAbstractTpl {
   std::size_t nf_;
   std::vector<pinocchio::FrameIndex>
       id_;  //!< Reference frame id of the contact
-  std::vector<pinocchio::ReferenceFrame> type_;  //!< Type of contact
+  std::vector<pinocchio::SE3> placements_;  //!< Placement of contact relative to parent
+  // TODO(jfoster): only allowing one type per contact model
+  pinocchio::ReferenceFrame type_;  //!< Type of contact
 };
 
 template <typename _Scalar>
@@ -196,7 +198,7 @@ struct ContactDataAbstractTpl : public InteractionDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   ContactDataAbstractTpl(Model<Scalar>* const model,
                          pinocchio::DataTpl<Scalar>* const data, const int nf)
-      : InteractionDataAbstractTpl<Scalar>(model, data, nf),
+      : InteractionDataAbstractTpl<Scalar>(model, nf),
         pinocchio(data),
         a0(model->get_nc()),
         da0_dx(model->get_nc(), model->get_state()->get_ndx()),

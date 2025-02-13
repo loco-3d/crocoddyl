@@ -44,9 +44,10 @@ void ImpulseModelAbstractTpl<Scalar>::updateForceDiff(
 template <typename Scalar>
 void ImpulseModelAbstractTpl<Scalar>::setZeroForce(
     const boost::shared_ptr<ImpulseDataAbstract>& data) const {
-  // TODO(jfoster): there is only ever 1 force data for impulses
-    data->force_datas[0].f.setZero();
-    data->force_datas[0].fext.setZero();
+  ForceDataAbstract fdata =
+      data->force_datas[0];  // only 1 force data for impulses
+  fdata.f.setZero();
+  fdata.fext.setZero();
 }
 
 template <typename Scalar>
@@ -87,6 +88,11 @@ std::size_t ImpulseModelAbstractTpl<Scalar>::get_ni() const {
 template <typename Scalar>
 std::size_t ImpulseModelAbstractTpl<Scalar>::get_nu() const {
   return 0;
+}
+
+template <typename Scalar>
+std::size_t ImpulseModelAbstractTpl<Scalar>::get_nf() const {
+  return 1;
 }
 
 template <typename Scalar>

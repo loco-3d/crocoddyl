@@ -149,25 +149,15 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
   ContactData2DTpl(Model<Scalar>* const model,
                    pinocchio::DataTpl<Scalar>* const data)
       : Base(model, data, 1),
-        fJf(6, model->get_state()->get_nv()),
-        v_partial_dq(6, model->get_state()->get_nv()),
-        a_partial_dq(6, model->get_state()->get_nv()),
-        a_partial_dv(6, model->get_state()->get_nv()),
-        a_partial_da(6, model->get_state()->get_nv()),
         fXjdv_dq(6, model->get_state()->get_nv()),
         fXjda_dq(6, model->get_state()->get_nv()),
         fXjda_dv(6, model->get_state()->get_nv()) {
     // There is only one element in the force_datas vector
     ForceDataAbstract& fdata = force_datas[0];
-    fdata.frame = model->get_id();
+    fdata.frame = model->get_id(0);
     fdata.jMf = model->get_state()->get_pinocchio()->frames[fdata.frame].placement;
     fdata.fXj = fdata.jMf.inverse().toActionMatrix();
 
-    fJf.setZero();
-    v_partial_dq.setZero();
-    a_partial_dq.setZero();
-    a_partial_dv.setZero();
-    a_partial_da.setZero();
     fXjdv_dq.setZero();
     fXjda_dq.setZero();
     fXjda_dv.setZero();
@@ -187,11 +177,6 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
 
   pinocchio::MotionTpl<Scalar> v;
   pinocchio::MotionTpl<Scalar> a;
-  Matrix6xs fJf;
-  Matrix6xs v_partial_dq;
-  Matrix6xs a_partial_dq;
-  Matrix6xs a_partial_dv;
-  Matrix6xs a_partial_da;
   Matrix6xs fXjdv_dq;
   Matrix6xs fXjda_dq;
   Matrix6xs fXjda_dv;
