@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +11,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
@@ -266,4 +268,5 @@ int main(int argc, char** argv) {
 
 int main(int, char**) {}
 
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL

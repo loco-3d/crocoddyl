@@ -48,7 +48,9 @@ void exposeMultibody() {
   exposeResidualImpulseCoM();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
   exposeResidualPairCollision();
+#endif
 #endif
 
   exposeContact1D();

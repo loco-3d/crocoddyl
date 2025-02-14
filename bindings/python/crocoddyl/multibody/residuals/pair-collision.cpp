@@ -9,6 +9,8 @@
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
+
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
@@ -136,5 +138,7 @@ void exposeResidualPairCollision() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 
 #endif  // PINOCCHIO_WITH_HPP_FCL

@@ -53,7 +53,9 @@ void exposeResidualFrameVelocity();
 void exposeResidualImpulseCoM();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 void exposeResidualPairCollision();
+#endif
 #endif
 
 void exposeContact1D();

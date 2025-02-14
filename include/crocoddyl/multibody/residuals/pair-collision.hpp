@@ -10,6 +10,8 @@
 #ifndef CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
 #define CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
 
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
+
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
 #include <pinocchio/multibody/geometry.hpp>
@@ -195,5 +197,13 @@ struct ResidualDataPairCollisionTpl : public ResidualDataAbstractTpl<_Scalar> {
 #include "crocoddyl/multibody/residuals/pair-collision.hxx"
 
 #endif  // PINOCCHIO_WITH_HPP_FCL
+
+#else
+
+CROCODDYL_PRAGMA_WARNING(
+    "This header is currently disabled as Pinocchio does not support casting "
+    "of GeometryData")
+
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_PAIR_COLLISION_HPP_
