@@ -69,6 +69,15 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::make_unique<derived_class<float>>(*this);                 \
   }
 
+#define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class) \
+  /* Implements casting by overriding `cloneAsFloat` */        \
+  std::unique_ptr<base_class> cloneAsDouble() const override { \
+    return std::unique_ptr<base_class>(nullptr);               \
+  }                                                            \
+  std::unique_ptr<base_class> cloneAsFloat() const override {  \
+    return std::unique_ptr<base_class>(nullptr);               \
+  }
+
 #define CROCODDYL_INNER_DERIVED_CAST(base_class, inner_class, derived_class) \
   template <typename NewScalar>                                              \
   explicit derived_class(                                                    \

@@ -16,14 +16,15 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Scalar>
+template <typename _Scalar>
 class ResidualModelAbstractTpl_wrap
-    : public ResidualModelAbstractTpl<Scalar>,
-      public bp::wrapper<ResidualModelAbstractTpl<Scalar>> {
+    : public ResidualModelAbstractTpl<_Scalar>,
+      public bp::wrapper<ResidualModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelAbstractTpl_wrap)
 
+  typedef _Scalar Scalar;
   typedef typename crocoddyl::ResidualModelAbstractTpl<Scalar> ResidualModel;
   typedef typename crocoddyl::ResidualDataAbstractTpl<Scalar> ResidualData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
@@ -115,7 +116,7 @@ class ResidualModelAbstractTpl_wrap
 
   std::shared_ptr<ResidualData> default_createData(
       DataCollectorAbstract* const data) {
-    return this->ResidualModelAbstract::createData(data);
+    return this->ResidualModel::createData(data);
   }
 
   void calcCostDiff(const std::shared_ptr<CostData>& cdata,

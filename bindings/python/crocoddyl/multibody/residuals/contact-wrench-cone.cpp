@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,111 +9,141 @@
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
+template <typename Model>
+struct ResidualModelContactWrenchConeVisitor
+    : public bp::def_visitor<ResidualModelContactWrenchConeVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::WrenchCone Cone;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Cone>(
+               bp::args("self", "state", "id", "fref"),
+               "Initialize the contact wrench cone residual model.\n\n"
+               "The default nu is obtained from state.nv. Note that this "
+               "constructor can be used for forward-dynamics cases only.\n"
+               ":param state: state of the multibody system\n"
+               ":param id: reference frame id\n"
+               ":param fref: contact wrench cone"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            "Compute the contact wrench cone residual.\n\n"
+            ":param data: residual data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the Jacobians of the contact wrench cone residual.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def(
+            "createData", &Model::createData,
+            bp::with_custodian_and_ward_postcall<0, 2>(),
+            bp::args("self", "data"),
+            "Create the contact wrench cone residual data.\n\n"
+            "Each residual model has its own data that needs to be allocated. "
+            "This function\n"
+            "returns the allocated data for the contact wrench cone residual.\n"
+            ":param data: shared data\n"
+            ":return residual data.")
+        .add_property(
+            "id", bp::make_function(&Model::get_id),
+            bp::make_function(&Model::set_id,
+                              deprecated<>("Deprecated. Do not use set_id, "
+                                           "instead create a new model")),
+            "reference frame id")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_reference, "reference contact wrench cone");
+  }
+};
+
+template <typename Data>
+struct ResidualDataContactWrenchConeVisitor
+    : public bp::def_visitor<ResidualDataContactWrenchConeVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "contact",
+        bp::make_getter(&Data::contact,
+                        bp::return_value_policy<bp::return_by_value>()),
+        bp::make_setter(&Data::contact),
+        "contact data associated with the current residual");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_CONTACT_WRENCH_CONE_PYTHON_BINDINGS(Scalar) \
+  typedef ResidualModelContactWrenchConeTpl<Scalar> Model;                   \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef typename Model::StateMultibody State;                              \
+  typedef typename Model::WrenchCone Cone;                                   \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ResidualModelContactWrenchCone",                                      \
+      bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Cone,          \
+               std::size_t, bp::optional<bool>>(                             \
+          bp::args("self", "state", "id", "fref", "nu", "fwddyn"),           \
+          "Initialize the contact wrench cone residual model.\n\n"           \
+          ":param state: state of the multibody system\n"                    \
+          ":param id: reference frame id\n"                                  \
+          ":param fref: contact wrench cone\n"                               \
+          ":param nu: dimension of control vector\n"                         \
+          ":param fwddyn: indicate if we have a forward dynamics problem "   \
+          "(True) or inverse dynamics problem (False) (default True)"))      \
+      .def(ResidualModelContactWrenchConeVisitor<Model>())                   \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_RESIDUAL_DATA_CONTACT_WRENCH_CONE_PYTHON_BINDINGS(Scalar) \
+  typedef ResidualDataContactWrenchConeTpl<Scalar> Data;                    \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                         \
+  typedef ResidualModelContactWrenchConeTpl<Scalar> Model;                  \
+  typedef Model::DataCollectorAbstract DataCollector;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                      \
+  bp::class_<Data, bp::bases<DataBase>>(                                    \
+      "ResidualDataContactWrenchCone",                                      \
+      "Data for contact wrench cone residual.\n\n",                         \
+      bp::init<Model*, DataCollector*>(                                     \
+          bp::args("self", "model", "data"),                                \
+          "Create contact wrench cone residual data.\n\n"                   \
+          ":param model: contact wrench cone residual model\n"              \
+          ":param data: shared data")[bp::with_custodian_and_ward<          \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                      \
+      .def(ResidualDataContactWrenchConeVisitor<Data>())                    \
+      .def(CopyableVisitor<Data>());
+
 void exposeResidualContactWrenchCone() {
-  bp::register_ptr_to_python<
-      std::shared_ptr<ResidualModelContactWrenchCone> >();
-
-  bp::class_<ResidualModelContactWrenchCone, bp::bases<ResidualModelAbstract> >(
-      "ResidualModelContactWrenchCone",
-      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-               WrenchCone, std::size_t, bp::optional<bool> >(
-          bp::args("self", "state", "id", "fref", "nu", "fwddyn"),
-          "Initialize the contact wrench cone residual model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id\n"
-          ":param fref: contact wrench cone\n"
-          ":param nu: dimension of control vector\n"
-          ":param fwddyn: indicate if we have a forward dynamics problem "
-          "(True) or inverse dynamics problem (False) "
-          "(default True)"))
-      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-                    WrenchCone>(
-          bp::args("self", "state", "id", "fref"),
-          "Initialize the contact wrench cone residual model.\n\n"
-          "The default nu is obtained from state.nv. Note that this "
-          "constructor can be used for forward-dynamics\n"
-          "cases only.\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id\n"
-          ":param fref: contact wrench cone"))
-      .def<void (ResidualModelContactWrenchCone::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ResidualModelContactWrenchCone::calc,
-          bp::args("self", "data", "x", "u"),
-          "Compute the contact wrench cone residual.\n\n"
-          ":param data: residual data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelContactWrenchCone::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (ResidualModelContactWrenchCone::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ResidualModelContactWrenchCone::calcDiff,
-          bp::args("self", "data", "x", "u"),
-          "Compute the Jacobians of the contact wrench cone residual.\n\n"
-          "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelContactWrenchCone::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ResidualModelAbstract::calcDiff,
-          bp::args("self", "data", "x"))
-      .def("createData", &ResidualModelContactWrenchCone::createData,
-           bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the contact wrench cone residual data.\n\n"
-           "Each residual model has its own data that needs to be allocated. "
-           "This function\n"
-           "returns the allocated data for the contact wrench cone residual.\n"
-           ":param data: shared data\n"
-           ":return residual data.")
-      .add_property(
-          "id", bp::make_function(&ResidualModelContactWrenchCone::get_id),
-          bp::make_function(
-              &ResidualModelContactWrenchCone::set_id,
-              deprecated<>(
-                  "Deprecated. Do not use set_id, instead create a new model")),
-          "reference frame id")
-      .add_property(
-          "reference",
-          bp::make_function(&ResidualModelContactWrenchCone::get_reference,
-                            bp::return_internal_reference<>()),
-          &ResidualModelContactWrenchCone::set_reference,
-          "reference contact wrench cone")
-      .def(CopyableVisitor<ResidualModelContactWrenchCone>());
-
-  bp::register_ptr_to_python<std::shared_ptr<ResidualDataContactWrenchCone> >();
-
-  bp::class_<ResidualDataContactWrenchCone, bp::bases<ResidualDataAbstract> >(
-      "ResidualDataContactWrenchCone",
-      "Data for contact wrench cone residual.\n\n",
-      bp::init<ResidualModelContactWrenchCone*, DataCollectorAbstract*>(
-          bp::args("self", "model", "data"),
-          "Create contact wrench cone residual data.\n\n"
-          ":param model: contact wrench cone residual model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<
-          1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property(
-          "contact",
-          bp::make_getter(&ResidualDataContactWrenchCone::contact,
-                          bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ResidualDataContactWrenchCone::contact),
-          "contact data associated with the current residual")
-      .def(CopyableVisitor<ResidualDataContactWrenchCone>());
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_RESIDUAL_MODEL_CONTACT_WRENCH_CONE_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_RESIDUAL_DATA_CONTACT_WRENCH_CONE_PYTHON_BINDINGS)
 }
 
 }  // namespace python

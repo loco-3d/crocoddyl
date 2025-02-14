@@ -50,6 +50,7 @@ template <typename _Scalar>
 class ResidualModelAbstractTpl : public ResidualModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_BASE_DERIVED_CAST(ResidualModelBase, ResidualModelAbstractTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;

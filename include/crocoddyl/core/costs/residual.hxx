@@ -101,10 +101,16 @@ template <typename Scalar>
 template <typename NewScalar>
 CostModelResidualTpl<NewScalar> CostModelResidualTpl<Scalar>::cast() const {
   typedef CostModelResidualTpl<NewScalar> ReturnType;
-  ReturnType ret(state_->template cast<NewScalar>(),
-                 activation_->template cast<NewScalar>(),
-                 residual_->template cast<NewScalar>());
-  return ret;
+  if (activation_) {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   activation_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>());
+    return ret;
+  } else {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>());
+    return ret;
+  }
 }
 
 template <typename Scalar>

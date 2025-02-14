@@ -10,116 +10,148 @@
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
 
+template <typename Model>
+struct ResidualModelContactForceVisitor
+    : public bp::def_visitor<ResidualModelContactForceVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::Force Force;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Force,
+                    std::size_t>(
+               bp::args("self", "state", "id", "fref", "nc"),
+               "Initialize the contact force residual model.\n\n"
+               "The default nu is obtained from state.nv. Note that this "
+               "constructor can be used for forward-dynamics cases only.\n"
+               ":param state: state of the multibody system\n"
+               ":param id: reference frame id\n"
+               ":param nc: dimension of the contact force (nc <= 6)\n"
+               ":param fref: reference spatial contact force in the contact "
+               "coordinates\n"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the contact force residual.\n\n"
+            ":param data: residual data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the Jacobians of the contact force residual.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the contact force residual data.\n\n"
+             "Each residual model has its own data that needs to be allocated. "
+             "This function returns the allocated data for the contact force "
+             "residual.\n"
+             ":param data: shared data\n"
+             ":return residual data.")
+        .add_property(
+            "id", bp::make_function(&Model::get_id),
+            bp::make_function(&Model::set_id,
+                              deprecated<>("Deprecated. Do not use set_id, "
+                                           "instead create a new model")),
+            "reference frame id")
+        .add_property("reference",
+                      bp::make_function(
+                          &Model::get_reference,
+                          bp::return_value_policy<bp::copy_const_reference>()),
+                      &Model::set_reference, "reference spatial force");
+  }
+};
+
+template <typename Data>
+struct ResidualDataContactForceVisitor
+    : public bp::def_visitor<ResidualDataContactForceVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "contact",
+        bp::make_getter(&Data::contact,
+                        bp::return_value_policy<bp::return_by_value>()),
+        bp::make_setter(&Data::contact),
+        "contact data associated with the current residual");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_CONTACT_FORCE_PYTHON_BINDINGS(Scalar)        \
+  typedef ResidualModelContactForceTpl<Scalar> Model;                         \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                         \
+  typedef typename Model::StateMultibody State;                               \
+  typedef typename Model::Force Force;                                        \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+  bp::class_<Model, bp::bases<ModelBase>>(                                    \
+      "ResidualModelContactForce",                                            \
+      "This residual function is defined as r = f-fref, where f,fref "        \
+      "describe the current and reference the spatial forces, respectively.", \
+      bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Force,          \
+               std::size_t, std::size_t, bp::optional<bool>>(                 \
+          bp::args("self", "state", "id", "fref", "nc", "nu", "fwddyn"),      \
+          "Initialize the contact force residual model.\n\n"                  \
+          ":param state: state of the multibody system\n"                     \
+          ":param id: reference frame id\n"                                   \
+          ":param fref: reference spatial contact force in the contact "      \
+          "coordinates\n"                                                     \
+          ":param nc: dimension of the contact force (nc <= 6)\n"             \
+          ":param nu: dimension of control vector\n"                          \
+          ":param fwddyn: indicate if we have a forward dynamics problem "    \
+          "(True) or inverse dynamics problem (False) (default True)"))       \
+      .def(ResidualModelContactForceVisitor<Model>())                         \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_RESIDUAL_DATA_CONTACT_FORCE_PYTHON_BINDINGS(Scalar)     \
+  typedef ResidualDataContactForceTpl<Scalar> Data;                       \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                       \
+  typedef ResidualModelContactForceTpl<Scalar> Model;                     \
+  typedef Model::DataCollectorAbstract DataCollector;                     \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                    \
+  bp::class_<Data, bp::bases<DataBase>>(                                  \
+      "ResidualDataContactForce", "Data for contact force residual.\n\n", \
+      bp::init<Model*, DataCollector*>(                                   \
+          bp::args("self", "model", "data"),                              \
+          "Create contact force residual data.\n\n"                       \
+          ":param model: contact force residual model\n"                  \
+          ":param data: shared data")[bp::with_custodian_and_ward<        \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                    \
+      .def(ResidualDataContactForceVisitor<Data>())                       \
+      .def(CopyableVisitor<Data>());
+
 void exposeResidualContactForce() {
-  bp::register_ptr_to_python<std::shared_ptr<ResidualModelContactForce> >();
-
-  bp::class_<ResidualModelContactForce, bp::bases<ResidualModelAbstract> >(
-      "ResidualModelContactForce",
-      "This residual function is defined as r = f-fref, where f,fref describe "
-      "the current and reference\n"
-      "the spatial forces, respectively.",
-      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-               pinocchio::Force, std::size_t, std::size_t, bp::optional<bool> >(
-          bp::args("self", "state", "id", "fref", "nc", "nu", "fwddyn"),
-          "Initialize the contact force residual model.\n\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id\n"
-          ":param fref: reference spatial contact force in the contact "
-          "coordinates\n"
-          ":param nc: dimension of the contact force (nc <= 6)\n"
-          ":param nu: dimension of control vector\n"
-          ":param fwddyn: indicate if we have a forward dynamics problem "
-          "(True) or inverse "
-          "dynamics problem (False) (default True)"))
-      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
-                    pinocchio::Force, std::size_t>(
-          bp::args("self", "state", "id", "fref", "nc"),
-          "Initialize the contact force residual model.\n\n"
-          "The default nu is obtained from state.nv. Note that this "
-          "constructor can be used for forward-dynamics\n"
-          "cases only.\n"
-          ":param state: state of the multibody system\n"
-          ":param id: reference frame id\n"
-          ":param nc: dimension of the contact force (nc <= 6)\n"
-          ":param fref: reference spatial contact force in the contact "
-          "coordinates\n"))
-      .def<void (ResidualModelContactForce::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ResidualModelContactForce::calc,
-          bp::args("self", "data", "x", "u"),
-          "Compute the contact force residual.\n\n"
-          ":param data: residual data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelContactForce::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (ResidualModelContactForce::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ResidualModelContactForce::calcDiff,
-          bp::args("self", "data", "x", "u"),
-          "Compute the Jacobians of the contact force residual.\n\n"
-          "It assumes that calc has been run first.\n"
-          ":param data: action data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelContactForce::*)(
-          const std::shared_ptr<ResidualDataAbstract>&,
-          const Eigen::Ref<const Eigen::VectorXd>&)>(
-          "calcDiff", &ResidualModelAbstract::calcDiff,
-          bp::args("self", "data", "x"))
-      .def("createData", &ResidualModelContactForce::createData,
-           bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the contact force residual data.\n\n"
-           "Each residual model has its own data that needs to be allocated. "
-           "This function\n"
-           "returns the allocated data for the contact force residual.\n"
-           ":param data: shared data\n"
-           ":return residual data.")
-      .add_property(
-          "id", bp::make_function(&ResidualModelContactForce::get_id),
-          bp::make_function(
-              &ResidualModelContactForce::set_id,
-              deprecated<>(
-                  "Deprecated. Do not use set_id, instead create a new model")),
-          "reference frame id")
-      .add_property("reference",
-                    bp::make_function(
-                        &ResidualModelContactForce::get_reference,
-                        bp::return_value_policy<bp::copy_const_reference>()),
-                    &ResidualModelContactForce::set_reference,
-                    "reference spatial force")
-      .def(CopyableVisitor<ResidualModelContactForce>());
-
-  bp::register_ptr_to_python<std::shared_ptr<ResidualDataContactForce> >();
-
-  bp::class_<ResidualDataContactForce, bp::bases<ResidualDataAbstract> >(
-      "ResidualDataContactForce", "Data for contact force residual.\n\n",
-      bp::init<ResidualModelContactForce*, DataCollectorAbstract*>(
-          bp::args("self", "model", "data"),
-          "Create contact force residual data.\n\n"
-          ":param model: contact force residual model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<
-          1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property(
-          "contact",
-          bp::make_getter(&ResidualDataContactForce::contact,
-                          bp::return_value_policy<bp::return_by_value>()),
-          bp::make_setter(&ResidualDataContactForce::contact),
-          "contact data associated with the current residual")
-      .def(CopyableVisitor<ResidualDataContactForce>());
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_RESIDUAL_MODEL_CONTACT_FORCE_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_RESIDUAL_DATA_CONTACT_FORCE_PYTHON_BINDINGS)
 }
 
 }  // namespace python
