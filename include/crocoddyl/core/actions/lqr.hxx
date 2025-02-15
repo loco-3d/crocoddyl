@@ -17,7 +17,7 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const MatrixXs& A,
                                              const MatrixXs& Q,
                                              const MatrixXs& R,
                                              const MatrixXs& N)
-    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
+    : Base(std::make_shared<StateVector>(A.cols()), B.cols(), 0),
       drift_free_(true),
       updated_lqr_(false) {
   const std::size_t nx = state_->get_nx();
@@ -35,7 +35,7 @@ template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q, const MatrixXs& R,
     const MatrixXs& N, const VectorXs& f, const VectorXs& q, const VectorXs& r)
-    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0),
+    : Base(std::make_shared<StateVector>(A.cols()), B.cols(), 0),
       drift_free_(false),
       updated_lqr_(false) {
   const std::size_t nx = state_->get_nx();
@@ -51,7 +51,7 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(
     const MatrixXs& A, const MatrixXs& B, const MatrixXs& Q, const MatrixXs& R,
     const MatrixXs& N, const MatrixXs& G, const MatrixXs& H, const VectorXs& f,
     const VectorXs& q, const VectorXs& r, const VectorXs& g, const VectorXs& h)
-    : Base(boost::make_shared<StateVector>(A.cols()), B.cols(), 0, G.rows(),
+    : Base(std::make_shared<StateVector>(A.cols()), B.cols(), 0, G.rows(),
            H.rows(), G.rows(), H.rows()),
       drift_free_(false),
       updated_lqr_(false) {
@@ -62,7 +62,7 @@ template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
                                              const std::size_t nu,
                                              const bool drift_free)
-    : Base(boost::make_shared<StateVector>(nx), nu, 0),
+    : Base(std::make_shared<StateVector>(nx), nu, 0),
       A_(MatrixXs::Identity(nx, nx)),
       B_(MatrixXs::Identity(nx, nu)),
       Q_(MatrixXs::Identity(nx, nx)),
@@ -79,7 +79,7 @@ ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const std::size_t nx,
 
 template <typename Scalar>
 ActionModelLQRTpl<Scalar>::ActionModelLQRTpl(const ActionModelLQRTpl& copy)
-    : Base(boost::make_shared<StateVector>(copy.get_A().cols()),
+    : Base(std::make_shared<StateVector>(copy.get_A().cols()),
            copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows(),
            copy.get_G().rows(), copy.get_H().rows()),
       drift_free_(false),
@@ -94,7 +94,7 @@ ActionModelLQRTpl<Scalar>::~ActionModelLQRTpl() {}
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -135,7 +135,7 @@ void ActionModelLQRTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -161,7 +161,7 @@ void ActionModelLQRTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -197,7 +197,7 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActionModelLQRTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -217,15 +217,15 @@ void ActionModelLQRTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar>>
+std::shared_ptr<ActionDataAbstractTpl<Scalar>>
 ActionModelLQRTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool ActionModelLQRTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {

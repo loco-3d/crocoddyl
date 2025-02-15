@@ -22,16 +22,16 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
                                   StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
       factory.create(constraint_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
       model->createData(&shared_data);
   data->g *= nan("");
   data->h *= nan("");
@@ -55,21 +55,21 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
                                StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
       factory.create(constraint_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ConstraintModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -93,21 +93,21 @@ void test_partial_derivatives_against_numdiff(
     StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
       factory.create(constraint_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ConstraintModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -160,12 +160,12 @@ void test_dimensions_in_constraint_manager(
     StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
       factory.create(constraint_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
@@ -198,22 +198,22 @@ void test_partial_derivatives_in_constraint_manager(
     StateModelTypes::Type state_type) {
   // create the model
   ConstraintModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstract>& model =
       factory.create(constraint_type, state_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
-  const boost::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract>& data =
       model->createData(&shared_data);
 
   // create the constraint manager model
   crocoddyl::ConstraintModelManager constraint_man(state, model->get_nu());
   constraint_man.addConstraint("myConstraint", model, 1.);
-  const boost::shared_ptr<crocoddyl::ConstraintDataManager>& data_man =
+  const std::shared_ptr<crocoddyl::ConstraintDataManager>& data_man =
       constraint_man.createData(&shared_data);
 
   // Generating random values for the state and control

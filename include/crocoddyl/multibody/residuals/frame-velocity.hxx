@@ -16,7 +16,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Motion& velocity, const pinocchio::ReferenceFrame type,
     const std::size_t nu)
     : Base(state, 6, nu, true, true, false),
@@ -34,7 +34,7 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Motion& velocity, const pinocchio::ReferenceFrame type)
     : Base(state, 6, true, true, false),
       id_(id),
@@ -54,7 +54,7 @@ ResidualModelFrameVelocityTpl<Scalar>::~ResidualModelFrameVelocityTpl() {}
 
 template <typename Scalar>
 void ResidualModelFrameVelocityTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -67,7 +67,7 @@ void ResidualModelFrameVelocityTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelFrameVelocityTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Get the partial derivatives of the local frame velocity
   Data* d = static_cast<Data*>(data.get());
@@ -78,11 +78,11 @@ void ResidualModelFrameVelocityTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelFrameVelocityTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

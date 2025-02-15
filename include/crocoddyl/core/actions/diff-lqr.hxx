@@ -16,7 +16,7 @@ template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
     const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N)
-    : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
+    : Base(std::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
       drift_free_(true),
       updated_lqr_(false) {
   const std::size_t nq = state_->get_nq();
@@ -35,7 +35,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& Aq, const MatrixXs& Av, const MatrixXs& B,
     const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N, const VectorXs& f,
     const VectorXs& q, const VectorXs& r)
-    : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
+    : Base(std::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0),
       drift_free_(false),
       updated_lqr_(false) {
   const std::size_t nq = state_->get_nq();
@@ -52,8 +52,8 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const MatrixXs& Q, const MatrixXs& R, const MatrixXs& N, const MatrixXs& G,
     const MatrixXs& H, const VectorXs& f, const VectorXs& q, const VectorXs& r,
     const VectorXs& g, const VectorXs& h)
-    : Base(boost::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0,
-           G.rows(), H.rows(), G.rows(), H.rows()),
+    : Base(std::make_shared<StateVector>(2 * Aq.cols()), B.cols(), 0, G.rows(),
+           H.rows(), G.rows(), H.rows()),
       drift_free_(false),
       updated_lqr_(false) {
   set_LQR(Aq, Av, B, Q, R, N, G, H, f, q, r, g, h);
@@ -62,7 +62,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
 template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const std::size_t nq, const std::size_t nu, const bool drift_free)
-    : Base(boost::make_shared<StateVector>(2 * nq), nu),
+    : Base(std::make_shared<StateVector>(2 * nq), nu),
       Aq_(MatrixXs::Identity(nq, nq)),
       Av_(MatrixXs::Identity(nq, nq)),
       B_(MatrixXs::Identity(nq, nu)),
@@ -82,7 +82,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
 template <typename Scalar>
 DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
     const DifferentialActionModelLQRTpl& copy)
-    : Base(boost::make_shared<StateVector>(2 * copy.get_Aq().cols()),
+    : Base(std::make_shared<StateVector>(2 * copy.get_Aq().cols()),
            copy.get_B().cols(), 0, copy.get_G().rows(), copy.get_H().rows(),
            copy.get_G().rows(), copy.get_H().rows()),
       drift_free_(false),
@@ -97,7 +97,7 @@ DifferentialActionModelLQRTpl<Scalar>::~DifferentialActionModelLQRTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelLQRTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -141,7 +141,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelLQRTpl<Scalar>::calc(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -169,7 +169,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calc(
 
 template <typename Scalar>
 void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -206,7 +206,7 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -226,15 +226,15 @@ void DifferentialActionModelLQRTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelLQRTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool DifferentialActionModelLQRTpl<Scalar>::checkData(
-    const boost::shared_ptr<DifferentialActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<DifferentialActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {

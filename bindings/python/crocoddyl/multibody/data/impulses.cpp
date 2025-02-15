@@ -17,7 +17,7 @@ namespace python {
 void exposeDataCollectorImpulses() {
   bp::class_<DataCollectorImpulse, bp::bases<DataCollectorAbstract> >(
       "DataCollectorImpulse", "Impulse data collector.\n\n",
-      bp::init<boost::shared_ptr<ImpulseDataMultiple> >(
+      bp::init<std::shared_ptr<ImpulseDataMultiple> >(
           bp::args("self", "impulses"),
           "Create impulse data collection.\n\n"
           ":param impulses: impulses data"))
@@ -32,7 +32,7 @@ void exposeDataCollectorImpulses() {
              bp::bases<DataCollectorMultibody, DataCollectorImpulse> >(
       "DataCollectorMultibodyInImpulse",
       "Data collector for multibody systems in impulse.\n\n",
-      bp::init<pinocchio::Data*, boost::shared_ptr<ImpulseDataMultiple> >(
+      bp::init<pinocchio::Data*, std::shared_ptr<ImpulseDataMultiple> >(
           bp::args("self", "pinocchio", "impulses"),
           "Create multibody data collection.\n\n"
           ":param pinocchio: Pinocchio data\n"

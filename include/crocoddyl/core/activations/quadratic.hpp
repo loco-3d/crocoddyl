@@ -33,7 +33,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
   explicit ActivationModelQuadTpl(const std::size_t nr) : Base(nr) {};
   virtual ~ActivationModelQuadTpl() {};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -43,7 +43,7 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
     data->a_value = Scalar(0.5) * r.dot(r);
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -57,9 +57,9 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
                   "Arr has wrong value");
   };
 
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<ActivationDataAbstract> data =
-        boost::allocate_shared<ActivationDataAbstract>(
+  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+    std::shared_ptr<ActivationDataAbstract> data =
+        std::allocate_shared<ActivationDataAbstract>(
             Eigen::aligned_allocator<ActivationDataAbstract>(), this);
     data->Arr.diagonal().setOnes();
     return data;

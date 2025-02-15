@@ -73,27 +73,27 @@ class DifferentialActionModelFactory {
   explicit DifferentialActionModelFactory();
   ~DifferentialActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
       DifferentialActionModelTypes::Type type,
       bool with_baumgarte = true) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
+  std::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
   create_freeFwdDynamics(StateModelTypes::Type state_type,
                          ActuationModelTypes::Type actuation_type,
                          bool constraints = true) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
+  std::shared_ptr<crocoddyl::DifferentialActionModelFreeInvDynamics>
   create_freeInvDynamics(StateModelTypes::Type state_type,
                          ActuationModelTypes::Type actuation_type,
                          bool constraints = true) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
+  std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
   create_contactFwdDynamics(StateModelTypes::Type state_type,
                             ActuationModelTypes::Type actuation_type,
                             bool with_friction = true,
                             bool with_baumgarte = true) const;
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics>
+  std::shared_ptr<crocoddyl::DifferentialActionModelContactInvDynamics>
   create_contactInvDynamics(StateModelTypes::Type state_type,
                             ActuationModelTypes::Type actuation_type,
                             bool with_friction = true,

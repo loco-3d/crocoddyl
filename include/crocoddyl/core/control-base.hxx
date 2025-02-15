@@ -21,22 +21,22 @@ ControlParametrizationModelAbstractTpl<
     Scalar>::~ControlParametrizationModelAbstractTpl() {}
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelAbstractTpl<Scalar>::createData() {
-  return boost::allocate_shared<ControlParametrizationDataAbstract>(
+  return std::allocate_shared<ControlParametrizationDataAbstract>(
       Eigen::aligned_allocator<ControlParametrizationDataAbstract>(), this);
 }
 
 template <typename Scalar>
 bool ControlParametrizationModelAbstractTpl<Scalar>::checkData(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>&) {
+    const std::shared_ptr<ControlParametrizationDataAbstract>&) {
   return false;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs
 ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op) const {
   MatrixXs AJ(A.rows(), nu_);
   multiplyByJacobian(data, A, AJ, op);
@@ -46,7 +46,7 @@ ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs
 ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op) const {
   MatrixXs JTA(nu_, A.cols());
   multiplyJacobianTransposeBy(data, A, JTA, op);

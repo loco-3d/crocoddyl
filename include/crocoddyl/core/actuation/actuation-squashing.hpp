@@ -30,16 +30,16 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActuationSquashingModelTpl(
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<SquashingModelAbstract> squashing, const std::size_t nu)
+  ActuationSquashingModelTpl(std::shared_ptr<ActuationModelAbstract> actuation,
+                             std::shared_ptr<SquashingModelAbstract> squashing,
+                             const std::size_t nu)
       : Base(actuation->get_state(), nu),
         squashing_(squashing),
         actuation_(actuation) {};
 
   virtual ~ActuationSquashingModelTpl() {};
 
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
@@ -50,7 +50,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->tau_set = d->actuation->tau_set;
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
@@ -60,7 +60,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->dtau_du.noalias() = d->actuation->dtau_du * d->squashing->du_ds;
   };
 
-  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& tau) {
     if (static_cast<std::size_t>(tau.size()) != this->state_->get_nv()) {
@@ -72,20 +72,20 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->u.noalias() = data->Mtau * tau;
   }
 
-  boost::shared_ptr<ActuationDataAbstract> createData() {
-    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  std::shared_ptr<ActuationDataAbstract> createData() {
+    return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
-  const boost::shared_ptr<SquashingModelAbstract>& get_squashing() const {
+  const std::shared_ptr<SquashingModelAbstract>& get_squashing() const {
     return squashing_;
   };
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const {
+  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const {
     return actuation_;
   };
 
  protected:
-  boost::shared_ptr<SquashingModelAbstract> squashing_;
-  boost::shared_ptr<ActuationModelAbstract> actuation_;
+  std::shared_ptr<SquashingModelAbstract> squashing_;
+  std::shared_ptr<ActuationModelAbstract> actuation_;
 };
 
 template <typename _Scalar>
@@ -107,8 +107,8 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
 
   ~ActuationSquashingDataTpl() {}
 
-  boost::shared_ptr<SquashingDataAbstract> squashing;
-  boost::shared_ptr<ActuationDataAbstract> actuation;
+  std::shared_ptr<SquashingDataAbstract> squashing;
+  std::shared_ptr<ActuationDataAbstract> actuation;
 
   using Base::dtau_du;
   using Base::dtau_dx;

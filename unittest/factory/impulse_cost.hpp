@@ -49,7 +49,7 @@ class ImpulseCostModelFactory {
   explicit ImpulseCostModelFactory();
   ~ImpulseCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> create(
       ImpulseCostModelTypes::Type cost_type,
       PinocchioModelTypes::Type model_type,
       ActivationModelTypes::Type activation_type) const;

@@ -54,7 +54,7 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] cref   Reference CoM position
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelCoMPositionTpl(std::shared_ptr<StateMultibody> state,
                               const Vector3s& cref, const std::size_t nu);
 
   /**
@@ -65,7 +65,7 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the multibody system
    * @param[in] cref   Reference CoM position
    */
-  ResidualModelCoMPositionTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelCoMPositionTpl(std::shared_ptr<StateMultibody> state,
                               const Vector3s& cref);
   virtual ~ResidualModelCoMPositionTpl();
 
@@ -76,7 +76,7 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -87,10 +87,10 @@ class ResidualModelCoMPositionTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**

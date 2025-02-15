@@ -67,8 +67,8 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * terminal node (default true)
    */
   ConstraintModelResidualTpl(
-      boost::shared_ptr<typename Base::StateAbstract> state,
-      boost::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
+      std::shared_ptr<typename Base::StateAbstract> state,
+      std::shared_ptr<ResidualModelAbstract> residual, const VectorXs& lower,
       const VectorXs& upper, const bool T_act = true);
 
   /**
@@ -80,9 +80,8 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * terminal node (default true)
    */
   ConstraintModelResidualTpl(
-      boost::shared_ptr<typename Base::StateAbstract> state,
-      boost::shared_ptr<ResidualModelAbstract> residual,
-      const bool T_act = true);
+      std::shared_ptr<typename Base::StateAbstract> state,
+      std::shared_ptr<ResidualModelAbstract> residual, const bool T_act = true);
   virtual ~ConstraintModelResidualTpl();
 
   /**
@@ -92,7 +91,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -105,7 +104,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] data  Residual constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -115,7 +114,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -130,13 +129,13 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] data  Residual constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief Create the residual constraint data
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
+  virtual std::shared_ptr<ConstraintDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -147,8 +146,8 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   virtual void print(std::ostream& os) const;
 
  private:
-  void updateCalc(const boost::shared_ptr<ConstraintDataAbstract>& data);
-  void updateCalcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data);
+  void updateCalc(const std::shared_ptr<ConstraintDataAbstract>& data);
+  void updateCalcDiff(const std::shared_ptr<ConstraintDataAbstract>& data);
 
  protected:
   using Base::lb_;

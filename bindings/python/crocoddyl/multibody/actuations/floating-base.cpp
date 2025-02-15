@@ -17,7 +17,7 @@ namespace python {
 
 void exposeActuationFloatingBase() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> >();
+      std::shared_ptr<crocoddyl::ActuationModelFloatingBase> >();
 
   bp::class_<ActuationModelFloatingBase, bp::bases<ActuationModelAbstract> >(
       "ActuationModelFloatingBase",
@@ -25,7 +25,7 @@ void exposeActuationFloatingBase() {
       "It considers the first joint, defined in the Pinocchio model, as the "
       "floating-base joints.\n"
       "Then, this joint (that might have various DoFs) is unactuated.",
-      bp::init<boost::shared_ptr<StateMultibody> >(
+      bp::init<std::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the floating-base actuation model.\n\n"
           ":param state: state of multibody system"))

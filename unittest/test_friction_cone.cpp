@@ -142,7 +142,7 @@ void test_force_along_friction_cone_normal() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
       activation.createData();
 
   // Compute the activation value
@@ -168,7 +168,7 @@ void test_negative_force_along_friction_cone_normal() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
       activation.createData();
 
   // Compute the activation value
@@ -201,7 +201,7 @@ void test_force_parallel_to_friction_cone_normal() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
       activation.createData();
 
   // Compute the activation value

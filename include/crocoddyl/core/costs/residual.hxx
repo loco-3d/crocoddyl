@@ -12,15 +12,15 @@
 namespace crocoddyl {
 template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state,
-    boost::shared_ptr<ActivationModelAbstract> activation,
-    boost::shared_ptr<ResidualModelAbstract> residual)
+    std::shared_ptr<typename Base::StateAbstract> state,
+    std::shared_ptr<ActivationModelAbstract> activation,
+    std::shared_ptr<ResidualModelAbstract> residual)
     : Base(state, activation, residual) {}
 
 template <typename Scalar>
 CostModelResidualTpl<Scalar>::CostModelResidualTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state,
-    boost::shared_ptr<ResidualModelAbstract> residual)
+    std::shared_ptr<typename Base::StateAbstract> state,
+    std::shared_ptr<ResidualModelAbstract> residual)
     : Base(state, residual) {}
 
 template <typename Scalar>
@@ -28,7 +28,7 @@ CostModelResidualTpl<Scalar>::~CostModelResidualTpl() {}
 
 template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the cost residual
   residual_->calc(data->residual, x, u);
@@ -40,7 +40,7 @@ void CostModelResidualTpl<Scalar>::calc(
 
 template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calc(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
@@ -60,7 +60,7 @@ void CostModelResidualTpl<Scalar>::calc(
 
 template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   // Compute the derivatives of the activation and contact wrench cone residual
   // models
@@ -74,7 +74,7 @@ void CostModelResidualTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void CostModelResidualTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<CostDataAbstract>& data,
+    const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   // Compute the derivatives of the activation and contact wrench cone residual
   // models
@@ -94,10 +94,10 @@ void CostModelResidualTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<CostDataAbstractTpl<Scalar> >
+std::shared_ptr<CostDataAbstractTpl<Scalar> >
 CostModelResidualTpl<Scalar>::createData(DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>

@@ -15,14 +15,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxFDDP() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxFDDP> >();
+  bp::register_ptr_to_python<std::shared_ptr<SolverBoxFDDP> >();
 
   bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP> >(
       "SolverBoxFDDP",
       "Box-constrained FDDP solver.\n\n"
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(
+      bp::init<std::shared_ptr<ShootingProblem> >(
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))

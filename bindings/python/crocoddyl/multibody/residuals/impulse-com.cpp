@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualImpulseCoM() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelImpulseCoM> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelImpulseCoM> >();
 
   bp::class_<ResidualModelImpulseCoM, bp::bases<ResidualModelAbstract> >(
       "ResidualModelImpulseCoM",
@@ -23,13 +23,13 @@ void exposeResidualImpulseCoM() {
       "(vnext-v), with Jcom as the CoM Jacobian, and\n"
       "vnext the velocity after impact and v the velocity before impact, "
       "respectively.",
-      bp::init<boost::shared_ptr<StateMultibody> >(
+      bp::init<std::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the CoM position cost model for impulse dynamics.\n\n"
           "The default nu is obtained from state.nv.\n"
           ":param state: state of the multibody system"))
       .def<void (ResidualModelImpulseCoM::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelImpulseCoM::calc, bp::args("self", "data", "x"),
@@ -37,11 +37,11 @@ void exposeResidualImpulseCoM() {
           ":param data: residual data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (ResidualModelImpulseCoM::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelImpulseCoM::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelImpulseCoM::calcDiff,
@@ -52,7 +52,7 @@ void exposeResidualImpulseCoM() {
           ":param data: action data\n"
           ":param x: state point (dim. state.nx)")
       .def<void (ResidualModelImpulseCoM::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -67,7 +67,7 @@ void exposeResidualImpulseCoM() {
            ":return residual data.")
       .def(CopyableVisitor<ResidualModelImpulseCoM>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataImpulseCoM> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataImpulseCoM> >();
 
   bp::class_<ResidualDataImpulseCoM, bp::bases<ResidualDataAbstract> >(
       "ResidualDataImpulseCoM", "Data for impulse CoM residual.\n\n",

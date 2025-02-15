@@ -56,13 +56,13 @@ class ConstraintModelFactory {
   explicit ConstraintModelFactory();
   ~ConstraintModelFactory();
 
-  boost::shared_ptr<crocoddyl::ConstraintModelAbstract> create(
+  std::shared_ptr<crocoddyl::ConstraintModelAbstract> create(
       ConstraintModelTypes::Type constraint_type,
       StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::ConstraintModelAbstract> create_random_constraint(
+std::shared_ptr<crocoddyl::ConstraintModelAbstract> create_random_constraint(
     StateModelTypes::Type state_type);
 
 }  // namespace unittest

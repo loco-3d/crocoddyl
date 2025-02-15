@@ -45,7 +45,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel2DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector2s& xref,
                     const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
@@ -60,7 +60,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] xref   Contact position used for the Baumgarte stabilization
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel2DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector2s& xref,
                     const Vector2s& gains = Vector2s::Zero());
   virtual ~ContactModel2DTpl();
@@ -72,7 +72,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -82,7 +82,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -91,13 +91,13 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] data   2d contact data
    * @param[in] force  2d force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
                            const VectorXs& force);
 
   /**
    * @brief Create the 2d contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(
+  virtual std::shared_ptr<ContactDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**

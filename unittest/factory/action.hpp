@@ -53,10 +53,10 @@ class ActionModelFactory {
 
   enum Instance { First, Second, Terminal };
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> create(
       ActionModelTypes::Type type, Instance instance = Instance::First) const;
 
-  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
+  std::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
   create_impulseFwdDynamics(StateModelTypes::Type state_type) const;
 };
 

@@ -13,7 +13,7 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-StateNumDiffTpl<Scalar>::StateNumDiffTpl(boost::shared_ptr<Base> state)
+StateNumDiffTpl<Scalar>::StateNumDiffTpl(std::shared_ptr<Base> state)
     : Base(state->get_nx(), state->get_ndx()),
       state_(state),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}

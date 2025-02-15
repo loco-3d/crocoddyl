@@ -50,7 +50,7 @@ class ContactConstraintModelFactory {
   explicit ContactConstraintModelFactory();
   ~ContactConstraintModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
       ContactConstraintModelTypes::Type constraint_type,
       PinocchioModelTypes::Type model_type,
       ActuationModelTypes::Type actuation_type) const;

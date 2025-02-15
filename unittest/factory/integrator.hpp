@@ -45,14 +45,14 @@ class IntegratorFactory {
   explicit IntegratorFactory();
   ~IntegratorFactory();
 
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
       IntegratorTypes::Type type,
-      boost::shared_ptr<DifferentialActionModelAbstract> model) const;
+      std::shared_ptr<DifferentialActionModelAbstract> model) const;
 
-  boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
       IntegratorTypes::Type type,
-      boost::shared_ptr<DifferentialActionModelAbstract> model,
-      boost::shared_ptr<ControlParametrizationModelAbstract> control) const;
+      std::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<ControlParametrizationModelAbstract> control) const;
 };
 
 }  // namespace unittest

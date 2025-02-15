@@ -12,7 +12,7 @@
 #define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
@@ -30,7 +30,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  explicit StateNumDiffTpl(boost::shared_ptr<Base> state);
+  explicit StateNumDiffTpl(std::shared_ptr<Base> state);
   virtual ~StateNumDiffTpl();
 
   virtual VectorXs zero() const;
@@ -100,7 +100,7 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base>
+  std::shared_ptr<Base>
       state_;     //!< state we need to compute the numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation

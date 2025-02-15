@@ -40,22 +40,22 @@ class ContactModelAbstractTpl {
    * @param[in] nc     Dimension of the contact model
    * @param[in] nu     Dimension of the control vector
    */
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
                           const std::size_t nc, const std::size_t nu);
-  ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
                           const std::size_t nc);
 
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc, const std::size_t nu);)
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc);)
   virtual ~ContactModelAbstractTpl();
 
@@ -66,7 +66,7 @@ class ContactModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x) = 0;
 
   /**
@@ -76,7 +76,7 @@ class ContactModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x) = 0;
 
   /**
@@ -85,7 +85,7 @@ class ContactModelAbstractTpl {
    * @param[in] data   Contact data
    * @param[in] force  Contact force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
                            const VectorXs& force) = 0;
 
   /**
@@ -94,7 +94,7 @@ class ContactModelAbstractTpl {
    * @param[in] data   Contact data
    * @param[in] force  Contact force
    */
-  void updateForceDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+  void updateForceDiff(const std::shared_ptr<ContactDataAbstract>& data,
                        const MatrixXs& df_dx, const MatrixXs& df_du) const;
 
   /**
@@ -102,26 +102,25 @@ class ContactModelAbstractTpl {
    *
    * @param[in] data  Contact data
    */
-  void setZeroForce(const boost::shared_ptr<ContactDataAbstract>& data) const;
+  void setZeroForce(const std::shared_ptr<ContactDataAbstract>& data) const;
 
   /**
    * @brief Set the stack of spatial forces Jacobians to zero
    *
    * @param[in] data  Contact data
    */
-  void setZeroForceDiff(
-      const boost::shared_ptr<ContactDataAbstract>& data) const;
+  void setZeroForceDiff(const std::shared_ptr<ContactDataAbstract>& data) const;
 
   /**
    * @brief Create the contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(
+  virtual std::shared_ptr<ContactDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::shared_ptr<StateMultibody>& get_state() const;
 
   /**
    * @brief Return the dimension of the contact
@@ -168,7 +167,7 @@ class ContactModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  boost::shared_ptr<StateMultibody> state_;
+  std::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   std::size_t nu_;
   pinocchio::FrameIndex id_;        //!< Reference frame id of the contact

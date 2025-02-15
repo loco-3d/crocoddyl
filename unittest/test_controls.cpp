@@ -22,7 +22,7 @@ using namespace crocoddyl::unittest;
 
 void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   ControlFactory factory;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters
@@ -33,10 +33,10 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
 
   // Computing the partial derivatives of the value function
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
       control->createData();
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract>
-      data_num_diff = control_num_diff.createData();
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
+      control_num_diff.createData();
   control->calc(data, t, p);
   control_num_diff.calc(data_num_diff, t, p);
   control->calcDiff(data, t, p);
@@ -49,7 +49,7 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
 
 void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   ControlFactory factory;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters, the time, and the
@@ -60,10 +60,10 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
       control->createData();
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract>
-      data_num_diff = control_num_diff.createData();
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
+      control_num_diff.createData();
 
   // Checking the operator
   Eigen::MatrixXd A_J(Eigen::MatrixXd::Zero(A.rows(), control->get_nu()));
@@ -84,7 +84,7 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
 void test_multiplyJacobianTransposeBy_num_diff(
     ControlTypes::Type control_type) {
   ControlFactory factory;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
 
   // Generating random values for the control parameters, the time, and the
@@ -95,10 +95,10 @@ void test_multiplyJacobianTransposeBy_num_diff(
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
       control->createData();
-  boost::shared_ptr<crocoddyl::ControlParametrizationDataAbstract>
-      data_num_diff = control_num_diff.createData();
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
+      control_num_diff.createData();
 
   // Checking the operator
   Eigen::MatrixXd JT_A(Eigen::MatrixXd::Zero(control->get_nu(), A.cols()));

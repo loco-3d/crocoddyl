@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualFramePlacement() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelFramePlacement> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelFramePlacement> >();
 
   bp::class_<ResidualModelFramePlacement, bp::bases<ResidualModelAbstract> >(
       "ResidualModelFramePlacement",
@@ -23,7 +23,7 @@ void exposeResidualFramePlacement() {
       "residual as r = p - pref, with p and pref "
       "as\n"
       "the current and reference frame placements, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                pinocchio::SE3, std::size_t>(
           bp::args("self", "state", "id", "pref", "nu"),
           "Initialize the frame placement residual model.\n\n"
@@ -31,7 +31,7 @@ void exposeResidualFramePlacement() {
           ":param id: reference frame id\n"
           ":param pref: reference frame placement\n"
           ":param nu: dimension of control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     pinocchio::SE3>(
           bp::args("self", "state", "id", "pref"),
           "Initialize the frame placement residual model.\n\n"
@@ -40,7 +40,7 @@ void exposeResidualFramePlacement() {
           ":param id: reference frame id\n"
           ":param pref: reference frame placement"))
       .def<void (ResidualModelFramePlacement::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelFramePlacement::calc,
@@ -50,11 +50,11 @@ void exposeResidualFramePlacement() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFramePlacement::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelFramePlacement::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelFramePlacement::calcDiff,
@@ -65,7 +65,7 @@ void exposeResidualFramePlacement() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelFramePlacement::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -88,7 +88,7 @@ void exposeResidualFramePlacement() {
                     "reference frame placement")
       .def(CopyableVisitor<ResidualModelFramePlacement>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataFramePlacement> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataFramePlacement> >();
 
   bp::class_<ResidualDataFramePlacement, bp::bases<ResidualDataAbstract> >(
       "ResidualDataFramePlacement", "Data for frame placement residual.\n\n",

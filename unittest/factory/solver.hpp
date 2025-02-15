@@ -53,11 +53,11 @@ class SolverFactory {
   explicit SolverFactory();
   ~SolverFactory();
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> create(
+  std::shared_ptr<crocoddyl::SolverAbstract> create(
       SolverTypes::Type solver_type,
-      boost::shared_ptr<crocoddyl::ActionModelAbstract> model,
-      boost::shared_ptr<crocoddyl::ActionModelAbstract> model2,
-      boost::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const;
+      std::shared_ptr<crocoddyl::ActionModelAbstract> model,
+      std::shared_ptr<crocoddyl::ActionModelAbstract> model2,
+      std::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const;
 };
 
 }  // namespace unittest

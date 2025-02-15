@@ -59,13 +59,13 @@ class PinocchioModelFactory {
                        const std::string& srdf_file = "",
                        bool free_flyer = true);
 
-  boost::shared_ptr<pinocchio::Model> create() const;
+  std::shared_ptr<pinocchio::Model> create() const;
   std::vector<std::string> get_frame_names() const;
   std::vector<std::size_t> get_frame_ids() const;
   std::size_t get_contact_nc() const;
 
  private:
-  boost::shared_ptr<pinocchio::Model>
+  std::shared_ptr<pinocchio::Model>
       model_;  //!< The pointer to the state in testing
   std::vector<std::string> frame_name_;  //!< Frame name for unittesting
   std::vector<std::size_t> frame_id_;    //!< Frame id for unittesting

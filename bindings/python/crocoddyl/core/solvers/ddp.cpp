@@ -23,7 +23,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep,
                                        0, 1)
 
 void exposeSolverDDP() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverDDP> >();
+  bp::register_ptr_to_python<std::shared_ptr<SolverDDP> >();
 
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
       "SolverDDP",
@@ -38,7 +38,7 @@ void exposeSolverDDP() {
       "along a tuple of optimized control commands U*.\n"
       ":param shootingProblem: shooting problem (list of action models along "
       "trajectory.)",
-      bp::init<boost::shared_ptr<ShootingProblem> >(
+      bp::init<std::shared_ptr<ShootingProblem> >(
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))

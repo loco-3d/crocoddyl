@@ -16,7 +16,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActuationAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<ActuationModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActuationModelAbstract> >();
 
   bp::class_<ActuationModelAbstract_wrap, boost::noncopyable>(
       "ActuationModelAbstract",
@@ -28,7 +28,7 @@ void exposeActuationAbstract() {
       "The computation of the actuation signal and its partial derivatives are "
       "mainly carried out\n"
       "inside calc() and calcDiff(), respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
+      bp::init<std::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the actuation model.\n\n"
           ":param state: state description,\n"
@@ -42,7 +42,7 @@ void exposeActuationAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: joint-torque input (dim. nu)")
       .def<void (ActuationModelAbstract::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActuationModelAbstract::calc, bp::args("self", "data", "x"),
           "Ignore the computation of the actuation signal and actuation "
@@ -62,7 +62,7 @@ void exposeActuationAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: joint-torque input (dim. nu)")
       .def<void (ActuationModelAbstract::*)(
-          const boost::shared_ptr<ActuationDataAbstract>&,
+          const std::shared_ptr<ActuationDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActuationModelAbstract::calcDiff,
           bp::args("self", "data", "x"),
@@ -105,7 +105,7 @@ void exposeActuationAbstract() {
                             bp::return_value_policy<bp::return_by_value>()),
           "state");
 
-  bp::register_ptr_to_python<boost::shared_ptr<ActuationDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActuationDataAbstract> >();
 
   bp::class_<ActuationDataAbstract>(
       "ActuationDataAbstract",

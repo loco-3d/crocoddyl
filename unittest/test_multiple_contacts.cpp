@@ -26,36 +26,35 @@ using namespace crocoddyl::unittest;
  * assert signal
  */
 int calc(crocoddyl::ContactModelMultiple& model,
-         boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
+         std::shared_ptr<crocoddyl::ContactDataMultiple> data,
          Eigen::VectorXd& dx) {
   model.calc(data, dx);
   return 0;
 }
 
 int calcDiff(crocoddyl::ContactModelMultiple& model,
-             boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
+             std::shared_ptr<crocoddyl::ContactDataMultiple> data,
              Eigen::VectorXd& dx) {
   model.calcDiff(data, dx);
   return 0;
 }
 
 int updateForce(crocoddyl::ContactModelMultiple& model,
-                boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
+                std::shared_ptr<crocoddyl::ContactDataMultiple> data,
                 Eigen::VectorXd& dx) {
   model.updateForce(data, dx);
   return 0;
 }
 
-int updateAccelerationDiff(
-    crocoddyl::ContactModelMultiple& model,
-    boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
-    const Eigen::MatrixXd& ddv_dx) {
+int updateAccelerationDiff(crocoddyl::ContactModelMultiple& model,
+                           std::shared_ptr<crocoddyl::ContactDataMultiple> data,
+                           const Eigen::MatrixXd& ddv_dx) {
   model.updateAccelerationDiff(data, ddv_dx);
   return 0;
 }
 
 int updateForceDiff(crocoddyl::ContactModelMultiple& model,
-                    boost::shared_ptr<crocoddyl::ContactDataMultiple> data,
+                    std::shared_ptr<crocoddyl::ContactDataMultiple> data,
                     const Eigen::MatrixXd& df_dx,
                     const Eigen::MatrixXd& df_du) {
   model.updateForceDiff(data, df_dx, df_du);
@@ -68,9 +67,8 @@ void test_constructor() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // Run the print function
   std::ostringstream tmp;
@@ -84,19 +82,18 @@ void test_addContact() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // add an active contact
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 =
+  std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 =
       create_random_contact();
   model.addContact("random_contact_1", rand_contact_1);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
   BOOST_CHECK(model.get_nc_total() == rand_contact_1->get_nc());
 
   // add an inactive contact
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_2 =
+  std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_2 =
       create_random_contact();
   model.addContact("random_contact_2", rand_contact_2, false);
   BOOST_CHECK(model.get_nc() == rand_contact_1->get_nc());
@@ -121,12 +118,11 @@ void test_addContact_error_message() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // create an contact object
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
+  std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
       create_random_contact();
 
   // add twice the same contact object to the container
@@ -159,12 +155,11 @@ void test_removeContact() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // add an active contact
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
+  std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
       create_random_contact();
   model.addContact("random_contact", rand_contact);
   BOOST_CHECK(model.get_nc() == rand_contact->get_nc());
@@ -180,9 +175,8 @@ void test_removeContact_error_message() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // remove a none existing contact form the container, we expect a cout message
   // here
@@ -203,20 +197,19 @@ void test_calc() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m =
+    const std::shared_ptr<crocoddyl::ContactModelAbstract>& m =
         create_random_contact();
     model.addContact(os.str(), m);
     models.push_back(m);
@@ -224,7 +217,7 @@ void test_calc() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // compute the multiple contact data for the case when all contacts are
@@ -274,20 +267,19 @@ void test_calc_diff() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m =
+    const std::shared_ptr<crocoddyl::ContactModelAbstract>& m =
         create_random_contact();
     model.addContact(os.str(), m);
     models.push_back(m);
@@ -295,7 +287,7 @@ void test_calc_diff() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // compute the multiple contact data for the case when all contacts are
@@ -353,20 +345,19 @@ void test_calc_diff_no_recalc() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<boost::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<boost::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
-    const boost::shared_ptr<crocoddyl::ContactModelAbstract>& m =
+    const std::shared_ptr<crocoddyl::ContactModelAbstract>& m =
         create_random_contact();
     model.addContact(os.str(), m);
     models.push_back(m);
@@ -374,7 +365,7 @@ void test_calc_diff_no_recalc() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // compute the multiple contact data for the case when all contacts are
@@ -428,9 +419,8 @@ void test_updateForce() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // create the corresponding data object
   const pinocchio::Model& pinocchio_model =
@@ -445,7 +435,7 @@ void test_updateForce() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // Compute the jacobian and check that the contact model fetch it.
@@ -480,9 +470,8 @@ void test_updateAccelerationDiff() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
@@ -494,7 +483,7 @@ void test_updateAccelerationDiff() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // create the velocity diff
@@ -512,9 +501,8 @@ void test_updateForceDiff() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
@@ -526,7 +514,7 @@ void test_updateForceDiff() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data =
       model.createData(&pinocchio_data);
 
   // create force diff
@@ -550,19 +538,17 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model1(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   crocoddyl::ContactModelMultiple model2(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model1.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
   for (unsigned i = 0; i < 5; ++i) {
-    boost::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
+    std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
         create_random_contact();
     {
       std::ostringstream os;
@@ -577,9 +563,9 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   }
 
   // create the data of the multiple-contacts
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data1 =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data1 =
       model1.createData(&pinocchio_data);
-  boost::shared_ptr<crocoddyl::ContactDataMultiple> data2 =
+  std::shared_ptr<crocoddyl::ContactDataMultiple> data2 =
       model2.createData(&pinocchio_data);
 
   // create force diff
@@ -595,7 +581,7 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   // expected error message content
   std::string function_name =
       "void crocoddyl::ContactModelMultiple::updateForceDiff("
-      "const boost::shared_ptr<crocoddyl::ContactDataMultiple>&,"
+      "const std::shared_ptr<crocoddyl::ContactDataMultiple>&,"
       " const MatrixXd&) const";
   std::string assert_argument =
       "it_m->first == it_d->first && \"it doesn't match"
@@ -612,9 +598,8 @@ void test_get_contacts() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
@@ -645,9 +630,8 @@ void test_get_nc() {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ContactModelMultiple model(
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
-          state_factory.create(
-              StateModelTypes::StateMultibody_RandomHumanoid)));
+      std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
+          StateModelTypes::StateMultibody_RandomHumanoid)));
 
   // create the corresponding data object
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());

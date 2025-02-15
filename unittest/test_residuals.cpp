@@ -31,9 +31,9 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type,
   // Create the model
   ResidualModelFactory residual_factory;
   ActuationModelFactory actuation_factory;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
       actuation_factory.create(actuation_type, state_type);
-  const boost::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
       residual_factory.create(residual_type, state_type,
                               actuation_model->get_nu());
 
@@ -42,17 +42,17 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type,
   tmp << *model;
 
   // Create the corresponding shared data
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation_model->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
 
   // create the residual data
-  const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
       model->createData(&shared_data);
 
   // Generating random values for the state and control
@@ -80,29 +80,29 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type,
   // Create the model
   ResidualModelFactory residual_factory;
   ActuationModelFactory actuation_factory;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
       actuation_factory.create(actuation_type, state_type);
-  const boost::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
       residual_factory.create(residual_type, state_type,
                               actuation_model->get_nu());
 
   // Create the corresponding shared data
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation_model->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
 
   // Create the residual data
-  const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ResidualModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -135,29 +135,29 @@ void test_partial_derivatives_against_numdiff(
   // Create the model
   ResidualModelFactory residual_factory;
   ActuationModelFactory actuation_factory;
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
       actuation_factory.create(actuation_type, state_type);
-  const boost::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract>& model =
       residual_factory.create(residual_type, state_type,
                               actuation_model->get_nu());
 
   // Create the corresponding shared data
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation_model->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
 
   // Create the residual data
-  const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ResidualModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -211,10 +211,10 @@ void test_reference() {
       ActuationModelTypes::ActuationModelFloatingBase;
   StateModelFactory state_factory;
   ActuationModelFactory actuation_factory;
-  boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+  std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
           state_factory.create(state_type));
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
       actuation_factory.create(actuation_type, state_type);
 
   const std::size_t nu = actuation->get_nu();

@@ -46,11 +46,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   typedef CppAD::ADFun<CGScalar> ADFun;
 
-  ActionModelCodeGenTpl(boost::shared_ptr<ADBase> admodel,
-                        boost::shared_ptr<Base> model,
+  ActionModelCodeGenTpl(std::shared_ptr<ADBase> admodel,
+                        std::shared_ptr<Base> model,
                         const std::string& library_name,
                         const std::size_t n_env = 0,
-                        std::function<void(boost::shared_ptr<ADBase>,
+                        std::function<void(std::shared_ptr<ADBase>,
                                            const Eigen::Ref<const ADVectorXs>&)>
                             fn_record_env = empty_record_env,
                         const std::string& function_name_calc = "calc",
@@ -74,7 +74,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     loadLib();
   }
 
-  static void empty_record_env(boost::shared_ptr<ADBase>,
+  static void empty_record_env(std::shared_ptr<ADBase>,
                                const Eigen::Ref<const ADVectorXs>&) {}
 
   void recordCalc() {
@@ -196,13 +196,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     calcDiffFun_ptr = dynamicLib_ptr->model(function_name_calcDiff.c_str());
   }
 
-  void set_env(const boost::shared_ptr<ActionDataAbstract>& data,
+  void set_env(const std::shared_ptr<ActionDataAbstract>& data,
                const Eigen::Ref<const VectorXs>& env_val) const {
     Data* d = static_cast<Data*>(data.get());
     d->xu.tail(n_env) = env_val;
   }
 
-  void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calc(const std::shared_ptr<ActionDataAbstract>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
@@ -216,7 +216,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     d->distribute_calcout();
   }
 
-  void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) {
     Data* d = static_cast<Data*>(data.get());
@@ -229,8 +229,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     d->distribute_calcDiffout();
   }
 
-  boost::shared_ptr<ActionDataAbstract> createData() {
-    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  std::shared_ptr<ActionDataAbstract> createData() {
+    return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   }
 
   /// \brief Dimension of the input vector
@@ -245,9 +245,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::u_lb_;                //!< Lower control limits
   using Base::u_ub_;                //!< Upper control limits
 
-  boost::shared_ptr<Base> model;
-  boost::shared_ptr<ADBase> ad_model;
-  boost::shared_ptr<ADActionDataAbstract> ad_data;
+  std::shared_ptr<Base> model;
+  std::shared_ptr<ADBase> ad_model;
+  std::shared_ptr<ADActionDataAbstract> ad_data;
 
   /// \brief Name of the function
   const std::string function_name_calc, function_name_calcDiff;
@@ -260,7 +260,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   /// \brief A function that updates the environment variables before starting
   /// record.
-  std::function<void(boost::shared_ptr<ADBase>,
+  std::function<void(std::shared_ptr<ADBase>,
                      const Eigen::Ref<const ADVectorXs>&)>
       fn_record_env;
 

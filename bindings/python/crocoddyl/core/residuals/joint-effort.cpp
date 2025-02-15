@@ -15,15 +15,15 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualJointEffort() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelJointEffort> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelJointEffort> >();
 
   bp::class_<ResidualModelJointEffort, bp::bases<ResidualModelAbstract> >(
       "ResidualModelJointEffort",
       "This residual function defines a residual vector as r = u - uref, with "
       "u and uref as the current and\n"
       "reference joint efforts, respectively.",
-      bp::init<boost::shared_ptr<StateAbstract>,
-               boost::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd,
+      bp::init<std::shared_ptr<StateAbstract>,
+               std::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd,
                std::size_t, bp::optional<bool> >(
           bp::args("self", "state", "actuation", "uref", "nu", "fwddyn"),
           "Initialize the joint-effort residual model.\n\n"
@@ -34,16 +34,16 @@ void exposeResidualJointEffort() {
           ":param fwddyn: indicate if we have a forward dynamics problem "
           "(True) or inverse "
           "dynamics problem (False) (default False)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd>(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ActuationModelAbstract>, Eigen::VectorXd>(
           bp::args("self", "state", "actuation", "uref"),
           "Initialize the joint-effort residual model.\n\n"
           "The default nu value is obtained from state.nv.\n"
           ":param state: state description\n"
           ":param actuation: actuation model\n"
           ":param uref: reference joint effort"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ActuationModelAbstract>, std::size_t>(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ActuationModelAbstract>, std::size_t>(
           bp::args("self", "state", "actuation", "nu"),
           "Initialize the joint-effort residual model.\n\n"
           "The default reference joint-effort is obtained from "
@@ -51,8 +51,8 @@ void exposeResidualJointEffort() {
           ":param state: state description\n"
           ":param actuation: actuation model\n"
           ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>,
-                    boost::shared_ptr<ActuationModelAbstract> >(
+      .def(bp::init<std::shared_ptr<StateAbstract>,
+                    std::shared_ptr<ActuationModelAbstract> >(
           bp::args("self", "state", "actuation"),
           "Initialize the joint-effort residual model.\n\n"
           "The default reference joint-effort is obtained from "
@@ -61,7 +61,7 @@ void exposeResidualJointEffort() {
           ":param state: state description\n"
           ":param actuation: actuation model"))
       .def<void (ResidualModelJointEffort::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelJointEffort::calc,
@@ -71,11 +71,11 @@ void exposeResidualJointEffort() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelJointEffort::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelJointEffort::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelJointEffort::calcDiff,
@@ -86,7 +86,7 @@ void exposeResidualJointEffort() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelJointEffort::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))

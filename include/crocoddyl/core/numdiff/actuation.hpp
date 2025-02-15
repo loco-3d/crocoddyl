@@ -47,7 +47,7 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param model  Actuation model that we want to apply the numerical
    * differentiation
    */
-  explicit ActuationModelNumDiffTpl(boost::shared_ptr<Base> model);
+  explicit ActuationModelNumDiffTpl(std::shared_ptr<Base> model);
 
   /**
    * @brief Destroy the numdiff actuation model
@@ -57,36 +57,36 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ActuationDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ActuationDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::commands()
    */
-  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& tau);
 
@@ -94,18 +94,18 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @brief @copydoc Base::torqueTransform()
    */
   virtual void torqueTransform(
-      const boost::shared_ptr<ActuationDataAbstract>& data,
+      const std::shared_ptr<ActuationDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ActuationDataAbstract> createData();
+  virtual std::shared_ptr<ActuationDataAbstract> createData();
 
   /**
    * @brief Return the original actuation model
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -120,8 +120,8 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the
-                                   //!< numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the
+                                 //!< numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
 
@@ -173,10 +173,10 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
   VectorXs du;  //!< Control disturbance
   VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
                 //!< \int x dx_i \f$"
-  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data that contains the final results
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<Base> >
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation
 
   using Base::dtau_du;

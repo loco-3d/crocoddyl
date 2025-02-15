@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref,
+    std::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref,
     const std::size_t nu)
     : Base(state, state->get_ndx(), nu, true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
@@ -23,8 +23,8 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
                                     std::to_string(state_->get_nx()) + ")");
   }
   // Define the pinocchio model for the multibody state case
-  const boost::shared_ptr<StateMultibody>& s =
-      boost::dynamic_pointer_cast<StateMultibody>(state);
+  const std::shared_ptr<StateMultibody>& s =
+      std::dynamic_pointer_cast<StateMultibody>(state);
   if (s) {
     pin_model_ = s->get_pinocchio();
   }
@@ -32,7 +32,7 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref)
+    std::shared_ptr<typename Base::StateAbstract> state, const VectorXs& xref)
     : Base(state, state->get_ndx(), true, true, false), xref_(xref) {
   if (static_cast<std::size_t>(xref_.size()) != state_->get_nx()) {
     throw_pretty(
@@ -40,8 +40,8 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
                                     std::to_string(state_->get_nx()) + ")");
   }
   // Define the pinocchio model for the multibody state case
-  const boost::shared_ptr<StateMultibody>& s =
-      boost::dynamic_pointer_cast<StateMultibody>(state);
+  const std::shared_ptr<StateMultibody>& s =
+      std::dynamic_pointer_cast<StateMultibody>(state);
   if (s) {
     pin_model_ = s->get_pinocchio();
   }
@@ -49,12 +49,12 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu)
+    std::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu)
     : Base(state, state->get_ndx(), nu, true, true, false),
       xref_(state->zero()) {
   // Define the pinocchio model for the multibody state case
-  const boost::shared_ptr<StateMultibody>& s =
-      boost::dynamic_pointer_cast<StateMultibody>(state);
+  const std::shared_ptr<StateMultibody>& s =
+      std::dynamic_pointer_cast<StateMultibody>(state);
   if (s) {
     pin_model_ = s->get_pinocchio();
   }
@@ -62,11 +62,11 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
 
 template <typename Scalar>
 ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state)
+    std::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, state->get_ndx(), true, true, false), xref_(state->zero()) {
   // Define the pinocchio model for the multibody state case
-  const boost::shared_ptr<StateMultibody>& s =
-      boost::dynamic_pointer_cast<StateMultibody>(state);
+  const std::shared_ptr<StateMultibody>& s =
+      std::dynamic_pointer_cast<StateMultibody>(state);
   if (s) {
     pin_model_ = s->get_pinocchio();
   }
@@ -77,7 +77,7 @@ ResidualModelStateTpl<Scalar>::~ResidualModelStateTpl() {}
 
 template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -90,7 +90,7 @@ void ResidualModelStateTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -103,9 +103,9 @@ void ResidualModelStateTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::calcCostDiff(
-    const boost::shared_ptr<CostDataAbstract>& cdata,
-    const boost::shared_ptr<ResidualDataAbstract>& rdata,
-    const boost::shared_ptr<ActivationDataAbstract>& adata, const bool) {
+    const std::shared_ptr<CostDataAbstract>& cdata,
+    const std::shared_ptr<ResidualDataAbstract>& rdata,
+    const std::shared_ptr<ActivationDataAbstract>& adata, const bool) {
   const std::size_t nv = state_->get_nv();
   if (pin_model_) {
     typedef Eigen::Block<MatrixXs> MatrixBlock;

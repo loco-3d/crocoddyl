@@ -67,10 +67,10 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
 ActivationModelFactory::ActivationModelFactory() {}
 ActivationModelFactory::~ActivationModelFactory() {}
 
-boost::shared_ptr<crocoddyl::ActivationModelAbstract>
+std::shared_ptr<crocoddyl::ActivationModelAbstract>
 ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
                                std::size_t nr) const {
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
+  std::shared_ptr<crocoddyl::ActivationModelAbstract> activation;
   Eigen::VectorXd lb = Eigen::VectorXd::Random(nr);
   Eigen::VectorXd ub =
       lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
@@ -81,40 +81,39 @@ ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
 
   switch (activation_type) {
     case ActivationModelTypes::ActivationModelQuad:
-      activation = boost::make_shared<crocoddyl::ActivationModelQuad>(nr);
+      activation = std::make_shared<crocoddyl::ActivationModelQuad>(nr);
       break;
     case ActivationModelTypes::ActivationModelQuadFlatExp:
       activation =
-          boost::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr, alpha);
+          std::make_shared<crocoddyl::ActivationModelQuadFlatExp>(nr, alpha);
       break;
     case ActivationModelTypes::ActivationModelQuadFlatLog:
       activation =
-          boost::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr, alpha);
+          std::make_shared<crocoddyl::ActivationModelQuadFlatLog>(nr, alpha);
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation =
-          boost::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
+          std::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       activation =
-          boost::make_shared<crocoddyl::ActivationModelSmooth2Norm>(nr, eps);
+          std::make_shared<crocoddyl::ActivationModelSmooth2Norm>(nr, eps);
       break;
     case ActivationModelTypes::ActivationModelWeightedQuad:
       activation =
-          boost::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
+          std::make_shared<crocoddyl::ActivationModelWeightedQuad>(weights);
       break;
     case ActivationModelTypes::ActivationModelQuadraticBarrier:
-      activation =
-          boost::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(
-              crocoddyl::ActivationBounds(lb, ub));
+      activation = std::make_shared<crocoddyl::ActivationModelQuadraticBarrier>(
+          crocoddyl::ActivationBounds(lb, ub));
       break;
     case ActivationModelTypes::ActivationModelWeightedQuadraticBarrier:
-      activation = boost::make_shared<
-          crocoddyl::ActivationModelWeightedQuadraticBarrier>(
-          crocoddyl::ActivationBounds(lb, ub), weights);
+      activation =
+          std::make_shared<crocoddyl::ActivationModelWeightedQuadraticBarrier>(
+              crocoddyl::ActivationBounds(lb, ub), weights);
       break;
     case ActivationModelTypes::ActivationModel2NormBarrier:
-      activation = boost::make_shared<crocoddyl::ActivationModel2NormBarrier>(
+      activation = std::make_shared<crocoddyl::ActivationModel2NormBarrier>(
           nr, alpha, hessian);
       break;
     default:

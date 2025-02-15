@@ -113,7 +113,7 @@ class ActivationModelQuadraticBarrierTpl
       : Base(bounds.lb.size()), bounds_(bounds) {};
   virtual ~ActivationModelQuadraticBarrierTpl() {};
 
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -121,7 +121,7 @@ class ActivationModelQuadraticBarrierTpl
                                       std::to_string(nr_) + ")");
     }
 
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
     d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
     d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
@@ -129,7 +129,7 @@ class ActivationModelQuadraticBarrierTpl
                     Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
   };
 
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -137,7 +137,7 @@ class ActivationModelQuadraticBarrierTpl
                                       std::to_string(nr_) + ")");
     }
 
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
     data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
 
     using pinocchio::internal::if_then_else;
@@ -149,8 +149,8 @@ class ActivationModelQuadraticBarrierTpl
     }
   };
 
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+    return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
 
   const ActivationBounds& get_bounds() const { return bounds_; };

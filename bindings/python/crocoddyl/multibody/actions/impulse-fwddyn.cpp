@@ -17,8 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeActionImpulseFwdDynamics() {
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ActionModelImpulseFwdDynamics> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionModelImpulseFwdDynamics> >();
 
   bp::class_<ActionModelImpulseFwdDynamics, bp::bases<ActionModelAbstract> >(
       "ActionModelImpulseFwdDynamics",
@@ -30,9 +29,9 @@ void exposeActionImpulseFwdDynamics() {
       "include the armature, you need to use set_armature(). On the other "
       "hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>,
-               boost::shared_ptr<ImpulseModelMultiple>,
-               boost::shared_ptr<CostModelSum>,
+      bp::init<std::shared_ptr<StateMultibody>,
+               std::shared_ptr<ImpulseModelMultiple>,
+               std::shared_ptr<CostModelSum>,
                bp::optional<double, double, bool> >(
           bp::args("self", "state", " impulses", "costs", "r_coeff",
                    "inv_damping", "enable_force"),
@@ -51,10 +50,10 @@ void exposeActionImpulseFwdDynamics() {
           "JMinvJt (default 0.)\n"
           ":param enable_force: Enable the computation of force Jacobians "
           "(default False)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-                    boost::shared_ptr<ImpulseModelMultiple>,
-                    boost::shared_ptr<CostModelSum>,
-                    boost::shared_ptr<ConstraintModelManager>,
+      .def(bp::init<std::shared_ptr<StateMultibody>,
+                    std::shared_ptr<ImpulseModelMultiple>,
+                    std::shared_ptr<CostModelSum>,
+                    std::shared_ptr<ConstraintModelManager>,
                     bp::optional<double, double, bool> >(
           bp::args("self", "state", "impulses", "costs", "constraints",
                    "r_coeff", "inv_damping", "enable_force"),
@@ -75,7 +74,7 @@ void exposeActionImpulseFwdDynamics() {
           ":param enable_force: Enable the computation of force Jacobians "
           "(default False)"))
       .def<void (ActionModelImpulseFwdDynamics::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelImpulseFwdDynamics::calc,
@@ -90,11 +89,11 @@ void exposeActionImpulseFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
       .def<void (ActionModelImpulseFwdDynamics::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ActionModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ActionModelImpulseFwdDynamics::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelImpulseFwdDynamics::calcDiff,
@@ -112,7 +111,7 @@ void exposeActionImpulseFwdDynamics() {
           ":param u: time-continuous control input\n"
           "")
       .def<void (ActionModelImpulseFwdDynamics::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -159,8 +158,7 @@ void exposeActionImpulseFwdDynamics() {
           "Damping factor for cholesky decomposition of JMinvJt")
       .def(CopyableVisitor<ActionModelImpulseFwdDynamics>());
 
-  bp::register_ptr_to_python<
-      boost::shared_ptr<ActionDataImpulseFwdDynamics> >();
+  bp::register_ptr_to_python<std::shared_ptr<ActionDataImpulseFwdDynamics> >();
 
   bp::class_<ActionDataImpulseFwdDynamics, bp::bases<ActionDataAbstract> >(
       "ActionDataImpulseFwdDynamics",

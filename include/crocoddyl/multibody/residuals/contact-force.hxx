@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Force& fref, const std::size_t nc, const std::size_t nu,
     const bool fwddyn)
     : Base(state, nc, nu, fwddyn ? true : false, fwddyn ? true : false, true),
@@ -36,7 +36,7 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
 
 template <typename Scalar>
 ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Force& fref, const std::size_t nc)
     : Base(state, nc),
       fwddyn_(true),
@@ -61,7 +61,7 @@ ResidualModelContactForceTpl<Scalar>::~ResidualModelContactForceTpl() {}
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -83,14 +83,14 @@ void ResidualModelContactForceTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   if (fwddyn_ || update_jacobians_) {
     updateJacobians(data);
@@ -99,17 +99,17 @@ void ResidualModelContactForceTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   data->Rx.setZero();
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelContactForceTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  boost::shared_ptr<ResidualDataAbstract> d = boost::allocate_shared<Data>(
-      Eigen::aligned_allocator<Data>(), this, data);
+  std::shared_ptr<ResidualDataAbstract> d =
+      std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this, data);
   if (!fwddyn_) {
     updateJacobians(d);
   }
@@ -118,7 +118,7 @@ ResidualModelContactForceTpl<Scalar>::createData(
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::updateJacobians(
-    const boost::shared_ptr<ResidualDataAbstract>& data) {
+    const std::shared_ptr<ResidualDataAbstract>& data) {
   Data* d = static_cast<Data*>(data.get());
 
   const MatrixXs& df_dx = d->contact->df_dx;
@@ -144,8 +144,8 @@ void ResidualModelContactForceTpl<Scalar>::updateJacobians(
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::print(std::ostream& os) const {
-  boost::shared_ptr<StateMultibody> s =
-      boost::static_pointer_cast<StateMultibody>(state_);
+  std::shared_ptr<StateMultibody> s =
+      std::static_pointer_cast<StateMultibody>(state_);
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
   os << "ResidualModelContactForce {frame="

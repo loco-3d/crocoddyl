@@ -57,7 +57,7 @@ class ResidualModelCentroidalMomentumTpl
    * @param[in] href   Reference centroidal momentum
    * @param[in] nu     Dimension of the control vector
    */
-  ResidualModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelCentroidalMomentumTpl(std::shared_ptr<StateMultibody> state,
                                      const Vector6s& href,
                                      const std::size_t nu);
 
@@ -69,7 +69,7 @@ class ResidualModelCentroidalMomentumTpl
    * @param[in] state  State of the multibody system
    * @param[in] href   Reference centroidal momentum
    */
-  ResidualModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelCentroidalMomentumTpl(std::shared_ptr<StateMultibody> state,
                                      const Vector6s& href);
   virtual ~ResidualModelCentroidalMomentumTpl();
 
@@ -80,7 +80,7 @@ class ResidualModelCentroidalMomentumTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -91,14 +91,14 @@ class ResidualModelCentroidalMomentumTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the centroidal momentum residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -125,7 +125,7 @@ class ResidualModelCentroidalMomentumTpl
 
  private:
   Vector6s href_;  //!< Reference centroidal momentum
-  boost::shared_ptr<typename StateMultibody::PinocchioModel>
+  std::shared_ptr<typename StateMultibody::PinocchioModel>
       pin_model_;  //!< Pinocchio model
 };
 

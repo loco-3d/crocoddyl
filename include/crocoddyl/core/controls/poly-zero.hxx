@@ -19,7 +19,7 @@ ControlParametrizationModelPolyZeroTpl<
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty(
@@ -32,11 +32,11 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calc(
 template <typename Scalar>
 #ifndef NDEBUG
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>&) const {
 #else
 void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>&, const Scalar,
+    const std::shared_ptr<ControlParametrizationDataAbstract>&, const Scalar,
     const Eigen::Ref<const VectorXs>&) const {
 #endif
   // The Hessian has constant values which were set in createData.
@@ -45,17 +45,17 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelPolyZeroTpl<Scalar>::createData() {
-  boost::shared_ptr<Data> data =
-      boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  std::shared_ptr<Data> data =
+      std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   data->dw_du.setIdentity();
   return data;
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
     throw_pretty(
@@ -96,7 +96,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::convertBounds(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>&,
+    const std::shared_ptr<ControlParametrizationDataAbstract>&,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
@@ -129,7 +129,7 @@ void ControlParametrizationModelPolyZeroTpl<Scalar>::multiplyByJacobian(
 template <typename Scalar>
 void ControlParametrizationModelPolyZeroTpl<Scalar>::
     multiplyJacobianTransposeBy(
-        const boost::shared_ptr<ControlParametrizationDataAbstract>&,
+        const std::shared_ptr<ControlParametrizationDataAbstract>&,
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
         const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),

@@ -24,16 +24,15 @@ class ConstraintModelAbstract_wrap
   using ConstraintModelAbstract::nu_;
   using ConstraintModelAbstract::unone_;
 
-  ConstraintModelAbstract_wrap(
-      boost::shared_ptr<StateAbstract> state,
-      boost::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
-      const std::size_t nh)
+  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
+                               std::shared_ptr<ResidualModelAbstract> residual,
+                               const std::size_t ng, const std::size_t nh)
       : ConstraintModelAbstract(state, residual, ng, nh),
         bp::wrapper<ConstraintModelAbstract>() {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                                const std::size_t nu, const std::size_t ng,
                                const std::size_t nh, const bool T_const = true)
       : ConstraintModelAbstract(state, nu, ng, nh, T_const),
@@ -41,14 +40,14 @@ class ConstraintModelAbstract_wrap
     unone_ = NAN * MathBase::VectorXs::Ones(nu);
   }
 
-  ConstraintModelAbstract_wrap(boost::shared_ptr<StateAbstract> state,
+  ConstraintModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
                                const std::size_t ng, const std::size_t nh,
                                const bool T_const = true)
       : ConstraintModelAbstract(state, ng, nh, T_const) {
     unone_ = NAN * MathBase::VectorXs::Ones(nu_);
   }
 
-  void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& x,
             const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -70,7 +69,7 @@ class ConstraintModelAbstract_wrap
     }
   }
 
-  void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& x,
                 const Eigen::Ref<const Eigen::VectorXd>& u) {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
@@ -92,16 +91,16 @@ class ConstraintModelAbstract_wrap
     }
   }
 
-  boost::shared_ptr<ConstraintDataAbstract> createData(
+  std::shared_ptr<ConstraintDataAbstract> createData(
       DataCollectorAbstract* const data) {
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ConstraintDataAbstract> >(
+      return bp::call<std::shared_ptr<ConstraintDataAbstract> >(
           createData.ptr(), boost::ref(data));
     }
     return ConstraintModelAbstract::createData(data);
   }
 
-  boost::shared_ptr<ConstraintDataAbstract> default_createData(
+  std::shared_ptr<ConstraintDataAbstract> default_createData(
       DataCollectorAbstract* const data) {
     return this->ConstraintModelAbstract::createData(data);
   }

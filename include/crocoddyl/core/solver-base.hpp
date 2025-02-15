@@ -67,7 +67,7 @@ class SolverAbstract {
    *
    * @param[in] problem  shooting problem
    */
-  explicit SolverAbstract(boost::shared_ptr<ShootingProblem> problem);
+  explicit SolverAbstract(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverAbstract();
 
   /**
@@ -221,17 +221,17 @@ class SolverAbstract {
    * @param  callbacks  set of callback functions
    */
   void setCallbacks(
-      const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks);
+      const std::vector<std::shared_ptr<CallbackAbstract> >& callbacks);
 
   /**
    * @brief Return the list of callback functions using for diagnostic
    */
-  const std::vector<boost::shared_ptr<CallbackAbstract> >& getCallbacks() const;
+  const std::vector<std::shared_ptr<CallbackAbstract> >& getCallbacks() const;
 
   /**
    * @brief Return the shooting problem
    */
-  const boost::shared_ptr<ShootingProblem>& get_problem() const;
+  const std::shared_ptr<ShootingProblem>& get_problem() const;
 
   /**
    * @brief Return the state trajectory \f$\mathbf{x}_s\f$
@@ -429,11 +429,11 @@ class SolverAbstract {
   void set_feasnorm(const FeasibilityNorm feas_norm);
 
  protected:
-  boost::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
-  std::vector<Eigen::VectorXd> xs_;             //!< State trajectory
-  std::vector<Eigen::VectorXd> us_;             //!< Control trajectory
+  std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
+  std::vector<Eigen::VectorXd> xs_;           //!< State trajectory
+  std::vector<Eigen::VectorXd> us_;           //!< Control trajectory
   std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
-  std::vector<boost::shared_ptr<CallbackAbstract> >
+  std::vector<std::shared_ptr<CallbackAbstract> >
       callbacks_;      //!< Callback functions
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was

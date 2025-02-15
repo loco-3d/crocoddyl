@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nu)
+    std::shared_ptr<StateAbstract> state, const std::size_t nu)
     : state_(state),
       lb_(0),
       ub_(0),
@@ -26,7 +26,7 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
 
 template <typename Scalar>
 ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
-    boost::shared_ptr<StateAbstract> state)
+    std::shared_ptr<StateAbstract> state)
     : state_(state),
       lb_(0),
       ub_(0),
@@ -42,7 +42,7 @@ ConstraintModelManagerTpl<Scalar>::~ConstraintModelManagerTpl() {}
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::addConstraint(
     const std::string& name,
-    boost::shared_ptr<ConstraintModelAbstract> constraint, const bool active) {
+    std::shared_ptr<ConstraintModelAbstract> constraint, const bool active) {
   if (constraint->get_nu() != nu_) {
     throw_pretty(name << " constraint item doesn't have the same control "
                          "dimension (it should be " +
@@ -50,7 +50,7 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(
   }
   std::pair<typename ConstraintModelContainer::iterator, bool> ret =
       constraints_.insert(std::make_pair(
-          name, boost::make_shared<ConstraintItem>(name, constraint, active)));
+          name, std::make_shared<ConstraintItem>(name, constraint, active)));
   if (ret.second == false) {
     std::cout << "Warning: we couldn't add the " << name
               << " constraint item, it already existed." << std::endl;
@@ -128,7 +128,7 @@ void ConstraintModelManagerTpl<Scalar>::changeConstraintStatus(
 
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::calc(
-    const boost::shared_ptr<ConstraintDataManager>& data,
+    const std::shared_ptr<ConstraintDataManager>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -157,9 +157,9 @@ void ConstraintModelManagerTpl<Scalar>::calc(
   for (it_m = constraints_.begin(), end_m = constraints_.end(),
       it_d = data->constraints.begin(), end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    const std::shared_ptr<ConstraintItem>& m_i = it_m->second;
     if (m_i->active) {
-      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(
           it_m->first == it_d->first,
           "it doesn't match the constraint name between model and data ("
@@ -180,7 +180,7 @@ void ConstraintModelManagerTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::calc(
-    const boost::shared_ptr<ConstraintDataManager>& data,
+    const std::shared_ptr<ConstraintDataManager>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -204,9 +204,9 @@ void ConstraintModelManagerTpl<Scalar>::calc(
   for (it_m = constraints_.begin(), end_m = constraints_.end(),
       it_d = data->constraints.begin(), end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    const std::shared_ptr<ConstraintItem>& m_i = it_m->second;
     if (m_i->active && m_i->constraint->get_T_constraint()) {
-      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(
           it_m->first == it_d->first,
           "it doesn't match the constraint name between model and data ("
@@ -227,7 +227,7 @@ void ConstraintModelManagerTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ConstraintDataManager>& data,
+    const std::shared_ptr<ConstraintDataManager>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -260,9 +260,9 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
   for (it_m = constraints_.begin(), end_m = constraints_.end(),
       it_d = data->constraints.begin(), end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    const std::shared_ptr<ConstraintItem>& m_i = it_m->second;
     if (m_i->active) {
-      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(
           it_m->first == it_d->first,
           "it doesn't match the constraint name between model and data ("
@@ -283,7 +283,7 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ConstraintModelManagerTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ConstraintDataManager>& data,
+    const std::shared_ptr<ConstraintDataManager>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -310,9 +310,9 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
   for (it_m = constraints_.begin(), end_m = constraints_.end(),
       it_d = data->constraints.begin(), end_d = data->constraints.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ConstraintItem>& m_i = it_m->second;
+    const std::shared_ptr<ConstraintItem>& m_i = it_m->second;
     if (m_i->active && m_i->constraint->get_T_constraint()) {
-      const boost::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ConstraintDataAbstract>& d_i = it_d->second;
       assert_pretty(
           it_m->first == it_d->first,
           "it doesn't match the constraint name between model and data ("
@@ -330,15 +330,15 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ConstraintDataManagerTpl<Scalar> >
+std::shared_ptr<ConstraintDataManagerTpl<Scalar> >
 ConstraintModelManagerTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<ConstraintDataManager>(
+  return std::allocate_shared<ConstraintDataManager>(
       Eigen::aligned_allocator<ConstraintDataManager>(), this, data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >&
+const std::shared_ptr<StateAbstractTpl<Scalar> >&
 ConstraintModelManagerTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -421,7 +421,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Active:" << std::endl;
   for (std::set<std::string>::const_iterator it = active.begin();
        it != active.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>&
         constraint_item = model.get_constraints().find(*it)->second;
     if (it != --active.end()) {
@@ -433,7 +433,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Inactive:" << std::endl;
   for (std::set<std::string>::const_iterator it = inactive.begin();
        it != inactive.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ConstraintModelManagerTpl<Scalar>::ConstraintItem>&
         constraint_item = model.get_constraints().find(*it)->second;
     if (it != --inactive.end()) {

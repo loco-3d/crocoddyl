@@ -53,7 +53,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector3s& xref,
                     const pinocchio::ReferenceFrame type, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
@@ -73,7 +73,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] type   Type of contact
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector3s& xref,
                     const pinocchio::ReferenceFrame type,
                     const Vector2s& gains = Vector2s::Zero());
@@ -81,14 +81,14 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                         const pinocchio::FrameIndex id, const Vector3s& xref,
                         const std::size_t nu,
                         const Vector2s& gains = Vector2s::Zero());)
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                         const pinocchio::FrameIndex id, const Vector3s& xref,
                         const Vector2s& gains = Vector2s::Zero());)
   virtual ~ContactModel3DTpl();
@@ -100,7 +100,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -110,7 +110,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -119,13 +119,13 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] data   3d contact data
    * @param[in] force  3d force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
                            const VectorXs& force);
 
   /**
    * @brief Create the 3d contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(
+  virtual std::shared_ptr<ContactDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
   /**

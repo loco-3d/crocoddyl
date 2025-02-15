@@ -16,25 +16,25 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualControlGrav() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelControlGrav> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelControlGrav> >();
 
   bp::class_<ResidualModelControlGrav, bp::bases<ResidualModelAbstract> >(
       "ResidualModelControlGrav",
       "This residual function is defined as r = a(u) - g(q), where a(u)\n"
       "is the actuated torque; and q, g(q) are the generalized position\n"
       "and gravity vector, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, std::size_t>(
+      bp::init<std::shared_ptr<StateMultibody>, std::size_t>(
           bp::args("self", "state", "nu"),
           "Initialize the control-gravity residual model.\n\n"
           ":param state: state description\n"
           ":param nu: dimension of the control vector"))
-      .def(bp::init<boost::shared_ptr<StateMultibody> >(
+      .def(bp::init<std::shared_ptr<StateMultibody> >(
           bp::args("self", "state"),
           "Initialize the control-gravity residual model.\n\n"
           "The default nu is obtained from state.nv.\n"
           ":param state: state description"))
       .def<void (ResidualModelControlGrav::*)(
-          const boost::shared_ptr<ResidualDataAbstract> &,
+          const std::shared_ptr<ResidualDataAbstract> &,
           const Eigen::Ref<const Eigen::VectorXd> &,
           const Eigen::Ref<const Eigen::VectorXd> &)>(
           "calc", &ResidualModelControlGrav::calc,
@@ -44,11 +44,11 @@ void exposeResidualControlGrav() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelControlGrav::*)(
-          const boost::shared_ptr<ResidualDataAbstract> &,
+          const std::shared_ptr<ResidualDataAbstract> &,
           const Eigen::Ref<const Eigen::VectorXd> &)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelControlGrav::*)(
-          const boost::shared_ptr<ResidualDataAbstract> &,
+          const std::shared_ptr<ResidualDataAbstract> &,
           const Eigen::Ref<const Eigen::VectorXd> &,
           const Eigen::Ref<const Eigen::VectorXd> &)>(
           "calcDiff", &ResidualModelControlGrav::calcDiff,
@@ -58,7 +58,7 @@ void exposeResidualControlGrav() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelControlGrav::*)(
-          const boost::shared_ptr<ResidualDataAbstract> &,
+          const std::shared_ptr<ResidualDataAbstract> &,
           const Eigen::Ref<const Eigen::VectorXd> &)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -74,7 +74,7 @@ void exposeResidualControlGrav() {
            ":return residual data.")
       .def(CopyableVisitor<ResidualModelControlGrav>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataControlGrav> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataControlGrav> >();
 
   bp::class_<ResidualDataControlGrav, bp::bases<ResidualDataAbstract> >(
       "ResidualDataControlGrav", "Data for control gravity residual.\n\n",

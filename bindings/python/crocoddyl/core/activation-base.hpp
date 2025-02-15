@@ -23,7 +23,7 @@ class ActivationModelAbstract_wrap
   explicit ActivationModelAbstract_wrap(const std::size_t nr)
       : ActivationModelAbstract(nr), bp::wrapper<ActivationModelAbstract>() {}
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data,
+  void calc(const std::shared_ptr<ActivationDataAbstract>& data,
             const Eigen::Ref<const Eigen::VectorXd>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -34,7 +34,7 @@ class ActivationModelAbstract_wrap
                           (Eigen::VectorXd)r);
   }
 
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
                 const Eigen::Ref<const Eigen::VectorXd>& r) {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
@@ -45,16 +45,16 @@ class ActivationModelAbstract_wrap
                           (Eigen::VectorXd)r);
   }
 
-  boost::shared_ptr<ActivationDataAbstract> createData() {
+  std::shared_ptr<ActivationDataAbstract> createData() {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<boost::shared_ptr<ActivationDataAbstract> >(
+      return bp::call<std::shared_ptr<ActivationDataAbstract> >(
           createData.ptr());
     }
     return ActivationModelAbstract::createData();
   }
 
-  boost::shared_ptr<ActivationDataAbstract> default_createData() {
+  std::shared_ptr<ActivationDataAbstract> default_createData() {
     return this->ActivationModelAbstract::createData();
   }
 };

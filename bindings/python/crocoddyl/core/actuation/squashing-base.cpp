@@ -15,7 +15,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSquashingAbstract() {
-  bp::register_ptr_to_python<boost::shared_ptr<SquashingModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<SquashingModelAbstract> >();
 
   bp::class_<SquashingModelAbstract_wrap, boost::noncopyable>(
       "SquashingModelAbstract",
@@ -63,7 +63,7 @@ void exposeSquashingAbstract() {
           "upper bound for the active zone of the squashing function")
       .def(CopyableVisitor<SquashingModelAbstract_wrap>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<SquashingDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<SquashingDataAbstract> >();
 
   bp::class_<SquashingDataAbstract>(
       "SquashingDataAbstract",

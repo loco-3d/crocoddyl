@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActuationModelNumDiffTpl<Scalar>::ActuationModelNumDiffTpl(
-    boost::shared_ptr<Base> model)
+    std::shared_ptr<Base> model)
     : Base(model->get_state(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -23,7 +23,7 @@ ActuationModelNumDiffTpl<Scalar>::~ActuationModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -42,7 +42,7 @@ void ActuationModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -56,7 +56,7 @@ void ActuationModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -97,7 +97,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -124,7 +124,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::commands(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& tau) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
@@ -144,7 +144,7 @@ void ActuationModelNumDiffTpl<Scalar>::commands(
 
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::torqueTransform(
-    const boost::shared_ptr<ActuationDataAbstract>& data,
+    const std::shared_ptr<ActuationDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != model_->get_state()->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -162,13 +162,13 @@ void ActuationModelNumDiffTpl<Scalar>::torqueTransform(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActuationDataAbstractTpl<Scalar> >
+std::shared_ptr<ActuationDataAbstractTpl<Scalar> >
 ActuationModelNumDiffTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
 ActuationModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

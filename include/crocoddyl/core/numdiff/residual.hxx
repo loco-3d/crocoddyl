@@ -13,7 +13,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelNumDiffTpl<Scalar>::ResidualModelNumDiffTpl(
-    const boost::shared_ptr<Base>& model)
+    const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_nr(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -23,7 +23,7 @@ ResidualModelNumDiffTpl<Scalar>::~ResidualModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
@@ -32,7 +32,7 @@ void ResidualModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
@@ -41,7 +41,7 @@ void ResidualModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -85,7 +85,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -108,14 +108,14 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
 ResidualModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

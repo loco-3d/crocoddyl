@@ -16,7 +16,7 @@
 
 namespace crocoddyl {
 
-SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
+SolverAbstract::SolverAbstract(std::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
       is_feasible_(false),
       was_feasible_(false),
@@ -52,10 +52,10 @@ SolverAbstract::SolverAbstract(boost::shared_ptr<ShootingProblem> problem)
   us_.resize(T);
   fs_.resize(T + 1);
   g_adj_.resize(T + 1);
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     xs_[t] = model->get_state()->zero();
@@ -74,10 +74,10 @@ void SolverAbstract::resizeData() {
   START_PROFILER("SolverAbstract::resizeData");
   const std::size_t T = problem_->get_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     us_[t].conservativeResize(nu);
@@ -93,9 +93,9 @@ double SolverAbstract::computeDynamicFeasibility() {
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
   const Eigen::VectorXd& x0 = problem_->get_x0();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
 
   models[0]->get_state()->diff(xs_[0], x0, fs_[0]);
@@ -103,8 +103,8 @@ double SolverAbstract::computeDynamicFeasibility() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& m = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& d = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& m = models[t];
+    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     m->get_state()->diff(xs_[t + 1], d->xnext, fs_[t + 1]);
   }
   switch (feasnorm_) {
@@ -127,9 +127,9 @@ double SolverAbstract::computeDynamicFeasibility() {
 double SolverAbstract::computeInequalityFeasibility() {
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
 
   switch (feasnorm_) {
@@ -178,9 +178,9 @@ double SolverAbstract::computeInequalityFeasibility() {
 double SolverAbstract::computeEqualityFeasibility() {
   tmp_feas_ = 0.;
   const std::size_t T = problem_->get_T();
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   switch (feasnorm_) {
     case LInf:
@@ -215,11 +215,11 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                                   bool is_feasible) {
   const std::size_t T = problem_->get_T();
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   if (xs_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
       xs_[t] = model->get_state()->zero();
     }
     xs_.back() = problem_->get_terminalModel()->get_state()->zero();
@@ -255,7 +255,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 
   if (us_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
       const std::size_t nu = model->get_nu();
       us_[t] = Eigen::VectorXd::Zero(nu);
     }
@@ -265,7 +265,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
                    << us_warm.size() << " expecting " << T);
     }
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
       const std::size_t nu = model->get_nu();
       if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
         throw_pretty("Invalid argument: "
@@ -283,16 +283,16 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
 }
 
 void SolverAbstract::setCallbacks(
-    const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks) {
+    const std::vector<std::shared_ptr<CallbackAbstract> >& callbacks) {
   callbacks_ = callbacks;
 }
 
-const std::vector<boost::shared_ptr<CallbackAbstract> >&
+const std::vector<std::shared_ptr<CallbackAbstract> >&
 SolverAbstract::getCallbacks() const {
   return callbacks_;
 }
 
-const boost::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const {
+const std::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const {
   return problem_;
 }
 
@@ -399,10 +399,10 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
                                              std::to_string(T));
   }
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     if (static_cast<std::size_t>(us[t].size()) != nu) {
       throw_pretty("Invalid argument: "

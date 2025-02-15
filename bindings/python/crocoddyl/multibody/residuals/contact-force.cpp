@@ -17,14 +17,14 @@ namespace crocoddyl {
 namespace python {
 
 void exposeResidualContactForce() {
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualModelContactForce> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualModelContactForce> >();
 
   bp::class_<ResidualModelContactForce, bp::bases<ResidualModelAbstract> >(
       "ResidualModelContactForce",
       "This residual function is defined as r = f-fref, where f,fref describe "
       "the current and reference\n"
       "the spatial forces, respectively.",
-      bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                pinocchio::Force, std::size_t, std::size_t, bp::optional<bool> >(
           bp::args("self", "state", "id", "fref", "nc", "nu", "fwddyn"),
           "Initialize the contact force residual model.\n\n"
@@ -37,7 +37,7 @@ void exposeResidualContactForce() {
           ":param fwddyn: indicate if we have a forward dynamics problem "
           "(True) or inverse "
           "dynamics problem (False) (default True)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
+      .def(bp::init<std::shared_ptr<StateMultibody>, pinocchio::FrameIndex,
                     pinocchio::Force, std::size_t>(
           bp::args("self", "state", "id", "fref", "nc"),
           "Initialize the contact force residual model.\n\n"
@@ -50,7 +50,7 @@ void exposeResidualContactForce() {
           ":param fref: reference spatial contact force in the contact "
           "coordinates\n"))
       .def<void (ResidualModelContactForce::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelContactForce::calc,
@@ -60,11 +60,11 @@ void exposeResidualContactForce() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactForce::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
       .def<void (ResidualModelContactForce::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelContactForce::calcDiff,
@@ -75,7 +75,7 @@ void exposeResidualContactForce() {
           ":param x: state point (dim. state.nx)\n"
           ":param u: control input (dim. nu)")
       .def<void (ResidualModelContactForce::*)(
-          const boost::shared_ptr<ResidualDataAbstract>&,
+          const std::shared_ptr<ResidualDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &ResidualModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -103,7 +103,7 @@ void exposeResidualContactForce() {
                     "reference spatial force")
       .def(CopyableVisitor<ResidualModelContactForce>());
 
-  bp::register_ptr_to_python<boost::shared_ptr<ResidualDataContactForce> >();
+  bp::register_ptr_to_python<std::shared_ptr<ResidualDataContactForce> >();
 
   bp::class_<ResidualDataContactForce, bp::bases<ResidualDataAbstract> >(
       "ResidualDataContactForce", "Data for contact force residual.\n\n",

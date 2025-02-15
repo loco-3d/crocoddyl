@@ -18,7 +18,7 @@ namespace python {
 
 void exposeDifferentialActionContactFwdDynamics() {
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionModelContactFwdDynamics> >();
+      std::shared_ptr<DifferentialActionModelContactFwdDynamics> >();
 
   bp::class_<DifferentialActionModelContactFwdDynamics,
              bp::bases<DifferentialActionModelAbstract> >(
@@ -32,10 +32,10 @@ void exposeDifferentialActionContactFwdDynamics() {
       "include the armature, you need to use set_armature(). On the other "
       "hand, the\n"
       "stack of cost functions are implemented in CostModelSum().",
-      bp::init<boost::shared_ptr<StateMultibody>,
-               boost::shared_ptr<ActuationModelAbstract>,
-               boost::shared_ptr<ContactModelMultiple>,
-               boost::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
+      bp::init<std::shared_ptr<StateMultibody>,
+               std::shared_ptr<ActuationModelAbstract>,
+               std::shared_ptr<ContactModelMultiple>,
+               std::shared_ptr<CostModelSum>, bp::optional<double, bool> >(
           bp::args("self", "state", "actuation", "contacts", "costs",
                    "inv_damping", "enable_force"),
           "Initialize the constrained forward-dynamics action model.\n\n"
@@ -53,11 +53,11 @@ void exposeDifferentialActionContactFwdDynamics() {
           "JMinvJt (default 0.)\n"
           ":param enable_force: Enable the computation of force Jacobians "
           "(default False)"))
-      .def(bp::init<boost::shared_ptr<StateMultibody>,
-                    boost::shared_ptr<ActuationModelAbstract>,
-                    boost::shared_ptr<ContactModelMultiple>,
-                    boost::shared_ptr<CostModelSum>,
-                    boost::shared_ptr<ConstraintModelManager>,
+      .def(bp::init<std::shared_ptr<StateMultibody>,
+                    std::shared_ptr<ActuationModelAbstract>,
+                    std::shared_ptr<ContactModelMultiple>,
+                    std::shared_ptr<CostModelSum>,
+                    std::shared_ptr<ConstraintModelManager>,
                     bp::optional<double, bool> >(
           bp::args("self", "state", "actuation", "contacts", "costs",
                    "constraints", "inv_damping", "enable_force"),
@@ -78,7 +78,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param enable_force: Enable the computation of force Jacobians "
           "(default False)"))
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelContactFwdDynamics::calc,
@@ -93,12 +93,12 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input")
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &DifferentialActionModelAbstract::calc,
           bp::args("self", "data", "x"))
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelContactFwdDynamics::calcDiff,
@@ -115,7 +115,7 @@ void exposeDifferentialActionContactFwdDynamics() {
           ":param x: time-continuous state vector\n"
           ":param u: time-continuous control input\n")
       .def<void (DifferentialActionModelContactFwdDynamics::*)(
-          const boost::shared_ptr<DifferentialActionDataAbstract>&,
+          const std::shared_ptr<DifferentialActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &DifferentialActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -169,7 +169,7 @@ void exposeDifferentialActionContactFwdDynamics() {
       .def(CopyableVisitor<DifferentialActionModelContactFwdDynamics>());
 
   bp::register_ptr_to_python<
-      boost::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
+      std::shared_ptr<DifferentialActionDataContactFwdDynamics> >();
 
   bp::class_<DifferentialActionDataContactFwdDynamics,
              bp::bases<DifferentialActionDataAbstract> >(

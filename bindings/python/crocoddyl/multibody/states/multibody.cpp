@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeStateMultibody() {
-  bp::register_ptr_to_python<boost::shared_ptr<crocoddyl::StateMultibody> >();
+  bp::register_ptr_to_python<std::shared_ptr<crocoddyl::StateMultibody> >();
 
   bp::class_<StateMultibody, bp::bases<StateAbstract> >(
       "StateMultibody",
@@ -36,7 +36,7 @@ void exposeStateMultibody() {
       "code\n"
       "can be reused in any robot that is described through its Pinocchio "
       "model.",
-      bp::init<boost::shared_ptr<pinocchio::Model> >(
+      bp::init<std::shared_ptr<pinocchio::Model> >(
           bp::args("self", "pinocchioModel"),
           "Initialize the multibody state given a Pinocchio model.\n\n"
           ":param pinocchioModel: pinocchio model (i.e. multibody model)")

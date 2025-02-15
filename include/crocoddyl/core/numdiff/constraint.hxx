@@ -12,7 +12,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(
-    const boost::shared_ptr<Base>& model)
+    const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_nu(), model->get_ng(),
            model->get_nh()),
       model_(model),
@@ -23,7 +23,7 @@ ConstraintModelNumDiffTpl<Scalar>::~ConstraintModelNumDiffTpl() {}
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -46,7 +46,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -64,7 +64,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -128,7 +128,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty(
@@ -166,15 +166,15 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
+std::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
 ConstraintModelNumDiffTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ConstraintModelAbstractTpl<Scalar> >&
 ConstraintModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

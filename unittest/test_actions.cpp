@@ -23,20 +23,20 @@ using namespace crocoddyl::unittest;
 //----------------------------------------------------------------------------//
 
 void test_check_data(
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // Run the print function
   std::ostringstream tmp;
   tmp << *model;
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   BOOST_CHECK(model->checkData(data));
 }
 
-void test_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
+void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   data->cost = nan("");
 
@@ -59,13 +59,13 @@ void test_calc(const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
 }
 
 void test_partial_derivatives_against_numdiff(
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
 
   crocoddyl::ActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
       model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -115,7 +115,7 @@ void test_partial_derivatives_against_numdiff(
 void test_check_action_data(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
   test_check_data(model);
 }
@@ -125,15 +125,15 @@ void test_check_integrated_action_data(
     IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
       factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
-      ctrl = factory_ctrl.create(control_type, dam->get_nu());
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
       factory_int.create(integrator_type, dam, ctrl);
   test_check_data(model);
 }
@@ -141,7 +141,7 @@ void test_check_integrated_action_data(
 void test_calc_action_model(ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
   test_calc(model);
 }
@@ -151,15 +151,15 @@ void test_calc_integrated_action_model(
     IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
       factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
-      ctrl = factory_ctrl.create(control_type, dam->get_nu());
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
       factory_int.create(integrator_type, dam, ctrl);
   test_calc(model);
 }
@@ -168,7 +168,7 @@ void test_partial_derivatives_action_model(
     ActionModelTypes::Type action_model_type) {
   // create the model
   ActionModelFactory factory;
-  const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       factory.create(action_model_type);
   test_partial_derivatives_against_numdiff(model);
 }
@@ -178,15 +178,15 @@ void test_partial_derivatives_integrated_action_model(
     IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
       factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
-      ctrl = factory_ctrl.create(control_type, dam->get_nu());
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
+      factory_ctrl.create(control_type, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
       factory_int.create(integrator_type, dam, ctrl);
   test_partial_derivatives_against_numdiff(model);
 }
@@ -201,12 +201,12 @@ void test_partial_derivatives_integrated_action_model(
  * beginning of the step has the same value.
  */
 void test_calc_against_calc(
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model1,
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model2) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model1,
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model2) {
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data1 =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data1 =
       model1->createData();
-  const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data2 =
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data2 =
       model2->createData();
 
   // Generating random values for the state and control
@@ -231,19 +231,19 @@ void register_test_calc_integrated_action_model(
     ControlTypes::Type control_type2) {
   // create the differential action model
   DifferentialActionModelFactory factory_dam;
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
       factory_dam.create(dam_type);
   // create the control discretization
   ControlFactory factory_ctrl;
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
-      ctrl1 = factory_ctrl.create(control_type1, dam->get_nu());
-  const boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
-      ctrl2 = factory_ctrl.create(control_type2, dam->get_nu());
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl1 =
+      factory_ctrl.create(control_type1, dam->get_nu());
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl2 =
+      factory_ctrl.create(control_type2, dam->get_nu());
   // create the integrator
   IntegratorFactory factory_int;
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model1 =
+  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model1 =
       factory_int.create(integrator_type, dam, ctrl1);
-  const boost::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model2 =
+  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model2 =
       factory_int.create(integrator_type, dam, ctrl2);
 
   boost::test_tools::output_test_stream test_name;

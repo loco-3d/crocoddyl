@@ -94,7 +94,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] fwddyn  Indicates that we have a forward dynamics problem (true)
    * or inverse dynamics (false)
    */
-  ResidualModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelContactCoPPositionTpl(std::shared_ptr<StateMultibody> state,
                                      const pinocchio::FrameIndex id,
                                      const CoPSupport& cref,
                                      const std::size_t nu,
@@ -110,7 +110,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] id     Reference frame id
    * @param[in] cref   Reference support region of the CoP
    */
-  ResidualModelContactCoPPositionTpl(boost::shared_ptr<StateMultibody> state,
+  ResidualModelContactCoPPositionTpl(std::shared_ptr<StateMultibody> state,
                                      const pinocchio::FrameIndex id,
                                      const CoPSupport& cref);
   virtual ~ResidualModelContactCoPPositionTpl();
@@ -127,7 +127,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u);
 
@@ -141,7 +141,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -156,7 +156,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u);
 
@@ -171,7 +171,7 @@ class ResidualModelContactCoPPositionTpl
    * @param[in] data  Residual data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -184,7 +184,7 @@ class ResidualModelContactCoPPositionTpl
    * `DataCollectorContactTpl`)
    * @return the residual data.
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -192,7 +192,7 @@ class ResidualModelContactCoPPositionTpl
    *
    * @param[in] data  Contact friction cone residual data
    */
-  void updateJacobians(const boost::shared_ptr<ResidualDataAbstract>& data);
+  void updateJacobians(const std::shared_ptr<ResidualDataAbstract>& data);
 
   /**
    * @brief Indicates if we are using the forward-dynamics (true) or
@@ -274,8 +274,8 @@ struct ResidualDataContactCoPPositionTpl
 
     // Avoids data casting at runtime
     const pinocchio::FrameIndex id = model->get_id();
-    const boost::shared_ptr<StateMultibody>& state =
-        boost::static_pointer_cast<StateMultibody>(model->get_state());
+    const std::shared_ptr<StateMultibody>& state =
+        std::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[id].name;
     bool found_contact = false;
     if (is_contact) {
@@ -341,8 +341,8 @@ struct ResidualDataContactCoPPositionTpl
     }
   }
 
-  pinocchio::DataTpl<Scalar>* pinocchio;                     //!< Pinocchio data
-  boost::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force
+  pinocchio::DataTpl<Scalar>* pinocchio;                   //!< Pinocchio data
+  std::shared_ptr<ForceDataAbstractTpl<Scalar> > contact;  //!< Contact force
   using Base::r;
   using Base::Ru;
   using Base::Rx;

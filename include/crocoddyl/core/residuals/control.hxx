@@ -14,7 +14,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state, const VectorXs& uref)
+    std::shared_ptr<typename Base::StateAbstract> state, const VectorXs& uref)
     : Base(state, static_cast<std::size_t>(uref.size()),
            static_cast<std::size_t>(uref.size()), false, false, true),
       uref_(uref) {
@@ -27,7 +27,7 @@ ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
 
 template <typename Scalar>
 ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu)
+    std::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu)
     : Base(state, nu, nu, false, false, true), uref_(VectorXs::Zero(nu)) {
   if (nu_ == 0) {
     throw_pretty("Invalid argument: "
@@ -38,7 +38,7 @@ ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
 
 template <typename Scalar>
 ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
-    boost::shared_ptr<typename Base::StateAbstract> state)
+    std::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, state->get_nv(), state->get_nv(), false, false, true),
       uref_(VectorXs::Zero(state->get_nv())) {}
 
@@ -47,7 +47,7 @@ ResidualModelControlTpl<Scalar>::~ResidualModelControlTpl() {}
 
 template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
     throw_pretty(
@@ -60,7 +60,7 @@ void ResidualModelControlTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   data->r.setZero();
 }
@@ -68,11 +68,11 @@ void ResidualModelControlTpl<Scalar>::calc(
 template <typename Scalar>
 #ifndef NDEBUG
 void ResidualModelControlTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
 #else
 void ResidualModelControlTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>&,
+    const std::shared_ptr<ResidualDataAbstract>&,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
 #endif
   // The Jacobian has constant values which were set in createData.
@@ -81,11 +81,11 @@ void ResidualModelControlTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelControlTpl<Scalar>::createData(
     DataCollectorAbstract* const _data) {
-  boost::shared_ptr<ResidualDataAbstract> data =
-      boost::allocate_shared<ResidualDataAbstract>(
+  std::shared_ptr<ResidualDataAbstract> data =
+      std::allocate_shared<ResidualDataAbstract>(
           Eigen::aligned_allocator<ResidualDataAbstract>(), this, _data);
   data->Ru.diagonal().fill((Scalar)1.);
   return data;
@@ -93,9 +93,9 @@ ResidualModelControlTpl<Scalar>::createData(
 
 template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::calcCostDiff(
-    const boost::shared_ptr<CostDataAbstract>& cdata,
-    const boost::shared_ptr<ResidualDataAbstract>&,
-    const boost::shared_ptr<ActivationDataAbstract>& adata, const bool) {
+    const std::shared_ptr<CostDataAbstract>& cdata,
+    const std::shared_ptr<ResidualDataAbstract>&,
+    const std::shared_ptr<ActivationDataAbstract>& adata, const bool) {
   cdata->Lu = adata->Ar;
   cdata->Luu = adata->Arr;
 }

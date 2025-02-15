@@ -14,8 +14,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-ControlParametrizationModelNumDiffTpl<Scalar>::
-    ControlParametrizationModelNumDiffTpl(boost::shared_ptr<Base> model)
+ControlParametrizationModelNumDiffTpl<
+    Scalar>::ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model)
     : Base(model->get_nw(), model->get_nu()),
       model_(model),
       e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
@@ -26,17 +26,17 @@ ControlParametrizationModelNumDiffTpl<
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  std::shared_ptr<Data> data_nd = std::static_pointer_cast<Data>(data);
   model_->calc(data_nd->data_0, t, u);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
-  boost::shared_ptr<Data> data_nd = boost::static_pointer_cast<Data>(data);
+  std::shared_ptr<Data> data_nd = std::static_pointer_cast<Data>(data);
   data->w = data_nd->data_0->w;
 
   data_nd->du.setZero();
@@ -51,14 +51,14 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelNumDiffTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar t, const Eigen::Ref<const VectorXs>& w) const {
   model_->params(data, t, w);
 }
@@ -73,7 +73,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::convertBounds(
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
@@ -97,7 +97,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyByJacobian(
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
@@ -120,7 +120,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
 ControlParametrizationModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }

@@ -17,8 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 void exposeIntegratedActionAbstract() {
-  bp::register_ptr_to_python<
-      boost::shared_ptr<IntegratedActionModelAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionModelAbstract> >();
 
   bp::class_<IntegratedActionModelAbstract_wrap, boost::noncopyable,
              bp::bases<ActionModelAbstract> >(
@@ -27,7 +26,7 @@ void exposeIntegratedActionAbstract() {
       "In Crocoddyl, an integrated action model transforms a differential "
       "action model in a (discrete) action "
       "model.\n",
-      bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
+      bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
                bp::optional<double, bool> >(
           bp::args("self", "diffModel", "timeStep", "withCostResidual"),
           "Initialize the integrated-action model.\n\n"
@@ -37,8 +36,8 @@ void exposeIntegratedActionAbstract() {
           ":param timestep: integration time step (default 1e-3)\n"
           ":param withCostResidual: includes the cost residuals and "
           "derivatives (default True)."))
-      .def(bp::init<boost::shared_ptr<DifferentialActionModelAbstract>,
-                    boost::shared_ptr<ControlParametrizationModelAbstract>,
+      .def(bp::init<std::shared_ptr<DifferentialActionModelAbstract>,
+                    std::shared_ptr<ControlParametrizationModelAbstract>,
                     bp::optional<double, bool> >(
           bp::args("self", "diffModel", "control", "stepTime",
                    "withCostResidual"),
@@ -60,7 +59,7 @@ void exposeIntegratedActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelAbstract::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calc", &IntegratedActionModelAbstract::calc,
           bp::args("self", "data", "x"))
@@ -77,7 +76,7 @@ void exposeIntegratedActionAbstract() {
            ":param x: state point (dim. state.nx)\n"
            ":param u: control input (dim. nu)")
       .def<void (IntegratedActionModelAbstract::*)(
-          const boost::shared_ptr<ActionDataAbstract>&,
+          const std::shared_ptr<ActionDataAbstract>&,
           const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelAbstract::calcDiff,
           bp::args("self", "data", "x"))
@@ -106,8 +105,7 @@ void exposeIntegratedActionAbstract() {
           &IntegratedActionModelAbstract::set_dt, "step time")
       .def(PrintableVisitor<IntegratedActionModelAbstract>());
 
-  bp::register_ptr_to_python<
-      boost::shared_ptr<IntegratedActionDataAbstract> >();
+  bp::register_ptr_to_python<std::shared_ptr<IntegratedActionDataAbstract> >();
 
   bp::class_<IntegratedActionDataAbstract, bp::bases<ActionDataAbstract> >(
       "IntegratedActionDataAbstract",

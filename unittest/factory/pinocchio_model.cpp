@@ -131,7 +131,7 @@ PinocchioModelFactory::~PinocchioModelFactory() {}
 void PinocchioModelFactory::construct_model(const std::string& urdf_file,
                                             const std::string& srdf_file,
                                             bool free_flyer) {
-  model_ = boost::make_shared<pinocchio::Model>();
+  model_ = std::make_shared<pinocchio::Model>();
   if (!urdf_file.empty()) {
     if (free_flyer) {
       pinocchio::urdf::buildModel(urdf_file, pinocchio::JointModelFreeFlyer(),
@@ -156,7 +156,7 @@ void PinocchioModelFactory::construct_model(const std::string& urdf_file,
   }
 }
 
-boost::shared_ptr<pinocchio::Model> PinocchioModelFactory::create() const {
+std::shared_ptr<pinocchio::Model> PinocchioModelFactory::create() const {
   return model_;
 }
 std::vector<std::string> PinocchioModelFactory::get_frame_names() const {

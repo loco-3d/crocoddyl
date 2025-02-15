@@ -11,9 +11,9 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs, const Scalar r_coeff,
+    std::shared_ptr<StateMultibody> state,
+    std::shared_ptr<ImpulseModelMultiple> impulses,
+    std::shared_ptr<CostModelSum> costs, const Scalar r_coeff,
     const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr(), 0, 0),
       impulses_(impulses),
@@ -31,10 +31,10 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
 
 template <typename Scalar>
 ActionModelImpulseFwdDynamicsTpl<Scalar>::ActionModelImpulseFwdDynamicsTpl(
-    boost::shared_ptr<StateMultibody> state,
-    boost::shared_ptr<ImpulseModelMultiple> impulses,
-    boost::shared_ptr<CostModelSum> costs,
-    boost::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
+    std::shared_ptr<StateMultibody> state,
+    std::shared_ptr<ImpulseModelMultiple> impulses,
+    std::shared_ptr<CostModelSum> costs,
+    std::shared_ptr<ConstraintModelManager> constraints, const Scalar r_coeff,
     const Scalar JMinvJt_damping, const bool enable_force)
     : Base(state, 0, costs->get_nr(), constraints->get_ng(),
            constraints->get_nh(), constraints->get_ng_T(),
@@ -71,7 +71,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::init() {
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -89,7 +89,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -107,7 +107,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -123,7 +123,7 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
 
@@ -138,15 +138,15 @@ void ActionModelImpulseFwdDynamicsTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelImpulseFwdDynamicsTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {
@@ -156,7 +156,7 @@ bool ActionModelImpulseFwdDynamicsTpl<Scalar>::checkData(
 
 template <typename Scalar>
 void ActionModelImpulseFwdDynamicsTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<ActionDataAbstract>&, Eigen::Ref<VectorXs>,
+    const std::shared_ptr<ActionDataAbstract>&, Eigen::Ref<VectorXs>,
     const Eigen::Ref<const VectorXs>&, const std::size_t, const Scalar) {
   // do nothing
 }
@@ -345,19 +345,19 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::get_pinocchio() const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ImpulseModelMultipleTpl<Scalar> >&
+const std::shared_ptr<ImpulseModelMultipleTpl<Scalar> >&
 ActionModelImpulseFwdDynamicsTpl<Scalar>::get_impulses() const {
   return impulses_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<CostModelSumTpl<Scalar> >&
+const std::shared_ptr<CostModelSumTpl<Scalar> >&
 ActionModelImpulseFwdDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+const std::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
 ActionModelImpulseFwdDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
 }

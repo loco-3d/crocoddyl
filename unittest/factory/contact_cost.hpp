@@ -49,7 +49,7 @@ class ContactCostModelFactory {
   explicit ContactCostModelFactory();
   ~ContactCostModelFactory();
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
+  std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> create(
       ContactCostModelTypes::Type cost_type,
       PinocchioModelTypes::Type model_type,
       ActivationModelTypes::Type activation_type,
