@@ -69,11 +69,6 @@ class IntegratedActionModelRKTpl;
 template <typename Scalar>
 struct IntegratedActionDataRKTpl;
 
-template <typename Scalar>
-class IntegratedActionModelRK4Tpl;
-template <typename Scalar>
-struct IntegratedActionDataRK4Tpl;
-
 // residual
 template <typename Scalar>
 class ResidualModelAbstractTpl;
@@ -319,11 +314,6 @@ typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRKTpl<double> IntegratedActionModelRK;
 typedef IntegratedActionDataRKTpl<double> IntegratedActionDataRK;
-DEPRECATED(
-    "Use IntegratedActionModelRK",
-    typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;)
-DEPRECATED("Use IntegratedActionModelRK",
-           typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;)
 
 typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;

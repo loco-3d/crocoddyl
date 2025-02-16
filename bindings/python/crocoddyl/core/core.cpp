@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -29,7 +29,6 @@ void exposeCore() {
   exposeDataCollectorJoint();
   exposeIntegratedActionEuler();
   exposeIntegratedActionRK();
-  exposeIntegratedActionRK4();
   exposeCostAbstract();
   exposeResidualControl();
   exposeResidualJointEffort();
