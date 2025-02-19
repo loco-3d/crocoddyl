@@ -80,7 +80,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp, u);
     d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d actuation(x,u) / du
@@ -89,7 +89,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
     d->du(iu) = d->uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
     d->dtau_du.col(iu) = (d->data_u[iu]->tau - tau0) / d->uh_jac;
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 }
 
@@ -116,7 +116,7 @@ void ActuationModelNumDiffTpl<Scalar>::calcDiff(
     model_->get_state()->integrate(x, d->dx, d->xp);
     model_->calc(d->data_x[ix], d->xp);
     d->dtau_dx.col(ix) = (d->data_x[ix]->tau - tau0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 }
 
@@ -188,7 +188,7 @@ const Scalar ActuationModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ActuationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

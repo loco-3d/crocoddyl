@@ -94,7 +94,7 @@ const Scalar ActivationModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ActivationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

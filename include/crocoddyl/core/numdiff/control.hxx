@@ -40,7 +40,7 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
     data_nd->du(i) += uh_jac;
     model_->calc(data_nd->data_u[i], t, u + data_nd->du);
     data->dw_du.col(i) = data_nd->data_u[i]->w - data->w;
-    data_nd->du(i) = 0.;
+    data_nd->du(i) = Scalar(0.);
   }
   data->dw_du /= uh_jac;
 }
@@ -138,7 +138,7 @@ const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance()
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

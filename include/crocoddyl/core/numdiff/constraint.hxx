@@ -104,7 +104,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
     model_->calc(d->data_x[ix], d->xp, u);
     d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d constraint(x,u) / du
@@ -119,7 +119,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
     model_->calc(d->data_u[iu], x, d->up);
     d->Gu.col(iu) = (d->data_u[iu]->g - g0) / d->uh_jac;
     d->Hu.col(iu) = (d->data_u[iu]->h - h0) / d->uh_jac;
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 }
 
@@ -158,7 +158,7 @@ void ConstraintModelNumDiffTpl<Scalar>::calcDiff(
     model_->calc(d->data_x[ix], d->xp);
     d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 }
 
@@ -193,7 +193,7 @@ const Scalar ConstraintModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

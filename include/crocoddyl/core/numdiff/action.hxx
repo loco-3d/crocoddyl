@@ -119,7 +119,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     data->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     data->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
   data->Fx /= d->xh_jac;
 
@@ -138,7 +138,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     d->Gu.col(iu) = (d->data_u[iu]->g - g0) / d->uh_jac;
     d->Hu.col(iu) = (d->data_u[iu]->h - h0) / d->uh_jac;
-    d->du(iu) = 0.0;
+    d->du(iu) = Scalar(0.);
   }
   data->Fu /= d->uh_jac;
 
@@ -162,7 +162,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_x[ix]
               ->cost;  // cost due to positive disturbance in both directions
-      d->dx(ix) = 0.;
+      d->dx(ix) = Scalar(0.);
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
       const Scalar czp =
@@ -171,9 +171,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
-      d->dx(jx) = 0.;
+      d->dx(jx) = Scalar(0.);
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d^2 cost(x,u) / du^2
@@ -192,7 +192,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_u[iu]
               ->cost;  // cost due to positive disturbance in both directions
-      d->du(iu) = 0.;
+      d->du(iu) = Scalar(0.);
       model_->calc(d->data_u[iu], x, u + d->du);
       const Scalar czp =
           d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and
@@ -200,9 +200,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Luu(iu, ju) = (cpp - czp - cp + c0) / d->uh_hess_pow2;
       data->Luu(ju, iu) = data->Luu(iu, ju);
       d->du(iu) = d->uh_hess;
-      d->du(ju) = 0.;
+      d->du(ju) = Scalar(0.);
     }
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 
   // Computing the d^2 cost(x,u) / dxu
@@ -222,8 +222,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       model_->calc(d->data_x[ix], d->xp, u - d->du);
       const Scalar cmm = d->data_x[ix]->cost;
       data->Lxu(ix, ju) = (cpp - cpm - cmp + cmm) / d->xuh_hess_pow2;
-      d->dx(ix) = 0.;
-      d->du(ju) = 0.;
+      d->dx(ix) = Scalar(0.);
+      d->du(ju) = Scalar(0.);
     }
   }
 #endif
@@ -274,7 +274,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
 #ifdef NDEBUG
@@ -298,7 +298,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_x[ix]
               ->cost;  // cost due to positive disturbance in both directions
-      d->dx(ix) = 0.;
+      d->dx(ix) = Scalar(0.);
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
       const Scalar czp =
@@ -307,9 +307,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
-      d->dx(jx) = 0.;
+      d->dx(jx) = Scalar(0.);
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 #endif
 
@@ -354,7 +354,7 @@ const Scalar ActionModelNumDiffTpl<Scalar>::get_disturbance() const {
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

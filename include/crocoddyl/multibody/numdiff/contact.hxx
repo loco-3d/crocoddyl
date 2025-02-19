@@ -53,7 +53,7 @@ void ContactModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_x[ix], d->xp);
     d->da0_dx.col(ix) = (d->data_x[ix]->a0 - a0) / d->xh_jac;
-    d->dx(ix) = 0.0;
+    d->dx(ix) = Scalar(0.);
   }
 }
 
@@ -100,7 +100,7 @@ const Scalar ContactModelNumDiffTpl<Scalar>::get_disturbance() const {
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

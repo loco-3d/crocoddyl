@@ -62,7 +62,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_x[ix], d->xp, u);
     d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d residual(x,u) / du
@@ -76,7 +76,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_u[iu], x, d->up);
     d->Ru.col(iu) = (d->data_u[iu]->r - r0) / d->uh_jac;
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 }
 
@@ -100,7 +100,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_x[ix], d->xp);
     d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 }
 
@@ -134,7 +134,7 @@ const Scalar ResidualModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

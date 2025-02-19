@@ -24,7 +24,7 @@ void CostModelNumDiffTpl<Scalar>::calc(
     const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   Data* d = static_cast<Data*>(data.get());
-  d->data_0->cost = 0.0;
+  d->data_0->cost = Scalar(0.);
   model_->calc(d->data_0, x, u);
   d->cost = d->data_0->cost;
   d->residual->r = d->data_0->residual->r;
@@ -35,7 +35,7 @@ void CostModelNumDiffTpl<Scalar>::calc(
     const std::shared_ptr<CostDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   Data* d = static_cast<Data*>(data.get());
-  d->data_0->cost = 0.0;
+  d->data_0->cost = Scalar(0.);
   model_->calc(d->data_0, x);
   d->cost = d->data_0->cost;
   d->residual->r = d->data_0->residual->r;
@@ -74,7 +74,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
     if (get_with_gauss_approx()) {
       d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / d->xh_jac;
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d cost(x,u) / du
@@ -91,7 +91,7 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
     if (get_with_gauss_approx()) {
       d->residual->Ru.col(iu) = (d->data_u[iu]->residual->r - r0) / d->uh_jac;
     }
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 
   if (get_with_gauss_approx()) {
@@ -100,9 +100,9 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
     d->Lxu = d->residual->Rx.transpose() * Arr * d->residual->Ru;
     d->Luu = d->residual->Ru.transpose() * Arr * d->residual->Ru;
   } else {
-    d->Lxx.fill(0.0);
-    d->Lxu.fill(0.0);
-    d->Luu.fill(0.0);
+    d->Lxx.fill(Scalar(0.));
+    d->Lxu.fill(Scalar(0.));
+    d->Luu.fill(Scalar(0.));
   }
 }
 
@@ -136,14 +136,14 @@ void CostModelNumDiffTpl<Scalar>::calcDiff(
     if (get_with_gauss_approx()) {
       d->residual->Rx.col(ix) = (d->data_x[ix]->residual->r - r0) / d->xh_jac;
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   if (get_with_gauss_approx()) {
     const MatrixXs& Arr = d->data_0->activation->Arr;
     d->Lxx = d->residual->Rx.transpose() * Arr * d->residual->Rx;
   } else {
-    d->Lxx.fill(0.0);
+    d->Lxx.fill(Scalar(0.));
   }
 }
 
@@ -175,7 +175,7 @@ const Scalar CostModelNumDiffTpl<Scalar>::get_disturbance() const {
 
 template <typename Scalar>
 void CostModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

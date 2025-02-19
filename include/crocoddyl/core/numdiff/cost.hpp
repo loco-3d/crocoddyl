@@ -210,7 +210,7 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
     }
   }
 
-  virtual ~CostDataNumDiffTpl() {}
+  virtual ~CostDataNumDiffTpl() = default;
 
   using Base::activation;
   using Base::cost;
