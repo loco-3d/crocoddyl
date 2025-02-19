@@ -192,24 +192,17 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   ContactData6DLoopTpl(Model<Scalar> *const model,
                        pinocchio::DataTpl<Scalar> *const data)
       : Base(model, data, 2),
-        f1_v2_partial_dq(6, model->get_state()->get_nv()),
         da0_dq_t1(6, model->get_state()->get_nv()),
         da0_dq_t2(6, model->get_state()->get_nv()),
-        da0_dq_t2_tmp(6, model->get_state()->get_nv()),
         da0_dq_t3(6, model->get_state()->get_nv()),
-        da0_dq_t3_tmp(6, model->get_state()->get_nv()),
-        dpos_dq(6, model->get_state()->get_nv()),
-        dvel_dq(6, model->get_state()->get_nv()),
-        dtau_dq_tmp(model->get_state()->get_nv(), model->get_state()->get_nv()),
-        f1Jf2(6, model->get_state()->get_nv()),
         f1Mf2(SE3::Identity()),
         f1Xf2(SE3ActionMatrix::Identity()),
         f1vf2(Motion::Zero()),
-        f1af2(Motion::Zero()) {
-    if (force_datas.size() != 2 || nf != 2) {
+        f1af2(Motion::Zero()),
+        f_cross(6, 6) {
+    if (force_datas.size() != 2 || nf != 2)
       throw_pretty(
           "Invalid argument: " << "the force_datas has to be of size 2");
-    }
 
     ForceDataAbstract &fdata1 = force_datas[0];
     fdata1.frame = model->get_id(0);
@@ -223,17 +216,10 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
     fdata2.fXj = fdata2.jMf.inverse().toActionMatrix();
     fdata2.type = model->get_type();
 
-    f1_v2_partial_dq.setZero();
     da0_dq_t1.setZero();
     da0_dq_t2.setZero();
-    da0_dq_t2_tmp.setZero();
     da0_dq_t3.setZero();
-    da0_dq_t3_tmp.setZero();
-    dpos_dq.setZero();
-    dvel_dq.setZero();
-    dtau_dq_tmp.setZero();
-    f1Jf2.setZero();
-    j2Jj1.setZero();
+    f_cross.setZero();
   }
 
   using Base::a0;
@@ -244,23 +230,15 @@ struct ContactData6DLoopTpl : public ContactDataAbstractTpl<_Scalar> {
   // Intermediate calculations
   Matrix6xs da0_dq_t1;
   Matrix6xs da0_dq_t2;
-  Matrix6xs da0_dq_t2_tmp;
   Matrix6xs da0_dq_t3;
-  Matrix6xs da0_dq_t3_tmp;
-  Matrix6xs dpos_dq;
-  Matrix6xs dvel_dq;
-  MatrixXs dtau_dq_tmp;
 
   // Coupled terms
-  SE3 f1Mf2;  //<! Relative placement of the contact frames in the first contact
-              // frame
+  SE3 f1Mf2;
   SE3ActionMatrix f1Xf2;  //<! Relative action matrix of the
                           // contact frames in the first contact frame
   Motion f1vf2;
   Motion f1af2;
-  Matrix6xs f1Jf2;
-  Matrix6xs j2Jj1;
-  Matrix6xs f1_v2_partial_dq;
+  Matrix6s f_cross;
 };
 
 }  // namespace crocoddyl
