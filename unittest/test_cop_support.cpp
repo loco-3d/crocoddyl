@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,12 +29,20 @@ void test_constructor() {
 
   // Create the CoP support support
   crocoddyl::CoPSupport support(R, box);
+  crocoddyl::CoPSupport casted_support = support.cast<double>();
 
   BOOST_CHECK(support.get_R().isApprox(R));
   BOOST_CHECK(support.get_box().isApprox(box));
   BOOST_CHECK(static_cast<std::size_t>(support.get_A().rows()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_lb().size()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_ub().size()) == 4);
+
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_support.get_R().isApprox(R));
+  BOOST_CHECK(casted_support.get_box().isApprox(box));
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_A().rows()) == 4);
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_lb().size()) == 4);
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_ub().size()) == 4);
 
   // With rotation
   Eigen::Quaterniond q;
@@ -42,6 +51,7 @@ void test_constructor() {
 
   // Create the wrench support
   support = crocoddyl::CoPSupport(R, box);
+  casted_support = support.cast<double>();
 
   BOOST_CHECK(support.get_R().isApprox(R));
   BOOST_CHECK(support.get_box().isApprox(box));
@@ -49,9 +59,17 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(support.get_lb().size()) == 4);
   BOOST_CHECK(static_cast<std::size_t>(support.get_ub().size()) == 4);
 
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_support.get_R().isApprox(R));
+  BOOST_CHECK(casted_support.get_box().isApprox(box));
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_A().rows()) == 4);
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_lb().size()) == 4);
+  BOOST_CHECK(static_cast<std::size_t>(casted_support.get_ub().size()) == 4);
+
   // Create the wrench support from a reference
   {
     crocoddyl::CoPSupport support_from_reference(support);
+    casted_support = support_from_reference.cast<double>();
 
     BOOST_CHECK(support.get_R().isApprox(support_from_reference.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_reference.get_box()));
@@ -61,12 +79,28 @@ void test_constructor() {
       BOOST_CHECK(support.get_ub()[i] == support_from_reference.get_ub()[i]);
       BOOST_CHECK(support.get_lb()[i] == support_from_reference.get_lb()[i]);
     }
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(
+        casted_support.get_R().isApprox(support_from_reference.get_R()));
+    BOOST_CHECK(
+        casted_support.get_box().isApprox(support_from_reference.get_box()));
+    BOOST_CHECK(
+        casted_support.get_A().isApprox(support_from_reference.get_A()));
+    for (std::size_t i = 0;
+         i < static_cast<std::size_t>(casted_support.get_ub().size()); ++i) {
+      BOOST_CHECK(casted_support.get_ub()[i] ==
+                  support_from_reference.get_ub()[i]);
+      BOOST_CHECK(casted_support.get_lb()[i] ==
+                  support_from_reference.get_lb()[i]);
+    }
   }
 
   // Create the wrench support through the copy operator
   {
     crocoddyl::CoPSupport support_from_copy;
     support_from_copy = support;
+    casted_support = support_from_copy.cast<double>();
 
     BOOST_CHECK(support.get_R().isApprox(support_from_copy.get_R()));
     BOOST_CHECK(support.get_box().isApprox(support_from_copy.get_box()));
@@ -75,6 +109,16 @@ void test_constructor() {
          i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
       BOOST_CHECK(support.get_ub()[i] == support_from_copy.get_ub()[i]);
       BOOST_CHECK(support.get_lb()[i] == support_from_copy.get_lb()[i]);
+    }
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(casted_support.get_R().isApprox(support_from_copy.get_R()));
+    BOOST_CHECK(casted_support.get_box().isApprox(support_from_copy.get_box()));
+    BOOST_CHECK(casted_support.get_A().isApprox(support_from_copy.get_A()));
+    for (std::size_t i = 0;
+         i < static_cast<std::size_t>(support.get_ub().size()); ++i) {
+      BOOST_CHECK(casted_support.get_ub()[i] == support_from_copy.get_ub()[i]);
+      BOOST_CHECK(casted_support.get_lb()[i] == support_from_copy.get_lb()[i]);
     }
   }
 }
@@ -87,16 +131,25 @@ void test_A_matrix_with_rotation_change() {
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   crocoddyl::CoPSupport support_1(R, box);
+  crocoddyl::CoPSupport casted_support_1 = support_1.cast<double>();
 
   // With rotation
   Eigen::Quaterniond q;
   pinocchio::quaternion::uniformRandom(q);
   R = q.toRotationMatrix();
   crocoddyl::CoPSupport support_2(R, box);
+  crocoddyl::CoPSupport casted_support_2 = support_2.cast<double>();
 
   for (std::size_t i = 0; i < 4; ++i) {
     BOOST_CHECK((support_1.get_A().row(i).head<3>() -
                  support_2.get_A().row(i).head<3>() * R)
+                    .isZero(1e-9));
+  }
+
+  // Checking that casted computation is the same
+  for (std::size_t i = 0; i < 4; ++i) {
+    BOOST_CHECK((casted_support_1.get_A().row(i).head<3>() -
+                 casted_support_2.get_A().row(i).head<3>() * R)
                     .isZero(1e-9));
   }
 }
@@ -113,8 +166,12 @@ void test_cop_within_the_support_region() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(support.get_lb(), support.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value with a force along the contact normal
   Eigen::VectorXd wrench(6);
@@ -123,6 +180,10 @@ void test_cop_within_the_support_region() {
   Eigen::VectorXd r = support.get_A() * wrench;
   activation.calc(data, r);
   BOOST_CHECK(data->a_value == 0.);
+
+  // Checking that casted computation is the same
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value == 0.);
 
   // Create the CoP support with no rotation
   R = Eigen::Matrix3d::Identity();
@@ -136,6 +197,10 @@ void test_cop_within_the_support_region() {
   activation.calc(data, r);
   BOOST_CHECK(data->a_value == 0.);
 
+  // Checking that casted computation is the same
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value == 0.);
+
   // Compute the activation value with a small enough torque in Y
   wrench.setZero();
   wrench(5) = random_real_in_range(0., 100.);
@@ -143,6 +208,10 @@ void test_cop_within_the_support_region() {
   r = support.get_A() * wrench;
   activation.calc(data, r);
   BOOST_CHECK(data->a_value == 0.);
+
+  // Checking that casted computation is the same
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value == 0.);
 }
 
 void register_unit_tests() {

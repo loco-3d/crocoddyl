@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,7 @@ void test_constructor() {
 
   // Create the friction cone with rotation and surface normal
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone = cone.cast<double>();
 
   BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
@@ -37,6 +39,15 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 1);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 1);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
+
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_cone.get_R().isApprox(R));
+  BOOST_CHECK(casted_cone.get_mu() == mu);
+  BOOST_CHECK(casted_cone.get_nf() == nf);
+  BOOST_CHECK(casted_cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_A().rows()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_lb().size()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_ub().size()) == nf + 1);
 
   // With rotation
   Eigen::Quaterniond q;
@@ -45,6 +56,7 @@ void test_constructor() {
 
   // Create the friction cone
   cone = crocoddyl::FrictionCone(R, mu, nf, inner_appr);
+  casted_cone = cone.cast<double>();
 
   BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
@@ -54,9 +66,19 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 1);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 1);
 
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_cone.get_R().isApprox(R));
+  BOOST_CHECK(casted_cone.get_mu() == mu);
+  BOOST_CHECK(casted_cone.get_nf() == nf);
+  BOOST_CHECK(casted_cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_A().rows()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_lb().size()) == nf + 1);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_ub().size()) == nf + 1);
+
   // Create the friction cone from a reference
   {
     crocoddyl::FrictionCone cone_reference(cone);
+    casted_cone = cone_reference.cast<double>();
 
     BOOST_CHECK(cone.get_nf() == cone_reference.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_reference.get_A()));
@@ -71,12 +93,30 @@ void test_constructor() {
     BOOST_CHECK(std::abs(cone.get_min_nforce() -
                          cone_reference.get_min_nforce()) < 1e-9);
     BOOST_CHECK(cone.get_max_nforce() == cone_reference.get_max_nforce());
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(casted_cone.get_nf() == cone_reference.get_nf());
+    BOOST_CHECK(casted_cone.get_A().isApprox(cone_reference.get_A()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size());
+         ++i) {
+      BOOST_CHECK(casted_cone.get_ub()[i] == cone_reference.get_ub()[i]);
+      BOOST_CHECK(casted_cone.get_lb()[i] == cone_reference.get_lb()[i]);
+    }
+    BOOST_CHECK(casted_cone.get_R().isApprox(cone_reference.get_R()));
+    BOOST_CHECK(std::abs(casted_cone.get_mu() - cone_reference.get_mu()) <
+                1e-9);
+    BOOST_CHECK(cone.get_inner_appr() == cone_reference.get_inner_appr());
+    BOOST_CHECK(std::abs(casted_cone.get_min_nforce() -
+                         cone_reference.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_max_nforce() ==
+                cone_reference.get_max_nforce());
   }
 
   // Create the friction cone through the copy operator
   {
     crocoddyl::FrictionCone cone_copy;
     cone_copy = cone;
+    casted_cone = cone_copy.cast<double>();
 
     BOOST_CHECK(cone.get_nf() == cone_copy.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_copy.get_A()));
@@ -91,6 +131,21 @@ void test_constructor() {
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_copy.get_min_nforce()) <
                 1e-9);
     BOOST_CHECK(cone.get_max_nforce() == cone_copy.get_max_nforce());
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(casted_cone.get_nf() == cone_copy.get_nf());
+    BOOST_CHECK(casted_cone.get_A().isApprox(cone_copy.get_A()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size());
+         ++i) {
+      BOOST_CHECK(casted_cone.get_ub()[i] == cone_copy.get_ub()[i]);
+      BOOST_CHECK(casted_cone.get_lb()[i] == cone_copy.get_lb()[i]);
+    }
+    BOOST_CHECK(casted_cone.get_R().isApprox(cone_copy.get_R()));
+    BOOST_CHECK(std::abs(casted_cone.get_mu() - cone_copy.get_mu()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_inner_appr() == cone_copy.get_inner_appr());
+    BOOST_CHECK(std::abs(casted_cone.get_min_nforce() -
+                         cone_copy.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_max_nforce() == cone_copy.get_max_nforce());
   }
 }
 
@@ -100,10 +155,19 @@ void test_inner_approximation_of_friction_cone() {
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = true;
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone = cone.cast<double>();
   const Eigen::VectorXd A_mu = -cone.get_A().col(2);
   for (std::size_t i = 0; i < nf; ++i) {
     BOOST_CHECK_CLOSE(
         A_mu(i), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
+  }
+
+  // Checking that casted computation is the same
+  const Eigen::VectorXd A_mu_casted = -cone.get_A().col(2);
+  for (std::size_t i = 0; i < nf; ++i) {
+    BOOST_CHECK_CLOSE(A_mu_casted(i),
+                      mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.),
+                      1e-9);
   }
 }
 
@@ -116,16 +180,25 @@ void test_A_matrix_with_rotation_change() {
   // No rotation
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
   crocoddyl::FrictionCone cone_1(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone_1 = cone_1.cast<double>();
 
   // With rotation
   Eigen::Quaterniond q;
   pinocchio::quaternion::uniformRandom(q);
   R = q.toRotationMatrix();
   crocoddyl::FrictionCone cone_2(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone_2 = cone_2.cast<double>();
 
   for (std::size_t i = 0; i < 5; ++i) {
     BOOST_CHECK(
         (cone_1.get_A().row(i) - cone_2.get_A().row(i) * R).isZero(1e-9));
+  }
+
+  // Checking that casted computation is the same
+  for (std::size_t i = 0; i < 5; ++i) {
+    BOOST_CHECK(
+        (casted_cone_1.get_A().row(i) - casted_cone_2.get_A().row(i) * R)
+            .isZero(1e-9));
   }
 }
 
@@ -142,8 +215,12 @@ void test_force_along_friction_cone_normal() {
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value
   Eigen::Vector3d force = random_real_in_range(0., 100.) * R.col(2);
@@ -153,6 +230,10 @@ void test_force_along_friction_cone_normal() {
   // The activation value has to be zero since the force is inside the friction
   // cone
   BOOST_CHECK(data->a_value == 0.);
+
+  // Checking that casted computation is the same
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value == 0.);
 }
 
 void test_negative_force_along_friction_cone_normal() {
@@ -164,12 +245,17 @@ void test_negative_force_along_friction_cone_normal() {
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = false;
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone = cone.cast<double>();
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value
   Eigen::Vector3d force = -random_real_in_range(0., 100.) * R.col(2);
@@ -188,6 +274,15 @@ void test_negative_force_along_friction_cone_normal() {
   // friction cone
   activation.calc(data, r);
   BOOST_CHECK(data->a_value > 0.);
+
+  // Checking that casted computation is the same
+  r = casted_cone.get_A() * force;
+  for (std::size_t i = 0; i < nf; ++i) {
+    BOOST_CHECK(r(i) > 0.);
+  }
+  BOOST_CHECK_CLOSE(r(nf), -force.norm(), 1e-9);
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value > 0.);
 }
 
 void test_force_parallel_to_friction_cone_normal() {
@@ -197,12 +292,17 @@ void test_force_parallel_to_friction_cone_normal() {
   std::size_t nf = 2 * random_int_in_range(2, 16);
   bool inner_appr = false;
   crocoddyl::FrictionCone cone(R, mu, nf, inner_appr);
+  crocoddyl::FrictionCone casted_cone = cone.cast<double>();
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value
   Eigen::Vector3d force =
@@ -217,6 +317,12 @@ void test_force_parallel_to_friction_cone_normal() {
   // friction cone
   activation.calc(data, r);
   BOOST_CHECK(data->a_value > 0.);
+
+  // Checking that casted computation is the same
+  r = casted_cone.get_A() * force;
+  BOOST_CHECK_CLOSE(r(nf), 0., 1e-9);
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value > 0.);
 }
 
 void register_unit_tests() {
