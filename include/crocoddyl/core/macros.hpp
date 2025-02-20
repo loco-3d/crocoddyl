@@ -41,8 +41,8 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     }                                                                       \
   }                                                                         \
   /* Pure virtual method that derived classes must implement for casting */ \
-  virtual std::unique_ptr<base_class> cloneAsDouble() const = 0;            \
-  virtual std::unique_ptr<base_class> cloneAsFloat() const = 0;
+  virtual std::shared_ptr<base_class> cloneAsDouble() const = 0;            \
+  virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;
 
 /**
  * @brief Macro to declare the code for casting a Crocoddyl class
@@ -62,20 +62,20 @@ std::unique_ptr<T> make_unique(Args&&... args) {
                                               operator */                 \
   }                                                                       \
   /* Implements casting by overriding `cloneAsFloat` */                   \
-  std::unique_ptr<base_class> cloneAsDouble() const override {            \
-    return std::make_unique<derived_class<double>>(*this);                \
+  std::shared_ptr<base_class> cloneAsDouble() const override {            \
+    return std::make_shared<derived_class<double>>(*this);                \
   }                                                                       \
-  std::unique_ptr<base_class> cloneAsFloat() const override {             \
-    return std::make_unique<derived_class<float>>(*this);                 \
+  std::shared_ptr<base_class> cloneAsFloat() const override {             \
+    return std::make_shared<derived_class<float>>(*this);                 \
   }
 
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class) \
   /* Implements casting by overriding `cloneAsFloat` */        \
-  std::unique_ptr<base_class> cloneAsDouble() const override { \
-    return std::unique_ptr<base_class>(nullptr);               \
+  std::shared_ptr<base_class> cloneAsDouble() const override { \
+    return std::shared_ptr<base_class>(nullptr);               \
   }                                                            \
-  std::unique_ptr<base_class> cloneAsFloat() const override {  \
-    return std::unique_ptr<base_class>(nullptr);               \
+  std::shared_ptr<base_class> cloneAsFloat() const override {  \
+    return std::shared_ptr<base_class>(nullptr);               \
   }
 
 #define CROCODDYL_INNER_DERIVED_CAST(base_class, inner_class, derived_class) \
@@ -86,12 +86,12 @@ std::unique_ptr<T> make_unique(Args&&... args) {
                                               operator */                    \
   }                                                                          \
   /* Implements casting by overriding `cloneAsFloat` */                      \
-  std::unique_ptr<base_class> cloneAsDouble() const override {               \
-    return std::make_unique<typename inner_class<double>::derived_class>(    \
+  std::shared_ptr<base_class> cloneAsDouble() const override {               \
+    return std::make_shared<typename inner_class<double>::derived_class>(    \
         this->template cast<double>());                                      \
   }                                                                          \
-  std::unique_ptr<base_class> cloneAsFloat() const override {                \
-    return std::make_unique<typename inner_class<float>::derived_class>(     \
+  std::shared_ptr<base_class> cloneAsFloat() const override {                \
+    return std::make_shared<typename inner_class<float>::derived_class>(     \
         this->template cast<float>());                                       \
   }
 
