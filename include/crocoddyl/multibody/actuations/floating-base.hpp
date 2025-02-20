@@ -166,6 +166,16 @@ class ActuationModelFloatingBaseTpl
     return ret;
   }
 
+  /**
+   * @brief Print relevant information of the joint-effort residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const override {
+    os << "ActuationModelFloatingBase {nu=" << nu_
+       << ", nv=" << state_->get_nv() << "}";
+  }
+
  protected:
   using Base::nu_;
   using Base::state_;
