@@ -32,7 +32,7 @@ std::vector<ItemTpl<NewScalar>> vector_cast(
   std::vector<ItemTpl<NewScalar>> out;
   out.reserve(in.size());  // Optimize allocation
   for (const auto& obj : in) {
-    out.push_back(ItemTpl<NewScalar>(obj.template cast<NewScalar>()));
+    out.push_back(obj.template cast<NewScalar>());
   }
   return out;
 }
