@@ -33,6 +33,7 @@ ResidualModelJointEffortTpl<Scalar>::ResidualModelJointEffortTpl(
     std::shared_ptr<StateAbstract> state,
     std::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref)
     : Base(state, actuation->get_nu(), state->get_nv(), true, true, true),
+      actuation_(actuation),
       uref_(uref),
       fwddyn_(false) {}
 
@@ -41,6 +42,7 @@ ResidualModelJointEffortTpl<Scalar>::ResidualModelJointEffortTpl(
     std::shared_ptr<StateAbstract> state,
     std::shared_ptr<ActuationModelAbstract> actuation, const std::size_t nu)
     : Base(state, actuation->get_nu(), nu, true, true, true),
+      actuation_(actuation),
       uref_(VectorXs::Zero(actuation->get_nu())),
       fwddyn_(false) {
   if (nu_ == 0) {
@@ -55,6 +57,7 @@ ResidualModelJointEffortTpl<Scalar>::ResidualModelJointEffortTpl(
     std::shared_ptr<StateAbstract> state,
     std::shared_ptr<ActuationModelAbstract> actuation)
     : Base(state, actuation->get_nu(), state->get_nv(), true, true, true),
+      actuation_(actuation),
       uref_(VectorXs::Zero(actuation->get_nu())) {}
 
 template <typename Scalar>
