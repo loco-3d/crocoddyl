@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,9 +48,19 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type,
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
-
   BOOST_CHECK(static_cast<std::size_t>(data->tau.size()) ==
               model->get_state()->get_nv());
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->calc(casted_data, x_f, u_f);
+  float tol_f = std::sqrt(float(2.0) * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->tau.cast<float>() - casted_data->tau).isZero(tol_f));
 }
 
 void test_actuationSet(ActuationModelTypes::Type actuation_type,
@@ -86,6 +96,18 @@ void test_actuationSet(ActuationModelTypes::Type actuation_type,
     } else {
       BOOST_CHECK(data->tau_set[k] == true);
     }
+  }
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->calc(casted_data, x_f, u_f);
+  for (std::size_t k = 0; k < nv; ++k) {
+    BOOST_CHECK(data->tau_set[k] == casted_data->tau_set[k]);
   }
 }
 
@@ -129,6 +151,26 @@ void test_partial_derivatives_against_numdiff(
 
   // Checking the partial derivatives against numdiff
   BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(
+      (data->dtau_dx.cast<float>() - casted_data->dtau_dx).isZero(tol_f));
+  BOOST_CHECK(
+      (data->dtau_du.cast<float>() - casted_data->dtau_du).isZero(tol_f));
+
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  BOOST_CHECK(
+      (data->dtau_dx.cast<float>() - casted_data->dtau_dx).isZero(tol_f));
 }
 
 void test_commands(ActuationModelTypes::Type actuation_type,
@@ -158,6 +200,17 @@ void test_commands(ActuationModelTypes::Type actuation_type,
   // Checking the joint torques
   double tol = sqrt(model_num_diff.get_disturbance());
   BOOST_CHECK((data->u - data_num_diff->u).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf tau_f = tau.cast<float>();
+  casted_model->commands(casted_data, x_f, tau_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->u.cast<float>() - casted_data->u).isZero(tol_f));
 }
 
 void test_torqueTransform(ActuationModelTypes::Type actuation_type,
@@ -188,6 +241,17 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type,
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->Mtau - data_num_diff->Mtau).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->torqueTransform(casted_data, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Mtau.cast<float>() - casted_data->Mtau).isZero(tol_f));
 }
 
 //----------------------------------------------------------------------------//
