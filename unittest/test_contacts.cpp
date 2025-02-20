@@ -50,13 +50,17 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   ContactModelFactory factory;
   std::shared_ptr<crocoddyl::ContactModelAbstract> model =
       factory.create(contact_type, model_type, Eigen::Vector2d::Random());
+  std::shared_ptr<crocoddyl::ContactModelAbstract> casted_model =
+      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& casted_data =
+      casted_model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
@@ -77,6 +81,19 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+  casted_model->calc(casted_data, x);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!casted_data->a0.isZero());
+  }
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
 }
 
 void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
@@ -85,13 +102,17 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   ContactModelFactory factory;
   std::shared_ptr<crocoddyl::ContactModelAbstract> model =
       factory.create(contact_type, model_type, Eigen::Vector2d::Random());
+  std::shared_ptr<crocoddyl::ContactModelAbstract> casted_model =
+      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& casted_data =
+      casted_model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
@@ -114,6 +135,20 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+  casted_model->calc(casted_data, x);
+  casted_model->calcDiff(casted_data, x);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!casted_data->a0.isZero());
+    BOOST_CHECK(!casted_data->da0_dx.isZero());
+  }
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
 }
 
 void test_update_force(ContactModelTypes::Type contact_type,
@@ -122,19 +157,21 @@ void test_update_force(ContactModelTypes::Type contact_type,
   ContactModelFactory factory;
   std::shared_ptr<crocoddyl::ContactModelAbstract> model =
       factory.create(contact_type, model_type, Eigen::Vector2d::Random());
+  std::shared_ptr<crocoddyl::ContactModelAbstract> casted_model =
+      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& casted_data =
+      casted_model->createData(&pinocchio_data);
 
   // Create a random force and update it
   Eigen::VectorXd f = Eigen::VectorXd::Random(data->Jc.rows());
   model->updateForce(data, f);
-  std::shared_ptr<crocoddyl::ContactModel3D> m =
-      std::static_pointer_cast<crocoddyl::ContactModel3D>(model);
 
   // Check that nothing has been computed and that all value are initialized to
   // 0
@@ -145,6 +182,16 @@ void test_update_force(ContactModelTypes::Type contact_type,
   BOOST_CHECK(!data->fext.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+  casted_model->updateForce(casted_data, f);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->a0.isZero());
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(!casted_data->f.toVector().isZero());
+  BOOST_CHECK(!casted_data->fext.toVector().isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
 }
 
 void test_update_force_diff(ContactModelTypes::Type contact_type,
@@ -153,13 +200,17 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   ContactModelFactory factory;
   std::shared_ptr<crocoddyl::ContactModelAbstract> model =
       factory.create(contact_type, model_type, Eigen::Vector2d::Random());
+  std::shared_ptr<crocoddyl::ContactModelAbstract> casted_model =
+      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& casted_data =
+      casted_model->createData(&pinocchio_data);
 
   // Create a random force and update it
   Eigen::MatrixXd df_dx =
@@ -177,6 +228,16 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->fext.toVector().isZero());
   BOOST_CHECK(!data->df_dx.isZero());
   BOOST_CHECK(!data->df_du.isZero());
+
+  // Checking that casted computation is the same
+  casted_model->updateForceDiff(casted_data, df_dx, df_du);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->a0.isZero());
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->fext.toVector().isZero());
+  BOOST_CHECK(!casted_data->df_dx.isZero());
+  BOOST_CHECK(!casted_data->df_du.isZero());
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -188,13 +249,17 @@ void test_partial_derivatives_against_numdiff(
   ContactModelFactory factory;
   std::shared_ptr<crocoddyl::ContactModelAbstract> model =
       factory.create(contact_type, model_type, Eigen::Vector2d::Random());
+  std::shared_ptr<crocoddyl::ContactModelAbstract> casted_model =
+      model->cast<double>();
 
   // create the corresponding data object
   pinocchio::Model& pinocchio_model =
       *model->get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& casted_data =
+      casted_model->createData(&pinocchio_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::ContactModelNumDiff model_num_diff(model);
@@ -222,6 +287,14 @@ void test_partial_derivatives_against_numdiff(
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
+
+  // Checking that casted computation is the same
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  casted_model->calc(casted_data, x);
+  casted_model->calcDiff(casted_data, x);
+  tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  BOOST_CHECK((data->da0_dx - casted_data->da0_dx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//

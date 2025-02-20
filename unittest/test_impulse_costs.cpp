@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,10 +23,14 @@ void test_partial_derivatives_against_impulse_numdiff(
   // create the model
   const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       ImpulseCostModelFactory().create(cost_type, model_type, activation_type);
+  const std::shared_ptr<crocoddyl::ActionModelAbstract>& casted_model =
+      model->cast<double>();
 
   // create the corresponding data object and set the cost to nan
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
+  const std::shared_ptr<crocoddyl::ActionDataAbstract>& casted_data =
+      casted_model->createData();
 
   crocoddyl::ActionModelNumDiff model_num_diff(model);
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
@@ -64,6 +68,24 @@ void test_partial_derivatives_against_impulse_numdiff(
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
   }
+
+  // Checking that casted computation is the same
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x, u);
+  casted_model->calcDiff(casted_data, x, u);
+  tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
+  BOOST_CHECK((data->Lx - casted_data->Lx).isZero(tol));
+  BOOST_CHECK((data->Lu - casted_data->Lu).isZero(tol));
+  BOOST_CHECK((data->Lxx - casted_data->Lxx).isZero(tol));
+  BOOST_CHECK((data->Lxu - casted_data->Lxu).isZero(tol));
+  BOOST_CHECK((data->Luu - casted_data->Luu).isZero(tol));
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  casted_model->calc(casted_data, x);
+  casted_model->calcDiff(casted_data, x);
+  BOOST_CHECK((data->Lx - casted_data->Lx).isZero(tol));
+  BOOST_CHECK((data->Lxx - casted_data->Lxx).isZero(tol));
 }
 
 //----------------------------------------------------------------------------//
