@@ -1,21 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "pinocchio_model.hpp"
 
-#include <pinocchio/algorithm/center-of-mass.hpp>
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/parsers/sample-models.hpp>
 #include <pinocchio/parsers/srdf.hpp>
@@ -167,34 +159,6 @@ std::vector<std::size_t> PinocchioModelFactory::get_frame_ids() const {
 }
 std::size_t PinocchioModelFactory::get_contact_nc() const {
   return contact_nc_;
-}
-
-/**
- * @brief Compute all the pinocchio data needed for the numerical
- * differentiation. We use the address of the object to avoid a copy from the
- * "boost::bind".
- *
- * @param model is the rigid body robot model.
- * @param data contains the results of the computations.
- * @param x is the state vector.
- */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data,
-                        const Eigen::VectorXd& x, const Eigen::VectorXd&) {
-  const Eigen::VectorXd& q = x.segment(0, model->nq);
-  const Eigen::VectorXd& v = x.segment(model->nq, model->nv);
-  Eigen::VectorXd a = Eigen::VectorXd::Zero(model->nv);
-  Eigen::Matrix<double, 6, Eigen::Dynamic> tmp;
-  tmp.resize(6, model->nv);
-  pinocchio::forwardKinematics(*model, *data, q, v, a);
-  pinocchio::computeForwardKinematicsDerivatives(*model, *data, q, v, a);
-  pinocchio::computeJointJacobians(*model, *data, q);
-  pinocchio::updateFramePlacements(*model, *data);
-  pinocchio::centerOfMass(*model, *data, q, v, a);
-  pinocchio::jacobianCenterOfMass(*model, *data, q);
-  pinocchio::computeCentroidalMomentum(*model, *data, q, v);
-  pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp,
-                                                  tmp, tmp, tmp);
-  pinocchio::computeRNEADerivatives(*model, *data, q, v, a);
 }
 
 }  // namespace unittest

@@ -146,8 +146,10 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type,
 
   // Computing the residual from num diff
   std::vector<crocoddyl::ResidualModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation,
                                 actuation_model, actuation_data, _1, _2));
   model_num_diff.set_reevals(reevals);
@@ -229,8 +231,10 @@ void test_partial_derivatives_against_numdiff(
 
   // Computing the residual derivatives via numerical differentiation
   std::vector<crocoddyl::ResidualModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation,
                                 actuation_model, actuation_data, _1, _2));
   model_num_diff.set_reevals(reevals);

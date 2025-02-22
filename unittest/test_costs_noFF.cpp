@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
@@ -145,8 +145,10 @@ void test_partial_derivatives_against_numdiff(
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
   reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation,
                                 actuation_model, actuation_data, _1, _2));
   model_num_diff.set_reevals(reevals);

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,8 +121,10 @@ void test_partial_derivatives_against_numdiff(
   using namespace boost::placeholders;
 
   std::vector<crocoddyl::ConstraintModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the cost derivatives
