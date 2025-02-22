@@ -49,8 +49,6 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   ImpulseModelFactory factory;
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> model =
       factory.create(impulse_type, model_type);
-  std::shared_ptr<crocoddyl::ImpulseModelAbstract> casted_model =
-      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -58,8 +56,6 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& data =
       model->createData(&pinocchio_data);
-  const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& casted_data =
-      casted_model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
@@ -77,8 +73,20 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
-  casted_model->calc(casted_data, dx);
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model_f.get(),
+                                          &pinocchio_data_f, x_f);
+  Eigen::VectorXf dx_f;
+  casted_model->calc(casted_data, dx_f);
   BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero());
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
@@ -90,8 +98,6 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   ImpulseModelFactory factory;
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> model =
       factory.create(impulse_type, model_type);
-  std::shared_ptr<crocoddyl::ImpulseModelAbstract> casted_model =
-      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -99,8 +105,6 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& data =
       model->createData(&pinocchio_data);
-  const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& casted_data =
-      casted_model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
   Eigen::VectorXd x = model->get_state()->rand();
@@ -129,9 +133,21 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
-  casted_model->calc(casted_data, dx);
-  casted_model->calcDiff(casted_data, dx);
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model_f.get(),
+                                          &pinocchio_data_f, x_f);
+  Eigen::VectorXf dx_f;
+  casted_model->calc(casted_data, dx_f);
+  casted_model->calcDiff(casted_data, dx_f);
   BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero());
   if (model_type == PinocchioModelTypes::Hector &&
       (impulse_type == ImpulseModelTypes::ImpulseModel3D_LOCAL ||
        impulse_type ==
@@ -141,6 +157,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
     BOOST_CHECK(casted_data->dv0_dq.isZero());
   } else {
     BOOST_CHECK(!casted_data->dv0_dq.isZero());
+    BOOST_CHECK((data->dv0_dq.cast<float>() - casted_data->dv0_dq).isZero());
   }
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
@@ -152,8 +169,6 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   ImpulseModelFactory factory;
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> model =
       factory.create(impulse_type, model_type);
-  std::shared_ptr<crocoddyl::ImpulseModelAbstract> casted_model =
-      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -161,8 +176,6 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& data =
       model->createData(&pinocchio_data);
-  const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& casted_data =
-      casted_model->createData(&pinocchio_data);
 
   // Create a random force and update it
   Eigen::VectorXd f = Eigen::VectorXd::Random(data->Jc.rows());
@@ -176,10 +189,20 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
-  casted_model->updateForce(casted_data, f);
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf f_f = f.cast<float>();
+  casted_model->updateForce(casted_data, f_f);
   BOOST_CHECK(casted_data->Jc.isZero());
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   BOOST_CHECK(!casted_data->f.toVector().isZero());
+  BOOST_CHECK(
+      (data->f.toVector().cast<float>() - casted_data->f.toVector()).isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
 }
 
@@ -189,8 +212,6 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   ImpulseModelFactory factory;
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> model =
       factory.create(impulse_type, model_type);
-  std::shared_ptr<crocoddyl::ImpulseModelAbstract> casted_model =
-      model->cast<double>();
 
   // create the corresponding data object
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
@@ -198,8 +219,6 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
   const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& data =
       model->createData(&pinocchio_data);
-  const std::shared_ptr<crocoddyl::ImpulseDataAbstract>& casted_data =
-      casted_model->createData(&pinocchio_data);
 
   // Create a random force and update it
   Eigen::MatrixXd df_dx =
@@ -214,11 +233,20 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(!data->df_dx.isZero());
 
   // Checking that casted computation is the same
-  casted_model->updateForceDiff(casted_data, df_dx);
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::MatrixXf df_dx_f = df_dx.cast<float>();
+  casted_model->updateForceDiff(casted_data, df_dx_f);
   BOOST_CHECK(casted_data->Jc.isZero());
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(!casted_data->df_dx.isZero());
+  BOOST_CHECK((data->df_dx.cast<float>() - casted_data->df_dx).isZero());
 }
 
 //----------------------------------------------------------------------------//
