@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,12 +59,19 @@ class ActuationModelFactory {
  * @param x[in]      State vector
  * @param u[in]      Control vector
  */
+template <typename Scalar>
 void updateActuation(
-    const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
-    const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data,
-    const Eigen::VectorXd& x, const Eigen::VectorXd& u);
+    const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<Scalar>>& model,
+    const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<Scalar>>& data,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& u);
 
 }  // namespace unittest
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "actuation.hxx"
 
 #endif  // CROCODDYL_ACTUATION_FACTORY_HPP_

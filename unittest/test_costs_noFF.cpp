@@ -149,7 +149,7 @@ void test_partial_derivatives_against_numdiff(
       boost::bind(&crocoddyl::unittest::updateAllPinocchio<
                       double, 0, pinocchio::JointCollectionDefaultTpl>,
                   &pinocchio_model, &pinocchio_data, _1, _2));
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation,
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation<double>,
                                 actuation_model, actuation_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
