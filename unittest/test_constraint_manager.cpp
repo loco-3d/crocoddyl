@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,12 +30,19 @@ void test_constructor(StateModelTypes::Type state_type) {
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_constraints().size() == 0);
+
+  // Checking that casted computation is the same
+  crocoddyl::ConstraintModelManagerTpl<float> casted_model =
+      model.cast<float>();
+  BOOST_CHECK(casted_model.get_constraints().size() == 0);
 }
 
 void test_addConstraint(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
+  crocoddyl::ConstraintModelManagerTpl<float> casted_model =
+      model.cast<float>();
 
   // add an active constraint
   std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint_1 =
@@ -84,6 +91,49 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh() == nh);
   BOOST_CHECK(model.get_ng_T() == ng_T);
   BOOST_CHECK(model.get_nh_T() == nh_T);
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>
+      casted_rand_constraint_1 = rand_constraint_1->cast<float>();
+  casted_model.addConstraint("random_constraint_1", casted_rand_constraint_1);
+  ng = casted_rand_constraint_1->get_ng();
+  nh = casted_rand_constraint_1->get_nh();
+  ng_T = casted_rand_constraint_1->get_T_constraint() ? ng : 0;
+  nh_T = casted_rand_constraint_1->get_T_constraint() ? nh : 0;
+  BOOST_CHECK(casted_model.get_ng() == ng);
+  BOOST_CHECK(casted_model.get_nh() == nh);
+  BOOST_CHECK(casted_model.get_ng_T() == ng_T);
+  BOOST_CHECK(casted_model.get_nh_T() == nh_T);
+  std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>
+      casted_rand_constraint_2 = rand_constraint_2->cast<float>();
+  casted_model.addConstraint("random_constraint_2", casted_rand_constraint_2,
+                             false);
+  BOOST_CHECK(casted_model.get_ng() == ng);
+  BOOST_CHECK(casted_model.get_nh() == nh);
+  BOOST_CHECK(casted_model.get_ng_T() == ng_T);
+  BOOST_CHECK(casted_model.get_nh_T() == nh_T);
+  casted_model.changeConstraintStatus("random_constraint_2", true);
+  ng += casted_rand_constraint_2->get_ng();
+  nh += casted_rand_constraint_2->get_nh();
+  if (casted_rand_constraint_2->get_T_constraint()) {
+    ng_T += casted_rand_constraint_2->get_ng();
+    nh_T += casted_rand_constraint_2->get_nh();
+  }
+  BOOST_CHECK(casted_model.get_ng() == ng);
+  BOOST_CHECK(casted_model.get_nh() == nh);
+  BOOST_CHECK(casted_model.get_ng_T() == ng_T);
+  BOOST_CHECK(casted_model.get_nh_T() == nh_T);
+  casted_model.changeConstraintStatus("random_constraint_1", false);
+  ng -= casted_rand_constraint_1->get_ng();
+  nh -= casted_rand_constraint_1->get_nh();
+  if (casted_rand_constraint_1->get_T_constraint()) {
+    ng_T -= casted_rand_constraint_1->get_ng();
+    nh_T -= casted_rand_constraint_1->get_nh();
+  }
+  BOOST_CHECK(casted_model.get_ng() == ng);
+  BOOST_CHECK(casted_model.get_nh() == nh);
+  BOOST_CHECK(casted_model.get_ng_T() == ng_T);
+  BOOST_CHECK(casted_model.get_nh_T() == nh_T);
 }
 
 void test_addConstraint_error_message(StateModelTypes::Type state_type) {
@@ -125,6 +175,8 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::ConstraintModelManager model(state_factory.create(state_type));
+  crocoddyl::ConstraintModelManagerTpl<float> casted_model =
+      model.cast<float>();
 
   // add an active constraint
   std::shared_ptr<crocoddyl::ConstraintModelAbstract> rand_constraint =
@@ -145,6 +197,24 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh() == 0);
   BOOST_CHECK(model.get_ng_T() == 0);
   BOOST_CHECK(model.get_nh_T() == 0);
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>
+      casted_rand_constraint = rand_constraint->cast<float>();
+  casted_model.addConstraint("random_constraint", casted_rand_constraint);
+  ng = casted_rand_constraint->get_ng();
+  nh = casted_rand_constraint->get_nh();
+  ng_T = casted_rand_constraint->get_T_constraint() ? ng : 0;
+  nh_T = casted_rand_constraint->get_T_constraint() ? nh : 0;
+  BOOST_CHECK(casted_model.get_ng() == ng);
+  BOOST_CHECK(casted_model.get_nh() == nh);
+  BOOST_CHECK(casted_model.get_ng_T() == ng_T);
+  BOOST_CHECK(casted_model.get_nh_T() == nh_T);
+  casted_model.removeConstraint("random_constraint");
+  BOOST_CHECK(casted_model.get_ng() == 0);
+  BOOST_CHECK(casted_model.get_nh() == 0);
+  BOOST_CHECK(casted_model.get_ng_T() == 0);
+  BOOST_CHECK(casted_model.get_nh_T() == 0);
 }
 
 void test_removeConstraint_error_message(StateModelTypes::Type state_type) {
@@ -179,8 +249,8 @@ void test_calc(StateModelTypes::Type state_type) {
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some constraint objects
-  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
@@ -219,6 +289,48 @@ void test_calc(StateModelTypes::Type state_type) {
   }
   BOOST_CHECK(data->g.isApprox(g, 1e-9));
   BOOST_CHECK(data->h.isApprox(h, 1e-9));
+
+  // Checking that casted computation is the same
+  crocoddyl::ConstraintModelManagerTpl<float> casted_model =
+      model.cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model.get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(casted_models[i]->createData(&casted_shared_data));
+  }
+  const std::shared_ptr<crocoddyl::ConstraintDataManagerTpl<float>>&
+      casted_data = casted_model.createData(&casted_shared_data);
+  const Eigen::VectorXf& x1_f = x1.cast<float>();
+  const Eigen::VectorXf& u1_f = u1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  casted_model.calc(casted_data, x1_f, u1_f);
+  ng_i = 0;
+  nh_i = 0;
+  Eigen::VectorXf g_f = Eigen::VectorXf::Zero(casted_model.get_ng());
+  Eigen::VectorXf h_f = Eigen::VectorXf::Zero(casted_model.get_nh());
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models[i]->calc(casted_datas[i], x1_f, u1_f);
+    const std::size_t ng = casted_models[i]->get_ng();
+    const std::size_t nh = casted_models[i]->get_nh();
+    g_f.segment(ng_i, ng) = casted_datas[i]->g;
+    h_f.segment(nh_i, nh) = casted_datas[i]->h;
+    ng_i += ng;
+    nh_i += nh;
+  }
+  BOOST_CHECK(casted_data->g.isApprox(g_f, 1e-9f));
+  BOOST_CHECK(casted_data->h.isApprox(h_f, 1e-9f));
 }
 
 void test_calcDiff(StateModelTypes::Type state_type) {
@@ -233,8 +345,8 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some constraint objects
-  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_constraint_" << i;
@@ -327,6 +439,64 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->h.isApprox(h, 1e-9));
   BOOST_CHECK(data->Gx.isApprox(Gx, 1e-9));
   BOOST_CHECK(data->Hx.isApprox(Hx, 1e-9));
+
+  // Checking that casted computation is the same
+  crocoddyl::ConstraintModelManagerTpl<float> casted_model =
+      model.cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model.get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  std::vector<std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(casted_models[i]->createData(&casted_shared_data));
+  }
+  const std::shared_ptr<crocoddyl::ConstraintDataManagerTpl<float>>&
+      casted_data = casted_model.createData(&casted_shared_data);
+  const Eigen::VectorXf& x1_f = x1.cast<float>();
+  const Eigen::VectorXf& u1_f = u1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+
+  casted_model.calc(casted_data, x1_f, u1_f);
+  casted_model.calcDiff(casted_data, x1_f, u1_f);
+
+  ng_i = 0;
+  nh_i = 0;
+  Eigen::VectorXf g_f = Eigen::VectorXf::Zero(casted_model.get_ng());
+  Eigen::VectorXf h_f = Eigen::VectorXf::Zero(casted_model.get_nh());
+  Eigen::MatrixXf Gx_f = Eigen::MatrixXf::Zero(casted_model.get_ng(), ndx);
+  Eigen::MatrixXf Gu_f = Eigen::MatrixXf::Zero(casted_model.get_ng(), nu);
+  Eigen::MatrixXf Hx_f = Eigen::MatrixXf::Zero(casted_model.get_nh(), ndx);
+  Eigen::MatrixXf Hu_f = Eigen::MatrixXf::Zero(casted_model.get_nh(), nu);
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models[i]->calc(casted_datas[i], x1_f, u1_f);
+    casted_models[i]->calcDiff(casted_datas[i], x1_f, u1_f);
+    const std::size_t ng = casted_models[i]->get_ng();
+    const std::size_t nh = casted_models[i]->get_nh();
+    g_f.segment(ng_i, ng) = casted_datas[i]->g;
+    h_f.segment(nh_i, nh) = casted_datas[i]->h;
+    Gx_f.block(ng_i, 0, ng, ndx) = casted_datas[i]->Gx;
+    Gu_f.block(ng_i, 0, ng, nu) = casted_datas[i]->Gu;
+    Hx_f.block(nh_i, 0, nh, ndx) = casted_datas[i]->Hx;
+    Hu_f.block(nh_i, 0, nh, nu) = casted_datas[i]->Hu;
+    ng_i += ng;
+    nh_i += nh;
+  }
+  BOOST_CHECK(casted_data->g.isApprox(g_f, 1e-9f));
+  BOOST_CHECK(casted_data->h.isApprox(h_f, 1e-9f));
+  BOOST_CHECK(casted_data->Gx.isApprox(Gx_f, 1e-9f));
+  BOOST_CHECK(casted_data->Gu.isApprox(Gu_f, 1e-9f));
+  BOOST_CHECK(casted_data->Hx.isApprox(Hx_f, 1e-9f));
+  BOOST_CHECK(casted_data->Hu.isApprox(Hu_f, 1e-9f));
 }
 
 void test_get_constraints(StateModelTypes::Type state_type) {

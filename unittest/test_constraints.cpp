@@ -49,6 +49,32 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
   // Checking that calc returns a residual vector
   BOOST_CHECK(!data->g.hasNaN());
   BOOST_CHECK(!data->h.hasNaN());
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data = casted_model->createData(&casted_shared_data);
+  casted_data->g *= float(nan(""));
+  casted_data->h *= float(nan(""));
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  casted_model->calc(casted_data, x_f, u_f);
+  BOOST_CHECK(!casted_data->g.hasNaN());
+  BOOST_CHECK(!casted_data->h.hasNaN());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->g.cast<float>() - casted_data->g).isZero(tol_f));
+  BOOST_CHECK((data->h.cast<float>() - casted_data->h).isZero(tol_f));
 }
 
 void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
@@ -86,6 +112,34 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
   // Checking the partial derivatives against NumDiff
   BOOST_CHECK((data->g - data_num_diff->g).isZero());
   BOOST_CHECK((data->h - data_num_diff->h).isZero());
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data = casted_model->createData(&casted_shared_data);
+  crocoddyl::ConstraintModelNumDiffTpl<float> casted_model_num_diff =
+      model_num_diff.cast<float>();
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data_num_diff =
+          casted_model_num_diff.createData(&casted_shared_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((casted_data->g - casted_data_num_diff->g).isZero(tol_f));
+  BOOST_CHECK((casted_data->h - casted_data_num_diff->h).isZero(tol_f));
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -155,6 +209,53 @@ void test_partial_derivatives_against_numdiff(
   // Checking the partial derivatives against numdiff
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data = casted_model->createData(&casted_shared_data);
+  crocoddyl::ConstraintModelNumDiffTpl<float> casted_model_num_diff =
+      model_num_diff.cast<float>();
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data_num_diff =
+          casted_model_num_diff.createData(&casted_shared_data);
+  std::vector<crocoddyl::ConstraintModelNumDiffTpl<float>::ReevaluationFunction>
+      casted_reevals;
+  casted_reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      float, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &casted_pinocchio_model, &casted_pinocchio_data, _1, _2));
+  casted_model_num_diff.set_reevals(casted_reevals);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
+  casted_model_num_diff.calcDiff(casted_data_num_diff, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
+  BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
+  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
+  BOOST_CHECK((data->Hu.cast<float>() - casted_data->Hu).isZero(tol_f));
+  tol_f = sqrt(casted_model_num_diff.get_disturbance());
+  BOOST_CHECK((casted_data->Gx - casted_data_num_diff->Gx).isZero(tol_f));
+  BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
+  BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
+  BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
 }
 
 void test_dimensions_in_constraint_manager(
@@ -193,6 +294,21 @@ void test_dimensions_in_constraint_manager(
               constraint_man.get_state()->get_nv());
   BOOST_CHECK(model->get_ng() == constraint_man.get_ng());
   BOOST_CHECK(model->get_nh() == constraint_man.get_nh());
+
+  // Checking that casted computation is the same
+  crocoddyl::ConstraintModelManagerTpl<float> casted_constraint_man =
+      constraint_man.cast<float>();
+  BOOST_CHECK(model->get_state()->get_nx() ==
+              casted_constraint_man.get_state()->get_nx());
+  BOOST_CHECK(model->get_state()->get_ndx() ==
+              casted_constraint_man.get_state()->get_ndx());
+  BOOST_CHECK(model->get_nu() == casted_constraint_man.get_nu());
+  BOOST_CHECK(model->get_state()->get_nq() ==
+              casted_constraint_man.get_state()->get_nq());
+  BOOST_CHECK(model->get_state()->get_nv() ==
+              casted_constraint_man.get_state()->get_nv());
+  BOOST_CHECK(model->get_ng() == casted_constraint_man.get_ng());
+  BOOST_CHECK(model->get_nh() == casted_constraint_man.get_nh());
 }
 
 void test_partial_derivatives_in_constraint_manager(
@@ -235,6 +351,32 @@ void test_partial_derivatives_in_constraint_manager(
 
   BOOST_CHECK((data->Hx - data_man->Hx).isZero());
   BOOST_CHECK((data->Hu - data_man->Hu).isZero());
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data = casted_model->createData(&casted_shared_data);
+  crocoddyl::ConstraintModelManagerTpl<float> casted_constraint_man =
+      constraint_man.cast<float>();
+  const std::shared_ptr<crocoddyl::ConstraintDataManagerTpl<float>>&
+      casted_data_man = casted_constraint_man.createData(&casted_shared_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  casted_constraint_man.calc(casted_data_man, x_f, u_f);
+  casted_constraint_man.calcDiff(casted_data_man, x_f, u_f);
+  BOOST_CHECK((casted_data->Hx - casted_data_man->Hx).isZero());
+  BOOST_CHECK((casted_data->Hu - casted_data_man->Hu).isZero());
 }
 
 //----------------------------------------------------------------------------//
