@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/core/actions/lqr.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -30,12 +31,17 @@ void test_constructor(StateModelTypes::Type state_type) {
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_costs().size() == 0);
+
+  // Checking that casted computation is the same
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
+  BOOST_CHECK(casted_model.get_costs().size() == 0);
 }
 
 void test_addCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(state_factory.create(state_type));
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
 
   // add an active cost
   std::shared_ptr<crocoddyl::CostModelAbstract> rand_cost_1 =
@@ -67,6 +73,36 @@ void test_addCost(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nr_total() ==
               rand_cost_1->get_activation()->get_nr() +
                   rand_cost_2->get_activation()->get_nr());
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>> casted_rand_cost_1 =
+      rand_cost_1->cast<float>();
+  casted_model.addCost("random_cost_1", casted_rand_cost_1, 1.f);
+  BOOST_CHECK(casted_model.get_nr() ==
+              casted_rand_cost_1->get_activation()->get_nr());
+  BOOST_CHECK(casted_model.get_nr_total() ==
+              casted_rand_cost_1->get_activation()->get_nr());
+  std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>> casted_rand_cost_2 =
+      rand_cost_2->cast<float>();
+  casted_model.addCost("random_cost_2", casted_rand_cost_2, 1.f, false);
+  BOOST_CHECK(casted_model.get_nr() ==
+              casted_rand_cost_1->get_activation()->get_nr());
+  BOOST_CHECK(casted_model.get_nr_total() ==
+              casted_rand_cost_1->get_activation()->get_nr() +
+                  casted_rand_cost_2->get_activation()->get_nr());
+  casted_model.changeCostStatus("random_cost_2", true);
+  BOOST_CHECK(casted_model.get_nr() ==
+              casted_rand_cost_1->get_activation()->get_nr() +
+                  casted_rand_cost_2->get_activation()->get_nr());
+  BOOST_CHECK(casted_model.get_nr_total() ==
+              casted_rand_cost_1->get_activation()->get_nr() +
+                  casted_rand_cost_2->get_activation()->get_nr());
+  casted_model.changeCostStatus("random_cost_1", false);
+  BOOST_CHECK(casted_model.get_nr() ==
+              casted_rand_cost_2->get_activation()->get_nr());
+  BOOST_CHECK(casted_model.get_nr_total() ==
+              casted_rand_cost_1->get_activation()->get_nr() +
+                  casted_rand_cost_2->get_activation()->get_nr());
 }
 
 void test_addCost_error_message(StateModelTypes::Type state_type) {
@@ -107,6 +143,7 @@ void test_removeCost(StateModelTypes::Type state_type) {
   // Setup the test
   StateModelFactory state_factory;
   crocoddyl::CostModelSum model(state_factory.create(state_type));
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
 
   // add an active cost
   std::shared_ptr<crocoddyl::CostModelAbstract> rand_cost =
@@ -118,6 +155,16 @@ void test_removeCost(StateModelTypes::Type state_type) {
   model.removeCost("random_cost");
   BOOST_CHECK(model.get_nr() == 0);
   BOOST_CHECK(model.get_nr_total() == 0);
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>> casted_rand_cost =
+      rand_cost->cast<float>();
+  casted_model.addCost("random_cost", casted_rand_cost, 1.f);
+  BOOST_CHECK(casted_model.get_nr() ==
+              casted_rand_cost->get_activation()->get_nr());
+  casted_model.removeCost("random_cost");
+  BOOST_CHECK(casted_model.get_nr() == 0);
+  BOOST_CHECK(casted_model.get_nr_total() == 0);
 }
 
 void test_removeCost_error_message(StateModelTypes::Type state_type) {
@@ -152,8 +199,8 @@ void test_calc(StateModelTypes::Type state_type) {
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some cost objects
-  std::vector<std::shared_ptr<crocoddyl::CostModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::CostDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::CostModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::CostDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
@@ -202,6 +249,46 @@ void test_calc(StateModelTypes::Type state_type) {
     cost += datas[i]->cost;
   }
   BOOST_CHECK(data->cost == cost);
+
+  // Checking that casted computation is the same
+  model.changeCostStatus("random_cost_3", true);
+  model.changeCostStatus("random_cost_4", true);
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model.get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  std::vector<std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(casted_models[i]->createData(&casted_shared_data));
+  }
+  const std::shared_ptr<crocoddyl::CostDataSumTpl<float>>& casted_data =
+      casted_model.createData(&casted_shared_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  const Eigen::VectorXf u1_f = u1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1, u1);
+  casted_model.calc(casted_data, x1_f, u1_f);
+  BOOST_CHECK(casted_data->cost > 0.f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+  float cost_f = 0.f;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models[i]->calc(casted_datas[i], x1_f, u1_f);
+    cost_f += casted_datas[i]->cost;
+  }
+  BOOST_CHECK(casted_data->cost == cost_f);
 }
 
 void test_calcDiff(StateModelTypes::Type state_type) {
@@ -216,8 +303,8 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
 
   // create and add some cost objects
-  std::vector<std::shared_ptr<crocoddyl::CostModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::CostDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::CostModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::CostDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_cost_" << i;
@@ -339,6 +426,67 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->cost == cost);
   BOOST_CHECK(data->Lx == Lx);
   BOOST_CHECK(data->Lxx == Lxx);
+
+  // Checking that casted computation is the same
+  model.changeCostStatus("random_cost_3", true);
+  model.changeCostStatus("random_cost_4", true);
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model.get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data);
+  std::vector<std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(casted_models[i]->createData(&casted_shared_data));
+  }
+  const std::shared_ptr<crocoddyl::CostDataSumTpl<float>>& casted_data =
+      casted_model.createData(&casted_shared_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  const Eigen::VectorXf u1_f = u1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1, u1);
+  model.calcDiff(data, x1, u1);
+  casted_model.calc(casted_data, x1_f, u1_f);
+  casted_model.calcDiff(casted_data, x1_f, u1_f);
+  Lx.setZero();
+  Lu.setZero();
+  Lxx.setZero();
+  Lxu.setZero();
+  Luu.setZero();
+  float cost_f = 0.f;
+  Eigen::VectorXf Lx_f = Lx.cast<float>();
+  Eigen::VectorXf Lu_f = Lu.cast<float>();
+  Eigen::MatrixXf Lxx_f = Lxx.cast<float>();
+  Eigen::MatrixXf Lxu_f = Lxu.cast<float>();
+  Eigen::MatrixXf Luu_f = Luu.cast<float>();
+  for (std::size_t i = 0; i < 5;
+       ++i) {  // we need to update data because this costs are active
+    casted_models[i]->calc(casted_datas[i], x1_f, u1_f);
+    casted_models[i]->calcDiff(casted_datas[i], x1_f, u1_f);
+    cost_f += casted_datas[i]->cost;
+    Lx_f += casted_datas[i]->Lx;
+    Lu_f += casted_datas[i]->Lu;
+    Lxx_f += casted_datas[i]->Lxx;
+    Lxu_f += casted_datas[i]->Lxu;
+    Luu_f += casted_datas[i]->Luu;
+  }
+  BOOST_CHECK(casted_data->cost == cost_f);
+  BOOST_CHECK(casted_data->Lx == Lx_f);
+  BOOST_CHECK(casted_data->Lu == Lu_f);
+  BOOST_CHECK(casted_data->Lxx == Lxx_f);
+  BOOST_CHECK(casted_data->Lxu == Lxu_f);
+  BOOST_CHECK(casted_data->Luu == Luu_f);
 }
 
 void test_get_costs(StateModelTypes::Type state_type) {
