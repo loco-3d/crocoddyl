@@ -23,14 +23,10 @@ void test_partial_derivatives_against_impulse_numdiff(
   // create the model
   const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
       ImpulseCostModelFactory().create(cost_type, model_type, activation_type);
-  const std::shared_ptr<crocoddyl::ActionModelAbstract>& casted_model =
-      model->cast<double>();
 
   // create the corresponding data object and set the cost to nan
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& casted_data =
-      casted_model->createData();
 
   crocoddyl::ActionModelNumDiff model_num_diff(model);
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
@@ -70,22 +66,28 @@ void test_partial_derivatives_against_impulse_numdiff(
   }
 
   // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>>& casted_data =
+      casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
-  casted_model->calc(casted_data, x, u);
-  casted_model->calcDiff(casted_data, x, u);
-  tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
-  BOOST_CHECK((data->Lx - casted_data->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - casted_data->Lu).isZero(tol));
-  BOOST_CHECK((data->Lxx - casted_data->Lxx).isZero(tol));
-  BOOST_CHECK((data->Lxu - casted_data->Lxu).isZero(tol));
-  BOOST_CHECK((data->Luu - casted_data->Luu).isZero(tol));
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f));
+  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f));
   model->calc(data, x);
   model->calcDiff(data, x);
-  casted_model->calc(casted_data, x);
-  casted_model->calcDiff(casted_data, x);
-  BOOST_CHECK((data->Lx - casted_data->Lx).isZero(tol));
-  BOOST_CHECK((data->Lxx - casted_data->Lxx).isZero(tol));
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
 }
 
 //----------------------------------------------------------------------------//

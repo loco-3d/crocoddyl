@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,6 +46,21 @@ void test_partial_derivatives_against_impulse_numdiff(
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>
+      &casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> &casted_data =
+      casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
+  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
 }
 
 //----------------------------------------------------------------------------//
