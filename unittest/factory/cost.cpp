@@ -132,7 +132,7 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     case CostModelTypes::CostModelResidualState:
       cost = std::make_shared<crocoddyl::CostModelResidual>(
           state, activation_factory.create(activation_type, state->get_ndx()),
-          std::make_shared<crocoddyl::ResidualModelState>(state, state->rand(),
+          std::make_shared<crocoddyl::ResidualModelState>(state, state->zero(),
                                                           nu));
       break;
     case CostModelTypes::CostModelResidualControl:
