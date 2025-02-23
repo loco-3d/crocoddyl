@@ -74,16 +74,20 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(
     const std::string& name) {
   typename ConstraintModelContainer::iterator it = constraints_.find(name);
   if (it != constraints_.end()) {
-    ng_ -= it->second->constraint->get_ng();
-    nh_ -= it->second->constraint->get_nh();
-    if (it->second->constraint->get_T_constraint()) {
-      ng_T_ -= it->second->constraint->get_ng();
-      nh_T_ -= it->second->constraint->get_nh();
+    if (it->second->active) {
+      ng_ -= it->second->constraint->get_ng();
+      nh_ -= it->second->constraint->get_nh();
+      if (it->second->constraint->get_T_constraint()) {
+        ng_T_ -= it->second->constraint->get_ng();
+        nh_T_ -= it->second->constraint->get_nh();
+      }
+      lb_.resize(ng_);
+      ub_.resize(ng_);
+      active_set_.erase(name);
+    } else {
+      inactive_set_.erase(name);
     }
     constraints_.erase(it);
-    inactive_set_.erase(name);
-    lb_.resize(ng_);
-    ub_.resize(ng_);
   } else {
     std::cout << "Warning: we couldn't remove the " << name
               << " constraint item, it doesn't exist." << std::endl;
