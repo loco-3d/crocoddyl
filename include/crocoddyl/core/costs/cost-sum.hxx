@@ -255,7 +255,7 @@ CostModelSumTpl<NewScalar> CostModelSumTpl<Scalar>::cast() const {
   for (it_m = costs_.begin(), end_m = costs_.end(); it_m != end_m; ++it_m) {
     const std::string name = it_m->first;
     const CostType& m_i = it_m->second->template cast<NewScalar>();
-    ret.addCost(name, m_i.cost, m_i.active);
+    ret.addCost(name, m_i.cost, m_i.weight, m_i.active);
   }
   return ret;
 }
