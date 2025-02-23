@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft
-//                          University of Edinburgh, INRIA
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          INRIA, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +32,13 @@ void test_check_data(
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   BOOST_CHECK(model->checkData(data));
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
+      casted_model->createData();
+  BOOST_CHECK(casted_model->checkData(casted_data));
 }
 
 void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
@@ -56,6 +63,20 @@ void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   double tol = std::sqrt(2.0 * std::numeric_limits<double>::epsilon());
   model->calc(data, x);
   BOOST_CHECK((data->xnext - x).head(model->get_state()->get_nq()).isZero(tol));
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
+      casted_model->createData();
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  model->calc(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  BOOST_CHECK(static_cast<std::size_t>(casted_data->xnext.size()) ==
+              casted_model->get_state()->get_nx());
+  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -110,6 +131,40 @@ void test_partial_derivatives_against_numdiff(
   }
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+
+  // Checking that casted computation is the same
+  std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
+      casted_model->createData();
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->h.cast<float>() - casted_data->h).isZero(tol_f));
+  BOOST_CHECK((data->g.cast<float>() - casted_data->g).isZero(tol_f));
+  BOOST_CHECK((data->Fx.cast<float>() - casted_data->Fx).isZero(tol_f));
+  BOOST_CHECK((data->Fu.cast<float>() - casted_data->Fu).isZero(tol_f));
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
+  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
+  BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
+  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
+  BOOST_CHECK((data->Hu.cast<float>() - casted_data->Hu).isZero(tol_f));
+  crocoddyl::ActionModelNumDiffTpl<float> casted_model_num_diff =
+      model_num_diff.cast<float>();
+  std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>>
+      casted_data_num_diff = casted_model_num_diff.createData();
+  casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
+  casted_model_num_diff.calcDiff(casted_data_num_diff, x_f, u_f);
+  tol_f = 80.0f * sqrt(casted_model_num_diff.get_disturbance());
+  BOOST_CHECK((casted_data->Gx - casted_data_num_diff->Gx).isZero(tol_f));
+  BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
+  BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
+  BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
 }
 
 void test_check_action_data(ActionModelTypes::Type action_model_type) {
