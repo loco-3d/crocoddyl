@@ -208,12 +208,17 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::cast() const {
   typedef CostModelSumTpl<NewScalar> CostType;
   typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
   if (constraints_) {
+    const std::shared_ptr<ConstraintType>& constraints =
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>());
+    if (state_->get_nv() - actuation_->get_nu() > 0) {
+      constraints->removeConstraint("tau");
+    }
     ReturnType ret(
         std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
         actuation_->template cast<NewScalar>(),
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
-        std::make_shared<ConstraintType>(
-            constraints_->template cast<NewScalar>()));
+        constraints);
     return ret;
   } else {
     ReturnType ret(

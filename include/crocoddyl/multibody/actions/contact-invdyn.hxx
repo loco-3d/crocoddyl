@@ -357,13 +357,30 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::cast() const {
   typedef CostModelSumTpl<NewScalar> CostType;
   typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
   if (constraints_) {
+    const std::shared_ptr<ConstraintType>& constraints =
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>());
+    if (state_->get_nv() - actuation_->get_nu() > 0) {
+      constraints->removeConstraint("tau");
+    }
+    if (contacts_->get_nc_total() != 0) {
+      typename ContactModelMultiple::ContactModelContainer contact_list;
+      contact_list = contacts_->get_contacts();
+      typename ContactModelMultiple::ContactModelContainer::iterator it_m,
+          end_m;
+      for (it_m = contact_list.begin(), end_m = contact_list.end();
+           it_m != end_m; ++it_m) {
+        const std::string name = it_m->second->name;
+        constraints->removeConstraint(name + "_acc");
+        constraints->removeConstraint(name + "_force");
+      }
+    }
     ReturnType ret(
         std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
         actuation_->template cast<NewScalar>(),
         std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
-        std::make_shared<ConstraintType>(
-            constraints_->template cast<NewScalar>()));
+        constraints);
     return ret;
   } else {
     ReturnType ret(
