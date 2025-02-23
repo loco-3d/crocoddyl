@@ -22,7 +22,7 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
   ub_ = upper;
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
-      if (lb_(i) - ub_(i) > 0) {
+      if (lb_(i) - ub_(i) > Scalar(0.)) {
         throw_pretty(
             "Invalid argument: the upper bound is not equal to / higher than "
             "the lower bound.")
@@ -172,10 +172,17 @@ template <typename NewScalar>
 ConstraintModelResidualTpl<NewScalar> ConstraintModelResidualTpl<Scalar>::cast()
     const {
   typedef ConstraintModelResidualTpl<NewScalar> ReturnType;
-  ReturnType ret(
-      state_->template cast<NewScalar>(), residual_->template cast<NewScalar>(),
-      lb_.template cast<NewScalar>(), ub_.template cast<NewScalar>());
-  return ret;
+  if (type_ == ConstraintType::Inequality) {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>(),
+                   lb_.template cast<NewScalar>(),
+                   ub_.template cast<NewScalar>(), T_constraint_);
+    return ret;
+  } else {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>(), T_constraint_);
+    return ret;
+  }
 }
 
 template <typename Scalar>

@@ -53,7 +53,8 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(std::make_shared<ResidualModelAbstract>(state, ng + nh, nu)),
+      residual_(std::make_shared<ResidualModelAbstractTpl<Scalar>>(
+          state, ng + nh, nu)),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),
@@ -72,7 +73,8 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(std::make_shared<ResidualModelAbstract>(state, ng + nh)),
+      residual_(
+          std::make_shared<ResidualModelAbstractTpl<Scalar>>(state, ng + nh)),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),
@@ -99,7 +101,7 @@ void ConstraintModelAbstractTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-std::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
+std::shared_ptr<ConstraintDataAbstractTpl<Scalar>>
 ConstraintModelAbstractTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<ConstraintDataAbstract>(
@@ -157,13 +159,13 @@ void ConstraintModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const std::shared_ptr<StateAbstractTpl<Scalar> >&
+const std::shared_ptr<StateAbstractTpl<Scalar>>&
 ConstraintModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const std::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ResidualModelAbstractTpl<Scalar>>&
 ConstraintModelAbstractTpl<Scalar>::get_residual() const {
   return residual_;
 }

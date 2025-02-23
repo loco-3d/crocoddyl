@@ -282,8 +282,7 @@ struct ConstraintDataAbstractTpl {
   ConstraintDataAbstractTpl(Model<Scalar>* const model,
                             DataCollectorAbstract* const data)
       : shared(data),
-        residual(model->get_residual() ? model->get_residual()->createData(data)
-                                       : nullptr),
+        residual(model->get_residual()->createData(data)),
         g(model->get_ng()),
         Gx(model->get_ng(), model->get_state()->get_ndx()),
         Gu(model->get_ng(), model->get_nu()),
