@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,24 +9,39 @@
 #include "crocoddyl/core/data/actuation.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
+template <typename Data>
+struct DataCollectorActuationVisitor
+    : public bp::def_visitor<DataCollectorActuationVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "actuation",
+        bp::make_getter(&Data::actuation,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "actuation data");
+  }
+};
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_PYTHON_BINDINGS(Scalar)   \
+  typedef DataCollectorActuationTpl<Scalar> Data;                \
+  typedef DataCollectorAbstractTpl<Scalar> DataBase;             \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;        \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();           \
+  bp::class_<Data, bp::bases<DataBase>>(                         \
+      "DataCollectorActuation", "Actuation data collector.\n\n", \
+      bp::init<std::shared_ptr<ActuationData>>(                  \
+          bp::args("self", "actuation"),                         \
+          "Create actuation data collection.\n\n"                \
+          ":param actuation: actuation data"))                   \
+      .def(DataCollectorActuationVisitor<Data>())                \
+      .def(CopyableVisitor<Data>());
+
 void exposeDataCollectorActuation() {
-  bp::class_<DataCollectorActuation, bp::bases<DataCollectorAbstract> >(
-      "DataCollectorActuation", "Actuation data collector.\n\n",
-      bp::init<std::shared_ptr<ActuationDataAbstract> >(
-          bp::args("self", "actuation"),
-          "Create actuation data collection.\n\n"
-          ":param actuation: actuation data"))
-      .add_property(
-          "actuation",
-          bp::make_getter(&DataCollectorActuation::actuation,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "actuation data")
-      .def(CopyableVisitor<DataCollectorActuation>());
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_DATA_COLLECTOR_JOINT_PYTHON_BINDINGS)
 }
 
 }  // namespace python
