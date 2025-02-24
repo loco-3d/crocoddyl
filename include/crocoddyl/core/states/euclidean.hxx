@@ -88,7 +88,7 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&,
                                       std::to_string(ndx_) + ")");
     }
     Jfirst.setZero();
-    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, -1.);
+    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(-1.));
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
@@ -99,7 +99,7 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&,
                                       std::to_string(ndx_) + ")");
     }
     Jsecond.setZero();
-    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
+    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(1.));
   }
 }
 
