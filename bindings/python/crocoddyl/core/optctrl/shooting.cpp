@@ -20,8 +20,6 @@ namespace python {
 template <typename Problem>
 struct ShootingProblemVisitor
     : public bp::def_visitor<ShootingProblemVisitor<Problem>> {
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addCost_wrap,
-                                         Model::addCost, 3, 4)
   typedef typename Problem::ActionModelAbstract ActionModel;
   typedef typename Problem::ActionDataAbstract ActionData;
   typedef typename Problem::VectorXs VectorXs;
