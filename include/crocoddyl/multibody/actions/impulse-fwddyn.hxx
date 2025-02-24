@@ -156,16 +156,16 @@ ActionModelImpulseFwdDynamicsTpl<Scalar>::cast() const {
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
         std::make_shared<ConstraintType>(
             constraints_->template cast<NewScalar>()),
-        static_cast<NewScalar>(r_coeff_),
-        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+        scalar_cast<NewScalar>(r_coeff_),
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
     return ret;
   } else {
     ReturnType ret(
         std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
         std::make_shared<ImpulseType>(impulses_->template cast<NewScalar>()),
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
-        static_cast<NewScalar>(r_coeff_),
-        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+        scalar_cast<NewScalar>(r_coeff_),
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
     return ret;
   }
 }

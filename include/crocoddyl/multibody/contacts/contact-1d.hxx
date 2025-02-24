@@ -225,7 +225,7 @@ ContactModel1DTpl<NewScalar> ContactModel1DTpl<Scalar>::cast() const {
   typedef StateMultibodyTpl<NewScalar> StateType;
   ReturnType ret(
       std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
-      static_cast<NewScalar>(xref_), type_, Raxis_.template cast<NewScalar>(),
+      scalar_cast<NewScalar>(xref_), type_, Raxis_.template cast<NewScalar>(),
       nu_, gains_.template cast<NewScalar>());
   return ret;
 }

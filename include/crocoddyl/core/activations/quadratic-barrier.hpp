@@ -85,7 +85,7 @@ struct ActivationBoundsTpl {
   ActivationBoundsTpl<NewScalar> cast() const {
     typedef ActivationBoundsTpl<NewScalar> ReturnType;
     ReturnType res(lb.template cast<NewScalar>(), ub.template cast<NewScalar>(),
-                   static_cast<NewScalar>(beta));
+                   scalar_cast<NewScalar>(beta));
     return res;
   }
 

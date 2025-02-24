@@ -348,11 +348,11 @@ IntegratedActionModelRKTpl<NewScalar> IntegratedActionModelRKTpl<Scalar>::cast()
   if (control_) {
     ReturnType ret(differential_->template cast<NewScalar>(),
                    control_->template cast<NewScalar>(), rk_type_,
-                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
     return ret;
   } else {
     ReturnType ret(differential_->template cast<NewScalar>(), rk_type_,
-                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
     return ret;
   }
 }

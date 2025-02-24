@@ -116,7 +116,7 @@ class ActivationModelQuadFlatLogTpl
   template <typename NewScalar>
   ActivationModelQuadFlatLogTpl<NewScalar> cast() const {
     typedef ActivationModelQuadFlatLogTpl<NewScalar> ReturnType;
-    ReturnType res(nr_, static_cast<NewScalar>(alpha_));
+    ReturnType res(nr_, scalar_cast<NewScalar>(alpha_));
     return res;
   }
 

@@ -150,9 +150,9 @@ template <typename Scalar>
 template <typename NewScalar>
 FrictionConeTpl<NewScalar> FrictionConeTpl<Scalar>::cast() const {
   typedef FrictionConeTpl<NewScalar> ReturnType;
-  ReturnType ret(R_.template cast<NewScalar>(), static_cast<NewScalar>(mu_),
-                 nf_, inner_appr_, static_cast<NewScalar>(min_nforce_),
-                 static_cast<NewScalar>(max_nforce_));
+  ReturnType ret(R_.template cast<NewScalar>(), scalar_cast<NewScalar>(mu_),
+                 nf_, inner_appr_, scalar_cast<NewScalar>(min_nforce_),
+                 scalar_cast<NewScalar>(max_nforce_));
   return ret;
 }
 

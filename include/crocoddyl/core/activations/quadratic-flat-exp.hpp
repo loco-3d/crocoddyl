@@ -118,7 +118,7 @@ class ActivationModelQuadFlatExpTpl
   template <typename NewScalar>
   ActivationModelQuadFlatExpTpl<NewScalar> cast() const {
     typedef ActivationModelQuadFlatExpTpl<NewScalar> ReturnType;
-    ReturnType res(nr_, static_cast<NewScalar>(alpha_));
+    ReturnType res(nr_, scalar_cast<NewScalar>(alpha_));
     return res;
   }
 

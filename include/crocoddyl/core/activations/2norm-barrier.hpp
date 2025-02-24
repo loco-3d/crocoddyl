@@ -140,7 +140,7 @@ class ActivationModel2NormBarrierTpl
   template <typename NewScalar>
   ActivationModel2NormBarrierTpl<NewScalar> cast() const {
     typedef ActivationModel2NormBarrierTpl<NewScalar> ReturnType;
-    ReturnType res(nr_, static_cast<NewScalar>(alpha_), true_hessian_);
+    ReturnType res(nr_, scalar_cast<NewScalar>(alpha_), true_hessian_);
     return res;
   }
 

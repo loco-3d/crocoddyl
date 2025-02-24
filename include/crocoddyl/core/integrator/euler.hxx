@@ -170,11 +170,11 @@ IntegratedActionModelEulerTpl<Scalar>::cast() const {
   if (control_) {
     ReturnType ret(differential_->template cast<NewScalar>(),
                    control_->template cast<NewScalar>(),
-                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
     return ret;
   } else {
     ReturnType ret(differential_->template cast<NewScalar>(),
-                   static_cast<NewScalar>(time_step_), with_cost_residual_);
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
     return ret;
   }
 }

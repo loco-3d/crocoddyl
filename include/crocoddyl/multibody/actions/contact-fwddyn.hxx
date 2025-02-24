@@ -291,7 +291,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::cast() const {
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
         std::make_shared<ConstraintType>(
             constraints_->template cast<NewScalar>()),
-        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
     return ret;
   } else {
     ReturnType ret(
@@ -299,7 +299,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::cast() const {
         actuation_->template cast<NewScalar>(),
         std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
         std::make_shared<CostType>(costs_->template cast<NewScalar>()),
-        static_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
     return ret;
   }
 }

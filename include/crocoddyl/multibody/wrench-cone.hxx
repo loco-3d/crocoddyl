@@ -228,10 +228,9 @@ template <typename Scalar>
 template <typename NewScalar>
 WrenchConeTpl<NewScalar> WrenchConeTpl<Scalar>::cast() const {
   typedef WrenchConeTpl<NewScalar> ReturnType;
-  ReturnType ret(R_.template cast<NewScalar>(), static_cast<NewScalar>(mu_),
+  ReturnType ret(R_.template cast<NewScalar>(), NewScalar(mu_),
                  box_.template cast<NewScalar>(), nf_, inner_appr_,
-                 static_cast<NewScalar>(min_nforce_),
-                 static_cast<NewScalar>(max_nforce_));
+                 NewScalar(min_nforce_), NewScalar(max_nforce_));
   return ret;
 }
 

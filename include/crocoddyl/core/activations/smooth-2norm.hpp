@@ -112,7 +112,7 @@ class ActivationModelSmooth2NormTpl
   template <typename NewScalar>
   ActivationModelSmooth2NormTpl<NewScalar> cast() const {
     typedef ActivationModelSmooth2NormTpl<NewScalar> ReturnType;
-    ReturnType res(nr_, static_cast<NewScalar>(eps_));
+    ReturnType res(nr_, scalar_cast<NewScalar>(eps_));
     return res;
   }
 

@@ -61,8 +61,7 @@ std::vector<std::shared_ptr<ItemTpl<NewScalar>>> vector_cast(
 
 }  // namespace crocoddyl
 
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
+#ifdef CROCODDYL_WITH_CODEGEN
 
 // Specialize Eigen's internal cast_impl for your specific types
 namespace Eigen {

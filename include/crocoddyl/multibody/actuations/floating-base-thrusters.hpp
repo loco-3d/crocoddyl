@@ -79,8 +79,8 @@ struct ThrusterTpl {
   ThrusterTpl<NewScalar> cast() const {
     typedef ThrusterTpl<NewScalar> ReturnType;
     ReturnType ret(
-        pose.template cast<NewScalar>(), static_cast<NewScalar>(ctorque), type,
-        static_cast<NewScalar>(min_thrust), static_cast<NewScalar>(max_thrust));
+        pose.template cast<NewScalar>(), scalar_cast<NewScalar>(ctorque), type,
+        scalar_cast<NewScalar>(min_thrust), scalar_cast<NewScalar>(max_thrust));
     return ret;
   }
 

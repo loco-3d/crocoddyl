@@ -37,7 +37,7 @@ struct CostItemTpl {
   CostItemTpl<NewScalar> cast() const {
     typedef CostItemTpl<NewScalar> ReturnType;
     ReturnType ret(name, cost->template cast<NewScalar>(),
-                   static_cast<NewScalar>(weight), active);
+                   scalar_cast<NewScalar>(weight), active);
     return ret;
   }
 
