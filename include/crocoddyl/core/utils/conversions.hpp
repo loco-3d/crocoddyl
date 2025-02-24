@@ -37,6 +37,19 @@ std::vector<ItemTpl<NewScalar>> vector_cast(
   return out;
 }
 
+template <typename NewScalar, typename Scalar,
+          template <typename> class ItemTpl>
+std::vector<std::shared_ptr<ItemTpl<NewScalar>>> vector_cast(
+    const std::vector<std::shared_ptr<ItemTpl<Scalar>>>& in) {
+  std::vector<std::shared_ptr<ItemTpl<NewScalar>>> out;
+  out.reserve(in.size());  // Optimize allocation
+  for (const auto& obj : in) {
+    out.push_back(std::static_pointer_cast<ItemTpl<NewScalar>>(
+        obj->template cast<NewScalar>()));
+  }
+  return out;
+}
+
 }  // namespace crocoddyl
 
 #ifdef CROCODDYL_WITH_CODEGEN

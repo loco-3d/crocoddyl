@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -401,6 +401,16 @@ void ShootingProblemTpl<Scalar>::updateModel(
     running_models_[i] = model;
     running_datas_[i] = model->createData();
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
+  typedef ShootingProblemTpl<NewScalar> ReturnType;
+  ReturnType ret(x0_.template cast<NewScalar>(),
+                 vector_cast<NewScalar>(running_models_),
+                 terminal_model_->template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

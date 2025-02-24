@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
-// Oxford Copyright note valid unless otherwise stated in individual files. All
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -14,6 +15,7 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -191,6 +193,18 @@ class ShootingProblemTpl {
    */
   void updateModel(const std::size_t i,
                    std::shared_ptr<ActionModelAbstract> model);
+
+  /**
+   * @brief Cast the shooting problem to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ShootingProblemTpl<NewScalar> A shooting problem with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ShootingProblemTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the number of running nodes
