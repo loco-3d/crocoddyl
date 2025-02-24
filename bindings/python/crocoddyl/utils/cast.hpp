@@ -39,7 +39,8 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model>> {
       return bp::object(self.template cast<Float64>());
     } else if (dtype == "float") {
       return bp::object(self.template cast<Float32>());
-#ifdef CROCODDYL_WITH_CODEGEN
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
+                                       // when supporting codegen
     } else if (dtype == "adouble") {
       return bp::object(self.template cast<ADFloat64>());
 #endif

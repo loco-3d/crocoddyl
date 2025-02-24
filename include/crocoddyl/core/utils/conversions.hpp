@@ -13,6 +13,15 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 
+#ifdef CROCODDYL_WITH_CODEGEN
+#include <cppad/cg/support/cppadcg_eigen.hpp>
+#include <cppad/cppad.hpp>
+#endif
+
+#ifdef CROCODDYL_WITH_CODEGEN
+#include <cppad/cg/cg.hpp>
+#endif
+
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -52,7 +61,8 @@ std::vector<std::shared_ptr<ItemTpl<NewScalar>>> vector_cast(
 
 }  // namespace crocoddyl
 
-#ifdef CROCODDYL_WITH_CODEGEN
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
+                                       // when supporting codegen
 
 // Specialize Eigen's internal cast_impl for your specific types
 namespace Eigen {
