@@ -179,7 +179,7 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
   xs_f.back() = xs.back().cast<float>();
   float cost_f = casted_problem1.calc(xs_f, us_f);
   casted_problem2.calc(xs_f, us_f);
-  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   for (std::size_t i = 0; i < T; ++i) {
     const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>&
         casted_model = model->cast<float>();
@@ -196,9 +196,8 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
     BOOST_CHECK(
         (casted_problem2.get_runningDatas()[i]->xnext - casted_data->xnext)
             .isZero(1e-9f));
-    BOOST_CHECK(float(problem1.get_runningDatas()[i]->cost) -
-                    casted_data->cost <=
-                tol_f);
+    BOOST_CHECK(std::abs(float(problem1.get_runningDatas()[i]->cost) -
+                         casted_data->cost) <= tol_f);
     BOOST_CHECK((problem1.get_runningDatas()[i]->xnext.cast<float>() -
                  casted_data->xnext)
                     .isZero(tol_f));

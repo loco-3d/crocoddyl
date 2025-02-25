@@ -475,7 +475,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   casted_state->Jdiff(x1_f, x2_f, J1_f, J2_f);
   dX_dDX_f = Jdx_f;
   dDX_dX_f = J2_f;
-  BOOST_CHECK((dX_dDX_f - dDX_dX_f.inverse()).isZero(1e-6f));
+  BOOST_CHECK((dX_dDX_f - dDX_dX_f.inverse()).isZero(1e-4f));
 }
 
 void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {

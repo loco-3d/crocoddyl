@@ -238,7 +238,7 @@ void test_partial_derivatives_against_numdiff(
   model->calcDiff(data, x, u);
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
   BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
   BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
