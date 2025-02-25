@@ -124,6 +124,12 @@ class ActionModelAbstractTpl : public ActionModelBase {
                          const std::size_t ng = 0, const std::size_t nh = 0,
                          const std::size_t ng_T = 0,
                          const std::size_t nh_T = 0);
+  /**
+   * @brief Copy constructor
+   * @param other  Action model to be copied
+   */
+  ActionModelAbstractTpl(const ActionModelAbstractTpl<Scalar>& other);
+
   virtual ~ActionModelAbstractTpl() = default;
 
   /**

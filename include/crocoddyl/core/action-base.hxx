@@ -39,6 +39,22 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
       has_control_limits_(false) {}
 
 template <typename Scalar>
+ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
+    const ActionModelAbstractTpl<Scalar>& other)
+    : nu_(other.nu_),
+      nr_(other.nr_),
+      ng_(other.ng_),
+      nh_(other.nh_),
+      ng_T_(other.ng_T_),
+      nh_T_(other.nh_T_),
+      state_(other.state_),
+      g_lb_(other.g_lb_),
+      g_ub_(other.g_ub_),
+      u_lb_(other.u_lb_),
+      u_ub_(other.u_ub_),
+      has_control_limits_(other.has_control_limits_) {}
+
+template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::calc(
     const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
