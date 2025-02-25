@@ -75,8 +75,8 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const Scalar c = cos(x[2]);
-  const Scalar s = sin(x[2]);
+  const Scalar c = static_cast<Scalar>(cos(x[2]));
+  const Scalar s = static_cast<Scalar>(sin(x[2]));
   const Scalar w_x = cost_weights_[0] * cost_weights_[0];
   const Scalar w_u = cost_weights_[1] * cost_weights_[1];
   d->Lx = x * w_x;

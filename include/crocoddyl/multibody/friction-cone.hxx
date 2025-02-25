@@ -96,7 +96,8 @@ void FrictionConeTpl<Scalar>::update() {
 
   // Compute the mu given the type of friction cone approximation
   Scalar mu = mu_;
-  const Scalar theta = static_cast<Scalar>(2.0 * M_PI / nf_);
+  const Scalar theta =
+      static_cast<Scalar>(2.0 * M_PI) / static_cast<Scalar>(nf_);
   if (inner_appr_) {
     mu *= cos(theta / Scalar(2.));
   }
