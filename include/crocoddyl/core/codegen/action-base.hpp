@@ -14,6 +14,7 @@
 #include <functional>
 
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/utils/stop-watch.hpp"
 #include "pinocchio/codegen/cppadcg.hpp"
 
 namespace pinocchio {
