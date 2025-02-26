@@ -98,7 +98,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
-        updateParams_(updateParams) {
+        updateParams_(updateParams),
+        ad_calc_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
     ad_Y2_.resize(nY2_);
@@ -136,7 +138,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
-        updateParams_(updateParams) {
+        updateParams_(updateParams),
+        ad_calc_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
     ad_Y2_.resize(nY2_);
@@ -203,7 +207,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     START_PROFILER("ActionModelCodeGen::compileLib");
     switch (compiler_type_) {
       case GCC: {
-        CppAD::cg::GccCompiler<Scalar> compiler;
+        CppAD::cg::GccCompiler<Scalar> compiler("/usr/bin/gcc");
         std::vector<std::string> compile_flags = compiler.getCompileFlags();
         compile_flags[0] = compile_options_;
         compiler.setCompileFlags(compile_flags);
@@ -211,7 +215,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         break;
       }
       case CLANG: {
-        CppAD::cg::ClangCompiler<Scalar> compiler;
+        CppAD::cg::ClangCompiler<Scalar> compiler("/usr/bin/clang");
         std::vector<std::string> compile_flags = compiler.getCompileFlags();
         compile_flags[0] = compile_options_;
         compiler.setCompileFlags(compile_flags);
