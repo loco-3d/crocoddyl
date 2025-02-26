@@ -130,10 +130,10 @@ void print_benchmark(RobotEENames robot) {
 
   std::shared_ptr<crocoddyl::ActionModelAbstract> cg_runningModel =
       std::make_shared<crocoddyl::ActionModelCodeGen>(
-          ad_runningModel, runningModel, robot.robot_name + "_running_cg");
+          ad_runningModel, robot.robot_name + "_running_cg");
   std::shared_ptr<crocoddyl::ActionModelAbstract> cg_terminalModel =
       std::make_shared<crocoddyl::ActionModelCodeGen>(
-          ad_terminalModel, terminalModel, robot.robot_name + "_terminal_cg");
+          ad_terminalModel, robot.robot_name + "_terminal_cg");
 
   // Defining the shooting problem for both cases: with and without code
   // generation
