@@ -142,6 +142,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @brief Initialize the code-generated library
    */
   void initLib() {
+    START_PROFILER("ActionModelCodeGen::initLib");
     recordCalc();
     // Generate source code for calc
     calcCG_ = std::unique_ptr<CSourceGen>(
@@ -160,12 +161,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // Crate dynamic library manager
     dynLibManager_ = std::unique_ptr<LibraryProcessor>(
         new LibraryProcessor(*libCG_, lib_fname_));
+    STOP_PROFILER("ActionModelCodeGen::initLib");
   }
 
   /**
    * @brief Compile the code-generated library
    */
   void compileLib() {
+    START_PROFILER("ActionModelCodeGen::compileLib");
     switch (compiler_type_) {
       case GCC: {
         CppAD::cg::GccCompiler<Scalar> compiler;
@@ -184,6 +187,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         break;
       }
     }
+    STOP_PROFILER("ActionModelCodeGen::compileLib");
   }
 
   /**
@@ -236,12 +240,16 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void calc(const std::shared_ptr<ActionDataAbstract>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) override {
+    START_PROFILER("ActionModelCodeGen::calc");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
     d->X.head(nx) = x;
     d->X.segment(nx, nu_) = u;
+    START_PROFILER("ActionModelCodeGen::calc::ForwardZero");
     calcFun_->ForwardZero(d->X, d->Y1);
+    STOP_PROFILER("ActionModelCodeGen::calc::ForwardZero");
     d->set_Y1();
+    STOP_PROFILER("ActionModelCodeGen::calc");
   }
 
   /**
@@ -260,12 +268,16 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) override {
+    START_PROFILER("ActionModelCodeGen::calcDiff");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
     d->X.head(nx) = x;
     d->X.segment(nx, nu_) = u;
+    START_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
     calcDiffFun_->ForwardZero(d->X, d->Y2);
+    STOP_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
     d->set_Y2();
+    STOP_PROFILER("ActionModelCodeGen::calcDiff");
   }
 
   /**
