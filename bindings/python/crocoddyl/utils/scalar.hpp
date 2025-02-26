@@ -27,6 +27,16 @@ namespace python {
 
 typedef double Float64;
 typedef float Float32;
+
+enum class DType {
+  Float64,
+  Float32
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+  ,
+  ADFloat64
+#endif
+};
+
 #ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
                                        // when supporting codegen
 typedef CppAD::cg::CG<Float64> CGFloat64;

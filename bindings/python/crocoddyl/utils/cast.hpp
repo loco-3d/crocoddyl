@@ -34,23 +34,20 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model>> {
   }
 
  private:
-  static bp::object cast_instance(const Model& self, const std::string& dtype) {
-    if (dtype == "double") {
-      return bp::object(self.template cast<Float64>());
-    } else if (dtype == "float") {
-      return bp::object(self.template cast<Float32>());
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
-    } else if (dtype == "adouble") {
-      return bp::object(self.template cast<ADFloat64>());
+  static bp::object cast_instance(const Model& self, DType dtype) {
+    switch (dtype) {
+      case DType::Float64:
+        return bp::object(self.template cast<Float64>());
+      case DType::Float32:
+        return bp::object(self.template cast<Float32>());
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+      case DType::ADFloat64:
+        return bp::object(self.template cast<ADFloat64>());
 #endif
-    } else {
-      PyErr_SetString(
-          PyExc_TypeError,
-          "Unsupported dtype. Only 'int' and 'double' are supported.");
-      bp::throw_error_already_set();
-      return bp::object();  // This line will never be reached, but is needed
-                            // for completeness
+      default:
+        PyErr_SetString(PyExc_TypeError, "Unsupported dtype.");
+        bp::throw_error_already_set();
+        return bp::object();
     }
   }
 };
