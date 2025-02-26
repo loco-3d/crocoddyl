@@ -268,7 +268,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     typedef CppAD::cg::CG<NewScalar> CGNewScalar;
     typedef CppAD::AD<CGNewScalar> ADNewScalar;
     ReturnType ret(ad_model->template cast<ADNewScalar>(),
-                   model->template cast<NewScalar>(), library_name);
+                   model_->template cast<NewScalar>(), lib_fname);
     return ret;
   }
 
