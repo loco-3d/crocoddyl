@@ -70,37 +70,69 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       ParamsEnvironment;
 
   /**
-   * @brief Initialize the code generated action model
+   * @brief Initialize the code generated action model from a model
    *
-   * @param[in] admodel       Action model used to code generate
-   * @param[in] model         Action model to code generate
+   * @param[in] model         Action model which we want to code generate
    * @param[in] lib_fname     Name of the code generated library
    * @param[in] updateParams  Function used to update the calc and calcDiff's
    * parameters (default empty function)
-   * @param[in] Y1fun_name    Name of the calc function (default "calc")
-   * @param[in] Y2fun_name    Name of the calcDiff function (default "calcDiff")
    * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
    * @param[in] compile_options  Compilation flags (default: "-Ofast
    * -march=native")
    */
   ActionModelCodeGenTpl(
-      std::shared_ptr<ADBase> admodel, std::shared_ptr<Base> model,
-      const std::string& lib_fname, const std::size_t nP = 0,
-      ParamsEnvironment updateParams = EmptyParamsEnv,
-      const std::string& Y1fun_name = "calc",
-      const std::string& Y2fun_name = "calcDiff", CompilerType compiler = CLANG,
+      std::shared_ptr<Base> model, const std::string& lib_fname,
+      const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
+      CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
       : Base(model->get_state(), model->get_nu()),
-        model_(model),
-        ad_model_(admodel),
+        ad_model_(model->template cast<ADScalar>()),
         ad_data_(ad_model_->createData()),
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
         nY1_(state_->get_nx() + 1),
         ad_X_(nX_),
         ad_Y1_(nY1_),
-        Y1fun_name_(Y1fun_name),
-        Y2fun_name_(Y2fun_name),
+        Y1fun_name_("calc"),
+        Y2fun_name_("calcDiff"),
+        lib_fname_(lib_fname),
+        compiler_type_(compiler),
+        compile_options_(compile_options),
+        updateParams_(updateParams) {
+    const std::size_t ndx = state_->get_ndx();
+    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
+    ad_Y2_.resize(nY2_);
+    initLib();
+    loadLib();
+  }
+
+  /**
+   * @brief Initialize the code generated action model from an AD model
+   *
+   * @param[in] ad_model      Action model used to code generate
+   * @param[in] lib_fname     Name of the code generated library
+   * @param[in] updateParams  Function used to update the calc and calcDiff's
+   * parameters (default empty function)
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compile_options  Compilation flags (default: "-Ofast
+   * -march=native")
+   */
+  ActionModelCodeGenTpl(
+      std::shared_ptr<ADBase> ad_model, const std::string& lib_fname,
+      const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
+      CompilerType compiler = CLANG,
+      const std::string& compile_options = "-Ofast -march=native")
+      : Base(ad_model->get_state()->template cast<Scalar>(),
+             ad_model->get_nu()),
+        ad_model_(ad_model),
+        ad_data_(ad_model_->createData()),
+        nP_(nP),
+        nX_(state_->get_nx() + nu_ + nP_),
+        nY1_(state_->get_nx() + 1),
+        ad_X_(nX_),
+        ad_Y1_(nY1_),
+        Y1fun_name_("calc"),
+        Y2fun_name_("calcDiff"),
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
@@ -118,7 +150,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   ActionModelCodeGenTpl(const ActionModelCodeGenTpl<Scalar>& other)
       : Base(other),
-        model_(other.model_),
         ad_model_(other.ad_model_),
         nP_(other.nP_),
         nX_(other.nX_),
@@ -304,8 +335,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     typedef ActionModelCodeGenTpl<NewScalar> ReturnType;
     typedef CppAD::cg::CG<NewScalar> CGNewScalar;
     typedef CppAD::AD<CGNewScalar> ADNewScalar;
-    ReturnType ret(ad_model_->template cast<ADNewScalar>(),
-                   model_->template cast<NewScalar>(), lib_fname_);
+    ReturnType ret(ad_model_->template cast<ADNewScalar>(), lib_fname_);
     return ret;
   }
 
@@ -330,7 +360,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
-  std::shared_ptr<Base> model_;  //!< Action model to be code generated
   std::shared_ptr<ADBase>
       ad_model_;  //!< Action model needed for code generation
   std::shared_ptr<ADActionDataAbstract>
