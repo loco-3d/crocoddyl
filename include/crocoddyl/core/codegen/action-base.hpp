@@ -52,7 +52,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef MathBaseTpl<ADScalar> ADMathBase;
   typedef crocoddyl::ActionModelAbstractTpl<ADScalar> ADBase;
   typedef ActionDataAbstractTpl<ADScalar> ADActionDataAbstract;
-  typedef ActionDataCodeGenTpl<ADScalar> ADActionDataCodeGen;
   typedef typename ADMathBase::VectorXs ADVectorXs;
   typedef typename ADMathBase::MatrixXs ADMatrixXs;
   typedef
@@ -86,6 +85,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
       : Base(model->get_state(), model->get_nu()),
+        model_(model),
         ad_model_(model->template cast<ADScalar>()),
         ad_data_(ad_model_->createData()),
         nP_(nP),
@@ -126,6 +126,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       const std::string& compile_options = "-Ofast -march=native")
       : Base(ad_model->get_state()->template cast<Scalar>(),
              ad_model->get_nu()),
+        model_(ad_model->template cast<Scalar>()),
         ad_model_(ad_model),
         ad_data_(ad_model_->createData()),
         nP_(nP),
@@ -154,6 +155,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   ActionModelCodeGenTpl(const ActionModelCodeGenTpl<Scalar>& other)
       : Base(other),
+        model_(other.model_),
         ad_model_(other.ad_model_),
         nP_(other.nP_),
         nX_(other.nX_),
@@ -173,6 +175,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     initLib();
     loadLib();
   }
+
+  virtual ~ActionModelCodeGenTpl() = default;
 
   /**
    * @brief Initialize the code-generated library
@@ -326,6 +330,32 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   /**
+   * @brief Checks that a specific data belongs to this model
+   */
+  bool checkData(const std::shared_ptr<ActionDataAbstract>& data) override {
+    return model_->checkData(data);
+  }
+
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference
+   * posture as an equilibrium point, i.e. for
+   * \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   *
+   * @param[in] data    Action data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
+  void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
+                   Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                   const std::size_t maxiter, const Scalar tol) override {
+    model_->quasiStatic(data, u, x, maxiter, tol);
+  }
+
+  /**
    * @brief Cast the codegen action model to a different scalar type.
    *
    * It is useful for operations requiring different precision or scalar types.
@@ -337,11 +367,39 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   template <typename NewScalar>
   ActionModelCodeGenTpl<NewScalar> cast() const {
     typedef ActionModelCodeGenTpl<NewScalar> ReturnType;
-    typedef CppAD::cg::CG<NewScalar> CGNewScalar;
-    typedef CppAD::AD<CGNewScalar> ADNewScalar;
-    ReturnType ret(ad_model_->template cast<ADNewScalar>(), lib_fname_);
+    ReturnType ret(model_->template cast<NewScalar>(), lib_fname_);
     return ret;
   }
+
+  /**
+   * @brief Return the number of inequality constraints
+   */
+  std::size_t get_ng() const override { return model_->get_ng(); }
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  std::size_t get_nh() const override { return model_->get_nh(); }
+
+  /**
+   * @brief Return the number of inequality terminal constraints
+   */
+  std::size_t get_ng_T() const override { return model_->get_ng_T(); }
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  std::size_t get_nh_T() const override { return model_->get_nh_T(); }
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  const VectorXs& get_g_lb() const override { return model_->get_g_lb(); }
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  const VectorXs& get_g_ub() const override { return model_->get_g_ub(); }
 
   /**
    * @brief Return the dimension of the dependent vector used by calc and
@@ -360,10 +418,18 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   std::size_t get_nY2() const { return nY2_; }
 
+  /**
+   * @brief Print relevant information of the action model
+   *
+   * @param[out] os  Output stream object
+   */
+  void print(std::ostream& os) const override { model_->print(os); }
+
  protected:
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
+  std::shared_ptr<Base> model_;  //!< Action model to be code generated
   std::shared_ptr<ADBase>
       ad_model_;  //!< Action model needed for code generation
   std::shared_ptr<ADActionDataAbstract>
