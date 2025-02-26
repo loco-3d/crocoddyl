@@ -27,6 +27,8 @@ struct ScalarCast<NewScalar, CppAD::cg::CG<Scalar>> {
 
 namespace crocoddyl {
 
+enum CompilerType { GCC = 0, CLANG };
+
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
@@ -76,13 +78,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * parameters (default empty function)
    * @param[in] Y1fun_name    Name of the calc function (default "calc")
    * @param[in] Y2fun_name    Name of the calcDiff function (default "calcDiff")
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compile_options  Compilation flags (default: "-Ofast
+   * -march=native")
    */
-  ActionModelCodeGenTpl(std::shared_ptr<ADBase> admodel,
-                        std::shared_ptr<Base> model,
-                        const std::string& lib_fname, const std::size_t nP = 0,
-                        ParamsEnvironment updateParams = EmptyParamsEnv,
-                        const std::string& Y1fun_name = "calc",
-                        const std::string& Y2fun_name = "calcDiff")
+  ActionModelCodeGenTpl(
+      std::shared_ptr<ADBase> admodel, std::shared_ptr<Base> model,
+      const std::string& lib_fname, const std::size_t nP = 0,
+      ParamsEnvironment updateParams = EmptyParamsEnv,
+      const std::string& Y1fun_name = "calc",
+      const std::string& Y2fun_name = "calcDiff", CompilerType compiler = CLANG,
+      const std::string& compile_options = "-Ofast -march=native")
       : Base(model->get_state(), model->get_nu()),
         model_(model),
         ad_model_(admodel),
@@ -95,6 +101,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         Y1fun_name_(Y1fun_name),
         Y2fun_name_(Y2fun_name),
         lib_fname_(lib_fname),
+        compiler_type_(compiler),
+        compile_options_(compile_options),
         updateParams_(updateParams) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
@@ -121,6 +129,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         Y1fun_name_(other.Y1fun_name_),
         Y2fun_name_(other.Y2fun_name_),
         lib_fname_(other.lib_fname_),
+        compiler_type_(other.compiler_type_),
+        compile_options_(other.compile_options_),
         updateParams_(other.updateParams_),
         ad_calc_(std::make_unique<ADFun>(std::move(*other.ad_calc_))),
         ad_calcDiff_(std::make_unique<ADFun>(std::move(*other.ad_calcDiff_))) {
@@ -156,11 +166,24 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @brief Compile the code-generated library
    */
   void compileLib() {
-    CppAD::cg::GccCompiler<Scalar> compiler;
-    std::vector<std::string> compile_options = compiler.getCompileFlags();
-    compile_options[0] = "-O3";
-    compiler.setCompileFlags(compile_options);
-    dynLibManager_->createDynamicLibrary(compiler, false);
+    switch (compiler_type_) {
+      case GCC: {
+        CppAD::cg::GccCompiler<Scalar> compiler;
+        std::vector<std::string> compile_flags = compiler.getCompileFlags();
+        compile_flags[0] = compile_options_;
+        compiler.setCompileFlags(compile_flags);
+        dynLibManager_->createDynamicLibrary(compiler, false);
+        break;
+      }
+      case CLANG: {
+        CppAD::cg::ClangCompiler<Scalar> compiler;
+        std::vector<std::string> compile_flags = compiler.getCompileFlags();
+        compile_flags[0] = compile_options_;
+        compiler.setCompileFlags(compile_flags);
+        dynLibManager_->createDynamicLibrary(compiler, false);
+        break;
+      }
+    }
   }
 
   /**
@@ -181,7 +204,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param generate_if_exist  True for compiling the library when it exists
    */
   void loadLib(const bool generate_if_exist = true) {
-    if (!existLib() && generate_if_not_exist) {
+    if (!existLib() || generate_if_exist) {
       compileLib();
     }
     const auto it = dynLibManager_->getOptions().find("dlOpenMode");
@@ -313,9 +336,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   ADVectorXs ad_Y1_;  //!< Dependent variables used to tape calc function
   ADVectorXs ad_Y2_;  //!< Dependent variables used to tape calcDiff function
 
-  const std::string Y1fun_name_;  //!< Name of the calc function
-  const std::string Y2fun_name_;  //!< Name of the calcDiff function
-  const std::string lib_fname_;   //!< Name of the code generated library
+  const std::string Y1fun_name_;       //!< Name of the calc function
+  const std::string Y2fun_name_;       //!< Name of the calcDiff function
+  const std::string lib_fname_;        //!< Name of the code generated library
+  CompilerType compiler_type_;         //!< Type of compiler
+  const std::string compile_options_;  //!< Compilation options
 
   ParamsEnvironment updateParams_;  // Lambda function that updates parameter
                                     // variables before starting record.
@@ -457,4 +482,4 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-#endif  // ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
+#endif  // CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
