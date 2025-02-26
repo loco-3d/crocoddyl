@@ -80,7 +80,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   ActionModelCodeGenTpl(std::shared_ptr<ADBase> admodel,
                         std::shared_ptr<Base> model,
                         const std::string& lib_fname, const std::size_t nP = 0,
-                        ParamsEnvironment updateParams = empty_record_env,
+                        ParamsEnvironment updateParams = EmptyParamsEnv,
                         const std::string& Y1fun_name = "calc",
                         const std::string& Y2fun_name = "calcDiff")
       : Base(model->get_state(), model->get_nu()),
@@ -127,9 +127,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     initLib();
     loadLib();
   }
-
-  static void empty_record_env(std::shared_ptr<ADBase>,
-                               const Eigen::Ref<const ADVectorXs>&) {}
 
   /**
    * @brief Initialize the code-generated library
@@ -391,6 +388,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     it_Y2 += ndx * nu_;
     Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nu_, nu_) = ad_data_->Luu;
   }
+
+  static void EmptyParamsEnv(std::shared_ptr<ADBase>,
+                             const Eigen::Ref<const ADVectorXs>&) {}
 };
 
 template <typename _Scalar>
