@@ -46,7 +46,7 @@ class ActionModelAbstractTpl_wrap
                               const std::size_t nh_T = 0)
       : ActionModel(state, nu, nr, ng, nh, ng_T, nh_T),
         bp::wrapper<ActionModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu, Scalar(NAN));
   }
 
   void calc(const std::shared_ptr<ActionData>& data,

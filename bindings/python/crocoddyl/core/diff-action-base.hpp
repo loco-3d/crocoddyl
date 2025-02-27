@@ -50,7 +50,7 @@ class DifferentialActionModelAbstractTpl_wrap
                                           const std::size_t nh_T = 0)
       : DifferentialActionModel(state, nu, nr, ng, nh, ng_T, nh_T),
         bp::wrapper<DifferentialActionModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   void calc(const std::shared_ptr<DifferentialActionData>& data,

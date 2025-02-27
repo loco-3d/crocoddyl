@@ -44,7 +44,7 @@ class ConstraintModelAbstractTpl_wrap
                                   const std::size_t ng, const std::size_t nh)
       : ConstraintModel(state, residual, ng, nh),
         bp::wrapper<ConstraintModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   ConstraintModelAbstractTpl_wrap(std::shared_ptr<State> state,
@@ -53,14 +53,14 @@ class ConstraintModelAbstractTpl_wrap
                                   const bool T_const = true)
       : ConstraintModel(state, nu, ng, nh, T_const),
         bp::wrapper<ConstraintModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   ConstraintModelAbstractTpl_wrap(std::shared_ptr<State> state,
                                   const std::size_t ng, const std::size_t nh,
                                   const bool T_const = true)
       : ConstraintModel(state, ng, nh, T_const) {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   void calc(const std::shared_ptr<ConstraintData>& data,

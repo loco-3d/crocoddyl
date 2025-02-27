@@ -42,37 +42,37 @@ class CostModelAbstractTpl_wrap
                             std::shared_ptr<ActivationModel> activation,
                             std::shared_ptr<ResidualModel> residual)
       : CostModel(state, activation, residual), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
                             std::shared_ptr<ActivationModel> activation,
                             const std::size_t nu)
       : CostModel(state, activation, nu), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
                             std::shared_ptr<ActivationModel> activation)
       : CostModel(state, activation), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   CostModelAbstractTpl_wrap(std::shared_ptr<State> state,
                             std::shared_ptr<ResidualModel> residual)
       : CostModel(state, residual), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   CostModelAbstractTpl_wrap(std::shared_ptr<State> state, const std::size_t nr,
                             const std::size_t nu)
       : CostModel(state, nr, nu), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   CostModelAbstractTpl_wrap(std::shared_ptr<State> state, const std::size_t nr)
       : CostModel(state, nr), bp::wrapper<CostModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   void calc(const std::shared_ptr<CostData>& data,

@@ -47,7 +47,7 @@ class ResidualModelAbstractTpl_wrap
                                 const bool u_dependent = true)
       : ResidualModel(state, nr, nu, q_dependent, v_dependent, u_dependent),
         bp::wrapper<ResidualModel>() {
-    unone_ = NAN * VectorXs::Ones(nu);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   ResidualModelAbstractTpl_wrap(std::shared_ptr<State> state,
@@ -57,7 +57,7 @@ class ResidualModelAbstractTpl_wrap
                                 const bool u_dependent = true)
       : ResidualModel(state, nr, q_dependent, v_dependent, u_dependent),
         bp::wrapper<ResidualModel>() {
-    unone_ = NAN * VectorXs::Ones(nu_);
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
   void calc(const std::shared_ptr<ResidualData>& data,
