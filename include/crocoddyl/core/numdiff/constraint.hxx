@@ -16,7 +16,7 @@ ConstraintModelNumDiffTpl<Scalar>::ConstraintModelNumDiffTpl(
     : Base(model->get_state(), model->get_nu(), model->get_ng(),
            model->get_nh()),
       model_(model),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ConstraintModelNumDiffTpl<Scalar>::calc(

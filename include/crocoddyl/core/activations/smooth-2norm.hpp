@@ -94,9 +94,7 @@ class ActivationModelSmooth2NormTpl
     }
 
     data->Ar = r / data->a_value;
-    using std::pow;
-    data->Arr.diagonal().array() =
-        Scalar(1) / std::pow(data->a_value, Scalar(3));
+    data->Arr.diagonal().array() = Scalar(1) / pow(data->a_value, Scalar(3));
   };
 
   /**

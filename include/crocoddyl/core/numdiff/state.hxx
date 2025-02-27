@@ -16,7 +16,7 @@ template <typename Scalar>
 StateNumDiffTpl<Scalar>::StateNumDiffTpl(std::shared_ptr<Base> state)
     : Base(state->get_nx(), state->get_ndx()),
       state_(state),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 StateNumDiffTpl<Scalar>::~StateNumDiffTpl() {}

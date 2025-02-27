@@ -20,9 +20,9 @@ ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(
            model->get_ng(), model->get_nh(), model->get_ng_T(),
            model->get_nh_T()),
       model_(model),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())),
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
-  e_hess_ = std::sqrt(Scalar(2.0) * e_jac_);
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
   this->set_u_lb(model_->get_u_lb());
   this->set_u_ub(model_->get_u_ub());
 }
@@ -358,7 +358,7 @@ void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
-  e_hess_ = std::sqrt(2.0 * e_jac_);
+  e_hess_ = sqrt(2.0 * e_jac_);
 }
 
 template <typename Scalar>

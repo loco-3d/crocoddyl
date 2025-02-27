@@ -16,8 +16,10 @@
 
 #ifdef CROCODDYL_WITH_CODEGEN
 
+#include <cmath>
 #include <cppad/cg/cg.hpp>
 #include <cppad/cppad.hpp>
+#include <type_traits>
 
 namespace CppAD {
 template <class Scalar>
@@ -25,6 +27,37 @@ bool isfinite(const AD<CppAD::cg::CG<Scalar>>& x) {
   return std::isfinite(static_cast<Scalar>(CppAD::Value(x).getValue()));
 }
 }  // namespace CppAD
+
+namespace crocoddyl {
+
+// Case 1: Use std::pow for floating-point types
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
+pow(const Scalar& base, const Scalar& exponent) {
+  return std::pow(base, exponent);
+}
+
+// Case 2: Use CppAD::pow for CppAD types
+template <typename Scalar>
+typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
+pow(const Scalar& base, const Scalar& exponent) {
+  return CppAD::pow(base, exponent);
+}
+
+// Case 1: Use std::pow for floating-point types
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
+sqrt(const Scalar& base) {
+  return std::sqrt(base);
+}
+
+// Case 2: Use CppAD::pow for CppAD types
+template <typename Scalar>
+typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
+sqrt(const Scalar& base) {
+  return CppAD::sqrt(base);
+}
+}  // namespace crocoddyl
 
 #endif
 

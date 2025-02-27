@@ -18,7 +18,7 @@ ContactModelNumDiffTpl<Scalar>::ContactModelNumDiffTpl(
     : Base(model->get_state(), model->get_type(), model->get_nc(),
            model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ContactModelNumDiffTpl<Scalar>::calc(

@@ -21,8 +21,8 @@ DifferentialActionModelNumDiffTpl<Scalar>::DifferentialActionModelNumDiffTpl(
            model->get_nh_T()),
       model_(model),
       with_gauss_approx_(with_gauss_approx),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {
-  e_hess_ = std::sqrt(Scalar(2.0) * e_jac_);
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
   if (with_gauss_approx_ && nr_ == 1)
     throw_pretty("No Gauss approximation possible with nr = 1");
 }
@@ -353,7 +353,7 @@ void DifferentialActionModelNumDiffTpl<Scalar>::set_disturbance(
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
-  e_hess_ = std::sqrt(Scalar(2.0) * e_jac_);
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
 }
 
 template <typename Scalar>

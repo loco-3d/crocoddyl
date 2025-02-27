@@ -17,7 +17,7 @@ ControlParametrizationModelNumDiffTpl<
     Scalar>::ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model)
     : Base(model->get_nw(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
