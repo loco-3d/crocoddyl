@@ -16,14 +16,15 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Scalar>
+template <typename _Scalar>
 class ConstraintModelAbstractTpl_wrap
-    : public ConstraintModelAbstractTpl<Scalar>,
-      public bp::wrapper<ConstraintModelAbstractTpl<Scalar>> {
+    : public ConstraintModelAbstractTpl<_Scalar>,
+      public bp::wrapper<ConstraintModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ConstraintModelBase, ConstraintModelAbstractTpl_wrap)
 
+  typedef _Scalar Scalar;
   typedef typename crocoddyl::ConstraintModelAbstractTpl<Scalar>
       ConstraintModel;
   typedef typename crocoddyl::ConstraintDataAbstractTpl<Scalar> ConstraintData;

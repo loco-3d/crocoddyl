@@ -17,14 +17,15 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Scalar>
+template <typename _Scalar>
 class ActionModelAbstractTpl_wrap
-    : public ActionModelAbstractTpl<Scalar>,
-      public bp::wrapper<ActionModelAbstractTpl<Scalar>> {
+    : public ActionModelAbstractTpl<_Scalar>,
+      public bp::wrapper<ActionModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelAbstractTpl_wrap)
 
+  typedef _Scalar Scalar;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar> ActionModel;
   typedef typename crocoddyl::ActionDataAbstractTpl<Scalar> ActionData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;

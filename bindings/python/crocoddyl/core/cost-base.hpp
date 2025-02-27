@@ -17,14 +17,15 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Scalar>
+template <typename _Scalar>
 class CostModelAbstractTpl_wrap
-    : public CostModelAbstractTpl<Scalar>,
-      public bp::wrapper<CostModelAbstractTpl<Scalar>> {
+    : public CostModelAbstractTpl<_Scalar>,
+      public bp::wrapper<CostModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(CostModelBase, CostModelAbstractTpl_wrap)
 
+  typedef _Scalar Scalar;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModel;
   typedef typename crocoddyl::CostDataAbstractTpl<Scalar> CostData;
   typedef typename CostModel::StateAbstract State;

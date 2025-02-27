@@ -17,15 +17,16 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Scalar>
+template <typename _Scalar>
 class DifferentialActionModelAbstractTpl_wrap
-    : public DifferentialActionModelAbstractTpl<Scalar>,
-      public bp::wrapper<DifferentialActionModelAbstractTpl<Scalar>> {
+    : public DifferentialActionModelAbstractTpl<_Scalar>,
+      public bp::wrapper<DifferentialActionModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
                          DifferentialActionModelAbstractTpl_wrap)
 
+  typedef _Scalar Scalar;
   typedef typename crocoddyl::DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModel;
   typedef typename crocoddyl::DifferentialActionDataAbstractTpl<Scalar>
