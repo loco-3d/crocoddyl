@@ -14,6 +14,20 @@
 #include <boost/type_traits.hpp>
 #include <limits>
 
+#ifdef CROCODDYL_WITH_CODEGEN
+
+#include <cppad/cg/cg.hpp>
+#include <cppad/cppad.hpp>
+
+namespace CppAD {
+template <class Scalar>
+bool isfinite(const AD<CppAD::cg::CG<Scalar>>& x) {
+  return std::isfinite(static_cast<Scalar>(CppAD::Value(x).getValue()));
+}
+}  // namespace CppAD
+
+#endif
+
 // fwd
 
 template <typename MatrixLike,
