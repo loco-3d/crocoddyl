@@ -27,6 +27,7 @@ class DifferentialActionModelAbstractTpl_wrap
                          DifferentialActionModelAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef typename crocoddyl::DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModel;
   typedef typename crocoddyl::DifferentialActionDataAbstractTpl<Scalar>
@@ -67,7 +68,8 @@ class DifferentialActionModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
                             (VectorXs)x);
     } else {
@@ -89,7 +91,8 @@ class DifferentialActionModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
                             (VectorXs)x);
     } else {

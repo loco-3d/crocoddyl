@@ -26,6 +26,7 @@ class CostModelAbstractTpl_wrap
   CROCODDYL_DERIVED_CAST(CostModelBase, CostModelAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModel;
   typedef typename crocoddyl::CostDataAbstractTpl<Scalar> CostData;
   typedef typename CostModel::StateAbstract State;
@@ -89,7 +90,8 @@ class CostModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
                             (VectorXs)x);
     } else {
@@ -111,7 +113,8 @@ class CostModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
                             (VectorXs)x);
     } else {

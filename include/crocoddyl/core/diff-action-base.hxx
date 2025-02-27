@@ -231,7 +231,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::update_has_control_limits() {
   has_control_limits_ =
-      isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
+      isfinite(u_lb_.template cast<ScalarType>().array()).any() &&
+      isfinite(u_ub_.template cast<ScalarType>().array()).any();
 }
 
 template <typename Scalar>

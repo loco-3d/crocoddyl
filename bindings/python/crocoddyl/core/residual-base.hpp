@@ -25,6 +25,7 @@ class ResidualModelAbstractTpl_wrap
   CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef typename crocoddyl::ResidualModelAbstractTpl<Scalar> ResidualModel;
   typedef typename crocoddyl::ResidualDataAbstractTpl<Scalar> ResidualData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
@@ -73,7 +74,8 @@ class ResidualModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
                             (VectorXs)x);
     } else {
@@ -95,7 +97,8 @@ class ResidualModelAbstractTpl_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.template lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
                             (VectorXs)x);
     } else {

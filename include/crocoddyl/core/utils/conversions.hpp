@@ -25,6 +25,12 @@
 namespace crocoddyl {
 
 template <typename Scalar>
+struct ScalarSelector {
+  typedef typename std::conditional<std::is_floating_point<Scalar>::value,
+                                    Scalar, double>::type type;
+};
+
+template <typename Scalar>
 static Scalar scalar_cast(const double& x) {
   return static_cast<Scalar>(x);
 }

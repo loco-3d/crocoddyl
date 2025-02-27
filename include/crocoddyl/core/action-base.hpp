@@ -103,6 +103,7 @@ class ActionModelAbstractTpl : public ActionModelBase {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
