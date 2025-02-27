@@ -9,8 +9,6 @@
 
 #include <boost/core/demangle.hpp>
 
-#include "crocoddyl/core/utils/math.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

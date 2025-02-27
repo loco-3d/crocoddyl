@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 

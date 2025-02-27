@@ -16,7 +16,6 @@
 
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 
 namespace crocoddyl {
