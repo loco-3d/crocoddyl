@@ -67,7 +67,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q,
                                             d->fext, Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
   data->Ru = d->actuation->dtau_du;
 }
 
@@ -83,7 +83,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q,
                                                   Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
 }
 
 template <typename Scalar>

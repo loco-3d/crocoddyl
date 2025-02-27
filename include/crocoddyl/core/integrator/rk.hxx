@@ -392,9 +392,9 @@ void IntegratedActionModelRKTpl<Scalar>::quasiStatic(
   Data* d = static_cast<Data*>(data.get());
   const std::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
       d->control[0];
-  u0_data->w *= 0.;
+  u0_data->w *= Scalar(0.);
   differential_->quasiStatic(d->differential[0], u0_data->w, x, maxiter, tol);
-  control_->params(u0_data, 0., u0_data->w);
+  control_->params(u0_data, Scalar(0.), u0_data->w);
   u = u0_data->u;
 }
 

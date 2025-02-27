@@ -52,7 +52,7 @@ void ResidualModelImpulseCoMTpl<Scalar>::calcDiff(
   pinocchio::jacobianCenterOfMass(*pin_model_.get(), d->pinocchio_internal,
                                   false);
   d->ddv_dv = d->impulses->dvnext_dx.rightCols(ndx - nv);
-  d->ddv_dv.diagonal().array() -= 1;
+  d->ddv_dv.diagonal().array() -= Scalar(1);
   data->Rx.leftCols(nv) = d->dvc_dq;
   data->Rx.leftCols(nv).noalias() +=
       d->pinocchio_internal.Jcom * d->impulses->dvnext_dx.leftCols(nv);
