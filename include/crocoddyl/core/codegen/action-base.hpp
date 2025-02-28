@@ -280,6 +280,13 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     STOP_PROFILER("ActionModelCodeGen::calc");
   }
 
+  void calc(const std::shared_ptr<ActionDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x) override {
+    Data* d = static_cast<Data*>(data.get());
+    model_->calc(d->action, x);
+    d->cost = d->action->cost;
+  }
+
   /**
    * @brief Compute the derivatives of the dynamics and cost functions from a
    * code-generated library
@@ -306,6 +313,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     STOP_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
     d->set_Y2();
     STOP_PROFILER("ActionModelCodeGen::calcDiff");
+  }
+
+  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x) override {
+    Data* d = static_cast<Data*>(data.get());
+    model_->calcDiff(d->action, x);
+    d->Lx = d->action->Lx;
+    d->Lxx = d->action->Lxx;
   }
 
   /**
@@ -420,6 +435,16 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void print(std::ostream& os) const override { model_->print(os); }
 
  protected:
+  ActionModelCodeGenTpl()
+      : model_(nullptr),
+        lib_fname_(""),
+        nP_(0),
+        updateParams_(EmptyParamsEnv),
+        compiler_type_(CLANG),
+        compile_options_("-Ofast -march=native") {
+    // Add initialization logic if necessary
+  }
+
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
