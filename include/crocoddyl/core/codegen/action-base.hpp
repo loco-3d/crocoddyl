@@ -16,15 +16,6 @@
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
-namespace pinocchio {
-template <typename NewScalar, typename Scalar>
-struct ScalarCast<NewScalar, CppAD::cg::CG<Scalar>> {
-  static NewScalar cast(const CppAD::cg::CG<Scalar>& value) {
-    return static_cast<NewScalar>(value.getValue());
-  }
-};
-}  // namespace pinocchio
-
 namespace crocoddyl {
 
 enum CompilerType { GCC = 0, CLANG };
