@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "crocoddyl/core/constraint-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

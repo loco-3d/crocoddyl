@@ -10,7 +10,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
 #include "crocoddyl/core/actuation/squashing-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

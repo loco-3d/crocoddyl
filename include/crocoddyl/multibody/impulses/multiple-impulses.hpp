@@ -15,7 +15,6 @@
 #include <string>
 #include <utility>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 

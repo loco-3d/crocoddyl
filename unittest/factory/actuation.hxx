@@ -8,7 +8,6 @@
 
 #include "actuation.hpp"
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {

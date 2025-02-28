@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2025, University of Edinburgh, CTU, INRIA,
 //                          Heriot-Watt University, University of Pisa
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,7 +17,6 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/residuals/joint-acceleration.hpp"
 #include "crocoddyl/core/residuals/joint-effort.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"

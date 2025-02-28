@@ -11,7 +11,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

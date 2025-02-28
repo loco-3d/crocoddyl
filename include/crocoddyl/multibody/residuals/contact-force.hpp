@@ -11,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_FORCE_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"

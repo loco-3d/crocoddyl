@@ -11,7 +11,6 @@
 #include "crocoddyl/core/controls/poly-one.hpp"
 #include "crocoddyl/core/controls/poly-two-rk.hpp"
 #include "crocoddyl/core/controls/poly-zero.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {

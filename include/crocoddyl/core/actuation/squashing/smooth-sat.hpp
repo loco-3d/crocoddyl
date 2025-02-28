@@ -16,7 +16,6 @@
 
 #include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

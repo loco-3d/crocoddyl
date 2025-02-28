@@ -14,7 +14,6 @@
 #include <string>
 
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

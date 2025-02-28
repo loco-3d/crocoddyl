@@ -15,7 +15,6 @@
 
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/utils/conversions.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {

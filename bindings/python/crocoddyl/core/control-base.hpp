@@ -12,7 +12,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_CONTROL_BASE_HPP_
 
 #include "crocoddyl/core/control-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

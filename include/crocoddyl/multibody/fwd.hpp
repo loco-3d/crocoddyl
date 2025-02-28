@@ -11,8 +11,6 @@
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
 #include "crocoddyl/core/costs/residual.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 

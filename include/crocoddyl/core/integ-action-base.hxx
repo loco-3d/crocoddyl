@@ -14,7 +14,6 @@
 
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/integ-action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

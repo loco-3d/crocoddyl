@@ -7,7 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
 namespace crocoddyl {

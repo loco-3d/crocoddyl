@@ -13,8 +13,6 @@
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/multibody/fcl.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

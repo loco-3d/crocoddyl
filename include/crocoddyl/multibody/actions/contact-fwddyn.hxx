@@ -15,7 +15,6 @@
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {

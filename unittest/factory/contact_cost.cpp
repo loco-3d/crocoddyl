@@ -9,7 +9,6 @@
 #include "contact_cost.hpp"
 
 #include "crocoddyl/core/costs/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"

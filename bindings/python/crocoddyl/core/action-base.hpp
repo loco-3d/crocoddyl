@@ -11,7 +11,6 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

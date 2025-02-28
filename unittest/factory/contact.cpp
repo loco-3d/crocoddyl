@@ -8,7 +8,6 @@
 
 #include "contact.hpp"
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-2d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"

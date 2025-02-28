@@ -10,7 +10,6 @@
 #include "residual.hpp"
 
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/residuals/control-gravity.hpp"

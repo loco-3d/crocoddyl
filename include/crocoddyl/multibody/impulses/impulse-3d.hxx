@@ -10,7 +10,6 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 
 namespace crocoddyl {

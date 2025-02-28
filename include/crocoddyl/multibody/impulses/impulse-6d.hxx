@@ -10,8 +10,6 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

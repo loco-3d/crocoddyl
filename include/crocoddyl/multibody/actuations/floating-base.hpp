@@ -11,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 

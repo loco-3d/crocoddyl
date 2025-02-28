@@ -15,7 +15,6 @@
 #include <pinocchio/algorithm/rnea.hpp>
 
 #include "crocoddyl/core/constraints/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 
 namespace crocoddyl {

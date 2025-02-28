@@ -17,7 +17,6 @@
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

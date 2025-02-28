@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University,
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,7 +11,6 @@
 
 #include "cost.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"

@@ -11,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 

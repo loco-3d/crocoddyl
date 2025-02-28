@@ -6,8 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 using std::isfinite;

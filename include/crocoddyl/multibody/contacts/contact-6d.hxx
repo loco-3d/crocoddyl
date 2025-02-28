@@ -11,7 +11,6 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 
 namespace crocoddyl {

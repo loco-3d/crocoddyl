@@ -12,7 +12,6 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "factory/activation.hpp"
 #include "unittest_common.hpp"
 

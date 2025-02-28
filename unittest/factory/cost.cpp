@@ -17,7 +17,6 @@
 // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"

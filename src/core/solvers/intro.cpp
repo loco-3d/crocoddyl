@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {

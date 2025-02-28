@@ -11,8 +11,6 @@
 #include <iostream>
 #include <typeinfo>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>
