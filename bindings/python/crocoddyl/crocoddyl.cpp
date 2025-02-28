@@ -12,6 +12,11 @@
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
+#ifdef CROCODDYL_WITH_CODEGEN
+#include <pycppad/cast.hpp>
+#include <pycppad/cppad.hpp>
+#endif
+
 namespace crocoddyl {
 namespace python {
 
@@ -24,12 +29,18 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   bp::enum_<DType>("DType")
       .value("Float64", DType::Float64)
       .value("Float32", DType::Float32)
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+#ifdef CROCODDYL_WITH_CODEGEN
       .value("ADFloat64", DType::ADFloat64)
 #endif
       ;
 
   eigenpy::enableEigenPy();
+#ifdef CROCODDYL_WITH_CODEGEN
+  pycppad::enablePyCppAD();
+  bp::scope().attr("WITH_CODEGEN") = true;
+#else
+  bp::scope().attr("WITH_CODEGEN") = false;
+#endif
 
   typedef double Scalar;
   typedef Eigen::Matrix<Scalar, 4, 1> Vector4;

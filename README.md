@@ -47,9 +47,9 @@ If you want to learn more about **Crocoddyl** and its solvers, we suggest readin
  * Cache friendly
  * Multi-threading support via **[OpenMP](https://www.openmp.org/)**
  * Python bindings (including abstractions) via **[Boost Python](https://wiki.python.org/moin/boost.python)**
- * C++14/17/20 compliant
+ * C++11/14/17/20 compliant
  * Extensively tested
- * Automatic code generation support via **[CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)**
+ * Code generation in both C++ and Python via **[CppADCoGen](https://github.com/joaoleal/CppADCodeGen)**
 
 ## :penguin: Installation
 
@@ -123,12 +123,13 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
    * [Boost](https://www.boost.org/)
 2. (optional) Install Crocoddyl's optional dependencies
    * [OpenMP](https://www.openmp.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for multi-threading support)
-   * [CppADCogen](https://github.com/joaoleal/CppADCodeGen) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
-   * [Ipopt](https://github.com/coin-or/Ipopt) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for Ipopt support)
-   * [example-robot-data](https://github.com/gepetto/example-robot-data) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for robotic examples, install Python loaders)
-   * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in Gepetto viewer, i.e., `GepettoDisplay`)
+   * [CppADCoGen](https://github.com/joaoleal/CppADCodeGen) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
+   * [pycppad](https://github.com/Simple-Robotics/pycppad) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
+   * [Ipopt](https://github.com/coin-or/Ipopt) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for Ipopt support)
+   * [example-robot-data](https://github.com/gepetto/example-robot-data) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for robotic examples, install Python loaders)
+   * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in Gepetto viewer, i.e., `GepettoDisplay`)
    * [meshcat-python](https://github.com/rdeits/meshcat-python) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in Meshcat, i.e., `MeshcatDisplay`)
-   * [whole_body_state_rviz_plugin](https://github.com/loco-3d/whole_body_state_rviz_plugin) &nbsp;&nbsp;&nbsp;(for display in ROS, i.e., `RvizDisplay`)
+   * [whole_body_state_rviz_plugin](https://github.com/loco-3d/whole_body_state_rviz_plugin) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in ROS, i.e., `RvizDisplay`)
    * [crocoddyl_msgs](https://github.com/RobotMotorIntelligence/crocoddyl_msgs) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in ROS, i.e., `RvizDisplay`)
    * [urdf_parser_py](https://github.com/ros/urdf_parser_py) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in ROS, i.e., `RvizDisplay`)
    * [jupyter](https://jupyter.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for notebooks)

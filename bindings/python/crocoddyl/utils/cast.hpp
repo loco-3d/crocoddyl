@@ -56,7 +56,7 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model>> {
       case DType::Float32:
         return cast_instance_impl<Float32>(
             self, std::is_same<typename Model::Scalar, Float32>());
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+#ifdef CROCODDYL_WITH_CODEGEN
       case DType::ADFloat64:
         return cast_instance_impl<ADFloat64>(
             self, std::is_same<typename Model::Scalar, ADFloat64>());
