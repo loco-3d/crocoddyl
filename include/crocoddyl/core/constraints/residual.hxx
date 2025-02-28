@@ -8,8 +8,6 @@
 
 namespace crocoddyl {
 
-using std::isfinite;
-
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     std::shared_ptr<typename Base::StateAbstract> state,
