@@ -576,8 +576,8 @@ struct DifferentialActionDataContactInvDynamicsTpl
     }
     std::vector<bool> contact_status;
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator
-        it = model->get_contacts()->get_contacts().begin();
-        it != model->get_contacts()->get_contacts().end(); ++it) {
+             it = model->get_contacts()->get_contacts().begin();
+         it != model->get_contacts()->get_contacts().end(); ++it) {
       const std::shared_ptr<ContactItem>& m_i = it->second;
       contact_status.push_back(m_i->active);
       m_i->active = true;
@@ -585,8 +585,8 @@ struct DifferentialActionDataContactInvDynamicsTpl
     model->get_contacts()->updateForceDiff(multibody.contacts, df_dx, df_du);
     std::size_t cid = 0;
     for (typename ContactModelMultiple::ContactModelContainer::const_iterator
-        it = model->get_contacts()->get_contacts().begin();
-        it != model->get_contacts()->get_contacts().end(); ++it) {
+             it = model->get_contacts()->get_contacts().begin();
+         it != model->get_contacts()->get_contacts().end(); ++it) {
       const std::shared_ptr<ContactItem>& m_i = it->second;
       m_i->active = contact_status[cid];
       cid++;
