@@ -574,7 +574,23 @@ struct DifferentialActionDataContactInvDynamicsTpl
       df_du.block(fid, nv + fid, nc, nc).diagonal().setOnes();
       fid += nc;
     }
+    std::vector<bool> contact_status;
+    for (typename ContactModelMultiple::ContactModelContainer::const_iterator
+        it = model->get_contacts()->get_contacts().begin();
+        it != model->get_contacts()->get_contacts().end(); ++it) {
+      const std::shared_ptr<ContactItem>& m_i = it->second;
+      contact_status.push_back(m_i->active);
+      m_i->active = true;
+    }
     model->get_contacts()->updateForceDiff(multibody.contacts, df_dx, df_du);
+    std::size_t cid = 0;
+    for (typename ContactModelMultiple::ContactModelContainer::const_iterator
+        it = model->get_contacts()->get_contacts().begin();
+        it != model->get_contacts()->get_contacts().end(); ++it) {
+      const std::shared_ptr<ContactItem>& m_i = it->second;
+      m_i->active = contact_status[cid];
+      cid++;
+    }
     costs = model->get_costs()->createData(&multibody);
     constraints = model->get_constraints()->createData(&multibody);
     costs->shareMemory(this);
