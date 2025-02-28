@@ -37,6 +37,15 @@ enum class DType {
 #endif
 };
 
+#define CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(macro)               \
+  {                                                                 \
+    macro(Float64)                                                  \
+  }                                                                 \
+  {                                                                 \
+    bp::scope float_scope = getOrCreatePythonNamespace("scalar32"); \
+    macro(Float32)                                                  \
+  }
+
 #ifdef CROCODDYL_WITH_CODEGEN
 typedef CppAD::cg::CG<Float64> CGFloat64;
 typedef CppAD::AD<CGFloat64> ADFloat64;
