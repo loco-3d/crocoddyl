@@ -62,14 +62,8 @@ typedef CppAD::AD<CGFloat64> ADFloat64;
     macro(ADFloat64)                                                \
   }
 #else
-#define CROCODDYL_PYTHON_SCALARS(macro)                             \
-  {                                                                 \
-    macro(Float64)                                                  \
-  }                                                                 \
-  {                                                                 \
-    bp::scope float_scope = getOrCreatePythonNamespace("scalar32"); \
-    macro(Float32)                                                  \
-  }
+#define CROCODDYL_PYTHON_SCALARS(macro) \
+  CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(macro)
 #endif
 
 }  // namespace python
