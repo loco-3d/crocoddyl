@@ -59,6 +59,29 @@ sqrt(const Scalar& base) {
 }
 }  // namespace crocoddyl
 
+namespace Eigen {
+
+// Overload for Eigen::pow with CppAD-compatible types
+template <typename Derived>
+auto pow(const Eigen::ArrayBase<Derived>& base, double exponent) {
+  return base.unaryExpr([exponent](const typename Derived::Scalar& x) {
+    return CppAD::pow(x, typename Derived::Scalar(exponent));
+  });
+}
+
+// Overload for Eigen::sqrt with CppAD-compatible types
+template <typename Derived>
+typename std::enable_if<std::is_base_of<CppAD::cg::CG<typename Derived::Scalar>,
+                                        typename Derived::Scalar>::value,
+                        Eigen::Array<typename Derived::Scalar, Eigen::Dynamic,
+                                     Eigen::Dynamic>>::type
+sqrt(const Eigen::ArrayBase<Derived>& base) {
+  return base.unaryExpr(
+      [](const typename Derived::Scalar& x) { return CppAD::sqrt(x); });
+}
+
+}  // namespace Eigen
+
 #endif
 
 // fwd
