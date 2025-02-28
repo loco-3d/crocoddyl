@@ -205,6 +205,18 @@ if(Boost_VERSION GREATER 107299)
   add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 endif()
 
+# Enable ccache automatically if available
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+  message(STATUS "Using ccache: ${CCACHE_PROGRAM}")
+  set(CMAKE_C_COMPILER_LAUNCHER
+      ${CCACHE_PROGRAM}
+      CACHE STRING "C compiler launcher" FORCE)
+  set(CMAKE_CXX_COMPILER_LAUNCHER
+      ${CCACHE_PROGRAM}
+      CACHE STRING "C++ compiler launcher" FORCE)
+endif()
+
 # Include header and source files
 file(GLOB_RECURSE ${PROJECT_NAME}_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS ${PROJECT_SOURCE_DIR}/include/*.hpp
