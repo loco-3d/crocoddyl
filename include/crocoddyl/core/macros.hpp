@@ -38,8 +38,7 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }  // namespace std
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
+#ifdef CROCODDYL_WITH_CODEGEN
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<double>;                                                   \
@@ -69,8 +68,7 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       class_name<float>;
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
+#ifdef CROCODDYL_WITH_CODEGEN
 #define CROCODDYL_BASE_CAST(base_class, class)                              \
   template <typename Scalar>                                                \
   std::shared_ptr<class<Scalar>> cast() const {                             \
