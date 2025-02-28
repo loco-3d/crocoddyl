@@ -260,7 +260,7 @@ struct DifferentialActionModelLQRVisitor
 #define CROCODDYL_DIFFACTION_MODEL_LQR_PYTHON_BINDINGS(Scalar)                 \
   typedef DifferentialActionModelLQRTpl<Scalar> Model;                         \
   typedef DifferentialActionModelAbstractTpl<Scalar> ModelBase;                \
-  typedef typename ModelBase::VectorXs MatrixXs;                               \
+  typedef typename ModelBase::MatrixXs MatrixXs;                               \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model, bp::bases<ModelBase>>(                                     \
       "DifferentialActionModelLQR",                                            \
