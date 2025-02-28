@@ -112,6 +112,23 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::make_shared<derived_class<ADFloat64>>(*this);      \
   }
 
+#define CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(base_class, derived_class) \
+  template <typename NewScalar>                                           \
+  explicit derived_class(const derived_class<NewScalar>& other)           \
+      : derived_class(std::move(other.template cast<Scalar>())) {}        \
+  /* Implements casting by overriding `cloneAsFloat` */                   \
+  std::shared_ptr<base_class> cloneAsDouble() const override {            \
+    return std::make_shared<derived_class<double>>(*this);                \
+  }                                                                       \
+  std::shared_ptr<base_class> cloneAsFloat() const override {             \
+    return std::make_shared<derived_class<float>>(*this);                 \
+  }                                                                       \
+  std::shared_ptr<base_class> cloneAsADDouble() const override {          \
+    std::cout << "Unsupported casting: retuning to double as default"     \
+              << std::endl;                                               \
+    return cloneAsDouble();                                               \
+  }
+
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class)   \
   /* Implements casting by overriding `cloneAsFloat` */          \
   std::shared_ptr<base_class> cloneAsDouble() const override {   \

@@ -15,7 +15,6 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
-#include "pinocchio/codegen/cppadcg.hpp"
 
 namespace pinocchio {
 template <typename NewScalar, typename Scalar>
@@ -37,7 +36,7 @@ template <typename _Scalar>
 class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelCodeGenTpl)
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(ActionModelBase, ActionModelCodeGenTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
