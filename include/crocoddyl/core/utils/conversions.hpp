@@ -21,14 +21,13 @@ struct ScalarSelector {
                                     Scalar, double>::type type;
 };
 
-template <typename Scalar>
-static Scalar scalar_cast(const double& x) {
-  return static_cast<Scalar>(x);
-}
-
-template <typename Scalar>
-static Scalar scalar_cast(const float& x) {
-  return static_cast<Scalar>(x);
+// Casting between floating-point types
+template <typename NewScalar, typename Scalar>
+static typename std::enable_if<std::is_floating_point<NewScalar>::value &&
+                                   std::is_floating_point<Scalar>::value,
+                               NewScalar>::type
+scalar_cast(const Scalar& x) {
+  return static_cast<NewScalar>(x);
 }
 
 template <typename NewScalar, typename Scalar,
@@ -107,14 +106,23 @@ struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>, double> {
 
 namespace crocoddyl {
 
-template <typename Scalar>
-static inline Scalar scalar_cast(const CppAD::AD<CppAD::cg::CG<double>>& x) {
-  return static_cast<Scalar>(CppAD::Value(x).getValue());
+// Casting to CppAD types from floating-point types
+template <typename NewScalar, typename Scalar>
+static typename std::enable_if<
+    std::is_floating_point<Scalar>::value &&
+        (std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<double>>>::value ||
+         std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<float>>>::value),
+    NewScalar>::type
+scalar_cast(const Scalar& x) {
+  return static_cast<NewScalar>(x);
 }
 
-template <typename Scalar>
-static inline Scalar scalar_cast(const CppAD::AD<CppAD::cg::CG<float>>& x) {
-  return static_cast<Scalar>(CppAD::Value(x).getValue());
+// Casting to floating-point types from CppAD types
+template <typename NewScalar, typename Scalar>
+static inline typename std::enable_if<std::is_floating_point<Scalar>::value,
+                                      NewScalar>::type
+scalar_cast(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
+  return static_cast<NewScalar>(CppAD::Value(x).getValue());
 }
 
 }  // namespace crocoddyl
