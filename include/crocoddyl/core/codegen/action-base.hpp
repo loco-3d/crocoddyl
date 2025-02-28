@@ -44,8 +44,6 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef ActionDataAbstractTpl<ADScalar> ADActionDataAbstract;
   typedef typename ADMathBase::VectorXs ADVectorXs;
   typedef typename ADMathBase::MatrixXs ADMatrixXs;
-  typedef
-      typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(ADMatrixXs) RowADMatrixXs;
   typedef CppAD::ADFun<CGScalar> ADFun;
   typedef CppAD::cg::ModelCSourceGen<Scalar> CSourceGen;
   typedef CppAD::cg::ModelLibraryCSourceGen<Scalar> LibraryCSourceGen;
@@ -342,7 +340,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                    Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
                    const std::size_t maxiter, const Scalar tol) override {
-    model_->quasiStatic(data, u, x, maxiter, tol);
+    Data* d = static_cast<Data*>(data.get());
+    model_->quasiStatic(d->action, u, x, maxiter, tol);
   }
 
   /**
@@ -360,6 +359,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     ReturnType ret(model_->template cast<NewScalar>(), lib_fname_);
     return ret;
   }
+
+  /**
+   * @brief Return the action model
+   */
+  const std::shared_ptr<Base>& get_model() const { return model_; }
 
   /**
    * @brief Return the number of inequality constraints
@@ -531,7 +535,8 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataCodeGenTpl(Model<Scalar>* const model) : Base(model) {
+  explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
+      : Base(model), action(model->get_model()->createData()) {
     ActionModelCodeGenTpl<Scalar>* m =
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
@@ -556,6 +561,7 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs X;   //!< Independent variables used by calc and calcDiff functions
   VectorXs Y1;  //!< Dependent variables used by calc function
   VectorXs Y2;  //!< Dependent variables used by calcDiff function
+  std::shared_ptr<Base> action;  //!< Action data
 
   void set_Y1() {
     cost = Y1[0];
