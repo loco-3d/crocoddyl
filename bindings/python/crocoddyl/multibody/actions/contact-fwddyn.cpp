@@ -19,6 +19,7 @@ template <typename Model>
 struct DifferentialActionModelContactFwdDynamicsVisitor
     : public bp::def_visitor<
           DifferentialActionModelContactFwdDynamicsVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
   typedef typename Model::DifferentialActionDataAbstract Data;
   typedef typename Model::StateMultibody State;
   typedef typename Model::ActuationModelAbstract Actuation;
@@ -31,7 +32,7 @@ struct DifferentialActionModelContactFwdDynamicsVisitor
     cl
         .def(bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,
                       std::shared_ptr<Contacts>, std::shared_ptr<Costs>,
-                      std::shared_ptr<Constraints>, bp::optional<double, bool>>(
+                      std::shared_ptr<Constraints>, bp::optional<Scalar, bool>>(
             bp::args("self", "state", "actuation", "contacts", "costs",
                      "constraints", "inv_damping", "enable_force"),
             "Initialize the constrained forward-dynamics action model.\n\n"
@@ -184,7 +185,7 @@ struct DifferentialActionDataContactFwdDynamicsVisitor
       "implemented in CostModelSum().",                                        \
       bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,             \
                std::shared_ptr<Contacts>, std::shared_ptr<Costs>,              \
-               bp::optional<double, bool>>(                                    \
+               bp::optional<Scalar, bool>>(                                    \
           bp::args("self", "state", "actuation", "contacts", "costs",          \
                    "inv_damping", "enable_force"),                             \
           "Initialize the constrained forward-dynamics action model.\n\n"      \

@@ -17,11 +17,12 @@ namespace python {
 template <typename Model>
 struct ContactModel1DVisitor
     : public bp::def_visitor<ContactModel1DVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
   typedef typename Model::StateMultibody State;
   typedef typename Model::Vector2s Vector2s;
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, double,
+    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Scalar,
                     pinocchio::ReferenceFrame, bp::optional<Vector2s>>(
                bp::args("self", "state", "id", "xref", "type", "gains"),
                "Initialize the contact model.\n\n"
