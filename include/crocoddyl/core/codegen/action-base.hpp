@@ -18,6 +18,14 @@
 
 namespace crocoddyl {
 
+template <typename Scalar>
+std::unique_ptr<CppAD::ADFun<CppAD::cg::CG<Scalar>>> clone_adfun(
+    const CppAD::ADFun<CppAD::cg::CG<Scalar>>& original) {
+  auto cloned = std::make_unique<CppAD::ADFun<CppAD::cg::CG<Scalar>>>();
+  *cloned = original;  // Use assignment operator to copy the function
+  return cloned;
+}
+
 enum CompilerType { GCC = 0, CLANG };
 
 template <typename Scalar>
@@ -158,10 +166,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         compiler_type_(other.compiler_type_),
         compile_options_(other.compile_options_),
         updateParams_(other.updateParams_),
-        ad_calc_(std::make_unique<ADFun>(std::move(*other.ad_calc_))),
-        ad_calcDiff_(std::make_unique<ADFun>(std::move(*other.ad_calcDiff_))) {
-    initLib();
-    loadLib();
+        ad_calc_(clone_adfun(*other.ad_calc_)),
+        ad_calcDiff_(clone_adfun(*other.ad_calcDiff_)),
+        calcCG_(std::make_unique<CSourceGen>(*ad_calc_, Y1fun_name_)),
+        calcDiffCG_(std::make_unique<CSourceGen>(*ad_calcDiff_, Y2fun_name_)),
+        libCG_(std::make_unique<LibraryCSourceGen>(*calcCG_, *calcDiffCG_)),
+        dynLibManager_(
+            std::make_unique<LibraryProcessor>(*other.libCG_, lib_fname_)) {
+    loadLib(false);
   }
 
   virtual ~ActionModelCodeGenTpl() = default;
@@ -186,7 +198,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // Generate library for calc and calcDiff
     libCG_ = std::unique_ptr<LibraryCSourceGen>(
         new LibraryCSourceGen(*calcCG_, *calcDiffCG_));
-    // Crate dynamic library manager
+    // Create dynamic library manager
     dynLibManager_ = std::unique_ptr<LibraryProcessor>(
         new LibraryProcessor(*libCG_, lib_fname_));
     STOP_PROFILER("ActionModelCodeGen::initLib");
