@@ -130,7 +130,7 @@ struct ActionDataCodeGeneVisitor
       "for a defined action model. To handle this easily, it contains "        \
       "functions for initializing, compiling and loading the library. "        \
       "Additionally, it is possible to configure the compiler and its flags.", \
-      bp::init<std::shared_ptr<Model>, std::string,                            \
+      bp::init<std::shared_ptr<ModelBase>, std::string,                        \
                bp::optional<std::size_t, ParamsEnvironment, CompilerType,      \
                             std::string>>(                                     \
           bp::args("self", "model", "lib_fname", "updateParams", "compiler",   \
@@ -161,6 +161,10 @@ struct ActionDataCodeGeneVisitor
       .def(CopyableVisitor<Data>());
 
 void exposeActionCodeGen() {
+  bp::enum_<CompilerType>("CompilerType")
+      .value("GCC", CompilerType::GCC)
+      .value("CLANG", CompilerType::CLANG);
+
   CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(
       CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS)
   CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(
