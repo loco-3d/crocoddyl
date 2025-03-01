@@ -324,7 +324,7 @@ class ActuationModelFloatingBaseThrustersTpl
     }
     // Compute the torque transform matrix from generalized torques to joint
     // torque inputs
-    Mtau_ = pseudoInverse(MatrixXs(W_thrust_));
+    Mtau_ = pseudoInverse(W_thrust_);
     S_.noalias() = W_thrust_ * Mtau_;
     update_data_ = true;
   }
