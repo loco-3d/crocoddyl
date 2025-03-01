@@ -26,6 +26,28 @@ std::unique_ptr<CppAD::ADFun<CppAD::cg::CG<Scalar>>> clone_adfun(
   return cloned;
 }
 
+template <typename FromScalar, typename ToScalar>
+std::function<
+    void(std::shared_ptr<ActionModelAbstractTpl<ToScalar>>,
+         const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&)>
+cast_function(
+    const std::function<void(
+        std::shared_ptr<ActionModelAbstractTpl<FromScalar>>,
+        const Eigen::Ref<const typename MathBaseTpl<FromScalar>::VectorXs>&)>&
+        fn) {
+  return [fn](std::shared_ptr<ActionModelAbstractTpl<ToScalar>> to_base,
+              const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&
+                  to_vector) {
+    // Convert arguments
+    const std::shared_ptr<ActionModelAbstractTpl<FromScalar>>& from_base =
+        to_base->template cast<FromScalar>();
+    const typename MathBaseTpl<FromScalar>::VectorXs from_vector =
+        to_vector.template cast<FromScalar>();
+    // Call the original function with converted arguments
+    fn(from_base, from_vector);
+  };
+}
+
 enum CompilerType { GCC = 0, CLANG };
 
 template <typename Scalar>
@@ -383,7 +405,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   template <typename NewScalar>
   ActionModelCodeGenTpl<NewScalar> cast() const {
     typedef ActionModelCodeGenTpl<NewScalar> ReturnType;
-    ReturnType ret(model_->template cast<NewScalar>(), lib_fname_);
+    typedef typename ReturnType::ADScalar ADNewScalar;
+    ReturnType ret(model_->template cast<NewScalar>(), lib_fname_, nP_,
+                   cast_function<ADScalar, ADNewScalar>(updateParams_),
+                   compiler_type_, compile_options_);
     return ret;
   }
 
