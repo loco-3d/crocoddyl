@@ -88,7 +88,7 @@ sqrt(const Eigen::ArrayBase<Derived>& base) {
 
 template <typename MatrixLike,
           bool value =
-              boost::is_floating_point<typename MatrixLike::Scalar>::value>
+              (Eigen::NumTraits<typename MatrixLike::Scalar>::IsInteger == 0)>
 struct pseudoInverseAlgo {
   typedef typename MatrixLike::Scalar Scalar;
   typedef typename MatrixLike::RealScalar RealScalar;
@@ -101,11 +101,13 @@ struct pseudoInverseAlgo {
     RealScalar tolerance = epsilon *
                            static_cast<Scalar>(max(a.cols(), a.rows())) *
                            svd.singularValues().array().abs()(0);
-    return svd.matrixV() *
-           (svd.singularValues().array().abs() > tolerance)
-               .select(svd.singularValues().array().inverse(), 0)
-               .matrix()
-               .asDiagonal() *
+    // FIX: Replace select() with a lambda function
+    Eigen::Matrix<typename MatrixLike::Scalar, Eigen::Dynamic, 1>
+        invSingularValues =
+            svd.singularValues().unaryExpr([&](const Scalar& x) {
+              return (x > tolerance) ? Scalar(1) / x : Scalar(0);
+            });
+    return svd.matrixV() * invSingularValues.asDiagonal() *
            svd.matrixU().adjoint();
   }
 };
