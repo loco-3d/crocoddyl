@@ -101,6 +101,30 @@ struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>, double> {
   }
 };
 
+// Convert from CppAD::AD<CppAD::cg::CG<float>> to
+// CppAD::AD<CppAD::cg::CG<double>>
+template <>
+struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>,
+                 CppAD::AD<CppAD::cg::CG<double>>> {
+  EIGEN_DEVICE_FUNC static inline CppAD::AD<CppAD::cg::CG<double>> run(
+      const CppAD::AD<CppAD::cg::CG<float>>& x) {
+    return CppAD::AD<CppAD::cg::CG<double>>(
+        CppAD::cg::CG<double>(CppAD::Value(x).getValue()));
+  }
+};
+
+// Convert from CppAD::AD<CppAD::cg::CG<double>> to
+// CppAD::AD<CppAD::cg::CG<float>>
+template <>
+struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>,
+                 CppAD::AD<CppAD::cg::CG<float>>> {
+  EIGEN_DEVICE_FUNC static inline CppAD::AD<CppAD::cg::CG<float>> run(
+      const CppAD::AD<CppAD::cg::CG<double>>& x) {
+    return CppAD::AD<CppAD::cg::CG<float>>(
+        CppAD::cg::CG<float>(static_cast<float>(CppAD::Value(x).getValue())));
+  }
+};
+
 }  // namespace internal
 }  // namespace Eigen
 
