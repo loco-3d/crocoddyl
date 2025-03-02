@@ -360,13 +360,25 @@ class ActuationModelFloatingBaseThrustersTpl
     data->Mtau = Mtau_;
     const std::size_t nv = state_->get_nv();
     for (std::size_t k = 0; k < nv; ++k) {
-      if (fabs(S_(k, k)) < std::numeric_limits<Scalar>::epsilon()) {
-        data->tau_set[k] = false;
-      } else {
-        data->tau_set[k] = true;
-      }
+      data->tau_set[k] = if_static(S_(k, k));
     }
     update_data_ = false;
+  }
+
+  // Use for floating-point types
+  template <typename Scalar>
+  typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return (fabs(condition) < std::numeric_limits<Scalar>::epsilon()) ? false
+                                                                      : true;
+  }
+
+  // Use for CppAD types
+  template <typename Scalar>
+  typename std::enable_if<!std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return CppAD::Value(CppAD::fabs(condition)) >=
+           CppAD::numeric_limits<Scalar>::epsilon();
   }
 };
 
