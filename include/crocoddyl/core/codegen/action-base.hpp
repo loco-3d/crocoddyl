@@ -102,13 +102,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
       CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
-      : Base(model->get_state(), model->get_nu()),
+      : Base(model->get_state(), model->get_nu(), model->get_nr(),
+             model->get_ng(), model->get_nh()),
         model_(model),
         ad_model_(model->template cast<ADScalar>()),
         ad_data_(ad_model_->createData()),
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
-        nY1_(state_->get_nx() + 1),
+        nY1_(1 + state_->get_nx() + ng_ + nh_),
         ad_X_(nX_),
         ad_Y1_(nY1_),
         Y1fun_name_("calc"),
@@ -120,7 +121,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_calc_(std::make_unique<ADFun>()),
         ad_calcDiff_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
-    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
+    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
+           nu_;                                     // cost and dynamics
+    nY2_ += ng_ * (ndx + nu_) + nh_ * (ndx + nu_);  // constraints
     ad_Y2_.resize(nY2_);
     initLib();
     loadLib();
@@ -142,14 +145,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
       CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
-      : Base(ad_model->get_state()->template cast<Scalar>(),
-             ad_model->get_nu()),
+      : Base(ad_model->get_state()->template cast<Scalar>(), ad_model->get_nu(),
+             ad_model->get_nr(), ad_model->get_ng(), ad_model->get_nh()),
         model_(ad_model->template cast<Scalar>()),
         ad_model_(ad_model),
         ad_data_(ad_model_->createData()),
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
-        nY1_(state_->get_nx() + 1),
+        nY1_(1 + state_->get_nx() + ng_ + nh_),
         ad_X_(nX_),
         ad_Y1_(nY1_),
         Y1fun_name_("calc"),
@@ -161,7 +164,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_calc_(std::make_unique<ADFun>()),
         ad_calcDiff_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
-    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
+    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
+           nu_;                                     // cost and dynamics
+    nY2_ += ng_ * (ndx + nu_) + nh_ * (ndx + nu_);  // constraints
     ad_Y2_.resize(nY2_);
     initLib();
     loadLib();
@@ -319,6 +324,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     Data* d = static_cast<Data*>(data.get());
     model_->calc(d->action, x);
     d->cost = d->action->cost;
+    d->g = d->action->g;
+    d->h = d->action->h;
   }
 
   /**
@@ -355,6 +362,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     model_->calcDiff(d->action, x);
     d->Lx = d->action->Lx;
     d->Lxx = d->action->Lxx;
+    d->Gx = d->action->Gx;
+    d->Hx = d->action->Hx;
   }
 
   /**
@@ -482,6 +491,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // Add initialization logic if necessary
   }
 
+  using Base::ng_;     //!< Number of inequality constraints
+  using Base::nh_;     //!< Number of equality constraints
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
@@ -560,8 +571,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   void tapeCalcOutput() {
-    ad_Y1_[0] = ad_data_->cost;
-    ad_Y1_.tail(state_->get_nx()) = ad_data_->xnext;
+    Eigen::DenseIndex it_Y1 = 0;
+    ad_Y1_[it_Y1] = ad_data_->cost;
+    it_Y1 += 1;
+    ad_Y1_.segment(it_Y1, state_->get_nx()) = ad_data_->xnext;
+    it_Y1 += state_->get_nx();
+    ad_Y1_.segment(it_Y1, ng_) = ad_data_->g;
+    it_Y1 += ng_;
+    ad_Y1_.segment(it_Y1, nh_) = ad_data_->h;
   }
 
   void tapeCalcDiffOutput() {
@@ -580,6 +597,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, nu_) = ad_data_->Lxu;
     it_Y2 += ndx * nu_;
     Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nu_, nu_) = ad_data_->Luu;
+    it_Y2 += nu_ * nu_;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ng_, ndx) = ad_data_->Gx;
+    it_Y2 += ng_ * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ng_, nu_) = ad_data_->Gu;
+    it_Y2 += ng_ * nu_;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nh_, ndx) = ad_data_->Hx;
+    it_Y2 += nh_ * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nh_, nu_) = ad_data_->Hu;
   }
 
   static void EmptyParamsEnv(std::shared_ptr<ADBase>,
@@ -603,7 +628,7 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
     Y1.resize(m->get_nY1());
-    Y2.resize(m->get_nY1());
+    Y2.resize(m->get_nY2());
     X.setZero();
     Y1.setZero();
     Y2.setZero();
@@ -612,6 +637,12 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::cost;
   using Base::Fu;
   using Base::Fx;
+  using Base::g;
+  using Base::Gu;
+  using Base::Gx;
+  using Base::h;
+  using Base::Hu;
+  using Base::Hx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
@@ -626,13 +657,24 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   std::shared_ptr<Base> action;  //!< Action data
 
   void set_Y1() {
-    cost = Y1[0];
-    xnext = Y1.tail(xnext.size());
+    Eigen::DenseIndex it_Y1 = 0;
+    const std::size_t nx = xnext.size();
+    const std::size_t ng = g.size();
+    const std::size_t nh = h.size();
+    cost = Y1[it_Y1];
+    it_Y1 += 1;
+    xnext = Y1.segment(it_Y1, nx);
+    it_Y1 += nx;
+    g = Y1.segment(it_Y1, ng);
+    it_Y1 += ng;
+    h = Y1.segment(it_Y1, nh);
   }
 
   void set_Y2() {
     const std::size_t ndx = Fx.cols();
     const std::size_t nu = Fu.cols();
+    const std::size_t ng = g.size();
+    const std::size_t nh = h.size();
     Eigen::DenseIndex it_Y2 = 0;
     Fx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, ndx);
     it_Y2 += ndx * ndx;
@@ -647,6 +689,14 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Lxu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, nu);
     it_Y2 += ndx * nu;
     Luu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nu, nu);
+    it_Y2 += nu * nu;
+    Gx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ng, ndx);
+    it_Y2 += ng * ndx;
+    Gu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ng, nu);
+    it_Y2 += ng * nu;
+    Hx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, ndx);
+    it_Y2 += nh * ndx;
+    Hu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, nu);
   }
 };
 
