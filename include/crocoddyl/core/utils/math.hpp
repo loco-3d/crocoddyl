@@ -57,6 +57,20 @@ typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
 sqrt(const Scalar& base) {
   return CppAD::sqrt(base);
 }
+
+// Case 1: Use std::fabs for floating-point types
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
+fabs(const Scalar& base) {
+  return std::fabs(base);
+}
+
+// Case 2: Use CppAD::fabs for CppAD types
+template <typename Scalar>
+typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
+fabs(const Scalar& base) {
+  return CppAD::fabs(base);
+}
 }  // namespace crocoddyl
 
 namespace Eigen {
