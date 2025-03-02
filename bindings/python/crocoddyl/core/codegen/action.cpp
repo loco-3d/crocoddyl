@@ -114,7 +114,11 @@ struct ActionDataCodeGeneVisitor
             "dependent variables used by calc functione")
         .add_property(
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
-            "dependent variables used by calcDiff functione");
+            "dependent variables used by calcDiff functione")
+        .add_property(
+            "action",
+            bp::make_getter(&Data::action,
+                            bp::return_value_policy<bp::return_by_value>()));
   }
 };
 
