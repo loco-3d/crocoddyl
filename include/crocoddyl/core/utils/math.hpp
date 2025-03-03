@@ -27,6 +27,12 @@ constexpr Scalar pi() {
   return static_cast<Scalar>(3.14159265358979323846264338327950288);
 }
 
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+isfinite(const Scalar& x) {
+  return std::isfinite(x);
+}
+
 // Use std::pow for floating-point types
 template <typename Scalar, typename ExpScalar>
 typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
