@@ -31,9 +31,9 @@ bool isfinite(const AD<CppAD::cg::CG<Scalar>>& x) {
 namespace crocoddyl {
 
 // Case 1: Use std::pow for floating-point types
-template <typename Scalar>
+template <typename Scalar, typename ExpScalar>
 typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
-pow(const Scalar& base, const Scalar& exponent) {
+pow(const Scalar& base, const ExpScalar& exponent) {
   return std::pow(base, exponent);
 }
 
