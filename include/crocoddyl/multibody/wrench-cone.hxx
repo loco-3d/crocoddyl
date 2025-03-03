@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
-
 #include <iostream>
 
 namespace crocoddyl {
@@ -141,7 +139,8 @@ void WrenchConeTpl<Scalar>::update() {
 
   // Compute the mu given the type of friction cone approximation
   Scalar mu = mu_;
-  Scalar theta = static_cast<Scalar>(2.0 * M_PI) / static_cast<Scalar>(nf_);
+  Scalar theta =
+      static_cast<Scalar>(2.0) * pi<Scalar>() / static_cast<Scalar>(nf_);
   if (inner_appr_) {
     mu *= cos(theta / Scalar(2.));
   }

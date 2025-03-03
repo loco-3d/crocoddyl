@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 #define CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_
 
-#include <math.h>
-
 #include <stdexcept>
 
 #include "crocoddyl/core/actuation/squashing-base.hpp"

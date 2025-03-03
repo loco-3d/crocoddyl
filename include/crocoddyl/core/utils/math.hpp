@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,11 @@
 #endif
 
 namespace crocoddyl {
+
+template <typename Scalar>
+constexpr Scalar pi() {
+  return static_cast<Scalar>(3.14159265358979323846264338327950288);
+}
 
 // Use std::pow for floating-point types
 template <typename Scalar, typename ExpScalar>

@@ -159,15 +159,16 @@ void test_inner_approximation_of_friction_cone() {
   const Eigen::VectorXd A_mu = -cone.get_A().col(2);
   for (std::size_t i = 0; i < nf; ++i) {
     BOOST_CHECK_CLOSE(
-        A_mu(i), mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.), 1e-9);
+        A_mu(i), mu * cos((2 * pi<double>() / static_cast<double>(nf)) / 2.),
+        1e-9);
   }
 
   // Checking that casted computation is the same
   const Eigen::VectorXd A_mu_casted = -cone.get_A().col(2);
   for (std::size_t i = 0; i < nf; ++i) {
-    BOOST_CHECK_CLOSE(A_mu_casted(i),
-                      mu * cos((2 * M_PI / static_cast<double>(nf)) / 2.),
-                      1e-9);
+    BOOST_CHECK_CLOSE(
+        A_mu_casted(i),
+        mu * cos((2 * pi<double>() / static_cast<double>(nf)) / 2.), 1e-9);
   }
 }
 

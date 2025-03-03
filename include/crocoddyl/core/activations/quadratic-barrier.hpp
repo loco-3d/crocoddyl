@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_
 
-#include <math.h>
-
 #include <pinocchio/utils/static-if.hpp>
 #include <stdexcept>
 
