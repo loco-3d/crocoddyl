@@ -27,33 +27,6 @@ constexpr Scalar pi() {
   return static_cast<Scalar>(3.14159265358979323846264338327950288);
 }
 
-template <typename Scalar>
-typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
-isfinite(const Scalar& x) {
-  return std::isfinite(x);
-}
-
-// Use std::pow for floating-point types
-template <typename Scalar, typename ExpScalar>
-typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
-pow(const Scalar& base, const ExpScalar& exponent) {
-  return std::pow(base, exponent);
-}
-
-// Use std::pow for floating-point types
-template <typename Scalar>
-typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
-sqrt(const Scalar& base) {
-  return std::sqrt(base);
-}
-
-// Use std::fabs for floating-point types
-template <typename Scalar>
-typename std::enable_if<std::is_floating_point<Scalar>::value, Scalar>::type
-fabs(const Scalar& base) {
-  return std::fabs(base);
-}
-
 template <typename MatrixLike,
           bool value =
               (Eigen::NumTraits<typename MatrixLike::Scalar>::IsInteger == 0)>
@@ -98,29 +71,6 @@ MatrixLike pseudoInverse(
         Eigen::NumTraits<typename MatrixLike::Scalar>::dummy_precision()) {
   return pseudoInverseAlgo<MatrixLike>::run(a, epsilon);
 }
-
-#ifdef CROCODDYL_WITH_CODEGEN
-// Use CppAD::pow for CppAD types
-template <typename Scalar>
-typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
-pow(const Scalar& base, const Scalar& exponent) {
-  return CppAD::pow(base, exponent);
-}
-
-// Use CppAD::pow for CppAD types
-template <typename Scalar>
-typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
-sqrt(const Scalar& base) {
-  return CppAD::sqrt(base);
-}
-
-// Case 2: Use CppAD::fabs for CppAD types
-template <typename Scalar>
-typename std::enable_if<!std::is_floating_point<Scalar>::value, Scalar>::type
-fabs(const Scalar& base) {
-  return CppAD::fabs(base);
-}
-#endif
 
 }  // namespace crocoddyl
 
