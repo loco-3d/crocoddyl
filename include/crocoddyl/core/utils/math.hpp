@@ -31,6 +31,12 @@ constexpr Scalar pi() {
   return static_cast<Scalar>(3.14159265358979323846264338327950288);
 }
 
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+isfinite(const Scalar& value) {
+  return std::isfinite(value);
+}
+
 template <typename MatrixLike,
           bool value =
               (Eigen::NumTraits<typename MatrixLike::Scalar>::IsInteger == 0)>
