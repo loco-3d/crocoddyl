@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed checking of positive semi-define condition in LQR problems in https://github.com/loco-3d/crocoddyl/pull/1352
+
 ## [3.0.0] - 2025-03-19
 
 * :warning: BREAKING: replaced boost shared pointers by std ones in https://github.com/loco-3d/crocoddyl/pull/1339
