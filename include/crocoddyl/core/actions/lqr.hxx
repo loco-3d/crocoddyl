@@ -411,10 +411,10 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   }
   L_ = MatrixXs::Zero(nx + nu_, nx + nu_);
   L_ << Q, N, N.transpose(), R;
-  Eigen::LLT<MatrixXs> L_llt(H_);
+  Eigen::LLT<MatrixXs> L_llt(L_);
   if (!L_.isApprox(L_.transpose()) || L_llt.info() == Eigen::NumericalIssue) {
     throw_pretty("Invalid argument "
-                 << "[Q, N; N.T, R] is not semi-positive definite");
+                 << "[Q, N; N.T, R] is not positive semi-definite");
   }
 
   A_ = A;
