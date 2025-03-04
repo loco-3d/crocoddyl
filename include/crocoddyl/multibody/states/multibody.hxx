@@ -19,20 +19,18 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(
       pinocchio_(model),
       x0_(VectorXs::Zero(model->nq + model->nv)) {
   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
-
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
   // Instead simple represents any joint that can model within the Euclidean
   // manifold. The rest of joints use Euclidean algebra. We use this fact for
   // computing Jdiff.
-
   // Define internally the limits of the first joint
-
-  const std::size_t nq0 = model->joints[1].nq();
-
-  lb_.head(nq0) =
-      -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
-  ub_.head(nq0) = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
+  const std::size_t nq0 =
+      model->existJointName("root_joint")
+          ? model->joints[model->getJointId("root_joint")].nq()
+          : 0;
+  lb_.head(nq0) = -std::numeric_limits<Scalar>::max() * VectorXs::Ones(nq0);
+  ub_.head(nq0) = std::numeric_limits<Scalar>::max() * VectorXs::Ones(nq0);
   lb_.segment(nq0, nq_ - nq0) = pinocchio_->lowerPositionLimit.tail(nq_ - nq0);
   ub_.segment(nq0, nq_ - nq0) = pinocchio_->upperPositionLimit.tail(nq_ - nq0);
   lb_.tail(nv_) = -pinocchio_->velocityLimit;
