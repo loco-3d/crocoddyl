@@ -612,6 +612,7 @@ struct DifferentialActionDataContactInvDynamicsTpl
   typedef CostDataSumTpl<Scalar> CostDataSum;
   typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
+  typedef ContactItemTpl<Scalar> ContactItem;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
