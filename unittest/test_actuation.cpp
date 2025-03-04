@@ -89,7 +89,7 @@ void test_actuationSet(ActuationModelTypes::Type actuation_type,
 
   const std::size_t nv = model->get_state()->get_nv();
   Eigen::MatrixXd S =
-      data_num_diff->dtau_du * pseudoInverse(data_num_diff->dtau_du);
+      data_num_diff->dtau_du * crocoddyl::pseudoInverse(data_num_diff->dtau_du);
   for (std::size_t k = 0; k < nv; ++k) {
     if (fabs(S(k, k)) < std::numeric_limits<double>::epsilon()) {
       BOOST_CHECK(data->tau_set[k] == false);
