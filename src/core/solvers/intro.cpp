@@ -245,8 +245,10 @@ double SolverIntro::calcDiff() {
         const std::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
         if (model->get_nu() > 0 && model->get_nh() > 0) {
           Hu_lu_[t].compute(data->Hu);
-          YZ_[t] << Hu_lu_[t].matrixLU().transpose(), Hu_lu_[t].kernel();
           Hu_rank_[t] = Hu_lu_[t].rank();
+          YZ_[t].leftCols(Hu_rank_[t]).noalias() =
+              (Hu_lu_[t].permutationP() * data->Hu).transpose();
+          YZ_[t].rightCols(model->get_nu() - Hu_rank_[t]) = Hu_lu_[t].kernel();
           const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
                              Eigen::RowMajor>
               Y = YZ_[t].leftCols(Hu_lu_[t].rank());
