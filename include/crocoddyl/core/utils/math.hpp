@@ -75,6 +75,10 @@ MatrixLike pseudoInverse(
 }  // namespace crocoddyl
 
 #ifdef CROCODDYL_WITH_CODEGEN
+template <typename Scalar>
+bool isfinite(const CppAD::AD<Scalar>& value) {
+  return std::isfinite(CppAD::Value(value));
+}
 
 namespace CppAD {
 template <class Scalar>
