@@ -13,15 +13,6 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 
-#ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/support/cppadcg_eigen.hpp>
-#include <cppad/cppad.hpp>
-#endif
-
-#ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cg.hpp>
-#endif
-
 namespace crocoddyl {
 
 template <typename Scalar>

@@ -16,6 +16,10 @@
 #include <type_traits>
 
 #ifdef CROCODDYL_WITH_CODEGEN
+#include <cppad/cg/support/cppadcg_eigen.hpp>
+#endif
+
+#ifdef CROCODDYL_WITH_CODEGEN
 #include <cppad/cg/cg.hpp>
 #include <cppad/cppad.hpp>
 #endif
