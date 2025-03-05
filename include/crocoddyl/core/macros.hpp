@@ -63,29 +63,6 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;             \
   virtual std::shared_ptr<base_class> cloneAsADDouble() const = 0;
 
-#define CROCODDYL_BASE_CAST(base_class, class)                              \
-  template <typename Scalar>                                                \
-  std::shared_ptr<class<Scalar>> cast() const {                             \
-    return std::static_pointer_cast<class<Scalar>>(cast_impl<Scalar>());    \
-  } template <typename Scalar>                                              \
-  std::shared_ptr<base_class> cast_impl() const {                           \
-    if (typeid(Scalar) == typeid(double)) {                                 \
-      return cloneAsDouble();                                               \
-    } else if (typeid(Scalar) == typeid(float)) {                           \
-      return cloneAsFloat();                                                \
-    } else if (typeid(Scalar) == typeid(ADFloat64)) {                       \
-      return cloneAsADDouble();                                             \
-    } else {                                                                \
-      std::cout << "Unsupported casting: casting to double as default"      \
-                << std::endl;                                               \
-      return cloneAsDouble();                                               \
-    }                                                                       \
-  }                                                                         \
-  /* Pure virtual method that derived classes must implement for casting */ \
-  virtual std::shared_ptr<base_class> cloneAsDouble() const = 0;            \
-  virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;             \
-  virtual std::shared_ptr<base_class> cloneAsADDouble() const = 0;
-
 /**
  * @brief Macro to declare the code for casting a Crocoddyl class
  * When including this macro within a class, it is necessary to define the
@@ -182,26 +159,6 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   virtual std::shared_ptr<base_class> cloneAsDouble() const = 0;            \
   virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;
 
-#define CROCODDYL_BASE_CAST(base_class, class)                              \
-  template <typename Scalar>                                                \
-  std::shared_ptr<class<Scalar>> cast() const {                             \
-    return std::static_pointer_cast<class<Scalar>>(cast_impl<Scalar>());    \
-  } template <typename Scalar>                                              \
-  std::shared_ptr<base_class> cast_impl() const {                           \
-    if (typeid(Scalar) == typeid(double)) {                                 \
-      return cloneAsDouble();                                               \
-    } else if (typeid(Scalar) == typeid(float)) {                           \
-      return cloneAsFloat();                                                \
-    } else {                                                                \
-      std::cout << "Unsupported casting: casting to double as default"      \
-                << std::endl;                                               \
-      return cloneAsDouble();                                               \
-    }                                                                       \
-  }                                                                         \
-  /* Pure virtual method that derived classes must implement for casting */ \
-  virtual std::shared_ptr<base_class> cloneAsDouble() const = 0;            \
-  virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;
-
 /**
  * @brief Macro to declare the code for casting a Crocoddyl class
  * When including this macro within a class, it is necessary to define the
@@ -223,6 +180,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   }                                                                \
   std::shared_ptr<base_class> cloneAsFloat() const override {      \
     return std::make_shared<derived_class<float>>(*this);          \
+  }
+
+#define CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(base_class, derived_class) \
+  template <typename NewScalar>                                           \
+  explicit derived_class(const derived_class<NewScalar>& other)           \
+      : derived_class(std::move(other.template cast<Scalar>())) {}        \
+  /* Implements casting by overriding `cloneAsFloat` */                   \
+  std::shared_ptr<base_class> cloneAsDouble() const override {            \
+    return std::make_shared<derived_class<double>>(*this);                \
+  }                                                                       \
+  std::shared_ptr<base_class> cloneAsFloat() const override {             \
+    return std::make_shared<derived_class<float>>(*this);                 \
   }
 
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class) \
