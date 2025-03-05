@@ -410,6 +410,7 @@ ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
   ReturnType ret(x0_.template cast<NewScalar>(),
                  vector_cast<NewScalar>(running_models_),
                  terminal_model_->template cast<NewScalar>());
+  ret.set_nthreads((int)nthreads_);
   return ret;
 }
 
