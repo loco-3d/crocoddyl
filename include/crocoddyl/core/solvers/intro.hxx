@@ -1,28 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/intro.hpp"
-
-#include "crocoddyl/core/utils/stop-watch.hpp"
-
 namespace crocoddyl {
 
-SolverIntro::SolverIntro(std::shared_ptr<ShootingProblem> problem,
-                         const DynamicsSolverType dyn_solver,
-                         const EqualitySolverType eq_solver,
-                         const EqualitySolverType term_solver)
+template <typename Scalar>
+SolverIntroTpl<Scalar>::SolverIntroTpl(std::shared_ptr<ShootingProblem> problem,
+                                       const DynamicsSolverType dyn_solver,
+                                       const EqualitySolverType eq_solver,
+                                       const EqualitySolverType term_solver)
     : SolverFDDP(problem, dyn_solver, term_solver), eq_solver_(eq_solver) {
   allocateData();
 }
 
-SolverIntro::~SolverIntro() {}
-
-void SolverIntro::resizeRunningData() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::resizeRunningData() {
   START_PROFILER("SolverIntro::resizeRunningData");
   SolverFDDP::resizeRunningData();
   const std::size_t T = problem_->get_T();
@@ -49,7 +45,8 @@ void SolverIntro::resizeRunningData() {
   STOP_PROFILER("SolverIntro::resizeRunningData");
 }
 
-void SolverIntro::resizeTerminalData() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::resizeTerminalData() {
   START_PROFILER("SolverIntro::resizeTerminalData");
   SolverFDDP::resizeTerminalData();
   const std::size_t T = problem_->get_T();
@@ -67,7 +64,8 @@ void SolverIntro::resizeTerminalData() {
   STOP_PROFILER("SolverIntro::resizeTerminalData");
 }
 
-void SolverIntro::calcDir() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::calcDir() {
   START_PROFILER("SolverIntro::calcDir");
   SolverFDDP::calcDir();
   switch (eq_solver_) {
@@ -83,7 +81,8 @@ void SolverIntro::calcDir() {
   STOP_PROFILER("SolverIntro::calcDir");
 }
 
-void SolverIntro::computePolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computePolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computePolicy");
   switch (eq_solver_) {
     case LuNull:
@@ -97,7 +96,8 @@ void SolverIntro::computePolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computePolicy");
 }
 
-void SolverIntro::computeBatchPolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeBatchPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeBatchPolicy");
   switch (eq_solver_) {
     case LuNull:
@@ -111,7 +111,8 @@ void SolverIntro::computeBatchPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeBatchPolicy");
 }
 
-void SolverIntro::computeValueFunction(
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeValueFunction(
     const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
   START_PROFILER("SolverIntro::computeValueFunction");
   assert_pretty(t < problem_->get_T(),
@@ -130,17 +131,18 @@ void SolverIntro::computeValueFunction(
     STOP_PROFILER("SolverIntro::Vx");
     START_PROFILER("SolverIntro::Vxx");
     KQuu_2Qxu_[t].noalias() = K_[t].transpose() * Quu_[t];
-    KQuu_2Qxu_[t].noalias() -= 2 * Qxu_[t];
+    KQuu_2Qxu_[t].noalias() -= Scalar(2.) * Qxu_[t];
     Vxx_[t].noalias() += KQuu_2Qxu_[t] * K_[t];
     STOP_PROFILER("SolverIntro::Vxx");
   }
-  Vxx_tmp_ = 0.5 * (Vxx_[t] + Vxx_[t].transpose());
+  Vxx_tmp_ = Scalar(0.5) * (Vxx_[t] + Vxx_[t].transpose());
   Vxx_[t] = Vxx_tmp_;
   Vxx_f_[t].noalias() = Vxx_[t] * fs_[t];
   STOP_PROFILER("SolverIntro::computeValueFunction");
 }
 
-void SolverIntro::computeBatchValueFunction(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeBatchValueFunction(const std::size_t t) {
   START_PROFILER("SolverIntro::computeBatchValueFunction");
   SolverFDDP::computeBatchValueFunction(t);
   QuuKc_Quc_[t].noalias() = Quu_[t] * Kc_[t];
@@ -149,7 +151,8 @@ void SolverIntro::computeBatchValueFunction(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeBatchValueFunction");
 }
 
-void SolverIntro::allocateData() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::allocateData() {
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
   Hu_rank_.resize(T);
@@ -176,22 +179,22 @@ void SolverIntro::allocateData() {
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
     Hu_rank_[t] = nh;
-    KQuu_2Qxu_[t] = MatrixXdRowMajor::Zero(ndx, nu);
-    YZ_[t] = Eigen::MatrixXd::Zero(nu, nu);
-    Hy_[t] = Eigen::MatrixXd::Zero(nh, nh);
-    Qz_[t] = Eigen::VectorXd::Zero(nh);
-    Qzz_[t] = Eigen::MatrixXd::Zero(nh, nh);
-    Qxz_[t] = Eigen::MatrixXd::Zero(ndx, nh);
-    Quz_[t] = Eigen::MatrixXd::Zero(nu, nh);
-    kz_[t] = Eigen::VectorXd::Zero(nu);
-    Kz_[t] = Eigen::MatrixXd::Zero(nu, ndx);
-    ks_[t] = Eigen::VectorXd::Zero(nh);
-    Ks_[t] = Eigen::MatrixXd::Zero(nh, ndx);
-    QuuinvHuT_[t] = Eigen::MatrixXd::Zero(nu, nh);
-    Qzz_llt_[t] = Eigen::LLT<Eigen::MatrixXd>(nh);
-    Hu_lu_[t] = Eigen::FullPivLU<Eigen::MatrixXd>(nh, nu);
-    Hu_qr_[t] = Eigen::ColPivHouseholderQR<Eigen::MatrixXd>(nu, nh);
-    Hy_lu_[t] = Eigen::PartialPivLU<Eigen::MatrixXd>(nh);
+    KQuu_2Qxu_[t] = MatrixXsRowMajor::Zero(ndx, nu);
+    YZ_[t] = MatrixXs::Zero(nu, nu);
+    Hy_[t] = MatrixXs::Zero(nh, nh);
+    Qz_[t] = VectorXs::Zero(nh);
+    Qzz_[t] = MatrixXs::Zero(nh, nh);
+    Qxz_[t] = MatrixXs::Zero(ndx, nh);
+    Quz_[t] = MatrixXs::Zero(nu, nh);
+    kz_[t] = VectorXs::Zero(nu);
+    Kz_[t] = MatrixXs::Zero(nu, ndx);
+    ks_[t] = VectorXs::Zero(nh);
+    Ks_[t] = MatrixXs::Zero(nh, ndx);
+    QuuinvHuT_[t] = MatrixXs::Zero(nu, nh);
+    Qzz_llt_[t] = Eigen::LLT<MatrixXs>(nh);
+    Hu_lu_[t] = Eigen::FullPivLU<MatrixXs>(nh, nu);
+    Hu_qr_[t] = Eigen::ColPivHouseholderQR<MatrixXs>(nu, nh);
+    Hy_lu_[t] = Eigen::PartialPivLU<MatrixXs>(nh);
   }
   // Terminal constraint data
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
@@ -202,13 +205,14 @@ void SolverIntro::allocateData() {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     const std::size_t nh = model->get_nh();
-    Kcs_[t] = Eigen::MatrixXd::Zero(nh, nh_T);
-    QuuKc_Quc_[t] = Eigen::MatrixXd::Zero(nu, nh_T);
-    Qzc_[t] = Eigen::MatrixXd::Zero(nh, nh_T);
+    Kcs_[t] = MatrixXs::Zero(nh, nh_T);
+    QuuKc_Quc_[t] = MatrixXs::Zero(nu, nh_T);
+    Qzc_[t] = MatrixXs::Zero(nh, nh_T);
   }
 }
 
-void SolverIntro::calcLuNullDir() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::calcLuNullDir() {
   START_PROFILER("SolverIntro::calcLuNullDir");
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -219,20 +223,20 @@ void SolverIntro::calcLuNullDir() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model = models[t];
-    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     if (model->get_nu() > 0 && model->get_nh() > 0) {
       Hu_lu_[t].compute(data->Hu);
       Hu_rank_[t] = Hu_lu_[t].rank();
       YZ_[t].leftCols(Hu_rank_[t]).noalias() =
           (Hu_lu_[t].permutationP() * data->Hu).transpose();
       YZ_[t].rightCols(model->get_nu() - Hu_rank_[t]) = Hu_lu_[t].kernel();
-      const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+      const Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic,
                          Eigen::RowMajor>
           Y = YZ_[t].leftCols(Hu_lu_[t].rank());
       Hy_[t].noalias() = data->Hu * Y;
       Hy_lu_[t].compute(Hy_[t]);
-      const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv =
+      const Eigen::Inverse<Eigen::PartialPivLU<MatrixXs> > Hy_inv =
           Hy_lu_[t].inverse();
       ks_[t].noalias() = Hy_inv * data->h;
       Ks_[t].noalias() = Hy_inv * data->Hx;
@@ -243,7 +247,8 @@ void SolverIntro::calcLuNullDir() {
   STOP_PROFILER("SolverIntro::calcLuNullDir");
 }
 
-void SolverIntro::calcQrNullDir() {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::calcQrNullDir() {
   START_PROFILER("SolverIntro::calcQrNullDir");
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -254,18 +259,18 @@ void SolverIntro::calcQrNullDir() {
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model = models[t];
-    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     if (model->get_nu() > 0 && model->get_nh() > 0) {
       Hu_qr_[t].compute(data->Hu.transpose());
       YZ_[t] = Hu_qr_[t].householderQ();
       Hu_rank_[t] = Hu_qr_[t].rank();
-      const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+      const Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic,
                          Eigen::RowMajor>
           Y = YZ_[t].leftCols(Hu_qr_[t].rank());
       Hy_[t].noalias() = data->Hu * Y;
       Hy_lu_[t].compute(Hy_[t]);
-      const Eigen::Inverse<Eigen::PartialPivLU<Eigen::MatrixXd> > Hy_inv =
+      const Eigen::Inverse<Eigen::PartialPivLU<MatrixXs> > Hy_inv =
           Hy_lu_[t].inverse();
       ks_[t].noalias() = Hy_inv * data->h;
       Ks_[t].noalias() = Hy_inv * data->Hx;
@@ -276,7 +281,8 @@ void SolverIntro::calcQrNullDir() {
   STOP_PROFILER("SolverIntro::calcQrNullDir");
 }
 
-void SolverIntro::computeNullPolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeNullPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeNullPolicy");
   const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
@@ -286,7 +292,7 @@ void SolverIntro::computeNullPolicy(const std::size_t t) {
     START_PROFILER("SolverIntro::Qzz_inv");
     const std::size_t rank = Hu_rank_[t];
     const std::size_t nullity = nu - rank;
-    const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+    const Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic,
                        Eigen::RowMajor>
         Z = YZ_[t].rightCols(nullity);
     Quz_[t].noalias() = Quu_[t] * Z;
@@ -299,8 +305,8 @@ void SolverIntro::computeNullPolicy(const std::size_t t) {
     }
     Qz_[t].noalias() = Z.transpose() * Qu_[t];
     Qxz_[t].noalias() = Qxu_[t] * Z;
-    Eigen::Transpose<Eigen::MatrixXd> Qzx = Qxz_[t].transpose();
-    Eigen::Transpose<Eigen::MatrixXd> QzzinvQzu = Quz_[t].transpose();
+    Eigen::Transpose<MatrixXs> Qzx = Qxz_[t].transpose();
+    Eigen::Transpose<MatrixXs> QzzinvQzu = Quz_[t].transpose();
     Qzz_llt_[t].solveInPlace(Qz_[t]);
     Qzz_llt_[t].solveInPlace(Qzx);
     Qzz_llt_[t].solveInPlace(QzzinvQzu);
@@ -316,7 +322,8 @@ void SolverIntro::computeNullPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeNullPolicy");
 }
 
-void SolverIntro::computeNullBatchPolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeNullBatchPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeNullBatchPolicy");
   const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
@@ -325,7 +332,7 @@ void SolverIntro::computeNullBatchPolicy(const std::size_t t) {
   if (nu > 0 && nh > 0) {
     const std::size_t rank = Hu_rank_[t];
     const std::size_t nullity = nu - rank;
-    const Eigen::Block<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic,
+    const Eigen::Block<MatrixXs, Eigen::Dynamic, Eigen::Dynamic,
                        Eigen::RowMajor>
         Z = YZ_[t].rightCols(nullity);
     Qzc_[t].noalias() = Z.transpose() * Quc_[t];
@@ -338,7 +345,8 @@ void SolverIntro::computeNullBatchPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeNullBatchPolicy");
 }
 
-void SolverIntro::computeSchurPolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeSchurPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeSchurPolicy");
   const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
@@ -360,7 +368,7 @@ void SolverIntro::computeSchurPolicy(const std::size_t t) {
     if (info != Eigen::Success) {
       throw_pretty("backward error");
     }
-    Eigen::Transpose<Eigen::MatrixXd> HuQuuinv = QuuinvHuT_[t].transpose();
+    Eigen::Transpose<MatrixXs> HuQuuinv = QuuinvHuT_[t].transpose();
     Qzz_llt_[t].solveInPlace(HuQuuinv);
     ks_[t] = data->h;
     ks_[t].noalias() -= data->Hu * k_[t];
@@ -372,7 +380,8 @@ void SolverIntro::computeSchurPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeSchurPolicy");
 }
 
-void SolverIntro::computeSchurBatchPolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeSchurBatchPolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computeSchurBatchPolicy");
   const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_runningModels()[t];
@@ -390,45 +399,85 @@ void SolverIntro::computeSchurBatchPolicy(const std::size_t t) {
   STOP_PROFILER("SolverIntro::computeSchurBatchPolicy");
 }
 
-EqualitySolverType SolverIntro::get_equality_solver() const {
+template <typename Scalar>
+EqualitySolverType SolverIntroTpl<Scalar>::get_equality_solver() const {
   return eq_solver_;
 }
 
-const std::vector<std::size_t>& SolverIntro::get_Hu_rank() const {
+template <typename Scalar>
+const std::vector<std::size_t>& SolverIntroTpl<Scalar>::get_Hu_rank() const {
   return Hu_rank_;
 }
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_YZ() const { return YZ_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_YZ() const {
+  return YZ_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzz() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Qzz() const {
   return Qzz_;
 }
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qxz() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Qxz() const {
   return Qxz_;
 }
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Quz() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Quz() const {
   return Quz_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverIntro::get_Qz() const { return Qz_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverIntroTpl<Scalar>::get_Qz() const {
+  return Qz_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Hy() const { return Hy_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Hy() const {
+  return Hy_;
+}
 
-const std::vector<Eigen::VectorXd>& SolverIntro::get_kz() const { return kz_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverIntroTpl<Scalar>::get_kz() const {
+  return kz_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Kz() const { return Kz_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Kz() const {
+  return Kz_;
+}
 
-const std::vector<Eigen::VectorXd>& SolverIntro::get_ks() const { return ks_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverIntroTpl<Scalar>::get_ks() const {
+  return ks_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Ks() const { return Ks_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Ks() const {
+  return Ks_;
+}
 
-const std::vector<Eigen::MatrixXd>& SolverIntro::get_Qzc() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverIntroTpl<Scalar>::get_Qzc() const {
   return Qzc_;
 }
 
-void SolverIntro::set_equality_solver(const EqualitySolverType type) {
+template <typename Scalar>
+void SolverIntroTpl<Scalar>::set_equality_solver(
+    const EqualitySolverType type) {
   eq_solver_ = type;
 }
 

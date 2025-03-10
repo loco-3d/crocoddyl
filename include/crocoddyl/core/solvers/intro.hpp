@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,11 +13,21 @@
 
 namespace crocoddyl {
 
-class SolverIntro : public SolverFDDP {
+template <typename _Scalar>
+class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef typename MathBaseTpl<double>::MatrixXsRowMajor MatrixXdRowMajor;
+  typedef _Scalar Scalar;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+  typedef SolverFDDPTpl<Scalar> SolverFDDP;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
+  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
 
   /**
    * @brief Initialize the INTRO solver
@@ -26,37 +36,38 @@ class SolverIntro : public SolverFDDP {
    * @param[in] eq_solver    Type of equality solver
    * @param[in] term_solver  Type of terminal solver
    */
-  explicit SolverIntro(std::shared_ptr<ShootingProblem> problem,
-                       const DynamicsSolverType dyn_solver = FeasShoot,
-                       const EqualitySolverType eq_solver = LuNull,
-                       const EqualitySolverType term_solver = LuNull);
-  virtual ~SolverIntro();
+  explicit SolverIntroTpl(std::shared_ptr<ShootingProblem> problem,
+                          const DynamicsSolverType dyn_solver = FeasShoot,
+                          const EqualitySolverType eq_solver = LuNull,
+                          const EqualitySolverType term_solver = LuNull);
+  virtual ~SolverIntroTpl() = default;
 
   /**
    * @copybrief SolverFDDP::calcDir
    */
-  virtual void calcDir();
+  virtual void calcDir() override;
 
   /**
    * @copybrief SolverFDDP::computePolicy
    */
-  virtual void computePolicy(const std::size_t t);
+  virtual void computePolicy(const std::size_t t) override;
 
   /**
    * @copybrief SolverFDDP::computeBatchPolicy
    */
-  virtual void computeBatchPolicy(const std::size_t t);
+  virtual void computeBatchPolicy(const std::size_t t) override;
 
   /**
    * @copybrief SolverFDDP::computeValueFunction
    */
   virtual void computeValueFunction(
-      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
+      const std::size_t t,
+      const std::shared_ptr<ActionModelAbstract>& model) override;
 
   /**
    * @copybrief SolverFDDP::computeBatchValueFunction
    */
-  virtual void computeBatchValueFunction(const std::size_t t);
+  virtual void computeBatchValueFunction(const std::size_t t) override;
 
   /**
    * @brief Return the type of solver used for handling the equality constraints
@@ -72,59 +83,59 @@ class SolverIntro : public SolverFDDP {
    * @brief Return the span and kernel of control-equality constraints
    * \f$\mathbf{H_u}\f
    */
-  const std::vector<Eigen::MatrixXd>& get_YZ() const;
+  const std::vector<MatrixXs>& get_YZ() const;
 
   /**
    * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qzz() const;
+  const std::vector<MatrixXs>& get_Qzz() const;
 
   /**
    * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxz() const;
+  const std::vector<MatrixXs>& get_Qxz() const;
 
   /**
    * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Quz() const;
+  const std::vector<MatrixXs>& get_Quz() const;
 
   /**
    * @brief Return Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Qz() const;
+  const std::vector<VectorXs>& get_Qz() const;
 
   /**
    * @brief Return span-projected Jacobian of the equality-constraint with
    * respect to the control
    */
-  const std::vector<Eigen::MatrixXd>& get_Hy() const;
+  const std::vector<MatrixXs>& get_Hy() const;
 
   /**
    * @brief Return feedforward term related to the nullspace of
    * \f$\mathbf{H_u}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_kz() const;
+  const std::vector<VectorXs>& get_kz() const;
 
   /**
    * @brief Return feedback gain related to the nullspace of \f$\mathbf{H_u}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Kz() const;
+  const std::vector<MatrixXs>& get_Kz() const;
 
   /**
    * @brief Return feedforward term related to the equality constraints
    */
-  const std::vector<Eigen::VectorXd>& get_ks() const;
+  const std::vector<VectorXs>& get_ks() const;
 
   /**
    * @brief Return feedback gain related to the equality constraints
    */
-  const std::vector<Eigen::MatrixXd>& get_Ks() const;
+  const std::vector<MatrixXs>& get_Ks() const;
 
   /**
    * @brief Return Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zc}}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qzc() const;
+  const std::vector<MatrixXs>& get_Qzc() const;
 
   /**
    * @brief Modify the type of solver used for handling the equality constraints
@@ -141,12 +152,31 @@ class SolverIntro : public SolverFDDP {
   /**
    * @copybrief SolverAbstract::resizeRunningData
    */
-  virtual void resizeRunningData();
+  virtual void resizeRunningData() override;
 
   /**
    * @copybrief SolverAbstract::resizeTerminalData
    */
-  virtual void resizeTerminalData();
+  virtual void resizeTerminalData() override;
+
+  using SolverFDDP::fs_;
+  using SolverFDDP::K_;
+  using SolverFDDP::k_;
+  using SolverFDDP::Kc_;
+  using SolverFDDP::problem_;
+  using SolverFDDP::Qu_;
+  using SolverFDDP::Quc_;
+  using SolverFDDP::Quu_;
+  using SolverFDDP::Quu_llt_;
+  using SolverFDDP::Quuk_;
+  using SolverFDDP::Qx_;
+  using SolverFDDP::Qxu_;
+  using SolverFDDP::Qxx_;
+  using SolverFDDP::Vx_;
+  using SolverFDDP::Vxc_;
+  using SolverFDDP::Vxx_;
+  using SolverFDDP::Vxx_f_;
+  using SolverFDDP::Vxx_tmp_;
 
   void calcLuNullDir();
   void calcQrNullDir();
@@ -160,48 +190,53 @@ class SolverIntro : public SolverFDDP {
 
   std::vector<std::size_t>
       Hu_rank_;  //!< Rank of the control Jacobian of the equality constraints
-  std::vector<MatrixXdRowMajor> KQuu_2Qxu_;
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXsRowMajor> KQuu_2Qxu_;
+  std::vector<MatrixXs>
       YZ_;  //!< Span \f$\mathbf{Y}\in\mathbb{R}^{rank}\f$ and kernel
             //!< \f$\mathbf{Z}\in\mathbb{R}^{nullity}\f$ of the control-equality
             //!< constraints \f$\mathbf{H_u}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Hy_;  //!< Span-projected Jacobian of the equality-constraint with respect
             //!< to the control
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Qz_;  //!< Jacobian of the reduced Hamiltonian \f$\mathbf{Q_{z}}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Qzz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zz}}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Quz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       kz_;  //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Kz_;  //!< Feedback gain in the nullspace of \f$\mathbf{H_u}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       ks_;  //!< Feedforward term related to the equality constraints
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Ks_;  //!< Feedback gain related to the equality constraints
-  std::vector<Eigen::MatrixXd> QuuinvHuT_;
-  std::vector<Eigen::LLT<Eigen::MatrixXd> > Qzz_llt_;  //!< Cholesky LLT solver
-  std::vector<Eigen::FullPivLU<Eigen::MatrixXd> >
+  std::vector<MatrixXs> QuuinvHuT_;
+  std::vector<Eigen::LLT<MatrixXs> > Qzz_llt_;  //!< Cholesky LLT solver
+  std::vector<Eigen::FullPivLU<MatrixXs> >
       Hu_lu_;  //!< Full-pivot LU solvers used for computing the span and
                //!< nullspace matrices
-  std::vector<Eigen::ColPivHouseholderQR<Eigen::MatrixXd> >
+  std::vector<Eigen::ColPivHouseholderQR<MatrixXs> >
       Hu_qr_;  //!< Column-pivot QR solvers used for computing the span and
                //!< nullspace matrices
-  std::vector<Eigen::PartialPivLU<Eigen::MatrixXd> >
+  std::vector<Eigen::PartialPivLU<MatrixXs> >
       Hy_lu_;  //!< Partial-pivot LU solvers used for computing the feedforward
                //!< and feedback gain related to the equality constraint
 
-  std::vector<Eigen::MatrixXd> Kcs_;
-  std::vector<Eigen::MatrixXd> QuuKc_Quc_;
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs> Kcs_;
+  std::vector<MatrixXs> QuuKc_Quc_;
+  std::vector<MatrixXs>
       Qzc_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{zc}}\f$
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solvers/intro.hxx"
 
 #endif  // CROCODDYL_CORE_SOLVERS_INTRO_HPP_

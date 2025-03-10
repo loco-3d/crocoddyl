@@ -1,24 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/box-qp.hpp"
-
 namespace crocoddyl {
 
-BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,
-             const double th_acceptstep, const double th_grad, const double reg)
+template <typename Scalar>
+BoxQPTpl<Scalar>::BoxQPTpl(const std::size_t nx, const std::size_t maxiter,
+                           const Scalar th_acceptstep, const Scalar th_grad,
+                           const Scalar reg)
     : nx_(nx),
       maxiter_(maxiter),
       th_acceptstep_(th_acceptstep),
       th_grad_(th_grad),
       reg_(reg),
-      fold_(0.),
-      fnew_(0.),
+      fold_(Scalar(0.)),
+      fnew_(Scalar(0.)),
       x_(nx),
       xnew_(nx),
       g_(nx),
@@ -28,17 +28,16 @@ BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,
       qo_(nx),
       Ho_(nx, nx) {
   // Check if values have a proper range
-  if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
+  if (Scalar(0.) >= th_acceptstep && th_acceptstep >= Scalar(0.5)) {
     std::cerr << "Warning: th_acceptstep value should between 0 and 0.5"
               << std::endl;
   }
-  if (0. > th_grad) {
+  if (Scalar(0.) > th_grad) {
     std::cerr << "Warning: th_grad value has to be positive." << std::endl;
   }
-  if (0. > reg) {
+  if (Scalar(0.) > reg) {
     std::cerr << "Warning: reg value has to be positive." << std::endl;
   }
-
   // Initialized the values of vectors
   x_.setZero();
   xnew_.setZero();
@@ -48,25 +47,23 @@ BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,
   dxo_.setZero();
   qo_.setZero();
   Ho_.setZero();
-
   // Reserve the space and compute alphas
-  solution_.x = Eigen::VectorXd::Zero(nx);
+  solution_.x = VectorXs::Zero(nx);
   solution_.clamped_idx.reserve(nx_);
   solution_.free_idx.reserve(nx_);
   const std::size_t n_alphas_ = 10;
   alphas_.resize(n_alphas_);
   for (std::size_t n = 0; n < n_alphas_; ++n) {
-    alphas_[n] = 1. / pow(2., static_cast<double>(n));
+    alphas_[n] = Scalar(1.) / pow(Scalar(2.), static_cast<Scalar>(n));
   }
 }
 
-BoxQP::~BoxQP() {}
-
-const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
-                                  const Eigen::VectorXd& q,
-                                  const Eigen::VectorXd& lb,
-                                  const Eigen::VectorXd& ub,
-                                  const Eigen::VectorXd& xinit) {
+template <typename Scalar>
+const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::solve(const MatrixXs& H,
+                                                        const VectorXs& q,
+                                                        const VectorXs& lb,
+                                                        const VectorXs& ub,
+                                                        const VectorXs& xinit) {
   if (static_cast<std::size_t>(H.rows()) != nx_ ||
       static_cast<std::size_t>(H.cols()) != nx_) {
     throw_pretty("Invalid argument: "
@@ -93,12 +90,10 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
         "Invalid argument: " << "xinit has wrong dimension (it should be " +
                                     std::to_string(nx_) + ")");
   }
-
   // We need to enforce feasible warm-starting of the algorithm
   for (std::size_t i = 0; i < nx_; ++i) {
     x_(i) = std::max(std::min(xinit(i), ub(i)), lb(i));
   }
-
   // Start the numerical iterations
   for (std::size_t k = 0; k < maxiter_; ++k) {
     solution_.clamped_idx.clear();
@@ -107,26 +102,25 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
     g_ = q;
     g_.noalias() += H * x_;
     for (std::size_t j = 0; j < nx_; ++j) {
-      const double gj = g_(j);
-      const double xj = x_(j);
-      const double lbj = lb(j);
-      const double ubj = ub(j);
-      if ((xj == lbj && gj > 0.) || (xj == ubj && gj < 0.)) {
+      const Scalar gj = g_(j);
+      const Scalar xj = x_(j);
+      const Scalar lbj = lb(j);
+      const Scalar ubj = ub(j);
+      if ((xj == lbj && gj > Scalar(0.)) || (xj == ubj && gj < Scalar(0.))) {
         solution_.clamped_idx.push_back(j);
       } else {
         solution_.free_idx.push_back(j);
       }
     }
-
     // Compute the search direction as Newton step along the free space
     nf_ = solution_.free_idx.size();
     nc_ = solution_.clamped_idx.size();
-    Eigen::VectorBlock<Eigen::VectorXd> xf = xo_.head(nf_);
-    Eigen::VectorBlock<Eigen::VectorXd> xc = xo_.tail(nc_);
-    Eigen::VectorBlock<Eigen::VectorXd> dxf = dxo_.head(nf_);
-    Eigen::VectorBlock<Eigen::VectorXd> qf = qo_.head(nf_);
-    Eigen::Block<Eigen::MatrixXd> Hff = Ho_.topLeftCorner(nf_, nf_);
-    Eigen::Block<Eigen::MatrixXd> Hfc = Ho_.topRightCorner(nf_, nc_);
+    Eigen::VectorBlock<VectorXs> xf = xo_.head(nf_);
+    Eigen::VectorBlock<VectorXs> xc = xo_.tail(nc_);
+    Eigen::VectorBlock<VectorXs> dxf = dxo_.head(nf_);
+    Eigen::VectorBlock<VectorXs> qf = qo_.head(nf_);
+    Eigen::Block<MatrixXs> Hff = Ho_.topLeftCorner(nf_, nf_);
+    Eigen::Block<MatrixXs> Hfc = Ho_.topRightCorner(nf_, nc_);
     for (std::size_t i = 0; i < nf_; ++i) {
       const std::size_t fi = solution_.free_idx[i];
       qf(i) = q(fi);
@@ -140,7 +134,7 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
         Hfc(i, j) = H(fi, cj);
       }
     }
-    if (reg_ != 0.) {
+    if (reg_ != Scalar(0.)) {
       Hff.diagonal().array() += reg_;
     }
     Hff_inv_llt_.compute(Hff);
@@ -161,25 +155,23 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
       dx_(solution_.free_idx[i]) = dxf(i);
       g_(solution_.free_idx[i]) = -qf(i);
     }
-
     // Try different step lengths
-    fold_ = 0.5 * x_.dot(H * x_) + q.dot(x_);
-    for (std::vector<double>::const_iterator it = alphas_.begin();
+    fold_ = Scalar(0.5) * x_.dot(H * x_) + q.dot(x_);
+    for (typename std::vector<Scalar>::const_iterator it = alphas_.begin();
          it != alphas_.end(); ++it) {
-      double steplength = *it;
+      Scalar steplength = *it;
       for (std::size_t i = 0; i < nx_; ++i) {
         xnew_(i) =
             std::max(std::min(x_(i) + steplength * dx_(i), ub(i)), lb(i));
       }
-      fnew_ = 0.5 * xnew_.dot(H * xnew_) + q.dot(xnew_);
+      fnew_ = Scalar(0.5) * xnew_.dot(H * xnew_) + q.dot(xnew_);
       if (fold_ - fnew_ > th_acceptstep_ * g_.dot(x_ - xnew_)) {
         x_ = xnew_;
         break;
       }
     }
-
     // Check convergence
-    if (qf.lpNorm<Eigen::Infinity>() <= th_grad_) {
+    if (qf.template lpNorm<Eigen::Infinity>() <= th_grad_) {
       solution_.x = x_;
       return solution_;
     }
@@ -188,21 +180,43 @@ const BoxQPSolution& BoxQP::solve(const Eigen::MatrixXd& H,
   return solution_;
 }
 
-const BoxQPSolution& BoxQP::get_solution() const { return solution_; }
+template <typename Scalar>
+const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::get_solution() const {
+  return solution_;
+}
 
-std::size_t BoxQP::get_nx() const { return nx_; }
+template <typename Scalar>
+std::size_t BoxQPTpl<Scalar>::get_nx() const {
+  return nx_;
+}
 
-std::size_t BoxQP::get_maxiter() const { return maxiter_; }
+template <typename Scalar>
+std::size_t BoxQPTpl<Scalar>::get_maxiter() const {
+  return maxiter_;
+}
 
-double BoxQP::get_th_acceptstep() const { return th_acceptstep_; }
+template <typename Scalar>
+Scalar BoxQPTpl<Scalar>::get_th_acceptstep() const {
+  return th_acceptstep_;
+}
 
-double BoxQP::get_th_grad() const { return th_grad_; }
+template <typename Scalar>
+Scalar BoxQPTpl<Scalar>::get_th_grad() const {
+  return th_grad_;
+}
 
-double BoxQP::get_reg() const { return reg_; }
+template <typename Scalar>
+Scalar BoxQPTpl<Scalar>::get_reg() const {
+  return reg_;
+}
 
-const std::vector<double>& BoxQP::get_alphas() const { return alphas_; }
+template <typename Scalar>
+const std::vector<Scalar>& BoxQPTpl<Scalar>::get_alphas() const {
+  return alphas_;
+}
 
-void BoxQP::set_nx(const std::size_t nx) {
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_nx(const std::size_t nx) {
   nx_ = nx;
   x_.conservativeResize(nx);
   xnew_.conservativeResize(nx);
@@ -214,38 +228,45 @@ void BoxQP::set_nx(const std::size_t nx) {
   Ho_.conservativeResize(nx, nx);
 }
 
-void BoxQP::set_maxiter(const std::size_t maxiter) { maxiter_ = maxiter; }
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_maxiter(const std::size_t maxiter) {
+  maxiter_ = maxiter;
+}
 
-void BoxQP::set_th_acceptstep(const double th_acceptstep) {
-  if (0. >= th_acceptstep && th_acceptstep >= 0.5) {
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_th_acceptstep(const Scalar th_acceptstep) {
+  if (Scalar(0.) >= th_acceptstep && th_acceptstep >= Scalar(0.5)) {
     throw_pretty(
         "Invalid argument: " << "th_acceptstep value should between 0 and 0.5");
   }
   th_acceptstep_ = th_acceptstep;
 }
 
-void BoxQP::set_th_grad(const double th_grad) {
-  if (0. > th_grad) {
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_th_grad(const Scalar th_grad) {
+  if (Scalar(0.) > th_grad) {
     throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
 }
 
-void BoxQP::set_reg(const double reg) {
-  if (0. > reg) {
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_reg(const Scalar reg) {
+  if (Scalar(0.) > reg) {
     throw_pretty("Invalid argument: " << "reg value has to be positive.");
   }
   reg_ = reg;
 }
 
-void BoxQP::set_alphas(const std::vector<double>& alphas) {
-  double prev_alpha = alphas[0];
-  if (prev_alpha != 1.) {
+template <typename Scalar>
+void BoxQPTpl<Scalar>::set_alphas(const std::vector<Scalar>& alphas) {
+  Scalar prev_alpha = alphas[0];
+  if (prev_alpha != Scalar(1.)) {
     std::cerr << "Warning: alpha[0] should be 1" << std::endl;
   }
   for (std::size_t i = 1; i < alphas.size(); ++i) {
-    double alpha = alphas[i];
-    if (0. >= alpha) {
+    Scalar alpha = alphas[i];
+    if (Scalar(0.) >= alpha) {
       throw_pretty("Invalid argument: " << "alpha values has to be positive.");
     }
     if (alpha >= prev_alpha) {

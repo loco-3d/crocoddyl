@@ -1,40 +1,37 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/box-fddp.hpp"
-
 namespace crocoddyl {
 
-SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem,
-                             const DynamicsSolverType dyn_solver,
-                             const EqualitySolverType term_solver)
+template <typename Scalar>
+SolverBoxFDDPTpl<Scalar>::SolverBoxFDDPTpl(
+    std::shared_ptr<ShootingProblem> problem,
+    const DynamicsSolverType dyn_solver, const EqualitySolverType term_solver)
     : SolverFDDP(problem, dyn_solver, term_solver),
-      qp_(problem->get_runningModels()[0]->get_nu(), 100, 0.1, 1e-5, 0.) {
+      qp_(problem->get_runningModels()[0]->get_nu(), 100, Scalar(0.1),
+          Scalar(1e-5), Scalar(0.)) {
   allocateData();
-
   const std::size_t n_alphas = 10;
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / pow(2., static_cast<double>(n));
+    alphas_[n] = Scalar(1.) / pow(Scalar(2.), static_cast<Scalar>(n));
   }
   // Change the default convergence tolerance since the gradient of the
   // Lagrangian is smaller than an unconstrained OC problem (i.e. gradient = Qu
   // - mu^T * C where mu > 0 and C defines the inequality matrix that bounds the
   // control); and we don't have access to mu from the box QP.
-  th_stop_ = 5e-5;
+  th_stop_ = Scalar(5e-5);
 }
 
-SolverBoxFDDP::~SolverBoxFDDP() {}
-
-void SolverBoxFDDP::resizeRunningData() {
+template <typename Scalar>
+void SolverBoxFDDPTpl<Scalar>::resizeRunningData() {
   START_PROFILER("SolverBoxFDDP::resizeRunningData");
   SolverFDDP::resizeRunningData();
-
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
@@ -48,7 +45,8 @@ void SolverBoxFDDP::resizeRunningData() {
   STOP_PROFILER("SolverBoxFDDP::resizeRunningData");
 }
 
-void SolverBoxFDDP::allocateData() {
+template <typename Scalar>
+void SolverBoxFDDPTpl<Scalar>::allocateData() {
   const std::size_t T = problem_->get_T();
   Quu_inv_.resize(T);
   du_lb_.resize(T);
@@ -58,15 +56,16 @@ void SolverBoxFDDP::allocateData() {
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
-    Quu_inv_[t] = Eigen::MatrixXd::Zero(nu, nu);
-    du_lb_[t] = Eigen::VectorXd::Zero(nu);
-    du_ub_[t] = Eigen::VectorXd::Zero(nu);
+    Quu_inv_[t] = MatrixXs::Zero(nu, nu);
+    du_lb_[t] = VectorXs::Zero(nu);
+    du_ub_[t] = VectorXs::Zero(nu);
   }
   const std::size_t ndx = problem_->get_ndx();
-  xnext_ = Eigen::VectorXd::Zero(ndx);
+  xnext_ = VectorXs::Zero(ndx);
 }
 
-void SolverBoxFDDP::computePolicy(const std::size_t t) {
+template <typename Scalar>
+void SolverBoxFDDPTpl<Scalar>::computePolicy(const std::size_t t) {
   const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
   if (nu > 0) {
     if (!problem_->get_runningModels()[t]->get_has_control_limits() ||
@@ -75,13 +74,10 @@ void SolverBoxFDDP::computePolicy(const std::size_t t) {
       SolverFDDP::computePolicy(t);
       return;
     }
-
     du_lb_[t] = problem_->get_runningModels()[t]->get_u_lb() - us_[t];
     du_ub_[t] = problem_->get_runningModels()[t]->get_u_ub() - us_[t];
-
     const BoxQPSolution& boxqp_sol =
         qp_.solve(Quu_[t], Qu_[t], du_lb_[t], du_ub_[t], k_[t]);
-
     // Compute controls
     Quu_inv_[t].setZero();
     for (std::size_t i = 0; i < boxqp_sol.free_idx.size(); ++i) {
@@ -92,21 +88,21 @@ void SolverBoxFDDP::computePolicy(const std::size_t t) {
     }
     K_[t].noalias() = Quu_inv_[t] * Qxu_[t].transpose();
     k_[t] = -boxqp_sol.x;
-
     // The box-QP clamped the gradient direction; this is important for
     // accounting the algorithm advancement (i.e. stopping criteria)
     for (std::size_t i = 0; i < boxqp_sol.clamped_idx.size(); ++i) {
-      Qu_[t](boxqp_sol.clamped_idx[i]) = 0.;
+      Qu_[t](boxqp_sol.clamped_idx[i]) = Scalar(0.);
     }
   }
 }
 
-void SolverBoxFDDP::forwardPass(const double steplength) {
-  if (steplength > 1. || steplength < 0.) {
+template <typename Scalar>
+void SolverBoxFDDPTpl<Scalar>::forwardPass(const Scalar steplength) {
+  if (steplength > Scalar(1.) || steplength < Scalar(0.)) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
-  cost_try_ = 0.;
+  cost_try_ = Scalar(0.);
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
@@ -118,7 +114,6 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
       const std::shared_ptr<ActionModelAbstract>& m = models[t];
       const std::shared_ptr<ActionDataAbstract>& d = datas[t];
       const std::size_t nu = m->get_nu();
-
       xs_try_[t] = xnext_;
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       if (nu != 0) {
@@ -133,22 +128,19 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
       }
       xnext_ = d->xnext;
       cost_try_ += d->cost;
-
       if (raiseIfNaN(cost_try_)) {
         throw_pretty("forward_error");
       }
-      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      if (raiseIfNaN(xnext_.template lpNorm<Eigen::Infinity>())) {
         throw_pretty("forward_error");
       }
     }
-
     const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
     const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
     xs_try_.back() = xnext_;
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
-
     if (raiseIfNaN(cost_try_)) {
       throw_pretty("forward_error");
     }
@@ -171,30 +163,29 @@ void SolverBoxFDDP::forwardPass(const double steplength) {
       }
       xnext_ = d->xnext;
       cost_try_ += d->cost;
-
       if (raiseIfNaN(cost_try_)) {
         throw_pretty("forward_error");
       }
-      if (raiseIfNaN(xnext_.lpNorm<Eigen::Infinity>())) {
+      if (raiseIfNaN(xnext_.template lpNorm<Eigen::Infinity>())) {
         throw_pretty("forward_error");
       }
     }
-
     const std::shared_ptr<ActionModelAbstract>& m =
         problem_->get_terminalModel();
     const std::shared_ptr<ActionDataAbstract>& d = problem_->get_terminalData();
-    m->get_state()->integrate(xnext_, fs_.back() * (steplength - 1),
+    m->get_state()->integrate(xnext_, fs_.back() * (steplength - Scalar(1.)),
                               xs_try_.back());
     m->calc(d, xs_try_.back());
     cost_try_ += d->cost;
-
     if (raiseIfNaN(cost_try_)) {
       throw_pretty("forward_error");
     }
   }
 }
 
-const std::vector<Eigen::MatrixXd>& SolverBoxFDDP::get_Quu_inv() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverBoxFDDPTpl<Scalar>::get_Quu_inv() const {
   return Quu_inv_;
 }
 

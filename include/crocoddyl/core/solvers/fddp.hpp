@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -33,7 +33,7 @@ enum EqualitySolverType {
  *
  * The FDDP solver computes an optimal trajectory and control commands by
  * iterates running `backwardPass()` and `forwardPass()`. The backward pass
- * accepts infeasible guess as described in the `SolverDDP::backwardPass()`.
+ * accepts infeasible guess as described in the `SolverFDDP::backwardPass()`.
  * Additionally, the forward pass handles infeasibility simulations that
  * resembles the numerical behaviour of a multiple-shooting formulation, i.e.:
  * \f{eqnarray}
@@ -66,11 +66,29 @@ enum EqualitySolverType {
  * \sa `SolverAbstract()`, `backwardPass()`, `forwardPass()`,
  * `expectedImprovement()` and `updateExpectedImprovement()`
  */
-class SolverFDDP : public SolverAbstract {
+template <typename _Scalar>
+class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef typename MathBaseTpl<double>::MatrixXsRowMajor MatrixXdRowMajor;
+  typedef _Scalar Scalar;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
+  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
+  using SolverAbstract::computeDynamicFeasibility;
+  using SolverAbstract::computeEqualityFeasibility;
+  using SolverAbstract::computeFeasibility;
+  using SolverAbstract::computeInequalityFeasibility;
+  using SolverAbstract::resizeData;
+  using SolverAbstract::setCandidate;
 
   /**
    * @brief Initialize the FDDP solver
@@ -79,29 +97,30 @@ class SolverFDDP : public SolverAbstract {
    * @param[in] dyn_solver   Type of dynamic solver
    * @param[in] term_solver  Type of terminal solver
    */
-  explicit SolverFDDP(std::shared_ptr<ShootingProblem> problem,
-                      const DynamicsSolverType dyn_solver = FeasShoot,
-                      const EqualitySolverType term_solver = LuNull);
-  virtual ~SolverFDDP();
+  explicit SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
+                         const DynamicsSolverType dyn_solver = FeasShoot,
+                         const EqualitySolverType term_solver = LuNull);
+  virtual ~SolverFDDPTpl() = default;
 
   /**
    * @copybrief SolverAbstract::solve
    */
   virtual bool solve(
-      const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double init_reg = NAN);
+      const Scalar init_reg =
+          std::numeric_limits<Scalar>::quiet_NaN()) override;
 
   /**
    * @copybrief SolverAbstract::computeDirection
    */
-  virtual void computeDirection(const bool recalc = true);
+  virtual void computeDirection(const bool recalc = true) override;
 
   /**
    * @copybrief SolverAbstract::tryStep
    */
-  virtual double tryStep(const double steplength = 1);
+  virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
 
   /**
    * @brief Perform a forward pass with a predefined step length
@@ -117,14 +136,14 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  void forwardPass(const double steplength = 1);
+  void forwardPass(const Scalar steplength = Scalar(1.));
 
   /**
    * @brief Update the dual and slack variables with a predefined step length
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void updateDualsAndSlacks(const double stepLength = 1);
+  virtual void updateDualsAndSlacks(const Scalar stepLength = Scalar(1.));
 
   /**
    * @brief Check if we should accept or not the step
@@ -136,7 +155,7 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @copybrief SolverAbstract::stoppingCriteria
    */
-  virtual double stoppingCriteria();
+  virtual Scalar stoppingCriteria() override;
 
   /**
    * @copybrief SolverAbstract::expectedImprovement
@@ -152,7 +171,7 @@ class SolverFDDP : public SolverAbstract {
    * \mathbf{\bar{f}}_k^\top(2 V_{\mathbf{xx}_k}\mathbf{x}_k
    * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
    */
-  virtual const Eigen::Vector2d& expectedImprovement();
+  virtual const Vector2s& expectedImprovement() override;
 
   /**
    * @brief Update the Jacobian, Hessian and feasibility of the optimal control
@@ -297,7 +316,7 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void feasShootForwardPass(const double steplength);
+  virtual void feasShootForwardPass(const Scalar steplength);
 
   /**
    * @brief Run the multiple-shooting rollout
@@ -307,7 +326,7 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void multiShootForwardPass(const double steplength);
+  virtual void multiShootForwardPass(const Scalar steplength);
 
   /**
    * @brief Run the multiple-shooting rollout with intervals of
@@ -318,7 +337,7 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void hybridShootForwardPass(const double steplength);
+  virtual void hybridShootForwardPass(const Scalar steplength);
 
   /**
    * @brief Run the classical nonlinear rollout
@@ -329,7 +348,7 @@ class SolverFDDP : public SolverAbstract {
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    */
-  virtual void singleShootForwardPass(const double steplength);
+  virtual void singleShootForwardPass(const Scalar steplength);
 
   /**
    * @brief Increase the state and control regularization values by a
@@ -361,81 +380,81 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @brief Return the set of step lengths using by the line-search procedure
    */
-  const std::vector<double>& get_alphas() const;
+  const std::vector<Scalar>& get_alphas() const;
 
   /**
    * @brief Return the regularization factor used to increase the damping value
    */
-  double get_reg_incfactor() const;
+  Scalar get_reg_incfactor() const;
 
   /**
    * @brief Return the regularization factor used to decrease the damping value
    */
-  double get_reg_decfactor() const;
+  Scalar get_reg_decfactor() const;
 
   /**
    * @brief Return the minimum regularization value
    */
-  double get_reg_min() const;
+  Scalar get_reg_min() const;
 
   /**
    * @brief Return the maximum regularization value
    */
-  double get_reg_max() const;
+  Scalar get_reg_max() const;
 
   /**
    * @brief Return the tolerance of the expected gradient used for testing the
    * step
    */
-  double get_th_grad() const;
+  Scalar get_th_grad() const;
 
   /**
    * @brief Return the step-length threshold used to decrease regularization
    */
-  double get_th_stepdec() const;
+  Scalar get_th_stepdec() const;
 
   /**
    * @brief Return the step-length threshold used to increase regularization
    */
-  double get_th_stepinc() const;
+  Scalar get_th_stepinc() const;
 
   /**
    * @brief Return the minimum improvement threshold used to increase
    * regularization
    */
-  double get_th_minimprove() const;
+  Scalar get_th_minimprove() const;
 
   /**
    * @brief Return the threshold used for accepting step along ascent direction
    */
-  double get_th_acceptnegstep() const;
+  Scalar get_th_acceptnegstep() const;
 
   /**
    * @brief Return the threshold used for accepting minimum steps
    */
-  double get_th_acceptminstep() const;
+  Scalar get_th_acceptminstep() const;
 
   /**
    * @brief Return the rho parameter used in the merit function
    */
-  double get_rho() const;
+  Scalar get_rho() const;
 
   /**
    * @brief Return the threshold for switching to feasibility
    */
-  double get_th_minfeas() const;
+  Scalar get_th_minfeas() const;
 
   /**
    * @brief Return the estimated penalty parameter that balances relative
    * contribution of the cost function and equality constraints
    */
-  double get_upsilon() const;
+  Scalar get_upsilon() const;
 
   /**
    * @brief Return the upsilon decresing factor used to estimate to balance
    * optimality and feasibility
    */
-  double get_upsilon_decfactor() const;
+  Scalar get_upsilon_decfactor() const;
 
   /**
    * @brief Return the zero-upsilon label
@@ -453,112 +472,112 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Vxx() const;
+  const std::vector<MatrixXs>& get_Vxx() const;
 
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{x}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Vx() const;
+  const std::vector<VectorXs>& get_Vx() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{xx}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxx() const;
+  const std::vector<MatrixXs>& get_Qxx() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{xu}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxu() const;
+  const std::vector<MatrixXs>& get_Qxu() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{uu}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Quu() const;
+  const std::vector<MatrixXs>& get_Quu() const;
 
   /**
    * @brief Return the Jacobian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{x}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Qx() const;
+  const std::vector<VectorXs>& get_Qx() const;
 
   /**
    * @brief Return the Jacobian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{u}_s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_Qu() const;
+  const std::vector<VectorXs>& get_Qu() const;
 
   /**
    * @brief Return the feedback gains \f$\mathbf{K}_{s}\f$
    */
-  const std::vector<MatrixXdRowMajor>& get_K() const;
+  const std::vector<MatrixXsRowMajor>& get_K() const;
 
   /**
    * @brief Return the feedforward gains \f$\mathbf{k}_{s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_k() const;
+  const std::vector<VectorXs>& get_k() const;
 
   /**
    * @brief Return the linear update in \f$\delta\mathbf{x}_s\f$
    */
-  const std::vector<Eigen::VectorXd>& get_dxs() const;
+  const std::vector<VectorXs>& get_dxs() const;
 
   /**
    * @brief Return the feedforward gains \f$\delta\mathbf{u}_s\f$
    */
-  const std::vector<Eigen::VectorXd>& get_dus() const;
+  const std::vector<VectorXs>& get_dus() const;
 
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xc}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Vxc() const;
+  const std::vector<MatrixXs>& get_Vxc() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{xc}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Qxc() const;
+  const std::vector<MatrixXs>& get_Qxc() const;
 
   /**
    * @brief Return the Hessian of the Hamiltonian function
    * \f$\mathbf{Q}_{\mathbf{uc}_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Quc() const;
+  const std::vector<MatrixXs>& get_Quc() const;
 
   /**
    * @brief Return the linear update in \f$\delta\mathbf{X}_{c_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_dXc() const;
+  const std::vector<MatrixXs>& get_dXc() const;
 
   /**
    * @brief Return the linear update in \f$\delta\mathbf{U}_{c_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_dUc() const;
+  const std::vector<MatrixXs>& get_dUc() const;
 
   /**
    * @brief Return the feedforward gains \f$\mathbf{K}_{c_s}\f$
    */
-  const std::vector<Eigen::MatrixXd>& get_Kc() const;
+  const std::vector<MatrixXs>& get_Kc() const;
 
   /**
    * @brief Return the Jacobian of the terminal constraint gains
    * \f$\delta\mathbf{H}_{c}\f$
    */
-  const Eigen::MatrixXd& get_dHc() const;
+  const MatrixXs& get_dHc() const;
 
   /**
    * @brief Return the bias term of the terminal constraint gains
    * \f$\mathbf{h}_{c}\f$
    */
-  const Eigen::VectorXd& get_hc() const;
+  const VectorXs& get_hc() const;
 
   /**
    * @brief Return the next terminal-constraint multiplier
    * \f$\boldsymbol{\beta}^+\f$
    */
-  const Eigen::VectorXd& get_beta_plus() const;
+  const VectorXs& get_beta_plus() const;
 
   /**
    * @brief Set the dynamic solver used for handling the dynamics constraints
@@ -583,75 +602,75 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @brief Modify the set of step lengths using by the line-search procedure
    */
-  void set_alphas(const std::vector<double>& alphas);
+  void set_alphas(const std::vector<Scalar>& alphas);
 
   /**
    * @brief Modify the regularization factor used to increase the damping value
    */
-  void set_reg_incfactor(const double reg_factor);
+  void set_reg_incfactor(const Scalar reg_factor);
 
   /**
    * @brief Modify the regularization factor used to decrease the damping value
    */
-  void set_reg_decfactor(const double reg_factor);
+  void set_reg_decfactor(const Scalar reg_factor);
 
   /**
    * @brief Modify the minimum regularization value
    */
-  void set_reg_min(const double regmin);
+  void set_reg_min(const Scalar regmin);
 
   /**
    * @brief Modify the maximum regularization value
    */
-  void set_reg_max(const double regmax);
+  void set_reg_max(const Scalar regmax);
 
   /**
    * @brief Modify the tolerance of the expected gradient used for testing the
    * step
    */
-  void set_th_grad(const double th_grad);
+  void set_th_grad(const Scalar th_grad);
 
   /**
    * @brief Modify the step-length threshold used to decrease regularization
    */
-  void set_th_stepdec(const double th_step);
+  void set_th_stepdec(const Scalar th_step);
 
   /**
    * @brief Modify the step-length threshold used to increase regularization
    */
-  void set_th_stepinc(const double th_step);
+  void set_th_stepinc(const Scalar th_step);
 
   /**
    * @brief Modify the minimum improvement threshold used to increase
    * regularization
    */
-  void set_th_minimprove(const double th_step);
+  void set_th_minimprove(const Scalar th_step);
 
   /**
    * @brief Modify the threshold used for accepting step along ascent direction
    */
-  void set_th_acceptnegstep(const double th_acceptnegstep);
+  void set_th_acceptnegstep(const Scalar th_acceptnegstep);
 
   /**
    * @brief Modify the threshold used for accepting minimum steps
    */
-  void set_th_acceptminstep(const double th_acceptminstep);
+  void set_th_acceptminstep(const Scalar th_acceptminstep);
 
   /**
    * @brief Modify the rho parameter used in the merit function
    */
-  void set_rho(const double rho);
+  void set_rho(const Scalar rho);
 
   /**
    * @brief Modify the threshold for switching to feasibility
    */
-  void set_th_minfeas(const double th_minfeas);
+  void set_th_minfeas(const Scalar th_minfeas);
 
   /**
    * @brief Modify the upsilon decresing factor used to estimate to balance
    * optimality and feasibility
    */
-  void set_upsilon_decfactor(const double th_step);
+  void set_upsilon_decfactor(const Scalar th_step);
 
   /**
    * @brief Modify the zero-upsilon label
@@ -670,12 +689,12 @@ class SolverFDDP : public SolverAbstract {
   /**
    * @copybrief SolverAbstract::resizeRunningData
    */
-  virtual void resizeRunningData();
+  virtual void resizeRunningData() override;
 
   /**
    * @copybrief SolverAbstract::resizeTerminalData
    */
-  virtual void resizeTerminalData();
+  virtual void resizeTerminalData() override;
 
   /**
    * @brief compute the multiplier associated to the terminal constraint
@@ -684,134 +703,166 @@ class SolverFDDP : public SolverAbstract {
 
   DynamicsSolverType dyn_solver_;   //!< Type of dynamics solver
   EqualitySolverType term_solver_;  //!< Type of terminal solver
-  std::vector<double>
+  std::vector<Scalar>
       alphas_;  //!< Set of step lengths using by the line-search procedure
-  double reg_incfactor_;  //!< Regularization factor used to increase the
+  Scalar reg_incfactor_;  //!< Regularization factor used to increase the
                           //!< damping value
-  double reg_decfactor_;  //!< Regularization factor used to decrease the
+  Scalar reg_decfactor_;  //!< Regularization factor used to decrease the
                           //!< damping value
-  double reg_min_;        //!< Minimum allowed regularization value
-  double reg_max_;        //!< Maximum allowed regularization value
-  double th_grad_;  //!< Tolerance of the expected gradient used for testing the
+  Scalar reg_min_;        //!< Minimum allowed regularization value
+  Scalar reg_max_;        //!< Maximum allowed regularization value
+  Scalar th_grad_;  //!< Tolerance of the expected gradient used for testing the
                     //!< step
-  double th_noimprovement_;  //!< Threshold used to accept steps that cannot be
+  Scalar th_noimprovement_;  //!< Threshold used to accept steps that cannot be
                              //!< be improved due to numerical errors
-  double
+  Scalar
       th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  double
+  Scalar
       th_stepinc_;  //!< Step-length threshold used to increase regularization
-  double th_minimprove_;     //!< Minimum improvement threshold used in the
+  Scalar th_minimprove_;     //!< Minimum improvement threshold used in the
                              //!< regularization scheme
-  double th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
+  Scalar th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
                              //!< direction
-  double th_acceptminstep_;  //!< Threshold used for accepting step along with a
+  Scalar th_acceptminstep_;  //!< Threshold used for accepting step along with a
                              //!< minimum length
-  double rho_;         //!< Parameter used in the merit function to predict the
+  Scalar rho_;         //!< Parameter used in the merit function to predict the
                        //!< expected reduction
-  double th_minfeas_;  //!< Threshold for switching to feasibility
-  double
+  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
+  Scalar
       upsilon_;  //!< Estimated penalty parameter that balances relative
                  //!< contribution of the cost function and equality constraints
-  double upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
+  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
                               //!< decrease its value
   bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
                        //!< (upsilon) to zero when solve is called.
   std::vector<std::size_t> Ts_;  //!< Index that describes the hybrid shoots
 
   // allocate data
-  double dImpr_;  //!< Reduction in the iteration improvement (i.e., maximum
-                  //!< between cost and merit values)
-  Eigen::MatrixXd
-      Vxx_tmp_;  //!< Temporary variable for ensuring symmetry of Vxx
-  std::vector<Eigen::MatrixXd>
+  Scalar dImpr_;      //!< Reduction in the iteration improvement (i.e., maximum
+                      //!< between cost and merit values)
+  MatrixXs Vxx_tmp_;  //!< Temporary variable for ensuring symmetry of Vxx
+  std::vector<MatrixXs>
       Vxx_;  //!< Hessian of the Value function \f$\mathbf{V_{xx}}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Vxx_f_;  //!< Hessian of the Value function times the gap
                //!< \f$\mathbf{V_{xx} \bar{f}}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Vx_;  //!< Gradient of the Value function \f$\mathbf{V_x}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Lxx_dx_;  //!< Second-order change of the cost function
                 //!< \f$\boldsymbol{\ell}_{\mathbf{{xx}}}\delta\mathbf{x}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Luu_du_;  //!< Second-order change of the cost function
                 //!< \f$\boldsymbol{\ell}_{\mathbf{{uu}}}\delta\mathbf{u}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Lxu_du_;  //!< Second-order change of the cost function
                 //!< \f$\boldsymbol{\ell}_{\mathbf{{xu}}}\delta\mathbf{u}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Qxx_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xx}}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Qxu_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xu}}\f$
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Quu_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{uu}}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Qx_;  //!< Gradient of the Hamiltonian \f$\mathbf{Q_x}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<VectorXs>
       Qu_;  //!< Gradient of the Hamiltonian \f$\mathbf{Q_u}\f$
-  std::vector<MatrixXdRowMajor> K_;  //!< Feedback gains \f$\mathbf{K}\f$
-  std::vector<Eigen::VectorXd> k_;   //!< Feed-forward terms \f$\mathbf{l}\f$
-  std::vector<Eigen::VectorXd>
+  std::vector<MatrixXsRowMajor> K_;  //!< Feedback gains \f$\mathbf{K}\f$
+  std::vector<VectorXs> k_;          //!< Feed-forward terms \f$\mathbf{l}\f$
+  std::vector<VectorXs>
       dx_;  //!< State error during the roll-out/forward-pass (size T)
-  std::vector<Eigen::VectorXd> dxs_;  //!< Linear state direction (size T + 1)
-  std::vector<Eigen::VectorXd> dus_;  //!< Linear control direction (size T)
-  std::vector<MatrixXdRowMajor>
+  std::vector<VectorXs> dxs_;  //!< Linear state direction (size T + 1)
+  std::vector<VectorXs> dus_;  //!< Linear control direction (size T)
+  std::vector<MatrixXsRowMajor>
       FxTVxx_p_;  //!< Store the value of
                   //!< \f$\mathbf{f_x}^T\mathbf{V_{xx}}^{'}\f$
-  std::vector<MatrixXdRowMajor>
-      FuTVxx_p_;             //!< Store the values of
-                             //!< \f$\mathbf{f_u}^T\mathbf{V_{xx}}^{'}\f$
-                             //!< per each running node
-  Eigen::VectorXd fTVxx_p_;  //!< Store the value of
-                             //!< \f$\mathbf{\bar{f}}^T\mathbf{V_{xx}}^{'}\f$
-  std::vector<Eigen::LLT<Eigen::MatrixXd> > Quu_llt_;  //!< Cholesky LLT solver
-  std::vector<Eigen::VectorXd>
+  std::vector<MatrixXsRowMajor>
+      FuTVxx_p_;      //!< Store the values of
+                      //!< \f$\mathbf{f_u}^T\mathbf{V_{xx}}^{'}\f$
+                      //!< per each running node
+  VectorXs fTVxx_p_;  //!< Store the value of
+                      //!< \f$\mathbf{\bar{f}}^T\mathbf{V_{xx}}^{'}\f$
+  std::vector<Eigen::LLT<MatrixXs> > Quu_llt_;  //!< Cholesky LLT solver
+  std::vector<VectorXs>
       Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each
               //!< running node
 
   std::size_t nh_T_;      //!< Dimension of terminal constraints
   std::size_t dHc_rank_;  //!< Rank of the Jacobian of the terminal constraint
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Vxc_;  //!< Gradient of the Value function \f$\mathbf{V_{xc}}\f$
              //!< associated to the terminal constraint
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Qxc_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{xc}}\f$ associated to
              //!< the terminal constraint
-  std::vector<Eigen::MatrixXd>
+  std::vector<MatrixXs>
       Quc_;  //!< Hessian of the Hamiltonian \f$\mathbf{Q_{uc}}\f$ associated to
              //!< the terminal constraint
-  std::vector<Eigen::MatrixXd> dXc_;  //!< Linear state direction (size T + 1)
-                                      //!< associated to the terminal constraint
-  std::vector<Eigen::MatrixXd> dUc_;  //!< Linear control direction (size T)
-                                      //!< associated to the terminal constraint
-  std::vector<Eigen::MatrixXd> Kc_;   //!< Feed-forward terms \f$\mathbf{K_c}\f$
-                                      //!< associated to the terminal constraint
-  Eigen::MatrixXd dHc_;               //!< Jacobian of the terminal constraint
-  Eigen::VectorXd hc_;                //!< Bias term of the terminal constraint
-  Eigen::MatrixXd YZc_;
-  Eigen::VectorXd Yhc_;
-  Eigen::MatrixXd dHcY_;
-  Eigen::MatrixXd YdHcY_;
-  Eigen::VectorXd
-      beta_plus_;  //!< Next value of the terminal-constraint multiplier
-  Eigen::LLT<Eigen::MatrixXd>
+  std::vector<MatrixXs> dXc_;  //!< Linear state direction (size T + 1)
+                               //!< associated to the terminal constraint
+  std::vector<MatrixXs> dUc_;  //!< Linear control direction (size T)
+                               //!< associated to the terminal constraint
+  std::vector<MatrixXs> Kc_;   //!< Feed-forward terms \f$\mathbf{K_c}\f$
+                               //!< associated to the terminal constraint
+  MatrixXs dHc_;               //!< Jacobian of the terminal constraint
+  VectorXs hc_;                //!< Bias term of the terminal constraint
+  MatrixXs YZc_;
+  VectorXs Yhc_;
+  MatrixXs dHcY_;
+  MatrixXs YdHcY_;
+  VectorXs beta_plus_;  //!< Next value of the terminal-constraint multiplier
+  Eigen::LLT<MatrixXs>
       YdHcY_llt_;  //!< Cholesky LLT solver for the terminal constraint
-  Eigen::FullPivLU<Eigen::MatrixXd>
+  Eigen::FullPivLU<MatrixXs>
       dHc_lu_;  //!< Full-pivot LU solvers used for computing the span and
                 //!< nullspace matrices of the terminal constraint
-  Eigen::ColPivHouseholderQR<Eigen::MatrixXd>
+  Eigen::ColPivHouseholderQR<MatrixXs>
       dHc_qr_;  //!< Column-pivot QR solvers used for computing the span and
                 //!< nullspace matrices of the terminal constraint
 
   DEPRECATED(
       "Do not use this member",
-      double dg_;)  //!< Internal data for computing the expected improvement
+      Scalar dg_;)  //!< Internal data for computing the expected improvement
   DEPRECATED(
       "Do not use this member",
-      double dq_;)  //!< Internal data for computing the expected improvement
+      Scalar dq_;)  //!< Internal data for computing the expected improvement
   DEPRECATED(
       "Do not use this member",
-      double dv_;)  //!< Internal data for computing the expected improvement
+      Scalar dv_;)  //!< Internal data for computing the expected improvement
+
+  using SolverAbstract::callbacks_;
+  using SolverAbstract::cost_;
+  using SolverAbstract::cost_try_;
+  using SolverAbstract::d_;
+  using SolverAbstract::dfeas_;
+  using SolverAbstract::dPhi_;
+  using SolverAbstract::dPhiexp_;
+  using SolverAbstract::dreg_;
+  using SolverAbstract::DV_;
+  using SolverAbstract::dV_;
+  using SolverAbstract::dVexp_;
+  using SolverAbstract::dVexp_full_;
+  using SolverAbstract::feas_;
+  using SolverAbstract::ffeas_;
+  using SolverAbstract::ffeas_try_;
+  using SolverAbstract::fs_;
+  using SolverAbstract::fs_try_;
+  using SolverAbstract::gfeas_;
+  using SolverAbstract::gfeas_try_;
+  using SolverAbstract::hfeas_;
+  using SolverAbstract::hfeas_try_;
+  using SolverAbstract::iter_;
+  using SolverAbstract::merit_;
+  using SolverAbstract::preg_;
+  using SolverAbstract::problem_;
+  using SolverAbstract::steplength_;
+  using SolverAbstract::stop_;
+  using SolverAbstract::th_acceptstep_;
+  using SolverAbstract::th_stop_;
+  using SolverAbstract::us_;
+  using SolverAbstract::us_try_;
+  using SolverAbstract::xs_;
+  using SolverAbstract::xs_try_;
 
  private:
   bool acceptstep_;
@@ -819,5 +870,10 @@ class SolverFDDP : public SolverAbstract {
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solvers/fddp.hxx"
 
 #endif  // CROCODDYL_CORE_SOLVERS_FDDP_HPP_

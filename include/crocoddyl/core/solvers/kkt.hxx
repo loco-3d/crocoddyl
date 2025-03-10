@@ -1,42 +1,39 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft,
-//                          University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/solvers/kkt.hpp"
-
 namespace crocoddyl {
 
-SolverKKT::SolverKKT(std::shared_ptr<ShootingProblem> problem)
+template <typename Scalar>
+SolverKKTTpl<Scalar>::SolverKKTTpl(std::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
-      reg_incfactor_(10.),
-      reg_decfactor_(10.),
-      reg_min_(1e-9),
-      reg_max_(1e9),
-      cost_try_(0.),
-      th_grad_(1e-12),
+      reg_incfactor_(Scalar(10.)),
+      reg_decfactor_(Scalar(10.)),
+      reg_min_(Scalar(1e-9)),
+      reg_max_(Scalar(1e9)),
+      th_grad_(Scalar(1e-12)),
       was_feasible_(false) {
   allocateData();
   const std::size_t n_alphas = 10;
-  preg_ = 0.;
-  dreg_ = 0.;
+  preg_ = Scalar(0.);
+  dreg_ = Scalar(0.);
   alphas_.resize(n_alphas);
   for (std::size_t n = 0; n < n_alphas; ++n) {
-    alphas_[n] = 1. / pow(2., (double)n);
+    alphas_[n] = Scalar(1.) / pow(Scalar(2.), (Scalar)n);
   }
 }
 
-SolverKKT::~SolverKKT() {}
-
-bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
-                      const std::vector<Eigen::VectorXd>& init_us,
-                      const std::size_t maxiter, const bool is_feasible,
-                      const double) {
+template <typename Scalar>
+bool SolverKKTTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
+                                 const std::vector<VectorXs>& init_us,
+                                 const std::size_t maxiter,
+                                 const bool is_feasible, const Scalar) {
   setCandidate(init_xs, init_us, is_feasible);
   bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -53,9 +50,8 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
       }
       break;
     }
-
     expectedImprovement();
-    for (std::vector<double>::const_iterator it = alphas_.begin();
+    for (typename std::vector<Scalar>::const_iterator it = alphas_.begin();
          it != alphas_.end(); ++it) {
       steplength_ = *it;
       try {
@@ -63,7 +59,8 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
       } catch (std::exception& e) {
         continue;
       }
-      dVexp_ = steplength_ * DV_[1] + 0.5 * steplength_ * steplength_ * DV_[2];
+      dVexp_ = steplength_ * DV_[1] +
+               Scalar(0.5) * steplength_ * steplength_ * DV_[2];
       if (DV_[1] < th_grad_ || !is_feasible_ || dV_ > th_acceptstep_ * dVexp_) {
         was_feasible_ = is_feasible_;
         setCandidate(xs_try_, us_try_, true);
@@ -86,15 +83,16 @@ bool SolverKKT::solve(const std::vector<Eigen::VectorXd>& init_xs,
   return false;
 }
 
-void SolverKKT::computeDirection(const bool recalc) {
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::computeDirection(const bool recalc) {
   const std::size_t T = problem_->get_T();
   if (recalc) {
     calcDiff();
   }
   computePrimalDual();
-  const Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> p_x =
+  const Eigen::VectorBlock<VectorXs, Eigen::Dynamic> p_x =
       primal_.segment(0, ndx_);
-  const Eigen::VectorBlock<Eigen::VectorXd, Eigen::Dynamic> p_u =
+  const Eigen::VectorBlock<VectorXs, Eigen::Dynamic> p_u =
       primal_.segment(ndx_, nu_);
 
   std::size_t ix = 0;
@@ -116,13 +114,13 @@ void SolverKKT::computeDirection(const bool recalc) {
   lambdas_.back() = dual_.segment(ix, ndxi);
 }
 
-double SolverKKT::tryStep(const double steplength) {
+template <typename Scalar>
+Scalar SolverKKTTpl<Scalar>::tryStep(const Scalar steplength) {
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
-
     m->get_state()->integrate(xs_[t], steplength * dxs_[t], xs_try_[t]);
     if (m->get_nu() != 0) {
       us_try_[t] = us_[t];
@@ -135,7 +133,8 @@ double SolverKKT::tryStep(const double steplength) {
   return cost_ - cost_try_;
 }
 
-double SolverKKT::stoppingCriteria() {
+template <typename Scalar>
+Scalar SolverKKTTpl<Scalar>::stoppingCriteria() {
   const std::size_t T = problem_->get_T();
   std::size_t ix = 0;
   std::size_t iu = 0;
@@ -147,7 +146,6 @@ double SolverKKT::stoppingCriteria() {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
     const std::size_t nui = models[t]->get_nu();
-
     dF.segment(ix, ndxi) = lambdas_[t];
     dF.segment(ix, ndxi).noalias() -= d->Fx.transpose() * lambdas_[t + 1];
     dF.segment(ndx_ + iu, nui).noalias() = -lambdas_[t + 1].transpose() * d->Fu;
@@ -162,7 +160,9 @@ double SolverKKT::stoppingCriteria() {
   return stop_;
 }
 
-const Eigen::Vector2d& SolverKKT::expectedImprovement() {
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector2s&
+SolverKKTTpl<Scalar>::expectedImprovement() {
   DV_.setZero();
   // -grad^T.primal
   DV_[1] = -kktref_.segment(0, ndx_ + nu_).dot(primal_);
@@ -178,34 +178,64 @@ const Eigen::Vector2d& SolverKKT::expectedImprovement() {
 #pragma GCC diagnostic pop
 }
 
-const Eigen::MatrixXd& SolverKKT::get_kkt() const { return kkt_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::MatrixXs& SolverKKTTpl<Scalar>::get_kkt()
+    const {
+  return kkt_;
+}
 
-const Eigen::VectorXd& SolverKKT::get_kktref() const { return kktref_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs& SolverKKTTpl<Scalar>::get_kktref()
+    const {
+  return kktref_;
+}
 
-const Eigen::VectorXd& SolverKKT::get_primaldual() const { return primaldual_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::VectorXs&
+SolverKKTTpl<Scalar>::get_primaldual() const {
+  return primaldual_;
+}
 
-const std::vector<Eigen::VectorXd>& SolverKKT::get_dxs() const { return dxs_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverKKTTpl<Scalar>::get_dxs() const {
+  return dxs_;
+}
 
-const std::vector<Eigen::VectorXd>& SolverKKT::get_dus() const { return dus_; }
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverKKTTpl<Scalar>::get_dus() const {
+  return dus_;
+}
 
-const std::vector<Eigen::VectorXd>& SolverKKT::get_lambdas() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverKKTTpl<Scalar>::get_lambdas() const {
   return lambdas_;
 }
 
-std::size_t SolverKKT::get_nx() const { return nx_; }
+template <typename Scalar>
+std::size_t SolverKKTTpl<Scalar>::get_nx() const {
+  return nx_;
+}
 
-std::size_t SolverKKT::get_ndx() const { return ndx_; }
+template <typename Scalar>
+std::size_t SolverKKTTpl<Scalar>::get_ndx() const {
+  return ndx_;
+}
 
-std::size_t SolverKKT::get_nu() const { return nu_; }
+template <typename Scalar>
+std::size_t SolverKKTTpl<Scalar>::get_nu() const {
+  return nu_;
+}
 
-double SolverKKT::calcDiff() {
+template <typename Scalar>
+Scalar SolverKKTTpl<Scalar>::calcDiff() {
   cost_ = problem_->calc(xs_, us_);
   cost_ = problem_->calcDiff(xs_, us_);
-
   // offset on constraint xnext = f(x,u) due to x0 = ref.
   const std::size_t cx0 =
       problem_->get_runningModels()[0]->get_state()->get_ndx();
-
   std::size_t ix = 0;
   std::size_t iu = 0;
   const std::size_t T = problem_->get_T();
@@ -217,13 +247,11 @@ double SolverKKT::calcDiff() {
         problem_->get_runningDatas()[t];
     const std::size_t ndxi = m->get_state()->get_ndx();
     const std::size_t nui = m->get_nu();
-
     // Computing the gap at the initial state
     if (t == 0) {
       m->get_state()->diff(problem_->get_x0(), xs_[0],
                            kktref_.segment(ndx_ + nu_, ndxi));
     }
-
     // Filling KKT matrix
     kkt_.block(ix, ix, ndxi, ndxi) = d->Lxx;
     kkt_.block(ix, ndx_ + iu, ndxi, nui) = d->Lxu;
@@ -231,13 +259,11 @@ double SolverKKT::calcDiff() {
     kkt_.block(ndx_ + iu, ndx_ + iu, nui, nui) = d->Luu;
     kkt_.block(ndx_ + nu_ + cx0 + ix, ix, ndxi, ndxi) = -d->Fx;
     kkt_.block(ndx_ + nu_ + cx0 + ix, ndx_ + iu, ndxi, nui) = -d->Fu;
-
     // Filling KKT vector
     kktref_.segment(ix, ndxi) = d->Lx;
     kktref_.segment(ndx_ + iu, nui) = d->Lu;
     m->get_state()->diff(d->xnext, xs_[t + 1],
                          kktref_.segment(ndx_ + nu_ + cx0 + ix, ndxi));
-
     ix += ndxi;
     iu += nui;
   }
@@ -251,13 +277,15 @@ double SolverKKT::calcDiff() {
   return cost_;
 }
 
-void SolverKKT::computePrimalDual() {
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::computePrimalDual() {
   primaldual_ = kkt_.lu().solve(-kktref_);
   primal_ = primaldual_.segment(0, ndx_ + nu_);
   dual_ = primaldual_.segment(ndx_ + nu_, ndx_);
 }
 
-void SolverKKT::increaseRegularization() {
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::increaseRegularization() {
   preg_ *= reg_incfactor_;
   if (preg_ > reg_max_) {
     preg_ = reg_max_;
@@ -265,7 +293,8 @@ void SolverKKT::increaseRegularization() {
   dreg_ = preg_;
 }
 
-void SolverKKT::decreaseRegularization() {
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::decreaseRegularization() {
   preg_ /= reg_decfactor_;
   if (preg_ < reg_min_) {
     preg_ = reg_min_;
@@ -273,14 +302,14 @@ void SolverKKT::decreaseRegularization() {
   dreg_ = preg_;
 }
 
-void SolverKKT::allocateData() {
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::allocateData() {
   const std::size_t T = problem_->get_T();
   dxs_.resize(T + 1);
   dus_.resize(T);
   lambdas_.resize(T + 1);
   xs_try_.resize(T + 1);
   us_try_.resize(T);
-
   nx_ = 0;
   ndx_ = 0;
   nu_ = 0;
@@ -293,13 +322,13 @@ void SolverKKT::allocateData() {
     if (t == 0) {
       xs_try_[t] = problem_->get_x0();
     } else {
-      xs_try_[t] = Eigen::VectorXd::Constant(nx, NAN);
+      xs_try_[t] = VectorXs::Constant(nx, NAN);
     }
     const std::size_t nu = model->get_nu();
-    us_try_[t] = Eigen::VectorXd::Constant(nu, NAN);
-    dxs_[t] = Eigen::VectorXd::Zero(ndx);
-    dus_[t] = Eigen::VectorXd::Zero(nu);
-    lambdas_[t] = Eigen::VectorXd::Zero(ndx);
+    us_try_[t] = VectorXs::Zero(nu);
+    dxs_[t] = VectorXs::Zero(ndx);
+    dus_[t] = VectorXs::Zero(nu);
+    lambdas_[t] = VectorXs::Zero(ndx);
     nx_ += nx;
     ndx_ += ndx;
     nu_ += nu;
@@ -307,9 +336,8 @@ void SolverKKT::allocateData() {
   nx_ += nx;
   ndx_ += ndx;
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
-  dxs_.back() = Eigen::VectorXd::Zero(ndx);
-  lambdas_.back() = Eigen::VectorXd::Zero(ndx);
-
+  dxs_.back() = VectorXs::Zero(ndx);
+  lambdas_.back() = VectorXs::Zero(ndx);
   // Set dimensions for kkt matrix and kkt_ref vector
   kkt_.resize(2 * ndx_ + nu_, 2 * ndx_ + nu_);
   kkt_.setZero();

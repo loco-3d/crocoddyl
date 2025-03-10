@@ -1,45 +1,41 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#include <omp.h>
-#endif  // CROCODDYL_WITH_MULTITHREADING
-
-#include "crocoddyl/core/solver-base.hpp"
-
 namespace crocoddyl {
 
-SolverAbstract::SolverAbstract(std::shared_ptr<ShootingProblem> problem)
+template <typename Scalar>
+SolverAbstractTpl<Scalar>::SolverAbstractTpl(
+    std::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
-      th_acceptstep_(0.1),
-      th_stop_(1e-9),
-      th_gaptol_(1e-16),
+      th_acceptstep_(Scalar(0.1)),
+      th_stop_(Scalar(1e-9)),
+      th_gaptol_(Scalar(1e-16)),
       feasnorm_(LInf),
       iter_(0),
-      tmp_feas_(0.) {
+      tmp_feas_(Scalar(0.)) {
   allocateData();
 }
 
-SolverAbstract::~SolverAbstract() {}
-
-void SolverAbstract::resizeData() {
-  START_PROFILER("SolverAbstract::resizeData");
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::resizeData() {
+  START_PROFILER("SolverAbstractTpl<Scalar>::resizeData");
   resizeRunningData();
   resizeTerminalData();
-  STOP_PROFILER("SolverAbstract::resizeData");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::resizeData");
 }
 
-void SolverAbstract::resizeRunningData() {
-  START_PROFILER("SolverAbstract::resizeRunningData");
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::resizeRunningData() {
+  START_PROFILER("SolverAbstractTpl<Scalar>::resizeRunningData");
   const std::size_t T = problem_->get_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -50,37 +46,41 @@ void SolverAbstract::resizeRunningData() {
     g_adj_[t].conservativeResize(ng);
   }
   g_adj_.back().conservativeResize(ng_T);
-  STOP_PROFILER("SolverAbstract::resizeRunningData");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::resizeRunningData");
 }
 
-void SolverAbstract::resizeTerminalData() {}
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::resizeTerminalData() {}
 
-double SolverAbstract::computeFeasibility(
-    const std::vector<Eigen::VectorXd>& fs) {
-  tmp_feas_ = 0.;
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::computeFeasibility(
+    const std::vector<VectorXs>& fs) {
+  tmp_feas_ = Scalar(0.);
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < fs.size(); ++t) {
-        tmp_feas_ = std::max(tmp_feas_, fs[t].lpNorm<Eigen::Infinity>());
+        tmp_feas_ =
+            std::max(tmp_feas_, fs[t].template lpNorm<Eigen::Infinity>());
       }
       break;
     case L1:
       for (std::size_t t = 0; t < fs.size(); ++t) {
-        tmp_feas_ += fs_[t].lpNorm<1>();
+        tmp_feas_ += fs_[t].template lpNorm<1>();
       }
       break;
   }
   return tmp_feas_;
 }
 
-double SolverAbstract::computeDynamicFeasibility() {
-  START_PROFILER("SolverAbstract::computeDynamicFeasibility");
-  tmp_feas_ = 0.;
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::computeDynamicFeasibility() {
+  START_PROFILER("SolverAbstractTpl<Scalar>::computeDynamicFeasibility");
+  tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
-  const Eigen::VectorXd& x0 = problem_->get_x0();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const VectorXs& x0 = problem_->get_x0();
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
 
   models[0]->get_state()->diff(xs_[0], x0, fs_[0]);
@@ -94,29 +94,32 @@ double SolverAbstract::computeDynamicFeasibility() {
   }
   switch (feasnorm_) {
     case LInf:
-      tmp_feas_ = std::max(tmp_feas_, fs_[0].lpNorm<Eigen::Infinity>());
+      tmp_feas_ =
+          std::max(tmp_feas_, fs_[0].template lpNorm<Eigen::Infinity>());
       for (std::size_t t = 0; t < T; ++t) {
-        tmp_feas_ = std::max(tmp_feas_, fs_[t + 1].lpNorm<Eigen::Infinity>());
+        tmp_feas_ =
+            std::max(tmp_feas_, fs_[t + 1].template lpNorm<Eigen::Infinity>());
       }
       break;
     case L1:
-      tmp_feas_ = fs_[0].lpNorm<1>();
+      tmp_feas_ = fs_[0].template lpNorm<1>();
       for (std::size_t t = 0; t < T; ++t) {
-        tmp_feas_ += fs_[t + 1].lpNorm<1>();
+        tmp_feas_ += fs_[t + 1].template lpNorm<1>();
       }
       break;
   }
-  STOP_PROFILER("SolverAbstract::computeDynamicFeasibility");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeDynamicFeasibility");
   return tmp_feas_;
 }
 
-double SolverAbstract::computeInequalityFeasibility() {
-  START_PROFILER("SolverAbstract::computeInequalityFeasibility");
-  tmp_feas_ = 0.;
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
+  START_PROFILER("SolverAbstractTpl<Scalar>::computeInequalityFeasibility");
+  tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   switch (feasnorm_) {
     case LInf:
@@ -126,7 +129,8 @@ double SolverAbstract::computeInequalityFeasibility() {
                           ->g.cwiseMax(models[t]->get_g_lb())
                           .cwiseMin(models[t]->get_g_ub());
           tmp_feas_ = std::max(
-              tmp_feas_, (datas[t]->g - g_adj_[t]).lpNorm<Eigen::Infinity>());
+              tmp_feas_,
+              (datas[t]->g - g_adj_[t]).template lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
@@ -135,7 +139,7 @@ double SolverAbstract::computeInequalityFeasibility() {
                 ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
                 .cwiseMin(problem_->get_terminalModel()->get_g_ub());
         tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
-                         .lpNorm<Eigen::Infinity>();
+                         .template lpNorm<Eigen::Infinity>();
       }
       break;
     case L1:
@@ -144,8 +148,8 @@ double SolverAbstract::computeInequalityFeasibility() {
           g_adj_[t] = datas[t]
                           ->g.cwiseMax(models[t]->get_g_lb())
                           .cwiseMin(models[t]->get_g_ub());
-          tmp_feas_ =
-              std::max(tmp_feas_, (datas[t]->g - g_adj_[t]).lpNorm<1>());
+          tmp_feas_ = std::max(tmp_feas_,
+                               (datas[t]->g - g_adj_[t]).template lpNorm<1>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
@@ -153,58 +157,60 @@ double SolverAbstract::computeInequalityFeasibility() {
             problem_->get_terminalData()
                 ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
                 .cwiseMin(problem_->get_terminalModel()->get_g_ub());
-        tmp_feas_ +=
-            (problem_->get_terminalData()->g - g_adj_.back()).lpNorm<1>();
+        tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
+                         .template lpNorm<1>();
       }
       break;
   }
-  STOP_PROFILER("SolverAbstract::computeInequalityFeasibility");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeInequalityFeasibility");
   return tmp_feas_;
 }
 
-double SolverAbstract::computeEqualityFeasibility() {
-  START_PROFILER("SolverAbstract::computeEqualityFeasibility");
-  tmp_feas_ = 0.;
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
+  START_PROFILER("SolverAbstractTpl<Scalar>::computeEqualityFeasibility");
+  tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_nh() > 0) {
-          tmp_feas_ =
-              std::max(tmp_feas_, datas[t]->h.lpNorm<Eigen::Infinity>());
+          tmp_feas_ = std::max(tmp_feas_,
+                               datas[t]->h.template lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_nh_T() > 0) {
-        tmp_feas_ =
-            std::max(tmp_feas_,
-                     problem_->get_terminalData()->h.lpNorm<Eigen::Infinity>());
+        tmp_feas_ = std::max(
+            tmp_feas_,
+            problem_->get_terminalData()->h.template lpNorm<Eigen::Infinity>());
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_nh() > 0) {
-          tmp_feas_ += datas[t]->h.lpNorm<1>();
+          tmp_feas_ += datas[t]->h.template lpNorm<1>();
         }
       }
       if (problem_->get_terminalModel()->get_nh_T() > 0) {
-        tmp_feas_ += problem_->get_terminalData()->h.lpNorm<1>();
+        tmp_feas_ += problem_->get_terminalData()->h.template lpNorm<1>();
       }
       break;
   }
-  STOP_PROFILER("SolverAbstract::computeEqualityFeasibility");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeEqualityFeasibility");
   return tmp_feas_;
 }
 
-void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
-                                  const std::vector<Eigen::VectorXd>& us_warm,
-                                  bool is_feasible) {
-  START_PROFILER("SolverAbstract::setCandidate");
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::setCandidate(
+    const std::vector<VectorXs>& xs_warm, const std::vector<VectorXs>& us_warm,
+    bool is_feasible) {
+  START_PROFILER("SolverAbstractTpl<Scalar>::setCandidate");
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   if (xs_warm.size() == 0) {
     for (std::size_t t = 0; t < T; ++t) {
@@ -245,7 +251,7 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     for (std::size_t t = 0; t < T; ++t) {
       const std::shared_ptr<ActionModelAbstract>& model = models[t];
       const std::size_t nu = model->get_nu();
-      us_[t] = Eigen::VectorXd::Zero(nu);
+      us_[t] = VectorXs::Zero(nu);
     }
   } else {
     if (us_warm.size() != T) {
@@ -268,10 +274,11 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
   is_feasible_ = is_feasible;
-  STOP_PROFILER("SolverAbstract::setCandidate");
+  STOP_PROFILER("SolverAbstractTpl<Scalar>::setCandidate");
 }
 
-void SolverAbstract::allocateData() {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::allocateData() {
   // Guess trajectory
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
@@ -283,7 +290,7 @@ void SolverAbstract::allocateData() {
   fs_.resize(T + 1);
   fs_try_.resize(T + 1);
   g_adj_.resize(T + 1);
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -291,24 +298,24 @@ void SolverAbstract::allocateData() {
     const std::size_t ng = model->get_ng();
     xs_[t] = model->get_state()->zero();
     xs_try_[t] = model->get_state()->zero();
-    us_[t] = Eigen::VectorXd::Zero(nu);
-    us_try_[t] = Eigen::VectorXd::Zero(nu);
-    fs_[t] = Eigen::VectorXd::Zero(ndx);
-    fs_try_[t] = Eigen::VectorXd::Zero(ndx);
-    g_adj_[t] = Eigen::VectorXd::Zero(ng);
+    us_[t] = VectorXs::Zero(nu);
+    us_try_[t] = VectorXs::Zero(nu);
+    fs_[t] = VectorXs::Zero(ndx);
+    fs_try_[t] = VectorXs::Zero(ndx);
+    g_adj_[t] = VectorXs::Zero(ng);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
-  fs_.back() = Eigen::VectorXd::Zero(ndx);
-  fs_try_.back() = Eigen::VectorXd::Zero(ndx);
-  g_adj_.back() = Eigen::VectorXd::Zero(ng_T);
+  fs_.back() = VectorXs::Zero(ndx);
+  fs_try_.back() = VectorXs::Zero(ndx);
+  g_adj_.back() = VectorXs::Zero(ng_T);
   // Cost, merit and convergence
   is_feasible_ = false;
   was_feasible_ = false;
-  cost_ = 0.;
-  cost_try_ = 0.;
-  merit_ = 0.;
-  stop_ = 0.;
+  cost_ = Scalar(0.);
+  cost_try_ = Scalar(0.);
+  merit_ = Scalar(0.);
+  stop_ = Scalar(0.);
   // Expected reduction and improvement
   DV_.setZero();
 #pragma GCC diagnostic push
@@ -316,130 +323,209 @@ void SolverAbstract::allocateData() {
   // TODO: remove d_
   d_.setZero();
 #pragma GCC diagnostic pop
-  dV_ = 0.;
-  dPhi_ = 0.;
-  dVexp_full_ = 0.;
-  dVexp_ = 0.;
-  dPhiexp_ = 0.;
-  dfeas_ = 0.;
+  dV_ = Scalar(0.);
+  dPhi_ = Scalar(0.);
+  dVexp_full_ = Scalar(0.);
+  dVexp_ = Scalar(0.);
+  dPhiexp_ = Scalar(0.);
+  dfeas_ = Scalar(0.);
   // Current and next feasibility
-  feas_ = 0.;
-  ffeas_ = 0.;
-  gfeas_ = 0.;
-  hfeas_ = 0.;
-  ffeas_try_ = 0.;
-  gfeas_try_ = 0.;
-  hfeas_try_ = 0.;
-  tmp_feas_ = 0.;
+  feas_ = Scalar(0.);
+  ffeas_ = Scalar(0.);
+  gfeas_ = Scalar(0.);
+  hfeas_ = Scalar(0.);
+  ffeas_try_ = Scalar(0.);
+  gfeas_try_ = Scalar(0.);
+  hfeas_try_ = Scalar(0.);
+  tmp_feas_ = Scalar(0.);
   // Regularization and step length
-  preg_ = 0.;
-  dreg_ = 0.;
-  steplength_ = 1.;
+  preg_ = Scalar(0.);
+  dreg_ = Scalar(0.);
+  steplength_ = Scalar(1.);
 }
 
-void SolverAbstract::setCallbacks(
-    const std::vector<std::shared_ptr<CallbackAbstract> >& callbacks) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::setCallbacks(
+    const std::vector<std::shared_ptr<CallbackAbstract>>& callbacks) {
   callbacks_ = callbacks;
 }
 
-const std::vector<std::shared_ptr<CallbackAbstract> >&
-SolverAbstract::getCallbacks() const {
+template <typename Scalar>
+const std::vector<std::shared_ptr<CallbackAbstractTpl<Scalar>>>&
+SolverAbstractTpl<Scalar>::getCallbacks() const {
   return callbacks_;
 }
 
-const std::shared_ptr<ShootingProblem>& SolverAbstract::get_problem() const {
+template <typename Scalar>
+const std::shared_ptr<ShootingProblemTpl<Scalar>>&
+SolverAbstractTpl<Scalar>::get_problem() const {
   return problem_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_xs() const {
   return xs_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_us() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_us() const {
   return us_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_fs() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_fs() const {
   return fs_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_xs_try() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_xs_try() const {
   return xs_try_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_us_try() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_us_try() const {
   return us_try_;
 }
 
-const std::vector<Eigen::VectorXd>& SolverAbstract::get_fs_try() const {
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_fs_try() const {
   return fs_try_;
 }
 
-bool SolverAbstract::get_is_feasible() const { return is_feasible_; }
+template <typename Scalar>
+bool SolverAbstractTpl<Scalar>::get_is_feasible() const {
+  return is_feasible_;
+}
 
-double SolverAbstract::get_cost() const { return cost_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_cost() const {
+  return cost_;
+}
 
-double SolverAbstract::get_merit() const { return merit_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_merit() const {
+  return merit_;
+}
 
-double SolverAbstract::get_stop() const { return stop_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_stop() const {
+  return stop_;
+}
 
-const Eigen::Vector3d& SolverAbstract::get_DV() const { return DV_; }
+template <typename Scalar>
+const typename MathBaseTpl<Scalar>::Vector3s&
+SolverAbstractTpl<Scalar>::get_DV() const {
+  return DV_;
+}
 
-double SolverAbstract::get_dV() const { return dV_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dV() const {
+  return dV_;
+}
 
-double SolverAbstract::get_dPhi() const { return dPhi_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dPhi() const {
+  return dPhi_;
+}
 
-double SolverAbstract::get_dVexp() const { return dVexp_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dVexp() const {
+  return dVexp_;
+}
 
-double SolverAbstract::get_dPhiexp() const { return dPhiexp_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dPhiexp() const {
+  return dPhiexp_;
+}
 
-double SolverAbstract::get_dfeas() const { return dfeas_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dfeas() const {
+  return dfeas_;
+}
 
-double SolverAbstract::get_feas() const { return feas_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_feas() const {
+  return feas_;
+}
 
-double SolverAbstract::get_ffeas() const { return ffeas_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_ffeas() const {
+  return ffeas_;
+}
 
-double SolverAbstract::get_gfeas() const { return gfeas_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_gfeas() const {
+  return gfeas_;
+}
 
-double SolverAbstract::get_hfeas() const { return hfeas_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_hfeas() const {
+  return hfeas_;
+}
 
-double SolverAbstract::get_ffeas_try() const { return ffeas_try_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_ffeas_try() const {
+  return ffeas_try_;
+}
 
-double SolverAbstract::get_gfeas_try() const { return gfeas_try_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_gfeas_try() const {
+  return gfeas_try_;
+}
 
-double SolverAbstract::get_hfeas_try() const { return hfeas_try_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_hfeas_try() const {
+  return hfeas_try_;
+}
 
-double SolverAbstract::get_preg() const { return preg_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_preg() const {
+  return preg_;
+}
 
-double SolverAbstract::get_dreg() const { return dreg_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_dreg() const {
+  return dreg_;
+}
 
-DEPRECATED(
-    "Use get_preg for gettting the primal-dual regularization",
-    double SolverAbstract::get_xreg() const { return preg_; })
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_steplength() const {
+  return steplength_;
+}
 
-DEPRECATED(
-    "Use get_preg for gettting the primal-dual regularization",
-    double SolverAbstract::get_ureg() const { return preg_; })
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_th_acceptstep() const {
+  return th_acceptstep_;
+}
 
-double SolverAbstract::get_steplength() const { return steplength_; }
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_th_stop() const {
+  return th_stop_;
+}
 
-double SolverAbstract::get_th_acceptstep() const { return th_acceptstep_; }
+template <typename Scalar>
+FeasibilityNorm SolverAbstractTpl<Scalar>::get_feasnorm() const {
+  return feasnorm_;
+}
 
-double SolverAbstract::get_th_stop() const { return th_stop_; }
+template <typename Scalar>
+std::size_t SolverAbstractTpl<Scalar>::get_iter() const {
+  return iter_;
+}
 
-double SolverAbstract::get_th_gaptol() const { return th_gaptol_; }
-
-FeasibilityNorm SolverAbstract::get_feasnorm() const { return feasnorm_; }
-
-std::size_t SolverAbstract::get_iter() const { return iter_; }
-
-void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_xs(const std::vector<VectorXs>& xs) {
   const std::size_t T = problem_->get_T();
   if (xs.size() != T + 1) {
     throw_pretty("Invalid argument: " << "xs list has to be of length " +
                                              std::to_string(T + 1));
   }
-
   const std::size_t nx = problem_->get_nx();
   for (std::size_t t = 0; t < T; ++t) {
     if (static_cast<std::size_t>(xs[t].size()) != nx) {
@@ -459,14 +545,14 @@ void SolverAbstract::set_xs(const std::vector<Eigen::VectorXd>& xs) {
   xs_ = xs;
 }
 
-void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_us(const std::vector<VectorXs>& us) {
   const std::size_t T = problem_->get_T();
   if (us.size() != T) {
     throw_pretty("Invalid argument: " << "us list has to be of length " +
                                              std::to_string(T));
   }
-
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -481,68 +567,55 @@ void SolverAbstract::set_us(const std::vector<Eigen::VectorXd>& us) {
   us_ = us;
 }
 
-void SolverAbstract::set_preg(const double preg) {
-  if (preg < 0.) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_preg(const Scalar preg) {
+  if (preg < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "preg value has to be positive.");
   }
   preg_ = preg;
 }
 
-void SolverAbstract::set_dreg(const double dreg) {
-  if (dreg < 0.) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_dreg(const Scalar dreg) {
+  if (dreg < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "dreg value has to be positive.");
   }
   dreg_ = dreg;
 }
 
-DEPRECATED(
-    "Use set_preg for gettting the primal-variable regularization",
-    void SolverAbstract::set_xreg(const double xreg) {
-      if (xreg < 0.) {
-        throw_pretty("Invalid argument: " << "xreg value has to be positive.");
-      }
-      xreg_ = xreg;
-      preg_ = xreg;
-    })
-
-DEPRECATED(
-    "Use set_preg for gettting the primal-variable regularization",
-    void SolverAbstract::set_ureg(const double ureg) {
-      if (ureg < 0.) {
-        throw_pretty("Invalid argument: " << "ureg value has to be positive.");
-      }
-      ureg_ = ureg;
-      preg_ = ureg;
-    })
-
-void SolverAbstract::set_th_acceptstep(const double th_acceptstep) {
-  if (0. >= th_acceptstep || th_acceptstep > 1) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_th_acceptstep(const Scalar th_acceptstep) {
+  if (Scalar(0.) >= th_acceptstep || th_acceptstep > Scalar(1.)) {
     throw_pretty(
         "Invalid argument: " << "th_acceptstep value should between 0 and 1.");
   }
   th_acceptstep_ = th_acceptstep;
 }
 
-void SolverAbstract::set_th_stop(const double th_stop) {
-  if (th_stop <= 0.) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_th_stop(const Scalar th_stop) {
+  if (th_stop <= Scalar(0.)) {
     throw_pretty("Invalid argument: " << "th_stop value has to higher than 0.");
   }
   th_stop_ = th_stop;
 }
 
-void SolverAbstract::set_th_gaptol(const double th_gaptol) {
-  if (0. > th_gaptol) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_th_gaptol(const Scalar th_gaptol) {
+  if (Scalar(0.) > th_gaptol) {
     throw_pretty("Invalid argument: " << "th_gaptol value has to be positive.");
   }
   th_gaptol_ = th_gaptol;
 }
 
-void SolverAbstract::set_feasnorm(const FeasibilityNorm feasnorm) {
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_feasnorm(const FeasibilityNorm feasnorm) {
   feasnorm_ = feasnorm;
 }
 
-bool raiseIfNaN(const double value) {
-  if (std::isnan(value) || std::isinf(value) || value >= 1e30) {
+template <typename Scalar>
+bool raiseIfNaN(const Scalar value) {
+  if (std::isnan(value) || std::isinf(value) || value >= Scalar(1e30)) {
     return true;
   } else {
     return false;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2025, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,23 +27,35 @@ namespace crocoddyl {
  *
  * \sa `solve()`
  */
-class SolverIpopt : public SolverAbstract {
+template <typename _Scalar>
+class SolverIpoptTpl : public SolverAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef IpoptInterfaceTpl<Scalar> IpoptInterface;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector2s Vector2s;
+  using SolverAbstract::resizeData;
+  using SolverAbstract::setCandidate;
 
   /**
    * @brief Initialize the Ipopt solver
    *
    * @param[in]  problem solver to be diagnostic
    */
-  SolverIpopt(std::shared_ptr<crocoddyl::ShootingProblem> problem);
-  ~SolverIpopt();
+  SolverIpoptTpl(std::shared_ptr<ShootingProblem> problem);
+  ~SolverIpoptTpl() = default;
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-             const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
-             const std::size_t maxiter = 100, const bool is_feasible = false,
-             const double reg_init = 1e-9);
-  virtual void resizeData();
+  bool solve(
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init = Scalar(1e-9)) override;
+  virtual void resizeData() override;
 
   /**
    * @brief Set a string ipopt option
@@ -61,18 +73,30 @@ class SolverIpopt : public SolverAbstract {
    */
   void setNumericIpoptOption(const std::string& tag, Ipopt::Number value);
 
-  void set_th_stop(const double th_stop);
+  void set_th_stop(const Scalar th_stop);
 
  private:
   Ipopt::SmartPtr<IpoptInterface> ipopt_iface_;
   Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app_;
   Ipopt::ApplicationReturnStatus ipopt_status_;
 
-  virtual void computeDirection(const bool recalc);
-  virtual double tryStep(const double steplength = 1);
-  virtual double stoppingCriteria();
-  virtual const Eigen::Vector2d& expectedImprovement();
+  virtual void computeDirection(const bool recalc) override;
+  virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
+  virtual Scalar stoppingCriteria() override;
+  virtual const Vector2s& expectedImprovement() override;
+
+  using SolverAbstract::cost_;
+  using SolverAbstract::d_;
+  using SolverAbstract::iter_;
+  using SolverAbstract::th_stop_;
+  using SolverAbstract::us_;
+  using SolverAbstract::xs_;
 };
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solvers/ipopt.hxx"
 
 #endif

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, IRI: CSIC-UPC, Heriot-Watt University
+// Copyright (C) 2022-2025, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,8 +16,6 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
 namespace crocoddyl {
-
-struct IpoptInterfaceData;
 
 /**
  * @brief Class for interfacing a crocoddyl::ShootingProblem with IPOPT
@@ -58,19 +56,27 @@ struct IpoptInterfaceData;
  *  \sa `get_nlp_info()`, `get_bounds_info()`, `eval_f()`, `eval_g()`,
  * `eval_grad_f()`, `eval_jac_g()`, `eval_h()`
  */
-
-class IpoptInterface : public Ipopt::TNLP {
+template <typename _Scalar>
+class IpoptInterfaceTpl : public Ipopt::TNLP {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
+  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef IpoptInterfaceDataTpl<Scalar> IpoptInterfaceData;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
 
   /**
    * @brief Initialize the Ipopt interface
    *
    * @param[in] problem  Crocoddyl shooting problem
    */
-  IpoptInterface(const std::shared_ptr<crocoddyl::ShootingProblem>& problem);
+  IpoptInterfaceTpl(const std::shared_ptr<ShootingProblem>& problem);
 
-  virtual ~IpoptInterface();
+  virtual ~IpoptInterfaceTpl() = default;
 
   /**
    * @brief  Methods to gather information about the NLP
@@ -434,51 +440,56 @@ class IpoptInterface : public Ipopt::TNLP {
   /**
    * @brief Return the state vector
    */
-  const std::vector<Eigen::VectorXd>& get_xs() const;
+  const std::vector<VectorXs>& get_xs() const;
 
   /**
    * @brief Return the control vector
    */
-  const std::vector<Eigen::VectorXd>& get_us() const;
+  const std::vector<VectorXs>& get_us() const;
 
   /**
    * @brief Return the crocoddyl::ShootingProblem to be solved
    */
-  const std::shared_ptr<crocoddyl::ShootingProblem>& get_problem() const;
+  const std::shared_ptr<ShootingProblem>& get_problem() const;
 
-  double get_cost() const;
+  Scalar get_cost() const;
 
   /**
    * @brief Modify the state vector
    */
-  void set_xs(const std::vector<Eigen::VectorXd>& xs);
+  void set_xs(const std::vector<VectorXs>& xs);
 
   /**
    * @brief Modify the control vector
    */
-  void set_us(const std::vector<Eigen::VectorXd>& us);
+  void set_us(const std::vector<VectorXs>& us);
 
  private:
-  std::shared_ptr<crocoddyl::ShootingProblem>
-      problem_;                      //!< Optimal control problem
-  std::vector<Eigen::VectorXd> xs_;  //!< Vector of states
-  std::vector<Eigen::VectorXd> us_;  //!< Vector of controls
-  std::vector<std::size_t> ixu_;     //!< Index of at node i
-  std::size_t nvar_;                 //!< Number of NLP variables
-  std::size_t nconst_;               //!< Number of the NLP constraints
+  std::shared_ptr<ShootingProblem> problem_;  //!< Optimal control problem
+  std::vector<VectorXs> xs_;                  //!< Vector of states
+  std::vector<VectorXs> us_;                  //!< Vector of controls
+  std::vector<std::size_t> ixu_;              //!< Index of at node i
+  std::size_t nvar_;                          //!< Number of NLP variables
+  std::size_t nconst_;                        //!< Number of the NLP constraints
   std::vector<std::shared_ptr<IpoptInterfaceData>> datas_;  //!< Vector of Datas
-  double cost_;                                             //!< Total cost
+  Scalar cost_;                                             //!< Total cost
 
-  IpoptInterface(const IpoptInterface&);
+  IpoptInterfaceTpl(const IpoptInterfaceTpl&);
 
-  IpoptInterface& operator=(const IpoptInterface&);
+  IpoptInterfaceTpl& operator=(const IpoptInterfaceTpl&);
 };
 
-struct IpoptInterfaceData {
+template <typename _Scalar>
+struct IpoptInterfaceDataTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  IpoptInterfaceData(const std::size_t nx, const std::size_t ndx,
-                     const std::size_t nu)
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  IpoptInterfaceDataTpl(const std::size_t nx, const std::size_t ndx,
+                        const std::size_t nu)
       : x(nx),
         xnext(nx),
         dx(ndx),
@@ -539,31 +550,33 @@ struct IpoptInterfaceData {
     Ldxu.conservativeResize(ndx, nu);
   }
 
-  Eigen::VectorXd x;        //!< Integrated state
-  Eigen::VectorXd xnext;    //!< Integrated state at next node
-  Eigen::VectorXd dx;       //!< Increment in the tangent space
-  Eigen::VectorXd dxnext;   //!< Increment in the tangent space at next node
-  Eigen::VectorXd x_diff;   //!< State difference
-  Eigen::VectorXd u;        //!< Control
-  Eigen::MatrixXd Jint_dx;  //!< Jacobian of the sum operation w.r.t dx
-  Eigen::MatrixXd
-      Jint_dxnext;  //!< Jacobian of the sum operation w.r.t dx at next node
-  Eigen::MatrixXd
-      Jdiff_x;  //!< Jacobian of the diff operation w.r.t the first element
-  Eigen::MatrixXd Jdiff_xnext;  //!< Jacobian of the diff operation w.r.t the
-                                //!< first element at the next node
-  Eigen::MatrixXd Jg_dx;        //!< Jacobian of the dynamic constraint w.r.t dx
-  Eigen::MatrixXd
-      Jg_dxnext;         //!< Jacobian of the dynamic constraint w.r.t dxnext
-  Eigen::MatrixXd Jg_u;  //!< Jacobian of the dynamic constraint w.r.t u
-  Eigen::MatrixXd
-      Jg_ic;  //!< Jacobian of the initial condition constraint w.r.t dx
-  Eigen::MatrixXd FxJint_dx;  //!< Intermediate computation needed for Jg_ic
-  Eigen::VectorXd Ldx;        //!< Jacobian of the cost w.r.t dx
-  Eigen::MatrixXd Ldxdx;      //!< Hessian of the cost w.r.t dxdx
-  Eigen::MatrixXd Ldxu;       //!< Hessian of the cost w.r.t dxu
+  VectorXs x;        //!< Integrated state
+  VectorXs xnext;    //!< Integrated state at next node
+  VectorXs dx;       //!< Increment in the tangent space
+  VectorXs dxnext;   //!< Increment in the tangent space at next node
+  VectorXs x_diff;   //!< State difference
+  VectorXs u;        //!< Control
+  MatrixXs Jint_dx;  //!< Jacobian of the sum operation w.r.t dx
+  MatrixXs
+      Jint_dxnext;   //!< Jacobian of the sum operation w.r.t dx at next node
+  MatrixXs Jdiff_x;  //!< Jacobian of the diff operation w.r.t the first element
+  MatrixXs Jdiff_xnext;  //!< Jacobian of the diff operation w.r.t the
+                         //!< first element at the next node
+  MatrixXs Jg_dx;        //!< Jacobian of the dynamic constraint w.r.t dx
+  MatrixXs Jg_dxnext;    //!< Jacobian of the dynamic constraint w.r.t dxnext
+  MatrixXs Jg_u;         //!< Jacobian of the dynamic constraint w.r.t u
+  MatrixXs Jg_ic;  //!< Jacobian of the initial condition constraint w.r.t dx
+  MatrixXs FxJint_dx;  //!< Intermediate computation needed for Jg_ic
+  VectorXs Ldx;        //!< Jacobian of the cost w.r.t dx
+  MatrixXs Ldxdx;      //!< Hessian of the cost w.r.t dxdx
+  MatrixXs Ldxu;       //!< Hessian of the cost w.r.t dxu
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solvers/ipopt/ipopt-iface.hxx"
 
 #endif
