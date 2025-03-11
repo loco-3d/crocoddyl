@@ -28,9 +28,9 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
   Raxis_ = Matrix3s::Identity();
 }
 
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated FrameXX has
-                             // been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// TODO: Remove once the deprecated update call has been removed in a future
+// release
+CROCODDYL_DISABLE_WARNING_DEPRECATED
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
@@ -60,7 +60,7 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
             << std::endl;
 }
 
-#pragma GCC diagnostic pop
+CROCODDYL_ENABLE_WARNING_DEPRECATED
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::calc(

@@ -342,13 +342,12 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
       DV_[2] -= dxs_.back().dot(Lxx_dx_.back());
       break;
   }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
   // TODO: remove d_
   d_[0] = DV_[1];
   d_[1] = DV_[2];
   return d_;
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
 }
 
 template <typename Scalar>

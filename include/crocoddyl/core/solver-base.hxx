@@ -318,11 +318,10 @@ void SolverAbstractTpl<Scalar>::allocateData() {
   stop_ = Scalar(0.);
   // Expected reduction and improvement
   DV_.setZero();
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
   // TODO: remove d_
   d_.setZero();
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
   dV_ = Scalar(0.);
   dPhi_ = Scalar(0.);
   dVexp_full_ = Scalar(0.);

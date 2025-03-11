@@ -169,13 +169,12 @@ SolverKKTTpl<Scalar>::expectedImprovement() {
   // -(hessian.primal)^T.primal
   kkt_primal_.noalias() = kkt_.block(0, 0, ndx_ + nu_, ndx_ + nu_) * primal_;
   DV_[2] = -kkt_primal_.dot(primal_);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
   // TODO: remove d_
   d_[0] = DV_[1];
   d_[1] = DV_[2];
   return d_;
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
 }
 
 template <typename Scalar>

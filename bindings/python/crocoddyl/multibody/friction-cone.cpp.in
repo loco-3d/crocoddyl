@@ -112,13 +112,13 @@ struct FrictionConeVisitor
       .def(CopyableVisitor<Model>());
 
 void exposeFrictionCone() {
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
-                             // been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: Remove once the deprecated update call has been removed in a future
+  // release
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
 
   CROCODDYL_FRICTION_CONE_PYTHON_BINDINGS(@SCALAR_TYPE@)
 
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
 }
 
 }  // namespace python

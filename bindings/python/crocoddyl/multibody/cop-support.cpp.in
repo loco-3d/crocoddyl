@@ -66,13 +66,13 @@ struct CoPSupportVisitor : public bp::def_visitor<CoPSupportVisitor<Model>> {
       .def(CopyableVisitor<Model>());
 
 void exposeCoPSupport() {
-#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
-                             // been removed in a future release
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: Remove once the deprecated update call has been removed in a future
+  // release
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
 
   CROCODDYL_COP_SUPPORT_PYTHON_BINDINGS(@SCALAR_TYPE@)
 
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
 }
 
 }  // namespace python
