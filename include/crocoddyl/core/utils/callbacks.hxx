@@ -7,11 +7,14 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/callbacks.hpp"
+#include <iomanip>
+#include <iostream>
 
 namespace crocoddyl {
 
-CallbackVerbose::CallbackVerbose(VerboseLevel level, int precision)
+template <typename Scalar>
+CallbackVerboseTpl<Scalar>::CallbackVerboseTpl(VerboseLevel level,
+                                               int precision)
     : CallbackAbstract(),
       level_(level),
       separator_("  "),
@@ -19,24 +22,31 @@ CallbackVerbose::CallbackVerbose(VerboseLevel level, int precision)
   set_precision(precision);
 }
 
-CallbackVerbose::~CallbackVerbose() {}
+template <typename Scalar>
+VerboseLevel CallbackVerboseTpl<Scalar>::get_level() const {
+  return level_;
+}
 
-VerboseLevel CallbackVerbose::get_level() const { return level_; }
-
-void CallbackVerbose::set_level(VerboseLevel level) {
+template <typename Scalar>
+void CallbackVerboseTpl<Scalar>::set_level(VerboseLevel level) {
   level_ = level;
   update_header();
 }
 
-int CallbackVerbose::get_precision() const { return precision_; }
+template <typename Scalar>
+int CallbackVerboseTpl<Scalar>::get_precision() const {
+  return precision_;
+}
 
-void CallbackVerbose::set_precision(int precision) {
+template <typename Scalar>
+void CallbackVerboseTpl<Scalar>::set_precision(int precision) {
   if (precision < 0) throw_pretty("The precision needs to be at least 0.");
   precision_ = precision;
   update_header();
 }
 
-void CallbackVerbose::update_header() {
+template <typename Scalar>
+void CallbackVerboseTpl<Scalar>::update_header() {
   auto center_string = [](const std::string& str, int width,
                           bool right_padding = true) {
     const int padding_size = width - static_cast<int>(str.length());
@@ -52,7 +62,6 @@ void CallbackVerbose::update_header() {
       return std::string(padding_left, ' ') + str;
     }
   };
-
   header_.clear();
   // Scientific mode requires a column width of 6 + precision
   const int columnwidth = 6 + precision_;
@@ -130,13 +139,14 @@ void CallbackVerbose::update_header() {
   }
 }
 
-void CallbackVerbose::operator()(SolverAbstract& solver) {
+template <typename Scalar>
+void CallbackVerboseTpl<Scalar>::operator()(SolverAbstract& solver) {
   if (solver.get_iter() % 10 == 0) {
     std::cout << header_ << std::endl << std::flush;
   }
-  auto space_sign = [this](const double value) {
+  auto space_sign = [this](const Scalar value) {
     std::stringstream stream;
-    if (value >= 0.) {
+    if (value >= Scalar(0.)) {
       stream << " ";
     } else {
       stream << "-";
@@ -144,7 +154,6 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
     stream << std::scientific << std::setprecision(precision_) << abs(value);
     return stream.str();
   };
-
   std::cout << std::setw(4) << solver.get_iter() << separator_;  // iter
   switch (level_) {
     case _0: {
@@ -234,6 +243,14 @@ void CallbackVerbose::operator()(SolverAbstract& solver) {
   }
   std::cout << std::endl;
   std::cout << std::flush;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+CallbackVerboseTpl<NewScalar> CallbackVerboseTpl<Scalar>::cast() const {
+  typedef CallbackVerboseTpl<NewScalar> ReturnType;
+  ReturnType ret(level_, precision_);
+  return ret;
 }
 
 }  // namespace crocoddyl

@@ -63,6 +63,9 @@ struct IpoptInterfaceDataTpl;
 template <typename Scalar>
 class CallbackAbstractTpl;
 
+template <typename Scalar>
+class CallbackVerboseTpl;
+
 // action
 template <typename Scalar>
 class ActionModelAbstractTpl;
@@ -337,6 +340,7 @@ typedef SolverKKTTpl<double> SolverKKT;
 typedef BoxQPTpl<double> BoxQP;
 typedef BoxQPSolutionTpl<double> BoxQPSolution;
 typedef CallbackAbstractTpl<double> CallbackAbstract;
+typedef CallbackVerboseTpl<double> CallbackVerbose;
 
 #ifdef CROCODDYL_WITH_IPOPT
 typedef IpoptInterfaceTpl<double> IpoptInterface;
