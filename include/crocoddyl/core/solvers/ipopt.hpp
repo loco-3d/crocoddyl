@@ -27,12 +27,11 @@ namespace crocoddyl {
  *
  * \sa `solve()`
  */
-template <typename _Scalar>
-class SolverIpoptTpl : public SolverAbstractTpl<_Scalar> {
+class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef _Scalar Scalar;
+  typedef Ipopt::Number Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
   typedef IpoptInterfaceTpl<Scalar> IpoptInterface;
@@ -47,8 +46,8 @@ class SolverIpoptTpl : public SolverAbstractTpl<_Scalar> {
    *
    * @param[in]  problem solver to be diagnostic
    */
-  SolverIpoptTpl(std::shared_ptr<ShootingProblem> problem);
-  ~SolverIpoptTpl() = default;
+  SolverIpopt(std::shared_ptr<ShootingProblem> problem);
+  ~SolverIpopt() = default;
 
   bool solve(
       const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
@@ -88,6 +87,7 @@ class SolverIpoptTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::cost_;
   using SolverAbstract::d_;
   using SolverAbstract::iter_;
+  using SolverAbstract::problem_;
   using SolverAbstract::th_stop_;
   using SolverAbstract::us_;
   using SolverAbstract::xs_;

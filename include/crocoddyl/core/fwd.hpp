@@ -51,8 +51,7 @@ template <typename Scalar>
 struct BoxQPSolutionTpl;
 
 #ifdef CROCODDYL_WITH_IPOPT
-template <typename Scalar>
-class SolverIpoptTpl;
+class SolverIpopt;
 
 template <typename Scalar>
 class IpoptInterfaceTpl;
@@ -340,7 +339,6 @@ typedef BoxQPSolutionTpl<double> BoxQPSolution;
 typedef CallbackAbstractTpl<double> CallbackAbstract;
 
 #ifdef CROCODDYL_WITH_IPOPT
-typedef SolverIpoptTpl<double> SolverIpopt;
 typedef IpoptInterfaceTpl<double> IpoptInterface;
 typedef IpoptInterfaceDataTpl<double> IpoptInterfaceData;
 #endif

@@ -8,8 +8,9 @@
 
 namespace crocoddyl {
 
-template <typename Scalar>
-SolverIpoptTpl<Scalar>::SolverIpoptTpl(std::shared_ptr<ShootingProblem> problem)
+typedef Ipopt::Number Scalar;
+
+inline SolverIpopt::SolverIpopt(std::shared_ptr<ShootingProblem> problem)
     : SolverAbstract(problem),
       ipopt_iface_(new IpoptInterface(problem)),
       ipopt_app_(IpoptApplicationFactory()) {
@@ -21,12 +22,11 @@ SolverIpoptTpl<Scalar>::SolverIpoptTpl(std::shared_ptr<ShootingProblem> problem)
   }
 }
 
-template <typename Scalar>
-bool SolverIpoptTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
-                                   const std::vector<VectorXs>& init_us,
-                                   const std::size_t maxiter,
-                                   const bool is_feasible,
-                                   const Scalar /*reg_init*/) {
+inline bool SolverIpopt::solve(const std::vector<VectorXs>& init_xs,
+                               const std::vector<VectorXs>& init_us,
+                               const std::size_t maxiter,
+                               const bool is_feasible,
+                               const Scalar /*reg_init*/) {
   setCandidate(init_xs, init_us, is_feasible);
   ipopt_iface_->set_xs(xs_);
   ipopt_iface_->set_us(us_);
@@ -43,45 +43,33 @@ bool SolverIpoptTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
          ipopt_status_ == Ipopt::Solved_To_Acceptable_Level;
 }
 
-template <typename Scalar>
-void SolverIpoptTpl<Scalar>::resizeData() {
+inline void SolverIpopt::resizeData() {
   SolverAbstract::resizeData();
   ipopt_iface_->resizeData();
 }
 
-template <typename Scalar>
-void SolverIpoptTpl<Scalar>::computeDirection(const bool) {}
+inline void SolverIpopt::computeDirection(const bool) {}
 
-template <typename Scalar>
-Scalar SolverIpoptTpl<Scalar>::tryStep(const Scalar) {
-  return Scalar(0.);
-}
+inline Scalar SolverIpopt::tryStep(const Scalar) { return Scalar(0.); }
 
-template <typename Scalar>
-Scalar SolverIpoptTpl<Scalar>::stoppingCriteria() {
-  return Scalar(0.);
-}
+inline Scalar SolverIpopt::stoppingCriteria() { return Scalar(0.); }
 
-template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s&
-SolverIpoptTpl<Scalar>::expectedImprovement() {
+inline const typename MathBaseTpl<Scalar>::Vector2s&
+SolverIpopt::expectedImprovement() {
   return d_;
 }
 
-template <typename Scalar>
-void SolverIpoptTpl<Scalar>::setStringIpoptOption(const std::string& tag,
-                                                  const std::string& value) {
+inline void SolverIpopt::setStringIpoptOption(const std::string& tag,
+                                              const std::string& value) {
   ipopt_app_->Options()->SetStringValue(tag, value);
 }
 
-template <typename Scalar>
-void SolverIpoptTpl<Scalar>::setNumericIpoptOption(const std::string& tag,
-                                                   Ipopt::Number value) {
+inline void SolverIpopt::setNumericIpoptOption(const std::string& tag,
+                                               Ipopt::Number value) {
   ipopt_app_->Options()->SetNumericValue(tag, value);
 }
 
-template <typename Scalar>
-void SolverIpoptTpl<Scalar>::set_th_stop(const Scalar th_stop) {
+inline void SolverIpopt::set_th_stop(const Scalar th_stop) {
   if (th_stop <= Scalar(0.)) {
     throw_pretty("Invalid argument: " << "th_stop value has to higher than 0.");
   }
