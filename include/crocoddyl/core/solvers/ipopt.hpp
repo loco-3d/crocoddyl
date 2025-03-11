@@ -30,6 +30,7 @@ namespace crocoddyl {
 class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_BASE_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverIpopt)
 
   typedef Ipopt::Number Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;

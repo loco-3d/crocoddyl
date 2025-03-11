@@ -33,8 +33,10 @@ template <typename _Scalar>
 class CallbackVerboseTpl : public CallbackAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(CallbackBase, CallbackVerboseTpl)
 
   typedef _Scalar Scalar;
+  typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
 
   explicit CallbackVerboseTpl(VerboseLevel level = _4, int precision = 3);

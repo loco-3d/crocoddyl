@@ -70,6 +70,7 @@ template <typename _Scalar>
 class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverFDDPTpl)
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
@@ -368,6 +369,17 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   void updateCandidate();
 
   /**
+   * @brief Cast the FDDP solver to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return SolverFDDPTpl<NewScalar> A FDDP solver with the new scalar type.
+   */
+  template <typename NewScalar>
+  SolverFDDPTpl<NewScalar> cast() const;
+
+  /**
    * @brief Return the type of solver used for handling the dynamics constraints
    */
   DynamicsSolverType get_dynamics_solver() const;
@@ -629,6 +641,12 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * step
    */
   void set_th_grad(const Scalar th_grad);
+
+  /**
+   * @brief Modify the threshold used to accept steps that cannot be be improved
+   * due to numerical errors the th noimprovement object
+   */
+  void set_th_noimprovement(const Scalar th_noimprovement);
 
   /**
    * @brief Modify the step-length threshold used to decrease regularization

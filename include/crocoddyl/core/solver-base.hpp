@@ -29,6 +29,13 @@ const std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>
 
 enum FeasibilityNorm { LInf = 0, L1 };
 
+class SolverBase {
+ public:
+  virtual ~SolverBase() = default;
+
+  CROCODDYL_BASE_CAST(SolverBase, SolverAbstractTpl)
+};
+
 /**
  * @brief Abstract class for optimal control solvers
  *
@@ -66,7 +73,7 @@ enum FeasibilityNorm { LInf = 0, L1 };
  * \sa `solve()`, `computeDirection()`, `tryStep()`, `stoppingCriteria()`
  */
 template <typename _Scalar>
-class SolverAbstractTpl {
+class SolverAbstractTpl : public SolverBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -570,6 +577,16 @@ class SolverAbstractTpl {
              Scalar ureg_;)      //!< Current control regularization values
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
+
+ private:
+  SolverAbstractTpl() : problem_(nullptr) {}
+};
+
+class CallbackBase {
+ public:
+  virtual ~CallbackBase() = default;
+
+  CROCODDYL_BASE_CAST(CallbackBase, CallbackAbstractTpl)
 };
 
 /**
@@ -580,7 +597,7 @@ class SolverAbstractTpl {
  * display motions.
  */
 template <typename _Scalar>
-class CallbackAbstractTpl {
+class CallbackAbstractTpl : public CallbackBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

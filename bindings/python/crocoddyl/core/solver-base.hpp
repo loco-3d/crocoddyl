@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,9 +17,20 @@
 namespace crocoddyl {
 namespace python {
 
-class SolverAbstract_wrap : public SolverAbstract,
-                            public bp::wrapper<SolverAbstract> {
+template <typename _Scalar>
+class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
+                               public bp::wrapper<SolverAbstractTpl<_Scalar>> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(SolverBase, SolverAbstractTpl_wrap)
+
+  typedef _Scalar Scalar;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector2s Vector2s;
+
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
   using SolverAbstract::d_;
@@ -42,6 +53,7 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::merit_;
+  using SolverAbstract::problem_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
   using SolverAbstract::us_;
@@ -49,35 +61,34 @@ class SolverAbstract_wrap : public SolverAbstract,
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
 
-  explicit SolverAbstract_wrap(std::shared_ptr<ShootingProblem> problem)
+  explicit SolverAbstractTpl_wrap(std::shared_ptr<ShootingProblem> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
-  ~SolverAbstract_wrap() {}
+  ~SolverAbstractTpl_wrap() = default;
 
-  bool solve(const std::vector<Eigen::VectorXd>& init_xs,
-             const std::vector<Eigen::VectorXd>& init_us,
-             const std::size_t maxiter, const bool is_feasible,
-             const double reg_init) {
+  bool solve(const std::vector<VectorXs>& init_xs,
+             const std::vector<VectorXs>& init_us, const std::size_t maxiter,
+             const bool is_feasible, const Scalar reg_init) override {
     return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us,
                           maxiter, is_feasible, reg_init);
   }
 
-  void computeDirection(const bool recalc = true) {
+  void computeDirection(const bool recalc = true) override {
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(const double step_length = 1) {
-    return bp::call<double>(this->get_override("tryStep").ptr(), step_length);
+  Scalar tryStep(const Scalar step_length = Scalar(1.)) override {
+    return bp::call<Scalar>(this->get_override("tryStep").ptr(), step_length);
   }
 
-  double stoppingCriteria() {
-    stop_ = bp::call<double>(this->get_override("stoppingCriteria").ptr());
+  Scalar stoppingCriteria() override {
+    stop_ = bp::call<Scalar>(this->get_override("stoppingCriteria").ptr());
     return stop_;
   }
 
-  const Eigen::Vector2d& expectedImprovement() {
+  const Vector2s& expectedImprovement() override {
     bp::list exp_impr =
         bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
-    d_ << bp::extract<double>(exp_impr[0]), bp::extract<double>(exp_impr[1]);
+    d_ << bp::extract<Scalar>(exp_impr[0]), bp::extract<Scalar>(exp_impr[1]);
     return d_;
   }
 
@@ -90,18 +101,43 @@ class SolverAbstract_wrap : public SolverAbstract,
     exp_impr.append(d_[1]);
     return exp_impr;
   }
+
+  template <typename NewScalar>
+  SolverAbstractTpl_wrap<NewScalar> cast() const {
+    typedef SolverAbstractTpl_wrap<NewScalar> ReturnType;
+    typedef ShootingProblemTpl<NewScalar> ProblemType;
+    ReturnType ret(
+        std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
+    return ret;
+  }
 };
 
-class CallbackAbstract_wrap : public CallbackAbstract,
-                              public bp::wrapper<CallbackAbstract> {
+template <typename _Scalar>
+class CallbackAbstractTpl_wrap
+    : public CallbackAbstractTpl<_Scalar>,
+      public bp::wrapper<CallbackAbstractTpl<_Scalar>> {
  public:
-  CallbackAbstract_wrap()
-      : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
-  ~CallbackAbstract_wrap() {}
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(CallbackBase, CallbackAbstractTpl_wrap)
 
-  void operator()(SolverAbstract& solver) {
+  typedef _Scalar Scalar;
+  typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+
+  CallbackAbstractTpl_wrap()
+      : CallbackAbstract(), bp::wrapper<CallbackAbstract>() {}
+  ~CallbackAbstractTpl_wrap() = default;
+
+  void operator()(SolverAbstract& solver) override {
     return bp::call<void>(this->get_override("__call__").ptr(),
                           boost::ref(solver));
+  }
+
+  template <typename NewScalar>
+  CallbackAbstractTpl_wrap<NewScalar> cast() const {
+    typedef CallbackAbstractTpl_wrap<NewScalar> ReturnType;
+    ReturnType ret;
+    return ret;
   }
 };
 

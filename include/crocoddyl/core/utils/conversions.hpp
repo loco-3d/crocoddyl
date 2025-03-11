@@ -36,6 +36,30 @@ scalar_cast(const Scalar& x) {
   return static_cast<NewScalar>(x);
 }
 
+template <typename NewScalar, typename Scalar>
+std::vector<NewScalar> vector_cast(const std::vector<Scalar>& in) {
+  std::vector<NewScalar> out;
+  out.reserve(in.size());  // Optimize allocation
+  for (const auto& obj : in) {
+    out.push_back(scalar_cast<NewScalar>(obj));
+  }
+  return out;
+}
+
+template <typename NewScalar, typename Scalar, int Rows, int Cols, int Options,
+          int MaxRows, int MaxCols>
+std::vector<Eigen::Matrix<NewScalar, Rows, Cols, Options, MaxRows, MaxCols>>
+vector_cast(const std::vector<
+            Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>& in) {
+  std::vector<Eigen::Matrix<NewScalar, Rows, Cols, Options, MaxRows, MaxCols>>
+      out;
+  out.reserve(in.size());  // Optimize allocation
+  for (const auto& obj : in) {
+    out.push_back(obj.template cast<NewScalar>());
+  }
+  return out;
+}
+
 template <typename NewScalar, typename Scalar,
           template <typename> class ItemTpl>
 std::vector<ItemTpl<NewScalar>> vector_cast(

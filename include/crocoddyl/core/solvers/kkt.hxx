@@ -178,6 +178,27 @@ SolverKKTTpl<Scalar>::expectedImprovement() {
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+SolverKKTTpl<NewScalar> SolverKKTTpl<Scalar>::cast() const {
+  typedef SolverKKTTpl<NewScalar> ReturnType;
+  typedef ShootingProblemTpl<NewScalar> ProblemType;
+  ReturnType ret(
+      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
+  // Setting the abstract parameters
+  ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
+  ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
+  ret.set_th_stop(scalar_cast<NewScalar>(th_stop_));
+  // Setting the KKT parameters
+  ret.set_alphas(vector_cast<NewScalar>(alphas_));
+  ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
+  ret.set_reg_decfactor(scalar_cast<NewScalar>(reg_decfactor_));
+  ret.set_reg_min(scalar_cast<NewScalar>(reg_min_));
+  ret.set_reg_max(scalar_cast<NewScalar>(reg_max_));
+  ret.set_th_grad(scalar_cast<NewScalar>(th_grad_));
+  return ret;
+}
+
+template <typename Scalar>
 const typename MathBaseTpl<Scalar>::MatrixXs& SolverKKTTpl<Scalar>::get_kkt()
     const {
   return kkt_;
@@ -352,6 +373,68 @@ void SolverKKTTpl<Scalar>::allocateData() {
   dual_.setZero();
   dF.resize(ndx_ + nu_);
   dF.setZero();
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_alphas(const std::vector<Scalar>& alphas) {
+  Scalar prev_alpha = alphas[0];
+  if (prev_alpha != Scalar(1.)) {
+    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
+  }
+  for (std::size_t i = 1; i < alphas.size(); ++i) {
+    Scalar alpha = alphas[i];
+    if (Scalar(0.) >= alpha) {
+      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
+    }
+    if (alpha >= prev_alpha) {
+      throw_pretty(
+          "Invalid argument: " << "alpha values are monotonously decreasing.");
+    }
+    prev_alpha = alpha;
+  }
+  alphas_ = alphas;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_reg_incfactor(const Scalar regfactor) {
+  if (regfactor <= Scalar(1.)) {
+    throw_pretty(
+        "Invalid argument: " << "reg_incfactor value is higher than 1.");
+  }
+  reg_incfactor_ = regfactor;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_reg_decfactor(const Scalar regfactor) {
+  if (regfactor <= Scalar(1.)) {
+    throw_pretty(
+        "Invalid argument: " << "reg_decfactor value is higher than 1.");
+  }
+  reg_decfactor_ = regfactor;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_reg_min(const Scalar regmin) {
+  if (Scalar(0.) > regmin) {
+    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
+  }
+  reg_min_ = regmin;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_reg_max(const Scalar regmax) {
+  if (Scalar(0.) > regmax) {
+    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
+  }
+  reg_max_ = regmax;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::set_th_grad(const Scalar th_grad) {
+  if (Scalar(0.) > th_grad) {
+    throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
+  }
+  th_grad_ = th_grad;
 }
 
 }  // namespace crocoddyl

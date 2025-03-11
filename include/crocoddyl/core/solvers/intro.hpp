@@ -17,6 +17,7 @@ template <typename _Scalar>
 class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverIntroTpl)
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
@@ -68,6 +69,17 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
    * @copybrief SolverFDDP::computeBatchValueFunction
    */
   virtual void computeBatchValueFunction(const std::size_t t) override;
+
+  /**
+   * @brief Cast the Intro solver to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return SolverIntroTpl<NewScalar> An Intro solver with the new scalar type.
+   */
+  template <typename NewScalar>
+  SolverIntroTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the type of solver used for handling the equality constraints
@@ -159,6 +171,9 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
    */
   virtual void resizeTerminalData() override;
 
+  using SolverFDDP::alphas_;
+  using SolverFDDP::callbacks_;
+  using SolverFDDP::dyn_solver_;
   using SolverFDDP::fs_;
   using SolverFDDP::K_;
   using SolverFDDP::k_;
@@ -172,11 +187,29 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   using SolverFDDP::Qx_;
   using SolverFDDP::Qxu_;
   using SolverFDDP::Qxx_;
+  using SolverFDDP::reg_decfactor_;
+  using SolverFDDP::reg_incfactor_;
+  using SolverFDDP::reg_max_;
+  using SolverFDDP::reg_min_;
+  using SolverFDDP::rho_;
+  using SolverFDDP::term_solver_;
+  using SolverFDDP::th_acceptminstep_;
+  using SolverFDDP::th_acceptnegstep_;
+  using SolverFDDP::th_acceptstep_;
+  using SolverFDDP::th_grad_;
+  using SolverFDDP::th_minfeas_;
+  using SolverFDDP::th_minimprove_;
+  using SolverFDDP::th_noimprovement_;
+  using SolverFDDP::th_stepdec_;
+  using SolverFDDP::th_stepinc_;
+  using SolverFDDP::th_stop_;
+  using SolverFDDP::upsilon_decfactor_;
   using SolverFDDP::Vx_;
   using SolverFDDP::Vxc_;
   using SolverFDDP::Vxx_;
   using SolverFDDP::Vxx_f_;
   using SolverFDDP::Vxx_tmp_;
+  using SolverFDDP::zero_upsilon_;
 
   void calcLuNullDir();
   void calcQrNullDir();

@@ -19,6 +19,7 @@ template <typename _Scalar>
 class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverKKTTpl)
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
@@ -45,6 +46,17 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   virtual Scalar stoppingCriteria() override;
   virtual const Vector2s& expectedImprovement() override;
 
+  /**
+   * @brief Cast the KKT solver to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return SolverKKTTpl<NewScalar> A KKT solver with the new scalar type.
+   */
+  template <typename NewScalar>
+  SolverKKTTpl<NewScalar> cast() const;
+
   const MatrixXs& get_kkt() const;
   const VectorXs& get_kktref() const;
   const VectorXs& get_primaldual() const;
@@ -54,6 +66,37 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   std::size_t get_nx() const;
   std::size_t get_ndx() const;
   std::size_t get_nu() const;
+
+  /**
+   * @brief Modify the set of step lengths using by the line-search procedure
+   */
+  void set_alphas(const std::vector<Scalar>& alphas);
+
+  /**
+   * @brief Modify the regularization factor used to increase the damping value
+   */
+  void set_reg_incfactor(const Scalar reg_factor);
+
+  /**
+   * @brief Modify the regularization factor used to decrease the damping value
+   */
+  void set_reg_decfactor(const Scalar reg_factor);
+
+  /**
+   * @brief Modify the minimum regularization value
+   */
+  void set_reg_min(const Scalar regmin);
+
+  /**
+   * @brief Modify the maximum regularization value
+   */
+  void set_reg_max(const Scalar regmax);
+
+  /**
+   * @brief Modify the tolerance of the expected gradient used for testing the
+   * step
+   */
+  void set_th_grad(const Scalar th_grad);
 
  protected:
   void allocateData();
@@ -82,6 +125,9 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   Scalar reg_decfactor_;
   Scalar reg_min_;
   Scalar reg_max_;
+  std::vector<Scalar> alphas_;
+  Scalar th_grad_;
+  bool was_feasible_;
 
  private:
   Scalar calcDiff();
@@ -102,9 +148,6 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   VectorXs primaldual_;
   VectorXs primal_;
   VectorXs dual_;
-  std::vector<Scalar> alphas_;
-  Scalar th_grad_;
-  bool was_feasible_;
   VectorXs kkt_primal_;
   VectorXs dF;
 };

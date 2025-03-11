@@ -956,6 +956,38 @@ void SolverFDDPTpl<Scalar>::updateCandidate() {
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+SolverFDDPTpl<NewScalar> SolverFDDPTpl<Scalar>::cast() const {
+  typedef SolverFDDPTpl<NewScalar> ReturnType;
+  typedef ShootingProblemTpl<NewScalar> ProblemType;
+  ReturnType ret(
+      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()),
+      dyn_solver_, term_solver_);
+  // Setting the abstract parameters
+  ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
+  ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
+  ret.set_th_stop(scalar_cast<NewScalar>(th_stop_));
+  // Setting the FDDP parameters
+  ret.set_alphas(vector_cast<NewScalar>(alphas_));
+  ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
+  ret.set_reg_decfactor(scalar_cast<NewScalar>(reg_decfactor_));
+  ret.set_reg_min(scalar_cast<NewScalar>(reg_min_));
+  ret.set_reg_max(scalar_cast<NewScalar>(reg_max_));
+  ret.set_th_grad(scalar_cast<NewScalar>(th_grad_));
+  ret.set_th_noimprovement(scalar_cast<NewScalar>(th_noimprovement_));
+  ret.set_th_stepdec(scalar_cast<NewScalar>(th_stepdec_));
+  ret.set_th_stepinc(scalar_cast<NewScalar>(th_stepinc_));
+  ret.set_th_minimprove(scalar_cast<NewScalar>(th_minimprove_));
+  ret.set_th_acceptnegstep(scalar_cast<NewScalar>(th_acceptnegstep_));
+  ret.set_th_acceptminstep(scalar_cast<NewScalar>(th_acceptminstep_));
+  ret.set_rho(scalar_cast<NewScalar>(rho_));
+  ret.set_th_minfeas(scalar_cast<NewScalar>(th_minfeas_));
+  ret.set_upsilon_decfactor(scalar_cast<NewScalar>(upsilon_decfactor_));
+  ret.set_zero_upsilon(zero_upsilon_);
+  return ret;
+}
+
+template <typename Scalar>
 void SolverFDDPTpl<Scalar>::allocateData() {
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
@@ -1356,6 +1388,16 @@ void SolverFDDPTpl<Scalar>::set_th_grad(const Scalar th_grad) {
     throw_pretty("Invalid argument: " << "th_grad value has to be positive.");
   }
   th_grad_ = th_grad;
+}
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::set_th_noimprovement(
+    const Scalar th_noimprovement) {
+  if (Scalar(0.) > th_noimprovement) {
+    throw_pretty(
+        "Invalid argument: " << "th_noimprovement value has to be positive.");
+  }
+  th_noimprovement_ = th_noimprovement;
 }
 
 template <typename Scalar>
