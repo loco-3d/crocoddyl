@@ -16,28 +16,28 @@
 namespace crocoddyl {
 
 // Trait to extract base scalar type
-template <typename T>
+template <typename Scalar>
 struct ScalarBaseType {
-  typedef T type;
+  typedef Scalar type;
 };
 
 #ifdef CROCODDYL_WITH_CODEGEN
 
-template <typename T>
-struct ScalarBaseType<CppAD::AD<T>> {
-  typedef typename ScalarBaseType<T>::type type;
+template <typename Scalar>
+struct ScalarBaseType<CppAD::AD<Scalar>> {
+  typedef typename ScalarBaseType<Scalar>::type type;
 };
 
-template <typename T>
-struct ScalarBaseType<CppAD::cg::CG<T>> {
-  typedef typename ScalarBaseType<T>::type type;
+template <typename Scalar>
+struct ScalarBaseType<CppAD::cg::CG<Scalar>> {
+  typedef typename ScalarBaseType<Scalar>::type type;
 };
 
 #endif
 
 // Main function
 template <typename Scalar>
-Scalar ScaleNumerics(double base_value, double float_multiplier = 1e3) {
+Scalar ScaleNumerics(double base_value, double float_multiplier = 1e4) {
   typedef typename ScalarBaseType<Scalar>::type Base;
   return std::is_same<Base, float>::value
              ? static_cast<Scalar>(base_value * float_multiplier)
