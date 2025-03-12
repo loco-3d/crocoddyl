@@ -15,6 +15,7 @@
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/core/utils/math.hpp"
+#include "crocoddyl/core/utils/scalar.hpp"
 
 namespace crocoddyl {
 
