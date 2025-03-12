@@ -17,7 +17,7 @@ SolverKKTTpl<Scalar>::SolverKKTTpl(std::shared_ptr<ShootingProblem> problem)
       reg_decfactor_(Scalar(10.)),
       reg_min_(Scalar(1e-9)),
       reg_max_(Scalar(1e9)),
-      th_grad_(Scalar(1e-12)),
+      th_grad_(ScaleNumerics<Scalar>(1e-12)),
       was_feasible_(false) {
   allocateData();
   const std::size_t n_alphas = 10;

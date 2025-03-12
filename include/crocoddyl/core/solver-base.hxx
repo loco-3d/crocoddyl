@@ -14,7 +14,7 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
     std::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
       th_acceptstep_(Scalar(0.1)),
-      th_stop_(Scalar(1e-9)),
+      th_stop_(ScaleNumerics<Scalar>(1e-9)),
       th_gaptol_(Scalar(1e-16)),
       feasnorm_(LInf),
       iter_(0),
