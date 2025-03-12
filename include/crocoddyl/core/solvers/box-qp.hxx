@@ -181,6 +181,16 @@ const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::solve(const MatrixXs& H,
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+BoxQPTpl<NewScalar> BoxQPTpl<Scalar>::cast() const {
+  typedef BoxQPTpl<NewScalar> ReturnType;
+  ReturnType ret(nx_, maxiter_, scalar_cast<NewScalar>(th_acceptstep_),
+                 scalar_cast<NewScalar>(th_grad_),
+                 scalar_cast<NewScalar>(reg_));
+  return ret;
+}
+
+template <typename Scalar>
 const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::get_solution() const {
   return solution_;
 }

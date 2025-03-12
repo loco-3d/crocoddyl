@@ -50,6 +50,23 @@ struct BoxQPSolutionTpl {
                    const std::vector<size_t>& clamped_idx)
       : Hff_inv(Hff_inv), x(x), free_idx(free_idx), clamped_idx(clamped_idx) {}
 
+  /**
+   * @brief Cast the BoxQP solution to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return BoxQPSolutionTpl<NewScalar> A BoxQP solution with the new scalar
+   * type.
+   */
+  template <typename NewScalar>
+  BoxQPSolutionTpl<NewScalar> cast() const {
+    typedef BoxQPSolutionTpl<NewScalar> ReturnType;
+    ReturnType ret(Hff_inv.template cast<NewScalar>(),
+                   x.template cast<NewScalar>(), free_idx, clamped_idx);
+    return ret;
+  }
+
   MatrixXs Hff_inv;                 //!< Inverse of the free space Hessian
   VectorXs x;                       //!< Decision vector
   std::vector<size_t> free_idx;     //!< Free space indexes
@@ -126,6 +143,17 @@ class BoxQPTpl {
   const BoxQPSolution& solve(const MatrixXs& H, const VectorXs& q,
                              const VectorXs& lb, const VectorXs& ub,
                              const VectorXs& xinit);
+
+  /**
+   * @brief Cast the BoxQP solver to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return BoxQPTpl<NewScalar> A BoxQP solver with the new scalar type.
+   */
+  template <typename NewScalar>
+  BoxQPTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the stored solution

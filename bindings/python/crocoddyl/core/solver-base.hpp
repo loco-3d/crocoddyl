@@ -141,9 +141,6 @@ class CallbackAbstractTpl_wrap
   }
 };
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads,
-                                       SolverAbstract::setCandidate, 0, 3)
-
 }  // namespace python
 }  // namespace crocoddyl
 

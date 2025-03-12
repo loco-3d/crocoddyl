@@ -10,30 +10,429 @@
 #include "crocoddyl/core/solvers/fddp.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/core/solver-base.hpp"
 
 #define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, SolverFDDP::solve, 0,
-                                       5)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
-                                       SolverFDDP::computeDirection, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, SolverFDDP::tryStep,
-                                       0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
-                                       SolverFDDP::forwardPass, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_updateDualsAndSlacks,
-                                       SolverFDDP::updateDualsAndSlacks, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setDynamicsSolver,
-                                       SolverFDDP::set_dynamics_solver, 1, 2)
+template <typename Model>
+struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, Model::solve, 0, 5)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
+                                         Model::computeDirection, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, Model::tryStep, 0,
+                                         1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
+                                         Model::forwardPass, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_updateDualsAndSlacks,
+                                         Model::updateDualsAndSlacks, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setDynamicsSolver,
+                                         Model::set_dynamics_solver, 1, 2)
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(
+          "solve", &Model::solve,
+          SolverFDDP_solves(
+              bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
+                       "init_reg"),
+              "Compute the optimal trajectory xopt, uopt as lists of T+1 and T "
+              "terms.\n\n"
+              "From an initial guess init_xs,init_us (feasible or not), "
+              "iterate over computeDirection and tryStep until "
+              "stoppingCriteria is below threshold. It also describes the "
+              "globalization strategy used during the numerical optimization.\n"
+              ":param init_xs: initial guess for state trajectory with T+1 "
+              "elements (default [])\n"
+              ":param init_us: initial guess for control trajectory with T "
+              "elements (default []).\n"
+              ":param maxiter: maximum allowed number of iterations (default "
+              "100).\n"
+              ":param is_feasible: true if the init_xs are obtained from "
+              "integrating the init_us (rollout) (default False).\n"
+              ":param init_reg: initial guess for the regularization value. "
+              "Very low values are typical used with very good guess points "
+              "(default 1e-9).\n"
+              ":returns the optimal trajectory xopt, uopt and a boolean that "
+              "describes if convergence was reached."))
+        .def("computeDirection", &Model::computeDirection,
+             SolverFDDP_computeDirections(
+                 bp::args("self", "recalc"),
+                 "Compute the search direction (dx, du) for the current guess "
+                 "(xs, us).\n\n"
+                 "You must call setCandidate first in order to define the "
+                 "current\n"
+                 "guess. A current guess defines a state and control "
+                 "trajectory (xs, us) of T+1 and T elements, respectively.\n"
+                 ":params recalc: true for recalculating the derivatives at "
+                 "current state and control.\n"
+                 ":returns the search direction dx, du and the dual lambdas as "
+                 "lists of T+1, T and T+1 lengths."))
+        .def("tryStep", &Model::tryStep,
+             SolverFDDP_trySteps(
+                 bp::args("self", "stepLength"),
+                 "Rollout the system with a predefined step length.\n\n"
+                 ":param stepLength: step length (default 1)\n"
+                 ":returns the cost improvement."))
+        .def("forwardPass", &Model::forwardPass,
+             SolverFDDP_forwardPass(
+                 bp::args("self", "stepLength"),
+                 "Perform a forward pass with a predefined step length.\n\n"
+                 "Our solver supports fourth type of forward passes: "
+                 "feasiblility-driven (FeasShoot), multiple shooting "
+                 "(MultiShoot), hybrid shooting (HybridShoot), and single "
+                 "shooting (SingleShoot).\n"
+                 "The feasibility-driven shooting decreases monotonocally the "
+                 "dynamics feasibility based on the applied step length. The "
+                 "hybrid shooting combines both feasibility-driven and "
+                 "multiple shooting approaches. Instead, the single shooting "
+                 "is the traditional approach implemented in DDP. The type of "
+                 "dynamics solver can be defined via setDynamicsSolver.\n"
+                 ":param stepLength: step length (default 1)"))
+        .def("updateDualsAndSlacks", &Model::updateDualsAndSlacks,
+             SolverFDDP_updateDualsAndSlacks(
+                 bp::args("self", "stepLength"),
+                 "Update the dual and slack variables with a predefined step "
+                 "length.\n\n"
+                 ":param stepLength: step length (default 1)"))
+        .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
+             "Check if we should accept or not the step\n\n"
+             ":return True if we should accept the step. False otherwise.")
+        .def("stoppingCriteria", &Model::stoppingCriteria, bp::args("self"),
+             "Return a sum of positive parameters whose sum quantifies the "
+             "FDDP termination.")
+        .def("expectedImprovement", &Model::expectedImprovement,
+             bp::return_value_policy<bp::reference_existing_object>(),
+             bp::args("self"),
+             "Return two scalars denoting the quadratic improvement model\n\n"
+             "For computing the expected improvement, you need to compute "
+             "first the search direction by running computeDirection. The "
+             "quadratic improvement model is described as dV = DV_0 + DV_1 + "
+             "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
+             "and quadraticm terms, respectively")
+        .def(
+            "calcDir", &Model::calcDir, bp::args("self"),
+            "Update the Jacobian and Hessian of the optimal control problem\n\n"
+            "These derivatives are computed around the guess state and control "
+            "trajectory. These trajectory can be set by using setCandidate.\n"
+            ":return the total cost around the guess trajectory.")
+        .def("linearRollout", &Model::calcDir, bp::args("self"),
+             "Perform a linear rollout give the current control policy\n\n"
+             "The results of this linear rollout are stored in dxs and dus.")
+        .def("backwardPass", &Model::backwardPass, bp::args("self"),
+             "Run the backward pass (Riccati sweep)\n\n"
+             "It assumes that the Jacobian and Hessians of the optimal control "
+             "problem have been compute. These terms are computed by running "
+             "calc.")
+        .def("batchPass", &Model::batchPass, bp::args("self"),
+             "Run the batch pass to account for its constraints\n\n"
+             "Update the direction and feed-forward term to account for the "
+             "terminal constraint. To do so, we first compute the unscaled "
+             "search direction accounting for the terminal constraint.")
+        .def("updateDir", &Model::updateDir, bp::args("self"),
+             "Update search direction associated with the batch's constraints")
+        .def("computeActionValueFunction", &Model::computeActionValueFunction,
+             bp::args("self", "t", "model", "data"),
+             "Compute the linear-quadratic model of the control Hamiltonian\n\n"
+             ":param t: time instance\n"
+             ":param model: action model in the given time instance\n"
+             ":param data: action data in the given time instance")
+        .def("computeBatchActionValueFunction",
+             &Model::computeBatchActionValueFunction,
+             bp::args("self", "t", "data"),
+             "Compute the linear-quadratic approximation of the control "
+             "action-value function associated to the batch's constraints\n\n"
+             ":param t: time instance\n"
+             ":param data: action data in the given time instance")
+        .def("computePolicy", &Model::computePolicy, bp::args("self", "t"),
+             "Compute the local policy.\n\n"
+             "This function is called in the backward pass after updating the "
+             "local Hamiltonian.\n"
+             ":param t: time instance")
+        .def("computeValueFunction", &Model::computeValueFunction,
+             bp::args("self", "t", "model"),
+             "Compute the quadratic model of the value function.\n\n"
+             "This function is called in the backward pass after updating the "
+             "local Hamiltonian.\n"
+             ":param t: time instance\n"
+             ":param model: action model in the given time instance")
+        .def("computeBatchValueFunction", &Model::computeBatchValueFunction,
+             bp::args("self", "t"),
+             "Compute the linear-quadratic approximation of the value function "
+             "associated to the batch's constraints.\n\n"
+             "This function is called in the backward pass after updating the "
+             "local Hamiltonian.\n"
+             ":param t: time instance")
+        .def("feasShootForwardPass", &Model::feasShootForwardPass,
+             bp::args("self", "stepLength"),
+             "Run the feasibility-driven rollout\n\n"
+             "It rollouts the action model given the feasibility-driven "
+             "approach described in `Crocoddyl: An Efficient and Versatile "
+             "Framework for Multi-Contact Optimal Control`.\n"
+             "We can define different step lengths\n"
+             ":param stepLength: applied step length (<= 1. and >= 0.)")
+        .def("multiShootForwardPass", &Model::multiShootForwardPass,
+             bp::args("self", "stepLength"),
+             "Run the multiple-shooting rollout\n\n"
+             "It rollouts the action model given the classical "
+             "multiple-shooting approach described in `TODO:`. We can define "
+             "different step lengths\n"
+             ":param stepLength: applied step length (<= 1. and >= 0.)")
+        .def("hybridShootForwardPass", &Model::hybridShootForwardPass,
+             bp::args("self", "stepLength"),
+             "Run the multiple-shooting rollout\n\n"
+             "It rollouts the action model given the classical hybrid-shooting "
+             "approach described in `TODO:`. We can define different step "
+             "lengths\n"
+             ":param stepLength: applied step length (<= 1. and >= 0.)")
+        .def("singleShootForwardPass", &Model::singleShootForwardPass,
+             bp::args("self", "stepLength"),
+             "Run the classical DDP rollout\n\n"
+             "It rollouts the action model given the classical DDP approach "
+             "described in `A second-order gradient method for determining "
+             "optimal trajectories of non-linear discrete-time systems`. We "
+             "can define different step lengths\n"
+             ":param stepLength: applied step length (<= 1. and >= 0.)")
+        .def("updateCandidate", &Model::updateCandidate, bp::args("self"),
+             "Update the candidate solution: cost, feasibilities, and merit "
+             "value")
+        .add_property(
+            "dyn_solver", bp::make_function(&Model::get_dynamics_solver),
+            "type of solver used for handling the dynamics constraints.")
+        .add_property(
+            "term_solver", bp::make_function(&Model::get_terminal_solver),
+            bp::make_function(&Model::set_terminal_solver),
+            "type of solver used for handling the terminal constraints.")
+        .def("setDynamicsSolver", &Model::set_dynamics_solver,
+             SolverFDDP_setDynamicsSolver(
+                 bp::args("self", "type", "Tshoot"),
+                 "Set the type of dynamics solver.\n\n"
+                 ":param type: type of dynamics solver\n"
+                 ":param Tshoot: number of shooting nodes used in the "
+                 "hybrid-shooting solver (default 0)"))
+        .add_property(
+            "alphas",
+            bp::make_function(
+                &Model::get_alphas,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            bp::make_function(&Model::set_alphas),
+            "list of step length (alpha) values")
+        .add_property(
+            "reg_incFactor", bp::make_function(&Model::get_reg_incfactor),
+            bp::make_function(&Model::set_reg_incfactor),
+            "regularization factor used for increasing the damping value.")
+        .add_property(
+            "reg_decFactor", bp::make_function(&Model::get_reg_decfactor),
+            bp::make_function(&Model::set_reg_decfactor),
+            "regularization factor used for decreasing the damping value.")
+        .add_property("reg_min", bp::make_function(&Model::get_reg_min),
+                      bp::make_function(&Model::set_reg_min),
+                      "minimum regularization value.")
+        .add_property("reg_max", bp::make_function(&Model::get_reg_max),
+                      bp::make_function(&Model::set_reg_max),
+                      "maximum regularization value.")
+        .add_property("th_grad", bp::make_function(&Model::get_th_grad),
+                      bp::make_function(&Model::set_th_grad),
+                      "threshold for accepting step which gradients is lower "
+                      "than this value")
+        .add_property(
+            "th_stepDec", bp::make_function(&Model::get_th_stepdec),
+            bp::make_function(&Model::set_th_stepdec),
+            "threshold for decreasing the regularization after approving a "
+            "step (higher values decreases the regularization)")
+        .add_property(
+            "th_stepInc", bp::make_function(&Model::get_th_stepinc),
+            bp::make_function(&Model::set_th_stepinc),
+            "threshold for increasing the regularization after approving a "
+            "step (higher values decreases the regularization)")
+        .add_property("th_minImprove",
+                      bp::make_function(&Model::get_th_minimprove),
+                      bp::make_function(&Model::set_th_minimprove),
+                      "threshold for minimum improvement used in the "
+                      "regularization scheme")
+        .add_property("th_acceptNegStep",
+                      bp::make_function(&Model::get_th_acceptnegstep),
+                      bp::make_function(&Model::set_th_acceptnegstep),
+                      "threshold for step acceptance in ascent direction")
+        .add_property("th_acceptMinStep",
+                      bp::make_function(&Model::get_th_acceptminstep),
+                      bp::make_function(&Model::set_th_acceptminstep),
+                      "threshold for minimum step acceptance")
+        .add_property("rho", bp::make_function(&Model::get_rho),
+                      bp::make_function(&Model::set_rho),
+                      "parameter used in the merit function to predict the "
+                      "expected reduction.")
+        .add_property("th_minfeas", bp::make_function(&Model::get_th_minfeas),
+                      bp::make_function(&Model::set_th_minfeas),
+                      "threshold to define minimum feasibility.")
+        .add_property(
+            "upsilon", bp::make_function(&Model::get_upsilon),
+            "estimated penalty parameter that balances relative contribution "
+            "of the cost function and equality constraints.")
+        .add_property("upsilon_decFactor",
+                      bp::make_function(&Model::get_upsilon_decfactor),
+                      bp::make_function(&Model::set_upsilon_decfactor),
+                      "threshold for decreasing the penalization that balances "
+                      "optimality and feasibility.")
+        .add_property("zero_upsilon",
+                      bp::make_function(&Model::get_zero_upsilon),
+                      bp::make_function(&Model::set_zero_upsilon),
+                      "True if we set estimated penalty parameter (upsilon) to "
+                      "zero when solve is called.")
+        .add_property(
+            "Vxx",
+            make_function(
+                &Model::get_Vxx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Vxx")
+        .add_property(
+            "Vx",
+            make_function(
+                &Model::get_Vx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Vx")
+        .add_property(
+            "Qxx",
+            make_function(
+                &Model::get_Qxx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qxx")
+        .add_property(
+            "Qxu",
+            make_function(
+                &Model::get_Qxu,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qxu")
+        .add_property(
+            "Quu",
+            make_function(
+                &Model::get_Quu,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Quu")
+        .add_property(
+            "Qx",
+            make_function(
+                &Model::get_Qx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qx")
+        .add_property(
+            "Qu",
+            make_function(
+                &Model::get_Qu,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qu")
+        .add_property(
+            "K",
+            make_function(
+                &Model::get_K,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "K")
+        .add_property(
+            "k",
+            make_function(
+                &Model::get_k,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "k")
+        .add_property(
+            "dxs",
+            make_function(
+                &Model::get_dxs,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "linear changes in the state trajectory.")
+        .add_property(
+            "dus",
+            make_function(
+                &Model::get_dus,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "linear changes in the control trajectory.")
+        .add_property(
+            "Vxc",
+            make_function(
+                &Model::get_Vxc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Vxc")
+        .add_property(
+            "Qxc",
+            make_function(
+                &Model::get_Qxc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qxc")
+        .add_property(
+            "Quc",
+            make_function(
+                &Model::get_Quc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Quc")
+        .add_property(
+            "dXc",
+            make_function(
+                &Model::get_dXc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "dXc")
+        .add_property(
+            "dUc",
+            make_function(
+                &Model::get_dUc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "dUc")
+        .add_property(
+            "Kc",
+            make_function(
+                &Model::get_Kc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Kc")
+        .add_property(
+            "dHc",
+            make_function(
+                &Model::get_dHc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "dHc")
+        .add_property(
+            "hc",
+            make_function(
+                &Model::get_hc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "hc")
+        .add_property(
+            "beta_plus",
+            make_function(
+                &Model::get_beta_plus,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "beta_plus");
+  }
+};
+
+#define CROCODDYL_SOLVER_FDDP_PYTHON_BINDINGS(Scalar)                          \
+  typedef SolverFDDPTpl<Scalar> Model;                                         \
+  typedef SolverAbstractTpl<Scalar> ModelBase;                                 \
+  typedef typename ModelBase::ShootingProblem ShootingProblem;                 \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "SolverFDDP",                                                            \
+      "Feasibility-driven DDP (FDDP) solver.\n\n"                              \
+      "The FDDP solver computes an optimal trajectory and control commands "   \
+      "by iterates running backward and forward passes. The backward-pass "    \
+      "updates locally the quadratic approximation of the problem and "        \
+      "computes descent direction, and the forward-pass rollouts this new "    \
+      "policy by integrating the system dynamics along a tuple of optimized "  \
+      "control commands U*.\n"                                                 \
+      ":param shootingProblem: shooting problem (list of action models along " \
+      "trajectory.)",                                                          \
+      bp::init<std::shared_ptr<ShootingProblem>,                               \
+               bp::optional<DynamicsSolverType, EqualitySolverType>>(          \
+          bp::args("self", "problem", "dyn_solver", "term_solver"),            \
+          "Initialize the vector dimension.\n\n"                               \
+          ":param problem: shooting problem.\n"                                \
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"    \
+          ":param term_solver: type of terminal solver (defaul LuNull)"))      \
+      .def(SolverFDDPVisitor<Model>())                                         \
+      .def(CastVisitor<Model>())                                               \
+      .def(CopyableVisitor<Model>());
 
 void exposeSolverFDDP() {
 #ifdef SCALAR_float64
-  bp::register_ptr_to_python<std::shared_ptr<SolverFDDP> >();
-
   bp::enum_<DynamicsSolverType>("DynamicsSolverType")
       .value("FeasShoot", FeasShoot)
       .value("MultiShoot", MultiShoot)
@@ -46,408 +445,10 @@ void exposeSolverFDDP() {
       .value("QrNull", QrNull)
       .value("Schur", Schur)
       .export_values();
+#endif
 
-  bp::class_<SolverFDDP, bp::bases<SolverAbstract> >(
-      "SolverFDDP",
-      "Feasibility-driven DDP (FDDP) solver.\n\n"
-      "The FDDP solver computes an optimal trajectory and control commands by "
-      "iterates\n"
-      "running backward and forward passes. The backward-pass updates locally "
-      "the\n"
-      "quadratic approximation of the problem and computes descent direction,\n"
-      "and the forward-pass rollouts this new policy by integrating the system "
-      "dynamics\n"
-      "along a tuple of optimized control commands U*.\n"
-      ":param shootingProblem: shooting problem (list of action models along "
-      "trajectory.)",
-      bp::init<std::shared_ptr<ShootingProblem>,
-               bp::optional<DynamicsSolverType, EqualitySolverType> >(
-          bp::args("self", "problem", "dyn_solver", "term_solver"),
-          "Initialize the vector dimension.\n\n"
-          ":param problem: shooting problem.\n"
-          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"
-          ":param term_solver: type of terminal solver (defaul LuNull)"))
-      .def("solve", &SolverFDDP::solve,
-           SolverFDDP_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
-                        "init_reg"),
-               "Compute the optimal trajectory xopt, uopt as lists of T+1 and "
-               "T terms.\n\n"
-               "From an initial guess init_xs,init_us (feasible or not), "
-               "iterate\n"
-               "over computeDirection and tryStep until stoppingCriteria is "
-               "below\n"
-               "threshold. It also describes the globalization strategy used\n"
-               "during the numerical optimization.\n"
-               ":param init_xs: initial guess for state trajectory with T+1 "
-               "elements (default [])\n"
-               ":param init_us: initial guess for control trajectory with T "
-               "elements (default []).\n"
-               ":param maxiter: maximum allowed number of iterations (default "
-               "100).\n"
-               ":param is_feasible: true if the init_xs are obtained from "
-               "integrating the init_us (rollout)\n"
-               "(default False).\n"
-               ":param init_reg: initial guess for the regularization value. "
-               "Very low values are typical\n"
-               "                 used with very good guess points (default "
-               "1e-9).\n"
-               ":returns the optimal trajectory xopt, uopt and a boolean that "
-               "describes if convergence was reached."))
-      .def("computeDirection", &SolverFDDP::computeDirection,
-           SolverFDDP_computeDirections(
-               bp::args("self", "recalc"),
-               "Compute the search direction (dx, du) for the current guess "
-               "(xs, us).\n\n"
-               "You must call setCandidate first in order to define the "
-               "current\n"
-               "guess. A current guess defines a state and control trajectory\n"
-               "(xs, us) of T+1 and T elements, respectively.\n"
-               ":params recalc: true for recalculating the derivatives at "
-               "current state and control.\n"
-               ":returns the search direction dx, du and the dual lambdas as "
-               "lists of T+1, T and T+1 lengths."))
-      .def("tryStep", &SolverFDDP::tryStep,
-           SolverFDDP_trySteps(
-               bp::args("self", "stepLength"),
-               "Rollout the system with a predefined step length.\n\n"
-               ":param stepLength: step length (default 1)\n"
-               ":returns the cost improvement."))
-      .def("forwardPass", &SolverFDDP::forwardPass,
-           SolverFDDP_forwardPass(
-               bp::args("self", "stepLength"),
-               "Perform a forward pass with a predefined step length.\n\n"
-               "Our solver supports fourth type of forward passes: "
-               "feasiblility-driven (FeasShoot), multiple shooting "
-               "(MultiShoot), hybrid shooting (HybridShoot), and single "
-               "shooting (SingleShoot).\n"
-               "The feasibility-driven shooting decreases monotonocally the "
-               "dynamics feasibility based on the applied step length.\n"
-               "The hybrid shooting combines both feasibility-driven and "
-               "multiple shooting approaches.\n"
-               "Instead, the single shooting is the traditional approach "
-               "implemented in DDP.\n"
-               "The type of dynamics solver can be defined via "
-               "setDynamicsSolver.\n"
-               ":param stepLength: step length (default 1)"))
-      .def("updateDualsAndSlacks", &SolverFDDP::updateDualsAndSlacks,
-           SolverFDDP_updateDualsAndSlacks(
-               bp::args("self", "stepLength"),
-               "Update the dual and slack variables with a predefined step "
-               "length.\n\n"
-               ":param stepLength: step length (default 1)"))
-      .def("checkAcceptance", &SolverFDDP::checkAcceptance, bp::args("self"),
-           "Check if we should accept or not the step\n\n"
-           ":return True if we should accept the step. False otherwise.")
-      .def("stoppingCriteria", &SolverFDDP::stoppingCriteria, bp::args("self"),
-           "Return a sum of positive parameters whose sum quantifies the FDDP "
-           "termination.")
-      .def(
-          "expectedImprovement", &SolverFDDP::expectedImprovement,
-          bp::return_value_policy<bp::reference_existing_object>(),
-          bp::args("self"),
-          "Return two scalars denoting the quadratic improvement model\n\n"
-          "For computing the expected improvement, you need to compute first\n"
-          "the search direction by running computeDirection. The quadratic\n"
-          "improvement model is described as dV = DV_0 + DV_1 + 0.5 * DV_2,"
-          "where DV_0, DV_1, and DV_2 are the constant, linear, and quadratic\n"
-          "terms, respectively")
-      .def("calcDir", &SolverFDDP::calcDir, bp::args("self"),
-           "Update the Jacobian and Hessian of the optimal control problem\n\n"
-           "These derivatives are computed around the guess state and control\n"
-           "trajectory. These trajectory can be set by using setCandidate.\n"
-           ":return the total cost around the guess trajectory.")
-      .def("linearRollout", &SolverFDDP::calcDir, bp::args("self"),
-           "Perform a linear rollout give the current control policy\n\n"
-           "The results of this linear rollout are stored in dxs and dus.")
-      .def("backwardPass", &SolverFDDP::backwardPass, bp::args("self"),
-           "Run the backward pass (Riccati sweep)\n\n"
-           "It assumes that the Jacobian and Hessians of the optimal control "
-           "problem have been\n"
-           "compute. These terms are computed by running calc.")
-      .def("batchPass", &SolverFDDP::batchPass, bp::args("self"),
-           "Run the batch pass to account for its constraints\n\n"
-           "Update the direction and feed-forward term to account for the "
-           "terminal constraint. To do so, we first compute the unscaled "
-           "search direction accounting for the terminal constraint.")
-      .def("updateDir", &SolverFDDP::updateDir, bp::args("self"),
-           "Update search direction associated with the batch's constraints")
-      .def("computeActionValueFunction",
-           &SolverFDDP::computeActionValueFunction,
-           bp::args("self", "t", "model", "data"),
-           "Compute the linear-quadratic model of the control Hamiltonian\n\n"
-           ":param t: time instance\n"
-           ":param model: action model in the given time instance\n"
-           ":param data: action data in the given time instance")
-      .def("computeBatchActionValueFunction",
-           &SolverFDDP::computeBatchActionValueFunction,
-           bp::args("self", "t", "data"),
-           "Compute the linear-quadratic approximation of the control "
-           "action-value function associated to the batch's constraints\n\n"
-           ":param t: time instance\n"
-           ":param data: action data in the given time instance")
-      .def("computePolicy", &SolverFDDP::computePolicy, bp::args("self", "t"),
-           "Compute the local policy.\n\n"
-           "This function is called in the backward pass after updating the "
-           "local Hamiltonian.\n"
-           ":param t: time instance")
-      .def("computeValueFunction", &SolverFDDP::computeValueFunction,
-           bp::args("self", "t", "model"),
-           "Compute the quadratic model of the value function.\n\n"
-           "This function is called in the backward pass after updating the "
-           "local Hamiltonian.\n"
-           ":param t: time instance\n"
-           ":param model: action model in the given time instance")
-      .def("computeBatchValueFunction", &SolverFDDP::computeBatchValueFunction,
-           bp::args("self", "t"),
-           "Compute the linear-quadratic approximation of the value function "
-           "associated to the batch's constraints.\n\n"
-           "This function is called in the backward pass after updating the "
-           "local Hamiltonian.\n"
-           ":param t: time instance")
-      .def("feasShootForwardPass", &SolverFDDP::feasShootForwardPass,
-           bp::args("self", "stepLength"),
-           "Run the feasibility-driven rollout\n\n"
-           "It rollouts the action model given the feasibility-driven approach "
-           "described in"
-           "`Crocoddyl: An Efficient and Versatile Framework for Multi-Contact "
-           "Optimal Control`.\n"
-           "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)")
-      .def("multiShootForwardPass", &SolverFDDP::multiShootForwardPass,
-           bp::args("self", "stepLength"),
-           "Run the multiple-shooting rollout\n\n"
-           "It rollouts the action model given the classical multiple-shooting "
-           "approach described in"
-           "`TODO:`.\n"
-           "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)")
-      .def("hybridShootForwardPass", &SolverFDDP::hybridShootForwardPass,
-           bp::args("self", "stepLength"),
-           "Run the multiple-shooting rollout\n\n"
-           "It rollouts the action model given the classical hybrid-shooting "
-           "approach described in"
-           "`TODO:`.\n"
-           "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)")
-      .def("singleShootForwardPass", &SolverFDDP::singleShootForwardPass,
-           bp::args("self", "stepLength"),
-           "Run the classical DDP rollout\n\n"
-           "It rollouts the action model given the classical DDP approach "
-           "described in"
-           "`A second-order gradient method for determining optimal "
-           "trajectories of non-linear discrete-time systems`.\n"
-           "We can define different step lengths\n"
-           ":param stepLength: applied step length (<= 1. and >= 0.)")
-      .def(
-          "updateCandidate", &SolverFDDP::updateCandidate, bp::args("self"),
-          "Update the candidate solution: cost, feasibilities, and merit value")
-      .add_property(
-          "dyn_solver", bp::make_function(&SolverFDDP::get_dynamics_solver),
-          "type of solver used for handling the dynamics constraints.")
-      .add_property(
-          "term_solver", bp::make_function(&SolverFDDP::get_terminal_solver),
-          bp::make_function(&SolverFDDP::set_terminal_solver),
-          "type of solver used for handling the terminal constraints.")
-      .def("setDynamicsSolver", &SolverFDDP::set_dynamics_solver,
-           SolverFDDP_setDynamicsSolver(
-               bp::args("self", "type", "Tshoot"),
-               "Set the type of dynamics solver.\n\n"
-               ":param type: type of dynamics solver\n"
-               ":param Tshoot: number of shooting nodes used in the "
-               "hybrid-shooting solver (default 0)"))
-      .add_property(
-          "alphas",
-          bp::make_function(
-              &SolverFDDP::get_alphas,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          bp::make_function(&SolverFDDP::set_alphas),
-          "list of step length (alpha) values")
-      .add_property(
-          "reg_incFactor", bp::make_function(&SolverFDDP::get_reg_incfactor),
-          bp::make_function(&SolverFDDP::set_reg_incfactor),
-          "regularization factor used for increasing the damping value.")
-      .add_property(
-          "reg_decFactor", bp::make_function(&SolverFDDP::get_reg_decfactor),
-          bp::make_function(&SolverFDDP::set_reg_decfactor),
-          "regularization factor used for decreasing the damping value.")
-      .add_property("reg_min", bp::make_function(&SolverFDDP::get_reg_min),
-                    bp::make_function(&SolverFDDP::set_reg_min),
-                    "minimum regularization value.")
-      .add_property("reg_max", bp::make_function(&SolverFDDP::get_reg_max),
-                    bp::make_function(&SolverFDDP::set_reg_max),
-                    "maximum regularization value.")
-      .add_property("th_grad", bp::make_function(&SolverFDDP::get_th_grad),
-                    bp::make_function(&SolverFDDP::set_th_grad),
-                    "threshold for accepting step which gradients is lower "
-                    "than this value")
-      .add_property("th_stepDec",
-                    bp::make_function(&SolverFDDP::get_th_stepdec),
-                    bp::make_function(&SolverFDDP::set_th_stepdec),
-                    "threshold for decreasing the regularization after "
-                    "approving a step (higher values decreases the "
-                    "regularization)")
-      .add_property("th_stepInc",
-                    bp::make_function(&SolverFDDP::get_th_stepinc),
-                    bp::make_function(&SolverFDDP::set_th_stepinc),
-                    "threshold for increasing the regularization after "
-                    "approving a step (higher values decreases the "
-                    "regularization)")
-      .add_property(
-          "th_minImprove", bp::make_function(&SolverFDDP::get_th_minimprove),
-          bp::make_function(&SolverFDDP::set_th_minimprove),
-          "threshold for minimum improvement used in the regularization scheme")
-      .add_property("th_acceptNegStep",
-                    bp::make_function(&SolverFDDP::get_th_acceptnegstep),
-                    bp::make_function(&SolverFDDP::set_th_acceptnegstep),
-                    "threshold for step acceptance in ascent direction")
-      .add_property("th_acceptMinStep",
-                    bp::make_function(&SolverFDDP::get_th_acceptminstep),
-                    bp::make_function(&SolverFDDP::set_th_acceptminstep),
-                    "threshold for minimum step acceptance")
-      .add_property("rho", bp::make_function(&SolverFDDP::get_rho),
-                    bp::make_function(&SolverFDDP::set_rho),
-                    "parameter used in the merit function to predict the "
-                    "expected reduction.")
-      .add_property("th_minfeas",
-                    bp::make_function(&SolverFDDP::get_th_minfeas),
-                    bp::make_function(&SolverFDDP::set_th_minfeas),
-                    "threshold to define minimum feasibility.")
-      .add_property("upsilon", bp::make_function(&SolverFDDP::get_upsilon),
-                    "estimated penalty parameter that balances relative "
-                    "contribution of the cost function and equality "
-                    "constraints.")
-      .add_property("upsilon_decFactor",
-                    bp::make_function(&SolverFDDP::get_upsilon_decfactor),
-                    bp::make_function(&SolverFDDP::set_upsilon_decfactor),
-                    "threshold for decreasing the penalization that balances "
-                    "optimality and feasibility.")
-      .add_property("zero_upsilon",
-                    bp::make_function(&SolverFDDP::get_zero_upsilon),
-                    bp::make_function(&SolverFDDP::set_zero_upsilon),
-                    "True if we set estimated penalty parameter (upsilon) to "
-                    "zero when solve is called.")
-      .add_property(
-          "Vxx",
-          make_function(
-              &SolverFDDP::get_Vxx,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Vxx")
-      .add_property(
-          "Vx",
-          make_function(
-              &SolverFDDP::get_Vx,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Vx")
-      .add_property(
-          "Qxx",
-          make_function(
-              &SolverFDDP::get_Qxx,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qxx")
-      .add_property(
-          "Qxu",
-          make_function(
-              &SolverFDDP::get_Qxu,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qxu")
-      .add_property(
-          "Quu",
-          make_function(
-              &SolverFDDP::get_Quu,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Quu")
-      .add_property(
-          "Qx",
-          make_function(
-              &SolverFDDP::get_Qx,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qx")
-      .add_property(
-          "Qu",
-          make_function(
-              &SolverFDDP::get_Qu,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qu")
-      .add_property(
-          "K",
-          make_function(
-              &SolverFDDP::get_K,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "K")
-      .add_property(
-          "k",
-          make_function(
-              &SolverFDDP::get_k,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "k")
-      .add_property(
-          "dxs",
-          make_function(
-              &SolverFDDP::get_dxs,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "linear changes in the state trajectory.")
-      .add_property(
-          "dus",
-          make_function(
-              &SolverFDDP::get_dus,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "linear changes in the control trajectory.")
-      .add_property(
-          "Vxc",
-          make_function(
-              &SolverFDDP::get_Vxc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Vxc")
-      .add_property(
-          "Qxc",
-          make_function(
-              &SolverFDDP::get_Qxc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qxc")
-      .add_property(
-          "Quc",
-          make_function(
-              &SolverFDDP::get_Quc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Quc")
-      .add_property(
-          "dXc",
-          make_function(
-              &SolverFDDP::get_dXc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "dXc")
-      .add_property(
-          "dUc",
-          make_function(
-              &SolverFDDP::get_dUc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "dUc")
-      .add_property(
-          "Kc",
-          make_function(
-              &SolverFDDP::get_Kc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Kc")
-      .add_property(
-          "dHc",
-          make_function(
-              &SolverFDDP::get_dHc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "dHc")
-      .add_property(
-          "hc",
-          make_function(
-              &SolverFDDP::get_hc,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "hc")
-      .add_property(
-          "beta_plus",
-          make_function(
-              &SolverFDDP::get_beta_plus,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "beta_plus")
-      .def(CopyableVisitor<SolverFDDP>());
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_SOLVER_FDDP_PYTHON_BINDINGS(@SCALAR_TYPE@)
 #endif
 }
 
