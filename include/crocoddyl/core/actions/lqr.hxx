@@ -419,13 +419,10 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   }
   L_ = MatrixXs::Zero(nx + nu_, nx + nu_);
   L_ << Q, N, N.transpose(), R;
-  Eigen::SelfAdjointEigenSolver<MatrixXs> eig(L_);
-  if (eig.info() != Eigen::Success ||
-      eig.eigenvalues().minCoeff() < ScaleNumerics<Scalar>(-1e-9)) {
+  if (checkPSD(L_)) {
     throw_pretty("Invalid argument "
                  << "[Q, N; N.T, R] is not positive semi-definite");
   }
-
   A_ = A;
   B_ = B;
   f_ = f;
