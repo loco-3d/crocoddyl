@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Add install version in https://github.com/loco-3d/crocoddyl/pull/1355
 * Removed absolute path for boost library in https://github.com/loco-3d/crocoddyl/pull/1353
 * Fixed checking of positive semi-define condition in LQR problems in https://github.com/loco-3d/crocoddyl/pull/1352
 * Compute LU decomposition using permutationP in https://github.com/loco-3d/crocoddyl/pull/1351
