@@ -67,7 +67,6 @@ jobs:
           . ~/venv/bin/activate
           pip install --upgrade pip
           pip install "numpy<2" "pybind11>=2.12"
-          pip install example-robot-data
       # This step will fetch/store the directory used by ccache before/after the ci run
       - uses: actions/cache@v4
         with:
