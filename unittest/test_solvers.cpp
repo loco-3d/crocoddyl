@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -320,6 +320,72 @@ void test_solver_convergence(SolverTypes::Type solver_type,
 
 //____________________________________________________________________________//
 
+void test_casted_solver(SolverTypes::Type solver_type,
+                        ActionModelTypes::Type action_type, size_t T) {
+  // Create action models
+  std::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(action_type);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(action_type, ActionModelFactory::Second);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
+
+  // Create the solver
+  SolverFactory solver_factory;
+  std::shared_ptr<crocoddyl::SolverAbstract> solver =
+      solver_factory.create(solver_type, model, model2, modelT, T);
+  std::shared_ptr<crocoddyl::SolverAbstractTpl<float>> casted_solver =
+      solver->cast<float>();
+
+  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  const std::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  // Generate the different state along the trajectory
+  const std::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  for (std::size_t i = 0; i < T; ++i) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs.push_back(state->rand());
+    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
+  }
+  xs.push_back(state->rand());
+  std::vector<Eigen::VectorXf> xs_f = crocoddyl::vector_cast<float>(xs);
+  std::vector<Eigen::VectorXf> us_f = crocoddyl::vector_cast<float>(us);
+
+  // Compute solve with coldstart
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  solver->solve();
+  casted_solver->solve();
+  for (std::size_t i = 0; i < T; ++i) {
+    BOOST_CHECK((solver->get_xs()[i].cast<float>() - casted_solver->get_xs()[i])
+                    .isZero(tol_f));
+    BOOST_CHECK((solver->get_us()[i].cast<float>() - casted_solver->get_us()[i])
+                    .isZero(tol_f));
+  }
+  BOOST_CHECK(
+      (solver->get_xs().back().cast<float>() - casted_solver->get_xs().back())
+          .isZero(tol_f));
+
+  // Compute solve with warmstart
+  solver->solve(xs, us);
+  casted_solver->solve(xs_f, us_f);
+  for (std::size_t i = 0; i < T; ++i) {
+    BOOST_CHECK((solver->get_xs()[i].cast<float>() - casted_solver->get_xs()[i])
+                    .isZero(tol_f));
+    BOOST_CHECK((solver->get_us()[i].cast<float>() - casted_solver->get_us()[i])
+                    .isZero(tol_f));
+  }
+  BOOST_CHECK(
+      (solver->get_xs().back().cast<float>() - casted_solver->get_xs().back())
+          .isZero(tol_f));
+}
+
+//____________________________________________________________________________//
+
 void test_kkt_dimension(ActionModelTypes::Type action_type, size_t T) {
   // Create action models
   std::shared_ptr<crocoddyl::ActionModelAbstract> model =
@@ -437,7 +503,7 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
   xs.push_back(state->rand());
 
   // Define the callback function
-  std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+  std::vector<std::shared_ptr<crocoddyl::CallbackAbstract>> cbs;
   cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());
 
   // Print the name of the action model for introspection
@@ -488,6 +554,11 @@ void register_solvers_againt_lqr_actions_unit_tests(
                                       solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(
       boost::bind(&test_solver_convergence, solver_type, action_type, T)));
+  if ((solver_type != SolverTypes::SolverIpopt) &&
+      (solver_type != SolverTypes::SolverKKT)) {
+    ts->add(BOOST_TEST_CASE(
+        boost::bind(&test_casted_solver, solver_type, action_type, T)));
+  }
   framework::master_test_suite().add(ts);
 }
 
