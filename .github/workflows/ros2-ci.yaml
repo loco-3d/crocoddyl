@@ -49,15 +49,24 @@ jobs:
       UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
       CTEST_OUTPUT_ON_FAILURE: 1
       BUILDER: colcon
-      # This by-passes issues on importing example_robot_data module when running examples and unit tests.
-      # It seems target_ws is unable to properly overlay upstream_ws.
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      # Install python3-venv to ensure virtual environment can be created
+      - name: Install python3-venv
+        run: |
+          sudo apt update
+          sudo apt install -y python3-venv
+      # Create virtual environment and install dependencies
+      - name: Setup Python environment
+        run: |
+          python3 -m venv ~/venv
+          . ~/venv/bin/activate
+          pip install --upgrade pip
+          pip install "numpy<2" "pybind11>=2.12"
       # This step will fetch/store the directory used by ccache before/after the ci run
       - uses: actions/cache@v4
         with:

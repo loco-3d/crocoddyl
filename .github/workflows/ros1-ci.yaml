@@ -51,6 +51,11 @@ jobs:
       # target after completion of the regular test target. The output of this step does affect the output of the CI process.
       # Note, this does not affect projects that do not have pure CMake projects in their upstream_ws.
       BUILDER: catkin_tools
+      AFTER_SETUP_UPSTREAM_WORKSPACE: |
+        python3 -m venv ~/venv
+        . ~/venv/bin/activate
+        pip install --upgrade pip
+        pip install "numpy<2" "pybind11>=2.12"
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
