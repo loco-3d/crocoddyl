@@ -51,7 +51,12 @@ jobs:
       BUILDER: colcon
       # This by-passes issues on importing example_robot_data module when running examples and unit tests.
       # It seems target_ws is unable to properly overlay upstream_ws.
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
+      AFTER_SETUP_UPSTREAM_WORKSPACE: |
+        python3 -m venv ~/venv
+        . ~/venv/bin/activate
+        pip install --upgrade pip
+        pip install "numpy<2" "pybind11>=2.12"
+        pip install example-robot-data
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
