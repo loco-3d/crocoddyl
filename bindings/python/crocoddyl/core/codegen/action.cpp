@@ -9,6 +9,7 @@
 #include <pinocchio/codegen/cppadcg.hpp>
 
 #include "crocoddyl/core/codegen/action-base.hpp"
+#include "crocoddyl/multibody/codegen/pinocchio_cast.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
