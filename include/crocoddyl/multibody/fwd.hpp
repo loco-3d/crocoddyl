@@ -10,6 +10,12 @@
 #ifndef CROCODDYL_MULTIBODY_FWD_HPP_
 #define CROCODDYL_MULTIBODY_FWD_HPP_
 
+#ifdef CROCODDYL_WITH_CODEGEN
+#include <pinocchio/codegen/cppadcg.hpp>
+
+#include "crocoddyl/multibody/codegen/pinocchio_cast.hpp"
+#endif
+
 #include "crocoddyl/core/costs/residual.hpp"
 
 namespace crocoddyl {
