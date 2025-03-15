@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_FORCE_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
@@ -57,6 +56,7 @@ template <typename _Scalar>
 class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelContactForceTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -104,7 +104,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
   ResidualModelContactForceTpl(std::shared_ptr<StateMultibody> state,
                                const pinocchio::FrameIndex id,
                                const Force& fref, const std::size_t nc);
-  virtual ~ResidualModelContactForceTpl();
+  virtual ~ResidualModelContactForceTpl() = default;
 
   /**
    * @brief Compute the contact force residual
@@ -120,7 +120,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the residual vector for nodes that depends only on the state
@@ -133,7 +133,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the contact force residual
@@ -149,7 +149,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the Jacobian of the residual functions with respect to the
@@ -163,7 +163,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the contact force residual data
@@ -172,7 +172,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @return the residual data.
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
 
   /**
    * @brief Update the Jacobians of the contact friction cone residual
@@ -180,6 +180,18 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] data  Contact friction cone residual data
    */
   void updateJacobians(const std::shared_ptr<ResidualDataAbstract>& data);
+
+  /**
+   * @brief Cast the contact-force residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelContactForceTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelContactForceTpl<NewScalar> cast() const;
 
   /**
    * @brief Indicates if we are using the forward-dynamics (true) or
@@ -215,7 +227,7 @@ class ResidualModelContactForceTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nr_;
@@ -341,6 +353,7 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
           frame_name);
     }
   }
+  virtual ~ResidualDataContactForceTpl() = default;
 
   std::shared_ptr<ForceDataAbstractTpl<Scalar> >
       contact;               //!< Contact force data

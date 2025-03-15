@@ -1,13 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
 namespace crocoddyl {
@@ -286,6 +285,25 @@ ImpulseModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<ImpulseDataMultiple>(
       Eigen::aligned_allocator<ImpulseDataMultiple>(), this, data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ImpulseModelMultipleTpl<NewScalar> ImpulseModelMultipleTpl<Scalar>::cast()
+    const {
+  typedef ImpulseModelMultipleTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ImpulseItemTpl<NewScalar> ImpulseType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()));
+  typename ImpulseModelContainer::const_iterator it_m, end_m;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(); it_m != end_m;
+       ++it_m) {
+    const std::string name = it_m->first;
+    const ImpulseType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addImpulse(name, m_i.impulse, m_i.active);
+  }
+  return ret;
 }
 
 template <typename Scalar>

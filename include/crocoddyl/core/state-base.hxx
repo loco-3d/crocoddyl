@@ -1,10 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
+
+#include <boost/core/demangle.hpp>
+
 #include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
@@ -109,6 +113,11 @@ StateAbstractTpl<Scalar>::Jintegrate_Js(const Eigen::Ref<const VectorXs>& x,
 }
 
 template <typename Scalar>
+void StateAbstractTpl<Scalar>::print(std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
+}
+
+template <typename Scalar>
 std::size_t StateAbstractTpl<Scalar>::get_nx() const {
   return nx_;
 }
@@ -170,6 +179,13 @@ void StateAbstractTpl<Scalar>::set_ub(const VectorXs& ub) {
 template <typename Scalar>
 void StateAbstractTpl<Scalar>::update_has_limits() {
   has_limits_ = isfinite(lb_.array()).any() || isfinite(ub_.array()).any();
+}
+
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& os,
+                         const StateAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
 }
 
 }  // namespace crocoddyl

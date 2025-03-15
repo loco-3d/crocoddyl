@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,

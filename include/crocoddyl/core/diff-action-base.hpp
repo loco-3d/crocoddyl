@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,15 +10,21 @@
 #ifndef CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
+
+class DifferentialActionModelBase {
+ public:
+  virtual ~DifferentialActionModelBase() = default;
+
+  CROCODDYL_BASE_CAST(DifferentialActionModelBase,
+                      DifferentialActionModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for differential action model
@@ -26,7 +32,7 @@ namespace crocoddyl {
  * A differential action model combines dynamics, cost and constraints models.
  * We can use it in each node of our optimal control problem thanks to dedicated
  * integration rules (e.g., `IntegratedActionModelEulerTpl` or
- * `IntegratedActionModelRK4Tpl`). These integrated action models produce action
+ * `IntegratedActionModelRKTpl`). These integrated action models produce action
  * models (`ActionModelAbstractTpl`). Thus, every time that we want to describe
  * a problem, we need to provide ways of computing the dynamics, cost,
  * constraints functions and their derivatives. All these are described inside
@@ -116,11 +122,12 @@ namespace crocoddyl {
  * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class DifferentialActionModelAbstractTpl {
+class DifferentialActionModelAbstractTpl : public DifferentialActionModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionDataAbstractTpl<Scalar>
       DifferentialActionDataAbstract;
@@ -146,7 +153,7 @@ class DifferentialActionModelAbstractTpl {
                                      const std::size_t nh = 0,
                                      const std::size_t ng_T = 0,
                                      const std::size_t nh_T = 0);
-  virtual ~DifferentialActionModelAbstractTpl();
+  virtual ~DifferentialActionModelAbstractTpl() = default;
 
   /**
    * @brief Compute the system acceleration and cost value
@@ -368,6 +375,8 @@ class DifferentialActionModelAbstractTpl {
   VectorXs u_ub_;            //!< Upper control limits
   bool has_control_limits_;  //!< Indicates whether any of the control limits is
                              //!< finite
+  DifferentialActionModelAbstractTpl()
+      : nu_(0), nr_(0), ng_(0), nh_(0), ng_T_(0), nh_T_(0), state_(nullptr) {}
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined
@@ -434,7 +443,7 @@ struct DifferentialActionDataAbstractTpl {
     Hx.setZero();
     Hu.setZero();
   }
-  virtual ~DifferentialActionDataAbstractTpl() {}
+  virtual ~DifferentialActionDataAbstractTpl() = default;
 
   Scalar cost;    //!< cost value
   VectorXs xout;  //!< evolution state

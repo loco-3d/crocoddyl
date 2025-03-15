@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, Airbus, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, Airbus, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +15,6 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -43,6 +43,7 @@ class ActivationModel2NormBarrierTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModel2NormBarrierTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -69,7 +70,7 @@ class ActivationModel2NormBarrierTpl
       throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModel2NormBarrierTpl() {};
+  virtual ~ActivationModel2NormBarrierTpl() = default;
 
   /**
    * @brief Compute the 2-norm barrier function
@@ -78,7 +79,7 @@ class ActivationModel2NormBarrierTpl
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r) {
+                    const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -101,7 +102,7 @@ class ActivationModel2NormBarrierTpl
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r) {
+                        const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -113,11 +114,12 @@ class ActivationModel2NormBarrierTpl
       data->Ar = (d->d - alpha_) / d->d * r;
       if (true_hessian_) {
         data->Arr.diagonal() =
-            alpha_ * r.array().square() / std::pow(d->d, 3);  // True Hessian
+            alpha_ * r.array().square() / pow(d->d, Scalar(3));  // True Hessian
         data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
       } else {
         data->Arr.diagonal() =
-            r.array().square() / std::pow(d->d, 2);  // GN Hessian approximation
+            r.array().square() /
+            pow(d->d, Scalar(2));  // GN Hessian approximation
       }
     } else {
       data->Ar.setZero();
@@ -130,9 +132,16 @@ class ActivationModel2NormBarrierTpl
    *
    * @return the activation data
    */
-  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  template <typename NewScalar>
+  ActivationModel2NormBarrierTpl<NewScalar> cast() const {
+    typedef ActivationModel2NormBarrierTpl<NewScalar> ReturnType;
+    ReturnType res(nr_, scalar_cast<NewScalar>(alpha_), true_hessian_);
+    return res;
+  }
 
   /**
    * @brief Get and set the threshold factor
@@ -145,7 +154,7 @@ class ActivationModel2NormBarrierTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const {
+  virtual void print(std::ostream& os) const override {
     os << "ActivationModel2NormBarrier {nr=" << nr_ << ", alpha=" << alpha_
        << ", Hessian=" << true_hessian_ << "}";
   }
@@ -163,11 +172,15 @@ struct ActivationData2NormBarrierTpl
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
   explicit ActivationData2NormBarrierTpl(Activation* const activation)
       : Base(activation), d(Scalar(0)) {}
+  virtual ~ActivationData2NormBarrierTpl() = default;
 
   Scalar d;  //!< Norm of the residual
 

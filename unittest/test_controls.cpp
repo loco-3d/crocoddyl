@@ -1,9 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft,
-//                     University of Edinburgh, INRIA, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft,
+//                          University of Edinburgh, INRIA,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise controld in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,18 +26,19 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
 
+  const std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract>& data =
+      control->createData();
+
   // Generating random values for the control parameters
   const Eigen::VectorXd p = Eigen::VectorXd::Random(control->get_nu());
   double t = Eigen::VectorXd::Random(1)(0) * 0.5 + 1.;  // random in [0, 1]
 
   // Get the num diff control
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
-
-  // Computing the partial derivatives of the value function
-  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
-      control->createData();
   std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
       control_num_diff.createData();
+
+  // Computing the partial derivatives of the value function
   control->calc(data, t, p);
   control_num_diff.calc(data_num_diff, t, p);
   control->calcDiff(data, t, p);
@@ -45,12 +47,29 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->dw_du - data_num_diff->dw_du).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationModelAbstractTpl<float>>&
+      casted_control = control->cast<float>();
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationDataAbstractTpl<float>>& casted_data =
+      casted_control->createData();
+  const Eigen::VectorXf p_f = p.cast<float>();
+  float t_f = float(t);
+  casted_control->calc(casted_data, t_f, p_f);
+  casted_control->calcDiff(casted_data, t_f, p_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->dw_du.cast<float>() - casted_data->dw_du).isZero(tol_f));
 }
 
 void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   ControlFactory factory;
   const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
+
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
+      control->createData();
 
   // Generating random values for the control parameters, the time, and the
   // matrix to multiply
@@ -60,8 +79,6 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
-  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
-      control->createData();
   std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
       control_num_diff.createData();
 
@@ -79,6 +96,25 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((A_J - A_J_num_diff).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationModelAbstractTpl<float>>&
+      casted_control = control->cast<float>();
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationDataAbstractTpl<float>>& casted_data =
+      casted_control->createData();
+  Eigen::MatrixXf A_J_f(
+      Eigen::MatrixXf::Zero(A.rows(), casted_control->get_nu()));
+  const Eigen::VectorXf p_f = p.cast<float>();
+  float t_f = float(t);
+  const Eigen::MatrixXf A_f = A.cast<float>();
+  casted_control->calc(casted_data, t_f, p_f);
+  casted_control->calcDiff(casted_data, t_f, p_f);
+  casted_control->multiplyByJacobian(casted_data, A_f, A_J_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->dw_du.cast<float>() - casted_data->dw_du).isZero(tol_f));
+  BOOST_CHECK((A_J.cast<float>() - A_J_f).isZero(tol_f));
 }
 
 void test_multiplyJacobianTransposeBy_num_diff(
@@ -86,6 +122,9 @@ void test_multiplyJacobianTransposeBy_num_diff(
   ControlFactory factory;
   const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>&
       control = factory.create(control_type, 10);
+
+  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
+      control->createData();
 
   // Generating random values for the control parameters, the time, and the
   // matrix to multiply
@@ -95,8 +134,6 @@ void test_multiplyJacobianTransposeBy_num_diff(
 
   // Get the num diff control and datas
   crocoddyl::ControlParametrizationModelNumDiff control_num_diff(control);
-  std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data =
-      control->createData();
   std::shared_ptr<crocoddyl::ControlParametrizationDataAbstract> data_num_diff =
       control_num_diff.createData();
 
@@ -114,6 +151,24 @@ void test_multiplyJacobianTransposeBy_num_diff(
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((JT_A - JT_A_num_diff).isZero(tol));
+
+  // Checking that casted computation is the same
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationModelAbstractTpl<float>>&
+      casted_control = control->cast<float>();
+  const std::shared_ptr<
+      crocoddyl::ControlParametrizationDataAbstractTpl<float>>& casted_data =
+      casted_control->createData();
+  const Eigen::VectorXf p_f = p.cast<float>();
+  float t_f = float(t);
+  const Eigen::MatrixXf A_f = A.cast<float>();
+  Eigen::MatrixXf JT_A_f(
+      Eigen::MatrixXf::Zero(casted_control->get_nu(), A_f.cols()));
+  casted_control->calc(casted_data, t_f, p_f);
+  casted_control->calcDiff(casted_data, t_f, p_f);
+  casted_control->multiplyJacobianTransposeBy(casted_data, A_f, JT_A_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((JT_A.cast<float>() - JT_A_f).isZero(tol_f));
 }
 
 //----------------------------------------------------------------------------//

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -15,83 +15,118 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeResidualControlGrav() {
-  bp::register_ptr_to_python<std::shared_ptr<ResidualModelControlGrav> >();
+template <typename Model>
+struct ResidualModelControlGravVisitor
+    : public bp::def_visitor<ResidualModelControlGravVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>>(
+               bp::args("self", "state"),
+               "Initialize the control-gravity residual model.\n\n"
+               "The default nu is obtained from state.nv.\n"
+               ":param state: state description"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the control residual.\n\n"
+            ":param data: residual data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the control residual.\n\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the control residual data.\n\n"
+             "Each residual model has its own data that needs to be allocated. "
+             "This "
+             "function\n"
+             "returns the allocated data for the control gravity residual.\n"
+             ":param data: shared data\n"
+             ":return residual data.");
+  }
+};
 
-  bp::class_<ResidualModelControlGrav, bp::bases<ResidualModelAbstract> >(
-      "ResidualModelControlGrav",
-      "This residual function is defined as r = a(u) - g(q), where a(u)\n"
-      "is the actuated torque; and q, g(q) are the generalized position\n"
-      "and gravity vector, respectively.",
-      bp::init<std::shared_ptr<StateMultibody>, std::size_t>(
-          bp::args("self", "state", "nu"),
-          "Initialize the control-gravity residual model.\n\n"
-          ":param state: state description\n"
-          ":param nu: dimension of the control vector"))
-      .def(bp::init<std::shared_ptr<StateMultibody> >(
-          bp::args("self", "state"),
-          "Initialize the control-gravity residual model.\n\n"
-          "The default nu is obtained from state.nv.\n"
-          ":param state: state description"))
-      .def<void (ResidualModelControlGrav::*)(
-          const std::shared_ptr<ResidualDataAbstract> &,
-          const Eigen::Ref<const Eigen::VectorXd> &,
-          const Eigen::Ref<const Eigen::VectorXd> &)>(
-          "calc", &ResidualModelControlGrav::calc,
-          bp::args("self", "data", "x", "u"),
-          "Compute the control residual.\n\n"
-          ":param data: residual data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelControlGrav::*)(
-          const std::shared_ptr<ResidualDataAbstract> &,
-          const Eigen::Ref<const Eigen::VectorXd> &)>(
-          "calc", &ResidualModelAbstract::calc, bp::args("self", "data", "x"))
-      .def<void (ResidualModelControlGrav::*)(
-          const std::shared_ptr<ResidualDataAbstract> &,
-          const Eigen::Ref<const Eigen::VectorXd> &,
-          const Eigen::Ref<const Eigen::VectorXd> &)>(
-          "calcDiff", &ResidualModelControlGrav::calcDiff,
-          bp::args("self", "data", "x", "u"),
-          "Compute the derivatives of the control residual.\n\n"
-          ":param data: action data\n"
-          ":param x: state point (dim. state.nx)\n"
-          ":param u: control input (dim. nu)")
-      .def<void (ResidualModelControlGrav::*)(
-          const std::shared_ptr<ResidualDataAbstract> &,
-          const Eigen::Ref<const Eigen::VectorXd> &)>(
-          "calcDiff", &ResidualModelAbstract::calcDiff,
-          bp::args("self", "data", "x"))
-      .def("createData", &ResidualModelControlGrav::createData,
-           bp::with_custodian_and_ward_postcall<0, 2>(),
-           bp::args("self", "data"),
-           "Create the control residual data.\n\n"
-           "Each residual model has its own data that needs to be allocated. "
-           "This "
-           "function\n"
-           "returns the allocated data for the control gravity residual.\n"
-           ":param data: shared data\n"
-           ":return residual data.")
-      .def(CopyableVisitor<ResidualModelControlGrav>());
-
-  bp::register_ptr_to_python<std::shared_ptr<ResidualDataControlGrav> >();
-
-  bp::class_<ResidualDataControlGrav, bp::bases<ResidualDataAbstract> >(
-      "ResidualDataControlGrav", "Data for control gravity residual.\n\n",
-      bp::init<ResidualModelControlGrav *, DataCollectorAbstract *>(
-          bp::args("self", "model", "data"),
-          "Create control gravity residual data.\n\n"
-          ":param model: control gravity residual model\n"
-          ":param data: shared data")[bp::with_custodian_and_ward<
-          1, 2, bp::with_custodian_and_ward<1, 3> >()])
-      .add_property("pinocchio",
-                    bp::make_getter(&ResidualDataControlGrav::pinocchio),
+template <typename Data>
+struct ResidualDataControlGravVisitor
+    : public bp::def_visitor<ResidualDataControlGravVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property("pinocchio", bp::make_getter(&Data::pinocchio),
                     "Pinocchio data used for internal computations")
-      .add_property("actuation",
-                    bp::make_getter(&ResidualDataControlGrav::actuation,
-                                    bp::return_internal_reference<>()),
-                    "actuation model")
-      .def(CopyableVisitor<ResidualDataControlGrav>());
+        .add_property("actuation",
+                      bp::make_getter(&Data::actuation,
+                                      bp::return_internal_reference<>()),
+                      "actuation model");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_CONTROL_GRAV_PYTHON_BINDINGS(Scalar)        \
+  typedef ResidualModelControlGravTpl<Scalar> Model;                         \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef typename Model::StateMultibody State;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ResidualModelControlGrav",                                            \
+      "This residual function is defined as r = a(u) - g(q), where a(u) is " \
+      "the actuated torque; and q, g(q) are the generalized position and "   \
+      "gravity vector, respectively.",                                       \
+      bp::init<std::shared_ptr<State>, std::size_t>(                         \
+          bp::args("self", "state", "nu"),                                   \
+          "Initialize the control-gravity residual model.\n\n"               \
+          ":param state: state description\n"                                \
+          ":param nu: dimension of the control vector"))                     \
+      .def(ResidualModelControlGravVisitor<Model>())                         \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_RESIDUAL_DATA_CONTROL_GRAV_PYTHON_BINDINGS(Scalar)       \
+  typedef ResidualDataControlGravTpl<Scalar> Data;                         \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                        \
+  typedef ResidualModelControlGravTpl<Scalar> Model;                       \
+  typedef Model::DataCollectorAbstract DataCollector;                      \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                     \
+  bp::class_<Data, bp::bases<DataBase>>(                                   \
+      "ResidualDataControlGrav", "Data for control gravity residual.\n\n", \
+      bp::init<Model*, DataCollector*>(                                    \
+          bp::args("self", "model", "data"),                               \
+          "Create control gravity residual data.\n\n"                      \
+          ":param model: control gravity residual model\n"                 \
+          ":param data: shared data")[bp::with_custodian_and_ward<         \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                     \
+      .def(ResidualDataControlGravVisitor<Data>())                         \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualControlGrav() {
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_RESIDUAL_MODEL_CONTROL_GRAV_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_RESIDUAL_DATA_CONTROL_GRAV_PYTHON_BINDINGS)
 }
 
 }  // namespace python

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,34 +11,52 @@
 #define BINDINGS_PYTHON_CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_
 
 #include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-class DifferentialActionModelAbstract_wrap
-    : public DifferentialActionModelAbstract,
-      public bp::wrapper<DifferentialActionModelAbstract> {
+template <typename _Scalar>
+class DifferentialActionModelAbstractTpl_wrap
+    : public DifferentialActionModelAbstractTpl<_Scalar>,
+      public bp::wrapper<DifferentialActionModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  using DifferentialActionModelAbstract::unone_;
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelAbstractTpl_wrap)
 
-  DifferentialActionModelAbstract_wrap(std::shared_ptr<StateAbstract> state,
-                                       const std::size_t nu,
-                                       const std::size_t nr = 1,
-                                       const std::size_t ng = 0,
-                                       const std::size_t nh = 0,
-                                       const std::size_t ng_T = 0,
-                                       const std::size_t nh_T = 0)
-      : DifferentialActionModelAbstract(state, nu, nr, ng, nh, ng_T, nh_T),
-        bp::wrapper<DifferentialActionModelAbstract>() {
-    unone_ = NAN * MathBase::VectorXs::Ones(nu);
+  typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
+  typedef typename crocoddyl::DifferentialActionModelAbstractTpl<Scalar>
+      DifferentialActionModel;
+  typedef typename crocoddyl::DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionData;
+  typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
+  typedef typename DifferentialActionModel::VectorXs VectorXs;
+  using DifferentialActionModel::ng_;
+  using DifferentialActionModel::ng_T_;
+  using DifferentialActionModel::nh_;
+  using DifferentialActionModel::nh_T_;
+  using DifferentialActionModel::nr_;
+  using DifferentialActionModel::nu_;
+  using DifferentialActionModel::state_;
+  using DifferentialActionModel::unone_;
+
+  DifferentialActionModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                                          const std::size_t nu,
+                                          const std::size_t nr = 1,
+                                          const std::size_t ng = 0,
+                                          const std::size_t nh = 0,
+                                          const std::size_t ng_T = 0,
+                                          const std::size_t nh_T = 0)
+      : DifferentialActionModel(state, nu, nr, ng, nh, ng_T, nh_T),
+        bp::wrapper<DifferentialActionModel>() {
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
 
-  void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const Eigen::VectorXd>& x,
-            const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calc(const std::shared_ptr<DifferentialActionData>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -49,18 +67,19 @@ class DifferentialActionModelAbstract_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
-      return bp::call<void>(this->get_override("calc").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+      return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x,
+                            (VectorXs)u);
     }
   }
 
-  void calcDiff(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const Eigen::VectorXd>& x,
-                const Eigen::Ref<const Eigen::VectorXd>& u) {
+  void calcDiff(const std::shared_ptr<DifferentialActionData>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
       throw_pretty(
           "Invalid argument: " << "x has wrong dimension (it should be " +
@@ -71,36 +90,36 @@ class DifferentialActionModelAbstract_wrap
           "Invalid argument: " << "u has wrong dimension (it should be " +
                                       std::to_string(nu_) + ")");
     }
-    if (std::isnan(u.lpNorm<Eigen::Infinity>())) {
+    if (std::isnan(
+            scalar_cast<ScalarType>(u.template lpNorm<Eigen::Infinity>()))) {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x);
+                            (VectorXs)x);
     } else {
       return bp::call<void>(this->get_override("calcDiff").ptr(), data,
-                            (Eigen::VectorXd)x, (Eigen::VectorXd)u);
+                            (VectorXs)x, (VectorXs)u);
     }
   }
 
-  std::shared_ptr<DifferentialActionDataAbstract> createData() {
+  std::shared_ptr<DifferentialActionData> createData() override {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
-      return bp::call<std::shared_ptr<DifferentialActionDataAbstract> >(
+      return bp::call<std::shared_ptr<DifferentialActionData>>(
           createData.ptr());
     }
-    return DifferentialActionModelAbstract::createData();
+    return DifferentialActionModel::createData();
   }
 
-  std::shared_ptr<DifferentialActionDataAbstract> default_createData() {
-    return this->DifferentialActionModelAbstract::createData();
+  std::shared_ptr<DifferentialActionData> default_createData() {
+    return this->DifferentialActionModel::createData();
   }
 
-  void quasiStatic(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                   Eigen::Ref<Eigen::VectorXd> u,
-                   const Eigen::Ref<const Eigen::VectorXd>& x,
-                   const std::size_t maxiter, const double tol) {
+  void quasiStatic(const std::shared_ptr<DifferentialActionData>& data,
+                   Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                   const std::size_t maxiter, const Scalar tol) override {
     if (boost::python::override quasiStatic =
             this->get_override("quasiStatic")) {
-      u = bp::call<Eigen::VectorXd>(quasiStatic.ptr(), data, (Eigen::VectorXd)x,
-                                    maxiter, tol);
+      u = bp::call<VectorXs>(quasiStatic.ptr(), data, (VectorXs)x, maxiter,
+                             tol);
       if (static_cast<std::size_t>(u.size()) != nu_) {
         throw_pretty(
             "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -108,22 +127,24 @@ class DifferentialActionModelAbstract_wrap
       }
       return;
     }
-    return DifferentialActionModelAbstract::quasiStatic(data, u, x, maxiter,
-                                                        tol);
+    return DifferentialActionModel::quasiStatic(data, u, x, maxiter, tol);
   }
 
-  void default_quasiStatic(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      Eigen::Ref<Eigen::VectorXd> u, const Eigen::Ref<const Eigen::VectorXd>& x,
-      const std::size_t maxiter, const double tol) {
-    return this->DifferentialActionModelAbstract::quasiStatic(data, u, x,
-                                                              maxiter, tol);
+  void default_quasiStatic(const std::shared_ptr<DifferentialActionData>& data,
+                           Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x,
+                           const std::size_t maxiter, const Scalar tol) {
+    return this->DifferentialActionModel::quasiStatic(data, u, x, maxiter, tol);
+  }
+
+  template <typename NewScalar>
+  DifferentialActionModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef DifferentialActionModelAbstractTpl_wrap<NewScalar> ReturnType;
+    ReturnType ret(state_->template cast<NewScalar>(), nr_, nu_, ng_, nh_,
+                   ng_T_, nh_T_);
+    return ret;
   }
 };
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
-    DifferentialActionModel_quasiStatic_wraps,
-    DifferentialActionModelAbstract::quasiStatic_x, 2, 4)
 
 }  // namespace python
 }  // namespace crocoddyl

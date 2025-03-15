@@ -59,7 +59,7 @@ jobs:
     - uses: actions/cache@v4
       with:
         path: ${{ env.CCACHE_DIR }}
-        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-${{ github.sha }}
+        key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-${{ github.run_id }}
         restore-keys: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-
 
     - uses: conda-incubator/setup-miniconda@v3
@@ -111,10 +111,8 @@ jobs:
       run: |
         conda activate crocoddyl
         echo $CONDA_PREFIX
-
         mkdir build
         cd build
-
         cmake .. \
           -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
@@ -122,6 +120,7 @@ jobs:
           -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DGENERATE_PYTHON_STUBS=ON \
           -DOpenMP_ROOT=$CONDA_PREFIX
         make
+        make VERBOSE=1
 
     - name: Run unit tests
       shell: bash -l {0}
@@ -129,7 +128,7 @@ jobs:
         conda activate crocoddyl
         cd build
         export CTEST_OUTPUT_ON_FAILURE=1
-        make test
+        ctest --output-on-failure
 
     - name:  Install Crocoddyl
       shell: bash -l {0}

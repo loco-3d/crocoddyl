@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,7 +11,6 @@
 #define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
 #include <boost/core/demangle.hpp>
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <stdexcept>
 
@@ -20,8 +19,15 @@
 
 namespace crocoddyl {
 
+class ActivationModelBase {
+ public:
+  virtual ~ActivationModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ActivationModelBase, ActivationModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class ActivationModelAbstractTpl {
+class ActivationModelAbstractTpl : public ActivationModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -32,7 +38,7 @@ class ActivationModelAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   explicit ActivationModelAbstractTpl(const std::size_t nr) : nr_(nr) {};
-  virtual ~ActivationModelAbstractTpl() {};
+  virtual ~ActivationModelAbstractTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& r) = 0;
@@ -65,6 +71,7 @@ class ActivationModelAbstractTpl {
 
  protected:
   std::size_t nr_;
+  ActivationModelAbstractTpl() : nr_(0) {};
 };
 
 template <typename _Scalar>
@@ -84,7 +91,7 @@ struct ActivationDataAbstractTpl {
         Arr(DiagonalMatrixXs(activation->get_nr())) {
     Arr.setZero();
   }
-  virtual ~ActivationDataAbstractTpl() {}
+  virtual ~ActivationDataAbstractTpl() = default;
 
   Scalar a_value;
   VectorXs Ar;

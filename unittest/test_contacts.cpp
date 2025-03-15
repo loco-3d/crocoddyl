@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,7 +9,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
@@ -56,7 +55,7 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
@@ -78,6 +77,31 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model_f.get(),
+                                          &pinocchio_data_f, x_f);
+  casted_model->calc(casted_data, x_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!casted_data->a0.isZero());
+  }
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
@@ -91,7 +115,7 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
 
   // Compute the jacobian and check that the impulse model fetch it.
@@ -115,6 +139,34 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->f.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(pinocchio_model_f.get(),
+                                          &pinocchio_data_f, x_f);
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  if (model_type !=
+      PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
+                                      // body system.
+    BOOST_CHECK(!casted_data->a0.isZero());
+    BOOST_CHECK(!casted_data->da0_dx.isZero());
+    BOOST_CHECK((data->a0.cast<float>() - casted_data->a0).isZero());
+    BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero());
+  }
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_update_force(ContactModelTypes::Type contact_type,
@@ -128,14 +180,12 @@ void test_update_force(ContactModelTypes::Type contact_type,
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
 
   // Create a random force and update it
   Eigen::VectorXd f = Eigen::VectorXd::Random(data->Jc.rows());
   model->updateForce(data, f);
-  std::shared_ptr<crocoddyl::ContactModel3D> m =
-      std::static_pointer_cast<crocoddyl::ContactModel3D>(model);
 
   // Check that nothing has been computed and that all value are initialized to
   // 0
@@ -146,6 +196,31 @@ void test_update_force(ContactModelTypes::Type contact_type,
   BOOST_CHECK(!data->fext.toVector().isZero());
   BOOST_CHECK(data->df_dx.isZero());
   BOOST_CHECK(data->df_du.isZero());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::VectorXf f_f = f.cast<float>();
+  casted_model->updateForce(casted_data, f_f);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->a0.isZero());
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(!casted_data->f.toVector().isZero());
+  BOOST_CHECK(!casted_data->fext.toVector().isZero());
+  BOOST_CHECK(
+      (data->f.toVector().cast<float>() - casted_data->f.toVector()).isZero());
+  BOOST_CHECK(
+      (data->fext.toVector().cast<float>() - casted_data->fext.toVector())
+          .isZero());
+  BOOST_CHECK(casted_data->df_dx.isZero());
+  BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_update_force_diff(ContactModelTypes::Type contact_type,
@@ -159,7 +234,7 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   const std::shared_ptr<pinocchio::Model>& pinocchio_model =
       model->get_state()->get_pinocchio();
   pinocchio::Data pinocchio_data(*pinocchio_model.get());
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
 
   // Create a random force and update it
@@ -178,6 +253,29 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->fext.toVector().isZero());
   BOOST_CHECK(!data->df_dx.isZero());
   BOOST_CHECK(!data->df_du.isZero());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
+      casted_model->get_state()->get_pinocchio();
+  pinocchio::DataTpl<float> pinocchio_data_f(*pinocchio_model_f.get());
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  Eigen::MatrixXf df_dx_f = df_dx.cast<float>();
+  Eigen::MatrixXf df_du_f = df_du.cast<float>();
+  casted_model->updateForceDiff(casted_data, df_dx_f, df_du_f);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->a0.isZero());
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  BOOST_CHECK(casted_data->f.toVector().isZero());
+  BOOST_CHECK(casted_data->fext.toVector().isZero());
+  BOOST_CHECK(!casted_data->df_dx.isZero());
+  BOOST_CHECK(!casted_data->df_du.isZero());
+  BOOST_CHECK((data->df_dx.cast<float>() - casted_data->df_dx).isZero());
+  BOOST_CHECK((data->df_du.cast<float>() - casted_data->df_du).isZero());
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -194,7 +292,7 @@ void test_partial_derivatives_against_numdiff(
   pinocchio::Model& pinocchio_model =
       *model->get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  std::shared_ptr<crocoddyl::ContactDataAbstract> data =
+  const std::shared_ptr<crocoddyl::ContactDataAbstract>& data =
       model->createData(&pinocchio_data);
 
   // Create the equivalent num diff model and data.
@@ -210,8 +308,10 @@ void test_partial_derivatives_against_numdiff(
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::ContactModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
   // Computing the contact derivatives
@@ -223,6 +323,43 @@ void test_partial_derivatives_against_numdiff(
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
+      model->cast<float>();
+  pinocchio::ModelTpl<float>& pinocchio_model_f =
+      *casted_model->get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> pinocchio_data_f(pinocchio_model_f);
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&pinocchio_data_f);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::ContactModelNumDiffTpl<float> casted_model_num_diff =
+      model_num_diff.cast<float>();
+  const std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>&
+      casted_data_num_diff =
+          casted_model_num_diff.createData(&pinocchio_data_f);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model_f, &pinocchio_data_f,
+                                          x_f);
+  std::vector<crocoddyl::ContactModelNumDiffTpl<float>::ReevaluationFunction>
+      reevals_f;
+  reevals_f.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      float, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model_f, &pinocchio_data_f, _1, _2));
+  casted_model_num_diff.set_reevals(reevals_f);
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  casted_model_num_diff.calc(casted_data_num_diff, x_f);
+  casted_model_num_diff.calcDiff(casted_data_num_diff, x_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
+  BOOST_CHECK((casted_data->da0_dx - casted_data_num_diff->da0_dx)
+                  .isZero(30.f * tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

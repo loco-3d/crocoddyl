@@ -1,14 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -41,9 +40,6 @@ ResidualModelControlTpl<Scalar>::ResidualModelControlTpl(
     std::shared_ptr<typename Base::StateAbstract> state)
     : Base(state, state->get_nv(), state->get_nv(), false, false, true),
       uref_(VectorXs::Zero(state->get_nv())) {}
-
-template <typename Scalar>
-ResidualModelControlTpl<Scalar>::~ResidualModelControlTpl() {}
 
 template <typename Scalar>
 void ResidualModelControlTpl<Scalar>::calc(
@@ -98,6 +94,16 @@ void ResidualModelControlTpl<Scalar>::calcCostDiff(
     const std::shared_ptr<ActivationDataAbstract>& adata, const bool) {
   cdata->Lu = adata->Ar;
   cdata->Luu = adata->Arr;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelControlTpl<NewScalar> ResidualModelControlTpl<Scalar>::cast()
+    const {
+  typedef ResidualModelControlTpl<NewScalar> ReturnType;
+  ReturnType ret(state_->template cast<NewScalar>(),
+                 uref_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

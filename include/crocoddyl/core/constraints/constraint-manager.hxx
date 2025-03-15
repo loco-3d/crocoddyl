@@ -1,14 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -74,16 +72,20 @@ void ConstraintModelManagerTpl<Scalar>::removeConstraint(
     const std::string& name) {
   typename ConstraintModelContainer::iterator it = constraints_.find(name);
   if (it != constraints_.end()) {
-    ng_ -= it->second->constraint->get_ng();
-    nh_ -= it->second->constraint->get_nh();
-    if (it->second->constraint->get_T_constraint()) {
-      ng_T_ -= it->second->constraint->get_ng();
-      nh_T_ -= it->second->constraint->get_nh();
+    if (it->second->active) {
+      ng_ -= it->second->constraint->get_ng();
+      nh_ -= it->second->constraint->get_nh();
+      if (it->second->constraint->get_T_constraint()) {
+        ng_T_ -= it->second->constraint->get_ng();
+        nh_T_ -= it->second->constraint->get_nh();
+      }
+      lb_.resize(ng_);
+      ub_.resize(ng_);
+      active_set_.erase(name);
+    } else {
+      inactive_set_.erase(name);
     }
     constraints_.erase(it);
-    inactive_set_.erase(name);
-    lb_.resize(ng_);
-    ub_.resize(ng_);
   } else {
     std::cout << "Warning: we couldn't remove the " << name
               << " constraint item, it doesn't exist." << std::endl;
@@ -335,6 +337,23 @@ ConstraintModelManagerTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<ConstraintDataManager>(
       Eigen::aligned_allocator<ConstraintDataManager>(), this, data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ConstraintModelManagerTpl<NewScalar> ConstraintModelManagerTpl<Scalar>::cast()
+    const {
+  typedef ConstraintModelManagerTpl<NewScalar> ReturnType;
+  typedef ConstraintItemTpl<NewScalar> ConstraintType;
+  ReturnType ret(state_->template cast<NewScalar>(), nu_);
+  typename ConstraintModelContainer::const_iterator it_m, end_m;
+  for (it_m = constraints_.begin(), end_m = constraints_.end(); it_m != end_m;
+       ++it_m) {
+    const std::string name = it_m->first;
+    const ConstraintType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addConstraint(name, m_i.constraint, m_i.active);
+  }
+  return ret;
 }
 
 template <typename Scalar>

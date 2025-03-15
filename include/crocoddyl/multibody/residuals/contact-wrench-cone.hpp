@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_WRENCH_CONE_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
@@ -56,6 +55,7 @@ class ResidualModelContactWrenchConeTpl
     : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelContactWrenchConeTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -101,7 +101,7 @@ class ResidualModelContactWrenchConeTpl
   ResidualModelContactWrenchConeTpl(std::shared_ptr<StateMultibody> state,
                                     const pinocchio::FrameIndex id,
                                     const WrenchCone& fref);
-  virtual ~ResidualModelContactWrenchConeTpl();
+  virtual ~ResidualModelContactWrenchConeTpl() = default;
 
   /**
    * @brief Compute the contact wrench cone residual
@@ -117,7 +117,7 @@ class ResidualModelContactWrenchConeTpl
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the residual vector for nodes that depends only on the state
@@ -130,7 +130,7 @@ class ResidualModelContactWrenchConeTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the contact wrench cone residual
@@ -146,7 +146,7 @@ class ResidualModelContactWrenchConeTpl
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the Jacobian of the residual functions with respect to the
@@ -160,7 +160,7 @@ class ResidualModelContactWrenchConeTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the contact wrench cone residual data
@@ -169,7 +169,7 @@ class ResidualModelContactWrenchConeTpl
    * @return the residual data.
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
 
   /**
    * @brief Update the Jacobians of the contact friction cone residual
@@ -177,6 +177,19 @@ class ResidualModelContactWrenchConeTpl
    * @param[in] data  Contact friction cone residual data
    */
   void updateJacobians(const std::shared_ptr<ResidualDataAbstract>& data);
+
+  /**
+   * @brief Cast the contact-wrench-cone residual model to a different scalar
+   * type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelContactWrenchConeTpl<NewScalar> A residual model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelContactWrenchConeTpl<NewScalar> cast() const;
 
   /**
    * @brief Indicates if we are using the forward-dynamics (true) or
@@ -210,7 +223,7 @@ class ResidualModelContactWrenchConeTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;
@@ -326,6 +339,7 @@ struct ResidualDataContactWrenchConeTpl
                    frame_name);
     }
   }
+  virtual ~ResidualDataContactWrenchConeTpl() = default;
 
   std::shared_ptr<ForceDataAbstractTpl<Scalar> >
       contact;  //!< Contact force data

@@ -11,7 +11,6 @@
 #include "contact.hpp"
 #include "cost.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"

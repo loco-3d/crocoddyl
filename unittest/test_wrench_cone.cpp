@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +34,7 @@ void test_constructor() {
 
   // Create the wrench cone
   crocoddyl::WrenchCone cone(R, mu, box, nf, inner_appr);
+  crocoddyl::WrenchCone casted_cone = cone.cast<double>();
 
   BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
@@ -42,6 +44,16 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(cone.get_A().rows()) == nf + 13);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 13);
+
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_cone.get_R().isApprox(R));
+  BOOST_CHECK(casted_cone.get_mu() == mu);
+  BOOST_CHECK(casted_cone.get_nf() == nf);
+  BOOST_CHECK(casted_cone.get_box().isApprox(box));
+  BOOST_CHECK(casted_cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_ub().size()) == nf + 13);
 
   // With rotation
   Eigen::Quaterniond q;
@@ -50,6 +62,7 @@ void test_constructor() {
 
   // Create the wrench cone
   cone = crocoddyl::WrenchCone(R, mu, box, nf, inner_appr);
+  casted_cone = cone.cast<double>();
 
   BOOST_CHECK(cone.get_R().isApprox(R));
   BOOST_CHECK(cone.get_mu() == mu);
@@ -60,9 +73,20 @@ void test_constructor() {
   BOOST_CHECK(static_cast<std::size_t>(cone.get_lb().size()) == nf + 13);
   BOOST_CHECK(static_cast<std::size_t>(cone.get_ub().size()) == nf + 13);
 
+  // Checking that casted computation is the same
+  BOOST_CHECK(casted_cone.get_R().isApprox(R));
+  BOOST_CHECK(casted_cone.get_mu() == mu);
+  BOOST_CHECK(casted_cone.get_nf() == nf);
+  BOOST_CHECK(casted_cone.get_box().isApprox(box));
+  BOOST_CHECK(casted_cone.get_inner_appr() == inner_appr);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_A().rows()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_lb().size()) == nf + 13);
+  BOOST_CHECK(static_cast<std::size_t>(casted_cone.get_ub().size()) == nf + 13);
+
   // Create the wrench cone from a reference
   {
     crocoddyl::WrenchCone cone_reference(cone);
+    casted_cone = cone_reference.cast<double>();
 
     BOOST_CHECK(cone.get_nf() == cone_reference.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_reference.get_A()));
@@ -78,12 +102,32 @@ void test_constructor() {
     BOOST_CHECK(std::abs(cone.get_min_nforce() -
                          cone_reference.get_min_nforce()) < 1e-9);
     BOOST_CHECK(cone.get_max_nforce() == cone_reference.get_max_nforce());
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(casted_cone.get_nf() == cone_reference.get_nf());
+    BOOST_CHECK(casted_cone.get_A().isApprox(cone_reference.get_A()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size());
+         ++i) {
+      BOOST_CHECK(casted_cone.get_ub()[i] == cone_reference.get_ub()[i]);
+      BOOST_CHECK(casted_cone.get_lb()[i] == cone_reference.get_lb()[i]);
+    }
+    BOOST_CHECK(casted_cone.get_R().isApprox(cone_reference.get_R()));
+    BOOST_CHECK(casted_cone.get_box().isApprox(cone_reference.get_box()));
+    BOOST_CHECK(std::abs(casted_cone.get_mu() - cone_reference.get_mu()) <
+                1e-9);
+    BOOST_CHECK(casted_cone.get_inner_appr() ==
+                cone_reference.get_inner_appr());
+    BOOST_CHECK(std::abs(casted_cone.get_min_nforce() -
+                         cone_reference.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_max_nforce() ==
+                cone_reference.get_max_nforce());
   }
 
   // Create the wrench cone through the copy operator
   {
     crocoddyl::WrenchCone cone_copy;
     cone_copy = cone;
+    casted_cone = cone_copy.cast<double>();
 
     BOOST_CHECK(cone.get_nf() == cone_copy.get_nf());
     BOOST_CHECK(cone.get_A().isApprox(cone_copy.get_A()));
@@ -99,6 +143,22 @@ void test_constructor() {
     BOOST_CHECK(std::abs(cone.get_min_nforce() - cone_copy.get_min_nforce()) <
                 1e-9);
     BOOST_CHECK(cone.get_max_nforce() == cone_copy.get_max_nforce());
+
+    // Checking that casted computation is the same
+    BOOST_CHECK(casted_cone.get_nf() == cone_copy.get_nf());
+    BOOST_CHECK(casted_cone.get_A().isApprox(cone_copy.get_A()));
+    for (std::size_t i = 0; i < static_cast<std::size_t>(cone.get_ub().size());
+         ++i) {
+      BOOST_CHECK(casted_cone.get_ub()[i] == cone_copy.get_ub()[i]);
+      BOOST_CHECK(casted_cone.get_lb()[i] == cone_copy.get_lb()[i]);
+    }
+    BOOST_CHECK(casted_cone.get_R().isApprox(cone_copy.get_R()));
+    BOOST_CHECK(casted_cone.get_box().isApprox(cone_copy.get_box()));
+    BOOST_CHECK(std::abs(casted_cone.get_mu() - cone_copy.get_mu()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_inner_appr() == cone_copy.get_inner_appr());
+    BOOST_CHECK(std::abs(casted_cone.get_min_nforce() -
+                         cone_copy.get_min_nforce()) < 1e-9);
+    BOOST_CHECK(casted_cone.get_max_nforce() == cone_copy.get_max_nforce());
   }
 }
 
@@ -116,6 +176,7 @@ void test_against_friction_cone() {
   // Create wrench and friction cone
   crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
   crocoddyl::FrictionCone friction_cone(R, mu, nf, inner_appr, 0., 100.);
+  crocoddyl::WrenchCone casted_wrench_cone = wrench_cone.cast<double>();
 
   BOOST_CHECK((wrench_cone.get_R() - friction_cone.get_R()).isZero(1e-9));
   BOOST_CHECK(wrench_cone.get_mu() == friction_cone.get_mu());
@@ -129,6 +190,22 @@ void test_against_friction_cone() {
   for (std::size_t i = 0; i < nf + 1; ++i) {
     BOOST_CHECK(wrench_cone.get_ub()[i] == friction_cone.get_ub()[i]);
     BOOST_CHECK(wrench_cone.get_lb()[i] == friction_cone.get_lb()[i]);
+  }
+
+  // Checking that casted computation is the same
+  BOOST_CHECK(
+      (casted_wrench_cone.get_R() - friction_cone.get_R()).isZero(1e-9));
+  BOOST_CHECK(casted_wrench_cone.get_mu() == friction_cone.get_mu());
+  BOOST_CHECK(casted_wrench_cone.get_nf() == friction_cone.get_nf());
+  for (std::size_t i = 0; i < nf + 1; ++i) {
+    for (std::size_t j = 0; j < 3; ++j) {
+      BOOST_CHECK(casted_wrench_cone.get_A().row(i)[j] ==
+                  friction_cone.get_A().row(i)[j]);
+    }
+  }
+  for (std::size_t i = 0; i < nf + 1; ++i) {
+    BOOST_CHECK(casted_wrench_cone.get_ub()[i] == friction_cone.get_ub()[i]);
+    BOOST_CHECK(casted_wrench_cone.get_lb()[i] == friction_cone.get_lb()[i]);
   }
 }
 
@@ -146,6 +223,7 @@ void test_against_cop_support() {
   // Create wrench and friction cone
   crocoddyl::WrenchCone wrench_cone(R, mu, box, nf, inner_appr, 0., 100.);
   crocoddyl::CoPSupport cop_support(R, box);
+  crocoddyl::WrenchCone casted_wrench_cone = wrench_cone.cast<double>();
 
   BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
@@ -158,6 +236,21 @@ void test_against_cop_support() {
     BOOST_CHECK(wrench_cone.get_ub()[i + nf + 1] == cop_support.get_ub()[i]);
     BOOST_CHECK(wrench_cone.get_lb()[i + nf + 1] == cop_support.get_lb()[i]);
   }
+
+  // Checking that casted computation is the same
+  BOOST_CHECK((casted_wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
+  for (std::size_t i = 0; i < 4; ++i) {
+    for (std::size_t j = 0; j < 6; ++j) {
+      BOOST_CHECK(casted_wrench_cone.get_A().row(nf + i + 1)[j] ==
+                  cop_support.get_A().row(i)[j]);
+    }
+  }
+  for (std::size_t i = 0; i < 4; ++i) {
+    BOOST_CHECK(casted_wrench_cone.get_ub()[i + nf + 1] ==
+                cop_support.get_ub()[i]);
+    BOOST_CHECK(casted_wrench_cone.get_lb()[i + nf + 1] ==
+                cop_support.get_lb()[i]);
+  }
 }
 
 void test_force_along_wrench_cone_normal() {
@@ -169,23 +262,33 @@ void test_force_along_wrench_cone_normal() {
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
                                              random_real_in_range(0.01, 0.1));
   crocoddyl::WrenchCone cone(R, mu, cone_box);
+  crocoddyl::WrenchCone casted_cone = cone.cast<double>();
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = random_real_in_range(0., 100.) * R.col(2);
+  wrench.head<3>() = random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
   // The activation value has to be zero since the wrench is inside the wrench
   // cone
   BOOST_CHECK(data->a_value == 0.);
+
+  // Checking that casted computation is the same
+  r = casted_cone.get_A() * wrench;
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value == 0.);
 }
 
 void test_negative_force_along_wrench_cone_normal() {
@@ -197,17 +300,22 @@ void test_negative_force_along_wrench_cone_normal() {
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
                                              random_real_in_range(0.01, 0.1));
   crocoddyl::WrenchCone cone(R, mu, cone_box);
+  crocoddyl::WrenchCone casted_cone = cone.cast<double>();
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   // Compute the activation value
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * R.col(2);
+  wrench.head<3>() = -random_real_in_range(0., 100.) * R.col(2);
   Eigen::VectorXd r = cone.get_A() * wrench;
   activation.calc(data, r);
 
@@ -223,6 +331,15 @@ void test_negative_force_along_wrench_cone_normal() {
   // wrench cone
   activation.calc(data, r);
   BOOST_CHECK(data->a_value > 0.);
+
+  // Checking that casted computation is the same
+  r = casted_cone.get_A() * wrench;
+  casted_activation.calc(casted_data, r);
+  for (std::size_t i = 0; i < casted_cone.get_nf(); ++i) {
+    BOOST_CHECK(r(i) > 0.);
+  }
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value > 0.);
 }
 
 void test_force_parallel_to_wrench_cone_normal() {
@@ -232,22 +349,32 @@ void test_force_parallel_to_wrench_cone_normal() {
   Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
                                              random_real_in_range(0.01, 0.1));
   crocoddyl::WrenchCone cone(R, mu, cone_box);
+  crocoddyl::WrenchCone casted_cone = cone.cast<double>();
 
   // Create the activation for quadratic barrier
   crocoddyl::ActivationBounds bounds(cone.get_lb(), cone.get_ub());
   crocoddyl::ActivationModelQuadraticBarrier activation(bounds);
-  std::shared_ptr<crocoddyl::ActivationDataAbstract> data =
+  crocoddyl::ActivationModelQuadraticBarrier casted_activation =
+      activation.cast<double>();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
       activation.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& casted_data =
+      casted_activation.createData();
 
   Eigen::VectorXd wrench(6);
   wrench.setZero();
-  wrench.head(3) = -random_real_in_range(0., 100.) * Eigen::Vector3d::UnitX();
+  wrench.head<3>() = -random_real_in_range(0., 100.) * Eigen::Vector3d::UnitX();
   Eigen::VectorXd r = cone.get_A() * wrench;
 
   // The activation value has to be positive since the force is outside the
   // wrench cone
   activation.calc(data, r);
   BOOST_CHECK(data->a_value > 0.);
+
+  // Checking that casted computation is the same
+  r = casted_cone.get_A() * wrench;
+  casted_activation.calc(casted_data, r);
+  BOOST_CHECK(casted_data->a_value > 0.);
 }
 
 void register_unit_tests() {

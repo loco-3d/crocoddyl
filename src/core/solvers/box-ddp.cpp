@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 SolverBoxDDP::SolverBoxDDP(std::shared_ptr<ShootingProblem> problem)

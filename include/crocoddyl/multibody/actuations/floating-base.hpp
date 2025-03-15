@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_
 
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
@@ -36,6 +35,9 @@ template <typename _Scalar>
 class ActuationModelFloatingBaseTpl
     : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase, ActuationModelFloatingBaseTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -59,7 +61,7 @@ class ActuationModelFloatingBaseTpl
                              ? state->get_pinocchio()->getJointId("root_joint")
                              : 0)]
                      .nv()) {};
-  virtual ~ActuationModelFloatingBaseTpl() {};
+  virtual ~ActuationModelFloatingBaseTpl() = default;
 
   /**
    * @brief Compute the floating-base actuation signal from the joint-torque
@@ -71,7 +73,7 @@ class ActuationModelFloatingBaseTpl
    */
   virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>& /*x*/,
-                    const Eigen::Ref<const VectorXs>& u) {
+                    const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -90,11 +92,11 @@ class ActuationModelFloatingBaseTpl
 #ifndef NDEBUG
   virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>& /*u*/) {
+                        const Eigen::Ref<const VectorXs>& /*u*/) override {
 #else
   virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>& /*x*/,
-                        const Eigen::Ref<const VectorXs>& /*u*/) {
+                        const Eigen::Ref<const VectorXs>& /*u*/) override {
 #endif
     // The derivatives has constant values which were set in createData.
     assert_pretty(data->dtau_dx.isZero(), "dtau_dx has wrong value");
@@ -104,7 +106,7 @@ class ActuationModelFloatingBaseTpl
 
   virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>& tau) {
+                        const Eigen::Ref<const VectorXs>& tau) override {
     if (static_cast<std::size_t>(tau.size()) != state_->get_nv()) {
       throw_pretty(
           "Invalid argument: " << "tau has wrong dimension (it should be " +
@@ -116,11 +118,11 @@ class ActuationModelFloatingBaseTpl
 #ifndef NDEBUG
   virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The torque transform has constant values which were set in createData.
     assert_pretty(MatrixXs(data->Mtau).isApprox(Mtau_), "Mtau has wrong value");
@@ -131,7 +133,7 @@ class ActuationModelFloatingBaseTpl
    *
    * @return the actuation data
    */
-  virtual std::shared_ptr<Data> createData() {
+  virtual std::shared_ptr<Data> createData() override {
     typedef StateMultibodyTpl<Scalar> StateMultibody;
     std::shared_ptr<StateMultibody> state =
         std::static_pointer_cast<StateMultibody>(state_);
@@ -153,6 +155,25 @@ class ActuationModelFloatingBaseTpl
 #endif
     return data;
   };
+
+  template <typename NewScalar>
+  ActuationModelFloatingBaseTpl<NewScalar> cast() const {
+    typedef ActuationModelFloatingBaseTpl<NewScalar> ReturnType;
+    typedef StateMultibodyTpl<NewScalar> StateType;
+    ReturnType ret(std::static_pointer_cast<StateType>(
+        state_->template cast<NewScalar>()));
+    return ret;
+  }
+
+  /**
+   * @brief Print relevant information of the joint-effort residual
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const override {
+    os << "ActuationModelFloatingBase {nu=" << nu_
+       << ", nv=" << state_->get_nv() << "}";
+  }
 
  protected:
   using Base::nu_;

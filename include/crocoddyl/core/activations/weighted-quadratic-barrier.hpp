@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,6 @@
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -22,6 +22,8 @@ class ActivationModelWeightedQuadraticBarrierTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase,
+                         ActivationModelWeightedQuadraticBarrierTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -35,10 +37,10 @@ class ActivationModelWeightedQuadraticBarrierTpl
   explicit ActivationModelWeightedQuadraticBarrierTpl(
       const ActivationBounds& bounds, const VectorXs& weights)
       : Base(bounds.lb.size()), bounds_(bounds), weights_(weights) {};
-  virtual ~ActivationModelWeightedQuadraticBarrierTpl() {};
+  virtual ~ActivationModelWeightedQuadraticBarrierTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r) {
+                    const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -55,7 +57,7 @@ class ActivationModelWeightedQuadraticBarrierTpl
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r) {
+                        const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -76,9 +78,17 @@ class ActivationModelWeightedQuadraticBarrierTpl
     data->Arr.diagonal().array() *= weights_.array();
   };
 
-  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  template <typename NewScalar>
+  ActivationModelWeightedQuadraticBarrierTpl<NewScalar> cast() const {
+    typedef ActivationModelWeightedQuadraticBarrierTpl<NewScalar> ReturnType;
+    ReturnType res(bounds_.template cast<NewScalar>(),
+                   weights_.template cast<NewScalar>());
+    return res;
+  }
 
   const ActivationBounds& get_bounds() const { return bounds_; };
   const VectorXs& get_weights() const { return weights_; };
@@ -97,7 +107,7 @@ class ActivationModelWeightedQuadraticBarrierTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const {
+  virtual void print(std::ostream& os) const override {
     os << "ActivationModelWeightedQuadraticBarrier {nr=" << nr_ << "}";
   }
 

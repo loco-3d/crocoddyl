@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2019-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,11 +40,6 @@ class FrictionConeTpl {
   typedef typename MathBase::Quaternions Quaternions;
 
   /**
-   * @brief Initialize the friction cone
-   */
-  explicit FrictionConeTpl();
-
-  /**
    * @brief Initialize the wrench cone
    *
    * @param[in] R           Rotation matrix that defines the cone orientation
@@ -59,12 +55,6 @@ class FrictionConeTpl {
       const Matrix3s& R, const Scalar mu, std::size_t nf = 4,
       const bool inner_appr = true, const Scalar min_nforce = Scalar(0.),
       const Scalar max_nforce = std::numeric_limits<Scalar>::infinity());
-  DEPRECATED("Use constructor based on rotation matrix.",
-             FrictionConeTpl(const Vector3s& normal, const Scalar mu,
-                             std::size_t nf = 4, const bool inner_appr = true,
-                             const Scalar min_nforce = Scalar(0.),
-                             const Scalar max_nforce =
-                                 std::numeric_limits<Scalar>::infinity());)
 
   /**
    * @brief Initialize the wrench cone
@@ -72,6 +62,11 @@ class FrictionConeTpl {
    * @param[in] cone  Friction cone
    */
   FrictionConeTpl(const FrictionConeTpl<Scalar>& cone);
+
+  /**
+   * @brief Initialize the friction cone
+   */
+  explicit FrictionConeTpl();
   ~FrictionConeTpl();
 
   /**
@@ -90,6 +85,18 @@ class FrictionConeTpl {
                          const Scalar min_nforce = Scalar(0.),
                          const Scalar max_nforce =
                              std::numeric_limits<Scalar>::infinity()));
+
+  /**
+   * @brief Cast the friction cone to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return FrictionConeTpl<NewScalar> An friction conel with the new scalar
+   * type.
+   */
+  template <typename NewScalar>
+  FrictionConeTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the matrix of friction cone

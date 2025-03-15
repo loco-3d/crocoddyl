@@ -1,15 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, University of Edinburgh, New York
-// University,
-//                          Heriot-Watt University
-// Max Planck Gesellschaft, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          New York University, Heriot-Watt University,
+//                          Max Planck Gesellschaft, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -18,11 +15,7 @@ ControlParametrizationModelNumDiffTpl<
     Scalar>::ControlParametrizationModelNumDiffTpl(std::shared_ptr<Base> model)
     : Base(model->get_nw(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ControlParametrizationModelNumDiffTpl<
-    Scalar>::~ControlParametrizationModelNumDiffTpl() {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::calc(
@@ -40,12 +33,12 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::calcDiff(
   data->w = data_nd->data_0->w;
 
   data_nd->du.setZero();
-  const Scalar uh_jac = e_jac_ * std::max(1., u.norm());
+  const Scalar uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (std::size_t i = 0; i < model_->get_nu(); ++i) {
     data_nd->du(i) += uh_jac;
     model_->calc(data_nd->data_u[i], t, u + data_nd->du);
     data->dw_du.col(i) = data_nd->data_u[i]->w - data->w;
-    data_nd->du(i) = 0.;
+    data_nd->du(i) = Scalar(0.);
   }
   data->dw_du /= uh_jac;
 }
@@ -120,6 +113,15 @@ void ControlParametrizationModelNumDiffTpl<Scalar>::multiplyJacobianTransposeBy(
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelNumDiffTpl<NewScalar>
+ControlParametrizationModelNumDiffTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
+}
+
+template <typename Scalar>
 const std::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
 ControlParametrizationModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
@@ -134,7 +136,7 @@ const Scalar ControlParametrizationModelNumDiffTpl<Scalar>::get_disturbance()
 template <typename Scalar>
 void ControlParametrizationModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

@@ -17,7 +17,6 @@
 #ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
 #endif
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {

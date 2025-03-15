@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,10 +31,6 @@ ResidualModelContactControlGravTpl<Scalar>::ResidualModelContactControlGravTpl(
     std::shared_ptr<StateMultibody> state)
     : Base(state, state->get_nv(), state->get_nv(), true, false, true),
       pin_model_(*state->get_pinocchio()) {}
-
-template <typename Scalar>
-ResidualModelContactControlGravTpl<
-    Scalar>::~ResidualModelContactControlGravTpl() {}
 
 template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calc(
@@ -70,7 +67,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q,
                                             d->fext, Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
   data->Ru = d->actuation->dtau_du;
 }
 
@@ -86,7 +83,7 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q,
                                                   Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
 }
 
 template <typename Scalar>
@@ -95,6 +92,18 @@ ResidualModelContactControlGravTpl<Scalar>::createData(
     DataCollectorAbstract *const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelContactControlGravTpl<NewScalar>
+ResidualModelContactControlGravTpl<Scalar>::cast() const {
+  typedef ResidualModelContactControlGravTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      nu_);
+  return ret;
 }
 
 template <typename Scalar>

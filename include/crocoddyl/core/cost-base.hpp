@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,7 +10,6 @@
 #ifndef CROCODDYL_CORE_COST_BASE_HPP_
 #define CROCODDYL_CORE_COST_BASE_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 
 #include "crocoddyl/core/activation-base.hpp"
@@ -21,6 +21,13 @@
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
+
+class CostModelBase {
+ public:
+  virtual ~CostModelBase() = default;
+
+  CROCODDYL_BASE_CAST(CostModelBase, CostModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for cost models
@@ -56,7 +63,7 @@ namespace crocoddyl {
  * `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class CostModelAbstractTpl {
+class CostModelAbstractTpl : public CostModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -142,7 +149,7 @@ class CostModelAbstractTpl {
    */
   CostModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                        const std::size_t nr);
-  virtual ~CostModelAbstractTpl();
+  virtual ~CostModelAbstractTpl() = default;
 
   /**
    * @brief Compute the cost value and its residual vector
@@ -272,6 +279,8 @@ class CostModelAbstractTpl {
   std::shared_ptr<ResidualModelAbstract> residual_;      //!< Residual model
   std::size_t nu_;                                       //!< Control dimension
   VectorXs unone_;                                       //!< No control vector
+  CostModelAbstractTpl()
+      : state_(nullptr), activation_(nullptr), residual_(nullptr), nu_(0) {}
 };
 
 template <typename _Scalar>
@@ -304,7 +313,7 @@ struct CostDataAbstractTpl {
     Lxu.setZero();
     Luu.setZero();
   }
-  virtual ~CostDataAbstractTpl() {}
+  virtual ~CostDataAbstractTpl() = default;
 
   DEPRECATED(
       "Use residual.r", const VectorXs& get_r() const { return residual->r; };)

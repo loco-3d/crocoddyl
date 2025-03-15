@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, New York University, Max Planck
-// Gesellschaft,
-//                          INRIA
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,6 +77,12 @@ void test_constructor() {
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_impulses().size() == 0);
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  BOOST_CHECK(casted_model.get_impulses().size() == 0);
+#endif
 }
 
 void test_addImpulse() {
@@ -85,6 +91,7 @@ void test_addImpulse() {
   crocoddyl::ImpulseModelMultiple model(
       std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
           StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
 
   // add an active impulse
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse_1 =
@@ -113,6 +120,33 @@ void test_addImpulse() {
   BOOST_CHECK(model.get_nc() == rand_impulse_2->get_nc());
   BOOST_CHECK(model.get_nc_total() ==
               rand_impulse_1->get_nc() + rand_impulse_2->get_nc());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>>
+      casted_rand_impulse_1 = rand_impulse_1->cast<float>();
+  casted_model.addImpulse("random_impulse_1", casted_rand_impulse_1);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_impulse_1->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() == casted_rand_impulse_1->get_nc());
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>>
+      casted_rand_impulse_2 = rand_impulse_2->cast<float>();
+  casted_model.addImpulse("random_impulse_2", casted_rand_impulse_2, false);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_impulse_1->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_impulse_1->get_nc() +
+                  casted_rand_impulse_2->get_nc());
+  casted_model.changeImpulseStatus("random_impulse_2", true);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_impulse_1->get_nc() +
+                                           casted_rand_impulse_2->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_impulse_1->get_nc() +
+                  casted_rand_impulse_2->get_nc());
+  casted_model.changeImpulseStatus("random_impulse_1", false);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_impulse_2->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_impulse_1->get_nc() +
+                  casted_rand_impulse_2->get_nc());
+#endif
 }
 
 void test_addImpulse_error_message() {
@@ -158,6 +192,7 @@ void test_removeImpulse() {
   crocoddyl::ImpulseModelMultiple model(
       std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
           StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
 
   // add an active impulse
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse =
@@ -168,6 +203,18 @@ void test_removeImpulse() {
   // remove the impulse
   model.removeImpulse("random_impulse");
   BOOST_CHECK(model.get_nc() == 0);
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>>
+      casted_rand_impulse = rand_impulse->cast<float>();
+  casted_model.addImpulse("random_impulse", casted_rand_impulse);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_impulse->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() == casted_rand_impulse->get_nc());
+  casted_model.removeImpulse("random_impulse");
+  BOOST_CHECK(casted_model.get_nc() == 0);
+  BOOST_CHECK(casted_model.get_nc_total() == 0);
+#endif
 }
 
 void test_removeImpulse_error_message() {
@@ -203,8 +250,8 @@ void test_calc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
@@ -232,7 +279,7 @@ void test_calc() {
 
   // check Jc against single impulse computations
   std::size_t ni = 0;
-  const std::size_t nv = model.get_state()->get_nv();
+  std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
     const std::size_t ni_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
@@ -257,6 +304,50 @@ void test_calc() {
     BOOST_CHECK(data->Jc.block(ni, 0, ni_i, nv) == datas[i]->Jc);
     ni += ni_i;
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  model.changeImpulseStatus("random_impulse_3", true);
+  model.changeImpulseStatus("random_impulse_4", true);
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(
+        casted_models[i]->createData(&casted_pinocchio_data));
+  }
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1);
+  casted_model.calc(casted_data, x1_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->dv0_dq.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
+  BOOST_CHECK((data->dv0_dq.cast<float>() - casted_data->dv0_dq).isZero(tol_f));
+  BOOST_CHECK(casted_data->dv0_dq.isZero());
+  ni = 0;
+  nv = casted_model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t ni_i = casted_models[i]->get_nc();
+    casted_models[i]->calc(casted_datas[i], x1_f);
+    BOOST_CHECK(casted_data->Jc.block(ni, 0, ni_i, nv) == casted_datas[i]->Jc);
+    ni += ni_i;
+  }
+  ni = 0;
+#endif
 }
 
 void test_calc_diff() {
@@ -271,8 +362,8 @@ void test_calc_diff() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
@@ -302,7 +393,7 @@ void test_calc_diff() {
 
   // check Jc against single impulse computations
   std::size_t ni = 0;
-  const std::size_t nv = model.get_state()->get_nv();
+  std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
     const std::size_t ni_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
@@ -332,6 +423,54 @@ void test_calc_diff() {
     BOOST_CHECK(data->dv0_dq.block(ni, 0, ni_i, nv) == datas[i]->dv0_dq);
     ni += ni_i;
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  model.changeImpulseStatus("random_impulse_3", true);
+  model.changeImpulseStatus("random_impulse_4", true);
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(
+        casted_models[i]->createData(&casted_pinocchio_data));
+  }
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1);
+  model.calcDiff(data, x1);
+  casted_model.calc(casted_data, x1_f);
+  casted_model.calcDiff(casted_data, x1_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK(!casted_data->dv0_dq.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
+  BOOST_CHECK((data->dv0_dq.cast<float>() - casted_data->dv0_dq).isZero(tol_f));
+  ni = 0;
+  nv = casted_model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t ni_i = casted_models[i]->get_nc();
+    casted_models[i]->calc(casted_datas[i], x1_f);
+    casted_models[i]->calcDiff(casted_datas[i], x1_f);
+    BOOST_CHECK(casted_data->Jc.block(ni, 0, ni_i, nv) == casted_datas[i]->Jc);
+    BOOST_CHECK(casted_data->dv0_dq.block(ni, 0, ni_i, nv) ==
+                casted_datas[i]->dv0_dq);
+    ni += ni_i;
+  }
+  ni = 0;
+#endif
 }
 
 void test_calc_diff_no_recalc() {
@@ -346,8 +485,8 @@ void test_calc_diff_no_recalc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ImpulseDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_impulse_" << i;
@@ -446,6 +585,37 @@ void test_updateForce() {
        it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  const Eigen::VectorXf forces_f = forces.cast<float>();
+  casted_model.updateForce(casted_data, forces_f);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->dv0_dq.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  crocoddyl::ImpulseModelMultipleTpl<float>::ImpulseDataContainer::iterator
+      it_d_f,
+      end_d_f;
+  for (it_d_f = casted_data->impulses.begin(),
+      end_d_f = casted_data->impulses.end(), it_d = data->impulses.begin(),
+      end_d = data->impulses.end();
+       it_d_f != end_d_f || it_d != end_d; ++it_d_f, ++it_d) {
+    BOOST_CHECK(!it_d_f->second->f.toVector().isZero());
+    BOOST_CHECK((it_d->second->f.toVector().cast<float>() -
+                 it_d_f->second->f.toVector())
+                    .isZero(tol_f));
+  }
+#endif
 }
 
 void test_updateVelocityDiff() {
@@ -478,6 +648,18 @@ void test_updateVelocityDiff() {
 
   // Test
   BOOST_CHECK((data->dvnext_dx - dvnext_dx).isZero(1e-9));
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::MatrixXf dvnext_dx_f = dvnext_dx.cast<float>();
+  casted_model.updateVelocityDiff(casted_data, dvnext_dx_f);
+  BOOST_CHECK((casted_data->dvnext_dx - dvnext_dx_f).isZero(1e-9f));
+#endif
 }
 
 void test_updateForceDiff() {
@@ -514,6 +696,29 @@ void test_updateForceDiff() {
        it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->df_dx.isZero());
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ImpulseModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::MatrixXf df_dx_f = df_dx.cast<float>();
+  casted_model.updateForceDiff(casted_data, df_dx_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  crocoddyl::ImpulseModelMultipleTpl<float>::ImpulseDataContainer::iterator
+      it_d_f,
+      end_d_f;
+  for (it_d_f = casted_data->impulses.begin(),
+      end_d_f = casted_data->impulses.end(), it_d = data->impulses.begin(),
+      end_d = data->impulses.end();
+       it_d_f != end_d_f || it_d != end_d; ++it_d_f, ++it_d) {
+    BOOST_CHECK(!it_d_f->second->df_dx.isZero());
+    BOOST_CHECK((it_d->second->df_dx.cast<float>() - it_d_f->second->df_dx)
+                    .isZero(tol_f));
+  }
+#endif
 }
 
 void test_assert_updateForceDiff_assert_mismatch_model_data() {
@@ -530,7 +735,7 @@ void test_assert_updateForceDiff_assert_mismatch_model_data() {
   pinocchio::Data pinocchio_data(*model1.get_state()->get_pinocchio().get());
 
   // create and add some impulse objects
-  std::vector<std::shared_ptr<ImpulseModelFactory> > impulse_factories;
+  std::vector<std::shared_ptr<ImpulseModelFactory>> impulse_factories;
   for (unsigned i = 0; i < 5; ++i) {
     std::shared_ptr<crocoddyl::ImpulseModelAbstract> rand_impulse =
         create_random_impulse();

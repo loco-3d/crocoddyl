@@ -1,13 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/numdiff/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -16,10 +15,7 @@ ResidualModelNumDiffTpl<Scalar>::ResidualModelNumDiffTpl(
     const std::shared_ptr<Base>& model)
     : Base(model->get_state(), model->get_nr(), model->get_nu()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())) {}
-
-template <typename Scalar>
-ResidualModelNumDiffTpl<Scalar>::~ResidualModelNumDiffTpl() {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
 
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::calc(
@@ -55,7 +51,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -65,11 +61,11 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_x[ix], d->xp, u);
     d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d residual(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (std::size_t iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     d->up = u + d->du;
@@ -79,7 +75,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_u[iu], x, d->up);
     d->Ru.col(iu) = (d->data_u[iu]->r - r0) / d->uh_jac;
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 }
 
@@ -103,7 +99,7 @@ void ResidualModelNumDiffTpl<Scalar>::calcDiff(
     }
     model_->calc(d->data_x[ix], d->xp);
     d->Rx.col(ix) = (d->data_x[ix]->r - r0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 }
 
@@ -112,6 +108,15 @@ std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelNumDiffTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelNumDiffTpl<NewScalar> ResidualModelNumDiffTpl<Scalar>::cast()
+    const {
+  typedef ResidualModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
 }
 
 template <typename Scalar>
@@ -128,7 +133,7 @@ const Scalar ResidualModelNumDiffTpl<Scalar>::get_disturbance() const {
 template <typename Scalar>
 void ResidualModelNumDiffTpl<Scalar>::set_disturbance(
     const Scalar disturbance) {
-  if (disturbance < 0.) {
+  if (disturbance < Scalar(0.)) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;

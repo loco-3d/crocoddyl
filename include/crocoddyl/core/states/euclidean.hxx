@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&,
                                       std::to_string(ndx_) + ")");
     }
     Jfirst.setZero();
-    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, -1.);
+    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(-1.));
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
@@ -98,7 +99,7 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&,
                                       std::to_string(ndx_) + ")");
     }
     Jsecond.setZero();
-    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
+    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(1.));
   }
 }
 
@@ -174,6 +175,19 @@ void StateVectorTpl<Scalar>::JintegrateTransport(
         "Invalid argument: firstsecond must be either first or second. both "
         "not supported for this operation.");
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateVectorTpl<NewScalar> StateVectorTpl<Scalar>::cast() const {
+  typedef StateVectorTpl<NewScalar> ReturnType;
+  ReturnType res(nx_);
+  return res;
+}
+
+template <typename Scalar>
+void StateVectorTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateVector {nx=" << nx_ << "}";
 }
 
 }  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,6 +76,12 @@ void test_constructor() {
 
   // Test the initial size of the map
   BOOST_CHECK(model.get_contacts().size() == 0);
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  BOOST_CHECK(casted_model.get_contacts().size() == 0);
+#endif
 }
 
 void test_addContact() {
@@ -84,6 +90,7 @@ void test_addContact() {
   crocoddyl::ContactModelMultiple model(
       std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
           StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
 
   // add an active contact
   std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact_1 =
@@ -112,6 +119,33 @@ void test_addContact() {
   BOOST_CHECK(model.get_nc() == rand_contact_2->get_nc());
   BOOST_CHECK(model.get_nc_total() ==
               rand_contact_1->get_nc() + rand_contact_2->get_nc());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>
+      casted_rand_contact_1 = rand_contact_1->cast<float>();
+  casted_model.addContact("random_contact_1", casted_rand_contact_1);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_contact_1->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() == casted_rand_contact_1->get_nc());
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>
+      casted_rand_contact_2 = rand_contact_2->cast<float>();
+  casted_model.addContact("random_contact_2", casted_rand_contact_2, false);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_contact_1->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_contact_1->get_nc() +
+                  casted_rand_contact_2->get_nc());
+  casted_model.changeContactStatus("random_contact_2", true);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_contact_1->get_nc() +
+                                           casted_rand_contact_2->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_contact_1->get_nc() +
+                  casted_rand_contact_2->get_nc());
+  casted_model.changeContactStatus("random_contact_1", false);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_contact_2->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() ==
+              casted_rand_contact_1->get_nc() +
+                  casted_rand_contact_2->get_nc());
+#endif
 }
 
 void test_addContact_error_message() {
@@ -157,6 +191,7 @@ void test_removeContact() {
   crocoddyl::ContactModelMultiple model(
       std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
           StateModelTypes::StateMultibody_RandomHumanoid)));
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
 
   // add an active contact
   std::shared_ptr<crocoddyl::ContactModelAbstract> rand_contact =
@@ -169,6 +204,18 @@ void test_removeContact() {
   model.removeContact("random_contact");
   BOOST_CHECK(model.get_nc() == 0);
   BOOST_CHECK(model.get_nc_total() == 0);
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>
+      casted_rand_contact = rand_contact->cast<float>();
+  casted_model.addContact("random_contact", casted_rand_contact);
+  BOOST_CHECK(casted_model.get_nc() == casted_rand_contact->get_nc());
+  BOOST_CHECK(casted_model.get_nc_total() == casted_rand_contact->get_nc());
+  casted_model.removeContact("random_contact");
+  BOOST_CHECK(casted_model.get_nc() == 0);
+  BOOST_CHECK(casted_model.get_nc_total() == 0);
+#endif
 }
 
 void test_removeContact_error_message() {
@@ -199,13 +246,14 @@ void test_calc() {
   crocoddyl::ContactModelMultiple model(
       std::static_pointer_cast<crocoddyl::StateMultibody>(state_factory.create(
           StateModelTypes::StateMultibody_RandomHumanoid)));
+
   // create the corresponding data object
   pinocchio::Model& pinocchio_model = *model.get_state()->get_pinocchio().get();
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
@@ -234,7 +282,7 @@ void test_calc() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t nv = model.get_state()->get_nv();
+  std::size_t nv = model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
     const std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
@@ -261,6 +309,51 @@ void test_calc() {
     BOOST_CHECK(data->a0.segment(nc, nc_i) == datas[i]->a0);
     nc += nc_i;
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  model.changeContactStatus("random_contact_3", true);
+  model.changeContactStatus("random_contact_4", true);
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(
+        casted_models[i]->createData(&casted_pinocchio_data));
+  }
+  std::shared_ptr<crocoddyl::ContactDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1);
+  casted_model.calc(casted_data, x1_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK(!casted_data->a0.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
+  BOOST_CHECK((data->a0.cast<float>() - casted_data->a0).isZero(tol_f));
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  nc = 0;
+  nv = casted_model.get_state()->get_nv();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t nc_i = casted_models[i]->get_nc();
+    casted_models[i]->calc(casted_datas[i], x1_f);
+    BOOST_CHECK(casted_data->Jc.block(nc, 0, nc_i, nv) == casted_datas[i]->Jc);
+    BOOST_CHECK(casted_data->a0.segment(nc, nc_i) == casted_datas[i]->a0);
+    nc += nc_i;
+  }
+  nc = 0;
+#endif
 }
 
 void test_calc_diff() {
@@ -274,8 +367,8 @@ void test_calc_diff() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
@@ -306,8 +399,8 @@ void test_calc_diff() {
 
   // check Jc and a0 against single contact computations
   std::size_t nc = 0;
-  const std::size_t nv = model.get_state()->get_nv();
-  const std::size_t ndx = model.get_state()->get_ndx();
+  std::size_t nv = model.get_state()->get_nv();
+  std::size_t ndx = model.get_state()->get_ndx();
   for (std::size_t i = 0; i < 5; ++i) {
     const std::size_t nc_i = models[i]->get_nc();
     models[i]->calc(datas[i], x1);
@@ -339,6 +432,57 @@ void test_calc_diff() {
     BOOST_CHECK(data->da0_dx.block(nc, 0, nc_i, ndx) == datas[i]->da0_dx);
     nc += nc_i;
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  model.changeContactStatus("random_contact_3", true);
+  model.changeContactStatus("random_contact_4", true);
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>>
+      casted_models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstractTpl<float>>>
+      casted_datas;
+  for (std::size_t i = 0; i < 5; ++i) {
+    casted_models.push_back(models[i]->cast<float>());
+    casted_datas.push_back(
+        casted_models[i]->createData(&casted_pinocchio_data));
+  }
+  std::shared_ptr<crocoddyl::ContactDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf x1_f = x1.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
+                                          x1);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x1_f);
+  model.calc(data, x1);
+  model.calcDiff(data, x1);
+  casted_model.calc(casted_data, x1_f);
+  casted_model.calcDiff(casted_data, x1_f);
+  BOOST_CHECK(!casted_data->Jc.isZero());
+  BOOST_CHECK(!casted_data->a0.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
+  BOOST_CHECK((data->a0.cast<float>() - casted_data->a0).isZero(tol_f));
+  BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
+  nc = 0;
+  nv = casted_model.get_state()->get_nv();
+  ndx = casted_model.get_state()->get_ndx();
+  for (std::size_t i = 0; i < 5; ++i) {
+    const std::size_t nc_i = casted_models[i]->get_nc();
+    casted_models[i]->calc(casted_datas[i], x1_f);
+    casted_models[i]->calcDiff(casted_datas[i], x1_f);
+    BOOST_CHECK(casted_data->Jc.block(nc, 0, nc_i, nv) == casted_datas[i]->Jc);
+    BOOST_CHECK(casted_data->a0.segment(nc, nc_i) == casted_datas[i]->a0);
+    BOOST_CHECK(casted_data->da0_dx.block(nc, 0, nc_i, ndx) ==
+                casted_datas[i]->da0_dx);
+    nc += nc_i;
+  }
+  nc = 0;
+#endif
 }
 
 void test_calc_diff_no_recalc() {
@@ -352,8 +496,8 @@ void test_calc_diff_no_recalc() {
   pinocchio::Data pinocchio_data(*model.get_state()->get_pinocchio().get());
 
   // create and add some contact objects
-  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract> > models;
-  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract> > datas;
+  std::vector<std::shared_ptr<crocoddyl::ContactModelAbstract>> models;
+  std::vector<std::shared_ptr<crocoddyl::ContactDataAbstract>> datas;
   for (std::size_t i = 0; i < 5; ++i) {
     std::ostringstream os;
     os << "random_contact_" << i;
@@ -464,6 +608,47 @@ void test_updateForce() {
        it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->f.toVector().isZero());
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_model.get_state()->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ContactDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::VectorXf q_f = casted_model.get_state()->rand().segment(
+      0, casted_model.get_state()->get_nq());
+  const Eigen::VectorXf v_f =
+      Eigen::VectorXf::Random(casted_model.get_state()->get_nv());
+  const Eigen::VectorXf a_f =
+      Eigen::VectorXf::Random(casted_model.get_state()->get_nv());
+  pinocchio::computeJointJacobians(casted_pinocchio_model,
+                                   casted_pinocchio_data, q_f);
+  pinocchio::updateFramePlacements(casted_pinocchio_model,
+                                   casted_pinocchio_data);
+  pinocchio::computeForwardKinematicsDerivatives(
+      casted_pinocchio_model, casted_pinocchio_data, q_f, v_f, a_f);
+  const Eigen::VectorXf forces_f = forces.cast<float>();
+  casted_model.updateForce(casted_data, forces_f);
+  BOOST_CHECK(casted_data->Jc.isZero());
+  BOOST_CHECK(casted_data->a0.isZero());
+  BOOST_CHECK(casted_data->da0_dx.isZero());
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  crocoddyl::ContactModelMultipleTpl<float>::ContactDataContainer::iterator
+      it_d_f,
+      end_d_f;
+  for (it_d_f = casted_data->contacts.begin(),
+      end_d_f = casted_data->contacts.end(), it_d = data->contacts.begin(),
+      end_d = data->contacts.end();
+       it_d_f != end_d_f || it_d != end_d; ++it_d_f, ++it_d) {
+    BOOST_CHECK(!it_d_f->second->f.toVector().isZero());
+    BOOST_CHECK((it_d->second->f.toVector().cast<float>() -
+                 it_d_f->second->f.toVector())
+                    .isZero(tol_f));
+  }
+#endif
 }
 
 void test_updateAccelerationDiff() {
@@ -495,6 +680,18 @@ void test_updateAccelerationDiff() {
 
   // Test
   BOOST_CHECK((data->ddv_dx - ddv_dx).isZero(1e-9));
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ContactDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::MatrixXf ddv_dx_f = ddv_dx.cast<float>();
+  casted_model.updateAccelerationDiff(casted_data, ddv_dx_f);
+  BOOST_CHECK((casted_data->ddv_dx - ddv_dx_f).isZero(1e-9f));
+#endif
 }
 
 void test_updateForceDiff() {
@@ -532,6 +729,30 @@ void test_updateForceDiff() {
        it_d != end_d; ++it_d) {
     BOOST_CHECK(!it_d->second->df_dx.isZero());
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
+  pinocchio::DataTpl<float> casted_pinocchio_data(
+      *casted_model.get_state()->get_pinocchio().get());
+  std::shared_ptr<crocoddyl::ContactDataMultipleTpl<float>> casted_data =
+      casted_model.createData(&casted_pinocchio_data);
+  const Eigen::MatrixXf df_dx_f = df_dx.cast<float>();
+  const Eigen::MatrixXf df_du_f = df_du.cast<float>();
+  casted_model.updateForceDiff(casted_data, df_dx_f, df_du_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  crocoddyl::ContactModelMultipleTpl<float>::ContactDataContainer::iterator
+      it_d_f,
+      end_d_f;
+  for (it_d_f = casted_data->contacts.begin(),
+      end_d_f = casted_data->contacts.end(), it_d = data->contacts.begin(),
+      end_d = data->contacts.end();
+       it_d_f != end_d_f || it_d != end_d; ++it_d_f, ++it_d) {
+    BOOST_CHECK(!it_d_f->second->df_dx.isZero());
+    BOOST_CHECK((it_d->second->df_dx.cast<float>() - it_d_f->second->df_dx)
+                    .isZero(tol_f));
+  }
+#endif
 }
 
 void test_assert_updateForceDiff_assert_mismatch_model_data() {

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -53,11 +53,10 @@ void build_arm_action_models(
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR
-                              "/kinova_description/robots/kinova.urdf",
+                              "/talos_data/robots/talos_left_arm.urdf",
                               modeld);
   pinocchio::srdf::loadReferenceConfigurations(
-      modeld,
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf",
+      modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
       false);
 
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
@@ -69,10 +68,10 @@ void build_arm_action_models(
   std::shared_ptr<CostModelAbstract> goalTrackingCost =
       std::make_shared<CostModelResidual>(
           state, std::make_shared<ResidualModelFramePlacement>(
-                     state, model.getFrameId("j2s6s200_end_effector"),
+                     state, model.getFrameId("gripper_left_joint"),
                      pinocchio::SE3Tpl<Scalar>(
                          Matrix3s::Identity(),
-                         Vector3s(Scalar(0.6), Scalar(0.2), Scalar(0.5)))));
+                         Vector3s(Scalar(0.), Scalar(0.), Scalar(0.4)))));
   std::shared_ptr<CostModelAbstract> xRegCost =
       std::make_shared<CostModelResidual>(
           state, std::make_shared<ResidualModelState>(state));

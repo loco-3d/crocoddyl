@@ -1,13 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 template <typename Scalar>
@@ -17,9 +15,6 @@ ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
       dt_(Scalar(0.1)) {
   cost_weights_ << Scalar(10.), Scalar(1.);
 }
-
-template <typename Scalar>
-ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
@@ -78,8 +73,8 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const Scalar c = cos(x[2]);
-  const Scalar s = sin(x[2]);
+  const Scalar c = static_cast<Scalar>(cos(x[2]));
+  const Scalar s = static_cast<Scalar>(sin(x[2]));
   const Scalar w_x = cost_weights_[0] * cost_weights_[0];
   const Scalar w_u = cost_weights_[1] * cost_weights_[1];
   d->Lx = x * w_x;
@@ -113,6 +108,14 @@ template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelUnicycleTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelUnicycleTpl<NewScalar> ActionModelUnicycleTpl<Scalar>::cast() const {
+  typedef ActionModelUnicycleTpl<NewScalar> ReturnType;
+  ReturnType ret;
+  return ret;
 }
 
 template <typename Scalar>

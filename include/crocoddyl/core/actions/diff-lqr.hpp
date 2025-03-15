@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -47,6 +47,10 @@ template <typename _Scalar>
 class DifferentialActionModelLQRTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelLQRTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -129,22 +133,36 @@ class DifferentialActionModelLQRTpl
   /** @brief Copy constructor */
   DifferentialActionModelLQRTpl(const DifferentialActionModelLQRTpl& copy);
 
-  virtual ~DifferentialActionModelLQRTpl();
+  virtual ~DifferentialActionModelLQRTpl() = default;
 
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
-  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
+      const Eigen::Ref<const VectorXs>& x) override;
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the differential-LQR model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelLQRTpl<NewScalar> A differential-action
+   * model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelLQRTpl<NewScalar> cast() const;
+
   virtual bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief Create a random LQR model
@@ -272,7 +290,7 @@ class DifferentialActionModelLQRTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::ng_;     //!< Equality constraint dimension
@@ -325,6 +343,7 @@ struct DifferentialActionDataLQRTpl
     Hx = model->get_H().leftCols(2 * nq);
     Hu = model->get_H().rightCols(nu);
   }
+  virtual ~DifferentialActionDataLQRTpl() = default;
 
   using Base::cost;
   using Base::Fu;

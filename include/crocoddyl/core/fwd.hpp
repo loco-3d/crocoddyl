@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,7 +10,12 @@
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
 
+#include "crocoddyl/core/macros.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/utils/math.hpp"
+#include "crocoddyl/core/utils/scalar.hpp"
 
 namespace crocoddyl {
 
@@ -67,11 +73,6 @@ template <typename Scalar>
 class IntegratedActionModelRKTpl;
 template <typename Scalar>
 struct IntegratedActionDataRKTpl;
-
-template <typename Scalar>
-class IntegratedActionModelRK4Tpl;
-template <typename Scalar>
-struct IntegratedActionDataRK4Tpl;
 
 // residual
 template <typename Scalar>
@@ -259,6 +260,11 @@ template <typename Scalar>
 struct DifferentialActionDataNumDiffTpl;
 
 template <typename Scalar>
+class ActuationModelNumDiffTpl;
+template <typename Scalar>
+struct ActuationDataNumDiffTpl;
+
+template <typename Scalar>
 class ActivationModelNumDiffTpl;
 template <typename Scalar>
 struct ActivationDataNumDiffTpl;
@@ -313,11 +319,6 @@ typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRKTpl<double> IntegratedActionModelRK;
 typedef IntegratedActionDataRKTpl<double> IntegratedActionDataRK;
-DEPRECATED(
-    "Use IntegratedActionModelRK",
-    typedef IntegratedActionModelRK4Tpl<double> IntegratedActionModelRK4;)
-DEPRECATED("Use IntegratedActionModelRK",
-           typedef IntegratedActionDataRK4Tpl<double> IntegratedActionDataRK4;)
 
 typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
@@ -418,6 +419,8 @@ typedef ControlParametrizationDataNumDiffTpl<double>
     ControlParametrizationDataNumDiff;
 typedef DifferentialActionModelNumDiffTpl<double>
     DifferentialActionModelNumDiff;
+typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
+typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;

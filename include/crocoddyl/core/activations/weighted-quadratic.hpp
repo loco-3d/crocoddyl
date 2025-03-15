@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -22,6 +21,7 @@ class ActivationModelWeightedQuadTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModelWeightedQuadTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -33,10 +33,10 @@ class ActivationModelWeightedQuadTpl
 
   explicit ActivationModelWeightedQuadTpl(const VectorXs& weights)
       : Base(weights.size()), weights_(weights), new_weights_(false) {};
-  virtual ~ActivationModelWeightedQuadTpl() {};
+  virtual ~ActivationModelWeightedQuadTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r) {
+                    const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -49,7 +49,7 @@ class ActivationModelWeightedQuadTpl
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r) {
+                        const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -68,7 +68,7 @@ class ActivationModelWeightedQuadTpl
 #endif
   };
 
-  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
     std::shared_ptr<Data> data =
         std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     data->Arr.diagonal() = weights_;
@@ -79,6 +79,13 @@ class ActivationModelWeightedQuadTpl
 
     return data;
   };
+
+  template <typename NewScalar>
+  ActivationModelWeightedQuadTpl<NewScalar> cast() const {
+    typedef ActivationModelWeightedQuadTpl<NewScalar> ReturnType;
+    ReturnType res(weights_.template cast<NewScalar>());
+    return res;
+  }
 
   const VectorXs& get_weights() const { return weights_; };
   void set_weights(const VectorXs& weights) {
@@ -97,7 +104,7 @@ class ActivationModelWeightedQuadTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const {
+  virtual void print(std::ostream& os) const override {
     os << "ActivationModelQuad {nr=" << nr_ << "}";
   }
 
@@ -121,13 +128,19 @@ struct ActivationDataWeightedQuadTpl
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
   explicit ActivationDataWeightedQuadTpl(Activation* const activation)
       : Base(activation), Wr(VectorXs::Zero(activation->get_nr())) {}
+  virtual ~ActivationDataWeightedQuadTpl() = default;
 
   VectorXs Wr;
+
+  using Base::a_value;
+  using Base::Ar;
+  using Base::Arr;
 };
 
 }  // namespace crocoddyl

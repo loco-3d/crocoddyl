@@ -1,16 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
-
-using std::isfinite;
 
 template <typename Scalar>
 ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
@@ -22,7 +18,7 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
   ub_ = upper;
   for (std::size_t i = 0; i < residual_->get_nr(); ++i) {
     if (isfinite(lb_(i)) && isfinite(ub_(i))) {
-      if (lb_(i) - ub_(i) > 0) {
+      if (lb_(i) - ub_(i) > Scalar(0.)) {
         throw_pretty(
             "Invalid argument: the upper bound is not equal to / higher than "
             "the lower bound.")
@@ -55,9 +51,6 @@ ConstraintModelResidualTpl<Scalar>::ConstraintModelResidualTpl(
     T_constraint_ = false;
   }
 }
-
-template <typename Scalar>
-ConstraintModelResidualTpl<Scalar>::~ConstraintModelResidualTpl() {}
 
 template <typename Scalar>
 void ConstraintModelResidualTpl<Scalar>::calc(
@@ -167,6 +160,24 @@ void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
       break;
     case ConstraintType::Both:  // this condition is not supported and possible
       break;
+  }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ConstraintModelResidualTpl<NewScalar> ConstraintModelResidualTpl<Scalar>::cast()
+    const {
+  typedef ConstraintModelResidualTpl<NewScalar> ReturnType;
+  if (type_ == ConstraintType::Inequality) {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>(),
+                   lb_.template cast<NewScalar>(),
+                   ub_.template cast<NewScalar>(), T_constraint_);
+    return ret;
+  } else {
+    ReturnType ret(state_->template cast<NewScalar>(),
+                   residual_->template cast<NewScalar>(), T_constraint_);
+    return ret;
   }
 }
 

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +15,6 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -38,6 +38,7 @@ class ActivationModelSmooth1NormTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModelSmooth1NormTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -67,7 +68,7 @@ class ActivationModelSmooth1NormTpl
                 << std::endl;
     }
   };
-  virtual ~ActivationModelSmooth1NormTpl() {};
+  virtual ~ActivationModelSmooth1NormTpl() = default;
 
   /**
    * @brief Compute the smooth-abs function
@@ -76,7 +77,7 @@ class ActivationModelSmooth1NormTpl
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r) {
+                    const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -95,7 +96,7 @@ class ActivationModelSmooth1NormTpl
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r) {
+                        const Eigen::Ref<const VectorXs>& r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
       throw_pretty(
           "Invalid argument: " << "r has wrong dimension (it should be " +
@@ -113,16 +114,23 @@ class ActivationModelSmooth1NormTpl
    *
    * @return the activation data
    */
-  virtual std::shared_ptr<ActivationDataAbstract> createData() {
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  template <typename NewScalar>
+  ActivationModelSmooth1NormTpl<NewScalar> cast() const {
+    typedef ActivationModelSmooth1NormTpl<NewScalar> ReturnType;
+    ReturnType res(nr_, scalar_cast<NewScalar>(eps_));
+    return res;
+  }
 
   /**
    * @brief Print relevant information of the smooth-1norm model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const {
+  virtual void print(std::ostream& os) const override {
     os << "ActivationModelSmooth1Norm {nr=" << nr_ << ", eps=" << eps_ << "}";
   }
 
@@ -141,12 +149,17 @@ struct ActivationDataSmooth1NormTpl
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
 
   template <typename Activation>
   explicit ActivationDataSmooth1NormTpl(Activation* const activation)
       : Base(activation), a(VectorXs::Zero(activation->get_nr())) {}
+  virtual ~ActivationDataSmooth1NormTpl() = default;
 
   VectorXs a;
+
+  using Base::a_value;
+  using Base::Ar;
   using Base::Arr;
 };
 

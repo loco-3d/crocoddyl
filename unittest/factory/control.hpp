@@ -13,7 +13,6 @@
 
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {

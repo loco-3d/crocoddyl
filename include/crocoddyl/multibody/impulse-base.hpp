@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,8 +17,15 @@
 
 namespace crocoddyl {
 
+class ImpulseModelBase {
+ public:
+  virtual ~ImpulseModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ImpulseModelBase, ImpulseModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class ImpulseModelAbstractTpl {
+class ImpulseModelAbstractTpl : public ImpulseModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -38,7 +45,7 @@ class ImpulseModelAbstractTpl {
       "pinocchio::LOCAL",
       ImpulseModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc);)
-  virtual ~ImpulseModelAbstractTpl();
+  virtual ~ImpulseModelAbstractTpl() = default;
 
   virtual void calc(const std::shared_ptr<ImpulseDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x) = 0;
@@ -99,6 +106,7 @@ class ImpulseModelAbstractTpl {
   std::size_t nc_;
   pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
   pinocchio::ReferenceFrame type_;  //!< Type of contact
+  ImpulseModelAbstractTpl() : state_(nullptr), nc_(0), id_(0) {};
 };
 
 template <typename _Scalar>
@@ -121,7 +129,7 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
     dv0_dq.setZero();
     dtau_dq.setZero();
   }
-  virtual ~ImpulseDataAbstractTpl() {}
+  virtual ~ImpulseDataAbstractTpl() = default;
 
   using Base::df_dx;
   using Base::f;

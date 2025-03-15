@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ template <typename _Scalar>
 class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ConstraintModelBase, ConstraintModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
@@ -51,14 +52,14 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
   /**
    * @brief Initialize the numdiff constraint model
    */
-  virtual ~ConstraintModelNumDiffTpl();
+  virtual ~ConstraintModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calc()
    */
   virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calc(const
@@ -66,14 +67,14 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff()
    */
   virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff(const
@@ -81,13 +82,25 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * VectorXs>& x)
    */
   virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::createData()
    */
   virtual std::shared_ptr<ConstraintDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the constraint numdiff model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ConstraintModelNumDiffTpl<NewScalar> A constraint model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ConstraintModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original constraint model

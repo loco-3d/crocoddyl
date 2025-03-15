@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -40,6 +40,7 @@ class IntegratedActionModelRKTpl
     : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActionModelBase, IntegratedActionModelRKTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -48,8 +49,12 @@ class IntegratedActionModelRKTpl
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModelAbstract;
+  typedef DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionDataAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar>
       ControlParametrizationModelAbstract;
+  typedef ControlParametrizationDataAbstractTpl<Scalar>
+      ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -83,7 +88,7 @@ class IntegratedActionModelRKTpl
       std::shared_ptr<DifferentialActionModelAbstract> model,
       const RKType rktype, const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
-  virtual ~IntegratedActionModelRKTpl();
+  virtual ~IntegratedActionModelRKTpl() = default;
 
   /**
    * @brief Integrate the differential action model using RK scheme
@@ -94,7 +99,7 @@ class IntegratedActionModelRKTpl
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Integrate the total cost value for nodes that depends only on the
@@ -107,7 +112,7 @@ class IntegratedActionModelRKTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the partial derivatives of the RK integrator
@@ -118,7 +123,7 @@ class IntegratedActionModelRKTpl
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the partial derivatives of the cost
@@ -131,19 +136,32 @@ class IntegratedActionModelRKTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the RK integrator data
    *
    * @return the RK integrator data
    */
-  virtual std::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the RK integrated-action model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return IntegratedActionModelRKTpl<NewScalar> An action model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  IntegratedActionModelRKTpl<NewScalar> cast() const;
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(
+      const std::shared_ptr<ActionDataAbstract>& data) override;
 
   /**
    * @brief Computes the quasic static commands
@@ -162,7 +180,7 @@ class IntegratedActionModelRKTpl
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
-                           const Scalar tol = Scalar(1e-9));
+                           const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of nodes of the integrator
@@ -174,7 +192,7 @@ class IntegratedActionModelRKTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::control_;       //!< Control parametrization
@@ -194,6 +212,7 @@ class IntegratedActionModelRKTpl
    */
   void set_rk_type(const RKType rktype);
 
+  RKType rk_type_;
   std::vector<Scalar> rk_c_;
   std::size_t ni_;
 };
@@ -271,7 +290,7 @@ struct IntegratedActionDataRKTpl
     dyi_dx[0].diagonal().setOnes();
     dki_dx[0].topRightCorner(nv, nv).diagonal().setOnes();
   }
-  virtual ~IntegratedActionDataRKTpl() {}
+  virtual ~IntegratedActionDataRKTpl() = default;
 
   std::vector<std::shared_ptr<DifferentialActionDataAbstract> >
       differential;  //!< List of differential model data

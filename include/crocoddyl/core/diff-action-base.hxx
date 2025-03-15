@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,8 +10,6 @@
 #include <boost/core/demangle.hpp>
 #include <iostream>
 #include <typeinfo>
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -35,10 +33,6 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
       u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
       u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
-
-template <typename Scalar>
-DifferentialActionModelAbstractTpl<
-    Scalar>::~DifferentialActionModelAbstractTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::calc(
@@ -235,7 +229,8 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(
 template <typename Scalar>
 void DifferentialActionModelAbstractTpl<Scalar>::update_has_control_limits() {
   has_control_limits_ =
-      isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
+      isfinite(u_lb_.template cast<ScalarType>().array()).any() &&
+      isfinite(u_ub_.template cast<ScalarType>().array()).any();
 }
 
 template <typename Scalar>

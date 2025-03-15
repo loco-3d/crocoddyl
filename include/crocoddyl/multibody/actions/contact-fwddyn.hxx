@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -15,8 +15,6 @@
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -34,7 +32,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::
       contacts_(contacts),
       costs_(costs),
       constraints_(nullptr),
-      pinocchio_(*state->get_pinocchio().get()),
+      pinocchio_(state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
@@ -58,17 +56,13 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::
       contacts_(contacts),
       costs_(costs),
       constraints_(constraints),
-      pinocchio_(*state->get_pinocchio().get()),
+      pinocchio_(state->get_pinocchio().get()),
       with_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())),
       JMinvJt_damping_(fabs(JMinvJt_damping)),
       enable_force_(enable_force) {
   init();
 }
-
-template <typename Scalar>
-DifferentialActionModelContactFwdDynamicsTpl<
-    Scalar>::~DifferentialActionModelContactFwdDynamicsTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::init() {
@@ -90,8 +84,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::init() {
                std::to_string(nu_) + ")");
   }
 
-  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
-  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
+  Base::set_u_lb(Scalar(-1.) * pinocchio_->effortLimit.tail(nu_));
+  Base::set_u_ub(Scalar(+1.) * pinocchio_->effortLimit.tail(nu_));
 }
 
 template <typename Scalar>
@@ -118,8 +112,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
 
   // Computing the forward dynamics with the holonomic constraints defined by
   // the contact model
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
-  pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(*pinocchio_, d->pinocchio);
 
   if (!with_armature_) {
     d->pinocchio.M.diagonal() += armature_;
@@ -138,7 +132,7 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
 #endif
 
   pinocchio::forwardDynamics(
-      pinocchio_, d->pinocchio, d->multibody.actuation->tau,
+      *pinocchio_, d->pinocchio, d->multibody.actuation->tau,
       d->multibody.contacts->Jc.topRows(nc), d->multibody.contacts->a0.head(nc),
       JMinvJt_damping_);
   d->xout = d->pinocchio.ddq;
@@ -170,8 +164,8 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
-  pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(*pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
@@ -209,11 +203,12 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::calcDiff(
   // recursively: https://eigen.tuxfamily.org/bz/show_bug.cgi?id=408. Therefore,
   // it is not possible to pass d->Kinv.topLeftCorner(nv + nc, nv + nc)
   d->Kinv.resize(nv + nc, nv + nc);
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout,
+  pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, d->xout,
                                     d->multibody.contacts->fext);
   contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
   pinocchio::getKKTContactDynamicMatrixInverse(
-      pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc), d->Kinv);
+      *pinocchio_, d->pinocchio, d->multibody.contacts->Jc.topRows(nc),
+      d->Kinv);
 
   actuation_->calcDiff(d->multibody.actuation, x, u);
   contacts_->calcDiff(d->multibody.contacts, x);
@@ -278,6 +273,36 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+DifferentialActionModelContactFwdDynamicsTpl<NewScalar>
+DifferentialActionModelContactFwdDynamicsTpl<Scalar>::cast() const {
+  typedef DifferentialActionModelContactFwdDynamicsTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ContactModelMultipleTpl<NewScalar> ContactType;
+  typedef CostModelSumTpl<NewScalar> CostType;
+  typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
+  if (constraints_) {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>()),
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+    return ret;
+  } else {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        scalar_cast<NewScalar>(JMinvJt_damping_), enable_force_);
+    return ret;
+  }
+}
+
+template <typename Scalar>
 void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
     const std::shared_ptr<DifferentialActionDataAbstract>& data,
     Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x, std::size_t,
@@ -307,10 +332,10 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_xstatic.tail(nv).setZero();
   u.setZero();
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q,
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q,
                              d->tmp_xstatic.tail(nv));
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
+  pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio, q);
+  pinocchio::rnea(*pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
                   d->tmp_xstatic.tail(nv));
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u);
   actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u);
@@ -407,7 +432,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_g_ub() const {
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>&
 DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
+  return *pinocchio_;
 }
 
 template <typename Scalar>

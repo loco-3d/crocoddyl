@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -55,9 +55,6 @@ ResidualModelContactForceTpl<Scalar>::ResidualModelContactForceTpl(
         << "the frame index is wrong (it does not exist in the robot)");
   }
 }
-
-template <typename Scalar>
-ResidualModelContactForceTpl<Scalar>::~ResidualModelContactForceTpl() {}
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::calc(
@@ -140,6 +137,18 @@ void ResidualModelContactForceTpl<Scalar>::updateJacobians(
       break;
   }
   update_jacobians_ = false;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelContactForceTpl<NewScalar>
+ResidualModelContactForceTpl<Scalar>::cast() const {
+  typedef ResidualModelContactForceTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      id_, fref_.template cast<NewScalar>(), nr_, nu_, fwddyn_);
+  return ret;
 }
 
 template <typename Scalar>

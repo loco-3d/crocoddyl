@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,6 @@
 #include "crocoddyl/core/actuation/actuation-squashing.hpp"
 #include "crocoddyl/core/actuation/squashing-base.hpp"
 #include "crocoddyl/core/actuation/squashing/smooth-sat.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"
@@ -114,13 +113,6 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
       break;
   }
   return actuation;
-}
-
-void updateActuation(
-    const std::shared_ptr<crocoddyl::ActuationModelAbstract>& model,
-    const std::shared_ptr<crocoddyl::ActuationDataAbstract>& data,
-    const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
-  model->calc(data, x, u);
 }
 
 }  // namespace unittest

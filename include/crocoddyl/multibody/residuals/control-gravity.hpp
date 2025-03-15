@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +11,6 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTROL_GRAVITY_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
@@ -36,6 +36,7 @@ template <typename _Scalar>
 class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelControlGravTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -64,7 +65,7 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    */
   ResidualModelControlGravTpl(std::shared_ptr<StateMultibody> state);
-  virtual ~ResidualModelControlGravTpl();
+  virtual ~ResidualModelControlGravTpl() = default;
 
   /**
    * @brief Compute the control gravity residual
@@ -75,14 +76,14 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract> &data,
                     const Eigen::Ref<const VectorXs> &x,
-                    const Eigen::Ref<const VectorXs> &u);
+                    const Eigen::Ref<const VectorXs> &u) override;
 
   /**
    * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &x);
+                    const Eigen::Ref<const VectorXs> &x) override;
 
   /**
    * @brief Compute the Jacobians of the control gravity residual
@@ -93,7 +94,7 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract> &data,
                         const Eigen::Ref<const VectorXs> &x,
-                        const Eigen::Ref<const VectorXs> &u);
+                        const Eigen::Ref<const VectorXs> &u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
@@ -101,17 +102,29 @@ class ResidualModelControlGravTpl : public ResidualModelAbstractTpl<_Scalar> {
    * VectorXs>& x)
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &x);
+                        const Eigen::Ref<const VectorXs> &x) override;
 
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract *const data);
+      DataCollectorAbstract *const data) override;
+
+  /**
+   * @brief Cast the control-gravity residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelControlGravTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelControlGravTpl<NewScalar> cast() const;
 
   /**
    * @brief Print relevant information of the control-grav residual
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream &os) const;
+  virtual void print(std::ostream &os) const override;
 
  protected:
   using Base::nu_;
@@ -152,6 +165,7 @@ struct ResidualDataControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
     pinocchio = PinocchioData(*(sm->get_pinocchio().get()));
     actuation = d->actuation;
   }
+  virtual ~ResidualDataControlGravTpl() = default;
 
   PinocchioData pinocchio;  //!< Pinocchio data
   std::shared_ptr<ActuationDataAbstractTpl<Scalar> >

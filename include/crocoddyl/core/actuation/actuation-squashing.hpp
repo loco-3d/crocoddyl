@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,29 +20,29 @@ template <typename _Scalar>
 class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase, ActuationSquashingModelTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
   typedef ActuationSquashingDataTpl<Scalar> Data;
-  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
   typedef ActuationDataAbstractTpl<Scalar> ActuationDataAbstract;
   typedef SquashingModelAbstractTpl<Scalar> SquashingModelAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ActuationSquashingModelTpl(std::shared_ptr<ActuationModelAbstract> actuation,
+  ActuationSquashingModelTpl(std::shared_ptr<Base> actuation,
                              std::shared_ptr<SquashingModelAbstract> squashing,
                              const std::size_t nu)
       : Base(actuation->get_state(), nu),
         squashing_(squashing),
         actuation_(actuation) {};
 
-  virtual ~ActuationSquashingModelTpl() {};
+  virtual ~ActuationSquashingModelTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u) {
+                    const Eigen::Ref<const VectorXs>& u) override {
     Data* d = static_cast<Data*>(data.get());
 
     squashing_->calc(d->squashing, u);
@@ -52,7 +53,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u) {
+                        const Eigen::Ref<const VectorXs>& u) override {
     Data* d = static_cast<Data*>(data.get());
 
     squashing_->calcDiff(d->squashing, u);
@@ -62,7 +63,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
 
   virtual void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& tau) {
+                        const Eigen::Ref<const VectorXs>& tau) override {
     if (static_cast<std::size_t>(tau.size()) != this->state_->get_nv()) {
       throw_pretty("Invalid argument: "
                    << "tau has wrong dimension (it should be " +
@@ -72,20 +73,27 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
     data->u.noalias() = data->Mtau * tau;
   }
 
-  std::shared_ptr<ActuationDataAbstract> createData() {
+  std::shared_ptr<ActuationDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   };
+
+  template <typename NewScalar>
+  ActuationSquashingModelTpl<NewScalar> cast() const {
+    typedef ActuationSquashingModelTpl<NewScalar> ReturnType;
+    ReturnType ret(actuation_->template cast<NewScalar>(),
+                   squashing_->template cast<NewScalar>(), nu_);
+    return ret;
+  }
 
   const std::shared_ptr<SquashingModelAbstract>& get_squashing() const {
     return squashing_;
   };
-  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const {
-    return actuation_;
-  };
+  const std::shared_ptr<Base>& get_actuation() const { return actuation_; };
 
  protected:
   std::shared_ptr<SquashingModelAbstract> squashing_;
-  std::shared_ptr<ActuationModelAbstract> actuation_;
+  std::shared_ptr<Base> actuation_;
+  using Base::nu_;
 };
 
 template <typename _Scalar>
@@ -105,15 +113,17 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
         squashing(model->get_squashing()->createData()),
         actuation(model->get_actuation()->createData()) {}
 
-  ~ActuationSquashingDataTpl() {}
+  virtual ~ActuationSquashingDataTpl() = default;
 
   std::shared_ptr<SquashingDataAbstract> squashing;
-  std::shared_ptr<ActuationDataAbstract> actuation;
+  std::shared_ptr<Base> actuation;
 
   using Base::dtau_du;
   using Base::dtau_dx;
+  using Base::Mtau;
   using Base::tau;
   using Base::tau_set;
+  using Base::u;
 };
 
 }  // namespace crocoddyl

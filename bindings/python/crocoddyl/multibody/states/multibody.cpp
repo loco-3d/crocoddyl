@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,115 +11,123 @@
 
 #include "python/crocoddyl/core/state-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeStateMultibody() {
-  bp::register_ptr_to_python<std::shared_ptr<crocoddyl::StateMultibody> >();
-
-  bp::class_<StateMultibody, bp::bases<StateAbstract> >(
-      "StateMultibody",
-      "Multibody state defined using Pinocchio.\n\n"
-      "Pinocchio defines operators for integrating or differentiating the "
-      "robot's\n"
-      "configuration space. And here we assume that the state is defined by "
-      "the\n"
-      "robot's configuration and its joint velocities (x=[q,v]). Generally "
-      "speaking,\n"
-      "q lies on the manifold configuration manifold (M) and v in its tangent "
-      "space\n"
-      "(Tx M). Additionally the Pinocchio allows us to compute analytically "
-      "the\n"
-      "Jacobians for the differentiate and integrate operators. Note that this "
-      "code\n"
-      "can be reused in any robot that is described through its Pinocchio "
-      "model.",
-      bp::init<std::shared_ptr<pinocchio::Model> >(
-          bp::args("self", "pinocchioModel"),
-          "Initialize the multibody state given a Pinocchio model.\n\n"
-          ":param pinocchioModel: pinocchio model (i.e. multibody model)")
-          [bp::with_custodian_and_ward<1, 2>()])
-      .def("zero", &StateMultibody::zero, bp::args("self"),
+template <typename State>
+struct StateMultibodyVisitor
+    : public bp::def_visitor<StateMultibodyVisitor<State>> {
+  typedef typename State::Scalar Scalar;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs,
+                                         StateAbstractTpl<Scalar>::Jdiff_Js, 2,
+                                         3)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+      Jintegrates, StateAbstractTpl<Scalar>::Jintegrate_Js, 2, 3)
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("zero", &State::zero, bp::args("self"),
            "Return the neutral robot configuration with zero velocity.\n\n"
            ":return neutral robot configuration with zero velocity")
-      .def("rand", &StateMultibody::rand, bp::args("self"),
-           "Return a random reference state.\n\n"
-           ":return random reference state")
-      .def("diff", &StateMultibody::diff_dx, bp::args("self", "x0", "x1"),
-           "Operator that differentiates the two robot states.\n\n"
-           "It returns the value of x1 [-] x0 operation. This operator uses "
-           "the Lie\n"
-           "algebra since the robot's root could lie in the SE(3) manifold.\n"
-           ":param x0: current state (dim state.nx()).\n"
-           ":param x1: next state (dim state.nx()).\n"
-           ":return x1 - x0 value (dim state.nx()).")
-      .def("integrate", &StateMultibody::integrate_x,
-           bp::args("self", "x", "dx"),
-           "Operator that integrates the current robot state.\n\n"
-           "It returns the value of x [+] dx operation. This operator uses the "
-           "Lie\n"
-           "algebra since the robot's root could lie in the SE(3) manifold.\n"
-           "Futhermore there is no timestep here (i.e. dx = v*dt), note this "
-           "if you're\n"
-           "integrating a velocity v during an interval dt.\n"
-           ":param x: current state (dim state.nx()).\n"
-           ":param dx: displacement of the state (dim state.ndx()).\n"
-           ":return x + dx value (dim state.nx()).")
-      .def(
-          "Jdiff", &StateMultibody::Jdiff_Js,
-          Jdiffs(
-              bp::args("self", "x0", "x1", "firstsecond"),
-              "Compute the partial derivatives of the diff operator.\n\n"
-              "Both Jacobian matrices are represented throught an identity "
-              "matrix, with the exception\n"
-              "that the robot's root is defined as free-flying joint (SE(3)). "
-              "By default, this\n"
-              "function returns the derivatives of the first and second "
-              "argument (i.e.\n"
-              "firstsecond='both'). However we ask for a specific partial "
-              "derivative by setting\n"
-              "firstsecond='first' or firstsecond='second'.\n"
-              ":param x0: current state (dim state.nx()).\n"
-              ":param x1: next state (dim state.nx()).\n"
-              ":param firstsecond: derivative w.r.t x0 or x1 or both\n"
-              ":return the partial derivative(s) of the diff(x0, x1) function"))
-      .def("Jintegrate", &StateMultibody::Jintegrate_Js,
-           Jintegrates(
-               bp::args("self", "x", "dx", "firstsecond"),
-               "Compute the partial derivatives of arithmetic addition.\n\n"
-               "Both Jacobian matrices are represented throught an identity "
-               "matrix. with the exception\n"
-               "that the robot's root is defined as free-flying joint (SE(3)). "
-               "By default, this\n"
-               "function returns the derivatives of the first and second "
-               "argument (i.e.\n"
-               "firstsecond='both'). However we ask for a specific partial "
-               "derivative by setting\n"
-               "firstsecond='first' or firstsecond='second'.\n"
-               ":param x: current state (dim state.nx()).\n"
-               ":param dx: displacement of the state (dim state.ndx()).\n"
-               ":param firstsecond: derivative w.r.t x or dx or both\n"
-               ":return the partial derivative(s) of the integrate(x, dx) "
-               "function"))
-      .def("JintegrateTransport", &StateMultibody::JintegrateTransport,
-           bp::args("self", "x", "dx", "Jin", "firstsecond"),
-           "Parallel transport from integrate(x, dx) to x.\n\n"
-           "This function performs the parallel transportation of an input "
-           "matrix whose columns\n"
-           "are expressed in the tangent space at integrate(x, dx) to the "
-           "tangent space at x point\n"
-           ":param x: state point (dim. state.nx).\n"
-           ":param dx: velocity vector (dim state.ndx).\n"
-           ":param Jin: input matrix (number of rows = state.nv).\n"
-           ":param firstsecond: derivative w.r.t x or dx")
-      .add_property(
-          "pinocchio",
-          bp::make_function(&StateMultibody::get_pinocchio,
-                            bp::return_value_policy<bp::return_by_value>()),
-          "pinocchio model")
-      .def(CopyableVisitor<StateMultibody>());
+        .def("rand", &State::rand, bp::args("self"),
+             "Return a random reference state.\n\n"
+             ":return random reference state")
+        .def("diff", &State::diff_dx, bp::args("self", "x0", "x1"),
+             "Operator that differentiates the two robot states.\n\n"
+             "It returns the value of x1 [-] x0 operation. This operator uses "
+             "the Lie algebra since the robot's root could lie in the SE(3) "
+             "manifold.\n"
+             ":param x0: current state (dim state.nx()).\n"
+             ":param x1: next state (dim state.nx()).\n"
+             ":return x1 - x0 value (dim state.nx()).")
+        .def("integrate", &State::integrate_x, bp::args("self", "x", "dx"),
+             "Operator that integrates the current robot state.\n\n"
+             "It returns the value of x [+] dx operation. This operator uses "
+             "the Lie algebra since the robot's root could lie in the SE(3) "
+             "manifold. Futhermore there is no timestep here (i.e. dx = v*dt), "
+             "note this if you're integrating a velocity v during an interval "
+             "dt.\n"
+             ":param x: current state (dim state.nx()).\n"
+             ":param dx: displacement of the state (dim state.ndx()).\n"
+             ":return x + dx value (dim state.nx()).")
+        .def("Jdiff", &State::Jdiff_Js,
+             Jdiffs(bp::args("self", "x0", "x1", "firstsecond"),
+                    "Compute the partial derivatives of the diff operator.\n\n"
+                    "Both Jacobian matrices are represented throught an "
+                    "identity matrix, with the exception that the robot's root "
+                    "is defined as free-flying joint (SE(3)). By default, this "
+                    "function returns the derivatives of the first and second "
+                    "argument (i.e. firstsecond='both'). However we ask for a "
+                    "specific partial derivative by setting "
+                    "firstsecond='first' or firstsecond='second'.\n"
+                    ":param x0: current state (dim state.nx()).\n"
+                    ":param x1: next state (dim state.nx()).\n"
+                    ":param firstsecond: derivative w.r.t x0 or x1 or both\n"
+                    ":return the partial derivative(s) of the diff(x0, x1) "
+                    "function"))
+        .def("Jintegrate", &State::Jintegrate_Js,
+             Jintegrates(
+                 bp::args("self", "x", "dx", "firstsecond"),
+                 "Compute the partial derivatives of arithmetic addition.\n\n"
+                 "Both Jacobian matrices are represented throught an identity "
+                 "matrix. with the exception that the robot's root is defined "
+                 "as free-flying joint (SE(3)). By default, this function "
+                 "returns the derivatives of the first and second argument "
+                 "(i.e. firstsecond='both'). However we ask for a specific "
+                 "partial derivative by setting firstsecond='first' or "
+                 "firstsecond='second'.\n"
+                 ":param x: current state (dim state.nx()).\n"
+                 ":param dx: displacement of the state (dim state.ndx()).\n"
+                 ":param firstsecond: derivative w.r.t x or dx or both\n"
+                 ":return the partial derivative(s) of the integrate(x, dx) "
+                 "function"))
+        .def("JintegrateTransport", &State::JintegrateTransport,
+             bp::args("self", "x", "dx", "Jin", "firstsecond"),
+             "Parallel transport from integrate(x, dx) to x.\n\n"
+             "This function performs the parallel transportation of an input "
+             "matrix whose columns are expressed in the tangent space at "
+             "integrate(x, dx) to the tangent space at x point\n"
+             ":param x: state point (dim. state.nx).\n"
+             ":param dx: velocity vector (dim state.ndx).\n"
+             ":param Jin: input matrix (number of rows = state.nv).\n"
+             ":param firstsecond: derivative w.r.t x or dx")
+        .add_property(
+            "pinocchio",
+            bp::make_function(&State::get_pinocchio,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "pinocchio model");
+  }
+};
+
+#define CROCODDYL_STATE_MULTIBODY_PYTHON_BINDINGS(Scalar)                    \
+  typedef StateMultibodyTpl<Scalar> State;                                   \
+  typedef StateAbstractTpl<Scalar> StateBase;                                \
+  typedef pinocchio::ModelTpl<Scalar> Model;                                 \
+  bp::register_ptr_to_python<std::shared_ptr<State>>();                      \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<State, bp::bases<StateBase>>(                                   \
+      "StateMultibody",                                                      \
+      "Multibody state defined using Pinocchio.\n\n"                         \
+      "Pinocchio defines operators for integrating or differentiating the "  \
+      "robot's configuration space. And here we assume that the state is "   \
+      "defined by the robot's configuration and its joint velocities "       \
+      "(x=[q,v]). Generally speaking, q lies on the manifold configuration " \
+      "manifold (M) and v in its tangent space (Tx M). Additionally the "    \
+      "Pinocchio allows us to compute analytically the Jacobians for the "   \
+      "differentiate and integrate operators. Note that this code can be "   \
+      "reused in any robot that is described through its Pinocchio model.",  \
+      bp::init<std::shared_ptr<Model>>(                                      \
+          bp::args("self", "pinocchio"),                                     \
+          "Initialize the multibody state given a Pinocchio model.\n\n"      \
+          ":param pinocchio: pinocchio model (i.e. multibody model)")        \
+          [bp::with_custodian_and_ward<1, 2>()])                             \
+      .def(StateMultibodyVisitor<State>())                                   \
+      .def(CastVisitor<State>())                                             \
+      .def(PrintableVisitor<State>())                                        \
+      .def(CopyableVisitor<State>());
+
+void exposeStateMultibody() {
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_STATE_MULTIBODY_PYTHON_BINDINGS)
 }
 
 }  // namespace python

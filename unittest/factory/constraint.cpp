@@ -10,7 +10,6 @@
 
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
@@ -151,9 +150,9 @@ ConstraintModelFactory::create(ConstraintModelTypes::Type constraint_type,
       break;
     case ConstraintModelTypes::ConstraintModelResidualFramePlacementInequality:
       lb = MathBaseTpl<double>::Vector6s::Zero();
-      lb.tail(3) << -INFINITY, -INFINITY, -INFINITY;
+      lb.tail<3>() << -INFINITY, -INFINITY, -INFINITY;
       ub = MathBaseTpl<double>::Vector6s::Random().cwiseAbs();
-      ub.head(3) << INFINITY, INFINITY, INFINITY;
+      ub.head<3>() << INFINITY, INFINITY, INFINITY;
       constraint = std::make_shared<crocoddyl::ConstraintModelResidual>(
           state,
           std::make_shared<crocoddyl::ResidualModelFramePlacement>(

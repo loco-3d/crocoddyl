@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,10 +13,6 @@ template <typename Scalar>
 ControlParametrizationModelPolyOneTpl<
     Scalar>::ControlParametrizationModelPolyOneTpl(const std::size_t nw)
     : Base(nw, 2 * nw) {}
-
-template <typename Scalar>
-ControlParametrizationModelPolyOneTpl<
-    Scalar>::~ControlParametrizationModelPolyOneTpl() {}
 
 template <typename Scalar>
 void ControlParametrizationModelPolyOneTpl<Scalar>::calc(
@@ -161,6 +158,21 @@ void ControlParametrizationModelPolyOneTpl<Scalar>::multiplyJacobianTransposeBy(
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
       break;
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelPolyOneTpl<NewScalar>
+ControlParametrizationModelPolyOneTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelPolyOneTpl<NewScalar> ReturnType;
+  ReturnType ret(nw_);
+  return ret;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelPolyOneTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << "ControlParametrizationModelPolyZero {nw=" << nw_ << "}";
 }
 
 }  // namespace crocoddyl

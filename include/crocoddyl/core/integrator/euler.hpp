@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -38,6 +38,7 @@ class IntegratedActionModelEulerTpl
     : public IntegratedActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActionModelBase, IntegratedActionModelEulerTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -81,7 +82,7 @@ class IntegratedActionModelEulerTpl
       std::shared_ptr<DifferentialActionModelAbstract> model,
       const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
-  virtual ~IntegratedActionModelEulerTpl();
+  virtual ~IntegratedActionModelEulerTpl() = default;
 
   /**
    * @brief Integrate the differential action model using symplectic Euler
@@ -93,7 +94,7 @@ class IntegratedActionModelEulerTpl
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Integrate the total cost value for nodes that depends only on the
@@ -106,7 +107,7 @@ class IntegratedActionModelEulerTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the partial derivatives of the symplectic Euler integrator
@@ -117,7 +118,7 @@ class IntegratedActionModelEulerTpl
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the partial derivatives of the cost
@@ -130,19 +131,32 @@ class IntegratedActionModelEulerTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the symplectic Euler data
    *
    * @return the symplectic Euler data
    */
-  virtual std::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the Euler integrated-action model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return IntegratedActionModelEulerTpl<NewScalar> An action model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  IntegratedActionModelEulerTpl<NewScalar> cast() const;
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(
+      const std::shared_ptr<ActionDataAbstract>& data) override;
 
   /**
    * @brief Computes the quasic static commands
@@ -161,14 +175,14 @@ class IntegratedActionModelEulerTpl
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
-                           const Scalar tol = Scalar(1e-9));
+                           const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Print relevant information of the Euler integrator model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::control_;       //!< Control parametrization
@@ -209,7 +223,7 @@ struct IntegratedActionDataEulerTpl
     da_du = MatrixXs::Zero(nv, model->get_nu());
     Lwu = MatrixXs::Zero(model->get_control()->get_nw(), model->get_nu());
   }
-  virtual ~IntegratedActionDataEulerTpl() {}
+  virtual ~IntegratedActionDataEulerTpl() = default;
 
   std::shared_ptr<DifferentialActionDataAbstract>
       differential;  //!< Differential model data

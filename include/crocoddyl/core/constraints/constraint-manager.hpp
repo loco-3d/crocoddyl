@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "crocoddyl/core/constraint-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -31,6 +30,13 @@ struct ConstraintItemTpl {
                     std::shared_ptr<ConstraintModelAbstract> constraint,
                     bool active = true)
       : name(name), constraint(constraint), active(active) {}
+
+  template <typename NewScalar>
+  ConstraintItemTpl<NewScalar> cast() const {
+    typedef ConstraintItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, constraint->template cast<NewScalar>(), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the constraint item
@@ -194,6 +200,18 @@ class ConstraintModelManagerTpl {
    */
   std::shared_ptr<ConstraintDataManager> createData(
       DataCollectorAbstract* const data);
+
+  /**
+   * @brief Cast the constraint-manager model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ConstraintModelManagerTpl<NewScalar> A constraint-manager model
+   * with the new scalar type.
+   */
+  template <typename NewScalar>
+  ConstraintModelManagerTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the state

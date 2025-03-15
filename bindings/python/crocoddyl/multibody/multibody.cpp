@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,6 @@ void exposeMultibody() {
   exposeActuationFloatingBase();
   exposeActuationFull();
   exposeActuationFloatingBaseThruster();
-  exposeActuationModelMultiCopterBase();
   exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
@@ -49,7 +48,9 @@ void exposeMultibody() {
   exposeResidualImpulseCoM();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
   exposeResidualPairCollision();
+#endif
 #endif
 
   exposeContact1D();

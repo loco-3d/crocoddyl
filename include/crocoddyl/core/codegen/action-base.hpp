@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, INRIA, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, INRIA, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -14,9 +14,41 @@
 #include <functional>
 
 #include "crocoddyl/core/action-base.hpp"
-#include "pinocchio/codegen/cppadcg.hpp"
+#include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
+
+template <typename Scalar>
+std::unique_ptr<CppAD::ADFun<CppAD::cg::CG<Scalar>>> clone_adfun(
+    const CppAD::ADFun<CppAD::cg::CG<Scalar>>& original) {
+  auto cloned = std::make_unique<CppAD::ADFun<CppAD::cg::CG<Scalar>>>();
+  *cloned = original;  // Use assignment operator to copy the function
+  return cloned;
+}
+
+template <typename FromScalar, typename ToScalar>
+std::function<
+    void(std::shared_ptr<ActionModelAbstractTpl<ToScalar>>,
+         const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&)>
+cast_function(
+    const std::function<void(
+        std::shared_ptr<ActionModelAbstractTpl<FromScalar>>,
+        const Eigen::Ref<const typename MathBaseTpl<FromScalar>::VectorXs>&)>&
+        fn) {
+  return [fn](std::shared_ptr<ActionModelAbstractTpl<ToScalar>> to_base,
+              const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&
+                  to_vector) {
+    // Convert arguments
+    const std::shared_ptr<ActionModelAbstractTpl<FromScalar>>& from_base =
+        to_base->template cast<FromScalar>();
+    const typename MathBaseTpl<FromScalar>::VectorXs from_vector =
+        to_vector.template cast<FromScalar>();
+    // Call the original function with converted arguments
+    fn(from_base, from_vector);
+  };
+}
+
+enum CompilerType { GCC = 0, CLANG };
 
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
@@ -24,267 +56,535 @@ struct ActionDataCodeGenTpl;
 template <typename _Scalar>
 class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(ActionModelBase, ActionModelCodeGenTpl)
+
   typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef ActionDataCodeGenTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
-  typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
-  typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
+  typedef MathBaseTpl<ADScalar> ADMathBase;
   typedef crocoddyl::ActionModelAbstractTpl<ADScalar> ADBase;
   typedef ActionDataAbstractTpl<ADScalar> ADActionDataAbstract;
-  typedef ActionDataCodeGenTpl<ADScalar> ADActionDataCodeGen;
-  typedef typename MathBaseTpl<ADScalar>::VectorXs ADVectorXs;
-  typedef typename MathBaseTpl<ADScalar>::MatrixXs ADMatrixXs;
-  typedef typename MathBaseTpl<ADScalar>::Vector3s ADVector3s;
-  typedef typename MathBaseTpl<ADScalar>::Matrix3s ADMatrix3s;
-
-  typedef
-      typename PINOCCHIO_EIGEN_PLAIN_ROW_MAJOR_TYPE(ADMatrixXs) RowADMatrixXs;
-
+  typedef typename ADMathBase::VectorXs ADVectorXs;
+  typedef typename ADMathBase::MatrixXs ADMatrixXs;
   typedef CppAD::ADFun<CGScalar> ADFun;
+  typedef CppAD::cg::ModelCSourceGen<Scalar> CSourceGen;
+  typedef CppAD::cg::ModelLibraryCSourceGen<Scalar> LibraryCSourceGen;
+  typedef CppAD::cg::DynamicModelLibraryProcessor<Scalar> LibraryProcessor;
+  typedef CppAD::cg::DynamicLib<Scalar> DynamicLib;
+  typedef CppAD::cg::GenericModel<Scalar> GenericModel;
+  typedef CppAD::cg::LinuxDynamicLib<Scalar> LinuxDynamicLib;
+  typedef CppAD::cg::system::SystemInfo<> SystemInfo;
+  typedef std::function<void(std::shared_ptr<ADBase>,
+                             const Eigen::Ref<const ADVectorXs>&)>
+      ParamsEnvironment;
 
-  ActionModelCodeGenTpl(std::shared_ptr<ADBase> admodel,
-                        std::shared_ptr<Base> model,
-                        const std::string& library_name,
-                        const std::size_t n_env = 0,
-                        std::function<void(std::shared_ptr<ADBase>,
-                                           const Eigen::Ref<const ADVectorXs>&)>
-                            fn_record_env = empty_record_env,
-                        const std::string& function_name_calc = "calc",
-                        const std::string& function_name_calcDiff = "calcDiff")
+  /**
+   * @brief Initialize the code generated action model from a model
+   *
+   * @param[in] model         Action model which we want to code generate
+   * @param[in] lib_fname     Name of the code generated library
+   * @param[in] updateParams  Function used to update the calc and calcDiff's
+   * parameters (default empty function)
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compile_options  Compilation flags (default: "-Ofast
+   * -march=native")
+   */
+  ActionModelCodeGenTpl(
+      std::shared_ptr<Base> model, const std::string& lib_fname,
+      const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
+      CompilerType compiler = CLANG,
+      const std::string& compile_options = "-Ofast -march=native")
       : Base(model->get_state(), model->get_nu()),
-        model(model),
-        ad_model(admodel),
-        ad_data(ad_model->createData()),
-        function_name_calc(function_name_calc),
-        function_name_calcDiff(function_name_calcDiff),
-        library_name(library_name),
-        n_env(n_env),
-        fn_record_env(fn_record_env),
-        ad_X(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
-        ad_X2(ad_model->get_state()->get_nx() + ad_model->get_nu() + n_env),
-        ad_calcout(ad_model->get_state()->get_nx() + 1) {
-    const std::size_t ndx = ad_model->get_state()->get_ndx();
-    const std::size_t nu = ad_model->get_nu();
-    ad_calcDiffout.resize(2 * ndx * ndx + 2 * ndx * nu + nu * nu + ndx + nu);
+        model_(model),
+        ad_model_(model->template cast<ADScalar>()),
+        ad_data_(ad_model_->createData()),
+        nP_(nP),
+        nX_(state_->get_nx() + nu_ + nP_),
+        nY1_(state_->get_nx() + 1),
+        ad_X_(nX_),
+        ad_Y1_(nY1_),
+        Y1fun_name_("calc"),
+        Y2fun_name_("calcDiff"),
+        lib_fname_(lib_fname),
+        compiler_type_(compiler),
+        compile_options_(compile_options),
+        updateParams_(updateParams),
+        ad_calc_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()) {
+    const std::size_t ndx = state_->get_ndx();
+    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
+    ad_Y2_.resize(nY2_);
     initLib();
     loadLib();
   }
 
-  static void empty_record_env(std::shared_ptr<ADBase>,
-                               const Eigen::Ref<const ADVectorXs>&) {}
-
-  void recordCalc() {
-    CppAD::Independent(ad_X);
-    const std::size_t nx = ad_model->get_state()->get_nx();
-    const std::size_t nu = ad_model->get_nu();
-
-    fn_record_env(ad_model, ad_X.tail(n_env));
-
-    ad_model->calc(ad_data, ad_X.head(nx), ad_X.segment(nx, nu));
-    collect_calcout();
-    // ad_calcout.template head<1>()[0] = ad_data->cost;
-    // ad_calcout.tail(ad_model->get_state()->get_nx()) = ad_data->xnext;
-    ad_calc.Dependent(ad_X, ad_calcout);
-    ad_calc.optimize("no_compare_op");
+  /**
+   * @brief Initialize the code generated action model from an AD model
+   *
+   * @param[in] ad_model      Action model used to code generate
+   * @param[in] lib_fname     Name of the code generated library
+   * @param[in] updateParams  Function used to update the calc and calcDiff's
+   * parameters (default empty function)
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compile_options  Compilation flags (default: "-Ofast
+   * -march=native")
+   */
+  ActionModelCodeGenTpl(
+      std::shared_ptr<ADBase> ad_model, const std::string& lib_fname,
+      const std::size_t nP = 0, ParamsEnvironment updateParams = EmptyParamsEnv,
+      CompilerType compiler = CLANG,
+      const std::string& compile_options = "-Ofast -march=native")
+      : Base(ad_model->get_state()->template cast<Scalar>(),
+             ad_model->get_nu()),
+        model_(ad_model->template cast<Scalar>()),
+        ad_model_(ad_model),
+        ad_data_(ad_model_->createData()),
+        nP_(nP),
+        nX_(state_->get_nx() + nu_ + nP_),
+        nY1_(state_->get_nx() + 1),
+        ad_X_(nX_),
+        ad_Y1_(nY1_),
+        Y1fun_name_("calc"),
+        Y2fun_name_("calcDiff"),
+        lib_fname_(lib_fname),
+        compiler_type_(compiler),
+        compile_options_(compile_options),
+        updateParams_(updateParams),
+        ad_calc_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()) {
+    const std::size_t ndx = state_->get_ndx();
+    nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx + nu_;
+    ad_Y2_.resize(nY2_);
+    initLib();
+    loadLib();
   }
 
-  void collect_calcout() {
-    ad_calcout[0] = ad_data->cost;
-    ad_calcout.tail(ad_model->get_state()->get_nx()) = ad_data->xnext;
+  /**
+   * @brief Copy constructor
+   * @param other  Action model to be copied
+   */
+  ActionModelCodeGenTpl(const ActionModelCodeGenTpl<Scalar>& other)
+      : Base(other),
+        model_(other.model_),
+        ad_model_(other.ad_model_),
+        nP_(other.nP_),
+        nX_(other.nX_),
+        nY1_(other.nY1_),
+        nY2_(other.nY2_),
+        ad_X_(other.nX_),
+        ad_Y1_(other.nY1_),
+        ad_Y2_(other.nY2_),
+        Y1fun_name_(other.Y1fun_name_),
+        Y2fun_name_(other.Y2fun_name_),
+        lib_fname_(other.lib_fname_),
+        compiler_type_(other.compiler_type_),
+        compile_options_(other.compile_options_),
+        updateParams_(other.updateParams_),
+        ad_calc_(clone_adfun(*other.ad_calc_)),
+        ad_calcDiff_(clone_adfun(*other.ad_calcDiff_)),
+        calcCG_(std::make_unique<CSourceGen>(*ad_calc_, Y1fun_name_)),
+        calcDiffCG_(std::make_unique<CSourceGen>(*ad_calcDiff_, Y2fun_name_)),
+        libCG_(std::make_unique<LibraryCSourceGen>(*calcCG_, *calcDiffCG_)),
+        dynLibManager_(
+            std::make_unique<LibraryProcessor>(*other.libCG_, lib_fname_)) {
+    loadLib(false);
   }
 
-  void collect_calcDiffout() {
-    ADVectorXs& ad_Y = ad_calcDiffout;
+  virtual ~ActionModelCodeGenTpl() = default;
 
-    const std::size_t ndx = ad_model->get_state()->get_ndx();
-    const std::size_t nu = ad_model->get_nu();
-    Eigen::DenseIndex it_Y = 0;
-    Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, ndx, ndx) = ad_data->Fx;
-    it_Y += ndx * ndx;
-    Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, ndx, nu) = ad_data->Fu;
-    it_Y += ndx * nu;
-    Eigen::Map<ADVectorXs>(ad_Y.data() + it_Y, ndx) = ad_data->Lx;
-    it_Y += ndx;
-    Eigen::Map<ADVectorXs>(ad_Y.data() + it_Y, nu) = ad_data->Lu;
-    it_Y += nu;
-    Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, ndx, ndx) = ad_data->Lxx;
-    it_Y += ndx * ndx;
-    Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, ndx, nu) = ad_data->Lxu;
-    it_Y += ndx * nu;
-    Eigen::Map<ADMatrixXs>(ad_Y.data() + it_Y, nu, nu) = ad_data->Luu;
-  }
-
-  void recordCalcDiff() {
-    CppAD::Independent(ad_X2);
-    const std::size_t nx = ad_model->get_state()->get_nx();
-    const std::size_t nu = ad_model->get_nu();
-
-    fn_record_env(ad_model, ad_X2.tail(n_env));
-
-    ad_model->calc(ad_data, ad_X2.head(nx), ad_X2.segment(nx, nu));
-    ad_model->calcDiff(ad_data, ad_X2.head(nx), ad_X2.segment(nx, nu));
-
-    collect_calcDiffout();
-    ad_calcDiff.Dependent(ad_X2, ad_calcDiffout);
-    ad_calcDiff.optimize("no_compare_op");
-  }
-
+  /**
+   * @brief Initialize the code-generated library
+   */
   void initLib() {
+    START_PROFILER("ActionModelCodeGen::initLib");
     recordCalc();
-
-    // generates source code
-    calcgen_ptr = std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> >(
-        new CppAD::cg::ModelCSourceGen<Scalar>(ad_calc, function_name_calc));
-    calcgen_ptr->setCreateForwardZero(true);
-    calcgen_ptr->setCreateJacobian(false);
-
-    // generates source code
+    // Generate source code for calc
+    calcCG_ = std::unique_ptr<CSourceGen>(
+        new CSourceGen(*ad_calc_.get(), Y1fun_name_));
+    calcCG_->setCreateForwardZero(true);
+    calcCG_->setCreateJacobian(false);
+    // Generate source code for calcDiff
     recordCalcDiff();
-    calcDiffgen_ptr = std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> >(
-        new CppAD::cg::ModelCSourceGen<Scalar>(ad_calcDiff,
-                                               function_name_calcDiff));
-    calcDiffgen_ptr->setCreateForwardZero(true);
-    calcDiffgen_ptr->setCreateJacobian(false);
-
-    libcgen_ptr = std::unique_ptr<CppAD::cg::ModelLibraryCSourceGen<Scalar> >(
-        new CppAD::cg::ModelLibraryCSourceGen<Scalar>(*calcgen_ptr,
-                                                      *calcDiffgen_ptr));
-
-    dynamicLibManager_ptr =
-        std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> >(
-            new CppAD::cg::DynamicModelLibraryProcessor<Scalar>(*libcgen_ptr,
-                                                                library_name));
+    calcDiffCG_ = std::unique_ptr<CSourceGen>(
+        new CSourceGen(*ad_calcDiff_.get(), Y2fun_name_));
+    calcDiffCG_->setCreateForwardZero(true);
+    calcDiffCG_->setCreateJacobian(false);
+    // Generate library for calc and calcDiff
+    libCG_ = std::unique_ptr<LibraryCSourceGen>(
+        new LibraryCSourceGen(*calcCG_, *calcDiffCG_));
+    // Create dynamic library manager
+    dynLibManager_ = std::unique_ptr<LibraryProcessor>(
+        new LibraryProcessor(*libCG_, lib_fname_));
+    STOP_PROFILER("ActionModelCodeGen::initLib");
   }
 
+  /**
+   * @brief Compile the code-generated library
+   */
   void compileLib() {
-    CppAD::cg::GccCompiler<Scalar> compiler;
-    std::vector<std::string> compile_options = compiler.getCompileFlags();
-    compile_options[0] = "-O3";
-    compiler.setCompileFlags(compile_options);
-    dynamicLibManager_ptr->createDynamicLibrary(compiler, false);
+    START_PROFILER("ActionModelCodeGen::compileLib");
+    switch (compiler_type_) {
+      case GCC: {
+        CppAD::cg::GccCompiler<Scalar> compiler("/usr/bin/gcc");
+        std::vector<std::string> compile_flags = compiler.getCompileFlags();
+        compile_flags[0] = compile_options_;
+        compiler.setCompileFlags(compile_flags);
+        dynLibManager_->createDynamicLibrary(compiler, false);
+        break;
+      }
+      case CLANG: {
+        CppAD::cg::ClangCompiler<Scalar> compiler("/usr/bin/clang");
+        std::vector<std::string> compile_flags = compiler.getCompileFlags();
+        compile_flags[0] = compile_options_;
+        compiler.setCompileFlags(compile_flags);
+        dynLibManager_->createDynamicLibrary(compiler, false);
+        break;
+      }
+    }
+    STOP_PROFILER("ActionModelCodeGen::compileLib");
   }
 
+  /**
+   * @brief Check if the code-generated library exists
+   *
+   * @return Return true if the code-generated library exists, otherwise false.
+   */
   bool existLib() const {
     const std::string filename =
-        dynamicLibManager_ptr->getLibraryName() +
-        CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
+        dynLibManager_->getLibraryName() + SystemInfo::DYNAMIC_LIB_EXTENSION;
     std::ifstream file(filename.c_str());
     return file.good();
   }
 
-  void loadLib(const bool generate_if_not_exist = true) {
-    if (not existLib() && generate_if_not_exist) compileLib();
-
-    const auto it = dynamicLibManager_ptr->getOptions().find("dlOpenMode");
-    if (it == dynamicLibManager_ptr->getOptions().end()) {
-      dynamicLib_ptr.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-          dynamicLibManager_ptr->getLibraryName() +
-          CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
+  /**
+   * @brief Load the code-generated library
+   *
+   * @param generate_if_exist  True for compiling the library when it exists
+   */
+  void loadLib(const bool generate_if_exist = true) {
+    if (!existLib() || generate_if_exist) {
+      compileLib();
+    }
+    const auto it = dynLibManager_->getOptions().find("dlOpenMode");
+    const std::string filename =
+        dynLibManager_->getLibraryName() + SystemInfo::DYNAMIC_LIB_EXTENSION;
+    if (it == dynLibManager_->getOptions().end()) {
+      dynLib_.reset(new LinuxDynamicLib(filename));
     } else {
       int dlOpenMode = std::stoi(it->second);
-      dynamicLib_ptr.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-          dynamicLibManager_ptr->getLibraryName() +
-              CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION,
-          dlOpenMode));
+      dynLib_.reset(new LinuxDynamicLib(filename, dlOpenMode));
     }
-
-    calcFun_ptr = dynamicLib_ptr->model(function_name_calc.c_str());
-    calcDiffFun_ptr = dynamicLib_ptr->model(function_name_calcDiff.c_str());
+    calcFun_ = dynLib_->model(Y1fun_name_.c_str());
+    calcDiffFun_ = dynLib_->model(Y2fun_name_.c_str());
   }
 
-  void set_env(const std::shared_ptr<ActionDataAbstract>& data,
-               const Eigen::Ref<const VectorXs>& env_val) const {
+  void set_parameters(const std::shared_ptr<ActionDataAbstract>& data,
+                      const Eigen::Ref<const VectorXs>& p) const {
     Data* d = static_cast<Data*>(data.get());
-    d->xu.tail(n_env) = env_val;
+    d->X.tail(nP_) = p;
+  }
+
+  /**
+   * @brief Compute the next state and cost value from a code-generated library
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
+  void calc(const std::shared_ptr<ActionDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>& u) override {
+    START_PROFILER("ActionModelCodeGen::calc");
+    Data* d = static_cast<Data*>(data.get());
+    const std::size_t nx = state_->get_nx();
+    d->X.head(nx) = x;
+    d->X.segment(nx, nu_) = u;
+    START_PROFILER("ActionModelCodeGen::calc::ForwardZero");
+    calcFun_->ForwardZero(d->X, d->Y1);
+    STOP_PROFILER("ActionModelCodeGen::calc::ForwardZero");
+    d->set_Y1();
+    STOP_PROFILER("ActionModelCodeGen::calc");
   }
 
   void calc(const std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u) {
+            const Eigen::Ref<const VectorXs>& x) override {
     Data* d = static_cast<Data*>(data.get());
-    const std::size_t nx = ad_model->get_state()->get_nx();
-    const std::size_t nu = ad_model->get_nu();
+    model_->calc(d->action, x);
+    d->cost = d->action->cost;
+  }
 
-    d->xu.head(nx) = x;
-    d->xu.segment(nx, nu) = u;
-
-    calcFun_ptr->ForwardZero(d->xu, d->calcout);
-    d->distribute_calcout();
+  /**
+   * @brief Compute the derivatives of the dynamics and cost functions from a
+   * code-generated library
+   *
+   * In contrast to action models, this code-generated calcDiff doesn't assumes
+   * that `calc()` has been run first. This function builds a linear-quadratic
+   * approximation of the action model (i.e. dynamical system and cost
+   * function).
+   *
+   * @param[in] data  Action data
+   * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
+   * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
+   */
+  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& x,
+                const Eigen::Ref<const VectorXs>& u) override {
+    START_PROFILER("ActionModelCodeGen::calcDiff");
+    Data* d = static_cast<Data*>(data.get());
+    const std::size_t nx = state_->get_nx();
+    d->X.head(nx) = x;
+    d->X.segment(nx, nu_) = u;
+    START_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
+    calcDiffFun_->ForwardZero(d->X, d->Y2);
+    STOP_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
+    d->set_Y2();
+    STOP_PROFILER("ActionModelCodeGen::calcDiff");
   }
 
   void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u) {
+                const Eigen::Ref<const VectorXs>& x) override {
     Data* d = static_cast<Data*>(data.get());
-    const std::size_t nx = ad_model->get_state()->get_nx();
-    const std::size_t nu = ad_model->get_nu();
-
-    d->xu.head(nx) = x;
-    d->xu.segment(nx, nu) = u;
-    calcDiffFun_ptr->ForwardZero(d->xu, d->calcDiffout);
-    d->distribute_calcDiffout();
+    model_->calcDiff(d->action, x);
+    d->Lx = d->action->Lx;
+    d->Lxx = d->action->Lxx;
   }
 
-  std::shared_ptr<ActionDataAbstract> createData() {
+  /**
+   * @brief Create the data for the code-generated action
+   *
+   * @return the action data
+   */
+  std::shared_ptr<ActionDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   }
 
-  /// \brief Dimension of the input vector
-  Eigen::DenseIndex getInputDimension() const { return ad_X.size(); }
+  /**
+   * @brief Checks that a specific data belongs to this model
+   */
+  bool checkData(const std::shared_ptr<ActionDataAbstract>& data) override {
+    return model_->checkData(data);
+  }
+
+  /**
+   * @brief Computes the quasic static commands
+   *
+   * The quasic static commands are the ones produced for a the reference
+   * posture as an equilibrium point, i.e. for
+   * \f$\mathbf{f^q_x}\delta\mathbf{q}+\mathbf{f_u}\delta\mathbf{u}=\mathbf{0}\f$
+   *
+   * @param[in] data    Action data
+   * @param[out] u      Quasic static commands
+   * @param[in] x       State point (velocity has to be zero)
+   * @param[in] maxiter Maximum allowed number of iterations
+   * @param[in] tol     Tolerance
+   */
+  void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
+                   Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+                   const std::size_t maxiter, const Scalar tol) override {
+    Data* d = static_cast<Data*>(data.get());
+    model_->quasiStatic(d->action, u, x, maxiter, tol);
+  }
+
+  /**
+   * @brief Cast the codegen action model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ActionModelCodeGenTpl<NewScalar> A codegen action model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ActionModelCodeGenTpl<NewScalar> cast() const {
+    typedef ActionModelCodeGenTpl<NewScalar> ReturnType;
+    typedef typename ReturnType::ADScalar ADNewScalar;
+    ReturnType ret(model_->template cast<NewScalar>(), lib_fname_, nP_,
+                   cast_function<ADScalar, ADNewScalar>(updateParams_),
+                   compiler_type_, compile_options_);
+    return ret;
+  }
+
+  /**
+   * @brief Return the action model
+   */
+  const std::shared_ptr<Base>& get_model() const { return model_; }
+
+  /**
+   * @brief Return the number of inequality constraints
+   */
+  std::size_t get_ng() const override { return model_->get_ng(); }
+
+  /**
+   * @brief Return the number of equality constraints
+   */
+  std::size_t get_nh() const override { return model_->get_nh(); }
+
+  /**
+   * @brief Return the number of inequality terminal constraints
+   */
+  std::size_t get_ng_T() const override { return model_->get_ng_T(); }
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  std::size_t get_nh_T() const override { return model_->get_nh_T(); }
+
+  /**
+   * @brief Return the lower bound of the inequality constraints
+   */
+  const VectorXs& get_g_lb() const override { return model_->get_g_lb(); }
+
+  /**
+   * @brief Return the upper bound of the inequality constraints
+   */
+  const VectorXs& get_g_ub() const override { return model_->get_g_ub(); }
+
+  /**
+   * @brief Return the dimension of the dependent vector used by calc and
+   * calcDiff functions
+   */
+  std::size_t get_nX() const { return nX_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by calc function
+   */
+  std::size_t get_nY1() const { return nY1_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by calcDiff
+   * function
+   */
+  std::size_t get_nY2() const { return nY2_; }
+
+  /**
+   * @brief Print relevant information of the action model
+   *
+   * @param[out] os  Output stream object
+   */
+  void print(std::ostream& os) const override { model_->print(os); }
 
  protected:
-  using Base::has_control_limits_;  //!< Indicates whether any of the control
-                                    //!< limits
-  using Base::nr_;                  //!< Dimension of the cost residual
-  using Base::nu_;                  //!< Control dimension
-  using Base::state_;               //!< Model of the state
-  using Base::u_lb_;                //!< Lower control limits
-  using Base::u_ub_;                //!< Upper control limits
+  ActionModelCodeGenTpl()
+      : model_(nullptr),
+        lib_fname_(""),
+        nP_(0),
+        updateParams_(EmptyParamsEnv),
+        compiler_type_(CLANG),
+        compile_options_("-Ofast -march=native") {
+    // Add initialization logic if necessary
+  }
 
-  std::shared_ptr<Base> model;
-  std::shared_ptr<ADBase> ad_model;
-  std::shared_ptr<ADActionDataAbstract> ad_data;
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
 
-  /// \brief Name of the function
-  const std::string function_name_calc, function_name_calcDiff;
+  std::shared_ptr<Base> model_;  //!< Action model to be code generated
+  std::shared_ptr<ADBase>
+      ad_model_;  //!< Action model needed for code generation
+  std::shared_ptr<ADActionDataAbstract>
+      ad_data_;  //! Action data needed for code generation
 
-  /// \brief Name of the library
-  const std::string library_name;
+  std::size_t nP_;  //!< Dimension of the parameter variables in calc and
+                    //!< calcDiff functions
+  std::size_t nX_;  //!< Dimension of the independent variables used by calc and
+                    //!< calcDiff functions
+  std::size_t
+      nY1_;  //!< Dimension of the dependent variables used by calc function
+  std::size_t
+      nY2_;  //!< Dimension of the dependent variables used by calcDiff function
+  ADVectorXs ad_X_;   //!< Independent variables used to tape calc and calcDiff
+                      //!< functions
+  ADVectorXs ad_Y1_;  //!< Dependent variables used to tape calc function
+  ADVectorXs ad_Y2_;  //!< Dependent variables used to tape calcDiff function
 
-  /// \brief Size of the environment variables
-  const std::size_t n_env;
+  const std::string Y1fun_name_;       //!< Name of the calc function
+  const std::string Y2fun_name_;       //!< Name of the calcDiff function
+  const std::string lib_fname_;        //!< Name of the code generated library
+  CompilerType compiler_type_;         //!< Type of compiler
+  const std::string compile_options_;  //!< Compilation options
 
-  /// \brief A function that updates the environment variables before starting
-  /// record.
-  std::function<void(std::shared_ptr<ADBase>,
-                     const Eigen::Ref<const ADVectorXs>&)>
-      fn_record_env;
+  ParamsEnvironment updateParams_;  // Lambda function that updates parameter
+                                    // variables before starting record.
 
-  /// \brief Options to generate or not the source code for the evaluation
-  /// function
-  bool build_forward;
+  std::unique_ptr<ADFun> ad_calc_;  //! < Function used to code generate calc
+  std::unique_ptr<ADFun>
+      ad_calcDiff_;  //!< Function used to code generate calcDiff
+  std::unique_ptr<CSourceGen>
+      calcCG_;  //!< Code generated source code of calc function
+  std::unique_ptr<CSourceGen>
+      calcDiffCG_;  //!< Code generated source code of calcDiff function
+  std::unique_ptr<LibraryCSourceGen>
+      libCG_;  //!< Library of the code generated source code
+  std::unique_ptr<LibraryProcessor>
+      dynLibManager_;  //!< Dynamic library manager
+  std::unique_ptr<DynamicLib> dynLib_;
+  std::unique_ptr<GenericModel> calcFun_;  //!< Code generated calc function
+  std::unique_ptr<GenericModel>
+      calcDiffFun_;  //!< Code generated calcDiff function
 
-  ADVectorXs ad_X, ad_X2;
+ private:
+  void recordCalc() {
+    const std::size_t nx = state_->get_nx();
+    // Define the calc's input as the independent variables
+    CppAD::Independent(ad_X_);
+    // Record the calc's environment variables
+    updateParams_(ad_model_, ad_X_.tail(nP_));
+    // Collect computation in calc
+    ad_model_->calc(ad_data_, ad_X_.head(nx), ad_X_.segment(nx, nu_));
+    tapeCalcOutput();
+    // Define calc's output as the dependent variable
+    ad_calc_->Dependent(ad_X_, ad_Y1_);
+    ad_calc_->optimize("no_compare_op");
+  }
 
-  ADVectorXs ad_calcout;
-  ADVectorXs ad_calcDiffout;
+  void recordCalcDiff() {
+    const std::size_t nx = state_->get_nx();
+    // Define the calcDiff's input as the independent variables
+    CppAD::Independent(ad_X_);
+    // Record the calcDiff's environment variables
+    updateParams_(ad_model_, ad_X_.tail(nP_));
+    // Collect computation in calcDiff
+    ad_model_->calc(ad_data_, ad_X_.head(nx), ad_X_.segment(nx, nu_));
+    ad_model_->calcDiff(ad_data_, ad_X_.head(nx), ad_X_.segment(nx, nu_));
+    tapeCalcDiffOutput();
+    // Define calcDiff's output as the dependent variable
+    ad_calcDiff_->Dependent(ad_X_, ad_Y2_);
+    ad_calcDiff_->optimize("no_compare_op");
+  }
 
-  ADFun ad_calc, ad_calcDiff;
+  void tapeCalcOutput() {
+    ad_Y1_[0] = ad_data_->cost;
+    ad_Y1_.tail(state_->get_nx()) = ad_data_->xnext;
+  }
 
-  std::unique_ptr<CppAD::cg::ModelCSourceGen<Scalar> > calcgen_ptr,
-      calcDiffgen_ptr;
-  std::unique_ptr<CppAD::cg::ModelLibraryCSourceGen<Scalar> > libcgen_ptr;
-  std::unique_ptr<CppAD::cg::DynamicModelLibraryProcessor<Scalar> >
-      dynamicLibManager_ptr;
-  std::unique_ptr<CppAD::cg::DynamicLib<Scalar> > dynamicLib_ptr;
-  std::unique_ptr<CppAD::cg::GenericModel<Scalar> > calcFun_ptr,
-      calcDiffFun_ptr;
+  void tapeCalcDiffOutput() {
+    const std::size_t ndx = state_->get_ndx();
+    Eigen::DenseIndex it_Y2 = 0;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, ndx) = ad_data_->Fx;
+    it_Y2 += ndx * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, nu_) = ad_data_->Fu;
+    it_Y2 += ndx * nu_;
+    Eigen::Map<ADVectorXs>(ad_Y2_.data() + it_Y2, ndx) = ad_data_->Lx;
+    it_Y2 += ndx;
+    Eigen::Map<ADVectorXs>(ad_Y2_.data() + it_Y2, nu_) = ad_data_->Lu;
+    it_Y2 += nu_;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, ndx) = ad_data_->Lxx;
+    it_Y2 += ndx * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, nu_) = ad_data_->Lxu;
+    it_Y2 += ndx * nu_;
+    Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nu_, nu_) = ad_data_->Luu;
+  }
 
-};  // struct CodeGenBase
+  static void EmptyParamsEnv(std::shared_ptr<ADBase>,
+                             const Eigen::Ref<const ADVectorXs>&) {}
+};
 
 template <typename _Scalar>
 struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
@@ -295,6 +595,19 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef ActionDataAbstractTpl<Scalar> Base;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Model>
+  explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
+      : Base(model), action(model->get_model()->createData()) {
+    ActionModelCodeGenTpl<Scalar>* m =
+        static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
+    X.resize(m->get_nX());
+    Y1.resize(m->get_nY1());
+    Y2.resize(m->get_nY1());
+    X.setZero();
+    Y1.setZero();
+    Y2.setZero();
+  }
 
   using Base::cost;
   using Base::Fu;
@@ -307,51 +620,36 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::r;
   using Base::xnext;
 
-  VectorXs xu, calcout;
+  VectorXs X;   //!< Independent variables used by calc and calcDiff functions
+  VectorXs Y1;  //!< Dependent variables used by calc function
+  VectorXs Y2;  //!< Dependent variables used by calcDiff function
+  std::shared_ptr<Base> action;  //!< Action data
 
-  VectorXs calcDiffout;
-
-  void distribute_calcout() {
-    cost = calcout[0];
-    xnext = calcout.tail(xnext.size());
+  void set_Y1() {
+    cost = Y1[0];
+    xnext = Y1.tail(xnext.size());
   }
 
-  void distribute_calcDiffout() {
-    VectorXs& Y = calcDiffout;
-    const std::size_t ndx = Fx.rows();
+  void set_Y2() {
+    const std::size_t ndx = Fx.cols();
     const std::size_t nu = Fu.cols();
-
-    Eigen::DenseIndex it_Y = 0;
-    Fx = Eigen::Map<MatrixXs>(Y.data() + it_Y, ndx, ndx);
-    it_Y += ndx * ndx;
-    Fu = Eigen::Map<MatrixXs>(Y.data() + it_Y, ndx, nu);
-    it_Y += ndx * nu;
-    Lx = Eigen::Map<VectorXs>(Y.data() + it_Y, ndx);
-    it_Y += ndx;
-    Lu = Eigen::Map<VectorXs>(Y.data() + it_Y, nu);
-    it_Y += nu;
-    Lxx = Eigen::Map<MatrixXs>(Y.data() + it_Y, ndx, ndx);
-    it_Y += ndx * ndx;
-    Lxu = Eigen::Map<MatrixXs>(Y.data() + it_Y, ndx, nu);
-    it_Y += ndx * nu;
-    Luu = Eigen::Map<MatrixXs>(Y.data() + it_Y, nu, nu);
-  }
-
-  template <template <typename Scalar> class Model>
-  explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
-      : Base(model), calcout(model->get_state()->get_nx() + 1) {
-    ActionModelCodeGenTpl<Scalar>* m =
-        static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
-    xu.resize(m->getInputDimension());
-    xu.setZero();
-    calcout.setZero();
-    const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nu = model->get_nu();
-    calcDiffout.resize(2 * ndx * ndx + 2 * ndx * nu + nu * nu + ndx + nu);
-    calcDiffout.setZero();
+    Eigen::DenseIndex it_Y2 = 0;
+    Fx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, ndx);
+    it_Y2 += ndx * ndx;
+    Fu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, nu);
+    it_Y2 += ndx * nu;
+    Lx = Eigen::Map<VectorXs>(Y2.data() + it_Y2, ndx);
+    it_Y2 += ndx;
+    Lu = Eigen::Map<VectorXs>(Y2.data() + it_Y2, nu);
+    it_Y2 += nu;
+    Lxx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, ndx);
+    it_Y2 += ndx * ndx;
+    Lxu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, nu);
+    it_Y2 += ndx * nu;
+    Luu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nu, nu);
   }
 };
 
 }  // namespace crocoddyl
 
-#endif  // ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
+#endif  // CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_

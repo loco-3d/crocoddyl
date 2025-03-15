@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -24,7 +24,6 @@ void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
 void exposeActuationFloatingBaseThruster();
-void exposeActuationModelMultiCopterBase();
 void exposeForceAbstract();
 void exposeContactAbstract();
 void exposeImpulseAbstract();
@@ -54,7 +53,9 @@ void exposeResidualFrameVelocity();
 void exposeResidualImpulseCoM();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 void exposeResidualPairCollision();
+#endif
 #endif
 
 void exposeContact1D();

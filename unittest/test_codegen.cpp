@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -392,8 +392,7 @@ void test_codegen_4DoFArm() {
   // variable, and the function setting the environment variable as arguments.
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       std::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(
-          runningModelAD, runningModelD, "pyrene_arm_running", 3,
-          change_env<ADScalar>);
+          runningModelAD, "pyrene_arm_running", 3, change_env<ADScalar>);
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
@@ -408,7 +407,7 @@ void test_codegen_4DoFArm() {
   crocoddyl::ActionModelCodeGenTpl<Scalar>* rmcg =
       static_cast<crocoddyl::ActionModelCodeGenTpl<Scalar>*>(
           runningModelCG.get());
-  rmcg->set_env(runningDataCG, new_ref);
+  rmcg->set_parameters(runningDataCG, new_ref);
   crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m =
       static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(
           runningModelD.get());
@@ -457,7 +456,7 @@ void test_codegen_bipedal() {
 
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       std::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(
-          runningModelAD, runningModelD, "pyrene_biped");
+          runningModelAD, "pyrene_biped");
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -46,6 +46,9 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelLQRTpl)
+
   typedef _Scalar Scalar;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ActionModelAbstractTpl<Scalar> Base;
@@ -118,20 +121,34 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
   /** @brief Copy constructor */
   ActionModelLQRTpl(const ActionModelLQRTpl& copy);
 
-  virtual ~ActionModelLQRTpl();
+  virtual ~ActionModelLQRTpl() = default;
 
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
   virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
-  virtual std::shared_ptr<ActionDataAbstract> createData();
-  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
+                        const Eigen::Ref<const VectorXs>& x) override;
+  virtual std::shared_ptr<ActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the LQR model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ActionModelLQRTpl<NewScalar> A action model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ActionModelLQRTpl<NewScalar> cast() const;
+
+  virtual bool checkData(
+      const std::shared_ptr<ActionDataAbstract>& data) override;
 
   /**
    * @brief Create a random LQR model
@@ -248,7 +265,7 @@ class ActionModelLQRTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::ng_;     //!< Equality constraint dimension
@@ -300,6 +317,7 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
     Hx = model->get_H().leftCols(2 * nq);
     Hu = model->get_H().rightCols(nu);
   }
+  virtual ~ActionDataLQRTpl() = default;
 
   using Base::cost;
   using Base::Fu;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -15,7 +15,6 @@
 #include <string>
 #include <utility>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
@@ -33,6 +32,13 @@ struct ContactItemTpl {
                  std::shared_ptr<ContactModelAbstract> contact,
                  const bool active = true)
       : name(name), contact(contact), active(active) {}
+
+  template <typename NewScalar>
+  ContactItemTpl<NewScalar> cast() const {
+    typedef ContactItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, contact->template cast<NewScalar>(), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the contact item
@@ -212,6 +218,18 @@ class ContactModelMultipleTpl {
    */
   std::shared_ptr<ContactDataMultiple> createData(
       pinocchio::DataTpl<Scalar>* const data);
+
+  /**
+   * @brief Cast the multi-contact model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ContactModelMultipleTpl<NewScalar> A multi-contact model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ContactModelMultipleTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the multibody state

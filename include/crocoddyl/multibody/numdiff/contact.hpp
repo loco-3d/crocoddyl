@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -21,6 +21,7 @@ template <typename _Scalar>
 class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef ContactDataAbstractTpl<Scalar> ContactDataAbstract;
@@ -42,25 +43,25 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
   /**
    * @brief Default destructor of the ContactModelNumDiff object
    */
-  virtual ~ContactModelNumDiffTpl();
+  virtual ~ContactModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc ContactModelAbstract::calc()
    */
   void calc(const std::shared_ptr<ContactDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x);
+            const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc ContactModelAbstract::calcDiff()
    */
   void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x);
+                const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc ContactModelAbstract::updateForce()
    */
   void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
-                   const VectorXs& force);
+                   const VectorXs& force) override;
 
   /**
    * @brief Create a Data object
@@ -69,7 +70,10 @@ class ContactModelNumDiffTpl : public ContactModelAbstractTpl<_Scalar> {
    * @return std::shared_ptr<ContactModelAbstract>
    */
   std::shared_ptr<ContactDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data);
+      pinocchio::DataTpl<Scalar>* const data) override;
+
+  template <typename NewScalar>
+  ContactModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the acton model that we use to numerical differentiate

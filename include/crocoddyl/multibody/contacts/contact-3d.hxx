@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -58,9 +58,6 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(
 }
 
 #pragma GCC diagnostic pop
-
-template <typename Scalar>
-ContactModel3DTpl<Scalar>::~ContactModel3DTpl() {}
 
 template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(
@@ -209,6 +206,18 @@ std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModel3DTpl<NewScalar> ContactModel3DTpl<Scalar>::cast() const {
+  typedef ContactModel3DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      xref_.template cast<NewScalar>(), type_, nu_,
+      gains_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

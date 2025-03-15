@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,15 +10,20 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
+
+class ActionModelBase {
+ public:
+  virtual ~ActionModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ActionModelBase, ActionModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for action model
@@ -92,11 +97,12 @@ namespace crocoddyl {
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActionModelAbstractTpl {
+class ActionModelAbstractTpl : public ActionModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
@@ -118,7 +124,13 @@ class ActionModelAbstractTpl {
                          const std::size_t ng = 0, const std::size_t nh = 0,
                          const std::size_t ng_T = 0,
                          const std::size_t nh_T = 0);
-  virtual ~ActionModelAbstractTpl();
+  /**
+   * @brief Copy constructor
+   * @param other  Action model to be copied
+   */
+  ActionModelAbstractTpl(const ActionModelAbstractTpl<Scalar>& other);
+
+  virtual ~ActionModelAbstractTpl() = default;
 
   /**
    * @brief Compute the next state and cost value
@@ -330,6 +342,8 @@ class ActionModelAbstractTpl {
   VectorXs u_ub_;            //!< Upper control limits
   bool has_control_limits_;  //!< Indicates whether any of the control limits is
                              //!< finite
+  ActionModelAbstractTpl()
+      : nu_(0), nr_(0), ng_(0), nh_(0), ng_T_(0), nh_T_(0), state_(nullptr) {}
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined
@@ -394,7 +408,7 @@ struct ActionDataAbstractTpl {
     Hx.setZero();
     Hu.setZero();
   }
-  virtual ~ActionDataAbstractTpl() {}
+  virtual ~ActionDataAbstractTpl() = default;
 
   Scalar cost;     //!< cost value
   VectorXs xnext;  //!< evolution state

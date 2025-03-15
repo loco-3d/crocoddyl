@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,7 @@ template <typename _Scalar>
 class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ConstraintModelBase, ConstraintModelResidualTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -54,6 +55,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   typedef ConstraintDataResidualTpl<Scalar> Data;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
   typedef ResidualModelAbstractTpl<Scalar> ResidualModelAbstract;
+  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
@@ -82,7 +84,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
   ConstraintModelResidualTpl(
       std::shared_ptr<typename Base::StateAbstract> state,
       std::shared_ptr<ResidualModelAbstract> residual, const bool T_act = true);
-  virtual ~ConstraintModelResidualTpl();
+  virtual ~ConstraintModelResidualTpl() = default;
 
   /**
    * @brief Compute the residual constraint
@@ -93,7 +95,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the residual constraint based on state only
@@ -105,7 +107,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the residual constraint
@@ -116,7 +118,7 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the residual constraint with respect to
@@ -130,20 +132,32 @@ class ConstraintModelResidualTpl : public ConstraintModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the residual constraint data
    */
   virtual std::shared_ptr<ConstraintDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the residual constraint model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ConstraintModelResidualTpl<NewScalar> A constraint model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ConstraintModelResidualTpl<NewScalar> cast() const;
 
   /**
    * @brief Print relevant information of the cost-residual model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  private:
   void updateCalc(const std::shared_ptr<ConstraintDataAbstract>& data);
@@ -175,6 +189,7 @@ struct ConstraintDataResidualTpl : public ConstraintDataAbstractTpl<_Scalar> {
   ConstraintDataResidualTpl(Model<Scalar>* const model,
                             DataCollectorAbstract* const data)
       : Base(model, data) {}
+  virtual ~ConstraintDataResidualTpl() = default;
 
   using Base::g;
   using Base::Gu;

@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/make_shared.hpp>
+#include <boost/core/demangle.hpp>
 
 namespace crocoddyl {
 
@@ -15,10 +16,6 @@ ControlParametrizationModelAbstractTpl<
     Scalar>::ControlParametrizationModelAbstractTpl(const std::size_t nw,
                                                     const std::size_t nu)
     : nw_(nw), nu_(nu) {}
-
-template <typename Scalar>
-ControlParametrizationModelAbstractTpl<
-    Scalar>::~ControlParametrizationModelAbstractTpl() {}
 
 template <typename Scalar>
 std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
@@ -51,6 +48,20 @@ ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
   MatrixXs JTA(nu_, A.cols());
   multiplyJacobianTransposeBy(data, A, JTA, op);
   return JTA;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(
+    std::ostream& os,
+    const ControlParametrizationModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelAbstractTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

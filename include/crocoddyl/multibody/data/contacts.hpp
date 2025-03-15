@@ -21,7 +21,7 @@ template <typename Scalar>
 struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  DataCollectorContactTpl<Scalar>(
+  DataCollectorContactTpl(
       std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
   virtual ~DataCollectorContactTpl() {}

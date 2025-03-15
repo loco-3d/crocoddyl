@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -37,6 +37,7 @@ class ResidualModelCentroidalMomentumTpl
     : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelCentroidalMomentumTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -71,7 +72,7 @@ class ResidualModelCentroidalMomentumTpl
    */
   ResidualModelCentroidalMomentumTpl(std::shared_ptr<StateMultibody> state,
                                      const Vector6s& href);
-  virtual ~ResidualModelCentroidalMomentumTpl();
+  virtual ~ResidualModelCentroidalMomentumTpl() = default;
 
   /**
    * @brief Compute the centroidal momentum residual
@@ -82,7 +83,7 @@ class ResidualModelCentroidalMomentumTpl
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the centroidal momentum residual
@@ -93,13 +94,26 @@ class ResidualModelCentroidalMomentumTpl
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Create the centroidal momentum residual data
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the centroidal-momentum residual model to a different scalar
+   * type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelCentroidalMomentumTpl<NewScalar> A residual model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelCentroidalMomentumTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference centroidal momentum
@@ -116,7 +130,7 @@ class ResidualModelCentroidalMomentumTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;
@@ -161,6 +175,7 @@ struct ResidualDataCentroidalMomentumTpl
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
+  virtual ~ResidualDataCentroidalMomentumTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
   Matrix6xs dhd_dq;  //!< Jacobian of the centroidal momentum

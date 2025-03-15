@@ -16,113 +16,130 @@
 namespace crocoddyl {
 namespace python {
 
+template <typename Model>
+struct ControlParametrizationModelPolyOneVisitor
+    : public bp::def_visitor<ControlParametrizationModelPolyOneVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::ControlParametrizationDataAbstract Data;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(
+               const std::shared_ptr<Data>&, const Scalar,
+               const Eigen::Ref<const VectorXs>&) const>(&Model::calc),
+           bp::args("self", "data", "t", "u"),
+           "Compute the control value.\n\n"
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param u: control parameters (dim control.nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Scalar,
+                 const Eigen::Ref<const VectorXs>&) const>(&Model::calcDiff),
+             bp::args("self", "data", "t", "u"),
+             "Compute the Jacobian of the control value with respect to the "
+             "control parameters.\n\n"
+             "It assumes that calc has been run first.\n\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param u: control parameters (dim control.nu)")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the poly-one data.")
+        .def("params",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Scalar,
+                 const Eigen::Ref<const VectorXs>&) const>(&Model::params),
+             bp::args("self", "data", "t", "w"),
+             "Compute the control parameters.\n\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param w: control value (dim control.nw)")
+        .def("convertBounds", &Model::convertBounds,
+             bp::args("self", "w_lb", "w_ub"),
+             "Convert the bounds on the control to bounds on the control "
+             "parameters.\n\n"
+             ":param w_lb: lower bounds on u (dim control.nw).\n"
+             ":param w_ub: upper bounds on u (dim control.nw).\n"
+             ":return p_lb, p_ub: lower and upper bounds on the control "
+             "parameters (dim control.nu).")
+        .def(
+            "multiplyByJacobian", &Model::multiplyByJacobian_J,
+            bp::args("self", "data", "A"),
+            "Compute the product between the given matrix A and the derivative "
+            "of the control with respect to the parameters.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: control-parametrization data\n"
+            ":param A: matrix to multiply (dim na x control.nw)\n"
+            ":return Product between A and the partial derivative of the value "
+            "function (dim na x control.nu)")
+        .def("multiplyJacobianTransposeBy",
+             &Model::multiplyJacobianTransposeBy_J,
+             bp::args("self", "data", "A"),
+             "Compute the product between the transpose of the derivative of "
+             "the control with respect to the parameters and a given matrix "
+             "A.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: control-parametrization data\n"
+             ":param A: matrix to multiply (dim control.nw x na)\n"
+             ":return Product between the partial derivative of the value "
+             "function (transposed) and A (dim control.nu x "
+             "na)");
+  }
+};
+
+template <typename Data>
+struct ControlParametrizationDataPolyOneVisitor
+    : public bp::def_visitor<ControlParametrizationDataPolyOneVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "c", bp::make_getter(&Data::c, bp::return_internal_reference<>()),
+        "polynomial coefficients of the linear control model that depends on "
+        "time");
+  }
+};
+
+#define CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_POLYONE_PYTHON_BINDINGS(       \
+    Scalar)                                                                    \
+  typedef ControlParametrizationModelPolyOneTpl<Scalar> Model;                 \
+  typedef ControlParametrizationModelAbstractTpl<Scalar> ModelBase;            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ControlParametrizationModelPolyOne",                                    \
+      "Linear polynomial control.\n\n"                                         \
+      "This control is a linear function of time (normalized in [0,1]). The "  \
+      "first half of the parameter vector contains the initial value of the "  \
+      "differential control w, whereas the second half contains the value of " \
+      "w at t=0.5.",                                                           \
+      bp::init<std::size_t>(                                                   \
+          bp::args("self", "nw"),                                              \
+          "Initialize the control dimensions.\n\n"                             \
+          ":param nw: dimension of differential control space"))               \
+      .def(ControlParametrizationModelPolyOneVisitor<Model>())                 \
+      .def(CastVisitor<Model>())                                               \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_CONTROL_PARAMETRIZATION_DATA_POLYONE_PYTHON_BINDINGS(Scalar) \
+  typedef ControlParametrizationDataPolyOneTpl<Scalar> Data;                   \
+  typedef ControlParametrizationDataAbstractTpl<Scalar> DataBase;              \
+  typedef ControlParametrizationModelPolyOneTpl<Scalar> Model;                 \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ControlParametrizationDataPolyOne",                                     \
+      "Control-parametrization data for the linear polynomial control.",       \
+      bp::init<Model*>(bp::args("self", "model"),                              \
+                       "Create control-parametrization data.\n\n"              \
+                       ":param model: linear polynomial control model"))       \
+      .def(ControlParametrizationDataPolyOneVisitor<Data>())                   \
+      .def(CopyableVisitor<Data>());
+
 void exposeControlParametrizationPolyOne() {
-  bp::register_ptr_to_python<
-      std::shared_ptr<ControlParametrizationModelPolyOne> >();
-
-  bp::class_<ControlParametrizationModelPolyOne,
-             bp::bases<ControlParametrizationModelAbstract> >(
-      "ControlParametrizationModelPolyOne",
-      "Linear polynomial control.\n\n"
-      "This control is a linear function of time (normalized in [0,1])."
-      "The first half of the parameter vector contains the initial value of "
-      "the differential control w, "
-      "whereas the second half contains the value of w at t=0.5.",
-      bp::init<std::size_t>(
-          bp::args("self", "nw"),
-          "Initialize the control dimensions.\n\n"
-          ":param nw: dimension of differential control space"))
-      .def<void (ControlParametrizationModelPolyOne::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "calc", &ControlParametrizationModelPolyOne::calc,
-          bp::args("self", "data", "t", "u"),
-          "Compute the control value.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param u: control parameters (dim control.nu)")
-      .def<void (ControlParametrizationModelPolyOne::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "calcDiff", &ControlParametrizationModelPolyOne::calcDiff,
-          bp::args("self", "data", "t", "u"),
-          "Compute the Jacobian of the control value with respect to the "
-          "control parameters.\n"
-          "It assumes that calc has been run first.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param u: control parameters (dim control.nu)")
-      .def("createData", &ControlParametrizationModelPolyOne::createData,
-           bp::args("self"), "Create the poly-one data.")
-      .def<void (ControlParametrizationModelPolyOne::*)(
-          const std::shared_ptr<ControlParametrizationDataAbstract>&, double,
-          const Eigen::Ref<const Eigen::VectorXd>&) const>(
-          "params", &ControlParametrizationModelPolyOne::params,
-          bp::args("self", "data", "t", "w"),
-          "Compute the control parameters.\n\n"
-          ":param data: control-parametrization data\n"
-          ":param t: normalized time in [0, 1]\n"
-          ":param w: control value (dim control.nw)")
-      .def("convertBounds", &ControlParametrizationModelPolyOne::convertBounds,
-           bp::args("self", "w_lb", "w_ub"),
-           "Convert the bounds on the control to bounds on the control "
-           "parameters.\n\n"
-           ":param w_lb: lower bounds on u (dim control.nw).\n"
-           ":param w_ub: upper bounds on u (dim control.nw).\n"
-           ":return p_lb, p_ub: lower and upper bounds on the control "
-           "parameters (dim control.nu).")
-      .def("multiplyByJacobian",
-           &ControlParametrizationModelPolyOne::multiplyByJacobian_J,
-           ControlParametrizationModelAbstract_multiplyByJacobian_J_wrap(
-               bp::args("self", "data", "A", "op"),
-               "Compute the product between the given matrix A and the "
-               "derivative "
-               "of the control with respect to the "
-               "parameters.\n\n"
-               "It assumes that calc has been run first.\n"
-               ":param data: control-parametrization data\n"
-               ":param A: matrix to multiply (dim na x control.nw)\n"
-               ":op assignment operator which sets, adds, or removes the given "
-               "results\n"
-               ":return Product between A and the partial derivative of the "
-               "value "
-               "function (dim na x control.nu)"))
-      .def(
-          "multiplyJacobianTransposeBy",
-          &ControlParametrizationModelPolyOne::multiplyJacobianTransposeBy_J,
-          ControlParametrizationModelAbstract_multiplyJacobianTransposeBy_J_wrap(
-              bp::args("self", "data", "A", "op"),
-              "Compute the product between the transpose of the derivative of "
-              "the "
-              "control with respect to the parameters\n"
-              "and a given matrix A.\n\n"
-              "It assumes that calc has been run first.\n"
-              ":param data: control-parametrization data\n"
-              ":param A: matrix to multiply (dim control.nw x na)\n"
-              ":op assignment operator which sets, adds, or removes the given "
-              "results\n"
-              ":return Product between the partial derivative of the value "
-              "function (transposed) and A (dim control.nu x "
-              "na)"))
-      .def(CopyableVisitor<ControlParametrizationModelPolyOne>());
-
-  boost::python::register_ptr_to_python<
-      std::shared_ptr<ControlParametrizationDataPolyOne> >();
-
-  bp::class_<ControlParametrizationDataPolyOne,
-             bp::bases<ControlParametrizationDataAbstract> >(
-      "ControlParametrizationDataPolyOne",
-      "Control-parametrization data for the linear polynomial control.",
-      bp::init<ControlParametrizationModelPolyOne*>(
-          bp::args("self", "model"),
-          "Create control-parametrization data.\n\n"
-          ":param model: linear polynomial control model"))
-      .add_property("c",
-                    bp::make_getter(&ControlParametrizationDataPolyOne::c,
-                                    bp::return_internal_reference<>()),
-                    "polynomial coefficients of the linear control model that "
-                    "depends on time")
-      .def(CopyableVisitor<ControlParametrizationDataPolyOne>());
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_POLYONE_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_CONTROL_PARAMETRIZATION_DATA_POLYONE_PYTHON_BINDINGS)
 }
 
 }  // namespace python

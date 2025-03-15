@@ -15,7 +15,6 @@
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"

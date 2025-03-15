@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2022-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -38,15 +38,15 @@ template <typename _Scalar>
 class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelStateTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ResidualModelAbstractTpl<Scalar> Base;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
-  typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef ResidualDataAbstractTpl<Scalar> ResidualDataAbstract;
-  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -93,7 +93,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] activation  Activation model
    */
   ResidualModelStateTpl(std::shared_ptr<typename Base::StateAbstract> state);
-  virtual ~ResidualModelStateTpl();
+  virtual ~ResidualModelStateTpl() = default;
 
   /**
    * @brief Compute the state residual
@@ -104,7 +104,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the Jacobians of the state residual
@@ -115,7 +115,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivative of the state-cost function and store it in
@@ -134,7 +134,19 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
       const std::shared_ptr<CostDataAbstract>& cdata,
       const std::shared_ptr<ResidualDataAbstract>& rdata,
       const std::shared_ptr<ActivationDataAbstract>& adata,
-      const bool update_u = true);
+      const bool update_u = true) override;
+
+  /**
+   * @brief Cast the state residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelStateTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelStateTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference state
@@ -151,7 +163,7 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nr_;

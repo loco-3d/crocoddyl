@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 
 #include "action.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"

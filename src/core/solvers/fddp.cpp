@@ -12,7 +12,6 @@
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
 #include "crocoddyl/core/solvers/fddp.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 

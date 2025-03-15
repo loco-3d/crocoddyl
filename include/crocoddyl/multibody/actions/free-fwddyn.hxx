@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,7 +17,6 @@
 #include <pinocchio/algorithm/rnea-derivatives.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 
 namespace crocoddyl {
@@ -37,7 +36,7 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::
       actuation_(actuation),
       costs_(costs),
       constraints_(constraints),
-      pinocchio_(*state->get_pinocchio().get()),
+      pinocchio_(state->get_pinocchio().get()),
       without_armature_(true),
       armature_(VectorXs::Zero(state->get_nv())) {
   if (costs_->get_nu() != nu_) {
@@ -46,13 +45,9 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::
         << "Costs doesn't have the same control dimension (it should be " +
                std::to_string(nu_) + ")");
   }
-  Base::set_u_lb(Scalar(-1.) * pinocchio_.effortLimit.tail(nu_));
-  Base::set_u_ub(Scalar(+1.) * pinocchio_.effortLimit.tail(nu_));
+  Base::set_u_lb(Scalar(-1.) * pinocchio_->effortLimit.tail(nu_));
+  Base::set_u_ub(Scalar(+1.) * pinocchio_->effortLimit.tail(nu_));
 }
-
-template <typename Scalar>
-DifferentialActionModelFreeFwdDynamicsTpl<
-    Scalar>::~DifferentialActionModelFreeFwdDynamicsTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
@@ -79,15 +74,15 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
 
   // Computing the dynamics using ABA or manually for armature case
   if (without_armature_) {
-    d->xout = pinocchio::aba(pinocchio_, d->pinocchio, q, v,
+    d->xout = pinocchio::aba(*pinocchio_, d->pinocchio, q, v,
                              d->multibody.actuation->tau);
-    pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
+    pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
   } else {
-    pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+    pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
     d->pinocchio.M.diagonal() += armature_;
-    pinocchio::cholesky::decompose(pinocchio_, d->pinocchio);
+    pinocchio::cholesky::decompose(*pinocchio_, d->pinocchio);
     d->Minv.setZero();
-    pinocchio::cholesky::computeMinv(pinocchio_, d->pinocchio, d->Minv);
+    pinocchio::cholesky::computeMinv(*pinocchio_, d->pinocchio, d->Minv);
     d->u_drift = d->multibody.actuation->tau - d->pinocchio.nle;
     d->xout.noalias() = d->Minv * d->u_drift;
   }
@@ -117,7 +112,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
 
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
@@ -155,12 +150,12 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::calcDiff(
   // Computing the dynamics derivatives
   if (without_armature_) {
     pinocchio::computeABADerivatives(
-        pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau,
+        *pinocchio_, d->pinocchio, q, v, d->multibody.actuation->tau,
         d->Fx.leftCols(nv), d->Fx.rightCols(nv), d->pinocchio.Minv);
     d->Fx.noalias() += d->pinocchio.Minv * d->multibody.actuation->dtau_dx;
     d->Fu.noalias() = d->pinocchio.Minv * d->multibody.actuation->dtau_du;
   } else {
-    pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, d->xout);
+    pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, d->xout);
     d->dtau_dx.leftCols(nv) =
         d->multibody.actuation->dtau_dx.leftCols(nv) - d->pinocchio.dtau_dq;
     d->dtau_dx.rightCols(nv) =
@@ -197,6 +192,31 @@ template <typename Scalar>
 std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+DifferentialActionModelFreeFwdDynamicsTpl<NewScalar>
+DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::cast() const {
+  typedef DifferentialActionModelFreeFwdDynamicsTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef CostModelSumTpl<NewScalar> CostType;
+  typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
+  if (constraints_) {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>()));
+    return ret;
+  } else {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()));
+    return ret;
+  }
 }
 
 template <typename Scalar>
@@ -237,7 +257,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_xstatic.tail(nv).setZero();
   u.setZero();
 
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
+  pinocchio::rnea(*pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
                   d->tmp_xstatic.tail(nv));
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic, u);
   actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic, u);
@@ -315,7 +335,7 @@ void DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::print(
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>&
 DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
+  return *pinocchio_;
 }
 
 template <typename Scalar>

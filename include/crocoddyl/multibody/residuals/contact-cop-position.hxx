@@ -1,9 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Duisburg-Essen, University of
-// Edinburgh,
-//                          Heriot-Watt University
+// Copyright (C) 2020-2025, University of Duisburg-Essen,
+//                          University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,10 +30,6 @@ ResidualModelContactCoPPositionTpl<_Scalar>::ResidualModelContactCoPPositionTpl(
       update_jacobians_(true),
       id_(id),
       cref_(cref) {}
-
-template <typename Scalar>
-ResidualModelContactCoPPositionTpl<
-    Scalar>::~ResidualModelContactCoPPositionTpl() {}
 
 template <typename Scalar>
 void ResidualModelContactCoPPositionTpl<Scalar>::calc(
@@ -92,6 +87,18 @@ void ResidualModelContactCoPPositionTpl<Scalar>::updateJacobians(
   data->Rx.noalias() = A * df_dx;
   data->Ru.noalias() = A * df_du;
   update_jacobians_ = false;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelContactCoPPositionTpl<NewScalar>
+ResidualModelContactCoPPositionTpl<Scalar>::cast() const {
+  typedef ResidualModelContactCoPPositionTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      id_, cref_.template cast<NewScalar>(), nu_, fwddyn_);
+  return ret;
 }
 
 template <typename Scalar>

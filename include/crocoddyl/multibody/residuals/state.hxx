@@ -1,13 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2022-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 
 namespace crocoddyl {
@@ -73,9 +72,6 @@ ResidualModelStateTpl<Scalar>::ResidualModelStateTpl(
 }
 
 template <typename Scalar>
-ResidualModelStateTpl<Scalar>::~ResidualModelStateTpl() {}
-
-template <typename Scalar>
 void ResidualModelStateTpl<Scalar>::calc(
     const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
@@ -132,6 +128,17 @@ void ResidualModelStateTpl<Scalar>::calcCostDiff(
     cdata->Lx = adata->Ar;
     cdata->Lxx.diagonal() = adata->Arr.diagonal();
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelStateTpl<NewScalar> ResidualModelStateTpl<Scalar>::cast() const {
+  typedef ResidualModelStateTpl<NewScalar> ReturnType;
+  typedef StateAbstractTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      xref_.template cast<NewScalar>(), nu_);
+  return ret;
 }
 
 template <typename Scalar>

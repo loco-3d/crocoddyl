@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,8 +15,6 @@
 #include <pinocchio/algorithm/rnea.hpp>
 
 #include "crocoddyl/core/constraints/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 #include "crocoddyl/multibody/residuals/contact-force.hpp"
 
 namespace crocoddyl {
@@ -35,7 +33,7 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
       costs_(costs),
       constraints_(std::make_shared<ConstraintModelManager>(
           state, state->get_nv() + contacts->get_nc_total())),
-      pinocchio_(*state->get_pinocchio().get()) {
+      pinocchio_(state->get_pinocchio().get()) {
   init(state);
 }
 
@@ -56,13 +54,9 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::
       contacts_(contacts),
       costs_(costs),
       constraints_(constraints),
-      pinocchio_(*state->get_pinocchio().get()) {
+      pinocchio_(state->get_pinocchio().get()) {
   init(state);
 }
-
-template <typename Scalar>
-DifferentialActionModelContactInvDynamicsTpl<
-    Scalar>::~DifferentialActionModelContactInvDynamicsTpl() {}
 
 template <typename Scalar>
 void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
@@ -91,7 +85,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
 
   if (state_->get_nv() - actuation_->get_nu() > 0) {
     constraints_->addConstraint(
-        "tau", std::make_shared<ConstraintModelResidual>(
+        "tau", std::make_shared<ConstraintModelResidualTpl<Scalar>>(
                    state_,
                    std::make_shared<
                        typename DifferentialActionModelContactInvDynamicsTpl<
@@ -111,7 +105,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
       const bool active = contact->active;
       constraints_->addConstraint(
           name + "_acc",
-          std::make_shared<ConstraintModelResidual>(
+          std::make_shared<ConstraintModelResidualTpl<Scalar>>(
               state_,
               std::make_shared<
                   typename DifferentialActionModelContactInvDynamicsTpl<
@@ -120,9 +114,9 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::init(
           active);
       constraints_->addConstraint(
           name + "_force",
-          std::make_shared<ConstraintModelResidual>(
+          std::make_shared<ConstraintModelResidualTpl<Scalar>>(
               state_,
-              std::make_shared<ResidualModelContactForceTpl<Scalar> >(
+              std::make_shared<ResidualModelContactForceTpl<Scalar>>(
                   state, id, pinocchio::ForceTpl<Scalar>::Zero(), nc_i, nu_,
                   false),
               false),
@@ -158,14 +152,14 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
       f_ext = u.tail(nc);
 
   d->xout = a;
-  pinocchio::forwardKinematics(pinocchio_, d->pinocchio, q, v, a);
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio);
+  pinocchio::forwardKinematics(*pinocchio_, d->pinocchio, q, v, a);
+  pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio);
   contacts_->calc(d->multibody.contacts, x);
   contacts_->updateForce(d->multibody.contacts, f_ext);
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, v, a,
+  pinocchio::rnea(*pinocchio_, d->pinocchio, q, v, a,
                   d->multibody.contacts->fext);
-  pinocchio::updateGlobalPlacements(pinocchio_, d->pinocchio);
-  pinocchio::centerOfMass(pinocchio_, d->pinocchio, q, v, a);
+  pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
+  pinocchio::centerOfMass(*pinocchio_, d->pinocchio, q, v, a);
   actuation_->commands(d->multibody.actuation, x, d->pinocchio.tau);
   d->multibody.joint->a = a;
   d->multibody.joint->tau = d->multibody.actuation->u;
@@ -200,8 +194,8 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q, v);
-  pinocchio::computeCentroidalMomentum(pinocchio_, d->pinocchio);
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q, v);
+  pinocchio::computeCentroidalMomentum(*pinocchio_, d->pinocchio);
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
   d->constraints->resize(this, d, false);
@@ -232,13 +226,13 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> a =
       u.head(nv);
 
-  pinocchio::computeRNEADerivatives(pinocchio_, d->pinocchio, q, v, a,
+  pinocchio::computeRNEADerivatives(*pinocchio_, d->pinocchio, q, v, a,
                                     d->multibody.contacts->fext);
   contacts_->updateRneaDiff(d->multibody.contacts, d->pinocchio);
   d->pinocchio.M.template triangularView<Eigen::StrictlyLower>() =
       d->pinocchio.M.template triangularView<Eigen::StrictlyUpper>()
           .transpose();
-  pinocchio::jacobianCenterOfMass(pinocchio_, d->pinocchio, false);
+  pinocchio::jacobianCenterOfMass(*pinocchio_, d->pinocchio, false);
   actuation_->calcDiff(d->multibody.actuation, x, d->multibody.joint->tau);
   actuation_->torqueTransform(d->multibody.actuation, x,
                               d->multibody.joint->tau);
@@ -282,7 +276,7 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar>>
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::createData() {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
@@ -313,10 +307,10 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
   d->tmp_xstatic.tail(nv).setZero();
   u.setZero();
 
-  pinocchio::computeAllTerms(pinocchio_, d->pinocchio, q,
+  pinocchio::computeAllTerms(*pinocchio_, d->pinocchio, q,
                              d->tmp_xstatic.tail(nv));
-  pinocchio::computeJointJacobians(pinocchio_, d->pinocchio, q);
-  pinocchio::rnea(pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
+  pinocchio::computeJointJacobians(*pinocchio_, d->pinocchio, q);
+  pinocchio::rnea(*pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
                   d->tmp_xstatic.tail(nv));
   actuation_->calc(d->multibody.actuation, d->tmp_xstatic,
                    d->tmp_xstatic.tail(nu));
@@ -349,6 +343,51 @@ void DifferentialActionModelContactInvDynamicsTpl<Scalar>::quasiStatic(
     }
   }
   d->pinocchio.tau.setZero();
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+DifferentialActionModelContactInvDynamicsTpl<NewScalar>
+DifferentialActionModelContactInvDynamicsTpl<Scalar>::cast() const {
+  typedef DifferentialActionModelContactInvDynamicsTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ContactModelMultipleTpl<NewScalar> ContactType;
+  typedef CostModelSumTpl<NewScalar> CostType;
+  typedef ConstraintModelManagerTpl<NewScalar> ConstraintType;
+  if (constraints_) {
+    const std::shared_ptr<ConstraintType>& constraints =
+        std::make_shared<ConstraintType>(
+            constraints_->template cast<NewScalar>());
+    if (state_->get_nv() - actuation_->get_nu() > 0) {
+      constraints->removeConstraint("tau");
+    }
+    if (contacts_->get_nc_total() != 0) {
+      typename ContactModelMultiple::ContactModelContainer contact_list;
+      contact_list = contacts_->get_contacts();
+      typename ContactModelMultiple::ContactModelContainer::iterator it_m,
+          end_m;
+      for (it_m = contact_list.begin(), end_m = contact_list.end();
+           it_m != end_m; ++it_m) {
+        const std::string name = it_m->second->name;
+        constraints->removeConstraint(name + "_acc");
+        constraints->removeConstraint(name + "_force");
+      }
+    }
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()),
+        constraints);
+    return ret;
+  } else {
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        actuation_->template cast<NewScalar>(),
+        std::make_shared<ContactType>(contacts_->template cast<NewScalar>()),
+        std::make_shared<CostType>(costs_->template cast<NewScalar>()));
+    return ret;
+  }
 }
 
 template <typename Scalar>
@@ -433,29 +472,29 @@ DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_g_ub() const {
 template <typename Scalar>
 pinocchio::ModelTpl<Scalar>&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_pinocchio() const {
-  return pinocchio_;
+  return *pinocchio_;
 }
 
 template <typename Scalar>
-const std::shared_ptr<ActuationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ActuationModelAbstractTpl<Scalar>>&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_actuation() const {
   return actuation_;
 }
 
 template <typename Scalar>
-const std::shared_ptr<ContactModelMultipleTpl<Scalar> >&
+const std::shared_ptr<ContactModelMultipleTpl<Scalar>>&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_contacts() const {
   return contacts_;
 }
 
 template <typename Scalar>
-const std::shared_ptr<CostModelSumTpl<Scalar> >&
+const std::shared_ptr<CostModelSumTpl<Scalar>>&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_costs() const {
   return costs_;
 }
 
 template <typename Scalar>
-const std::shared_ptr<ConstraintModelManagerTpl<Scalar> >&
+const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
 DifferentialActionModelContactInvDynamicsTpl<Scalar>::get_constraints() const {
   return constraints_;
 }

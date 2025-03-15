@@ -2,7 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,6 @@
 #include <pinocchio/multibody/fwd.hpp>
 
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -40,6 +40,7 @@ class ResidualModelFrameTranslationTpl
     : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelFrameTranslationTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -60,7 +61,7 @@ class ResidualModelFrameTranslationTpl
    * @param[in] nu     Dimension of the control vector
    */
   ResidualModelFrameTranslationTpl(std::shared_ptr<StateMultibody> state,
-                                   const pinocchio::FrameIndex,
+                                   const pinocchio::FrameIndex id,
                                    const Vector3s& xref, const std::size_t nu);
 
   /**
@@ -75,7 +76,7 @@ class ResidualModelFrameTranslationTpl
   ResidualModelFrameTranslationTpl(std::shared_ptr<StateMultibody> state,
                                    const pinocchio::FrameIndex id,
                                    const Vector3s& xref);
-  virtual ~ResidualModelFrameTranslationTpl();
+  virtual ~ResidualModelFrameTranslationTpl() = default;
 
   /**
    * @brief Compute the frame translation residual
@@ -86,7 +87,7 @@ class ResidualModelFrameTranslationTpl
    */
   virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the frame translation residual
@@ -97,13 +98,26 @@ class ResidualModelFrameTranslationTpl
    */
   virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Create the frame translation residual data
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the frame-translation residual model to a different scalar
+   * type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelFrameTranslationTpl<NewScalar> A residual model with
+   * the new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelFrameTranslationTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference frame id
@@ -130,7 +144,7 @@ class ResidualModelFrameTranslationTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;
@@ -173,6 +187,7 @@ struct ResidualDataFrameTranslationTpl
     // Avoids data casting at runtime
     pinocchio = d->pinocchio;
   }
+  virtual ~ResidualDataFrameTranslationTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
   Matrix6xs fJf;                          //!< Local Jacobian of the frame

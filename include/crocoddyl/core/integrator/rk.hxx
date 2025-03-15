@@ -1,15 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -18,7 +16,7 @@ IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
     std::shared_ptr<DifferentialActionModelAbstract> model,
     std::shared_ptr<ControlParametrizationModelAbstract> control,
     const RKType rktype, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual) {
+    : Base(model, control, time_step, with_cost_residual), rk_type_(rktype) {
   set_rk_type(rktype);
 }
 
@@ -26,12 +24,9 @@ template <typename Scalar>
 IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
     std::shared_ptr<DifferentialActionModelAbstract> model, const RKType rktype,
     const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {
+    : Base(model, time_step, with_cost_residual), rk_type_(rktype) {
   set_rk_type(rktype);
 }
-
-template <typename Scalar>
-IntegratedActionModelRKTpl<Scalar>::~IntegratedActionModelRKTpl() {}
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::calc(
@@ -344,6 +339,23 @@ IntegratedActionModelRKTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+IntegratedActionModelRKTpl<NewScalar> IntegratedActionModelRKTpl<Scalar>::cast()
+    const {
+  typedef IntegratedActionModelRKTpl<NewScalar> ReturnType;
+  if (control_) {
+    ReturnType ret(differential_->template cast<NewScalar>(),
+                   control_->template cast<NewScalar>(), rk_type_,
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  } else {
+    ReturnType ret(differential_->template cast<NewScalar>(), rk_type_,
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  }
+}
+
+template <typename Scalar>
 bool IntegratedActionModelRKTpl<Scalar>::checkData(
     const std::shared_ptr<ActionDataAbstract>& data) {
   std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
@@ -378,9 +390,9 @@ void IntegratedActionModelRKTpl<Scalar>::quasiStatic(
   Data* d = static_cast<Data*>(data.get());
   const std::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
       d->control[0];
-  u0_data->w *= 0.;
+  u0_data->w *= Scalar(0.);
   differential_->quasiStatic(d->differential[0], u0_data->w, x, maxiter, tol);
-  control_->params(u0_data, 0., u0_data->w);
+  control_->params(u0_data, Scalar(0.), u0_data->w);
   u = u0_data->u;
 }
 

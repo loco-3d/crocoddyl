@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,7 @@ template <typename _Scalar>
 class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(StateBase, StateMultibodyTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -57,7 +59,7 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
    *
    * Note that the zero configuration is computed using `pinocchio::neutral`.
    */
-  virtual VectorXs zero() const;
+  virtual VectorXs zero() const override;
 
   /**
    * @brief Generate a random state
@@ -65,34 +67,44 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
    * Note that the random configuration is computed using `pinocchio::random`
    * which satisfies the manifold definition (e.g., the quaterion definition)
    */
-  virtual VectorXs rand() const;
+  virtual VectorXs rand() const override;
 
   virtual void diff(const Eigen::Ref<const VectorXs>& x0,
                     const Eigen::Ref<const VectorXs>& x1,
-                    Eigen::Ref<VectorXs> dxout) const;
+                    Eigen::Ref<VectorXs> dxout) const override;
   virtual void integrate(const Eigen::Ref<const VectorXs>& x,
                          const Eigen::Ref<const VectorXs>& dx,
-                         Eigen::Ref<VectorXs> xout) const;
+                         Eigen::Ref<VectorXs> xout) const override;
   virtual void Jdiff(const Eigen::Ref<const VectorXs>&,
                      const Eigen::Ref<const VectorXs>&,
                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
-                     const Jcomponent firstsecond = both) const;
+                     const Jcomponent firstsecond = both) const override;
 
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x,
                           const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst,
                           Eigen::Ref<MatrixXs> Jsecond,
                           const Jcomponent firstsecond = both,
-                          const AssignmentOp = setto) const;
+                          const AssignmentOp = setto) const override;
   virtual void JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
                                    const Eigen::Ref<const VectorXs>& dx,
                                    Eigen::Ref<MatrixXs> Jin,
-                                   const Jcomponent firstsecond) const;
+                                   const Jcomponent firstsecond) const override;
 
   /**
    * @brief Return the Pinocchio model (i.e., model of the rigid body system)
    */
   const std::shared_ptr<PinocchioModel>& get_pinocchio() const;
+
+  template <typename NewScalar>
+  StateMultibodyTpl<NewScalar> cast() const;
+
+  /**
+   * @brief Print relevant information of the state multibody
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::has_limits_;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,8 +10,6 @@
 #include <boost/core/demangle.hpp>
 #include <iostream>
 #include <typeinfo>
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -39,7 +37,20 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
       has_control_limits_(false) {}
 
 template <typename Scalar>
-ActionModelAbstractTpl<Scalar>::~ActionModelAbstractTpl() {}
+ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
+    const ActionModelAbstractTpl<Scalar>& other)
+    : nu_(other.nu_),
+      nr_(other.nr_),
+      ng_(other.ng_),
+      nh_(other.nh_),
+      ng_T_(other.ng_T_),
+      nh_T_(other.nh_T_),
+      state_(other.state_),
+      g_lb_(other.g_lb_),
+      g_ub_(other.g_ub_),
+      u_lb_(other.u_lb_),
+      u_ub_(other.u_ub_),
+      has_control_limits_(other.has_control_limits_) {}
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::calc(
@@ -234,7 +245,8 @@ void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
   has_control_limits_ =
-      isfinite(u_lb_.array()).any() && isfinite(u_ub_.array()).any();
+      isfinite(u_lb_.template cast<ScalarType>().array()).any() &&
+      isfinite(u_ub_.template cast<ScalarType>().array()).any();
 }
 
 template <typename Scalar>
