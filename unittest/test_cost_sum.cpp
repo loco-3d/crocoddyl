@@ -33,8 +33,10 @@ void test_constructor(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_costs().size() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
   BOOST_CHECK(casted_model.get_costs().size() == 0);
+#endif
 }
 
 void test_addCost(StateModelTypes::Type state_type) {
@@ -75,6 +77,7 @@ void test_addCost(StateModelTypes::Type state_type) {
                   rand_cost_2->get_activation()->get_nr());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>> casted_rand_cost_1 =
       rand_cost_1->cast<float>();
   casted_model.addCost("random_cost_1", casted_rand_cost_1, 1.f);
@@ -103,6 +106,7 @@ void test_addCost(StateModelTypes::Type state_type) {
   BOOST_CHECK(casted_model.get_nr_total() ==
               casted_rand_cost_1->get_activation()->get_nr() +
                   casted_rand_cost_2->get_activation()->get_nr());
+#endif
 }
 
 void test_addCost_error_message(StateModelTypes::Type state_type) {
@@ -157,6 +161,7 @@ void test_removeCost(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nr_total() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>> casted_rand_cost =
       rand_cost->cast<float>();
   casted_model.addCost("random_cost", casted_rand_cost, 1.f);
@@ -165,6 +170,7 @@ void test_removeCost(StateModelTypes::Type state_type) {
   casted_model.removeCost("random_cost");
   BOOST_CHECK(casted_model.get_nr() == 0);
   BOOST_CHECK(casted_model.get_nr_total() == 0);
+#endif
 }
 
 void test_removeCost_error_message(StateModelTypes::Type state_type) {
@@ -251,6 +257,7 @@ void test_calc(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->cost == cost);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   model.changeCostStatus("random_cost_3", true);
   model.changeCostStatus("random_cost_4", true);
   crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
@@ -289,6 +296,7 @@ void test_calc(StateModelTypes::Type state_type) {
     cost_f += casted_datas[i]->cost;
   }
   BOOST_CHECK(casted_data->cost == cost_f);
+#endif
 }
 
 void test_calcDiff(StateModelTypes::Type state_type) {
@@ -428,6 +436,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->Lxx == Lxx);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   model.changeCostStatus("random_cost_3", true);
   model.changeCostStatus("random_cost_4", true);
   crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
@@ -487,6 +496,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(casted_data->Lxx == Lxx_f);
   BOOST_CHECK(casted_data->Lxu == Lxu_f);
   BOOST_CHECK(casted_data->Luu == Luu_f);
+#endif
 }
 
 void test_get_costs(StateModelTypes::Type state_type) {

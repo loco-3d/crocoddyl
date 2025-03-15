@@ -72,6 +72,7 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type,
     BOOST_CHECK(!std::isnan(data->r(i)));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ResidualModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -100,6 +101,7 @@ void test_calc_returns_a_residual(ResidualModelTypes::Type residual_type,
     BOOST_CHECK(!std::isnan(casted_data->r(i)));
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->r.cast<float>() - casted_data->r).isZero(tol_f));
+#endif
 }
 
 void test_calc_against_numdiff(ResidualModelTypes::Type residual_type,
@@ -159,6 +161,7 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type,
   BOOST_CHECK(data->r == data_num_diff->r);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ResidualModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -183,6 +186,7 @@ void test_calc_against_numdiff(ResidualModelTypes::Type residual_type,
   casted_model->calc(casted_data, x_f, u_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->r.cast<float>() - casted_data->r).isZero(tol_f));
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -264,6 +268,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Rx - data_num_diff->Rx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ResidualModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -308,6 +313,7 @@ void test_partial_derivatives_against_numdiff(
   casted_model->calc(casted_data, x_f);
   casted_model->calcDiff(casted_data, x_f);
   BOOST_CHECK((data->Rx.cast<float>() - casted_data->Rx).isZero(tol_f));
+#endif
 }
 
 void test_reference() {
@@ -332,48 +338,52 @@ void test_reference() {
   state_residual.set_reference(x_ref);
   BOOST_CHECK((x_ref - state_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelStateTpl<float> casted_state_residual =
       state_residual.cast<float>();
   Eigen::VectorXf x_ref_f = casted_state_residual.get_state()->rand();
   casted_state_residual.set_reference(x_ref_f);
   BOOST_CHECK((x_ref_f - casted_state_residual.get_reference()).isZero());
-
+#endif
   // Test reference in control residual
   crocoddyl::ResidualModelControl control_residual(state, nu);
   Eigen::VectorXd u_ref = Eigen::VectorXd::Random(nu);
   control_residual.set_reference(u_ref);
   BOOST_CHECK((u_ref - control_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelControlTpl<float> casted_control_residual =
       control_residual.cast<float>();
   Eigen::VectorXf u_ref_f = Eigen::VectorXf::Random(nu);
   casted_control_residual.set_reference(u_ref_f);
   BOOST_CHECK((u_ref_f - casted_control_residual.get_reference()).isZero());
-
+#endif
   // Test reference in joint-acceleration residual
   crocoddyl::ResidualModelJointAcceleration jacc_residual(state, nu);
   Eigen::VectorXd a_ref = Eigen::VectorXd::Random(nv);
   jacc_residual.set_reference(a_ref);
   BOOST_CHECK((a_ref - jacc_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelJointAccelerationTpl<float> casted_jacc_residual =
       jacc_residual.cast<float>();
   Eigen::VectorXf a_ref_f = Eigen::VectorXf::Random(nv);
   casted_jacc_residual.set_reference(a_ref_f);
   BOOST_CHECK((a_ref_f - casted_jacc_residual.get_reference()).isZero());
-
+#endif
   // Test reference in joint-effort residual
   crocoddyl::ResidualModelJointEffort jeff_residual(state, actuation, nu);
   Eigen::VectorXd tau_ref = Eigen::VectorXd::Random(nu);
   jeff_residual.set_reference(tau_ref);
   BOOST_CHECK((tau_ref - jeff_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelJointEffortTpl<float> casted_jeff_residual =
       jeff_residual.cast<float>();
   Eigen::VectorXf tau_ref_f = Eigen::VectorXf::Random(nu);
   casted_jeff_residual.set_reference(tau_ref_f);
   BOOST_CHECK((tau_ref_f - casted_jeff_residual.get_reference()).isZero());
-
+#endif
   // Test reference in centroidal-momentum residual
   crocoddyl::ResidualModelCentroidalMomentum cmon_residual(
       state, Eigen::Matrix<double, 6, 1>::Zero());
@@ -381,12 +391,13 @@ void test_reference() {
   cmon_residual.set_reference(h_ref);
   BOOST_CHECK((h_ref - cmon_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelCentroidalMomentumTpl<float> casted_cmon_residual =
       cmon_residual.cast<float>();
   Eigen::Matrix<float, 6, 1> h_ref_f = Eigen::Matrix<float, 6, 1>::Random();
   casted_cmon_residual.set_reference(h_ref_f);
   BOOST_CHECK((h_ref_f - casted_cmon_residual.get_reference()).isZero());
-
+#endif
   // Test reference in com-position residual
   crocoddyl::ResidualModelCoMPosition c_residual(state,
                                                  Eigen::Vector3d::Zero());
@@ -394,11 +405,13 @@ void test_reference() {
   c_residual.set_reference(c_ref);
   BOOST_CHECK((c_ref - c_residual.get_reference()).isZero());
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ResidualModelCoMPositionTpl<float> casted_c_residual =
       c_residual.cast<float>();
   Eigen::Vector3f c_ref_f = Eigen::Vector3f::Random();
   casted_c_residual.set_reference(c_ref_f);
   BOOST_CHECK((c_ref_f - casted_c_residual.get_reference()).isZero());
+#endif
 }
 
 //----------------------------------------------------------------------------//

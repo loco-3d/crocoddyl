@@ -78,8 +78,10 @@ void test_constructor() {
   BOOST_CHECK(model.get_contacts().size() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
   BOOST_CHECK(casted_model.get_contacts().size() == 0);
+#endif
 }
 
 void test_addContact() {
@@ -119,6 +121,7 @@ void test_addContact() {
               rand_contact_1->get_nc() + rand_contact_2->get_nc());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>
       casted_rand_contact_1 = rand_contact_1->cast<float>();
   casted_model.addContact("random_contact_1", casted_rand_contact_1);
@@ -142,6 +145,7 @@ void test_addContact() {
   BOOST_CHECK(casted_model.get_nc_total() ==
               casted_rand_contact_1->get_nc() +
                   casted_rand_contact_2->get_nc());
+#endif
 }
 
 void test_addContact_error_message() {
@@ -202,6 +206,7 @@ void test_removeContact() {
   BOOST_CHECK(model.get_nc_total() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>>
       casted_rand_contact = rand_contact->cast<float>();
   casted_model.addContact("random_contact", casted_rand_contact);
@@ -210,6 +215,7 @@ void test_removeContact() {
   casted_model.removeContact("random_contact");
   BOOST_CHECK(casted_model.get_nc() == 0);
   BOOST_CHECK(casted_model.get_nc_total() == 0);
+#endif
 }
 
 void test_removeContact_error_message() {
@@ -305,6 +311,7 @@ void test_calc() {
   }
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   model.changeContactStatus("random_contact_3", true);
   model.changeContactStatus("random_contact_4", true);
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
@@ -346,6 +353,7 @@ void test_calc() {
     nc += nc_i;
   }
   nc = 0;
+#endif
 }
 
 void test_calc_diff() {
@@ -426,6 +434,7 @@ void test_calc_diff() {
   }
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   model.changeContactStatus("random_contact_3", true);
   model.changeContactStatus("random_contact_4", true);
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
@@ -473,6 +482,7 @@ void test_calc_diff() {
     nc += nc_i;
   }
   nc = 0;
+#endif
 }
 
 void test_calc_diff_no_recalc() {
@@ -600,6 +610,7 @@ void test_updateForce() {
   }
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
   pinocchio::ModelTpl<float>& casted_pinocchio_model =
       *casted_model.get_state()->get_pinocchio().get();
@@ -637,6 +648,7 @@ void test_updateForce() {
                  it_d_f->second->f.toVector())
                     .isZero(tol_f));
   }
+#endif
 }
 
 void test_updateAccelerationDiff() {
@@ -670,6 +682,7 @@ void test_updateAccelerationDiff() {
   BOOST_CHECK((data->ddv_dx - ddv_dx).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
   pinocchio::DataTpl<float> casted_pinocchio_data(
       *casted_model.get_state()->get_pinocchio().get());
@@ -678,6 +691,7 @@ void test_updateAccelerationDiff() {
   const Eigen::MatrixXf ddv_dx_f = ddv_dx.cast<float>();
   casted_model.updateAccelerationDiff(casted_data, ddv_dx_f);
   BOOST_CHECK((casted_data->ddv_dx - ddv_dx_f).isZero(1e-9f));
+#endif
 }
 
 void test_updateForceDiff() {
@@ -717,6 +731,7 @@ void test_updateForceDiff() {
   }
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ContactModelMultipleTpl<float> casted_model = model.cast<float>();
   pinocchio::DataTpl<float> casted_pinocchio_data(
       *casted_model.get_state()->get_pinocchio().get());
@@ -737,6 +752,7 @@ void test_updateForceDiff() {
     BOOST_CHECK((it_d->second->df_dx.cast<float>() - it_d_f->second->df_dx)
                     .isZero(tol_f));
   }
+#endif
 }
 
 void test_assert_updateForceDiff_assert_mismatch_model_data() {

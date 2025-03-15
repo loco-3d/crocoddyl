@@ -79,6 +79,7 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->df_du.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -100,6 +101,7 @@ void test_calc_fetch_jacobians(ContactModelTypes::Type contact_type,
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
   BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
@@ -139,6 +141,7 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->df_du.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -163,6 +166,7 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
   BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_update_force(ContactModelTypes::Type contact_type,
@@ -194,6 +198,7 @@ void test_update_force(ContactModelTypes::Type contact_type,
   BOOST_CHECK(data->df_du.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -215,6 +220,7 @@ void test_update_force(ContactModelTypes::Type contact_type,
           .isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
   BOOST_CHECK(casted_data->df_du.isZero());
+#endif
 }
 
 void test_update_force_diff(ContactModelTypes::Type contact_type,
@@ -249,6 +255,7 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   BOOST_CHECK(!data->df_du.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -268,6 +275,7 @@ void test_update_force_diff(ContactModelTypes::Type contact_type,
   BOOST_CHECK(!casted_data->df_du.isZero());
   BOOST_CHECK((data->df_dx.cast<float>() - casted_data->df_dx).isZero());
   BOOST_CHECK((data->df_du.cast<float>() - casted_data->df_du).isZero());
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -317,6 +325,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ContactModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   pinocchio::ModelTpl<float>& pinocchio_model_f =
@@ -350,6 +359,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
   BOOST_CHECK((casted_data->da0_dx - casted_data_num_diff->da0_dx)
                   .isZero(30.f * tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

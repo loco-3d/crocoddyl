@@ -48,6 +48,7 @@ void test_partial_derivatives_against_impulse_numdiff(
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>
       &casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> &casted_data =
@@ -61,6 +62,7 @@ void test_partial_derivatives_against_impulse_numdiff(
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
   BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

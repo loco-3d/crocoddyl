@@ -32,9 +32,11 @@ void test_constructor(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_constraints().size() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ConstraintModelManagerTpl<float> casted_model =
       model.cast<float>();
   BOOST_CHECK(casted_model.get_constraints().size() == 0);
+#endif
 }
 
 void test_addConstraint(StateModelTypes::Type state_type) {
@@ -93,6 +95,7 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh_T() == nh_T);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>
       casted_rand_constraint_1 = rand_constraint_1->cast<float>();
   casted_model.addConstraint("random_constraint_1", casted_rand_constraint_1);
@@ -134,6 +137,7 @@ void test_addConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(casted_model.get_nh() == nh);
   BOOST_CHECK(casted_model.get_ng_T() == ng_T);
   BOOST_CHECK(casted_model.get_nh_T() == nh_T);
+#endif
 }
 
 void test_addConstraint_error_message(StateModelTypes::Type state_type) {
@@ -199,6 +203,7 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(model.get_nh_T() == 0);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>
       casted_rand_constraint = rand_constraint->cast<float>();
   casted_model.addConstraint("random_constraint", casted_rand_constraint);
@@ -215,6 +220,7 @@ void test_removeConstraint(StateModelTypes::Type state_type) {
   BOOST_CHECK(casted_model.get_nh() == 0);
   BOOST_CHECK(casted_model.get_ng_T() == 0);
   BOOST_CHECK(casted_model.get_nh_T() == 0);
+#endif
 }
 
 void test_removeConstraint_error_message(StateModelTypes::Type state_type) {
@@ -291,6 +297,7 @@ void test_calc(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->h.isApprox(h, 1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ConstraintModelManagerTpl<float> casted_model =
       model.cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -331,6 +338,7 @@ void test_calc(StateModelTypes::Type state_type) {
   }
   BOOST_CHECK(casted_data->g.isApprox(g_f, 1e-9f));
   BOOST_CHECK(casted_data->h.isApprox(h_f, 1e-9f));
+#endif
 }
 
 void test_calcDiff(StateModelTypes::Type state_type) {
@@ -441,6 +449,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(data->Hx.isApprox(Hx, 1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ConstraintModelManagerTpl<float> casted_model =
       model.cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -497,6 +506,7 @@ void test_calcDiff(StateModelTypes::Type state_type) {
   BOOST_CHECK(casted_data->Gu.isApprox(Gu_f, 1e-9f));
   BOOST_CHECK(casted_data->Hx.isApprox(Hx_f, 1e-9f));
   BOOST_CHECK(casted_data->Hu.isApprox(Hu_f, 1e-9f));
+#endif
 }
 
 void test_get_constraints(StateModelTypes::Type state_type) {

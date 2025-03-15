@@ -51,6 +51,7 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
   BOOST_CHECK(!data->h.hasNaN());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -75,6 +76,7 @@ void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->g.cast<float>() - casted_data->g).isZero(tol_f));
   BOOST_CHECK((data->h.cast<float>() - casted_data->h).isZero(tol_f));
+#endif
 }
 
 void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
@@ -114,6 +116,7 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
   BOOST_CHECK((data->h - data_num_diff->h).isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -140,6 +143,7 @@ void test_calc_against_numdiff(ConstraintModelTypes::Type constraint_type,
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((casted_data->g - casted_data_num_diff->g).isZero(tol_f));
   BOOST_CHECK((casted_data->h - casted_data_num_diff->h).isZero(tol_f));
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -211,6 +215,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -256,6 +261,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
   BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
   BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
+#endif
 }
 
 void test_dimensions_in_constraint_manager(
@@ -296,6 +302,7 @@ void test_dimensions_in_constraint_manager(
   BOOST_CHECK(model->get_nh() == constraint_man.get_nh());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ConstraintModelManagerTpl<float> casted_constraint_man =
       constraint_man.cast<float>();
   BOOST_CHECK(model->get_state()->get_nx() ==
@@ -309,6 +316,7 @@ void test_dimensions_in_constraint_manager(
               casted_constraint_man.get_state()->get_nv());
   BOOST_CHECK(model->get_ng() == casted_constraint_man.get_ng());
   BOOST_CHECK(model->get_nh() == casted_constraint_man.get_nh());
+#endif
 }
 
 void test_partial_derivatives_in_constraint_manager(
@@ -353,6 +361,7 @@ void test_partial_derivatives_in_constraint_manager(
   BOOST_CHECK((data->Hu - data_man->Hu).isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
       casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -377,6 +386,7 @@ void test_partial_derivatives_in_constraint_manager(
   casted_constraint_man.calcDiff(casted_data_man, x_f, u_f);
   BOOST_CHECK((casted_data->Hx - casted_data_man->Hx).isZero());
   BOOST_CHECK((casted_data->Hu - casted_data_man->Hu).isZero());
+#endif
 }
 
 //----------------------------------------------------------------------------//

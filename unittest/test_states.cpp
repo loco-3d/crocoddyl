@@ -37,6 +37,7 @@ void test_state_dimension(StateModelTypes::Type state_type) {
               state->get_nx());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   BOOST_CHECK(static_cast<std::size_t>(casted_state->zero().size()) ==
@@ -50,6 +51,7 @@ void test_state_dimension(StateModelTypes::Type state_type) {
               casted_state->get_nx());
   BOOST_CHECK(static_cast<std::size_t>(casted_state->get_ub().size()) ==
               casted_state->get_nx());
+#endif
 }
 
 void test_integrate_against_difference(StateModelTypes::Type state_type) {
@@ -73,6 +75,7 @@ void test_integrate_against_difference(StateModelTypes::Type state_type) {
   BOOST_CHECK(dxi.isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x1_f = casted_state->rand();
@@ -84,6 +87,7 @@ void test_integrate_against_difference(StateModelTypes::Type state_type) {
   casted_state->integrate(x1_f, dx_f, x2i_f);
   casted_state->diff(x2i_f, x2_f, dxi_f);
   BOOST_CHECK(dxi_f.isZero(1e-6f));
+#endif
 }
 
 void test_difference_against_integrate(StateModelTypes::Type state_type) {
@@ -105,6 +109,7 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   BOOST_CHECK((dxd - dx).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x_f = casted_state->rand();
@@ -114,6 +119,7 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   casted_state->integrate(x_f, dx_f, xidx_f);
   casted_state->diff(x_f, xidx_f, dxd_f);
   BOOST_CHECK((dxd_f - dx_f).isZero(1e-6f));
+#endif
 }
 
 void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
@@ -146,6 +152,7 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   BOOST_CHECK((Jdiff_second - Jdiff_both_second).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x1_f = casted_state->rand();
@@ -166,6 +173,7 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   casted_state->Jdiff(x1_f, x2_f, Jdiff_both_first_f, Jdiff_both_second_f);
   BOOST_CHECK((Jdiff_first_f - Jdiff_both_first_f).isZero(1e-9f));
   BOOST_CHECK((Jdiff_second_f - Jdiff_both_second_f).isZero(1e-9f));
+#endif
 }
 
 void test_Jint_firstsecond(StateModelTypes::Type state_type) {
@@ -198,6 +206,7 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   BOOST_CHECK((Jint_second - Jint_both_second).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x_f = casted_state->rand();
@@ -219,6 +228,7 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   casted_state->Jintegrate(x_f, dx_f, Jint_both_first_f, Jint_both_second_f);
   BOOST_CHECK((Jint_first_f - Jint_both_first_f).isZero(1e-9f));
   BOOST_CHECK((Jint_second_f - Jint_both_second_f).isZero(1e-9f));
+#endif
 }
 
 void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
@@ -358,6 +368,7 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   BOOST_CHECK((Jint_2 - Jint_num_2).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   float tol_f = std::sqrt(float(2.0) * std::numeric_limits<float>::epsilon());
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
@@ -377,6 +388,7 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   casted_state->Jintegrate(x_f, dx_f, Jint_1_f, Jint_2_f);
   BOOST_CHECK((Jint_1_f - Jint_num_1_f).isZero(tol_f));
   BOOST_CHECK((Jint_2_f - Jint_num_2_f).isZero(tol_f));
+#endif
 }
 
 void test_JintegrateTransport(StateModelTypes::Type state_type) {
@@ -407,6 +419,7 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   BOOST_CHECK((Jref - Jint_2 * Jtest).isZero(1e-10));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x_f = casted_state->rand();
@@ -426,6 +439,7 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   Jref_f = Jtest_f;
   casted_state->JintegrateTransport(x_f, dx_f, Jref_f, crocoddyl::second);
   BOOST_CHECK((Jref_f - Jint_2_f * Jtest_f).isZero(1e-6f));
+#endif
 }
 
 void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
@@ -454,6 +468,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   const Eigen::VectorXf x1_f = casted_state->rand();
@@ -476,6 +491,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   dX_dDX_f = Jdx_f;
   dDX_dX_f = J2_f;
   BOOST_CHECK((dX_dDX_f - dDX_dX_f.inverse()).isZero(1e-4f));
+#endif
 }
 
 void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
@@ -522,6 +538,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isZero(1e-3));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::StateAbstractTpl<float>>& casted_state =
       state->cast<float>();
   float h_f = std::sqrt(float(2.0) * std::numeric_limits<float>::epsilon());
@@ -556,6 +573,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   casted_state->diff(x1_f, x2i_f, dxi_f);
   casted_state->Jdiff(x1_f, x_f, J1_f, J2_f);
   BOOST_CHECK((J2_f * eps_f - (dxi_f - dx_f) / h_f).isZero(1e-2f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

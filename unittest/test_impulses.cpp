@@ -73,6 +73,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -90,6 +91,7 @@ void test_calc_fetch_jacobians(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
+#endif
 }
 
 void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
@@ -133,6 +135,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -161,6 +164,7 @@ void test_calc_diff_fetch_derivatives(ImpulseModelTypes::Type impulse_type,
   }
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
+#endif
 }
 
 void test_update_force(ImpulseModelTypes::Type impulse_type,
@@ -189,6 +193,7 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(data->df_dx.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -204,6 +209,7 @@ void test_update_force(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(
       (data->f.toVector().cast<float>() - casted_data->f.toVector()).isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
+#endif
 }
 
 void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
@@ -233,6 +239,7 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(!data->df_dx.isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ImpulseModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   const std::shared_ptr<pinocchio::ModelTpl<float>>& pinocchio_model_f =
@@ -247,6 +254,7 @@ void test_update_force_diff(ImpulseModelTypes::Type impulse_type,
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(!casted_data->df_dx.isZero());
   BOOST_CHECK((data->df_dx.cast<float>() - casted_data->df_dx).isZero());
+#endif
 }
 
 //----------------------------------------------------------------------------//

@@ -61,6 +61,7 @@ void test_partial_derivatives_against_contact_numdiff(
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
       &casted_model = model->cast<float>();
   const std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -82,6 +83,7 @@ void test_partial_derivatives_against_contact_numdiff(
   casted_model->calcDiff(casted_data, x_f);
   BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
   BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

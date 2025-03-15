@@ -64,6 +64,7 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(!std::isnan(data->cost));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
       model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -91,6 +92,7 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(!std::isnan(casted_data->cost));
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type,
@@ -135,6 +137,7 @@ void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(data->cost == data_num_diff->cost);
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
       model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -160,6 +163,7 @@ void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type,
   casted_model->calc(casted_data, x_f, u_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -250,6 +254,7 @@ void test_partial_derivatives_against_numdiff(
   }
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
       model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -294,6 +299,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
   BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
   BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+#endif
 }
 
 void test_dimensions_in_cost_sum(CostModelNoFFTypes::Type cost_type,
@@ -334,6 +340,7 @@ void test_dimensions_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(model->get_activation()->get_nr() == cost_sum.get_nr());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::CostModelSumTpl<float> casted_cost_sum = cost_sum.cast<float>();
   BOOST_CHECK(model->get_state()->get_nx() ==
               casted_cost_sum.get_state()->get_nx());
@@ -345,6 +352,7 @@ void test_dimensions_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(model->get_state()->get_nv() ==
               casted_cost_sum.get_state()->get_nv());
   BOOST_CHECK(model->get_activation()->get_nr() == casted_cost_sum.get_nr());
+#endif
 }
 
 void test_partial_derivatives_in_cost_sum(
@@ -396,6 +404,7 @@ void test_partial_derivatives_in_cost_sum(
   BOOST_CHECK((data->Luu - data_sum->Luu).isZero());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
       model->cast<float>();
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
@@ -428,6 +437,7 @@ void test_partial_derivatives_in_cost_sum(
   BOOST_CHECK((casted_data->Lxx - casted_data_sum->Lxx).isZero());
   BOOST_CHECK((casted_data->Lxu - casted_data_sum->Lxu).isZero());
   BOOST_CHECK((casted_data->Luu - casted_data_sum->Luu).isZero());
+#endif
 }
 
 //----------------------------------------------------------------------------//

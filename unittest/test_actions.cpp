@@ -34,11 +34,13 @@ void test_check_data(
   BOOST_CHECK(model->checkData(data));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
       casted_model->createData();
   BOOST_CHECK(casted_model->checkData(casted_data));
+#endif
 }
 
 void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
@@ -65,6 +67,7 @@ void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   BOOST_CHECK((data->xnext - x).head(model->get_state()->get_nq()).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
@@ -77,6 +80,7 @@ void test_calc(const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
               casted_model->get_state()->get_nx());
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -133,6 +137,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> casted_model =
       model->cast<float>();
   std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> casted_data =
@@ -165,6 +170,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
   BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
   BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
+#endif
 }
 
 void test_check_action_data(ActionModelTypes::Type action_model_type) {

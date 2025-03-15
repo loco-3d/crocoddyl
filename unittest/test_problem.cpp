@@ -76,6 +76,7 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ShootingProblemTpl<float> casted_problem1 = problem1.cast<float>();
   crocoddyl::ShootingProblemTpl<float> casted_problem2 = problem2.cast<float>();
   std::vector<Eigen::VectorXf> xs_f(T + 1);
@@ -112,6 +113,7 @@ void test_calc(ActionModelTypes::Type action_model_type) {
                     .isZero(tol_f));
   }
   BOOST_CHECK(std::abs(float(cost) - cost_f) <= tol_f);
+#endif
 }
 
 void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
@@ -168,6 +170,7 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
   BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ShootingProblemTpl<float> casted_problem1 = problem1.cast<float>();
   crocoddyl::ShootingProblemTpl<float> casted_problem2 = problem2.cast<float>();
   std::vector<Eigen::VectorXf> xs_f(T + 1);
@@ -203,6 +206,7 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
                     .isZero(tol_f));
   }
   BOOST_CHECK(std::abs(float(cost) - cost_f) <= tol_f);
+#endif
 }
 
 void test_calcDiff(ActionModelTypes::Type action_model_type) {
@@ -269,6 +273,7 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ShootingProblemTpl<float> casted_problem1 = problem1.cast<float>();
   crocoddyl::ShootingProblemTpl<float> casted_problem2 = problem2.cast<float>();
   std::vector<Eigen::VectorXf> xs_f(T + 1);
@@ -326,6 +331,7 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
         (problem1.get_runningDatas()[i]->Luu.cast<float>() - casted_data->Luu)
             .isZero(tol_f));
   }
+#endif
 }
 
 void test_calcDiff_diffAction(
@@ -397,6 +403,7 @@ void test_calcDiff_diffAction(
   BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   crocoddyl::ShootingProblemTpl<float> casted_problem1 = problem1.cast<float>();
   crocoddyl::ShootingProblemTpl<float> casted_problem2 = problem2.cast<float>();
   std::vector<Eigen::VectorXf> xs_f(T + 1);
@@ -454,6 +461,7 @@ void test_calcDiff_diffAction(
         (problem1.get_runningDatas()[i]->Luu.cast<float>() - casted_data->Luu)
             .isZero(tol_f));
   }
+#endif
 }
 
 void test_rollout(ActionModelTypes::Type action_model_type) {

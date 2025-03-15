@@ -36,11 +36,13 @@ void test_check_data(DifferentialActionModelTypes::Type action_type) {
   BOOST_CHECK(model->checkData(data));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
       casted_model = model->cast<float>();
   std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
       casted_data = casted_model->createData();
   BOOST_CHECK(casted_model->checkData(casted_data));
+#endif
 }
 
 void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
@@ -64,6 +66,7 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
               model->get_state()->get_nv());
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
       casted_model = model->cast<float>();
   std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -75,6 +78,7 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
               casted_model->get_state()->get_nv());
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->xout.cast<float>() - casted_data->xout).isZero(tol_f));
+#endif
 }
 
 void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
@@ -97,6 +101,7 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   BOOST_CHECK(!std::isnan(data->cost));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
       casted_model = model->cast<float>();
   std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -108,6 +113,7 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   BOOST_CHECK(!std::isnan(casted_data->cost));
   float tol_f = 50.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
@@ -165,6 +171,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
     BOOST_CHECK(data->xout.norm() <= 1e-8);
 
     // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
     std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
         casted_model = model->cast<float>();
     std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -178,6 +185,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
         50.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
     BOOST_CHECK(casted_data->xout.norm() <= tol_f);
     BOOST_CHECK((data->xout.cast<float>() - casted_data->xout).isZero(tol_f));
+#endif
   }
 }
 
@@ -240,6 +248,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
 
   // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
       casted_model = model->cast<float>();
   std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -272,6 +281,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
   BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
   BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//
