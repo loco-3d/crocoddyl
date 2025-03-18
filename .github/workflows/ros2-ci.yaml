@@ -3,6 +3,9 @@ name: ROS
 # This determines when this workflow is run
 on:
   push:
+    branches:
+      - devel
+      - master
     paths-ignore:
       - 'doc/**'
       - '.gitlab-ci.yml'
@@ -14,6 +17,9 @@ on:
       - 'package.xml'
       - 'dependencies.rosintall'
   pull_request:
+    branches:
+      - devel
+      - master
     paths-ignore:
       - 'doc/**'
       - '.gitlab-ci.yml'
@@ -49,9 +55,6 @@ jobs:
       UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
       CTEST_OUTPUT_ON_FAILURE: 1
       BUILDER: colcon
-      # This by-passes issues on importing example_robot_data module when running examples and unit tests.
-      # It seems target_ws is unable to properly overlay upstream_ws.
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'pip install example-robot-data'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
