@@ -343,7 +343,8 @@ class DisplayAbstract(ABC):
         fc = []
         for key, contact in contact_data.todict().items():
             if contact_model[key].active:
-                if tuple(map(int, pinocchio.__version__.split("."))) >= (3, 0, 0):
+                version = tuple(int(x) for x in pinocchio.__version__.split("."))
+                if version >= (3, 0, 0):
                     joint = state.pinocchio.frames[contact.frame].parentJoint
                 else:
                     joint = state.pinocchio.frames[contact.frame].parent
