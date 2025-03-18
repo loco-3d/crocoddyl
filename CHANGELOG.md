@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 * :warning: BREAKING: replaced boost shared pointers by std ones in https://github.com/loco-3d/crocoddyl/pull/1339
+* :warning: BREAKING: require pinocchio >= 3.4.0
 
 ## [2.2.0] - 1980-01-01
 
