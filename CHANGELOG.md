@@ -12,9 +12,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Fixed checking of positive semi-define condition in LQR problems in https://github.com/loco-3d/crocoddyl/pull/1352
 * Compute LU decomposition using permutationP in https://github.com/loco-3d/crocoddyl/pull/1351
 * Force DifferentialActionDataContactInvDynamics to update df_du for all contacts in  https://github.com/loco-3d/crocoddyl/pull/1348
-* :warning: BREAKING: replaced boost shared pointers by std ones in https://github.com/loco-3d/crocoddyl/pull/1339
 
-## [2.2.0] - 1980-01-01
+## [3.0.0] - 2025-03-19
+
+* :warning: BREAKING: replaced boost shared pointers by std ones in https://github.com/loco-3d/crocoddyl/pull/1339
+* :warning: BREAKING: require pinocchio >= 3.4.0
+
+## [2.2.0] - 2025-02-10
 
 * Changed return policy in std::vector of Eigen's vector and matrices to be compliant with Pinocchio in https://github.com/loco-3d/crocoddyl/pull/1338
 * Prevent users to improperly setting residual references in https://github.com/loco-3d/crocoddyl/pull/1332
@@ -321,7 +325,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...v3.0.0
 [2.2.0]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...v2.1.0
 [2.0.2]: https://github.com/loco-3d/crocoddyl/compare/v2.0.1...v2.0.2

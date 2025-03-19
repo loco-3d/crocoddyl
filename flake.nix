@@ -11,7 +11,11 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       perSystem =
-        { pkgs, self', ... }:
+        {
+          pkgs,
+          self',
+          ...
+        }:
         {
           apps.default = {
             type = "app";
