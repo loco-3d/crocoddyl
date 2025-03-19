@@ -132,6 +132,42 @@ class ActionModelAbstractTpl_wrap
     return this->ActionModel::quasiStatic(data, u, x, maxiter, tol);
   }
 
+  std::size_t get_ng() {
+    if (boost::python::override get_ng = this->get_override("get_ng")) {
+      return bp::call<std::size_t>(get_ng.ptr());
+    }
+    return this->ActionModel::get_ng();
+  }
+
+  std::size_t default_get_ng() { return this->ActionModel::get_ng(); }
+
+  std::size_t get_nh() {
+    if (boost::python::override get_nh = this->get_override("get_nh")) {
+      return bp::call<std::size_t>(get_nh.ptr());
+    }
+    return this->ActionModel::get_nh();
+  }
+
+  std::size_t default_get_nh() { return this->ActionModel::get_nh(); }
+
+  std::size_t get_ng_T() {
+    if (boost::python::override get_ng_T = this->get_override("get_ng_T")) {
+      return bp::call<std::size_t>(get_ng_T.ptr());
+    }
+    return this->ActionModel::get_ng_T();
+  }
+
+  std::size_t default_get_ng_T() { return this->ActionModel::get_ng_T(); }
+
+  std::size_t get_nh_T() {
+    if (boost::python::override get_nh_T = this->get_override("get_nh_T")) {
+      return bp::call<std::size_t>(get_nh_T.ptr());
+    }
+    return this->ActionModel::get_nh_T();
+  }
+
+  std::size_t default_get_nh_T() { return this->ActionModel::get_nh_T(); }
+
   template <typename NewScalar>
   ActionModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef ActionModelAbstractTpl_wrap<NewScalar> ReturnType;

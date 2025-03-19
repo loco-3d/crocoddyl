@@ -97,18 +97,26 @@ struct ActionModelAbstractVisitor
             "ng", bp::make_function(&Model::get_ng),
             bp::make_setter(&Model::ng_, bp::return_internal_reference<>()),
             "number of inequality constraints")
+        .def("get_ng", &Model::get_ng, &Model::default_get_ng,
+            "Return the number of inequality constraints.")
         .add_property(
             "nh", bp::make_function(&Model::get_nh),
             bp::make_setter(&Model::nh_, bp::return_internal_reference<>()),
             "number of equality constraints")
+        .def("get_nh", &Model::get_nh, &Model::default_get_nh,
+            "Return the number of equality constraints.")
         .add_property(
             "ng_T", bp::make_function(&Model::get_ng_T),
             bp::make_setter(&Model::ng_T_, bp::return_internal_reference<>()),
             "number of inequality terminal constraints")
+        .def("get_ng_T", &Model::get_ng_T, &Model::default_get_ng_T,
+            "Return the number of inequality terminal constraints.")
         .add_property(
             "nh_T", bp::make_function(&Model::get_nh_T),
             bp::make_setter(&Model::nh_T_, bp::return_internal_reference<>()),
             "number of equality terminal constraints")
+        .def("get_nh_T", &Model::get_nh_T, &Model::default_get_nh_T,
+            "Return the number of equality terminal constraints.")
         .add_property(
             "state",
             bp::make_function(&Model::get_state,
