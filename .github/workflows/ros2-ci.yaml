@@ -61,18 +61,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      # Install python3-venv to ensure virtual environment can be created
-      - name: Install python3-venv
-        run: |
-          sudo apt update
-          sudo apt install -y python3-venv
-      # Create virtual environment and install dependencies
-      - name: Setup Python environment
-        run: |
-          python3 -m venv ~/venv
-          . ~/venv/bin/activate
-          pip install --upgrade pip
-          pip install "numpy<2" "pybind11>=2.12"
       # This step will fetch/store the directory used by ccache before/after the ci run
       - uses: actions/cache@v4
         with:
