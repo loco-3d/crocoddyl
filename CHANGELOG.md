@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Created Python bindings for (diff)-action getters in https://github.com/loco-3d/crocoddyl/pull/1362
 * Enabled casting and multi-scalar Python bindings in https://github.com/loco-3d/crocoddyl/pull/1346
 * Add install version in https://github.com/loco-3d/crocoddyl/pull/1355
 * Removed absolute path for boost library in https://github.com/loco-3d/crocoddyl/pull/1353
