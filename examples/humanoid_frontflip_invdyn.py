@@ -31,7 +31,6 @@ humanoid = HumanoidLocoManipulation(
 problem = humanoid.createFlipProblem(0.3)
 solver = crocoddyl.SolverIntro(problem)
 solver.th_minImprove = 1e-1
-solver.th_stop = 5e-5
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:

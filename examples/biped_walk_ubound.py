@@ -85,7 +85,6 @@ for i, phase in enumerate(GAITPHASES):
                     value["supportKnots"],
                 )
             )
-            solver[i].th_stop = 1e-7
 
     # Added the callback functions
     if WITHPLOT:

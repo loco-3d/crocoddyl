@@ -48,7 +48,6 @@ problem = humanoid.createMonkeyBarProblem(
 )
 solver = crocoddyl.SolverFDDP(problem)
 solver.th_minImprove = 1e-1
-solver.th_stop = 5e-5
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
 else:
