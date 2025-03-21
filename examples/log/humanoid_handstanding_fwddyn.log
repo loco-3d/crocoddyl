@@ -100,8 +100,6 @@ iter    cost       merit      stop      |grad|      preg       dreg      step   
   89  3.025e+01  3.025e+01  1.071e-07  3.515e-06  2.560e+01  2.560e+01  1.0000  1.438e-11  0.000e+00  6.147e-13  3.347e-06  3.352e-06  3.747e-06  3.753e-06
 iter    cost       merit      stop      |grad|      preg       dreg      step   ||ffeas||  ||gfeas||  ||hfeas||   dV-exp       dV      dPhi-exp     dPhi
   90  3.025e+01  3.025e+01  1.014e-08  3.186e-07  2.560e+02  2.560e+02  1.0000  1.399e-13  0.000e+00  3.422e-15  3.171e-07  3.171e-07  3.218e-07  3.218e-07
-  91  3.025e+01  3.025e+01  1.008e-09  3.152e-08  2.560e+03  2.560e+03  1.0000  1.008e-13  0.000e+00  3.089e-14  3.151e-08  3.151e-08  3.151e-08  3.151e-08
-  92  3.025e+01  3.025e+01  1.007e-10  3.149e-09  2.560e+04  2.560e+04  1.0000  7.860e-14  0.000e+00  8.882e-16  3.149e-09  3.149e-09  3.165e-09  3.165e-09
 Target end-effector pose:
    RF position: [ 0.4  -0.15  2.3 ]
    RF quaternion: [0. 1. 0. 0.]
@@ -109,6 +107,6 @@ Target end-effector pose:
    LF quaternion: [0. 1. 0. 0.]
 Terminal end-effector pose:
    RF position: [ 0.4  -0.15  2.3 ]
-   RF quaternion: [-0.  1.  0.  0.]
+   RF quaternion: [0. 1. 0. 0.]
    LF position: [0.4  0.15 2.3 ]
    LF quaternion: [-0.  1.  0.  0.]

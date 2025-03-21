@@ -410,7 +410,10 @@ SolverIntroTpl<NewScalar> SolverIntroTpl<Scalar>::cast() const {
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
-  ret.set_th_stop(scalar_cast<NewScalar>(th_stop_));
+  ret.set_th_stop(std::sqrt(std::numeric_limits<NewScalar>::epsilon()) <
+                          NewScalar(th_stop_)
+                      ? scalar_cast<NewScalar>(th_stop_)
+                      : std::sqrt(std::numeric_limits<NewScalar>::epsilon()));
   // Setting the FDDP parameters
   ret.set_alphas(vector_cast<NewScalar>(alphas_));
   ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
