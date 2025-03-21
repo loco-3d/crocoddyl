@@ -62,14 +62,14 @@ us = solver.problem.quasiStatic(xs[:-1])
 
 # print("*** SOLVE (FeasShoot) ***")
 # solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
-# solver.solve(xs, us, 300, False, 1e-9)
+# solver.solve(xs, us, 300, False)
 print("*** SOLVE (MultiShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
-solver.solve(xs, us, 300, False, 1e-9)
+solver.solve(xs, us, 300, False)
 # Ts = int(solver.problem.T / 3)
 # print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
 # solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
-# solver.solve(xs, us, 300, False, 1e-9)
+# solver.solve(xs, us, 300, False)
 
 # Display the solution
 if WITHDISPLAY:

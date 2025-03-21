@@ -162,7 +162,7 @@ else:
 # Solving it with the DDP algorithm
 xs = [x0] * (solver.problem.T + 1)
 us = solver.problem.quasiStatic([x0] * solver.problem.T)
-solver.solve(xs, us, 500, False, 1e-9)
+solver.solve(xs, us, 500, False)
 
 # Visualizing the solution in gepetto-viewer
 display = None
