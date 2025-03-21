@@ -448,8 +448,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_LQR(
   L_ = MatrixXs::Zero(2 * nq + nu_, 2 * nq + nu_);
   L_ << Q, N, N.transpose(), R;
   Eigen::SelfAdjointEigenSolver<MatrixXs> eig(L_);
-  if (eig.info() != Eigen::Success ||
-      eig.eigenvalues().minCoeff() < ScaleNumerics<Scalar>(-1e-9)) {
+  if (eig.info() != Eigen::Success || eig.eigenvalues().minCoeff() < -1e-12) {
     throw_pretty("Invalid argument "
                  << "[Q, N; N.T, R] is not positive semi-definite");
   }
