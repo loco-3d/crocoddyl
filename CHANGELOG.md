@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.0.1] - 2025-03-21
+
 * Add install version in https://github.com/loco-3d/crocoddyl/pull/1355
 * Removed absolute path for boost library in https://github.com/loco-3d/crocoddyl/pull/1353
 * Fixed checking of positive semi-define condition in LQR problems in https://github.com/loco-3d/crocoddyl/pull/1352
@@ -322,7 +324,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...v3.0.0
 [2.2.0]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/loco-3d/crocoddyl/compare/v2.0.2...v2.1.0
