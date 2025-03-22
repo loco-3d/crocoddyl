@@ -17,8 +17,8 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       term_solver_(term_solver),
       reg_incfactor_(Scalar(10.)),
       reg_decfactor_(Scalar(5.)),
-      reg_min_(Scalar(1e-9)),
-      reg_max_(Scalar(1e9)),
+      reg_min_(ScaleNumerics<Scalar>(1e-9)),
+      reg_max_(ScaleNumerics<Scalar>(1e9, 1e-4)),
       th_grad_(ScaleNumerics<Scalar>(1e-12)),
       th_noimprovement_(
           std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))),
@@ -966,16 +966,29 @@ SolverFDDPTpl<NewScalar> SolverFDDPTpl<Scalar>::cast() const {
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
-  ret.set_th_stop(std::sqrt(std::numeric_limits<NewScalar>::epsilon()) <
-                          NewScalar(th_stop_)
-                      ? scalar_cast<NewScalar>(th_stop_)
-                      : std::sqrt(std::numeric_limits<NewScalar>::epsilon()));
+  ret.set_th_stop(
+      std::sqrt(std::numeric_limits<NewScalar>::epsilon()) < NewScalar(th_stop_)
+          ? scalar_cast<NewScalar>(th_stop_)
+          : std::sqrt(
+                std::numeric_limits<NewScalar>::
+                    epsilon()));  // Stopping threshold shouldn't be lower than
+                                  // square root of the machine precision
   // Setting the FDDP parameters
   ret.set_alphas(vector_cast<NewScalar>(alphas_));
   ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
   ret.set_reg_decfactor(scalar_cast<NewScalar>(reg_decfactor_));
-  ret.set_reg_min(scalar_cast<NewScalar>(reg_min_));
-  ret.set_reg_max(scalar_cast<NewScalar>(reg_max_));
+  ret.set_reg_min(
+      ScaleNumerics<Scalar>(1e-9) < NewScalar(reg_min_)
+          ? scalar_cast<NewScalar>(reg_min_)
+          : ScaleNumerics<NewScalar>(
+                1e-9));  // Minimum regularization value shouldn't be lower than
+                         // 1e-9 or 1e-5 for doubles or floats
+  ret.set_reg_max(
+      ScaleNumerics<Scalar>(1e9, 1e-4) > NewScalar(reg_max_)
+          ? scalar_cast<NewScalar>(reg_max_)
+          : ScaleNumerics<NewScalar>(
+                1e9, 1e-4));  // Maximum regularization value shouldn't be
+                              // higher than 1e9 or 1e5 for doubles or floats
   ret.set_th_grad(scalar_cast<NewScalar>(ScaleNumerics<NewScalar>(th_grad_)));
   ret.set_th_noimprovement(scalar_cast<NewScalar>(th_noimprovement_));
   ret.set_th_stepdec(scalar_cast<NewScalar>(th_stepdec_));
