@@ -125,7 +125,7 @@ class CostModelSumTpl {
    *
    * @param[in] cost_item Cost item
    */
-  void addCost(const boost::shared_ptr<CostItem>& cost_item);
+  void addCost(const std::shared_ptr<CostItem>& cost_item);
 
   /**
    * @brief Remove a cost item

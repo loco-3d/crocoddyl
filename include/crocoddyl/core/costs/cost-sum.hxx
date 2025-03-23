@@ -48,8 +48,7 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name,
 }
 
 template <typename Scalar>
-void CostModelSumTpl<Scalar>::addCost(const boost::shared_ptr<CostItem>& cost_item)
-{
+void CostModelSumTpl<Scalar>::addCost(const std::shared_ptr<CostItem>& cost_item) {
   if (cost_item->cost->get_nu() != nu_) {
     throw_pretty(
         cost_item->name
