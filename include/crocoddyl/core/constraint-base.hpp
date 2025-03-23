@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,8 +9,7 @@
 #ifndef CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 #define CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/core/fwd.hpp"
 //
@@ -21,6 +20,13 @@
 namespace crocoddyl {
 
 enum ConstraintType { Inequality = 0, Equality, Both };
+
+class ConstraintModelBase {
+ public:
+  virtual ~ConstraintModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ConstraintModelBase, ConstraintModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for constraint models
@@ -47,7 +53,7 @@ enum ConstraintType { Inequality = 0, Equality, Both };
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ConstraintModelAbstractTpl {
+class ConstraintModelAbstractTpl : public ConstraintModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -67,34 +73,41 @@ class ConstraintModelAbstractTpl {
    * @param[in] ng        Number of inequality constraints
    * @param[in] nh        Number of equality constraints
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                             boost::shared_ptr<ResidualModelAbstract> residual,
+  ConstraintModelAbstractTpl(std::shared_ptr<StateAbstract> state,
+                             std::shared_ptr<ResidualModelAbstract> residual,
                              const std::size_t ng, const std::size_t nh);
 
   /**
    * @copybrief Initialize the constraint model
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] nu     Dimension of control vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state    State of the multibody system
+   * @param[in] nu       Dimension of control vector
+   * @param[in] ng       Number of inequality constraints
+   * @param[in] nh       Number of equality constraints
+   * @param[in] T_const  True if this is a constraint in both running and
+   * terminal nodes. False if it is a constraint on running nodes only (default
+   * true)
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+  ConstraintModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                              const std::size_t nu, const std::size_t ng,
-                             const std::size_t nh);
+                             const std::size_t nh, const bool T_const = true);
 
   /**
    * @copybrief ConstraintModelAbstractTpl()
    *
    * The default `nu` value is obtained from `StateAbstractTpl::get_nv()`.
    *
-   * @param[in] state  State of the multibody system
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] state    State of the multibody system
+   * @param[in] ng       Number of inequality constraints
+   * @param[in] nh       Number of equality constraints
+   * @param[in] T_const  True if this is a constraint in both running and
+   * terminal nodes. False if it is a constraint on running nodes only (default
+   * true)
    */
-  ConstraintModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
-                             const std::size_t ng, const std::size_t nh);
-  virtual ~ConstraintModelAbstractTpl();
+  ConstraintModelAbstractTpl(std::shared_ptr<StateAbstract> state,
+                             const std::size_t ng, const std::size_t nh,
+                             const bool T_const = true);
+  virtual ~ConstraintModelAbstractTpl() = default;
 
   /**
    * @brief Compute the constraint value
@@ -103,7 +116,7 @@ class ConstraintModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -117,7 +130,7 @@ class ConstraintModelAbstractTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -130,7 +143,7 @@ class ConstraintModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -145,7 +158,7 @@ class ConstraintModelAbstractTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -159,7 +172,7 @@ class ConstraintModelAbstractTpl {
    * @param data  Data collector
    * @return the constraint data
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
+  virtual std::shared_ptr<ConstraintDataAbstract> createData(
       DataCollectorAbstract* const data);
 
   /**
@@ -175,12 +188,12 @@ class ConstraintModelAbstractTpl {
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the residual model
    */
-  const boost::shared_ptr<ResidualModelAbstract>& get_residual() const;
+  const std::shared_ptr<ResidualModelAbstract>& get_residual() const;
 
   /**
    * @brief Return the type of constraint
@@ -213,6 +226,11 @@ class ConstraintModelAbstractTpl {
   std::size_t get_nh() const;
 
   /**
+   * @brief Return true if the constraint is imposed in terminal nodes as well.
+   */
+  bool get_T_constraint() const;
+
+  /**
    * @brief Print information on the constraint model
    */
   template <class Scalar>
@@ -233,16 +251,20 @@ class ConstraintModelAbstractTpl {
                              //!< construction time
 
  protected:
-  boost::shared_ptr<StateAbstract> state_;             //!< State description
-  boost::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
+  std::shared_ptr<StateAbstract> state_;             //!< State description
+  std::shared_ptr<ResidualModelAbstract> residual_;  //!< Residual model
   ConstraintType
-      type_;        //!< Type of constraint: inequality=0, equality=1, both=2
-  VectorXs lb_;     //!< Lower bound of the constraint
-  VectorXs ub_;     //!< Upper bound of the constraint
-  std::size_t nu_;  //!< Control dimension
-  std::size_t ng_;  //!< Number of inequality constraints
-  std::size_t nh_;  //!< Number of equality constraints
-  VectorXs unone_;  //!< No control vector
+      type_;           //!< Type of constraint: inequality=0, equality=1, both=2
+  VectorXs lb_;        //!< Lower bound of the constraint
+  VectorXs ub_;        //!< Upper bound of the constraint
+  std::size_t nu_;     //!< Control dimension
+  std::size_t ng_;     //!< Number of inequality constraints
+  std::size_t nh_;     //!< Number of equality constraints
+  bool T_constraint_;  //!< Label that indicates if the constraint is imposed in
+                       //!< terminal nodes as well
+  VectorXs unone_;     //!< No control vector
+  ConstraintModelAbstractTpl()
+      : state_(nullptr), residual_(nullptr), nu_(0), ng_(0), nh_(0) {}
 };
 
 template <typename _Scalar>
@@ -268,8 +290,7 @@ struct ConstraintDataAbstractTpl {
         Hx(model->get_nh(), model->get_state()->get_ndx()),
         Hu(model->get_nh(), model->get_nu()) {
     if (model->get_ng() == 0 && model->get_nh() == 0) {
-      throw_pretty("Invalid argument: "
-                   << "ng and nh cannot be equals to 0");
+      throw_pretty("Invalid argument: " << "ng and nh cannot be equals to 0");
     }
     g.setZero();
     Gx.setZero();
@@ -278,10 +299,10 @@ struct ConstraintDataAbstractTpl {
     Hx.setZero();
     Hu.setZero();
   }
-  virtual ~ConstraintDataAbstractTpl() {}
+  virtual ~ConstraintDataAbstractTpl() = default;
 
-  DataCollectorAbstract* shared;                     //!< Shared data
-  boost::shared_ptr<ResidualDataAbstract> residual;  //!< Residual data
+  DataCollectorAbstract* shared;                   //!< Shared data
+  std::shared_ptr<ResidualDataAbstract> residual;  //!< Residual data
   VectorXs g;   //!< Inequality constraint values
   MatrixXs Gx;  //!< Jacobian of the inequality constraint
   MatrixXs Gu;  //!< Jacobian of the inequality constraint

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -31,8 +31,8 @@ namespace benchmark {
 
 template <typename Scalar>
 void build_arm_action_models(
-    boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
-    boost::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
+    std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
+    std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
         terminalModel) {
   typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>
       DifferentialActionModelFreeFwdDynamics;
@@ -53,38 +53,37 @@ void build_arm_action_models(
   // because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(EXAMPLE_ROBOT_DATA_MODEL_DIR
-                              "/kinova_description/robots/kinova.urdf",
+                              "/talos_data/robots/talos_left_arm.urdf",
                               modeld);
   pinocchio::srdf::loadReferenceConfigurations(
-      modeld,
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf",
+      modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf",
       false);
 
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
 
-  boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
-      boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
-          boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
+  std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
+      std::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
+          std::make_shared<pinocchio::ModelTpl<Scalar> >(model));
 
-  boost::shared_ptr<CostModelAbstract> goalTrackingCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelFramePlacement>(
-                     state, model.getFrameId("j2s6s200_end_effector"),
+  std::shared_ptr<CostModelAbstract> goalTrackingCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelFramePlacement>(
+                     state, model.getFrameId("gripper_left_joint"),
                      pinocchio::SE3Tpl<Scalar>(
                          Matrix3s::Identity(),
-                         Vector3s(Scalar(0.6), Scalar(0.2), Scalar(0.5)))));
-  boost::shared_ptr<CostModelAbstract> xRegCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelState>(state));
-  boost::shared_ptr<CostModelAbstract> uRegCost =
-      boost::make_shared<CostModelResidual>(
-          state, boost::make_shared<ResidualModelControl>(state));
+                         Vector3s(Scalar(0.), Scalar(0.), Scalar(0.4)))));
+  std::shared_ptr<CostModelAbstract> xRegCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelState>(state));
+  std::shared_ptr<CostModelAbstract> uRegCost =
+      std::make_shared<CostModelResidual>(
+          state, std::make_shared<ResidualModelControl>(state));
 
   // Create a cost model per the running and terminal action model.
-  boost::shared_ptr<CostModelSum> runningCostModel =
-      boost::make_shared<CostModelSum>(state);
-  boost::shared_ptr<CostModelSum> terminalCostModel =
-      boost::make_shared<CostModelSum>(state);
+  std::shared_ptr<CostModelSum> runningCostModel =
+      std::make_shared<CostModelSum>(state);
+  std::shared_ptr<CostModelSum> terminalCostModel =
+      std::make_shared<CostModelSum>(state);
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
@@ -93,20 +92,20 @@ void build_arm_action_models(
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1e3));
 
   // We define an actuation model
-  boost::shared_ptr<ActuationModelFull> actuation =
-      boost::make_shared<ActuationModelFull>(state);
+  std::shared_ptr<ActuationModelFull> actuation =
+      std::make_shared<ActuationModelFull>(state);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
-  boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> runningDAM =
-      boost::make_shared<DifferentialActionModelFreeFwdDynamics>(
+  std::shared_ptr<DifferentialActionModelFreeFwdDynamics> runningDAM =
+      std::make_shared<DifferentialActionModelFreeFwdDynamics>(
           state, actuation, runningCostModel);
 
   runningModel =
-      boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-2));
+      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-2));
   terminalModel =
-      boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
+      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
 }
 
 }  // namespace benchmark

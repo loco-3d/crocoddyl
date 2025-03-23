@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Run Python code to get the version of pinocchio
+VERSION=$(python -c "import pinocchio; print(pinocchio.__version__)" 2>/dev/null)
+# Check if the version matches
+EXPECTED_VERSION="3.2.0"
+if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+    # Print warning message in yellow
+    echo -e "\033[33mWarning: Pinocchio version is $VERSION, but it is expected $EXPECTED_VERSION.\033[0m"
+else
+    echo "pinocchio version: $VERSION"
+fi
+
 LOGPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 EXAMPLEPATH=${LOGPATH}/..
 
@@ -31,8 +42,8 @@ update_logfile() {
 
 update_logfile "arm_manipulation_fwddyn"
 update_logfile "arm_manipulation_invdyn"
-update_logfile "bipedal_walk_fwddyn"
-update_logfile "bipedal_walk_invdyn"
+update_logfile "bipedal_gaits_fwddyn"
+update_logfile "bipedal_gaits_invdyn"
 update_logfile "bipedal_walk_ubound"
 update_logfile "boxfddp_vs_boxddp"
 update_logfile "double_pendulum_fwddyn"

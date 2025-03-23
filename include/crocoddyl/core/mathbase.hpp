@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,8 +10,9 @@
 #ifndef CROCODDYL_CORE_MATHBASE_HPP_
 #define CROCODDYL_CORE_MATHBASE_HPP_
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <Eigen/Dense>
+
+#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
 

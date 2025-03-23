@@ -48,7 +48,7 @@ class ActivationModelFactory {
   explicit ActivationModelFactory();
   ~ActivationModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> create(
+  std::shared_ptr<crocoddyl::ActivationModelAbstract> create(
       ActivationModelTypes::Type activation_type, std::size_t nr = 5) const;
 };
 

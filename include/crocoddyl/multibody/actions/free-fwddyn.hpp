@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -21,7 +21,6 @@
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -60,6 +59,8 @@ class DifferentialActionModelFreeFwdDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelFreeFwdDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -75,11 +76,11 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   DifferentialActionModelFreeFwdDynamicsTpl(
-      boost::shared_ptr<StateMultibody> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      boost::shared_ptr<CostModelSum> costs,
-      boost::shared_ptr<ConstraintModelManager> constraints = nullptr);
-  virtual ~DifferentialActionModelFreeFwdDynamicsTpl();
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr);
+  virtual ~DifferentialActionModelFreeFwdDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, and cost value
@@ -90,18 +91,17 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
@@ -111,73 +111,97 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the free forward-dynamics data
    *
    * @return free forward-dynamics data
    */
-  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the free-fwddyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelFreeFwdDynamicsTpl<NewScalar> A
+   * differential-action model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelFreeFwdDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Check that the given data belongs to the free forward-dynamics data
    */
   virtual bool checkData(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief @copydoc Base::quasiStatic()
    */
   virtual void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_ng_T() const override;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the actuation model
    */
-  const boost::shared_ptr<ActuationModelAbstract>& get_actuation() const;
+  const std::shared_ptr<ActuationModelAbstract>& get_actuation() const;
 
   /**
    * @brief Return the cost model
    */
-  const boost::shared_ptr<CostModelSum>& get_costs() const;
+  const std::shared_ptr<CostModelSum>& get_costs() const;
 
   /**
    * @brief Return the constraint model manager
    */
-  const boost::shared_ptr<ConstraintModelManager>& get_constraints() const;
+  const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
    * @brief Return the Pinocchio model
@@ -199,7 +223,7 @@ class DifferentialActionModelFreeFwdDynamicsTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -208,10 +232,10 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   using Base::state_;  //!< Model of the state
 
  private:
-  boost::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
-  boost::shared_ptr<CostModelSum> costs_;                  //!< Cost model
-  boost::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;                 //!< Pinocchio model
+  std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
   bool without_armature_;  //!< Indicate if we have defined an armature
   VectorXs armature_;      //!< Armature vector
 };
@@ -235,7 +259,7 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(
             &pinocchio, model->get_actuation()->createData(),
-            boost::make_shared<JointDataAbstract>(
+            std::make_shared<JointDataAbstract>(
                 model->get_state(), model->get_actuation(), model->get_nu())),
         costs(model->get_costs()->createData(&multibody)),
         Minv(model->get_state()->get_nv(), model->get_state()->get_nv()),
@@ -253,11 +277,12 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
     dtau_dx.setZero();
     tmp_xstatic.setZero();
   }
+  virtual ~DifferentialActionDataFreeFwdDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorJointActMultibody multibody;
-  boost::shared_ptr<CostDataSumTpl<Scalar> > costs;
-  boost::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  std::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  std::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
   MatrixXs Minv;
   VectorXs u_drift;
   MatrixXs dtau_dx;

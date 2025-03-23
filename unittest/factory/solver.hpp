@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, University of Edinburgh, LAAS-CNRS,
-//                          New York University, Max Planck Gesellschaft
+// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS,
+//                          New York University, Max Planck Gesellschaft,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,9 +53,11 @@ class SolverFactory {
   explicit SolverFactory();
   ~SolverFactory();
 
-  boost::shared_ptr<crocoddyl::SolverAbstract> create(
-      SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-      size_t T) const;
+  std::shared_ptr<crocoddyl::SolverAbstract> create(
+      SolverTypes::Type solver_type,
+      std::shared_ptr<crocoddyl::ActionModelAbstract> model,
+      std::shared_ptr<crocoddyl::ActionModelAbstract> model2,
+      std::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const;
 };
 
 }  // namespace unittest

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,6 +25,8 @@ struct ActionModelTypes {
     ActionModelUnicycle,
     ActionModelLQRDriftFree,
     ActionModelLQR,
+    ActionModelRandomLQR,
+    ActionModelRandomLQRwithTerminalConstraint,
     ActionModelImpulseFwdDynamics_HyQ,
     ActionModelImpulseFwdDynamics_Talos,
     NbActionModelTypes
@@ -48,10 +51,12 @@ class ActionModelFactory {
   explicit ActionModelFactory();
   ~ActionModelFactory();
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> create(
-      ActionModelTypes::Type type, bool secondInstance = false) const;
+  enum Instance { First, Second, Terminal };
 
-  boost::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
+  std::shared_ptr<crocoddyl::ActionModelAbstract> create(
+      ActionModelTypes::Type type, Instance instance = Instance::First) const;
+
+  std::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
   create_impulseFwdDynamics(StateModelTypes::Type state_type) const;
 };
 

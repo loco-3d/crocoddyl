@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2021-2025, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,9 @@ struct ResidualModelTypes {
     ResidualModelFrameVelocity,
     ResidualModelControlGrav,
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
     ResidualModelPairCollision,
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
     NbResidualModelTypes
   };
@@ -56,12 +58,12 @@ class ResidualModelFactory {
   explicit ResidualModelFactory();
   ~ResidualModelFactory();
 
-  boost::shared_ptr<crocoddyl::ResidualModelAbstract> create(
+  std::shared_ptr<crocoddyl::ResidualModelAbstract> create(
       ResidualModelTypes::Type residual_type, StateModelTypes::Type state_type,
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
+std::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
     StateModelTypes::Type state_type);
 
 }  // namespace unittest

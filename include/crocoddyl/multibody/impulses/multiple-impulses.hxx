@@ -1,20 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ImpulseModelMultipleTpl<Scalar>::ImpulseModelMultipleTpl(
-    boost::shared_ptr<StateMultibody> state)
+    std::shared_ptr<StateMultibody> state)
     : state_(state), nc_(0), nc_total_(0) {}
 
 template <typename Scalar>
@@ -22,11 +21,11 @@ ImpulseModelMultipleTpl<Scalar>::~ImpulseModelMultipleTpl() {}
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::addImpulse(
-    const std::string& name, boost::shared_ptr<ImpulseModelAbstract> impulse,
+    const std::string& name, std::shared_ptr<ImpulseModelAbstract> impulse,
     const bool active) {
   std::pair<typename ImpulseModelContainer::iterator, bool> ret =
       impulses_.insert(std::make_pair(
-          name, boost::make_shared<ImpulseItem>(name, impulse, active)));
+          name, std::make_shared<ImpulseItem>(name, impulse, active)));
   if (ret.second == false) {
     std::cerr << "Warning: we couldn't add the " << name
               << " impulse item, it already existed." << std::endl;
@@ -78,7 +77,7 @@ void ImpulseModelMultipleTpl<Scalar>::changeImpulseStatus(
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::calc(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (data->impulses.size() != impulses_.size()) {
     throw_pretty("Invalid argument: "
@@ -92,9 +91,9 @@ void ImpulseModelMultipleTpl<Scalar>::calc(
   for (it_m = impulses_.begin(), end_m = impulses_.end(),
       it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const std::shared_ptr<ImpulseItem>& m_i = it_m->second;
     if (m_i->active) {
-      const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the impulse name between model and data ("
                         << it_m->first << " != " << it_d->first << ")");
@@ -109,7 +108,7 @@ void ImpulseModelMultipleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (data->impulses.size() != impulses_.size()) {
     throw_pretty("Invalid argument: "
@@ -123,9 +122,9 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(
   for (it_m = impulses_.begin(), end_m = impulses_.end(),
       it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const std::shared_ptr<ImpulseItem>& m_i = it_m->second;
     if (m_i->active) {
-      const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+      const std::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
       assert_pretty(it_m->first == it_d->first,
                     "it doesn't match the impulse name between model and data ("
                         << it_m->first << " != " << it_d->first << ")");
@@ -140,23 +139,23 @@ void ImpulseModelMultipleTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateVelocity(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     const VectorXs& vnext) const {
   if (static_cast<std::size_t>(vnext.size()) != state_->get_nv()) {
-    throw_pretty("Invalid argument: "
-                 << "vnext has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "vnext has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nv()) + ")");
   }
   data->vnext = vnext;
 }
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& force) {
+    const std::shared_ptr<ImpulseDataMultiple>& data, const VectorXs& force) {
   if (static_cast<std::size_t>(force.size()) != nc_) {
-    throw_pretty("Invalid argument: "
-                 << "force has wrong dimension (it should be " +
-                        std::to_string(nc_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "force has wrong dimension (it should be " +
+                                    std::to_string(nc_) + ")");
   }
   if (static_cast<std::size_t>(data->impulses.size()) != impulses_.size()) {
     throw_pretty("Invalid argument: "
@@ -173,8 +172,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(
   for (it_m = impulses_.begin(), end_m = impulses_.end(),
       it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
-    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const std::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const std::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first,
                   "it doesn't match the impulse name between data and model");
     if (m_i->active) {
@@ -182,8 +181,13 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(
       const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
           force.segment(nc, nc_i);
       m_i->impulse->updateForce(d_i, force_i);
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+      const pinocchio::JointIndex joint =
+          state_->get_pinocchio()->frames[d_i->frame].parentJoint;
+#else
       const pinocchio::JointIndex joint =
           state_->get_pinocchio()->frames[d_i->frame].parent;
+#endif
       data->fext[joint] = d_i->fext;
       nc += nc_i;
     } else {
@@ -194,21 +198,21 @@ void ImpulseModelMultipleTpl<Scalar>::updateForce(
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateVelocityDiff(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     const MatrixXs& dvnext_dx) const {
   if (static_cast<std::size_t>(dvnext_dx.rows()) != state_->get_nv() ||
       static_cast<std::size_t>(dvnext_dx.cols()) != state_->get_ndx()) {
-    throw_pretty("Invalid argument: "
-                 << "dvnext_dx has wrong dimension (it should be " +
-                        std::to_string(state_->get_nv()) + "," +
-                        std::to_string(state_->get_ndx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dvnext_dx has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nv()) + "," +
+                                    std::to_string(state_->get_ndx()) + ")");
   }
   data->dvnext_dx = dvnext_dx;
 }
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     const MatrixXs& df_dx) const {
   const std::size_t ndx = state_->get_ndx();
   if (static_cast<std::size_t>(df_dx.rows()) != nc_ ||
@@ -228,8 +232,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(
   for (it_m = impulses_.begin(), end_m = impulses_.end(),
       it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
-    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const std::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const std::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first,
                   "it doesn't match the impulse name between data and model");
     if (m_i->active) {
@@ -246,7 +250,7 @@ void ImpulseModelMultipleTpl<Scalar>::updateForceDiff(
 
 template <typename Scalar>
 void ImpulseModelMultipleTpl<Scalar>::updateRneaDiff(
-    const boost::shared_ptr<ImpulseDataMultiple>& data,
+    const std::shared_ptr<ImpulseDataMultiple>& data,
     pinocchio::DataTpl<Scalar>& pinocchio) const {
   if (static_cast<std::size_t>(data->impulses.size()) !=
       this->get_impulses().size()) {
@@ -258,8 +262,8 @@ void ImpulseModelMultipleTpl<Scalar>::updateRneaDiff(
   for (it_m = impulses_.begin(), end_m = impulses_.end(),
       it_d = data->impulses.begin(), end_d = data->impulses.end();
        it_m != end_m || it_d != end_d; ++it_m, ++it_d) {
-    const boost::shared_ptr<ImpulseItem>& m_i = it_m->second;
-    const boost::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
+    const std::shared_ptr<ImpulseItem>& m_i = it_m->second;
+    const std::shared_ptr<ImpulseDataAbstract>& d_i = it_d->second;
     assert_pretty(it_m->first == it_d->first,
                   "it doesn't match the impulse name between data and model");
     if (m_i->active) {
@@ -276,15 +280,34 @@ void ImpulseModelMultipleTpl<Scalar>::updateRneaDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ImpulseDataMultipleTpl<Scalar> >
+std::shared_ptr<ImpulseDataMultipleTpl<Scalar> >
 ImpulseModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<ImpulseDataMultiple>(
+  return std::allocate_shared<ImpulseDataMultiple>(
       Eigen::aligned_allocator<ImpulseDataMultiple>(), this, data);
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >&
+template <typename NewScalar>
+ImpulseModelMultipleTpl<NewScalar> ImpulseModelMultipleTpl<Scalar>::cast()
+    const {
+  typedef ImpulseModelMultipleTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ImpulseItemTpl<NewScalar> ImpulseType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()));
+  typename ImpulseModelContainer::const_iterator it_m, end_m;
+  for (it_m = impulses_.begin(), end_m = impulses_.end(); it_m != end_m;
+       ++it_m) {
+    const std::string name = it_m->first;
+    const ImpulseType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addImpulse(name, m_i.impulse, m_i.active);
+  }
+  return ret;
+}
+
+template <typename Scalar>
+const std::shared_ptr<StateMultibodyTpl<Scalar> >&
 ImpulseModelMultipleTpl<Scalar>::get_state() const {
   return state_;
 }
@@ -339,7 +362,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Active:" << std::endl;
   for (std::set<std::string>::const_iterator it = active.begin();
        it != active.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ImpulseModelMultipleTpl<Scalar>::ImpulseItem>& impulse_item =
         model.get_impulses().find(*it)->second;
     if (it != --active.end()) {
@@ -351,7 +374,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "  Inactive:" << std::endl;
   for (std::set<std::string>::const_iterator it = inactive.begin();
        it != inactive.end(); ++it) {
-    const boost::shared_ptr<
+    const std::shared_ptr<
         typename ImpulseModelMultipleTpl<Scalar>::ImpulseItem>& impulse_item =
         model.get_impulses().find(*it)->second;
     if (it != --inactive.end()) {

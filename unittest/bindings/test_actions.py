@@ -181,11 +181,37 @@ class LQRTest(ActionModelAbstractTestCase):
     MODEL_DER = LQRModelDerived(NX, NU)
 
 
-class DifferentialLQRTest(ActionModelAbstractTestCase):
+class RandomLQRTest(ActionModelAbstractTestCase):
     NX = randint(2, 21)
     NU = randint(2, NX)
-    MODEL = crocoddyl.DifferentialActionModelLQR(NX, NU)
-    MODEL_DER = DifferentialLQRModelDerived(NX, NU)
+    MODEL = crocoddyl.ActionModelLQR.Random(NX, NU)
+    MODEL_DER = LQRModelDerived.fromLQR(
+        MODEL.A, MODEL.B, MODEL.Q, MODEL.R, MODEL.N, MODEL.f, MODEL.q, MODEL.r
+    )
+
+
+class DifferentialLQRTest(ActionModelAbstractTestCase):
+    NQ = randint(2, 21)
+    NU = randint(2, NQ)
+    MODEL = crocoddyl.DifferentialActionModelLQR(NQ, NU)
+    MODEL_DER = DifferentialLQRModelDerived(NQ, NU)
+
+
+class RandomDifferentialLQRTest(ActionModelAbstractTestCase):
+    NQ = randint(2, 21)
+    NU = randint(2, NQ)
+    MODEL = crocoddyl.DifferentialActionModelLQR.Random(NQ, NU)
+    MODEL_DER = DifferentialLQRModelDerived.fromLQR(
+        MODEL.Aq,
+        MODEL.Av,
+        MODEL.B,
+        MODEL.Q,
+        MODEL.R,
+        MODEL.N,
+        MODEL.f,
+        MODEL.q,
+        MODEL.r,
+    )
 
 
 class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
@@ -400,7 +426,9 @@ if __name__ == "__main__":
     test_classes_to_run = [
         UnicycleTest,
         LQRTest,
+        RandomLQRTest,
         DifferentialLQRTest,
+        RandomDifferentialLQRTest,
         TalosArmFreeFwdDynamicsTest,
         TalosArmFreeFwdDynamicsWithArmatureTest,
         AnymalFreeFwdDynamicsTest,

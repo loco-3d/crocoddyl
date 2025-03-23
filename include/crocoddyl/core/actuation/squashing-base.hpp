@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,18 +10,24 @@
 #ifndef CROCODDYL_CORE_SQUASHING_BASE_HPP_
 #define CROCODDYL_CORE_SQUASHING_BASE_HPP_
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/core/demangle.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
+class SquashingModelBase {
+ public:
+  virtual ~SquashingModelBase() = default;
+
+  CROCODDYL_BASE_CAST(SquashingModelBase, SquashingModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class SquashingModelAbstractTpl {
+class SquashingModelAbstractTpl : public SquashingModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -31,19 +38,34 @@ class SquashingModelAbstractTpl {
 
   SquashingModelAbstractTpl(const std::size_t ns) : ns_(ns) {
     if (ns_ == 0) {
-      throw_pretty("Invalid argument: "
-                   << "ns cannot be zero");
+      throw_pretty("Invalid argument: " << "ns cannot be zero");
     }
   };
-  virtual ~SquashingModelAbstractTpl() {};
+  virtual ~SquashingModelAbstractTpl() = default;
 
-  virtual void calc(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<SquashingDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& s) = 0;
-  virtual void calcDiff(const boost::shared_ptr<SquashingDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<SquashingDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& s) = 0;
-  virtual boost::shared_ptr<SquashingDataAbstract> createData() {
-    return boost::allocate_shared<SquashingDataAbstract>(
+  virtual std::shared_ptr<SquashingDataAbstract> createData() {
+    return std::allocate_shared<SquashingDataAbstract>(
         Eigen::aligned_allocator<SquashingDataAbstract>(), this);
+  }
+
+  /**
+   * @brief Print information on the actuation model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(
+      std::ostream& os, const SquashingModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the squashing model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const {
+    os << boost::core::demangle(typeid(*this).name());
   }
 
   std::size_t get_ns() const { return ns_; };
@@ -61,6 +83,7 @@ class SquashingModelAbstractTpl {
       s_ub_;  // Bound for the s variable (to apply using the Quadratic barrier)
   VectorXs
       s_lb_;  // Bound for the s variable (to apply using the Quadratic barrier)
+  SquashingModelAbstractTpl() : ns_(0) {};
 };
 
 template <typename _Scalar>
@@ -78,11 +101,19 @@ struct SquashingDataAbstractTpl {
     u.setZero();
     du_ds.setZero();
   }
-  virtual ~SquashingDataAbstractTpl() {}
+  SquashingDataAbstractTpl() {}
+  virtual ~SquashingDataAbstractTpl() = default;
 
   VectorXs u;
   MatrixXs du_ds;
 };
+
+template <class Scalar>
+std::ostream& operator<<(std::ostream& os,
+                         const SquashingModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
+}
 
 }  // namespace crocoddyl
 

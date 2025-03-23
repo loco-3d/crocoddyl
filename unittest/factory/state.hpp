@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +12,6 @@
 
 #include "crocoddyl/core/numdiff/state.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "pinocchio_model.hpp"
 
 namespace crocoddyl {
@@ -48,7 +48,7 @@ class StateModelFactory {
   explicit StateModelFactory();
   ~StateModelFactory();
 
-  boost::shared_ptr<crocoddyl::StateAbstract> create(
+  std::shared_ptr<crocoddyl::StateAbstract> create(
       StateModelTypes::Type state_type) const;
 };
 

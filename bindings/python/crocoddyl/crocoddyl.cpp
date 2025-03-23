@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, INRIA,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, INRIA,
 //                          Heriot-Watt University
 // University of Oxford Copyright note valid unless otherwise stated in
 // individual files. All rights reserved.
@@ -20,6 +20,14 @@ namespace bp = boost::python;
 BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
   bp::scope().attr("__version__") = crocoddyl::printVersion();
   bp::scope().attr("__raw_version__") = bp::str(CROCODDYL_VERSION);
+
+  bp::enum_<DType>("DType")
+      .value("Float64", DType::Float64)
+      .value("Float32", DType::Float32)
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+      .value("ADFloat64", DType::ADFloat64)
+#endif
+      ;
 
   eigenpy::enableEigenPy();
 

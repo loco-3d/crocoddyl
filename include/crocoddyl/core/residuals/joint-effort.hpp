@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2022-2023, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2022-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ template <typename _Scalar>
 class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ResidualModelBase, ResidualModelJointEffortTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -58,10 +59,10 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] fwddyn     Indicates that we have a forward dynamics problem
    * (true) or inverse dynamics (false) (default false)
    */
-  ResidualModelJointEffortTpl(
-      boost::shared_ptr<StateAbstract> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation, const VectorXs& uref,
-      const std::size_t nu, const bool fwddyn = false);
+  ResidualModelJointEffortTpl(std::shared_ptr<StateAbstract> state,
+                              std::shared_ptr<ActuationModelAbstract> actuation,
+                              const VectorXs& uref, const std::size_t nu,
+                              const bool fwddyn = false);
 
   /**
    * @brief Initialize the joint-effort residual model
@@ -72,10 +73,9 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] actuation  Actuation model
    * @param[in] uref       Reference joint effort
    */
-  ResidualModelJointEffortTpl(
-      boost::shared_ptr<StateAbstract> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      const VectorXs& uref);
+  ResidualModelJointEffortTpl(std::shared_ptr<StateAbstract> state,
+                              std::shared_ptr<ActuationModelAbstract> actuation,
+                              const VectorXs& uref);
 
   /**
    * @brief Initialize the joint-effort residual model
@@ -87,10 +87,9 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] actuation  Actuation model
    * @param[in] nu         Dimension of the control vector
    */
-  ResidualModelJointEffortTpl(
-      boost::shared_ptr<StateAbstract> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation,
-      const std::size_t nu);
+  ResidualModelJointEffortTpl(std::shared_ptr<StateAbstract> state,
+                              std::shared_ptr<ActuationModelAbstract> actuation,
+                              const std::size_t nu);
 
   /**
    * @brief Initialize the joint-effort residual model
@@ -103,10 +102,10 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] actuation  Actuation model
    */
   ResidualModelJointEffortTpl(
-      boost::shared_ptr<StateAbstract> state,
-      boost::shared_ptr<ActuationModelAbstract> actuation);
+      std::shared_ptr<StateAbstract> state,
+      std::shared_ptr<ActuationModelAbstract> actuation);
 
-  virtual ~ResidualModelJointEffortTpl();
+  virtual ~ResidualModelJointEffortTpl() = default;
 
   /**
    * @brief Compute the joint-effort residual
@@ -115,16 +114,16 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ResidualDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ResidualDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ResidualDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the joint-effort residual
@@ -133,23 +132,35 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ResidualDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ResidualDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the joint-effort residual data
    */
-  virtual boost::shared_ptr<ResidualDataAbstract> createData(
-      DataCollectorAbstract* const data);
+  virtual std::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the joint-effort residual model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ResidualModelJointEffortTpl<NewScalar> A residual model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ResidualModelJointEffortTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference joint-effort vector
@@ -166,7 +177,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nr_;
@@ -176,6 +187,7 @@ class ResidualModelJointEffortTpl : public ResidualModelAbstractTpl<_Scalar> {
   using Base::v_dependent_;
 
  private:
+  std::shared_ptr<ActuationModelAbstract> actuation_;  //!< Actuation model
   VectorXs uref_;  //!< Reference joint-effort input
   bool fwddyn_;    //!< True for forward dynamics, False for inverse dynamics
 };
@@ -203,8 +215,9 @@ struct ResidualDataJointEffortTpl : public ResidualDataAbstractTpl<_Scalar> {
     }
     joint = d->joint;
   }
+  virtual ~ResidualDataJointEffortTpl() = default;
 
-  boost::shared_ptr<JointDataAbstractTpl<Scalar> > joint;  //!< Joint data
+  std::shared_ptr<JointDataAbstractTpl<Scalar> > joint;  //!< Joint data
   using Base::r;
   using Base::Ru;
   using Base::Rx;

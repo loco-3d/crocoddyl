@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
@@ -27,7 +27,7 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type,
                               ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, activation_type);
 
   // Run the print function
@@ -35,18 +35,18 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type,
   tmp << *model;
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
   data->cost = nan("");
 
@@ -62,33 +62,64 @@ void test_calc_returns_a_cost(CostModelNoFFTypes::Type cost_type,
 
   // Checking that calc returns a cost value
   BOOST_CHECK(!std::isnan(data->cost));
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
+      model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>
+      casted_actuation =
+          std::make_shared<crocoddyl::ActuationModelFullTpl<float>>(
+              casted_state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_actuation_data = casted_actuation->createData();
+  crocoddyl::DataCollectorActMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data, casted_actuation_data);
+  const std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&casted_shared_data);
+  casted_data->cost = float(nan(""));
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  casted_model->calc(casted_data, x_f, u_f);
+  BOOST_CHECK(!std::isnan(casted_data->cost));
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type,
                                ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -104,6 +135,35 @@ void test_calc_against_numdiff(CostModelNoFFTypes::Type cost_type,
 
   // Checking the partial derivatives against NumDiff
   BOOST_CHECK(data->cost == data_num_diff->cost);
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
+      model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>
+      casted_actuation =
+          std::make_shared<crocoddyl::ActuationModelFullTpl<float>>(
+              casted_state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_actuation_data = casted_actuation->createData();
+  crocoddyl::DataCollectorActMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data, casted_actuation_data);
+  const std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&casted_shared_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  casted_model->calc(casted_data, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+#endif
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -113,27 +173,27 @@ void test_partial_derivatives_against_numdiff(
 
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_model =
+      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation_model->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // Create the equivalent num diff model and data.
   crocoddyl::CostModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data_num_diff =
       model_num_diff.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -145,9 +205,11 @@ void test_partial_derivatives_against_numdiff(
 
   // set the function that needs to be called at every step of the numdiff
   std::vector<crocoddyl::CostModelNumDiff::ReevaluationFunction> reevals;
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateAllPinocchio,
-                                &pinocchio_model, &pinocchio_data, _1, _2));
-  reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation,
+  reevals.push_back(
+      boost::bind(&crocoddyl::unittest::updateAllPinocchio<
+                      double, 0, pinocchio::JointCollectionDefaultTpl>,
+                  &pinocchio_model, &pinocchio_data, _1, _2));
+  reevals.push_back(boost::bind(&crocoddyl::unittest::updateActuation<double>,
                                 actuation_model, actuation_data, _1, _2));
   model_num_diff.set_reevals(reevals);
 
@@ -190,24 +252,72 @@ void test_partial_derivatives_against_numdiff(
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
+      model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>
+      casted_actuation =
+          std::make_shared<crocoddyl::ActuationModelFullTpl<float>>(
+              casted_state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_actuation_data = casted_actuation->createData();
+  crocoddyl::DataCollectorActMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data, casted_actuation_data);
+  const std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&casted_shared_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f));
+  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f));
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
+  crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
+                                          &casted_pinocchio_data, x_f);
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+#endif
 }
 
 void test_dimensions_in_cost_sum(CostModelNoFFTypes::Type cost_type,
                                  ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
@@ -228,6 +338,21 @@ void test_dimensions_in_cost_sum(CostModelNoFFTypes::Type cost_type,
   BOOST_CHECK(model->get_state()->get_nq() == cost_sum.get_state()->get_nq());
   BOOST_CHECK(model->get_state()->get_nv() == cost_sum.get_state()->get_nv());
   BOOST_CHECK(model->get_activation()->get_nr() == cost_sum.get_nr());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::CostModelSumTpl<float> casted_cost_sum = cost_sum.cast<float>();
+  BOOST_CHECK(model->get_state()->get_nx() ==
+              casted_cost_sum.get_state()->get_nx());
+  BOOST_CHECK(model->get_state()->get_ndx() ==
+              casted_cost_sum.get_state()->get_ndx());
+  BOOST_CHECK(model->get_nu() == casted_cost_sum.get_nu());
+  BOOST_CHECK(model->get_state()->get_nq() ==
+              casted_cost_sum.get_state()->get_nq());
+  BOOST_CHECK(model->get_state()->get_nv() ==
+              casted_cost_sum.get_state()->get_nv());
+  BOOST_CHECK(model->get_activation()->get_nr() == casted_cost_sum.get_nr());
+#endif
 }
 
 void test_partial_derivatives_in_cost_sum(
@@ -235,28 +360,28 @@ void test_partial_derivatives_in_cost_sum(
     ActivationModelTypes::Type activation_type) {
   // create the model
   CostModelFactory factory;
-  const boost::shared_ptr<crocoddyl::CostModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::CostModelAbstract>& model =
       factory.create(cost_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  const std::shared_ptr<crocoddyl::StateMultibody>& state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
 
-  boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFull>(state);
-  const boost::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
+  std::shared_ptr<crocoddyl::ActuationModelAbstract> actuation =
+      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstract>& actuation_data =
       actuation->createData();
   crocoddyl::DataCollectorActMultibody shared_data(&pinocchio_data,
                                                    actuation_data);
-  const boost::shared_ptr<crocoddyl::CostDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& data =
       model->createData(&shared_data);
 
   // create the cost sum model
   crocoddyl::CostModelSum cost_sum(state, model->get_nu());
   cost_sum.addCost("myCost", model, 1.);
-  const boost::shared_ptr<crocoddyl::CostDataSum>& data_sum =
+  const std::shared_ptr<crocoddyl::CostDataSum>& data_sum =
       cost_sum.createData(&shared_data);
 
   // Generating random values for the state and control
@@ -277,6 +402,42 @@ void test_partial_derivatives_in_cost_sum(
   BOOST_CHECK((data->Lxx - data_sum->Lxx).isZero());
   BOOST_CHECK((data->Lxu - data_sum->Lxu).isZero());
   BOOST_CHECK((data->Luu - data_sum->Luu).isZero());
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::CostModelAbstractTpl<float>>& casted_model =
+      model->cast<float>();
+  const std::shared_ptr<crocoddyl::StateMultibodyTpl<float>>& casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& casted_pinocchio_model =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> casted_pinocchio_data(casted_pinocchio_model);
+  std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>
+      casted_actuation =
+          std::make_shared<crocoddyl::ActuationModelFullTpl<float>>(
+              casted_state);
+  const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<float>>&
+      casted_actuation_data = casted_actuation->createData();
+  crocoddyl::DataCollectorActMultibodyTpl<float> casted_shared_data(
+      &casted_pinocchio_data, casted_actuation_data);
+  const std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>>& casted_data =
+      casted_model->createData(&casted_shared_data);
+  crocoddyl::CostModelSumTpl<float> casted_cost_sum = cost_sum.cast<float>();
+  const std::shared_ptr<crocoddyl::CostDataSumTpl<float>>& casted_data_sum =
+      casted_cost_sum.createData(&casted_shared_data);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  casted_cost_sum.calc(casted_data_sum, x_f, u_f);
+  casted_cost_sum.calcDiff(casted_data_sum, x_f, u_f);
+  BOOST_CHECK((casted_data->Lx - casted_data_sum->Lx).isZero());
+  BOOST_CHECK((casted_data->Lu - casted_data_sum->Lu).isZero());
+  BOOST_CHECK((casted_data->Lxx - casted_data_sum->Lxx).isZero());
+  BOOST_CHECK((casted_data->Lxu - casted_data_sum->Lxu).isZero());
+  BOOST_CHECK((casted_data->Luu - casted_data_sum->Luu).isZero());
+#endif
 }
 
 //----------------------------------------------------------------------------//

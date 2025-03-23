@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,7 +17,6 @@
 
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -29,10 +28,17 @@ struct CostItemTpl {
   typedef CostModelAbstractTpl<Scalar> CostModelAbstract;
 
   CostItemTpl() {}
-  CostItemTpl(const std::string& name,
-              boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
-              const bool active = true)
+  CostItemTpl(const std::string& name, std::shared_ptr<CostModelAbstract> cost,
+              const Scalar weight, const bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
+
+  template <typename NewScalar>
+  CostItemTpl<NewScalar> cast() const {
+    typedef CostItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, cost->template cast<NewScalar>(),
+                   scalar_cast<NewScalar>(weight), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the cost item
@@ -44,7 +50,7 @@ struct CostItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<CostModelAbstract> cost;
+  std::shared_ptr<CostModelAbstract> cost;
   Scalar weight;
   bool active;
 };
@@ -86,9 +92,8 @@ class CostModelSumTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<CostItem> >
-      CostModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<CostDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<CostItem> > CostModelContainer;
+  typedef std::map<std::string, std::shared_ptr<CostDataAbstract> >
       CostDataContainer;
 
   /**
@@ -97,7 +102,7 @@ class CostModelSumTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    */
-  CostModelSumTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu);
+  CostModelSumTpl(std::shared_ptr<StateAbstract> state, const std::size_t nu);
 
   /**
    * @brief Initialize the cost-sum model
@@ -106,7 +111,7 @@ class CostModelSumTpl {
    *
    * @param[in] state  State description
    */
-  explicit CostModelSumTpl(boost::shared_ptr<StateAbstract> state);
+  explicit CostModelSumTpl(std::shared_ptr<StateAbstract> state);
   ~CostModelSumTpl();
 
   /**
@@ -117,9 +122,8 @@ class CostModelSumTpl {
    * @param[in] weight  Cost weight
    * @param[in] active  True if the cost is activated (default true)
    */
-  void addCost(const std::string& name,
-               boost::shared_ptr<CostModelAbstract> cost, const Scalar weight,
-               const bool active = true);
+  void addCost(const std::string& name, std::shared_ptr<CostModelAbstract> cost,
+               const Scalar weight, const bool active = true);
 
   /**
    * @brief Add a cost item
@@ -150,7 +154,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSum>& data,
+  void calc(const std::shared_ptr<CostDataSum>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
@@ -164,7 +168,7 @@ class CostModelSumTpl {
    * @param[in] data  Cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<CostDataSum>& data,
+  void calc(const std::shared_ptr<CostDataSum>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -174,7 +178,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSum>& data,
+  void calcDiff(const std::shared_ptr<CostDataSum>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
@@ -190,7 +194,7 @@ class CostModelSumTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<CostDataSum>& data,
+  void calcDiff(const std::shared_ptr<CostDataSum>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -204,12 +208,24 @@ class CostModelSumTpl {
    * @param data  Data collector
    * @return the cost data
    */
-  boost::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
+  std::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
+
+  /**
+   * @brief Cast the cost-sum model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CostModelSumTpl<NewScalar> A cost-sum model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  CostModelSumTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the stack of cost models
@@ -279,9 +295,9 @@ class CostModelSumTpl {
                                   const CostModelSumTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateAbstract> state_;  //!< State description
-  CostModelContainer costs_;                //!< Stack of cost items
-  std::size_t nu_;                          //!< Dimension of the control input
+  std::shared_ptr<StateAbstract> state_;  //!< State description
+  CostModelContainer costs_;              //!< Stack of cost items
+  std::size_t nu_;                        //!< Dimension of the control input
   std::size_t nr_;        //!< Dimension of the active residual vector
   std::size_t nr_total_;  //!< Dimension of the total residual vector
   std::set<std::string> active_set_;  //!< Names of the active set of cost items
@@ -331,7 +347,7 @@ struct CostDataSumTpl {
     for (typename CostModelSumTpl<Scalar>::CostModelContainer::const_iterator
              it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
-      const boost::shared_ptr<CostItem>& item = it->second;
+      const std::shared_ptr<CostItem>& item = it->second;
       costs.insert(std::make_pair(item->name, item->cost->createData(data)));
     }
   }
@@ -363,44 +379,44 @@ struct CostDataSumTpl {
 
   void set_Lx(const VectorXs& _Lx) {
     if (Lx.size() != _Lx.size()) {
-      throw_pretty("Invalid argument: "
-                   << "Lx has wrong dimension (it should be " +
-                          std::to_string(Lx.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lx has wrong dimension (it should be " +
+                                      std::to_string(Lx.size()) + ")");
     }
     Lx = _Lx;
   }
   void set_Lu(const VectorXs& _Lu) {
     if (Lu.size() != _Lu.size()) {
-      throw_pretty("Invalid argument: "
-                   << "Lu has wrong dimension (it should be " +
-                          std::to_string(Lu.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lu has wrong dimension (it should be " +
+                                      std::to_string(Lu.size()) + ")");
     }
     Lu = _Lu;
   }
   void set_Lxx(const MatrixXs& _Lxx) {
     if (Lxx.rows() != _Lxx.rows() || Lxx.cols() != _Lxx.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Lxx has wrong dimension (it should be " +
-                          std::to_string(Lxx.rows()) + ", " +
-                          std::to_string(Lxx.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lxx has wrong dimension (it should be " +
+                                      std::to_string(Lxx.rows()) + ", " +
+                                      std::to_string(Lxx.cols()) + ")");
     }
     Lxx = _Lxx;
   }
   void set_Lxu(const MatrixXs& _Lxu) {
     if (Lxu.rows() != _Lxu.rows() || Lxu.cols() != _Lxu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Lxu has wrong dimension (it should be " +
-                          std::to_string(Lxu.rows()) + ", " +
-                          std::to_string(Lxu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Lxu has wrong dimension (it should be " +
+                                      std::to_string(Lxu.rows()) + ", " +
+                                      std::to_string(Lxu.cols()) + ")");
     }
     Lxu = _Lxu;
   }
   void set_Luu(const MatrixXs& _Luu) {
     if (Luu.rows() != _Luu.rows() || Luu.cols() != _Luu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Luu has wrong dimension (it should be " +
-                          std::to_string(Luu.rows()) + ", " +
-                          std::to_string(Luu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Luu has wrong dimension (it should be " +
+                                      std::to_string(Luu.rows()) + ", " +
+                                      std::to_string(Luu.cols()) + ")");
     }
     Luu = _Luu;
   }

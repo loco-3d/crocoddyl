@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,14 +11,13 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const pinocchio::ReferenceFrame type, const std::size_t nu,
     const Vector2s& gains)
     : Base(state, type, 6, nu), pref_(pref), gains_(gains) {
@@ -27,7 +26,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const pinocchio::ReferenceFrame type,
     const Vector2s& gains)
     : Base(state, type, 6), pref_(pref), gains_(gains) {
@@ -40,7 +39,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const std::size_t nu, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 6, nu),
       pref_(pref),
@@ -53,7 +52,7 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
 
 template <typename Scalar>
 ContactModel6DTpl<Scalar>::ContactModel6DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 6),
       pref_(pref),
@@ -67,11 +66,8 @@ ContactModel6DTpl<Scalar>::ContactModel6DTpl(
 #pragma GCC diagnostic pop
 
 template <typename Scalar>
-ContactModel6DTpl<Scalar>::~ContactModel6DTpl() {}
-
-template <typename Scalar>
 void ContactModel6DTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement<Scalar>(*state_->get_pinocchio().get(),
@@ -106,11 +102,16 @@ void ContactModel6DTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ContactModel6DTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parentJoint;
+#else
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parent;
+#endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
@@ -161,10 +162,10 @@ void ContactModel6DTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModel6DTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 6) {
-    throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be 6)");
+    throw_pretty(
+        "Invalid argument: " << "lambda has wrong dimension (it should be 6)");
   }
   Data* d = static_cast<Data*>(data.get());
   data->f = pinocchio::ForceTpl<Scalar>(force);
@@ -189,10 +190,22 @@ void ContactModel6DTpl<Scalar>::updateForce(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel6DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModel6DTpl<NewScalar> ContactModel6DTpl<Scalar>::cast() const {
+  typedef ContactModel6DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      pref_.template cast<NewScalar>(), type_, nu_,
+      gains_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

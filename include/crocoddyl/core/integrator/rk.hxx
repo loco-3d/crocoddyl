@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,50 +9,45 @@
 
 #include <iostream>
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control,
+    std::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<ControlParametrizationModelAbstract> control,
     const RKType rktype, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, control, time_step, with_cost_residual) {
+    : Base(model, control, time_step, with_cost_residual), rk_type_(rktype) {
   set_rk_type(rktype);
 }
 
 template <typename Scalar>
 IntegratedActionModelRKTpl<Scalar>::IntegratedActionModelRKTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    const RKType rktype, const Scalar time_step, const bool with_cost_residual)
-    : Base(model, time_step, with_cost_residual) {
+    std::shared_ptr<DifferentialActionModelAbstract> model, const RKType rktype,
+    const Scalar time_step, const bool with_cost_residual)
+    : Base(model, time_step, with_cost_residual), rk_type_(rktype) {
   set_rk_type(rktype);
 }
 
 template <typename Scalar>
-IntegratedActionModelRKTpl<Scalar>::~IntegratedActionModelRKTpl() {}
-
-template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   const std::size_t nv = state_->get_nv();
   Data* d = static_cast<Data*>(data.get());
 
-  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data =
+  const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
       d->differential[0];
-  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
+  const std::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
       d->control[0];
   control_->calc(u0_data, rk_c_[0], u);
   d->ws[0] = u0_data->w;
@@ -62,9 +57,9 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
   d->ki[0].tail(nv) = k0_data->xout;
   d->integral[0] = k0_data->cost;
   for (std::size_t i = 1; i < ni_; ++i) {
-    const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data =
+    const std::shared_ptr<DifferentialActionDataAbstract>& ki_data =
         d->differential[i];
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& ui_data =
+    const std::shared_ptr<ControlParametrizationDataAbstract>& ui_data =
         d->control[i];
     d->dx_rk[i].noalias() = time_step_ * rk_c_[i] * d->ki[i - 1];
     state_->integrate(x, d->dx_rk[i], d->y[i]);
@@ -101,16 +96,16 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data =
+  const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
       d->differential[0];
   differential_->calc(k0_data, x);
   d->dx.setZero();
@@ -125,17 +120,17 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
@@ -154,9 +149,9 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
     differential_->calcDiff(d->differential[i], d->y[i], d->ws[i]);
   }
 
-  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data =
+  const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
       d->differential[0];
-  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
+  const std::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
       d->control[0];
   d->dki_dx[0].bottomRows(nv) = k0_data->Fx;
   control_->multiplyByJacobian(
@@ -182,9 +177,9 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
       d->ddli_dxdu[0]);  // ddli_dxdu = ddli_dxdw * dw_du
 
   for (std::size_t i = 1; i < ni_; ++i) {
-    const boost::shared_ptr<DifferentialActionDataAbstract>& ki_data =
+    const std::shared_ptr<DifferentialActionDataAbstract>& ki_data =
         d->differential[i];
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& ui_data =
+    const std::shared_ptr<ControlParametrizationDataAbstract>& ui_data =
         d->control[i];
     d->dyi_dx[i].noalias() = d->dki_dx[i - 1] * rk_c_[i] * time_step_;
     d->dyi_du[i].noalias() = d->dki_du[i - 1] * rk_c_[i] * time_step_;
@@ -307,8 +302,8 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
   }
   d->Gx = k0_data->Gx;
   d->Hx = k0_data->Hx;
-  d->Gu.resize(differential_->get_ng(), nu_);
-  d->Hu.resize(differential_->get_nh(), nu_);
+  d->Gu.conservativeResize(differential_->get_ng(), nu_);
+  d->Hu.conservativeResize(differential_->get_nh(), nu_);
   control_->multiplyByJacobian(u0_data, k0_data->Gu, d->Gu);
   control_->multiplyByJacobian(u0_data, k0_data->Hu, d->Hu);
 
@@ -319,16 +314,16 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const boost::shared_ptr<DifferentialActionDataAbstract>& k0_data =
+  const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
       d->differential[0];
   differential_->calcDiff(k0_data, x);
   d->Lx = k0_data->Lx;
@@ -338,15 +333,32 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 IntegratedActionModelRKTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+IntegratedActionModelRKTpl<NewScalar> IntegratedActionModelRKTpl<Scalar>::cast()
+    const {
+  typedef IntegratedActionModelRKTpl<NewScalar> ReturnType;
+  if (control_) {
+    ReturnType ret(differential_->template cast<NewScalar>(),
+                   control_->template cast<NewScalar>(), rk_type_,
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  } else {
+    ReturnType ret(differential_->template cast<NewScalar>(), rk_type_,
+                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    return ret;
+  }
 }
 
 template <typename Scalar>
 bool IntegratedActionModelRKTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (data != NULL) {
     for (std::size_t i = 0; i < ni_; ++i) {
       if (!differential_->checkData(d->differential[i])) {
@@ -361,26 +373,26 @@ bool IntegratedActionModelRKTpl<Scalar>::checkData(
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const std::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,
     const Scalar tol) {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
 
   Data* d = static_cast<Data*>(data.get());
-  const boost::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
+  const std::shared_ptr<ControlParametrizationDataAbstract>& u0_data =
       d->control[0];
-  u0_data->w *= 0.;
+  u0_data->w *= Scalar(0.);
   differential_->quasiStatic(d->differential[0], u0_data->w, x, maxiter, tol);
-  control_->params(u0_data, 0., u0_data->w);
+  control_->params(u0_data, Scalar(0.), u0_data->w);
   u = u0_data->u;
 }
 

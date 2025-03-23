@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,17 +11,18 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const pinocchio::ReferenceFrame type, const Matrix3s& rotation,
-    const std::size_t nu, const Vector2s& gains)
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Scalar xref, const pinocchio::ReferenceFrame type,
+    const Matrix3s& rotation, const std::size_t nu, const Vector2s& gains)
     : Base(state, type, 1, nu), xref_(xref), Raxis_(rotation), gains_(gains) {
   id_ = id;
 }
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const pinocchio::ReferenceFrame type, const Vector2s& gains)
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Scalar xref, const pinocchio::ReferenceFrame type,
+    const Vector2s& gains)
     : Base(state, type, 1), xref_(xref), gains_(gains) {
   id_ = id;
   Raxis_ = Matrix3s::Identity();
@@ -33,8 +34,8 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const std::size_t nu, const Vector2s& gains)
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Scalar xref, const std::size_t nu, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1, nu),
       xref_(xref),
       gains_(gains) {
@@ -47,8 +48,8 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 
 template <typename Scalar>
 ContactModel1DTpl<Scalar>::ContactModel1DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    Scalar xref, const Vector2s& gains)
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    const Scalar xref, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 1),
       xref_(xref),
       gains_(gains) {
@@ -62,11 +63,8 @@ ContactModel1DTpl<Scalar>::ContactModel1DTpl(
 #pragma GCC diagnostic pop
 
 template <typename Scalar>
-ContactModel1DTpl<Scalar>::~ContactModel1DTpl() {}
-
-template <typename Scalar>
 void ContactModel1DTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio,
@@ -82,13 +80,13 @@ void ContactModel1DTpl<Scalar>::calc(
           .linear();
 
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
-  if (gains_[0] != 0.) {
+  if (gains_[0] != Scalar(0.)) {
     d->dp = d->pinocchio->oMf[id_].translation() -
             (xref_ * Raxis_ * Vector3s::UnitZ());
     d->dp_local.noalias() = oRf.transpose() * d->dp;
     d->a0_local += gains_[0] * d->dp_local;
   }
-  if (gains_[1] != 0.) {
+  if (gains_[1] != Scalar(0.)) {
     d->a0_local += gains_[1] * d->v.linear();
   }
   switch (type_) {
@@ -106,11 +104,16 @@ void ContactModel1DTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parentJoint;
+#else
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parent;
+#endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
@@ -132,14 +135,14 @@ void ContactModel1DTpl<Scalar>::calcDiff(
       d->vv_skew * d->fJf.template bottomRows<3>();
   const Eigen::Ref<const Matrix3s> oRf = d->pinocchio->oMf[id_].rotation();
 
-  if (gains_[0] != 0.) {
+  if (gains_[0] != Scalar(0.)) {
     pinocchio::skew(d->dp_local, d->dp_skew);
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[0] * d->dp_skew * d->fJf.template bottomRows<3>();
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[0] * d->fJf.template topRows<3>();
   }
-  if (gains_[1] != 0.) {
+  if (gains_[1] != Scalar(0.)) {
     d->da0_local_dx.leftCols(nv).noalias() +=
         gains_[1] * d->fXjdv_dq.template topRows<3>();
     d->da0_local_dx.rightCols(nv).noalias() +=
@@ -157,10 +160,10 @@ void ContactModel1DTpl<Scalar>::calcDiff(
                         *state_->get_pinocchio().get(), *d->pinocchio, id_,
                         pinocchio::LOCAL)
                         .linear();
-      if (gains_[0] != 0.) {
+      if (gains_[0] != Scalar(0.)) {
         d->a0_local += gains_[0] * d->dp_local;
       }
-      if (gains_[1] != 0.) {
+      if (gains_[1] != Scalar(0.)) {
         d->a0_local += gains_[1] * d->v.linear();
       }
       d->a0[0] = (Raxis_ * oRf * d->a0_local)[2];
@@ -177,10 +180,10 @@ void ContactModel1DTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 1) {
-    throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be 1)");
+    throw_pretty(
+        "Invalid argument: " << "lambda has wrong dimension (it should be 1)");
   }
   Data* d = static_cast<Data*>(data.get());
   const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();
@@ -209,10 +212,22 @@ void ContactModel1DTpl<Scalar>::updateForce(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel1DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModel1DTpl<NewScalar> ContactModel1DTpl<Scalar>::cast() const {
+  typedef ContactModel1DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      scalar_cast<NewScalar>(xref_), type_, Raxis_.template cast<NewScalar>(),
+      nu_, gains_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

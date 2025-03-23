@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,17 +21,13 @@ ControlParametrizationModelPolyTwoRKTpl<
 }
 
 template <typename Scalar>
-ControlParametrizationModelPolyTwoRKTpl<
-    Scalar>::~ControlParametrizationModelPolyTwoRKTpl() {}
-
-template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calc(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar t, const Eigen::Ref<const VectorXs>& u) const {
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs> >& p0 = u.head(nw_);
@@ -59,7 +56,7 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>&) const {
   Data* d = static_cast<Data*>(data.get());
   d->dw_du.leftCols(nw_).diagonal().array() = d->c[0];
@@ -68,19 +65,19 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelPolyTwoRKTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::params(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Scalar, const Eigen::Ref<const VectorXs>& w) const {
   if (static_cast<std::size_t>(w.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   data->u.head(nw_) = w;
   data->u.segment(nw_, nw_) = w;
@@ -93,24 +90,24 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::convertBounds(
     const Eigen::Ref<const VectorXs>& w_ub, Eigen::Ref<VectorXs> u_lb,
     Eigen::Ref<VectorXs> u_ub) const {
   if (static_cast<std::size_t>(u_lb.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u_lb has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u_lb has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(u_ub.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u_ub has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u_ub has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   if (static_cast<std::size_t>(w_lb.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w_lb has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w_lb has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   if (static_cast<std::size_t>(w_ub.size()) != nw_) {
-    throw_pretty("Invalid argument: "
-                 << "w_ub has wrong dimension (it should be " +
-                        std::to_string(nw_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "w_ub has wrong dimension (it should be " +
+                                    std::to_string(nw_) + ")");
   }
   u_lb.head(nw_) = w_lb;
   u_lb.segment(nw_, nw_) = w_lb;
@@ -122,19 +119,19 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::convertBounds(
 
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::multiplyByJacobian(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
     const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
                 ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.rows() != out.rows() || static_cast<std::size_t>(A.cols()) != nw_ ||
       static_cast<std::size_t>(out.cols()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have wrong dimensions (" +
-                        std::to_string(A.rows()) + "," +
-                        std::to_string(A.cols()) + " and " +
-                        std::to_string(out.rows()) + "," +
-                        std::to_string(out.cols()) + +")");
+    throw_pretty("Invalid argument: " << "A and out have wrong dimensions (" +
+                                             std::to_string(A.rows()) + "," +
+                                             std::to_string(A.cols()) +
+                                             " and " +
+                                             std::to_string(out.rows()) + "," +
+                                             std::to_string(out.cols()) + +")");
   }
   Data* d = static_cast<Data*>(data.get());
   switch (op) {
@@ -162,19 +159,19 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::multiplyByJacobian(
 template <typename Scalar>
 void ControlParametrizationModelPolyTwoRKTpl<Scalar>::
     multiplyJacobianTransposeBy(
-        const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+        const std::shared_ptr<ControlParametrizationDataAbstract>& data,
         const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
         const AssignmentOp op) const {
   assert_pretty(is_a_AssignmentOp(op),
                 ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (A.cols() != out.cols() || static_cast<std::size_t>(A.rows()) != nw_ ||
       static_cast<std::size_t>(out.rows()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "A and out have wrong dimensions (" +
-                        std::to_string(A.rows()) + "," +
-                        std::to_string(A.cols()) + " and " +
-                        std::to_string(out.rows()) + "," +
-                        std::to_string(out.cols()) + ")");
+    throw_pretty("Invalid argument: " << "A and out have wrong dimensions (" +
+                                             std::to_string(A.rows()) + "," +
+                                             std::to_string(A.cols()) +
+                                             " and " +
+                                             std::to_string(out.rows()) + "," +
+                                             std::to_string(out.cols()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   switch (op) {
@@ -195,6 +192,32 @@ void ControlParametrizationModelPolyTwoRKTpl<Scalar>::
       break;
     default:
       throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
+      break;
+  }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ControlParametrizationModelPolyTwoRKTpl<NewScalar>
+ControlParametrizationModelPolyTwoRKTpl<Scalar>::cast() const {
+  typedef ControlParametrizationModelPolyTwoRKTpl<NewScalar> ReturnType;
+  ReturnType ret(nw_, rktype_);
+  return ret;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelPolyTwoRKTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << "ControlParametrizationModelPolyTwoRK {nw=" << nw_;
+  switch (rktype_) {
+    case two:
+      os << ", rktype=two}";
+      break;
+    case three:
+      os << ", rktype=three}";
+      break;
+    case four:
+      os << ", rktype=four}";
       break;
   }
 }

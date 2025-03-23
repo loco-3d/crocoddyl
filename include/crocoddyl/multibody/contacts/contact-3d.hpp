@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University f_world Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University f_world Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,7 +16,6 @@
 #include <pinocchio/spatial/motion.hpp>
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
@@ -26,6 +25,7 @@ template <typename _Scalar>
 class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModel3DTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -53,7 +53,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector3s& xref,
                     const pinocchio::ReferenceFrame type, const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
@@ -73,7 +73,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] type   Type of contact
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector3s& xref,
                     const pinocchio::ReferenceFrame type,
                     const Vector2s& gains = Vector2s::Zero());
@@ -81,17 +81,17 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                         const pinocchio::FrameIndex id, const Vector3s& xref,
                         const std::size_t nu,
                         const Vector2s& gains = Vector2s::Zero());)
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ContactModel3DTpl(boost::shared_ptr<StateMultibody> state,
+      ContactModel3DTpl(std::shared_ptr<StateMultibody> state,
                         const pinocchio::FrameIndex id, const Vector3s& xref,
                         const Vector2s& gains = Vector2s::Zero());)
-  virtual ~ContactModel3DTpl();
+  virtual ~ContactModel3DTpl() = default;
 
   /**
    * @brief Compute the 3d contact Jacobian and drift
@@ -100,8 +100,8 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the 3d contact holonomic constraint
@@ -110,8 +110,8 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -119,14 +119,26 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] data   3d contact data
    * @param[in] force  3d force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                           const VectorXs& force);
+  virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
+                           const VectorXs& force) override;
 
   /**
    * @brief Create the 3d contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data);
+  virtual std::shared_ptr<ContactDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data) override;
+
+  /**
+   * @brief Cast the contact-3d model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ContactModel3DTpl<NewScalar> A contact model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ContactModel3DTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference frame translation
@@ -148,7 +160,7 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::id_;
@@ -215,6 +227,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
     fXjda_dv.setZero();
     fJf_df.setZero();
   }
+  virtual ~ContactData3DTpl() = default;
 
   using Base::a0;
   using Base::da0_dx;

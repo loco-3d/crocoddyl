@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, LAAS-CNRS, Heriot-Watt University
+// Copyright (C) 2021-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,45 +10,60 @@
 
 #include "python/crocoddyl/core/activation-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
 
 namespace crocoddyl {
 namespace python {
 
-void exposeActivation2NormBarrier() {
-  bp::class_<ActivationModel2NormBarrier, bp::bases<ActivationModelAbstract> >(
-      "ActivationModel2NormBarrier",
-      "An 2-norm activation model for a defined barrier alpha\n\n"
-      "If the residual is lower than an alpha threshold, this function imposes "
-      "a quadratic term. \n"
-      "In short, the activation value is 0 if the residual is major or equals "
-      "to alpha, otherwise, it is \n"
-      "equals to 0.5 *(||r|| - alpha)^2",
-      bp::init<std::size_t, bp::optional<double, bool> >(
-          bp::args("self", "nr", "alpha", "true_hessian"),
-          "Initialize the activation model.\n\n"
-          ":param nr: dimension of the cost-residual vector\n"
-          ":param alpha: activation threshold (default 0.1)\n"
-          ":param true_hessian: use true Hessian in calcDiff if true, "
-          "else Gauss-Newton approximation (default false)"))
-      .def("calc", &ActivationModel2NormBarrier::calc,
-           bp::args("self", "data", "r"),
+template <typename Model>
+struct ActivationModel2NormBarrierVisitor
+    : public bp::def_visitor<ActivationModel2NormBarrierVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            ":param data: activation data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModel2NormBarrier::calcDiff,
-           bp::args("self", "data", "r"),
-           "Compute the derivatives of the collision function.\n\n"
-           ":param data: activation data\n"
-           ":param r: residual vector \n")
-      .def("createData", &ActivationModel2NormBarrier::createData,
-           bp::args("self"), "Create the collision activation data.\n\n")
-      .add_property(
-          "alpha",
-          bp::make_function(&ActivationModel2NormBarrier::get_alpha,
-                            bp::return_value_policy<bp::return_by_value>()),
-          bp::make_function(&ActivationModel2NormBarrier::set_alpha), "alpha")
-      .def(CopyableVisitor<ActivationModel2NormBarrier>());
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "r"),
+             "Compute the derivatives of the collision function.\n\n"
+             ":param data: activation data\n"
+             ":param r: residual vector \n")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the collision activation data.\n\n")
+        .add_property(
+            "alpha",
+            bp::make_function(&Model::get_alpha,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_alpha), "alpha");
+  }
+};
+
+#define CROCODDYL_ACTIVATION_MODEL_2NORM_BARRIER_PYTHON_BINDINGS(Scalar)      \
+  typedef ActivationModel2NormBarrierTpl<Scalar> Model;                       \
+  typedef ActivationModelAbstractTpl<Scalar> ModelBase;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+  bp::class_<Model, bp::bases<ModelBase>>(                                    \
+      "ActivationModel2NormBarrier",                                          \
+      "An 2-norm activation model for a defined barrier alpha\n\n"            \
+      "If the residual is lower than an alpha threshold, this function "      \
+      "imposes a quadratic term. In short, the activation value is 0 if the " \
+      "residual is major or equals alpha, otherwise, it is equals to 0.5 "    \
+      "*(||r|| - alpha)^2",                                                   \
+      bp::init<std::size_t, bp::optional<Scalar, bool>>(                      \
+          bp::args("self", "nr", "alpha", "true_hessian"),                    \
+          "Initialize the activation model.\n\n"                              \
+          ":param nr: dimension of the cost-residual vector\n"                \
+          ":param alpha: activation threshold (default 0.1)\n"                \
+          ":param true_hessian: use true Hessian in calcDiff if true, "       \
+          "else Gauss-Newton approximation (default false)"))                 \
+      .def(ActivationModel2NormBarrierVisitor<Model>())                       \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+void exposeActivation2NormBarrier() {
+  CROCODDYL_PYTHON_SCALARS(
+      CROCODDYL_ACTIVATION_MODEL_2NORM_BARRIER_PYTHON_BINDINGS)
 }
 
 }  // namespace python

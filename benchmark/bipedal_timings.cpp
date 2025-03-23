@@ -73,11 +73,11 @@ int main(int argc, char* argv[]) {
   crocoddyl::Timer timer;
   std::cout << "NQ: " << model.nq << std::endl;
 
-  boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::make_shared<crocoddyl::StateMultibody>(
-          boost::make_shared<pinocchio::Model>(model));
-  boost::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation =
-      boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
+  std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::make_shared<crocoddyl::StateMultibody>(
+          std::make_shared<pinocchio::Model>(model));
+  std::shared_ptr<crocoddyl::ActuationModelFloatingBase> actuation =
+      std::make_shared<crocoddyl::ActuationModelFloatingBase>(state);
 
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
@@ -85,39 +85,39 @@ int main(int argc, char* argv[]) {
   Eigen::MatrixXd Jfirst(2 * model.nv, 2 * model.nv),
       Jsecond(2 * model.nv, 2 * model.nv);
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
-      boost::make_shared<crocoddyl::CostModelResidual>(
-          state, boost::make_shared<crocoddyl::ResidualModelFramePlacement>(
+  std::shared_ptr<crocoddyl::CostModelAbstract> goalTrackingCost =
+      std::make_shared<crocoddyl::CostModelResidual>(
+          state, std::make_shared<crocoddyl::ResidualModelFramePlacement>(
                      state, model.getFrameId("arm_right_7_joint"),
                      pinocchio::SE3(Eigen::Matrix3d::Identity(),
                                     Eigen::Vector3d(.0, .0, .4)),
                      actuation->get_nu()));
 
-  boost::shared_ptr<crocoddyl::CostModelAbstract> xRegCost =
-      boost::make_shared<crocoddyl::CostModelResidual>(
-          state, boost::make_shared<crocoddyl::ResidualModelState>(
+  std::shared_ptr<crocoddyl::CostModelAbstract> xRegCost =
+      std::make_shared<crocoddyl::CostModelResidual>(
+          state, std::make_shared<crocoddyl::ResidualModelState>(
                      state, actuation->get_nu()));
-  boost::shared_ptr<crocoddyl::CostModelAbstract> uRegCost =
-      boost::make_shared<crocoddyl::CostModelResidual>(
-          state, boost::make_shared<crocoddyl::ResidualModelControl>(
+  std::shared_ptr<crocoddyl::CostModelAbstract> uRegCost =
+      std::make_shared<crocoddyl::CostModelResidual>(
+          state, std::make_shared<crocoddyl::ResidualModelControl>(
                      state, actuation->get_nu()));
 
-  boost::shared_ptr<crocoddyl::CostModelSum> runningCostModel =
-      boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
-  boost::shared_ptr<crocoddyl::CostModelSum> terminalCostModel =
-      boost::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
+  std::shared_ptr<crocoddyl::CostModelSum> runningCostModel =
+      std::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
+  std::shared_ptr<crocoddyl::CostModelSum> terminalCostModel =
+      std::make_shared<crocoddyl::CostModelSum>(state, actuation->get_nu());
 
   runningCostModel->addCost("gripperPose", goalTrackingCost, 1);
   runningCostModel->addCost("xReg", xRegCost, 1e-4);
   runningCostModel->addCost("uReg", uRegCost, 1e-4);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
-  boost::shared_ptr<crocoddyl::ContactModelMultiple> contact_models =
-      boost::make_shared<crocoddyl::ContactModelMultiple>(state,
-                                                          actuation->get_nu());
+  std::shared_ptr<crocoddyl::ContactModelMultiple> contact_models =
+      std::make_shared<crocoddyl::ContactModelMultiple>(state,
+                                                        actuation->get_nu());
 
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
-      boost::make_shared<crocoddyl::ContactModel6D>(
+  std::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model6D =
+      std::make_shared<crocoddyl::ContactModel6D>(
           state, model.getFrameId(RF), pinocchio::SE3::Identity(),
           pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
           Eigen::Vector2d(0., 50.));
@@ -125,8 +125,8 @@ int main(int argc, char* argv[]) {
       model.frames[model.getFrameId(RF)].name + "_contact",
       support_contact_model6D);
 
-  boost::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
-      boost::make_shared<crocoddyl::ContactModel3D>(
+  std::shared_ptr<crocoddyl::ContactModelAbstract> support_contact_model3D =
+      std::make_shared<crocoddyl::ContactModel3D>(
           state, model.getFrameId(LF), Eigen::Vector3d::Zero(),
           pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
           Eigen::Vector2d(0., 50.));
@@ -134,65 +134,64 @@ int main(int argc, char* argv[]) {
       model.frames[model.getFrameId(LF)].name + "_contact",
       support_contact_model3D);
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
-      runningDAM = boost::make_shared<
+  std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
+      runningDAM = std::make_shared<
           crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state, actuation, contact_models, runningCostModel);
 
-  boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
-      terminalDAM = boost::make_shared<
+  std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics>
+      terminalDAM = std::make_shared<
           crocoddyl::DifferentialActionModelContactFwdDynamics>(
           state, actuation, contact_models, terminalCostModel);
 
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM,
-                                                                1e-3);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
-      boost::make_shared<crocoddyl::IntegratedActionModelRK>(
+  std::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
+      std::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
+      std::make_shared<crocoddyl::IntegratedActionModelRK>(
           runningDAM, crocoddyl::RKType::four, 1e-3);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      boost::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM,
-                                                                1e-3);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
+      std::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM,
+                                                              1e-3);
 
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> >
       runningModelsWithEuler(N, runningModelWithEuler);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> >
       runningModelsWithRK4(N, runningModelWithRK4);
 
-  boost::shared_ptr<crocoddyl::ShootingProblem> problemWithEuler =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithEuler,
-                                                     terminalModel);
-  boost::shared_ptr<crocoddyl::ShootingProblem> problemWithRK4 =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithRK4,
-                                                     terminalModel);
+  std::shared_ptr<crocoddyl::ShootingProblem> problemWithEuler =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithEuler,
+                                                   terminalModel);
+  std::shared_ptr<crocoddyl::ShootingProblem> problemWithRK4 =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModelsWithRK4,
+                                                   terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
 
   /***************************************************************/
 
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithEuler_data =
+  std::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithEuler_data =
       runningModelWithEuler->createData();
-  boost::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data =
+  std::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data =
       runningModelWithRK4->createData();
-  boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data =
+  std::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data =
       runningDAM->createData();
   crocoddyl::DifferentialActionDataContactFwdDynamics* d =
       static_cast<crocoddyl::DifferentialActionDataContactFwdDynamics*>(
           runningDAM_data.get());
-  boost::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data =
+  std::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data =
       actuation->createData();
-  boost::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data =
+  std::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data =
       goalTrackingCost->createData(&d->multibody);
-  boost::shared_ptr<crocoddyl::CostDataAbstract> xRegCost_data =
+  std::shared_ptr<crocoddyl::CostDataAbstract> xRegCost_data =
       xRegCost->createData(&d->multibody);
-  boost::shared_ptr<crocoddyl::CostDataAbstract> uRegCost_data =
+  std::shared_ptr<crocoddyl::CostDataAbstract> uRegCost_data =
       uRegCost->createData(&d->multibody);
 
-  boost::shared_ptr<crocoddyl::CostDataSum> runningCostModel_data =
+  std::shared_ptr<crocoddyl::CostDataSum> runningCostModel_data =
       runningCostModel->createData(&d->multibody);
 
-  boost::shared_ptr<crocoddyl::ActivationModelAbstract> activationQuad =
+  std::shared_ptr<crocoddyl::ActivationModelAbstract> activationQuad =
       xRegCost->get_activation();
-  boost::shared_ptr<crocoddyl::ActivationDataAbstract> activationQuad_data =
+  std::shared_ptr<crocoddyl::ActivationDataAbstract> activationQuad_data =
       activationQuad->createData();
 
   /********************************************************************/

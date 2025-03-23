@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ struct ForceDataAbstractTpl {
     df_dx.setZero();
     df_du.setZero();
   }
-  virtual ~ForceDataAbstractTpl() {}
+  virtual ~ForceDataAbstractTpl() = default;
 
   PinocchioData* pinocchio;        //!< Pinocchio data
   pinocchio::FrameIndex frame;     //!< Frame index of the contact frame

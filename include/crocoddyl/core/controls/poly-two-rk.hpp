@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +13,6 @@
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/integrator/rk.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -50,6 +50,10 @@ template <typename _Scalar>
 class ControlParametrizationModelPolyTwoRKTpl
     : public ControlParametrizationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ControlParametrizationModelBase,
+                         ControlParametrizationModelPolyTwoRKTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
@@ -67,7 +71,7 @@ class ControlParametrizationModelPolyTwoRKTpl
    */
   explicit ControlParametrizationModelPolyTwoRKTpl(const std::size_t nw,
                                                    const RKType rktype);
-  virtual ~ControlParametrizationModelPolyTwoRKTpl();
+  virtual ~ControlParametrizationModelPolyTwoRKTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -77,8 +81,8 @@ class ControlParametrizationModelPolyTwoRKTpl
    * @param[in]  u      Control parameters
    */
   virtual void calc(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Get the value of the Jacobian of the control with respect to the
@@ -91,15 +95,16 @@ class ControlParametrizationModelPolyTwoRKTpl
    * @param[in]  u      Control parameters
    */
   virtual void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& u) const;
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const Scalar t, const Eigen::Ref<const VectorXs>& u) const override;
 
   /**
    * @brief Create the control-parametrization data
    *
    * @return the control-parametrization data
    */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData()
+      override;
 
   /**
    * @brief Get a value of the control parameters u such that the control at the
@@ -110,8 +115,8 @@ class ControlParametrizationModelPolyTwoRKTpl
    * @param[in]  w      Control values
    */
   virtual void params(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Scalar t, const Eigen::Ref<const VectorXs>& w) const;
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const Scalar t, const Eigen::Ref<const VectorXs>& w) const override;
 
   /**
    * @brief Map the specified bounds from the control space to the parameter
@@ -125,7 +130,7 @@ class ControlParametrizationModelPolyTwoRKTpl
   virtual void convertBounds(const Eigen::Ref<const VectorXs>& w_lb,
                              const Eigen::Ref<const VectorXs>& w_ub,
                              Eigen::Ref<VectorXs> u_lb,
-                             Eigen::Ref<VectorXs> u_ub) const;
+                             Eigen::Ref<VectorXs> u_ub) const override;
 
   /**
    * @brief Compute the product between a specified matrix and the Jacobian of
@@ -141,9 +146,9 @@ class ControlParametrizationModelPolyTwoRKTpl
    * given results
    */
   virtual void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp = setto) const override;
 
   /**
    * @brief Compute the product between the transposed Jacobian of the control
@@ -159,9 +164,14 @@ class ControlParametrizationModelPolyTwoRKTpl
    * given results
    */
   virtual void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const;
+      const AssignmentOp = setto) const override;
+
+  template <typename NewScalar>
+  ControlParametrizationModelPolyTwoRKTpl<NewScalar> cast() const;
+
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::nu_;
@@ -186,8 +196,7 @@ struct ControlParametrizationDataPolyTwoRKTpl
       : Base(model), tmp_t2(0.) {
     c.setZero();
   }
-
-  virtual ~ControlParametrizationDataPolyTwoRKTpl() {}
+  virtual ~ControlParametrizationDataPolyTwoRKTpl() = default;
 
   Vector3s c;     //!< Polynomial coefficients of the second-order control model
                   //!< that depends on time

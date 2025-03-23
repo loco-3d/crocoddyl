@@ -1,12 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/make_shared.hpp>
+#include <boost/core/demangle.hpp>
 
 namespace crocoddyl {
 
@@ -17,26 +18,22 @@ ControlParametrizationModelAbstractTpl<
     : nw_(nw), nu_(nu) {}
 
 template <typename Scalar>
-ControlParametrizationModelAbstractTpl<
-    Scalar>::~ControlParametrizationModelAbstractTpl() {}
-
-template <typename Scalar>
-boost::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
+std::shared_ptr<ControlParametrizationDataAbstractTpl<Scalar> >
 ControlParametrizationModelAbstractTpl<Scalar>::createData() {
-  return boost::allocate_shared<ControlParametrizationDataAbstract>(
+  return std::allocate_shared<ControlParametrizationDataAbstract>(
       Eigen::aligned_allocator<ControlParametrizationDataAbstract>(), this);
 }
 
 template <typename Scalar>
 bool ControlParametrizationModelAbstractTpl<Scalar>::checkData(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>&) {
+    const std::shared_ptr<ControlParametrizationDataAbstract>&) {
   return false;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs
 ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op) const {
   MatrixXs AJ(A.rows(), nu_);
   multiplyByJacobian(data, A, AJ, op);
@@ -46,11 +43,25 @@ ControlParametrizationModelAbstractTpl<Scalar>::multiplyByJacobian_J(
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::MatrixXs
 ControlParametrizationModelAbstractTpl<Scalar>::multiplyJacobianTransposeBy_J(
-    const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+    const std::shared_ptr<ControlParametrizationDataAbstract>& data,
     const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op) const {
   MatrixXs JTA(nu_, A.cols());
   multiplyJacobianTransposeBy(data, A, JTA, op);
   return JTA;
+}
+
+template <typename Scalar>
+std::ostream& operator<<(
+    std::ostream& os,
+    const ControlParametrizationModelAbstractTpl<Scalar>& model) {
+  model.print(os);
+  return os;
+}
+
+template <typename Scalar>
+void ControlParametrizationModelAbstractTpl<Scalar>::print(
+    std::ostream& os) const {
+  os << boost::core::demangle(typeid(*this).name());
 }
 
 template <typename Scalar>

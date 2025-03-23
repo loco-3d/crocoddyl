@@ -1,21 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <pinocchio/algorithm/centroidal-derivatives.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s& href,
+    std::shared_ptr<StateMultibody> state, const Vector6s& href,
     const std::size_t nu)
     : Base(state, 6, nu, true, true, false),
       href_(href),
@@ -23,18 +23,14 @@ ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
 
 template <typename Scalar>
 ResidualModelCentroidalMomentumTpl<Scalar>::ResidualModelCentroidalMomentumTpl(
-    boost::shared_ptr<StateMultibody> state, const Vector6s& href)
+    std::shared_ptr<StateMultibody> state, const Vector6s& href)
     : Base(state, 6, true, true, false),
       href_(href),
       pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
-ResidualModelCentroidalMomentumTpl<
-    Scalar>::~ResidualModelCentroidalMomentumTpl() {}
-
-template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calc(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   // Compute the residual residual give the reference centroidal momentum
   Data* d = static_cast<Data*>(data.get());
@@ -43,7 +39,7 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ResidualDataAbstract>& data,
+    const std::shared_ptr<ResidualDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   const std::size_t& nv = state_->get_nv();
@@ -54,11 +50,23 @@ void ResidualModelCentroidalMomentumTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ResidualDataAbstractTpl<Scalar> >
+std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelCentroidalMomentumTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelCentroidalMomentumTpl<NewScalar>
+ResidualModelCentroidalMomentumTpl<Scalar>::cast() const {
+  typedef ResidualModelCentroidalMomentumTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      href_.template cast<NewScalar>(), nu_);
+  return ret;
 }
 
 template <typename Scalar>

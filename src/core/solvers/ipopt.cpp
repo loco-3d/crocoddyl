@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-SolverIpopt::SolverIpopt(boost::shared_ptr<crocoddyl::ShootingProblem> problem)
+SolverIpopt::SolverIpopt(std::shared_ptr<crocoddyl::ShootingProblem> problem)
     : SolverAbstract(problem),
       ipopt_iface_(new IpoptInterface(problem)),
       ipopt_app_(IpoptApplicationFactory()) {
@@ -74,8 +74,7 @@ void SolverIpopt::setNumericIpoptOption(const std::string& tag,
 
 void SolverIpopt::set_th_stop(const double th_stop) {
   if (th_stop <= 0.) {
-    throw_pretty("Invalid argument: "
-                 << "th_stop value has to higher than 0.");
+    throw_pretty("Invalid argument: " << "th_stop value has to higher than 0.");
   }
   th_stop_ = th_stop;
   ipopt_app_->Options()->SetNumericValue("tol", th_stop_);

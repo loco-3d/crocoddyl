@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -48,6 +48,8 @@ class DifferentialActionModelNumDiffTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -67,59 +69,72 @@ class DifferentialActionModelNumDiffTpl
    * approximation for computing the Hessians
    */
   explicit DifferentialActionModelNumDiffTpl(
-      boost::shared_ptr<Base> model, const bool with_gauss_approx = false);
-  virtual ~DifferentialActionModelNumDiffTpl();
+      std::shared_ptr<Base> model, const bool with_gauss_approx = false);
+  virtual ~DifferentialActionModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<DifferentialActionDataAbstract>& data, const
+   * std::shared_ptr<DifferentialActionDataAbstract>& data, const
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calcDiff(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the diff-action numdiff model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelNumDiffTpl<NewScalar> A differential-action
+   * model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief @copydoc Base::quasiStatic()
    */
   virtual void quasiStatic(
-      const boost::shared_ptr<DifferentialActionDataAbstract>& data,
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the differential acton model that we use to numerical
    * differentiate
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used in the numerical
@@ -143,7 +158,7 @@ class DifferentialActionModelNumDiffTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control
@@ -156,7 +171,7 @@ class DifferentialActionModelNumDiffTpl
 
  private:
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& x);
-  boost::shared_ptr<Base> model_;
+  std::shared_ptr<Base> model_;
   bool with_gauss_approx_;
   Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian
                    //!< calculation
@@ -224,9 +239,9 @@ struct DifferentialActionDataNumDiffTpl
   VectorXs dx;
   VectorXs du;
   VectorXs xp;
-  boost::shared_ptr<Base> data_0;
-  std::vector<boost::shared_ptr<Base> > data_x;
-  std::vector<boost::shared_ptr<Base> > data_u;
+  std::shared_ptr<Base> data_0;
+  std::vector<std::shared_ptr<Base> > data_x;
+  std::vector<std::shared_ptr<Base> > data_u;
 
   using Base::cost;
   using Base::Fu;

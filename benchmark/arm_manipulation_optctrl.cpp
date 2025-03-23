@@ -22,12 +22,12 @@ int main(int argc, char* argv[]) {
   }
 
   // Building the running and terminal models
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
+  std::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
   crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
 
   // Get the initial state
-  boost::shared_ptr<crocoddyl::StateMultibody> state =
-      boost::static_pointer_cast<crocoddyl::StateMultibody>(
+  std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
           runningModel->get_state());
   std::cout << "NQ: " << state->get_nq() << std::endl;
   std::cout << "Number of nodes: " << N << std::endl;
@@ -38,18 +38,18 @@ int main(int argc, char* argv[]) {
 
   // For this optimal control problem, we define 100 knots (or running action
   // models) plus a terminal knot
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
       N, runningModel);
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels,
-                                                     terminalModel);
+  std::shared_ptr<crocoddyl::ShootingProblem> problem =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModels,
+                                                   terminalModel);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(
       N, Eigen::VectorXd::Zero(runningModel->get_nu()));
   for (unsigned int i = 0; i < N; ++i) {
-    const boost::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
         problem->get_runningModels()[i];
-    const boost::shared_ptr<crocoddyl::ActionDataAbstract>& data =
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         problem->get_runningDatas()[i];
     model->quasiStatic(data, us[i], x0);
   }
@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
   // Formulating the optimal control problem
   crocoddyl::SolverFDDP solver(problem);
   if (CALLBACKS) {
-    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
-    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
+    std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());
     solver.setCallbacks(cbs);
   }
 

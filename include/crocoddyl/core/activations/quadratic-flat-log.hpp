@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +12,6 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -34,6 +34,7 @@ class ActivationModelQuadFlatLogTpl
     : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModelQuadFlatLogTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -52,15 +53,14 @@ class ActivationModelQuadFlatLogTpl
    * @param[in] alpha  Width of quadratic basin (default: 1.)
    */
 
-  explicit ActivationModelQuadFlatLogTpl(const std::size_t &nr,
-                                         const Scalar &alpha = Scalar(1.))
+  explicit ActivationModelQuadFlatLogTpl(const std::size_t nr,
+                                         const Scalar alpha = Scalar(1.))
       : Base(nr), alpha_(alpha) {
     if (alpha < Scalar(0.)) {
-      throw_pretty("Invalid argument: "
-                   << "alpha should be a positive value");
+      throw_pretty("Invalid argument: " << "alpha should be a positive value");
     }
   };
-  virtual ~ActivationModelQuadFlatLogTpl() {};
+  virtual ~ActivationModelQuadFlatLogTpl() = default;
 
   /*
    * @brief Compute the quadratic-flat-log function
@@ -68,14 +68,14 @@ class ActivationModelQuadFlatLogTpl
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActivationDataAbstract> &data,
-                    const Eigen::Ref<const VectorXs> &r) {
+  virtual void calc(const std::shared_ptr<ActivationDataAbstract> &data,
+                    const Eigen::Ref<const VectorXs> &r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
     d->a0 = r.squaredNorm() / alpha_;
     data->a_value = log(Scalar(1.0) + d->a0);
   };
@@ -86,14 +86,14 @@ class ActivationModelQuadFlatLogTpl
    * @param[in] data  Quadratic-log activation data
    * @param[in] r     Residual vector \f$\mathbf{r}\in\mathbb{R}^{nr}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract> &data,
-                        const Eigen::Ref<const VectorXs> &r) {
+  virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract> &data,
+                        const Eigen::Ref<const VectorXs> &r) override {
     if (static_cast<std::size_t>(r.size()) != nr_) {
-      throw_pretty("Invalid argument: "
-                   << "r has wrong dimension (it should be " +
-                          std::to_string(nr_) + ")");
+      throw_pretty(
+          "Invalid argument: " << "r has wrong dimension (it should be " +
+                                      std::to_string(nr_) + ")");
     }
-    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
     d->a1 = Scalar(2.0) / (alpha_ + alpha_ * d->a0);
     data->Ar = d->a1 * r;
@@ -106,11 +106,18 @@ class ActivationModelQuadFlatLogTpl
    *
    * @return the activation data
    */
-  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
-    boost::shared_ptr<Data> data =
-        boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override {
+    std::shared_ptr<Data> data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     return data;
   };
+
+  template <typename NewScalar>
+  ActivationModelQuadFlatLogTpl<NewScalar> cast() const {
+    typedef ActivationModelQuadFlatLogTpl<NewScalar> ReturnType;
+    ReturnType res(nr_, scalar_cast<NewScalar>(alpha_));
+    return res;
+  }
 
   Scalar get_alpha() const { return alpha_; };
   void set_alpha(const Scalar alpha) { alpha_ = alpha; };
@@ -120,7 +127,7 @@ class ActivationModelQuadFlatLogTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream &os) const {
+  virtual void print(std::ostream &os) const override {
     os << "ActivationModelQuadFlatLog {nr=" << nr_ << ", a=" << alpha_ << "}";
   }
 
@@ -144,14 +151,21 @@ struct ActivationDataQuadFlatLogTpl
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::DiagonalMatrixXs DiagonalMatrixXs;
   typedef ActivationDataAbstractTpl<Scalar> Base;
 
   template <typename Activation>
   explicit ActivationDataQuadFlatLogTpl(Activation *const activation)
-      : Base(activation), a0(0), a1(0) {}
+      : Base(activation), a0(Scalar(0)), a1(Scalar(0)) {}
+  virtual ~ActivationDataQuadFlatLogTpl() = default;
 
   Scalar a0;
   Scalar a1;
+
+  using Base::a_value;
+  using Base::Ar;
+  using Base::Arr;
 };
 
 }  // namespace crocoddyl

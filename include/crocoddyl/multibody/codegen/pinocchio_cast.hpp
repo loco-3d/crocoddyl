@@ -1,0 +1,24 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef CROCODDYL_MULTIBODY_CODEGEN_PINOCCHIO_CAST_HPP_
+#define CROCODDYL_MULTIBODY_CODEGEN_PINOCCHIO_CAST_HPP_
+
+#include <pinocchio/autodiff/cppad.hpp>
+
+namespace pinocchio {
+// Implement missing casting in Pinocchio
+template <typename NewScalar, typename Scalar>
+struct ScalarCast<NewScalar, CppAD::cg::CG<Scalar>> {
+  static NewScalar cast(const CppAD::cg::CG<Scalar>& cg_value) {
+    return static_cast<NewScalar>(cg_value.getValue());
+  }
+};
+}  // namespace pinocchio
+
+#endif  // CROCODDYL_MULTIBODY_CODEGEN_PINOCCHIO_CAST_HPP_

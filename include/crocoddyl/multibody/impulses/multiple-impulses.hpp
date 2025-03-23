@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -15,7 +15,6 @@
 #include <string>
 #include <utility>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
@@ -30,9 +29,16 @@ struct ImpulseItemTpl {
 
   ImpulseItemTpl() {}
   ImpulseItemTpl(const std::string& name,
-                 boost::shared_ptr<ImpulseModelAbstract> impulse,
+                 std::shared_ptr<ImpulseModelAbstract> impulse,
                  const bool active = true)
       : name(name), impulse(impulse), active(active) {}
+
+  template <typename NewScalar>
+  ImpulseItemTpl<NewScalar> cast() const {
+    typedef ImpulseItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, impulse->template cast<NewScalar>(), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the impulse item
@@ -44,7 +50,7 @@ struct ImpulseItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<ImpulseModelAbstract> impulse;
+  std::shared_ptr<ImpulseModelAbstract> impulse;
   bool active;
 };
 
@@ -75,9 +81,9 @@ class ImpulseModelMultipleTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ImpulseItem> >
+  typedef std::map<std::string, std::shared_ptr<ImpulseItem> >
       ImpulseModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ImpulseDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<ImpulseDataAbstract> >
       ImpulseDataContainer;
   typedef typename pinocchio::container::aligned_vector<
       pinocchio::ForceTpl<Scalar> >::iterator ForceIterator;
@@ -87,7 +93,7 @@ class ImpulseModelMultipleTpl {
    *
    * @param[in] state  Multibody state
    */
-  explicit ImpulseModelMultipleTpl(boost::shared_ptr<StateMultibody> state);
+  explicit ImpulseModelMultipleTpl(std::shared_ptr<StateMultibody> state);
   ~ImpulseModelMultipleTpl();
 
   /**
@@ -100,7 +106,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] active   Impulse status (active by default)
    */
   void addImpulse(const std::string& name,
-                  boost::shared_ptr<ImpulseModelAbstract> impulse,
+                  std::shared_ptr<ImpulseModelAbstract> impulse,
                   const bool active = true);
 
   /**
@@ -124,7 +130,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void calc(const std::shared_ptr<ImpulseDataMultiple>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -133,7 +139,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Multi-impulse data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void calcDiff(const std::shared_ptr<ImpulseDataMultiple>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -143,7 +149,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] vnext  System velocity after impulse
    * \f$\mathbf{v}'\in\mathbb{R}^{nv}\f$
    */
-  void updateVelocity(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void updateVelocity(const std::shared_ptr<ImpulseDataMultiple>& data,
                       const VectorXs& vnext) const;
 
   /**
@@ -153,7 +159,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] impulse  Spatial impulse defined in frame coordinate
    * \f${}^o\underline{\boldsymbol{\Lambda}}_c\in\mathbb{R}^{nc}\f$
    */
-  void updateForce(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void updateForce(const std::shared_ptr<ImpulseDataMultiple>& data,
                    const VectorXs& impulse);
 
   /**
@@ -164,7 +170,7 @@ class ImpulseModelMultipleTpl {
    * generalized coordinates
    * \f$\frac{\partial\dot{\mathbf{v}'}}{\partial\mathbf{x}}\in\mathbb{R}^{nv\times{ndx}}\f$
    */
-  void updateVelocityDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void updateVelocityDiff(const std::shared_ptr<ImpulseDataMultiple>& data,
                           const MatrixXs& dvnext_dx) const;
 
   /**
@@ -176,7 +182,7 @@ class ImpulseModelMultipleTpl {
    * coordinate
    * \f$\frac{\partial{}^o\underline{\boldsymbol{\Lambda}}_c}{\partial\mathbf{x}}\in\mathbb{R}^{nc\times{ndx}}\f$
    */
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void updateForceDiff(const std::shared_ptr<ImpulseDataMultiple>& data,
                        const MatrixXs& df_dx) const;
 
   /**
@@ -188,7 +194,7 @@ class ImpulseModelMultipleTpl {
    * @param[in] data       Multi-contact data
    * @param[in] pinocchio  Pinocchio data
    */
-  void updateRneaDiff(const boost::shared_ptr<ImpulseDataMultiple>& data,
+  void updateRneaDiff(const std::shared_ptr<ImpulseDataMultiple>& data,
                       pinocchio::DataTpl<Scalar>& pinocchio) const;
 
   /**
@@ -197,13 +203,25 @@ class ImpulseModelMultipleTpl {
    * @param[in] data  Pinocchio data
    * @return the multi-impulse data.
    */
-  boost::shared_ptr<ImpulseDataMultiple> createData(
+  std::shared_ptr<ImpulseDataMultiple> createData(
       pinocchio::DataTpl<Scalar>* const data);
+
+  /**
+   * @brief Cast the multi-impulse model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ImpulseModelMultipleTpl<NewScalar> A multi-impulse model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ImpulseModelMultipleTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the multibody state
    */
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::shared_ptr<StateMultibody>& get_state() const;
 
   /**
    * @brief Return the impulse models
@@ -243,7 +261,7 @@ class ImpulseModelMultipleTpl {
                                   const ImpulseModelMultipleTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateMultibody> state_;
+  std::shared_ptr<StateMultibody> state_;
   ImpulseModelContainer impulses_;
   std::size_t nc_;
   std::size_t nc_total_;
@@ -289,7 +307,7 @@ struct ImpulseDataMultipleTpl {
     for (typename ImpulseModelMultiple::ImpulseModelContainer::const_iterator
              it = model->get_impulses().begin();
          it != model->get_impulses().end(); ++it) {
-      const boost::shared_ptr<ImpulseItem>& item = it->second;
+      const std::shared_ptr<ImpulseItem>& item = it->second;
       impulses.insert(
           std::make_pair(item->name, item->impulse->createData(data)));
     }

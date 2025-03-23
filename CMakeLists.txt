@@ -51,7 +51,7 @@ include("${JRL_CMAKE_MODULES}/python-helpers.cmake")
 # Print initial message
 message(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 message(
-  STATUS "Copyright (C) 2018-2024 CNRS-LAAS, University of Edinburgh, INRIA")
+  STATUS "Copyright (C) 2018-2025 CNRS-LAAS, University of Edinburgh, INRIA")
 message(STATUS "                        Heriot-Watt University")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
@@ -91,8 +91,8 @@ if(APPLE) # Use the handmade approach
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP
                         ${CMAKE_MODULE_PATH})
 elseif(UNIX)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.20.0" OR ${CMAKE_VERSION}
-                                                  VERSION_EQUAL "3.20.0")
+  if(${CMAKE_VERSION} VERSION_GREATER "3.25.0" OR ${CMAKE_VERSION}
+                                                  VERSION_EQUAL "3.25.0")
     set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/find-external/OpenMP
                           ${CMAKE_MODULE_PATH})
   endif()
@@ -103,8 +103,8 @@ if(BUILD_PYTHON_INTERFACE)
   add_project_dependency(eigenpy 3.1.0 REQUIRED PKG_CONFIG_REQUIRES
                          "eigenpy >= 3.1.0")
 endif(BUILD_PYTHON_INTERFACE)
-add_project_dependency(pinocchio 2.6.20 REQUIRED PKG_CONFIG_REQUIRES
-                       "pinocchio >= 2.6.20")
+add_project_dependency(pinocchio 3.4.0 REQUIRED PKG_CONFIG_REQUIRES
+                       "pinocchio >= 3.4.0")
 if(BUILD_EXAMPLES
    OR BUILD_TESTING
    OR BUILD_BENCHMARK)
@@ -235,6 +235,7 @@ if(UNIX)
                         Boost::serialization)
   target_compile_definitions(
     ${PROJECT_NAME} PUBLIC PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2)
+  set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
@@ -280,4 +281,6 @@ endif()
 
 # PkgConfig packaging of the project
 pkg_config_append_libs(${PROJECT_NAME})
-pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
+foreach(boostlib ${BOOST_REQUIRED_COMPONENTS})
+  pkg_config_append_libs("boost_${boostlib}")
+endforeach()

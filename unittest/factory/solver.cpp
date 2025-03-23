@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
-//                          Max Planck Gesellschaft, University of Edinburgh
+// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +17,6 @@
 #ifdef CROCODDYL_WITH_IPOPT
 #include "crocoddyl/core/solvers/ipopt.hpp"
 #endif
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -58,16 +58,13 @@ SolverFactory::SolverFactory() {}
 
 SolverFactory::~SolverFactory() {}
 
-boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
-    SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
-    size_t T) const {
-  boost::shared_ptr<crocoddyl::SolverAbstract> solver;
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
-      ActionModelFactory().create(action_type);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
-      ActionModelFactory().create(action_type, true);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> >
-      running_models;
+std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
+    SolverTypes::Type solver_type,
+    std::shared_ptr<crocoddyl::ActionModelAbstract> model,
+    std::shared_ptr<crocoddyl::ActionModelAbstract> model2,
+    std::shared_ptr<crocoddyl::ActionModelAbstract> modelT, size_t T) const {
+  std::shared_ptr<crocoddyl::SolverAbstract> solver;
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > running_models;
   const size_t halfway = T / 2;
   for (size_t i = 0; i < halfway; ++i) {
     running_models.push_back(model);
@@ -76,29 +73,29 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
     running_models.push_back(model2);
   }
 
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(),
-                                                     running_models, model);
+  std::shared_ptr<crocoddyl::ShootingProblem> problem =
+      std::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(),
+                                                   running_models, modelT);
 
   switch (solver_type) {
     case SolverTypes::SolverKKT:
-      solver = boost::make_shared<crocoddyl::SolverKKT>(problem);
+      solver = std::make_shared<crocoddyl::SolverKKT>(problem);
       break;
     case SolverTypes::SolverDDP:
-      solver = boost::make_shared<crocoddyl::SolverDDP>(problem);
+      solver = std::make_shared<crocoddyl::SolverDDP>(problem);
       break;
     case SolverTypes::SolverFDDP:
-      solver = boost::make_shared<crocoddyl::SolverFDDP>(problem);
+      solver = std::make_shared<crocoddyl::SolverFDDP>(problem);
       break;
     case SolverTypes::SolverBoxDDP:
-      solver = boost::make_shared<crocoddyl::SolverBoxDDP>(problem);
+      solver = std::make_shared<crocoddyl::SolverBoxDDP>(problem);
       break;
     case SolverTypes::SolverBoxFDDP:
-      solver = boost::make_shared<crocoddyl::SolverBoxFDDP>(problem);
+      solver = std::make_shared<crocoddyl::SolverBoxFDDP>(problem);
       break;
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
-      solver = boost::make_shared<crocoddyl::SolverIpopt>(problem);
+      solver = std::make_shared<crocoddyl::SolverIpopt>(problem);
       break;
 #endif
     default:

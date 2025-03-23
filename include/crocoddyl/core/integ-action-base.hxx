@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh, University of
-// Oxford,
-//                          University of Trento, Heriot-Watt University
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,13 @@
 
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/integ-action-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
-    boost::shared_ptr<ControlParametrizationModelAbstract> control,
+    std::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<ControlParametrizationModelAbstract> control,
     const Scalar time_step, const bool with_cost_residual)
     : Base(model->get_state(), control->get_nu(), model->get_nr(),
            model->get_ng(), model->get_nh()),
@@ -40,7 +39,7 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
 
 template <typename Scalar>
 IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
-    boost::shared_ptr<DifferentialActionModelAbstract> model,
+    std::shared_ptr<DifferentialActionModelAbstract> model,
     const Scalar time_step, const bool with_cost_residual)
     : Base(model->get_state(), model->get_nu(), model->get_nr(),
            model->get_ng(), model->get_nh()),
@@ -68,16 +67,13 @@ void IntegratedActionModelAbstractTpl<Scalar>::init() {
 }
 
 template <typename Scalar>
-IntegratedActionModelAbstractTpl<Scalar>::~IntegratedActionModelAbstractTpl() {}
-
-template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 IntegratedActionModelAbstractTpl<Scalar>::createData() {
   if (control_->get_nu() > differential_->get_nu())
     std::cerr << "Warning: It is useless to use an Euler integrator with a "
                  "control parametrization larger than PolyZero"
               << std::endl;
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
@@ -88,6 +84,16 @@ std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh() const {
   return differential_->get_nh();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_ng_T() const {
+  return differential_->get_ng_T();
+}
+
+template <typename Scalar>
+std::size_t IntegratedActionModelAbstractTpl<Scalar>::get_nh_T() const {
+  return differential_->get_nh_T();
 }
 
 template <typename Scalar>
@@ -103,13 +109,13 @@ IntegratedActionModelAbstractTpl<Scalar>::get_g_ub() const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
+const std::shared_ptr<DifferentialActionModelAbstractTpl<Scalar> >&
 IntegratedActionModelAbstractTpl<Scalar>::get_differential() const {
   return differential_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
 IntegratedActionModelAbstractTpl<Scalar>::get_control() const {
   return control_;
 }
@@ -122,8 +128,7 @@ const Scalar IntegratedActionModelAbstractTpl<Scalar>::get_dt() const {
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
   if (dt < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "dt has positive value");
+    throw_pretty("Invalid argument: " << "dt has positive value");
   }
   time_step_ = dt;
   time_step2_ = dt * dt;
@@ -131,7 +136,7 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
 
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::set_differential(
-    boost::shared_ptr<DifferentialActionModelAbstract> model) {
+    std::shared_ptr<DifferentialActionModelAbstract> model) {
   if (control_->get_nw() != model->get_nu()) {
     throw_pretty("Invalid argument: "
                  << "control.nw (" + std::to_string(control_->get_nw()) +

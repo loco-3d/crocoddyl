@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,15 +10,20 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {
+
+class ActionModelBase {
+ public:
+  virtual ~ActionModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ActionModelBase, ActionModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for action model
@@ -92,11 +97,12 @@ namespace crocoddyl {
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActionModelAbstractTpl {
+class ActionModelAbstractTpl : public ActionModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef StateAbstractTpl<Scalar> StateAbstract;
@@ -108,13 +114,23 @@ class ActionModelAbstractTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
+   * @param[in] ng     Number of inequality constraints (default 0)
+   * @param[in] nh     Number of equality constraints (default 0)
+   * @param[in] ng_T   Number of inequality terminal constraints (default 0)
+   * @param[in] nh_T   Number of equality terminal constraints (default 0)
    */
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+  ActionModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t nu, const std::size_t nr = 0,
-                         const std::size_t ng = 0, const std::size_t nh = 0);
-  virtual ~ActionModelAbstractTpl();
+                         const std::size_t ng = 0, const std::size_t nh = 0,
+                         const std::size_t ng_T = 0,
+                         const std::size_t nh_T = 0);
+  /**
+   * @brief Copy constructor
+   * @param other  Action model to be copied
+   */
+  ActionModelAbstractTpl(const ActionModelAbstractTpl<Scalar>& other);
+
+  virtual ~ActionModelAbstractTpl() = default;
 
   /**
    * @brief Compute the next state and cost value
@@ -123,7 +139,7 @@ class ActionModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -138,7 +154,7 @@ class ActionModelAbstractTpl {
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -153,7 +169,7 @@ class ActionModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -168,7 +184,7 @@ class ActionModelAbstractTpl {
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -176,12 +192,12 @@ class ActionModelAbstractTpl {
    *
    * @return the action data
    */
-  virtual boost::shared_ptr<ActionDataAbstract> createData();
+  virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  virtual bool checkData(const boost::shared_ptr<ActionDataAbstract>& data);
+  virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
 
   /**
    * @brief Computes the quasic static commands
@@ -196,7 +212,7 @@ class ActionModelAbstractTpl {
    * @param[in] maxiter Maximum allowed number of iterations
    * @param[in] tol     Tolerance
    */
-  virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data,
+  virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
                            const std::size_t maxiter = 100,
@@ -213,7 +229,7 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    * @return Quasic static commands
    */
-  VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data,
+  VectorXs quasiStatic_x(const std::shared_ptr<ActionDataAbstract>& data,
                          const VectorXs& x, const std::size_t maxiter = 100,
                          const Scalar tol = Scalar(1e-9));
 
@@ -238,9 +254,19 @@ class ActionModelAbstractTpl {
   virtual std::size_t get_nh() const;
 
   /**
+   * @brief Return the number of inequality terminal constraints
+   */
+  virtual std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of equality terminal constraints
+   */
+  virtual std::size_t get_nh_T() const;
+
+  /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the lower bound of the inequality constraints
@@ -302,18 +328,22 @@ class ActionModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  std::size_t nu_;  //!< Control dimension
-  std::size_t nr_;  //!< Dimension of the cost residual
-  std::size_t ng_;  //!< Number of inequality constraints
-  std::size_t nh_;  //!< Number of equality constraints
-  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
-  VectorXs unone_;                          //!< Neutral state
+  std::size_t nu_;    //!< Control dimension
+  std::size_t nr_;    //!< Dimension of the cost residual
+  std::size_t ng_;    //!< Number of inequality constraints
+  std::size_t nh_;    //!< Number of equality constraints
+  std::size_t ng_T_;  //!< Number of inequality terminal constraints
+  std::size_t nh_T_;  //!< Number of equality terminal constraints
+  std::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  VectorXs unone_;                        //!< Neutral state
   VectorXs g_lb_;            //!< Lower bound of the inequality constraints
   VectorXs g_ub_;            //!< Lower bound of the inequality constraints
   VectorXs u_lb_;            //!< Lower control limits
   VectorXs u_ub_;            //!< Upper control limits
   bool has_control_limits_;  //!< Indicates whether any of the control limits is
                              //!< finite
+  ActionModelAbstractTpl()
+      : nu_(0), nr_(0), ng_(0), nh_(0), ng_T_(0), nh_T_(0), state_(nullptr) {}
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined
@@ -346,12 +376,22 @@ struct ActionDataAbstractTpl {
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
-        g(model->get_ng()),
-        Gx(model->get_ng(), model->get_state()->get_ndx()),
-        Gu(model->get_ng(), model->get_nu()),
-        h(model->get_nh()),
-        Hx(model->get_nh(), model->get_state()->get_ndx()),
-        Hu(model->get_nh(), model->get_nu()) {
+        g(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                              : model->get_ng_T()),
+        Gx(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                               : model->get_ng_T(),
+           model->get_state()->get_ndx()),
+        Gu(model->get_ng() > model->get_ng_T() ? model->get_ng()
+                                               : model->get_ng_T(),
+           model->get_nu()),
+        h(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                              : model->get_nh_T()),
+        Hx(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                               : model->get_nh_T(),
+           model->get_state()->get_ndx()),
+        Hu(model->get_nh() > model->get_nh_T() ? model->get_nh()
+                                               : model->get_nh_T(),
+           model->get_nu()) {
     xnext.setZero();
     Fx.setZero();
     Fu.setZero();
@@ -368,7 +408,7 @@ struct ActionDataAbstractTpl {
     Hx.setZero();
     Hu.setZero();
   }
-  virtual ~ActionDataAbstractTpl() {}
+  virtual ~ActionDataAbstractTpl() = default;
 
   Scalar cost;     //!< cost value
   VectorXs xnext;  //!< evolution state

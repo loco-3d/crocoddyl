@@ -1,4 +1,4 @@
 - git:
     uri: https://github.com/Gepetto/example-robot-data.git
-    version: v4.0.9
+    version: v4.3.0
     local-name: example-robot-data

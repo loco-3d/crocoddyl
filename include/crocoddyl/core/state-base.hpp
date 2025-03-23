@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, INRIA,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,7 +16,6 @@
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -24,6 +24,13 @@ enum Jcomponent { both = 0, first = 1, second = 2 };
 inline bool is_a_Jcomponent(Jcomponent firstsecond) {
   return (firstsecond == first || firstsecond == second || firstsecond == both);
 }
+
+class StateBase {
+ public:
+  virtual ~StateBase() = default;
+
+  CROCODDYL_BASE_CAST(StateBase, StateAbstractTpl)
+};
 
 /**
  * @brief Abstract class for the state representation
@@ -43,7 +50,7 @@ inline bool is_a_Jcomponent(Jcomponent firstsecond) {
  * `JintegrateTransport()`
  */
 template <typename _Scalar>
-class StateAbstractTpl {
+class StateAbstractTpl : public StateBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -266,6 +273,20 @@ class StateAbstractTpl {
   std::vector<MatrixXs> Jintegrate_Js(const Eigen::Ref<const VectorXs>& x,
                                       const Eigen::Ref<const VectorXs>& dx,
                                       const Jcomponent firstsecond = both);
+
+  /**
+   * @brief Print information on the state model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const ActionModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the state model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
   /**
    * @brief Return the dimension of the state tuple

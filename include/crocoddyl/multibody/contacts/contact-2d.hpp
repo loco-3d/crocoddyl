@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +15,6 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/spatial/motion.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
@@ -24,6 +24,7 @@ template <typename _Scalar>
 class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModel2DTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -45,7 +46,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel2DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector2s& xref,
                     const std::size_t nu,
                     const Vector2s& gains = Vector2s::Zero());
@@ -60,10 +61,10 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] xref   Contact position used for the Baumgarte stabilization
    * @param[in] gains  Baumgarte stabilization gains
    */
-  ContactModel2DTpl(boost::shared_ptr<StateMultibody> state,
+  ContactModel2DTpl(std::shared_ptr<StateMultibody> state,
                     const pinocchio::FrameIndex id, const Vector2s& xref,
                     const Vector2s& gains = Vector2s::Zero());
-  virtual ~ContactModel2DTpl();
+  virtual ~ContactModel2DTpl() = default;
 
   /**
    * @brief Compute the 2d contact Jacobian and drift
@@ -72,8 +73,8 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ContactDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<ContactDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the 2d contact holonomic constraint
@@ -82,8 +83,8 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ContactDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<ContactDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Convert the force into a stack of spatial forces
@@ -91,14 +92,26 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    * @param[in] data   2d contact data
    * @param[in] force  2d force
    */
-  virtual void updateForce(const boost::shared_ptr<ContactDataAbstract>& data,
-                           const VectorXs& force);
+  virtual void updateForce(const std::shared_ptr<ContactDataAbstract>& data,
+                           const VectorXs& force) override;
 
   /**
    * @brief Create the 2d contact data
    */
-  virtual boost::shared_ptr<ContactDataAbstract> createData(
-      pinocchio::DataTpl<Scalar>* const data);
+  virtual std::shared_ptr<ContactDataAbstract> createData(
+      pinocchio::DataTpl<Scalar>* const data) override;
+
+  /**
+   * @brief Cast the contact-2d model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ContactModel2DTpl<NewScalar> A contact model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ContactModel2DTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the reference frame translation
@@ -120,7 +133,7 @@ class ContactModel2DTpl : public ContactModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::id_;
@@ -174,6 +187,7 @@ struct ContactData2DTpl : public ContactDataAbstractTpl<_Scalar> {
     vw_skew.setZero();
     oRf.setZero();
   }
+  virtual ~ContactData2DTpl() = default;
 
   using Base::a0;
   using Base::da0_dx;

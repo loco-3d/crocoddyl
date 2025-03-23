@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,6 +39,7 @@ template <typename _Scalar>
 class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(CostModelBase, CostModelResidualTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -58,9 +59,9 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] activation  Activation model
    * @param[in] residual    Residual model
    */
-  CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                       boost::shared_ptr<ActivationModelAbstract> activation,
-                       boost::shared_ptr<ResidualModelAbstract> residual);
+  CostModelResidualTpl(std::shared_ptr<typename Base::StateAbstract> state,
+                       std::shared_ptr<ActivationModelAbstract> activation,
+                       std::shared_ptr<ResidualModelAbstract> residual);
   /**
    * @brief Initialize the residual cost model
    *
@@ -70,9 +71,9 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] residual    Residual model
    */
-  CostModelResidualTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                       boost::shared_ptr<ResidualModelAbstract> residual);
-  virtual ~CostModelResidualTpl();
+  CostModelResidualTpl(std::shared_ptr<typename Base::StateAbstract> state,
+                       std::shared_ptr<ResidualModelAbstract> residual);
+  virtual ~CostModelResidualTpl() = default;
 
   /**
    * @brief Compute the residual cost
@@ -81,9 +82,9 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the residual cost based on state only
@@ -94,8 +95,8 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] data  Residual cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the residual cost
@@ -104,9 +105,9 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the residual cost with respect to the
@@ -119,21 +120,33 @@ class CostModelResidualTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] data  Residual cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the residual cost data
    */
-  virtual boost::shared_ptr<CostDataAbstract> createData(
-      DataCollectorAbstract* const data);
+  virtual std::shared_ptr<CostDataAbstract> createData(
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the residual cost model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CostModelResidualTpl<NewScalar> A cost model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  CostModelResidualTpl<NewScalar> cast() const;
 
   /**
    * @brief Print relevant information of the cost-residual model
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::activation_;
@@ -156,6 +169,7 @@ struct CostDataResidualTpl : public CostDataAbstractTpl<_Scalar> {
   CostDataResidualTpl(Model<Scalar>* const model,
                       DataCollectorAbstract* const data)
       : Base(model, data) {}
+  virtual ~CostDataResidualTpl() = default;
 
   using Base::activation;
   using Base::cost;

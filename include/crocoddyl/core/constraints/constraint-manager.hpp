@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "crocoddyl/core/constraint-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -28,9 +27,16 @@ struct ConstraintItemTpl {
 
   ConstraintItemTpl() {}
   ConstraintItemTpl(const std::string& name,
-                    boost::shared_ptr<ConstraintModelAbstract> constraint,
+                    std::shared_ptr<ConstraintModelAbstract> constraint,
                     bool active = true)
       : name(name), constraint(constraint), active(active) {}
+
+  template <typename NewScalar>
+  ConstraintItemTpl<NewScalar> cast() const {
+    typedef ConstraintItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, constraint->template cast<NewScalar>(), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the constraint item
@@ -42,7 +48,7 @@ struct ConstraintItemTpl {
   }
 
   std::string name;
-  boost::shared_ptr<ConstraintModelAbstract> constraint;
+  std::shared_ptr<ConstraintModelAbstract> constraint;
   bool active;
 };
 
@@ -80,9 +86,9 @@ class ConstraintModelManagerTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, boost::shared_ptr<ConstraintItem> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintItem> >
       ConstraintModelContainer;
-  typedef std::map<std::string, boost::shared_ptr<ConstraintDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintDataAbstract> >
       ConstraintDataContainer;
 
   /**
@@ -91,7 +97,7 @@ class ConstraintModelManagerTpl {
    * @param[in] state  State of the multibody system
    * @param[in] nu     Dimension of control vector
    */
-  ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state,
+  ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state,
                             const std::size_t nu);
 
   /**
@@ -101,7 +107,7 @@ class ConstraintModelManagerTpl {
    *
    * @param[in] state  State of the multibody system
    */
-  explicit ConstraintModelManagerTpl(boost::shared_ptr<StateAbstract> state);
+  explicit ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state);
   ~ConstraintModelManagerTpl();
 
   /**
@@ -113,7 +119,7 @@ class ConstraintModelManagerTpl {
    * @param[in] active      True if the constraint is activated (default true)
    */
   void addConstraint(const std::string& name,
-                     boost::shared_ptr<ConstraintModelAbstract> constraint,
+                     std::shared_ptr<ConstraintModelAbstract> constraint,
                      const bool active = true);
 
   /**
@@ -139,7 +145,7 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calc(const std::shared_ptr<ConstraintDataManager>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u);
 
@@ -153,7 +159,7 @@ class ConstraintModelManagerTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calc(const std::shared_ptr<ConstraintDataManager>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -163,7 +169,7 @@ class ConstraintModelManagerTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calcDiff(const std::shared_ptr<ConstraintDataManager>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u);
 
@@ -178,7 +184,7 @@ class ConstraintModelManagerTpl {
    * @param[in] data  Constraint data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ConstraintDataManager>& data,
+  void calcDiff(const std::shared_ptr<ConstraintDataManager>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -192,13 +198,25 @@ class ConstraintModelManagerTpl {
    * @param data  Data collector
    * @return the constraint data
    */
-  boost::shared_ptr<ConstraintDataManager> createData(
+  std::shared_ptr<ConstraintDataManager> createData(
       DataCollectorAbstract* const data);
+
+  /**
+   * @brief Cast the constraint-manager model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ConstraintModelManagerTpl<NewScalar> A constraint-manager model
+   * with the new scalar type.
+   */
+  template <typename NewScalar>
+  ConstraintModelManagerTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
    * @brief Return the stack of constraint models
@@ -219,6 +237,16 @@ class ConstraintModelManagerTpl {
    * @brief Return the number of active equality constraints
    */
   std::size_t get_nh() const;
+
+  /**
+   * @brief Return the number of active inequality terminal constraints
+   */
+  std::size_t get_ng_T() const;
+
+  /**
+   * @brief Return the number of active equality terminal constraints
+   */
+  std::size_t get_nh_T() const;
 
   /**
    * @brief Return the names of the set of active constraints
@@ -255,13 +283,15 @@ class ConstraintModelManagerTpl {
       std::ostream& os, const ConstraintModelManagerTpl<Scalar>& model);
 
  private:
-  boost::shared_ptr<StateAbstract> state_;  //!< State description
-  ConstraintModelContainer constraints_;    //!< Stack of constraint items
-  VectorXs lb_;                             //!< Lower bound of the constraint
-  VectorXs ub_;                             //!< Upper bound of the constraint
-  std::size_t nu_;                          //!< Dimension of the control input
-  std::size_t ng_;  //!< Number of the active inequality constraints
-  std::size_t nh_;  //!< Number of the active equality constraints
+  std::shared_ptr<StateAbstract> state_;  //!< State description
+  ConstraintModelContainer constraints_;  //!< Stack of constraint items
+  VectorXs lb_;                           //!< Lower bound of the constraint
+  VectorXs ub_;                           //!< Upper bound of the constraint
+  std::size_t nu_;                        //!< Dimension of the control input
+  std::size_t ng_;    //!< Number of the active inequality constraints
+  std::size_t nh_;    //!< Number of the active equality constraints
+  std::size_t ng_T_;  //!< Number of the active inequality terminal constraints
+  std::size_t nh_T_;  //!< Number of the active equality terminal constraints
   std::set<std::string> active_set_;  //!< Names of the active constraint items
   std::set<std::string>
       inactive_set_;  //!< Names of the inactive constraint items
@@ -304,7 +334,7 @@ struct ConstraintDataManagerTpl {
              Scalar>::ConstraintModelContainer::const_iterator it =
              model->get_constraints().begin();
          it != model->get_constraints().end(); ++it) {
-      const boost::shared_ptr<ConstraintItem>& item = it->second;
+      const std::shared_ptr<ConstraintItem>& item = it->second;
       constraints.insert(
           std::make_pair(item->name, item->constraint->createData(data)));
     }
@@ -332,12 +362,27 @@ struct ConstraintDataManagerTpl {
         Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
   }
 
-  template <class ActionModel, class ActionData>
-  void resize(ActionModel* const model, ActionData* const data) {
+  template <class Model>
+  void resize(Model* const model, const bool running_node = true) {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nu = model->get_nu();
-    const std::size_t ng = model->get_ng();
-    const std::size_t nh = model->get_nh();
+    const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
+    const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
+    new (&g) Eigen::Map<VectorXs>(g_internal.data(), ng);
+    new (&Gx) Eigen::Map<MatrixXs>(Gx_internal.data(), ng, ndx);
+    new (&Gu) Eigen::Map<MatrixXs>(Gu_internal.data(), ng, nu);
+    new (&h) Eigen::Map<VectorXs>(h_internal.data(), nh);
+    new (&Hx) Eigen::Map<MatrixXs>(Hx_internal.data(), nh, ndx);
+    new (&Hu) Eigen::Map<MatrixXs>(Hu_internal.data(), nh, nu);
+  }
+
+  template <class ActionModel, class ActionData>
+  void resize(ActionModel* const model, ActionData* const data,
+              const bool running_node = true) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
+    const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
     data->g.conservativeResize(ng);
     data->Gx.conservativeResize(ng, ndx);
     data->Gu.conservativeResize(ng, nu);
@@ -361,53 +406,53 @@ struct ConstraintDataManagerTpl {
 
   void set_g(const VectorXs& _g) {
     if (g.size() != _g.size()) {
-      throw_pretty("Invalid argument: "
-                   << "g has wrong dimension (it should be " +
-                          std::to_string(g.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "g has wrong dimension (it should be " +
+                                      std::to_string(g.size()) + ")");
     }
     g = _g;
   }
   void set_Gx(const MatrixXs& _Gx) {
     if (Gx.rows() != _Gx.rows() || Gx.cols() != _Gx.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Gx has wrong dimension (it should be " +
-                          std::to_string(Gx.rows()) + ", " +
-                          std::to_string(Gx.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Gx has wrong dimension (it should be " +
+                                      std::to_string(Gx.rows()) + ", " +
+                                      std::to_string(Gx.cols()) + ")");
     }
     Gx = _Gx;
   }
   void set_Gu(const MatrixXs& _Gu) {
     if (Gu.rows() != _Gu.rows() || Gu.cols() != _Gu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Gu has wrong dimension (it should be " +
-                          std::to_string(Gu.rows()) + ", " +
-                          std::to_string(Gu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Gu has wrong dimension (it should be " +
+                                      std::to_string(Gu.rows()) + ", " +
+                                      std::to_string(Gu.cols()) + ")");
     }
     Gu = _Gu;
   }
   void set_h(const VectorXs& _h) {
     if (h.size() != _h.size()) {
-      throw_pretty("Invalid argument: "
-                   << "h has wrong dimension (it should be " +
-                          std::to_string(h.size()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "h has wrong dimension (it should be " +
+                                      std::to_string(h.size()) + ")");
     }
     h = _h;
   }
   void set_Hx(const MatrixXs& _Hx) {
     if (Hx.rows() != _Hx.rows() || Hx.cols() != _Hx.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Hx has wrong dimension (it should be " +
-                          std::to_string(Hx.rows()) + ", " +
-                          std::to_string(Hx.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Hx has wrong dimension (it should be " +
+                                      std::to_string(Hx.rows()) + ", " +
+                                      std::to_string(Hx.cols()) + ")");
     }
     Hx = _Hx;
   }
   void set_Hu(const MatrixXs& _Hu) {
     if (Hu.rows() != _Hu.rows() || Hu.cols() != _Hu.cols()) {
-      throw_pretty("Invalid argument: "
-                   << "Hu has wrong dimension (it should be " +
-                          std::to_string(Hu.rows()) + ", " +
-                          std::to_string(Hu.cols()) + ")");
+      throw_pretty(
+          "Invalid argument: " << "Hu has wrong dimension (it should be " +
+                                      std::to_string(Hu.rows()) + ", " +
+                                      std::to_string(Hu.cols()) + ")");
     }
     Hu = _Hu;
   }

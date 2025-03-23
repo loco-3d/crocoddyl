@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh, New York
-// University,
-//                          Max Planck Gesellschaft,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -34,6 +32,7 @@ template <typename _Scalar>
 class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(CostModelBase, CostModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
@@ -52,40 +51,40 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @param model  Cost model that we want to apply the numerical
    * differentiation
    */
-  explicit CostModelNumDiffTpl(const boost::shared_ptr<Base>& model);
+  explicit CostModelNumDiffTpl(const std::shared_ptr<Base>& model);
 
   /**
    * @brief Initialize the numdiff cost model
    */
-  virtual ~CostModelNumDiffTpl();
+  virtual ~CostModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<CostDataAbstract>& data,
+   * @brief @copydoc Base::calc(const std::shared_ptr<CostDataAbstract>& data,
    * const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<CostDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<CostDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
-   * @brief @copydoc Base::calcDiff(const boost::shared_ptr<CostDataAbstract>&
+   * @brief @copydoc Base::calcDiff(const std::shared_ptr<CostDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<CostDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<CostDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create a numdiff cost data
@@ -93,13 +92,25 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    * @param data  Data collector used by the original model
    * @return the numdiff cost data
    */
-  virtual boost::shared_ptr<CostDataAbstract> createData(
-      DataCollectorAbstract* const data);
+  virtual std::shared_ptr<CostDataAbstract> createData(
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the cost numdiff model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CostModelNumDiffTpl<NewScalar> A cost model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  CostModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original cost model
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -150,8 +161,8 @@ class CostModelNumDiffTpl : public CostModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;  //!< Cost model hat we want to apply the
-                                   //!< numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Cost model hat we want to apply the
+                                 //!< numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
   std::vector<ReevaluationFunction>
@@ -199,7 +210,7 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
     }
   }
 
-  virtual ~CostDataNumDiffTpl() {}
+  virtual ~CostDataNumDiffTpl() = default;
 
   using Base::activation;
   using Base::cost;
@@ -222,10 +233,10 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
   VectorXs du;  //!< Control disturbance.
   VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
                 //!< \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> >
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation.
 };
 

@@ -13,7 +13,6 @@
 
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -40,7 +39,7 @@ class ControlFactory {
   explicit ControlFactory();
   ~ControlFactory();
 
-  boost::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> create(
+  std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract> create(
       ControlTypes::Type control_type, const std::size_t nu) const;
 };
 

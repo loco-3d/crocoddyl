@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
-// Oxford Copyright note valid unless otherwise stated in individual files. All
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -14,8 +15,8 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -49,10 +50,10 @@ class ShootingProblemTpl {
    * @param[in] running_models  Running action models (size \f$T\f$)
    * @param[in] terminal_model  Terminal action model
    */
-  ShootingProblemTpl(const VectorXs& x0,
-                     const std::vector<boost::shared_ptr<ActionModelAbstract> >&
-                         running_models,
-                     boost::shared_ptr<ActionModelAbstract> terminal_model);
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+      std::shared_ptr<ActionModelAbstract> terminal_model);
 
   /**
    * @brief Initialize the shooting problem (models and datas)
@@ -65,11 +66,10 @@ class ShootingProblemTpl {
    */
   ShootingProblemTpl(
       const VectorXs& x0,
-      const std::vector<boost::shared_ptr<ActionModelAbstract> >&
-          running_models,
-      boost::shared_ptr<ActionModelAbstract> terminal_model,
-      const std::vector<boost::shared_ptr<ActionDataAbstract> >& running_datas,
-      boost::shared_ptr<ActionDataAbstract> terminal_data);
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      const std::vector<std::shared_ptr<ActionDataAbstract> >& running_datas,
+      std::shared_ptr<ActionDataAbstract> terminal_data);
   /**
    * @brief Initialize the shooting problem
    */
@@ -159,8 +159,8 @@ class ShootingProblemTpl {
    * @param[in] model  action model
    * @param[in] data   action data
    */
-  void circularAppend(boost::shared_ptr<ActionModelAbstract> model,
-                      boost::shared_ptr<ActionDataAbstract> data);
+  void circularAppend(std::shared_ptr<ActionModelAbstract> model,
+                      std::shared_ptr<ActionDataAbstract> data);
 
   /**
    * @copybrief circularAppend
@@ -171,7 +171,7 @@ class ShootingProblemTpl {
    *
    * @param[in] model  action model
    */
-  void circularAppend(boost::shared_ptr<ActionModelAbstract> model);
+  void circularAppend(std::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Update the model and data for a specific node
@@ -181,8 +181,8 @@ class ShootingProblemTpl {
    * @param[in] data   action data
    */
   void updateNode(const std::size_t i,
-                  boost::shared_ptr<ActionModelAbstract> model,
-                  boost::shared_ptr<ActionDataAbstract> data);
+                  std::shared_ptr<ActionModelAbstract> model,
+                  std::shared_ptr<ActionDataAbstract> data);
 
   /**
    * @brief Update a model and allocated new data for a specific node
@@ -191,7 +191,19 @@ class ShootingProblemTpl {
    * @param[in] model  action model
    */
   void updateModel(const std::size_t i,
-                   boost::shared_ptr<ActionModelAbstract> model);
+                   std::shared_ptr<ActionModelAbstract> model);
+
+  /**
+   * @brief Cast the shooting problem to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ShootingProblemTpl<NewScalar> A shooting problem with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ShootingProblemTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the number of running nodes
@@ -206,24 +218,24 @@ class ShootingProblemTpl {
   /**
    * @brief Return the running models
    */
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >&
-  get_runningModels() const;
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& get_runningModels()
+      const;
 
   /**
    * @brief Return the terminal model
    */
-  const boost::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
+  const std::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
 
   /**
    * @brief Return the running datas
    */
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& get_runningDatas()
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& get_runningDatas()
       const;
 
   /**
    * @brief Return the terminal data
    */
-  const boost::shared_ptr<ActionDataAbstract>& get_terminalData() const;
+  const std::shared_ptr<ActionDataAbstract>& get_terminalData() const;
 
   /**
    * @brief Modify the initial state
@@ -234,12 +246,12 @@ class ShootingProblemTpl {
    * @brief Modify the running models and allocate new data
    */
   void set_runningModels(
-      const std::vector<boost::shared_ptr<ActionModelAbstract> >& models);
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& models);
 
   /**
    * @brief Modify the terminal model and allocate new data
    */
-  void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
+  void set_terminalModel(std::shared_ptr<ActionModelAbstract> model);
 
   /**
    * @brief Modify the number of threads using with multithreading support
@@ -287,13 +299,12 @@ class ShootingProblemTpl {
   Scalar cost_;    //!< Total cost
   std::size_t T_;  //!< number of running nodes
   VectorXs x0_;    //!< Initial state
-  boost::shared_ptr<ActionModelAbstract>
+  std::shared_ptr<ActionModelAbstract>
       terminal_model_;  //!< Terminal action model
-  boost::shared_ptr<ActionDataAbstract>
-      terminal_data_;  //!< Terminal action data
-  std::vector<boost::shared_ptr<ActionModelAbstract> >
+  std::shared_ptr<ActionDataAbstract> terminal_data_;  //!< Terminal action data
+  std::vector<std::shared_ptr<ActionModelAbstract> >
       running_models_;  //!< Running action model
-  std::vector<boost::shared_ptr<ActionDataAbstract> >
+  std::vector<std::shared_ptr<ActionDataAbstract> >
       running_datas_;     //!< Running action data
   std::size_t nx_;        //!< State dimension
   std::size_t ndx_;       //!< State rate dimension

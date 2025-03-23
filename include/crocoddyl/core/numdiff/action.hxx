@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          New York University, Max Planck Gesellschaft,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -9,39 +9,36 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "crocoddyl/core/numdiff/action.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ActionModelNumDiffTpl<Scalar>::ActionModelNumDiffTpl(
-    boost::shared_ptr<Base> model, bool with_gauss_approx)
+    std::shared_ptr<Base> model, bool with_gauss_approx)
     : Base(model->get_state(), model->get_nu(), model->get_nr(),
-           model->get_ng(), model->get_nh()),
+           model->get_ng(), model->get_nh(), model->get_ng_T(),
+           model->get_nh_T()),
       model_(model),
-      e_jac_(std::sqrt(2.0 * std::numeric_limits<Scalar>::epsilon())),
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())),
       with_gauss_approx_(with_gauss_approx) {
-  e_hess_ = std::sqrt(2.0 * e_jac_);
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
   this->set_u_lb(model_->get_u_lb());
   this->set_u_ub(model_->get_u_ub());
 }
 
 template <typename Scalar>
-ActionModelNumDiffTpl<Scalar>::~ActionModelNumDiffTpl() {}
-
-template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x, u);
@@ -53,12 +50,12 @@ void ActionModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
   model_->calc(d->data_0, x);
@@ -70,17 +67,17 @@ void ActionModelNumDiffTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -94,10 +91,10 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   const std::size_t nu = model_->get_nu();
   const std::size_t ng = model_->get_ng();
   const std::size_t nh = model_->get_nh();
-  d->Gx.resize(ng, ndx);
-  d->Gu.resize(ng, nu);
-  d->Hx.resize(nh, ndx);
-  d->Hu.resize(nh, nu);
+  d->Gx.conservativeResize(ng, ndx);
+  d->Gu.conservativeResize(ng, nu);
+  d->Hx.conservativeResize(nh, ndx);
+  d->Hu.conservativeResize(nh, nu);
   d->du.setZero();
 
   assertStableStateFD(x);
@@ -106,7 +103,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -121,12 +118,12 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     data->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     data->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
   data->Fx /= d->xh_jac;
 
   // Computing the d action(x,u) / du
-  d->uh_jac = e_jac_ * std::max(1., u.norm());
+  d->uh_jac = e_jac_ * std::max(Scalar(1.), u.norm());
   for (unsigned iu = 0; iu < model_->get_nu(); ++iu) {
     d->du(iu) = d->uh_jac;
     model_->calc(d->data_u[iu], x, u + d->du);
@@ -140,13 +137,13 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     d->Gu.col(iu) = (d->data_u[iu]->g - g0) / d->uh_jac;
     d->Hu.col(iu) = (d->data_u[iu]->h - h0) / d->uh_jac;
-    d->du(iu) = 0.0;
+    d->du(iu) = Scalar(0.);
   }
   data->Fu /= d->uh_jac;
 
 #ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
-  d->xh_hess = e_hess_ * std::max(1., d->x_norm);
+  d->xh_hess = e_hess_ * std::max(Scalar(1.), d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     d->dx(ix) = d->xh_hess;
@@ -164,7 +161,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_x[ix]
               ->cost;  // cost due to positive disturbance in both directions
-      d->dx(ix) = 0.;
+      d->dx(ix) = Scalar(0.);
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp, u);
       const Scalar czp =
@@ -173,13 +170,13 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
-      d->dx(jx) = 0.;
+      d->dx(jx) = Scalar(0.);
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
   // Computing the d^2 cost(x,u) / du^2
-  d->uh_hess = e_hess_ * std::max(1., u.norm());
+  d->uh_hess = e_hess_ * std::max(Scalar(1.), u.norm());
   d->uh_hess_pow2 = d->uh_hess * d->uh_hess;
   for (std::size_t iu = 0; iu < nu; ++iu) {
     d->du(iu) = d->uh_hess;
@@ -194,7 +191,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_u[iu]
               ->cost;  // cost due to positive disturbance in both directions
-      d->du(iu) = 0.;
+      d->du(iu) = Scalar(0.);
       model_->calc(d->data_u[iu], x, u + d->du);
       const Scalar czp =
           d->data_u[iu]->cost;  // cost due to zero disturance in 'i' and
@@ -202,13 +199,13 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Luu(iu, ju) = (cpp - czp - cp + c0) / d->uh_hess_pow2;
       data->Luu(ju, iu) = data->Luu(iu, ju);
       d->du(iu) = d->uh_hess;
-      d->du(ju) = 0.;
+      d->du(ju) = Scalar(0.);
     }
-    d->du(iu) = 0.;
+    d->du(iu) = Scalar(0.);
   }
 
   // Computing the d^2 cost(x,u) / dxu
-  d->xuh_hess_pow2 = 4. * d->xh_hess * d->uh_hess;
+  d->xuh_hess_pow2 = Scalar(4.) * d->xh_hess * d->uh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     for (std::size_t ju = 0; ju < nu; ++ju) {
       d->dx(ix) = d->xh_hess;
@@ -224,8 +221,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       model_->calc(d->data_x[ix], d->xp, u - d->du);
       const Scalar cmm = d->data_x[ix]->cost;
       data->Lxu(ix, ju) = (cpp - cpm - cmp + cmm) / d->xuh_hess_pow2;
-      d->dx(ix) = 0.;
-      d->du(ju) = 0.;
+      d->dx(ix) = Scalar(0.);
+      d->du(ju) = Scalar(0.);
     }
   }
 #endif
@@ -239,12 +236,12 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -254,8 +251,8 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   const VectorXs& g0 = d->g;
   const VectorXs& h0 = d->h;
   const std::size_t ndx = model_->get_state()->get_ndx();
-  d->Gx.resize(model_->get_ng(), ndx);
-  d->Hx.resize(model_->get_nh(), ndx);
+  d->Gx.conservativeResize(model_->get_ng_T(), ndx);
+  d->Hx.conservativeResize(model_->get_nh_T(), ndx);
 
   assertStableStateFD(x);
 
@@ -263,7 +260,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
   d->dx.setZero();
-  d->xh_jac = e_jac_ * std::max(1., d->x_norm);
+  d->xh_jac = e_jac_ * std::max(Scalar(1.), d->x_norm);
   for (std::size_t ix = 0; ix < state_->get_ndx(); ++ix) {
     d->dx(ix) = d->xh_jac;
     model_->get_state()->integrate(x, d->dx, d->xp);
@@ -276,12 +273,12 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
     // constraint
     d->Gx.col(ix) = (d->data_x[ix]->g - g0) / d->xh_jac;
     d->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 
 #ifdef NDEBUG
   // Computing the d^2 cost(x,u) / dx^2
-  d->xh_hess = e_hess_ * std::max(1., d->x_norm);
+  d->xh_hess = e_hess_ * std::max(Scalar(1.), d->x_norm);
   d->xh_hess_pow2 = d->xh_hess * d->xh_hess;
   for (std::size_t ix = 0; ix < ndx; ++ix) {
     // We can apply the same formulas for finite difference as above
@@ -300,7 +297,7 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       const Scalar cpp =
           d->data_x[ix]
               ->cost;  // cost due to positive disturbance in both directions
-      d->dx(ix) = 0.;
+      d->dx(ix) = Scalar(0.);
       model_->get_state()->integrate(x, d->dx, d->xp);
       model_->calc(d->data_x[ix], d->xp);
       const Scalar czp =
@@ -309,9 +306,9 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
       data->Lxx(ix, jx) = (cpp - czp - cp + c0) / d->xh_hess_pow2;
       data->Lxx(jx, ix) = data->Lxx(ix, jx);
       d->dx(ix) = d->xh_hess;
-      d->dx(jx) = 0.;
+      d->dx(jx) = Scalar(0.);
     }
-    d->dx(ix) = 0.;
+    d->dx(ix) = Scalar(0.);
   }
 #endif
 
@@ -321,14 +318,14 @@ void ActionModelNumDiffTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelNumDiffTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::quasiStatic(
-    const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
+    const std::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,
     const Scalar tol) {
   Data* d = static_cast<Data*>(data.get());
@@ -336,7 +333,15 @@ void ActionModelNumDiffTpl<Scalar>::quasiStatic(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ActionModelAbstractTpl<Scalar> >&
+template <typename NewScalar>
+ActionModelNumDiffTpl<NewScalar> ActionModelNumDiffTpl<Scalar>::cast() const {
+  typedef ActionModelNumDiffTpl<NewScalar> ReturnType;
+  ReturnType res(model_->template cast<NewScalar>());
+  return res;
+}
+
+template <typename Scalar>
+const std::shared_ptr<ActionModelAbstractTpl<Scalar> >&
 ActionModelNumDiffTpl<Scalar>::get_model() const {
   return model_;
 }
@@ -348,12 +353,11 @@ const Scalar ActionModelNumDiffTpl<Scalar>::get_disturbance() const {
 
 template <typename Scalar>
 void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
-  if (disturbance < 0.) {
-    throw_pretty("Invalid argument: "
-                 << "Disturbance constant is positive");
+  if (disturbance < Scalar(0.)) {
+    throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
-  e_hess_ = std::sqrt(2.0 * e_jac_);
+  e_hess_ = sqrt(2.0 * e_jac_);
 }
 
 template <typename Scalar>

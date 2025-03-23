@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,8 +17,15 @@
 
 namespace crocoddyl {
 
+class ImpulseModelBase {
+ public:
+  virtual ~ImpulseModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ImpulseModelBase, ImpulseModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class ImpulseModelAbstractTpl {
+class ImpulseModelAbstractTpl : public ImpulseModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -29,34 +36,33 @@ class ImpulseModelAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+  ImpulseModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                           const pinocchio::ReferenceFrame type,
                           const std::size_t nc);
 
   DEPRECATED(
       "Use constructor that passes the type type of contact, this assumes is "
       "pinocchio::LOCAL",
-      ImpulseModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+      ImpulseModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc);)
-  virtual ~ImpulseModelAbstractTpl();
+  virtual ~ImpulseModelAbstractTpl() = default;
 
-  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ImpulseDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x) = 0;
-  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x) = 0;
 
-  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  virtual void updateForce(const std::shared_ptr<ImpulseDataAbstract>& data,
                            const VectorXs& force) = 0;
-  void updateForceDiff(const boost::shared_ptr<ImpulseDataAbstract>& data,
+  void updateForceDiff(const std::shared_ptr<ImpulseDataAbstract>& data,
                        const MatrixXs& df_dx) const;
-  void setZeroForce(const boost::shared_ptr<ImpulseDataAbstract>& data) const;
-  void setZeroForceDiff(
-      const boost::shared_ptr<ImpulseDataAbstract>& data) const;
+  void setZeroForce(const std::shared_ptr<ImpulseDataAbstract>& data) const;
+  void setZeroForceDiff(const std::shared_ptr<ImpulseDataAbstract>& data) const;
 
-  virtual boost::shared_ptr<ImpulseDataAbstract> createData(
+  virtual std::shared_ptr<ImpulseDataAbstract> createData(
       pinocchio::DataTpl<Scalar>* const data);
 
-  const boost::shared_ptr<StateMultibody>& get_state() const;
+  const std::shared_ptr<StateMultibody>& get_state() const;
   std::size_t get_nc() const;
   DEPRECATED("Use get_nc().", std::size_t get_ni() const;)
   std::size_t get_nu() const;
@@ -96,10 +102,11 @@ class ImpulseModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  boost::shared_ptr<StateMultibody> state_;
+  std::shared_ptr<StateMultibody> state_;
   std::size_t nc_;
   pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
   pinocchio::ReferenceFrame type_;  //!< Type of contact
+  ImpulseModelAbstractTpl() : state_(nullptr), nc_(0), id_(0) {};
 };
 
 template <typename _Scalar>
@@ -122,7 +129,7 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
     dv0_dq.setZero();
     dtau_dq.setZero();
   }
-  virtual ~ImpulseDataAbstractTpl() {}
+  virtual ~ImpulseDataAbstractTpl() = default;
 
   using Base::df_dx;
   using Base::f;

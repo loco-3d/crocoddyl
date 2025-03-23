@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 
 #include <vector>
 
+#include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
@@ -67,7 +68,7 @@ class SolverAbstract {
    *
    * @param[in] problem  shooting problem
    */
-  explicit SolverAbstract(boost::shared_ptr<ShootingProblem> problem);
+  explicit SolverAbstract(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverAbstract();
 
   /**
@@ -221,17 +222,17 @@ class SolverAbstract {
    * @param  callbacks  set of callback functions
    */
   void setCallbacks(
-      const std::vector<boost::shared_ptr<CallbackAbstract> >& callbacks);
+      const std::vector<std::shared_ptr<CallbackAbstract> >& callbacks);
 
   /**
    * @brief Return the list of callback functions using for diagnostic
    */
-  const std::vector<boost::shared_ptr<CallbackAbstract> >& getCallbacks() const;
+  const std::vector<std::shared_ptr<CallbackAbstract> >& getCallbacks() const;
 
   /**
    * @brief Return the shooting problem
    */
-  const boost::shared_ptr<ShootingProblem>& get_problem() const;
+  const std::shared_ptr<ShootingProblem>& get_problem() const;
 
   /**
    * @brief Return the state trajectory \f$\mathbf{x}_s\f$
@@ -429,11 +430,11 @@ class SolverAbstract {
   void set_feasnorm(const FeasibilityNorm feas_norm);
 
  protected:
-  boost::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
-  std::vector<Eigen::VectorXd> xs_;             //!< State trajectory
-  std::vector<Eigen::VectorXd> us_;             //!< Control trajectory
+  std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
+  std::vector<Eigen::VectorXd> xs_;           //!< State trajectory
+  std::vector<Eigen::VectorXd> us_;           //!< Control trajectory
   std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
-  std::vector<boost::shared_ptr<CallbackAbstract> >
+  std::vector<std::shared_ptr<CallbackAbstract> >
       callbacks_;      //!< Callback functions
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was
@@ -474,6 +475,7 @@ class SolverAbstract {
                                    //!< dynamics and constraints feasibility
   std::size_t iter_;  //!< Number of iteration performed by the solver
   double tmp_feas_;   //!< Temporal variables used for computed the feasibility
+  std::vector<Eigen::VectorXd> g_adj_;  //!< Adjusted inequality bound
 };
 
 /**

@@ -1,39 +1,34 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 template <typename Scalar>
 ActionModelUnicycleTpl<Scalar>::ActionModelUnicycleTpl()
     : ActionModelAbstractTpl<Scalar>(
-          boost::make_shared<StateVectorTpl<Scalar> >(3), 2, 5),
+          std::make_shared<StateVectorTpl<Scalar> >(3), 2, 5),
       dt_(Scalar(0.1)) {
   cost_weights_ << Scalar(10.), Scalar(1.);
 }
 
 template <typename Scalar>
-ActionModelUnicycleTpl<Scalar>::~ActionModelUnicycleTpl() {}
-
-template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -47,12 +42,12 @@ void ActionModelUnicycleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calc(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -64,22 +59,22 @@ void ActionModelUnicycleTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty("Invalid argument: "
-                 << "u has wrong dimension (it should be " +
-                        std::to_string(nu_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
-  const Scalar c = cos(x[2]);
-  const Scalar s = sin(x[2]);
+  const Scalar c = static_cast<Scalar>(cos(x[2]));
+  const Scalar s = static_cast<Scalar>(sin(x[2]));
   const Scalar w_x = cost_weights_[0] * cost_weights_[0];
   const Scalar w_u = cost_weights_[1] * cost_weights_[1];
   d->Lx = x * w_x;
@@ -95,12 +90,12 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ActionModelUnicycleTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
+    const std::shared_ptr<ActionDataAbstractTpl<Scalar> >& data,
     const Eigen::Ref<const VectorXs>& x) {
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(state_->get_nx()) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
   }
   Data* d = static_cast<Data*>(data.get());
 
@@ -110,15 +105,23 @@ void ActionModelUnicycleTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ActionDataAbstractTpl<Scalar> >
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelUnicycleTpl<Scalar>::createData() {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ActionModelUnicycleTpl<NewScalar> ActionModelUnicycleTpl<Scalar>::cast() const {
+  typedef ActionModelUnicycleTpl<NewScalar> ReturnType;
+  ReturnType ret;
+  return ret;
 }
 
 template <typename Scalar>
 bool ActionModelUnicycleTpl<Scalar>::checkData(
-    const boost::shared_ptr<ActionDataAbstract>& data) {
-  boost::shared_ptr<Data> d = boost::dynamic_pointer_cast<Data>(data);
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
   if (d != NULL) {
     return true;
   } else {

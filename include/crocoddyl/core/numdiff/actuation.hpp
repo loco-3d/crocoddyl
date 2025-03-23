@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -33,6 +33,9 @@ namespace crocoddyl {
 template <typename _Scalar>
 class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase, ActuationModelNumDiffTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -47,65 +50,69 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param model  Actuation model that we want to apply the numerical
    * differentiation
    */
-  explicit ActuationModelNumDiffTpl(boost::shared_ptr<Base> model);
+  explicit ActuationModelNumDiffTpl(std::shared_ptr<Base> model);
 
   /**
    * @brief Destroy the numdiff actuation model
    */
-  virtual ~ActuationModelNumDiffTpl();
+  virtual ~ActuationModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc Base::calc()
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
-   * @brief @copydoc Base::calc(const boost::shared_ptr<ActuationDataAbstract>&
+   * @brief @copydoc Base::calc(const std::shared_ptr<ActuationDataAbstract>&
    * data, const Eigen::Ref<const VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
-   * boost::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ActuationDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
    * @brief @copydoc Base::commands()
    */
-  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& tau);
+                        const Eigen::Ref<const VectorXs>& tau) override;
 
   /**
    * @brief @copydoc Base::torqueTransform()
    */
   virtual void torqueTransform(
-      const boost::shared_ptr<ActuationDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const std::shared_ptr<ActuationDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ActuationDataAbstract> createData();
+  virtual std::shared_ptr<ActuationDataAbstract> createData() override;
+
+  template <typename NewScalar>
+  ActuationModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original actuation model
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -120,8 +127,8 @@ class ActuationModelNumDiffTpl : public ActuationModelAbstractTpl<_Scalar> {
   void set_disturbance(const Scalar disturbance);
 
  private:
-  boost::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the
-                                   //!< numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Actuation model hat we want to apply the
+                                 //!< numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
 
@@ -173,10 +180,10 @@ struct ActuationDataNumDiffTpl : public ActuationDataAbstractTpl<_Scalar> {
   VectorXs du;  //!< Control disturbance
   VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
                 //!< \int x dx_i \f$"
-  boost::shared_ptr<Base> data_0;  //!< The data that contains the final results
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data that contains the final results
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation
-  std::vector<boost::shared_ptr<Base> >
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation
 
   using Base::dtau_du;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,7 +11,7 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector2s& xref, const std::size_t nu, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 2, nu),
       xref_(xref),
@@ -21,7 +21,7 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(
 
 template <typename Scalar>
 ContactModel2DTpl<Scalar>::ContactModel2DTpl(
-    boost::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
+    std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector2s& xref, const Vector2s& gains)
     : Base(state, pinocchio::ReferenceFrame::LOCAL, 2),
       xref_(xref),
@@ -30,11 +30,8 @@ ContactModel2DTpl<Scalar>::ContactModel2DTpl(
 }
 
 template <typename Scalar>
-ContactModel2DTpl<Scalar>::~ContactModel2DTpl() {}
-
-template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calc(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio,
@@ -69,11 +66,16 @@ void ContactModel2DTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ContactModel2DTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ContactDataAbstract>& data,
+    const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
+#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
+  const pinocchio::JointIndex joint =
+      state_->get_pinocchio()->frames[d->frame].parentJoint;
+#else
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parent;
+#endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
@@ -130,10 +132,10 @@ void ContactModel2DTpl<Scalar>::calcDiff(
 
 template <typename Scalar>
 void ContactModel2DTpl<Scalar>::updateForce(
-    const boost::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
+    const std::shared_ptr<ContactDataAbstract>& data, const VectorXs& force) {
   if (force.size() != 2) {
-    throw_pretty("Invalid argument: "
-                 << "lambda has wrong dimension (it should be 2)");
+    throw_pretty(
+        "Invalid argument: " << "lambda has wrong dimension (it should be 2)");
   }
   Data* d = static_cast<Data*>(data.get());
   const Eigen::Ref<const Matrix3s> R = d->jMf.rotation();
@@ -144,10 +146,21 @@ void ContactModel2DTpl<Scalar>::updateForce(
 }
 
 template <typename Scalar>
-boost::shared_ptr<ContactDataAbstractTpl<Scalar> >
+std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel2DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
-  return boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
-                                      data);
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
+                                    data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModel2DTpl<NewScalar> ContactModel2DTpl<Scalar>::cast() const {
+  typedef ContactModel2DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      xref_.template cast<NewScalar>(), nu_, gains_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

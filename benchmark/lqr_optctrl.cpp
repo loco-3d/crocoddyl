@@ -26,20 +26,20 @@ int main(int argc, char* argv[]) {
 
   // Creating the action models and warm point for the LQR system
   Eigen::VectorXd x0 = Eigen::VectorXd::Zero(NX);
-  boost::shared_ptr<crocoddyl::ActionModelAbstract> model =
-      boost::make_shared<crocoddyl::ActionModelLQR>(NX, NU);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      std::make_shared<crocoddyl::ActionModelLQR>(NX, NU);
   std::vector<Eigen::VectorXd> xs(N + 1, x0);
   std::vector<Eigen::VectorXd> us(N, Eigen::VectorXd::Zero(NU));
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> > runningModels(
       N, model);
 
   // Formulating the optimal control problem
-  boost::shared_ptr<crocoddyl::ShootingProblem> problem =
-      boost::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
+  std::shared_ptr<crocoddyl::ShootingProblem> problem =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, runningModels, model);
   crocoddyl::SolverFDDP solver(problem);
   if (CALLBACKS) {
-    std::vector<boost::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
-    cbs.push_back(boost::make_shared<crocoddyl::CallbackVerbose>());
+    std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
+    cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());
     solver.setCallbacks(cbs);
   }
 

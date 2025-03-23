@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Trento
+// Copyright (C) 2021-2025, University of Edinburgh, University of Trento,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,13 +10,20 @@
 #ifndef CROCODDYL_CORE_CONTROL_BASE_HPP_
 #define CROCODDYL_CORE_CONTROL_BASE_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
+
+class ControlParametrizationModelBase {
+ public:
+  virtual ~ControlParametrizationModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ControlParametrizationModelBase,
+                      ControlParametrizationModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for the control trajectory parametrization
@@ -40,7 +48,8 @@ namespace crocoddyl {
  * `multiplyJacobianTransposeBy`
  */
 template <typename _Scalar>
-class ControlParametrizationModelAbstractTpl {
+class ControlParametrizationModelAbstractTpl
+    : public ControlParametrizationModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -59,7 +68,7 @@ class ControlParametrizationModelAbstractTpl {
    */
   ControlParametrizationModelAbstractTpl(const std::size_t nw,
                                          const std::size_t nu);
-  virtual ~ControlParametrizationModelAbstractTpl();
+  virtual ~ControlParametrizationModelAbstractTpl() = default;
 
   /**
    * @brief Get the value of the control at the specified time
@@ -69,7 +78,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  u      Control parameters
    */
   virtual void calc(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
@@ -83,7 +92,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  u      Control parameters
    */
   virtual void calcDiff(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& u) const = 0;
 
   /**
@@ -91,7 +100,7 @@ class ControlParametrizationModelAbstractTpl {
    *
    * @return the control-parametrization data
    */
-  virtual boost::shared_ptr<ControlParametrizationDataAbstract> createData();
+  virtual std::shared_ptr<ControlParametrizationDataAbstract> createData();
 
   /**
    * @brief Update the control parameters u for a specified time t given the
@@ -102,7 +111,7 @@ class ControlParametrizationModelAbstractTpl {
    * @param[in]  w      Control inputs
    */
   virtual void params(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Scalar t, const Eigen::Ref<const VectorXs>& w) const = 0;
 
   /**
@@ -133,13 +142,13 @@ class ControlParametrizationModelAbstractTpl {
    * given results
    */
   virtual void multiplyByJacobian(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const = 0;
+      const AssignmentOp op = setto) const = 0;
 
   virtual MatrixXs multiplyByJacobian_J(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op = setto) const;
 
   /**
    * @brief Compute the product between the transpose of the derivative of the
@@ -156,19 +165,34 @@ class ControlParametrizationModelAbstractTpl {
    * given results
    */
   virtual void multiplyJacobianTransposeBy(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
       const Eigen::Ref<const MatrixXs>& A, Eigen::Ref<MatrixXs> out,
-      const AssignmentOp = setto) const = 0;
+      const AssignmentOp op = setto) const = 0;
 
   virtual MatrixXs multiplyJacobianTransposeBy_J(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data,
-      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp = setto) const;
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data,
+      const Eigen::Ref<const MatrixXs>& A, const AssignmentOp op = setto) const;
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
   virtual bool checkData(
-      const boost::shared_ptr<ControlParametrizationDataAbstract>& data);
+      const std::shared_ptr<ControlParametrizationDataAbstract>& data);
+
+  /**
+   * @brief Print information on the control model
+   */
+  template <class Scalar>
+  friend std::ostream& operator<<(
+      std::ostream& os,
+      const ControlParametrizationModelAbstractTpl<Scalar>& model);
+
+  /**
+   * @brief Print relevant information of the control model
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const;
 
   /**
    * @brief Return the dimension of the control inputs
@@ -183,6 +207,7 @@ class ControlParametrizationModelAbstractTpl {
  protected:
   std::size_t nw_;  //!< Control dimension
   std::size_t nu_;  //!< Control parameters dimension
+  ControlParametrizationModelAbstractTpl() : nw_(0), nu_(0) {};
 };
 
 template <typename _Scalar>
@@ -203,7 +228,7 @@ struct ControlParametrizationDataAbstractTpl {
     u.setZero();
     dw_du.setZero();
   }
-  virtual ~ControlParametrizationDataAbstractTpl() {}
+  virtual ~ControlParametrizationDataAbstractTpl() = default;
 
   VectorXs w;      //!< value of the differential control
   VectorXs u;      //!< value of the control parameters

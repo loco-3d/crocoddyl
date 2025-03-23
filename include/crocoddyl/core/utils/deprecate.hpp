@@ -43,9 +43,8 @@
 #ifndef CROCODDYL_IGNORE_DEPRECATED_HEADER
 #define CROCODDYL_PRAGMA_DEPRECATED_HEADER(old_header, new_header) \
   CROCODDYL_PRAGMA_WARNING(                                        \
-      Deprecated header file                                       \
-      : old_header has been replaced by                            \
-            new_header.\n Please use new_header instead of old_header.)
+      Deprecated header file : old_header has been replaced by     \
+          new_header.\n Please use new_header instead of old_header.)
 #else
 #define CROCODDYL_PRAGMA_DEPRECATED_HEADER(old_header, new_header)
 #endif  // CROCODDYL_IGNORE_DEPRECATED_HEADER
@@ -53,9 +52,8 @@
 #ifndef CROCODDYL_IGNORE_DEPRECATED_HEADER
 #define CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER(remove_header) \
   CROCODDYL_PRAGMA_WARNING(                                  \
-      Deprecated header file                                 \
-      : remove_header has now been                           \
-            deprecated.\n It would be removed in the upcoming releases.)
+      Deprecated header file : remove_header has now been    \
+          deprecated.\n It would be removed in the upcoming releases.)
 #else
 #define CROCODDYL_PRAGMA_TO_BE_REMOVED_HEADER(remove_header)
 #endif  // CROCODDYL_IGNORE_TO_BE_REMOVED_HEADER

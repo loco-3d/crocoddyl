@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,16 +10,21 @@
 #ifndef CROCODDYL_CORE_ACTUATION_BASE_HPP_
 #define CROCODDYL_CORE_ACTUATION_BASE_HPP_
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/state-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
+
+class ActuationModelBase {
+ public:
+  virtual ~ActuationModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ActuationModelBase, ActuationModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for the actuation-mapping model
@@ -42,7 +47,7 @@ namespace crocoddyl {
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActuationModelAbstractTpl {
+class ActuationModelAbstractTpl : public ActuationModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -59,9 +64,9 @@ class ActuationModelAbstractTpl {
    * @param[in] state  State description
    * @param[in] nu     Dimension of joint-torque input
    */
-  ActuationModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
+  ActuationModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                             const std::size_t nu);
-  virtual ~ActuationModelAbstractTpl();
+  virtual ~ActuationModelAbstractTpl() = default;
 
   /**
    * @brief Compute the actuation signal from the state point
@@ -72,7 +77,7 @@ class ActuationModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ActuationDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
                     const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -85,7 +90,7 @@ class ActuationModelAbstractTpl {
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calc(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void calc(const std::shared_ptr<ActuationDataAbstract>& data,
             const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -95,7 +100,7 @@ class ActuationModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Joint-torque input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  virtual void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& u) = 0;
 
@@ -108,7 +113,7 @@ class ActuationModelAbstractTpl {
    * @param[in] data  Actuation data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
-  void calcDiff(const boost::shared_ptr<ActuationDataAbstract>& data,
+  void calcDiff(const std::shared_ptr<ActuationDataAbstract>& data,
                 const Eigen::Ref<const VectorXs>& x);
 
   /**
@@ -120,7 +125,7 @@ class ActuationModelAbstractTpl {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] tau   Generalized torques \f$\mathbf{u}\in\mathbb{R}^{nv}\f$
    */
-  virtual void commands(const boost::shared_ptr<ActuationDataAbstract>& data,
+  virtual void commands(const std::shared_ptr<ActuationDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
                         const Eigen::Ref<const VectorXs>& tau) = 0;
 
@@ -135,14 +140,14 @@ class ActuationModelAbstractTpl {
    * @param[in] tau   Joint-torque inputs \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
   virtual void torqueTransform(
-      const boost::shared_ptr<ActuationDataAbstract>& data,
+      const std::shared_ptr<ActuationDataAbstract>& data,
       const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
   /**
    * @brief Create the actuation data
    *
    * @return the actuation data
    */
-  virtual boost::shared_ptr<ActuationDataAbstract> createData();
+  virtual std::shared_ptr<ActuationDataAbstract> createData();
 
   /**
    * @brief Return the dimension of the joint-torque input
@@ -152,14 +157,14 @@ class ActuationModelAbstractTpl {
   /**
    * @brief Return the state
    */
-  const boost::shared_ptr<StateAbstract>& get_state() const;
+  const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
-   * @brief Print information on the residual model
+   * @brief Print information on the actuation model
    */
   template <class Scalar>
   friend std::ostream& operator<<(
-      std::ostream& os, const ResidualModelAbstractTpl<Scalar>& model);
+      std::ostream& os, const ActuationModelAbstractTpl<Scalar>& model);
 
   /**
    * @brief Print relevant information of the residual model
@@ -169,8 +174,9 @@ class ActuationModelAbstractTpl {
   virtual void print(std::ostream& os) const;
 
  protected:
-  std::size_t nu_;  //!< Dimension of joint torque inputs
-  boost::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  std::size_t nu_;                        //!< Dimension of joint torque inputs
+  std::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  ActuationModelAbstractTpl() : nu_(0), state_(nullptr) {};
 };
 
 template <typename _Scalar>
@@ -196,7 +202,7 @@ struct ActuationDataAbstractTpl {
     dtau_du.setZero();
     Mtau.setZero();
   }
-  virtual ~ActuationDataAbstractTpl() {}
+  virtual ~ActuationDataAbstractTpl() = default;
 
   VectorXs tau;      //!< Generalized torques
   VectorXs u;        //!< Joint torques

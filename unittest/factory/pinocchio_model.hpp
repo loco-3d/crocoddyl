@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,17 +9,9 @@
 #ifndef CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 #define CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_
 
-#include <pinocchio/algorithm/center-of-mass.hpp>
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/fwd.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
-#include <pinocchio/parsers/srdf.hpp>
-#include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/model.hpp>
 
 #include "crocoddyl/core/utils/exception.hpp"
 
@@ -59,13 +51,13 @@ class PinocchioModelFactory {
                        const std::string& srdf_file = "",
                        bool free_flyer = true);
 
-  boost::shared_ptr<pinocchio::Model> create() const;
+  std::shared_ptr<pinocchio::Model> create() const;
   std::vector<std::string> get_frame_names() const;
   std::vector<std::size_t> get_frame_ids() const;
   std::size_t get_contact_nc() const;
 
  private:
-  boost::shared_ptr<pinocchio::Model>
+  std::shared_ptr<pinocchio::Model>
       model_;  //!< The pointer to the state in testing
   std::vector<std::string> frame_name_;  //!< Frame name for unittesting
   std::vector<std::size_t> frame_id_;    //!< Frame id for unittesting
@@ -82,11 +74,21 @@ class PinocchioModelFactory {
  * @param x[in]      State vector
  * @param u[in]      Control vector
  */
-void updateAllPinocchio(pinocchio::Model* const model, pinocchio::Data* data,
-                        const Eigen::VectorXd& x,
-                        const Eigen::VectorXd& u = Eigen::VectorXd());
+template <typename Scalar, int Options,
+          template <typename, int> class JointCollectionTpl>
+void updateAllPinocchio(
+    pinocchio::ModelTpl<Scalar, Options, JointCollectionTpl>* const model,
+    pinocchio::DataTpl<Scalar, Options, JointCollectionTpl>* data,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& u =
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1>());
 
 }  // namespace unittest
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "pinocchio_model.hxx"
 
 #endif  // CROCODDYL_PINOCCHIO_MODEL_FACTORY_HPP_

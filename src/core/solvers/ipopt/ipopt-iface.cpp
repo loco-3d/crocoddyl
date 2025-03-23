@@ -16,8 +16,7 @@
 
 namespace crocoddyl {
 
-IpoptInterface::IpoptInterface(
-    const boost::shared_ptr<ShootingProblem>& problem)
+IpoptInterface::IpoptInterface(const std::shared_ptr<ShootingProblem>& problem)
     : problem_(problem) {
   const std::size_t T = problem_->get_T();
   xs_.resize(T + 1);
@@ -27,7 +26,7 @@ IpoptInterface::IpoptInterface(
 
   nconst_ = 0;
   nvar_ = 0;
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nxi = models[t]->get_state()->get_nx();
@@ -46,7 +45,7 @@ IpoptInterface::IpoptInterface(
   // Initial condition
   nconst_ += models[0]->get_state()->get_ndx();
 
-  const boost::shared_ptr<ActionModelAbstract>& model =
+  const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_terminalModel();
   const std::size_t nxi = model->get_state()->get_nx();
   const std::size_t ndxi = model->get_state()->get_ndx();
@@ -58,7 +57,7 @@ IpoptInterface::IpoptInterface(
 void IpoptInterface::resizeData() {
   const std::size_t T = problem_->get_T();
   nvar_ = 0;
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t nxi = models[t]->get_state()->get_nx();
@@ -77,7 +76,7 @@ void IpoptInterface::resizeData() {
   // Initial condition
   nconst_ += models[0]->get_state()->get_ndx();
 
-  const boost::shared_ptr<ActionModelAbstract>& model =
+  const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_terminalModel();
   const std::size_t nxi = model->get_state()->get_nx();
   const std::size_t ndxi = model->get_state()->get_ndx();
@@ -97,7 +96,7 @@ bool IpoptInterface::get_nlp_info(Ipopt::Index& n, Ipopt::Index& m,
 
   nnz_jac_g = 0;  // Jacobian nonzeros for dynamic constraints
   nnz_h_lag = 0;  // Hessian nonzeros (only lower triangular part)
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
@@ -150,7 +149,7 @@ bool IpoptInterface::get_bounds_info(Ipopt::Index, Ipopt::Number* x_l,
                 "Inconsistent number of constraints");
 
   // Adding bounds
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {
     // Running state bounds
@@ -215,7 +214,7 @@ bool IpoptInterface::get_starting_point(Ipopt::Index, bool /*init_x*/,
   // initialize to the given starting point
   // State variables are always at 0 since they represent increments from the
   // given initial point
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -247,17 +246,17 @@ bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool,
                 "Inconsistent number of decision variables");
 
   // Running costs
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
     const std::size_t nui = model->get_nu();
 
@@ -271,14 +270,14 @@ bool IpoptInterface::eval_f(Ipopt::Index, const Ipopt::Number* x, bool,
 #pragma omp simd reduction(+ : obj_value)
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     obj_value += data->cost;
   }
 
   // Terminal costs
-  const boost::shared_ptr<ActionModelAbstract>& model =
+  const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& data =
+  const std::shared_ptr<ActionDataAbstract>& data =
       problem_->get_terminalData();
   const std::size_t ndxi = model->get_state()->get_ndx();
 
@@ -300,17 +299,17 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool,
   assert_pretty(n == static_cast<Ipopt::Index>(nvar_),
                 "Inconsistent number of decision variables");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
     const std::size_t nui = model->get_nu();
 
@@ -324,8 +323,8 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool,
     datas_[t]->Ldx.noalias() = datas_[t]->Jint_dx.transpose() * data->Lx;
   }
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
     const std::size_t nui = model->get_nu();
     for (std::size_t j = 0; j < ndxi; ++j) {
@@ -337,9 +336,9 @@ bool IpoptInterface::eval_grad_f(Ipopt::Index, const Ipopt::Number* x, bool,
   }
 
   // Terminal model
-  const boost::shared_ptr<ActionModelAbstract>& model =
+  const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_terminalModel();
-  const boost::shared_ptr<ActionDataAbstract>& data =
+  const std::shared_ptr<ActionDataAbstract>& data =
       problem_->get_terminalData();
   const std::size_t ndxi = model->get_state()->get_ndx();
 
@@ -370,20 +369,20 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x,
                 "Inconsistent number of constraints");
 
   // Dynamic constraints
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
-  const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
       problem_->get_runningDatas();
   const std::size_t T = problem_->get_T();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-    const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionDataAbstract>& data = datas[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
     const std::size_t nui = model->get_nu();
-    const boost::shared_ptr<ActionModelAbstract>& model_next =
+    const std::shared_ptr<ActionModelAbstract>& model_next =
         t + 1 == T ? problem_->get_terminalModel() : models[t + 1];
     const std::size_t ndxi_next = model_next->get_state()->get_ndx();
 
@@ -400,7 +399,7 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x,
 
   std::size_t ix = 0;
   for (std::size_t t = 0; t < T; ++t) {
-    const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+    const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t ndxi = model->get_state()->get_ndx();
     for (std::size_t j = 0; j < ndxi; ++j) {
       g[ix + j] = datas_[t]->x_diff[j];
@@ -409,7 +408,7 @@ bool IpoptInterface::eval_g(Ipopt::Index, const Ipopt::Number* x,
   }
 
   // Initial conditions
-  const boost::shared_ptr<ActionModelAbstract>& model = models[0];
+  const std::shared_ptr<ActionModelAbstract>& model = models[0];
   const std::size_t ndxi = model->get_state()->get_ndx();
   datas_[0]->dx = Eigen::VectorXd::Map(x, ndxi);
   model->get_state()->integrate(xs_[0], datas_[0]->dx, datas_[0]->x);
@@ -437,7 +436,7 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
   assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
                 "Inconsistent number of constraints");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   if (values == NULL) {
     // Dynamic constraints
@@ -445,7 +444,7 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
     std::size_t ix = 0;
     const std::size_t T = problem_->get_T();
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
       const std::size_t ndxi_next =
@@ -476,7 +475,7 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
                   "Number of jacobian elements set does not coincide with the "
                   "total non-zero Jacobian values");
   } else {
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+    const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
         problem_->get_runningDatas();
     // Dynamic constraints
     const std::size_t T = problem_->get_T();
@@ -484,9 +483,9 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
-      const boost::shared_ptr<ActionModelAbstract>& model_next =
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionDataAbstract>& data = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& model_next =
           t + 1 == T ? problem_->get_terminalModel() : models[t + 1];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t ndxi_next = model_next->get_state()->get_ndx();
@@ -519,8 +518,8 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
     }
     std::size_t idx = 0;
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionModelAbstract>& model_next =
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionModelAbstract>& model_next =
           t + 1 == T ? problem_->get_terminalModel() : models[t + 1];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
@@ -543,7 +542,7 @@ bool IpoptInterface::eval_jac_g(Ipopt::Index, const Ipopt::Number* x, bool,
     }
 
     // Initial condition
-    const boost::shared_ptr<ActionModelAbstract>& model = models[0];
+    const std::shared_ptr<ActionModelAbstract>& model = models[0];
     const std::size_t ndxi = model->get_state()->get_ndx();
     datas_[0]->dx = Eigen::VectorXd::Map(x, ndxi);
 
@@ -583,7 +582,7 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
   assert_pretty(m == static_cast<Ipopt::Index>(nconst_),
                 "Inconsistent number of constraints");
 
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   if (values == NULL) {
@@ -593,7 +592,7 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
     // Running Costs
     std::size_t idx = 0;
     for (std::size_t t = 0; t < problem_->get_T(); ++t) {
-      const boost::shared_ptr<ActionModelAbstract> model = models[t];
+      const std::shared_ptr<ActionModelAbstract> model = models[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
       for (std::size_t idx_row = 0; idx_row < ndxi + nui; ++idx_row) {
@@ -631,14 +630,14 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
     // return the values. This is a symmetric matrix, fill the lower left
     // triangle only
     // Running Costs
-    const std::vector<boost::shared_ptr<ActionDataAbstract> >& datas =
+    const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
         problem_->get_runningDatas();
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp parallel for num_threads(problem_->get_nthreads())
 #endif
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionDataAbstract>& data = datas[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
       datas_[t]->dx = Eigen::VectorXd::Map(x + ixu_[t], ndxi);
@@ -656,8 +655,8 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
 
     std::size_t idx = 0;
     for (std::size_t t = 0; t < T; ++t) {
-      const boost::shared_ptr<ActionModelAbstract>& model = models[t];
-      const boost::shared_ptr<ActionDataAbstract>& data = datas[t];
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::shared_ptr<ActionDataAbstract>& data = datas[t];
       const std::size_t ndxi = model->get_state()->get_ndx();
       const std::size_t nui = model->get_nu();
       for (std::size_t idx_row = 0; idx_row < ndxi; ++idx_row) {
@@ -686,9 +685,9 @@ bool IpoptInterface::eval_h(Ipopt::Index, const Ipopt::Number* x, bool,
     }
 
     // Terminal costs
-    const boost::shared_ptr<ActionModelAbstract>& model =
+    const std::shared_ptr<ActionModelAbstract>& model =
         problem_->get_terminalModel();
-    const boost::shared_ptr<ActionDataAbstract>& data =
+    const std::shared_ptr<ActionDataAbstract>& data =
         problem_->get_terminalData();
     const std::size_t ndxi = model->get_state()->get_ndx();
     datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
@@ -723,7 +722,7 @@ void IpoptInterface::finalize_solution(
     const Ipopt::IpoptData* /*ip_data*/,
     Ipopt::IpoptCalculatedQuantities* /*ip_cq*/) {
   // Copy the solution to vector once solver is finished
-  const std::vector<boost::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
       problem_->get_runningModels();
   const std::size_t T = problem_->get_T();
   for (std::size_t t = 0; t < T; ++t) {
@@ -737,7 +736,7 @@ void IpoptInterface::finalize_solution(
     us_[t] = datas_[t]->u;
   }
   // Terminal node
-  const boost::shared_ptr<ActionModelAbstract>& model =
+  const std::shared_ptr<ActionModelAbstract>& model =
       problem_->get_terminalModel();
   const std::size_t ndxi = model->get_state()->get_ndx();
   datas_[T]->dx = Eigen::VectorXd::Map(x + ixu_.back(), ndxi);
@@ -758,9 +757,9 @@ bool IpoptInterface::intermediate_callback(
   return true;
 }
 
-boost::shared_ptr<IpoptInterfaceData> IpoptInterface::createData(
+std::shared_ptr<IpoptInterfaceData> IpoptInterface::createData(
     const std::size_t nx, const std::size_t ndx, const std::size_t nu) {
-  return boost::allocate_shared<IpoptInterfaceData>(
+  return std::allocate_shared<IpoptInterfaceData>(
       Eigen::aligned_allocator<IpoptInterfaceData>(), nx, ndx, nu);
 }
 
@@ -784,7 +783,7 @@ const std::vector<Eigen::VectorXd>& IpoptInterface::get_us() const {
   return us_;
 }
 
-const boost::shared_ptr<ShootingProblem>& IpoptInterface::get_problem() const {
+const std::shared_ptr<ShootingProblem>& IpoptInterface::get_problem() const {
   return problem_;
 }
 

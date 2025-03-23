@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,16 +22,16 @@ void test_partial_derivatives_against_contact_numdiff(
     ActivationModelTypes::Type activation_type,
     ActuationModelTypes::Type actuation_type) {
   // create the model
-  const boost::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
       ContactCostModelFactory().create(cost_type, model_type, activation_type,
                                        actuation_type);
 
   // create the corresponding data object and set the cost to nan
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
       model->createData();
 
   crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
-  const boost::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
       data_num_diff = model_num_diff.createData();
 
   // Generating random values for the state and control
@@ -64,6 +64,32 @@ void test_partial_derivatives_against_contact_numdiff(
   if (model_num_diff.get_with_gauss_approx()) {
     BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
   }
+
+  // Checking that casted computation is the same
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>&
+      casted_model = model->cast<float>();
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>&
+      casted_data = casted_model->createData();
+  Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f));
+  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f));
+  model->calc(data, x);
+  model->calcDiff(data, x);
+  casted_model->calc(casted_data, x_f);
+  casted_model->calcDiff(casted_data, x_f);
+  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+#endif
 }
 
 //----------------------------------------------------------------------------//

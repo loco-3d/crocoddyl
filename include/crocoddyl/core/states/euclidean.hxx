@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,19 +31,19 @@ void StateVectorTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0,
                                   const Eigen::Ref<const VectorXs>& x1,
                                   Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x0 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(x1.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x1 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x1 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(dxout.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dxout has wrong dimension (it should be " +
-                        std::to_string(ndx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dxout has wrong dimension (it should be " +
+                                    std::to_string(ndx_) + ")");
   }
   dxout = x1 - x0;
 }
@@ -52,19 +53,19 @@ void StateVectorTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x,
                                        const Eigen::Ref<const VectorXs>& dx,
                                        Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(dx.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dx has wrong dimension (it should be " +
-                        std::to_string(ndx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dx has wrong dimension (it should be " +
+                                    std::to_string(ndx_) + ")");
   }
   if (static_cast<std::size_t>(xout.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "xout has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xout has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   xout = x + dx;
 }
@@ -81,24 +82,24 @@ void StateVectorTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>&,
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jfirst has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     Jfirst.setZero();
-    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, -1.);
+    Jfirst.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(-1.));
   }
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jsecond has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     Jsecond.setZero();
-    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, 1.);
+    Jsecond.diagonal() = MathBase::VectorXs::Constant(ndx_, Scalar(1.));
   }
 }
 
@@ -117,10 +118,10 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>&,
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jfirst has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     switch (op) {
       case setto:
@@ -141,10 +142,10 @@ void StateVectorTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>&,
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jsecond has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     switch (op) {
       case setto:
@@ -174,6 +175,19 @@ void StateVectorTpl<Scalar>::JintegrateTransport(
         "Invalid argument: firstsecond must be either first or second. both "
         "not supported for this operation.");
   }
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateVectorTpl<NewScalar> StateVectorTpl<Scalar>::cast() const {
+  typedef StateVectorTpl<NewScalar> ReturnType;
+  ReturnType res(nx_);
+  return res;
+}
+
+template <typename Scalar>
+void StateVectorTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateVector {nx=" << nx_ << "}";
 }
 
 }  // namespace crocoddyl

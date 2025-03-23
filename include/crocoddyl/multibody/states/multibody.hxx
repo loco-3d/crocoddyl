@@ -1,39 +1,36 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019, LAAS-CNRS
+// Copyright (C) 2019-2025, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <pinocchio/algorithm/joint-configuration.hpp>
 
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 StateMultibodyTpl<Scalar>::StateMultibodyTpl(
-    boost::shared_ptr<PinocchioModel> model)
+    std::shared_ptr<PinocchioModel> model)
     : Base(model->nq + model->nv, 2 * model->nv),
       pinocchio_(model),
       x0_(VectorXs::Zero(model->nq + model->nv)) {
   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
-
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
   // Instead simple represents any joint that can model within the Euclidean
   // manifold. The rest of joints use Euclidean algebra. We use this fact for
   // computing Jdiff.
-
   // Define internally the limits of the first joint
-
-  const std::size_t nq0 = model->joints[1].nq();
-
-  lb_.head(nq0) =
-      -std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
-  ub_.head(nq0) = std::numeric_limits<Scalar>::infinity() * VectorXs::Ones(nq0);
+  const std::size_t nq0 =
+      model->existJointName("root_joint")
+          ? model->joints[model->getJointId("root_joint")].nq()
+          : 0;
+  lb_.head(nq0) = -std::numeric_limits<Scalar>::max() * VectorXs::Ones(nq0);
+  ub_.head(nq0) = std::numeric_limits<Scalar>::max() * VectorXs::Ones(nq0);
   lb_.segment(nq0, nq_ - nq0) = pinocchio_->lowerPositionLimit.tail(nq_ - nq0);
   ub_.segment(nq0, nq_ - nq0) = pinocchio_->upperPositionLimit.tail(nq_ - nq0);
   lb_.tail(nv_) = -pinocchio_->velocityLimit;
@@ -65,19 +62,19 @@ void StateMultibodyTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0,
                                      const Eigen::Ref<const VectorXs>& x1,
                                      Eigen::Ref<VectorXs> dxout) const {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x0 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(x1.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x1 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x1 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(dxout.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dxout has wrong dimension (it should be " +
-                        std::to_string(ndx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dxout has wrong dimension (it should be " +
+                                    std::to_string(ndx_) + ")");
   }
 
   pinocchio::difference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
@@ -90,19 +87,19 @@ void StateMultibodyTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x,
                                           const Eigen::Ref<const VectorXs>& dx,
                                           Eigen::Ref<VectorXs> xout) const {
   if (static_cast<std::size_t>(x.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(dx.size()) != ndx_) {
-    throw_pretty("Invalid argument: "
-                 << "dx has wrong dimension (it should be " +
-                        std::to_string(ndx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "dx has wrong dimension (it should be " +
+                                    std::to_string(ndx_) + ")");
   }
   if (static_cast<std::size_t>(xout.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "xout has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "xout has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
 
   pinocchio::integrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_),
@@ -120,23 +117,23 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0,
       is_a_Jcomponent(firstsecond),
       ("firstsecond must be one of the Jcomponent {both, first, second}"));
   if (static_cast<std::size_t>(x0.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x0 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
   if (static_cast<std::size_t>(x1.size()) != nx_) {
-    throw_pretty("Invalid argument: "
-                 << "x1 has wrong dimension (it should be " +
-                        std::to_string(nx_) + ")");
+    throw_pretty(
+        "Invalid argument: " << "x1 has wrong dimension (it should be " +
+                                    std::to_string(nx_) + ")");
   }
 
   if (firstsecond == first) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jfirst has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
 
     pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
@@ -145,10 +142,10 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0,
   } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jsecond has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
                            Jsecond.topLeftCorner(nv_, nv_), pinocchio::ARG1);
@@ -156,17 +153,17 @@ void StateMultibodyTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0,
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jfirst has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jsecond has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_),
                            Jfirst.topLeftCorner(nv_, nv_), pinocchio::ARG0);
@@ -192,10 +189,10 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
   if (firstsecond == first || firstsecond == both) {
     if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ ||
         static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jfirst has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     switch (op) {
       case setto:
@@ -225,10 +222,10 @@ void StateMultibodyTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x,
   if (firstsecond == second || firstsecond == both) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ ||
         static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
-      throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " +
-                          std::to_string(ndx_) + "," + std::to_string(ndx_) +
-                          ")");
+      throw_pretty(
+          "Invalid argument: " << "Jsecond has wrong dimension (it should be " +
+                                      std::to_string(ndx_) + "," +
+                                      std::to_string(ndx_) + ")");
     }
     switch (op) {
       case setto:
@@ -285,9 +282,25 @@ void StateMultibodyTpl<Scalar>::JintegrateTransport(
 }
 
 template <typename Scalar>
-const boost::shared_ptr<pinocchio::ModelTpl<Scalar> >&
+const std::shared_ptr<pinocchio::ModelTpl<Scalar> >&
 StateMultibodyTpl<Scalar>::get_pinocchio() const {
   return pinocchio_;
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+StateMultibodyTpl<NewScalar> StateMultibodyTpl<Scalar>::cast() const {
+  typedef StateMultibodyTpl<NewScalar> ReturnType;
+  typedef pinocchio::ModelTpl<NewScalar> ModelType;
+  ReturnType res(
+      std::make_shared<ModelType>(pinocchio_->template cast<NewScalar>()));
+  return res;
+}
+
+template <typename Scalar>
+void StateMultibodyTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateMultibody {nx=" << nx_ << ", ndx=" << ndx_
+     << ", pinocchio=" << *pinocchio_.get() << "}";
 }
 
 }  // namespace crocoddyl

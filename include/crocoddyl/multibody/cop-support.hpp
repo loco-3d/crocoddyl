@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021, University of Edinburgh, University of Oxford
+// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,11 +39,6 @@ class CoPSupportTpl {
 
   /**
    * @brief Initialize the center of pressure support
-   */
-  explicit CoPSupportTpl();
-
-  /**
-   * @brief Initialize the center of pressure support
    *
    * @param[in] R    Rotation matrix that defines the support orientation w.r.t.
    * the inertial frame
@@ -63,6 +59,11 @@ class CoPSupportTpl {
    * @param[in] support  Center of pressure support
    */
   CoPSupportTpl(const CoPSupportTpl<Scalar>& support);
+
+  /**
+   * @brief Initialize the center of pressure support
+   */
+  explicit CoPSupportTpl();
   ~CoPSupportTpl();
 
   /**
@@ -76,6 +77,18 @@ class CoPSupportTpl {
    * parallel to those of the world frame.
    */
   void update();
+
+  /**
+   * @brief Cast the wrench cone to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CoPSupportTpl<NewScalar> A CoP support region with the new scalar
+   * type.
+   */
+  template <typename NewScalar>
+  CoPSupportTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the matrix of center of pressure support

@@ -34,8 +34,17 @@ GAITPHASES = [
             "stepLength": 0.6,
             "stepHeight": 0.1,
             "timeStep": 0.03,
-            "stepKnots": 35,
-            "supportKnots": 10,
+            "stepKnots": 15,
+            "supportKnots": 4,
+        }
+    },
+    {
+        "jumping": {
+            "jumpHeight": 0.1,
+            "jumpLength": [0.0, 0.3, 0.0],
+            "timeStep": 0.03,
+            "groundKnots": 9,
+            "flyingKnots": 6,
         }
     },
     {
@@ -43,26 +52,8 @@ GAITPHASES = [
             "stepLength": 0.6,
             "stepHeight": 0.1,
             "timeStep": 0.03,
-            "stepKnots": 35,
-            "supportKnots": 10,
-        }
-    },
-    {
-        "walking": {
-            "stepLength": 0.6,
-            "stepHeight": 0.1,
-            "timeStep": 0.03,
-            "stepKnots": 35,
-            "supportKnots": 10,
-        }
-    },
-    {
-        "walking": {
-            "stepLength": 0.6,
-            "stepHeight": 0.1,
-            "timeStep": 0.03,
-            "stepKnots": 35,
-            "supportKnots": 10,
+            "stepKnots": 15,
+            "supportKnots": 2,
         }
     },
 ]
@@ -82,7 +73,19 @@ for i, phase in enumerate(GAITPHASES):
                     value["supportKnots"],
                 )
             )
-            solver[i].th_stop = 1e-7
+        elif key == "jumping":
+            # Creating a jumping problem
+            solver[i] = crocoddyl.SolverIntro(
+                gait.createJumpingProblem(
+                    x0,
+                    value["jumpHeight"],
+                    value["jumpLength"],
+                    value["timeStep"],
+                    value["groundKnots"],
+                    value["flyingKnots"],
+                )
+            )
+        solver[i].th_stop = 1e-7
 
     # Added the callback functions
     print("*** SOLVE " + key + " ***")

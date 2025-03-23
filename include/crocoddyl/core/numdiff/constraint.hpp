@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ template <typename _Scalar>
 class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ConstraintModelBase, ConstraintModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef ConstraintDataAbstractTpl<Scalar> ConstraintDataAbstract;
@@ -46,53 +47,65 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
    *
    * @param model
    */
-  explicit ConstraintModelNumDiffTpl(const boost::shared_ptr<Base>& model);
+  explicit ConstraintModelNumDiffTpl(const std::shared_ptr<Base>& model);
 
   /**
    * @brief Initialize the numdiff constraint model
    */
-  virtual ~ConstraintModelNumDiffTpl();
+  virtual ~ConstraintModelNumDiffTpl() = default;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calc()
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calc(const
-   * boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calc(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+  virtual void calc(const std::shared_ptr<ConstraintDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff()
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x,
-                        const Eigen::Ref<const VectorXs>& u);
+                        const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc ConstraintModelAbstract::calcDiff(const
-   * boost::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
+   * std::shared_ptr<ConstraintDataAbstract>& data, const Eigen::Ref<const
    * VectorXs>& x)
    */
-  virtual void calcDiff(const boost::shared_ptr<ConstraintDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const std::shared_ptr<ConstraintDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief @copydoc Base::createData()
    */
-  virtual boost::shared_ptr<ConstraintDataAbstract> createData(
-      DataCollectorAbstract* const data);
+  virtual std::shared_ptr<ConstraintDataAbstract> createData(
+      DataCollectorAbstract* const data) override;
+
+  /**
+   * @brief Cast the constraint numdiff model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ConstraintModelNumDiffTpl<NewScalar> A constraint model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ConstraintModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the original constraint model
    */
-  const boost::shared_ptr<Base>& get_model() const;
+  const std::shared_ptr<Base>& get_model() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -131,8 +144,8 @@ class ConstraintModelNumDiffTpl : public ConstraintModelAbstractTpl<_Scalar> {
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
 
-  boost::shared_ptr<Base> model_;  //!< Constraint model hat we want to apply
-                                   //!< the numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Constraint model hat we want to apply
+                                 //!< the numerical differentiation
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
   std::vector<ReevaluationFunction>
@@ -193,10 +206,10 @@ struct ConstraintDataNumDiffTpl : public ConstraintDataAbstractTpl<_Scalar> {
   VectorXs du;  //!< Control disturbance.
   VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
                 //!< \int u du_i = u + du \f$".
-  boost::shared_ptr<Base> data_0;  //!< The data at the approximation point.
-  std::vector<boost::shared_ptr<Base> >
+  std::shared_ptr<Base> data_0;  //!< The data at the approximation point.
+  std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation.
-  std::vector<boost::shared_ptr<Base> >
+  std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation.
 };
 

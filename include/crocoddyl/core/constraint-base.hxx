@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state,
-    boost::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
+    std::shared_ptr<StateAbstract> state,
+    std::shared_ptr<ResidualModelAbstract> residual, const std::size_t ng,
     const std::size_t nh)
     : ng_internal_(ng),
       nh_internal_(nh),
@@ -28,6 +28,9 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(residual->get_nu()),
       ng_(ng),
       nh_(nh),
+      T_constraint_(residual->get_q_dependent() || residual->get_v_dependent()
+                        ? true
+                        : false),
       unone_(VectorXs::Zero(residual->get_nu())) {
   if (nh_ > residual_->get_nr()) {
     throw_pretty("Invalid argument: "
@@ -45,12 +48,13 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t nu,
-    const std::size_t ng, const std::size_t nh)
+    std::shared_ptr<StateAbstract> state, const std::size_t nu,
+    const std::size_t ng, const std::size_t nh, const bool T_const)
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh, nu)),
+      residual_(std::make_shared<ResidualModelAbstractTpl<Scalar>>(
+          state, ng + nh, nu)),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),
@@ -59,16 +63,18 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(nu),
       ng_(ng),
       nh_(nh),
+      T_constraint_(T_const),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
 ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
-    boost::shared_ptr<StateAbstract> state, const std::size_t ng,
-    const std::size_t nh)
+    std::shared_ptr<StateAbstract> state, const std::size_t ng,
+    const std::size_t nh, const bool T_const)
     : ng_internal_(ng),
       nh_internal_(nh),
       state_(state),
-      residual_(boost::make_shared<ResidualModelAbstract>(state, ng + nh)),
+      residual_(
+          std::make_shared<ResidualModelAbstractTpl<Scalar>>(state, ng + nh)),
       type_((ng > 0 && nh > 0) ? ConstraintType::Both
                                : (ng > 0 ? ConstraintType::Inequality
                                          : ConstraintType::Equality)),
@@ -77,30 +83,28 @@ ConstraintModelAbstractTpl<Scalar>::ConstraintModelAbstractTpl(
       nu_(state->get_nv()),
       ng_(ng),
       nh_(nh),
+      T_constraint_(T_const),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
-ConstraintModelAbstractTpl<Scalar>::~ConstraintModelAbstractTpl() {}
-
-template <typename Scalar>
 void ConstraintModelAbstractTpl<Scalar>::calc(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calc(data, x, unone_);
 }
 
 template <typename Scalar>
 void ConstraintModelAbstractTpl<Scalar>::calcDiff(
-    const boost::shared_ptr<ConstraintDataAbstract>& data,
+    const std::shared_ptr<ConstraintDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& x) {
   calcDiff(data, x, unone_);
 }
 
 template <typename Scalar>
-boost::shared_ptr<ConstraintDataAbstractTpl<Scalar> >
+std::shared_ptr<ConstraintDataAbstractTpl<Scalar>>
 ConstraintModelAbstractTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
-  return boost::allocate_shared<ConstraintDataAbstract>(
+  return std::allocate_shared<ConstraintDataAbstract>(
       Eigen::aligned_allocator<ConstraintDataAbstract>(), this, data);
 }
 
@@ -113,7 +117,7 @@ void ConstraintModelAbstractTpl<Scalar>::update_bounds(const VectorXs& lower,
         "Invalid argument: the dimension of the lower/upper bound is not the "
         "same to ng.")
   }
-  if (((upper - lower).array() <= 0.).any()) {
+  if (((upper - lower).array() <= Scalar(0.)).any()) {
     throw_pretty(
         "Invalid argument: the upper bound is not higher than the lower bound.")
   }
@@ -155,13 +159,13 @@ void ConstraintModelAbstractTpl<Scalar>::print(std::ostream& os) const {
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateAbstractTpl<Scalar> >&
+const std::shared_ptr<StateAbstractTpl<Scalar>>&
 ConstraintModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 
 template <typename Scalar>
-const boost::shared_ptr<ResidualModelAbstractTpl<Scalar> >&
+const std::shared_ptr<ResidualModelAbstractTpl<Scalar>>&
 ConstraintModelAbstractTpl<Scalar>::get_residual() const {
   return residual_;
 }
@@ -196,6 +200,11 @@ std::size_t ConstraintModelAbstractTpl<Scalar>::get_ng() const {
 template <typename Scalar>
 std::size_t ConstraintModelAbstractTpl<Scalar>::get_nh() const {
   return nh_;
+}
+
+template <typename Scalar>
+bool ConstraintModelAbstractTpl<Scalar>::get_T_constraint() const {
+  return T_constraint_;
 }
 
 template <class Scalar>

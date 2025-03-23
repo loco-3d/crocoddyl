@@ -12,10 +12,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve,
                                        0, 5)
 
 void exposeSolverIpopt() {
-  bp::register_ptr_to_python<boost::shared_ptr<SolverIpopt>>();
+  bp::register_ptr_to_python<std::shared_ptr<SolverIpopt>>();
   bp::class_<SolverIpopt, bp::bases<SolverAbstract>>(
       "SolverIpopt",
-      bp::init<const boost::shared_ptr<crocoddyl::ShootingProblem>&>(
+      bp::init<const std::shared_ptr<crocoddyl::ShootingProblem>&>(
           bp::args("self", "problem"), "Initialize solver"))
       .def("solve", &SolverIpopt::solve,
            SolverIpopt_solves(
