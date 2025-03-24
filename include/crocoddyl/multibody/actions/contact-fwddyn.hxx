@@ -494,3 +494,6 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::set_damping_factor(
 }
 
 }  // namespace crocoddyl
+
+#define CROCODDYL_EXPLICIT_INSTANTIATION_HEADER <crocoddyl/multibody/actions/contact-fwddyn.txx>
+#include <crocoddyl/core/utils/explicit-instantiation.hpp>

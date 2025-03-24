@@ -221,6 +221,49 @@ if(NOT BUILD_WITH_IPOPT OR (NOT IPOPT_FOUND))
        ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt.cpp)
 endif()
 
+function(PINOCCHIO_SPECIFIC_TYPE scalar_name scope)
+  set(LIB_NAME "${PROJECT_NAME}_${scalar_name}")
+  if(ENABLE_TEMPLATE_INSTANTIATION)
+    pinocchio_target(
+      ${LIB_NAME}
+      SCALAR ${scalar_name}
+      SOURCES ${${PROJECT_NAME}_CORE_SOURCES}
+      LIBRARY_PUBLIC_SCOPE PUBLIC_SCOPE)
+    set(${scope}
+        ${PUBLIC_SCOPE}
+        PARENT_SCOPE)
+  else()
+    pinocchio_target(
+      ${LIB_NAME}
+      SCALAR ${scalar_name}
+      SOURCES ${${PROJECT_NAME}_CORE_SOURCES}
+      LIBRARY_PUBLIC_SCOPE PUBLIC_SCOPE
+      INTERFACE)
+    set(${scope}
+        ${PUBLIC_SCOPE}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(CROCODDYL_CONFIG directory lib_name)
+  string(TOUPPER ${lib_name} upper_lib_name)
+  generate_configuration_header_v2(
+    INCLUDE_DIR
+    ${PROJECT_BINARY_DIR}/include
+    HEADER_DIR
+    crocoddyl/${directory}
+    FILENAME
+    config.hpp
+    LIBRARY_NAME
+    ${upper_lib_name}
+    EXPORT_SYMBOL
+    ${lib_name}_EXPORTS)
+    # By default DEFINE_SYMBOL add -D${lib_name}_EXPORTS. Don't use ${lib_name}_EXPORTS define since
+    # crocoddyl/config.hpp use crocoddyl_EXPORTS. This allow to use the same DLLAPI define for all
+    # template instantiation libraries.
+    set_target_properties(${lib_name} PROPERTIES DEFINE_SYMBOL "${PROJECT_NAME}_EXPORTS")
+endfunction()
+
 if(UNIX)
   # Build options We'd like to deactivate sign conversion since we frequently
   # convert Eigen::Index<>std::size_t Otherwise, activate all warnings.
@@ -245,6 +288,8 @@ if(UNIX)
     target_link_libraries(${PROJECT_NAME} ipopt)
     target_include_directories(${PROJECT_NAME} PUBLIC ${IPOPT_INCLUDE_DIRS})
   endif()
+
+  crocoddyl_config("" crocoddyl)
 
   install(
     TARGETS ${PROJECT_NAME}
