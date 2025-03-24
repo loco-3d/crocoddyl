@@ -226,18 +226,24 @@ function(PINOCCHIO_SPECIFIC_TYPE scalar_name scope)
   if(ENABLE_TEMPLATE_INSTANTIATION)
     pinocchio_target(
       ${LIB_NAME}
-      SCALAR ${scalar_name}
-      SOURCES ${${PROJECT_NAME}_CORE_SOURCES}
-      LIBRARY_PUBLIC_SCOPE PUBLIC_SCOPE)
+      SCALAR
+      ${scalar_name}
+      SOURCES
+      ${${PROJECT_NAME}_CORE_SOURCES}
+      LIBRARY_PUBLIC_SCOPE
+      PUBLIC_SCOPE)
     set(${scope}
         ${PUBLIC_SCOPE}
         PARENT_SCOPE)
   else()
     pinocchio_target(
       ${LIB_NAME}
-      SCALAR ${scalar_name}
-      SOURCES ${${PROJECT_NAME}_CORE_SOURCES}
-      LIBRARY_PUBLIC_SCOPE PUBLIC_SCOPE
+      SCALAR
+      ${scalar_name}
+      SOURCES
+      ${${PROJECT_NAME}_CORE_SOURCES}
+      LIBRARY_PUBLIC_SCOPE
+      PUBLIC_SCOPE
       INTERFACE)
     set(${scope}
         ${PUBLIC_SCOPE}
@@ -258,10 +264,12 @@ function(CROCODDYL_CONFIG directory lib_name)
     ${upper_lib_name}
     EXPORT_SYMBOL
     ${lib_name}_EXPORTS)
-    # By default DEFINE_SYMBOL add -D${lib_name}_EXPORTS. Don't use ${lib_name}_EXPORTS define since
-    # crocoddyl/config.hpp use crocoddyl_EXPORTS. This allow to use the same DLLAPI define for all
-    # template instantiation libraries.
-    set_target_properties(${lib_name} PROPERTIES DEFINE_SYMBOL "${PROJECT_NAME}_EXPORTS")
+  # By default DEFINE_SYMBOL add -D${lib_name}_EXPORTS. Don't use
+  # ${lib_name}_EXPORTS define since crocoddyl/config.hpp use crocoddyl_EXPORTS.
+  # This allow to use the same DLLAPI define for all template instantiation
+  # libraries.
+  set_target_properties(${lib_name} PROPERTIES DEFINE_SYMBOL
+                                               "${PROJECT_NAME}_EXPORTS")
 endfunction()
 
 if(UNIX)
