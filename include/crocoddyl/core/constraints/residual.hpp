@@ -208,4 +208,7 @@ struct ConstraintDataResidualTpl : public ConstraintDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/constraints/residual.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ConstraintModelResidualTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ConstraintDataResidualTpl)
+
 #endif  // CROCODDYL_CORE_CONSTRAINTS_RESIDUAL_CONSTRAINT_HPP_

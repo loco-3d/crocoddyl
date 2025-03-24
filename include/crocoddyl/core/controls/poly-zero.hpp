@@ -169,4 +169,7 @@ class ControlParametrizationModelPolyZeroTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/controls/poly-zero.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ControlParametrizationModelPolyZeroTpl)
+
 #endif  // CROCODDYL_CORE_CONTROLS_POLY_ZERO_HPP_

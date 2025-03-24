@@ -128,4 +128,7 @@ struct ActuationSquashingDataTpl : public ActuationDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActuationSquashingModelTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActuationSquashingDataTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATION_SQUASH_BASE_HPP_

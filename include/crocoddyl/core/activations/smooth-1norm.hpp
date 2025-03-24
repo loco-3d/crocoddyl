@@ -165,4 +165,9 @@ struct ActivationDataSmooth1NormTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModelSmooth1NormTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ActivationDataSmooth1NormTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_

@@ -127,4 +127,9 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/states/multibody.hxx"
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::StateMultibodyTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::StateMultibodyTpl<float>;
+
 #endif  // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_

@@ -253,4 +253,9 @@ struct IntegratedActionDataEulerTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integrator/euler.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::IntegratedActionModelEulerTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::IntegratedActionDataEulerTpl)
+
 #endif  // CROCODDYL_CORE_INTEGRATOR_EULER_HPP_

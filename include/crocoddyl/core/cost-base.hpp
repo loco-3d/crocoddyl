@@ -350,4 +350,7 @@ struct CostDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/cost-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CostModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_COST_BASE_HPP_

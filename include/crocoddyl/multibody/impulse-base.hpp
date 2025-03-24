@@ -150,4 +150,7 @@ struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulse-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ImpulseModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseDataAbstractTpl)
+
 #endif  // CROCODDYL_MULTIBODY_IMPULSE_BASE_HPP_

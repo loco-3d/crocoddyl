@@ -111,4 +111,6 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SquashingModelSmoothSatTpl)
+
 #endif  // CROCODDYL_CORE_SQUASHING_SMOOTH_SAT_HPP_

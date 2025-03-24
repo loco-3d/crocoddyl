@@ -183,4 +183,7 @@ struct ResidualDataControlGravTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/control-gravity.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelControlGravTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataControlGravTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTROL_GRAVITY_HPP_

@@ -210,4 +210,9 @@ struct ResidualDataFrameRotationTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/frame-rotation.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelFrameRotationTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataFrameRotationTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_FRAME_ROTATION_HPP_

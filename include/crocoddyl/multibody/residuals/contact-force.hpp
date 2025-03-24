@@ -371,4 +371,7 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-force.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelContactForceTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataContactForceTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_FORCE_HPP_

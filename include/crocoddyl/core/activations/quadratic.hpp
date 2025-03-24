@@ -87,4 +87,9 @@ class ActivationModelQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActivationModelQuadTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActivationModelQuadTpl<float>;
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_

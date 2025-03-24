@@ -171,4 +171,7 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/impulse-com.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelImpulseCoMTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataImpulseCoMTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_IMPULSE_COM_HPP_

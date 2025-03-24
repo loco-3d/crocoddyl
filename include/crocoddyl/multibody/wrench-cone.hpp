@@ -238,4 +238,6 @@ class WrenchConeTpl {
 
 #include "crocoddyl/multibody/wrench-cone.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::WrenchConeTpl)
+
 #endif  // CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_

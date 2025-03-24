@@ -476,4 +476,9 @@ struct DifferentialActionDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/diff-action-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_DIFF_ACTION_BASE_HPP_

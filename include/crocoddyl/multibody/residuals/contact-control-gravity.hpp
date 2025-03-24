@@ -210,4 +210,9 @@ struct ResidualDataContactControlGravTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelContactControlGravTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataContactControlGravTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_CONTROL_GRAVITY_HPP_

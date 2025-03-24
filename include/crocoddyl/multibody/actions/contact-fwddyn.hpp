@@ -415,4 +415,9 @@ struct DifferentialActionDataContactFwdDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/contact-fwddyn.hxx>
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelContactFwdDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataContactFwdDynamicsTpl)
+
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_

@@ -10,6 +10,9 @@ set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
+# Set up Crocoddyl's scalar types
+set(SCALAR_TYPES float double)
+
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
 if(EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
@@ -171,6 +174,7 @@ if(BUILD_WITH_CODEGEN_SUPPORT)
         "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DPINOCCHIO_CPPAD_REQUIRES_MATRIX_BASE_PLUGIN)"
     )
   endif()
+  list(APPEND SCALAR_TYPES CppAD::AD<CppAD::cg::CG<double>>)
 endif()
 
 # Add OpenMP
@@ -221,6 +225,27 @@ if(NOT BUILD_WITH_IPOPT OR (NOT IPOPT_FOUND))
        ${PROJECT_SOURCE_DIR}/src/core/solvers/ipopt.cpp)
 endif()
 
+function(project_config directory lib_name)
+  string(TOUPPER ${lib_name} upper_lib_name)
+  generate_configuration_header_v2(
+    INCLUDE_DIR
+    ${PROJECT_BINARY_DIR}/include
+    HEADER_DIR
+    ${directory}
+    FILENAME
+    config.hpp
+    LIBRARY_NAME
+    ${upper_lib_name}
+    EXPORT_SYMBOL
+    ${lib_name}_EXPORTS)
+  # By default DEFINE_SYMBOL add -D${lib_name}_EXPORTS. Don't use
+  # ${lib_name}_EXPORTS define since crocoddyl/config.hpp use crocoddyl_EXPORTS.
+  # This allow to use the same DLLAPI define for all template instantiation
+  # libraries.
+  set_target_properties(${lib_name} PROPERTIES DEFINE_SYMBOL
+                                               "${PROJECT_NAME}_EXPORTS")
+endfunction()
+
 if(UNIX)
   # Build options We'd like to deactivate sign conversion since we frequently
   # convert Eigen::Index<>std::size_t Otherwise, activate all warnings.
@@ -245,6 +270,46 @@ if(UNIX)
     target_link_libraries(${PROJECT_NAME} ipopt)
     target_include_directories(${PROJECT_NAME} PUBLIC ${IPOPT_INCLUDE_DIRS})
   endif()
+
+  project_config(crocoddyl crocoddyl)
+
+  # Function to sanitize the scalar type for filenames
+  function(sanitize_scalar_name scalar sanitized_name)
+    string(REPLACE "::" "_" sanitized "${scalar}")
+    string(REPLACE "<" "_" sanitized "${sanitized}")
+    string(REPLACE ">" "" sanitized "${sanitized}")
+    string(REPLACE "," "_" sanitized "${sanitized}")
+    set(${sanitized_name}
+        "${sanitized}"
+        PARENT_SCOPE)
+  endfunction()
+  # Find all .cpp.in template files recursively
+  file(GLOB_RECURSE ETI_TEMPLATE_FILES FOLLOW_SYMLINKS
+       ${CMAKE_SOURCE_DIR}/src/**/*.cpp.in)
+  set(generated_eti_files "")
+  foreach(template_file ${ETI_TEMPLATE_FILES})
+    # Extract the relative path from src/
+    file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/src" "${template_file}")
+    # Remove .in extension and get the subdirectory
+    string(REPLACE ".cpp.in" ".cpp" rel_output_file "${rel_path}")
+    # Generate full output path in the build directory
+    set(output_file "${CMAKE_BINARY_DIR}/src/${rel_output_file}")
+    # Ensure the output subdirectory exists
+    get_filename_component(output_dir "${output_file}" DIRECTORY)
+    file(MAKE_DIRECTORY ${output_dir})
+    # Generate .cpp file from template for each scalar type
+    foreach(scalar ${SCALAR_TYPES})
+      # Sanitize scalar name for filenames
+      sanitize_scalar_name("${scalar}" scalar_filename)
+      string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
+                     "${output_file}")
+      set(SCALAR_TYPE ${scalar})
+      configure_file(${template_file} ${scalar_output_file} @ONLY)
+      list(APPEND generated_eti_files ${scalar_output_file})
+    endforeach()
+  endforeach()
+  # Add generated files to the target
+  target_sources(${PROJECT_NAME} PRIVATE ${generated_eti_files})
 
   install(
     TARGETS ${PROJECT_NAME}

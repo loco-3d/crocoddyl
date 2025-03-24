@@ -117,4 +117,7 @@ std::ostream& operator<<(std::ostream& os,
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SquashingModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::SquashingDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_SQUASHING_BASE_HPP_

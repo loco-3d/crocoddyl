@@ -25,4 +25,6 @@ struct DataCollectorAbstractTpl {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorAbstractTpl)
+
 #endif  // CROCODDYL_CORE_DATA_COLLECTOR_BASE_HPP_

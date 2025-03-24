@@ -109,4 +109,7 @@ struct ActivationDataAbstractTpl {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActivationModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActivationDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATION_BASE_HPP_

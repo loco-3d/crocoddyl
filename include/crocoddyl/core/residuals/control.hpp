@@ -178,4 +178,6 @@ class ResidualModelControlTpl : public ResidualModelAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/residuals/control.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelControlTpl)
+
 #endif  // CROCODDYL_CORE_RESIDUALS_CONTROL_HPP_

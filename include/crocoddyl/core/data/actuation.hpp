@@ -31,4 +31,6 @@ struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorActuationTpl)
+
 #endif  // CROCODDYL_CORE_DATA_ACTUATION_HPP_

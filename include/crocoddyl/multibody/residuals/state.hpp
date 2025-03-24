@@ -184,4 +184,9 @@ class ResidualModelStateTpl : public ResidualModelAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/state.hxx"
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ResidualModelStateTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ResidualModelStateTpl<float>;
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_STATE_HPP_

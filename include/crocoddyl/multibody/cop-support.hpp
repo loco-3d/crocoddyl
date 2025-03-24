@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/wrench-cone.hpp"
 
 namespace crocoddyl {
 
@@ -150,5 +151,7 @@ class CoPSupportTpl {
 }  // namespace crocoddyl
 
 #include "crocoddyl/multibody/cop-support.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CoPSupportTpl)
 
 #endif  // CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_

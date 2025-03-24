@@ -45,4 +45,7 @@ struct ActivationDataSmoothAbsTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActivationModelSmoothAbsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActivationDataSmoothAbsTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_ABS_HPP_

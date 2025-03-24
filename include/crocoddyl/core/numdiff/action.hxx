@@ -357,7 +357,7 @@ void ActionModelNumDiffTpl<Scalar>::set_disturbance(const Scalar disturbance) {
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
-  e_hess_ = sqrt(2.0 * e_jac_);
+  e_hess_ = Scalar(sqrt(2.0 * e_jac_));
 }
 
 template <typename Scalar>

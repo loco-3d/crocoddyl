@@ -218,4 +218,9 @@ struct ResidualDataFrameVelocityTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/frame-velocity.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelFrameVelocityTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataFrameVelocityTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_FRAME_VELOCITY_HPP_

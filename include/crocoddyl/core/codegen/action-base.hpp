@@ -652,4 +652,7 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelCodeGenTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActionDataCodeGenTpl)
+
 #endif  // CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_

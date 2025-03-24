@@ -189,4 +189,7 @@ struct CostDataResidualTpl : public CostDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/costs/residual.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CostModelResidualTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostDataResidualTpl)
+
 #endif  // CROCODDYL_CORE_COSTS_RESIDUAL_COST_HPP_

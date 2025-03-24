@@ -441,4 +441,7 @@ struct ActionDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/action-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActionDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_ACTION_BASE_HPP_

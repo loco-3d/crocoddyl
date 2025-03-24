@@ -198,4 +198,9 @@ struct ControlParametrizationDataPolyOneTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/controls/poly-one.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ControlParametrizationModelPolyOneTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ControlParametrizationDataPolyOneTpl)
+
 #endif  // CROCODDYL_CORE_CONTROLS_POLY_ONE_HPP_

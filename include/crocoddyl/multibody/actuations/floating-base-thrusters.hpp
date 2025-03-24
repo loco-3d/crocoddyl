@@ -372,4 +372,9 @@ class ActuationModelFloatingBaseThrustersTpl
 
 }  // namespace crocoddyl
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActuationModelFloatingBaseThrustersTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActuationModelFloatingBaseThrustersTpl<float>;
+
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_

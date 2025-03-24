@@ -61,4 +61,6 @@ struct ForceDataAbstractTpl {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ForceDataAbstractTpl)
+
 #endif  // CROCODDYL_MULTIBODY_FORCE_BASE_HPP_

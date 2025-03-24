@@ -341,4 +341,8 @@ struct ImpulseDataMultipleTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulses/multiple-impulses.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ImpulseModelMultipleTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseDataMultipleTpl)
+
 #endif  // CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_

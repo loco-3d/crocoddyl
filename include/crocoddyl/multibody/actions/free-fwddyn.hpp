@@ -307,4 +307,9 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/free-fwddyn.hxx>
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataFreeFwdDynamicsTpl)
+
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_

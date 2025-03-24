@@ -231,4 +231,7 @@ struct ResidualDataJointEffortTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/residuals/joint-effort.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelJointEffortTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataJointEffortTpl)
+
 #endif  // CROCODDYL_CORE_RESIDUALS_JOINT_TORQUE_HPP_

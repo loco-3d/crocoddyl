@@ -262,4 +262,7 @@ struct ContactData6DTpl : public ContactDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contacts/contact-6d.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ContactModel6DTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactData6DTpl)
+
 #endif  // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_

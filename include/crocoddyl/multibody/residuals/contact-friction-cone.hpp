@@ -356,4 +356,9 @@ struct ResidualDataContactFrictionConeTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelContactFrictionConeTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataContactFrictionConeTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_FRICTION_CONE_HPP_

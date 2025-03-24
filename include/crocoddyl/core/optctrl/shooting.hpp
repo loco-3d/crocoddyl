@@ -324,4 +324,9 @@ class ShootingProblemTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/optctrl/shooting.hxx"
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ShootingProblemTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ShootingProblemTpl<float>;
+
 #endif  // CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_

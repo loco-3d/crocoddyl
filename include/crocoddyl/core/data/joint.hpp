@@ -99,4 +99,9 @@ struct DataCollectorJointActuationTpl : DataCollectorActuationTpl<Scalar> {
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::JointDataAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorJointTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActuationTpl)
+
 #endif  // CROCODDYL_CORE_DATA_JOINT_HPP_

@@ -290,4 +290,7 @@ struct ResidualDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/residual-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_RESIDUAL_BASE_HPP_

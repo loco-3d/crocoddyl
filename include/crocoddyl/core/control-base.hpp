@@ -243,4 +243,9 @@ struct ControlParametrizationDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/control-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ControlParametrizationModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ControlParametrizationDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_CONTROL_BASE_HPP_

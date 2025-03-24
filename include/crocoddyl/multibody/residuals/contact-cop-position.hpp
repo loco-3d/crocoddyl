@@ -372,4 +372,9 @@ struct ResidualDataContactCoPPositionTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-cop-position.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelContactCoPPositionTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataContactCoPPositionTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_COP_POSITION_HPP_

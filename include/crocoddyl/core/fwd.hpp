@@ -10,6 +10,7 @@
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
 
+#include "crocoddyl/config.hpp"
 #include "crocoddyl/core/macros.hpp"
 #include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"

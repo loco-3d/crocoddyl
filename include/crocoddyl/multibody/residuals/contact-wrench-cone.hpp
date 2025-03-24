@@ -356,4 +356,9 @@ struct ResidualDataContactWrenchConeTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelContactWrenchConeTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataContactWrenchConeTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_WRENCH_CONE_HPP_
