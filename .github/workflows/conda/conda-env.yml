@@ -7,7 +7,7 @@ dependencies:
   - numpy
   - scipy
   - python
-  - eigen=3.4.0
+  - eigen
   - eigenpy
   - hpp-fcl
   - urdfdom
