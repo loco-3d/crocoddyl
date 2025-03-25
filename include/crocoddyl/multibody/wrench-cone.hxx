@@ -84,7 +84,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
                  "infinity value"
               << std::endl;
   }
-  A_ = MatrixX3s::Zero(nf_ + 13, 6);
+  A_ = MatrixX6s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
 
