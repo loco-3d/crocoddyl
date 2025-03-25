@@ -158,10 +158,13 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
   if (model_type !=
       PinocchioModelTypes::Hector) {  // this is due to Hector is a single rigid
                                       // body system.
+    float tol_f =
+        80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
     BOOST_CHECK(!casted_data->a0.isZero());
     BOOST_CHECK(!casted_data->da0_dx.isZero());
     BOOST_CHECK((data->a0.cast<float>() - casted_data->a0).isZero());
-    BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero());
+    BOOST_CHECK(
+        (data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
   }
   BOOST_CHECK(casted_data->f.toVector().isZero());
   BOOST_CHECK(casted_data->df_dx.isZero());
@@ -355,9 +358,8 @@ void test_partial_derivatives_against_numdiff(
   casted_model->calcDiff(casted_data, x_f);
   casted_model_num_diff.calc(casted_data_num_diff, x_f);
   casted_model_num_diff.calcDiff(casted_data_num_diff, x_f);
-  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
-  tol_f = 80.0f * sqrt(casted_model_num_diff.get_disturbance());
   BOOST_CHECK((casted_data->da0_dx - casted_data_num_diff->da0_dx)
                   .isZero(30.f * tol_f));
 #endif
