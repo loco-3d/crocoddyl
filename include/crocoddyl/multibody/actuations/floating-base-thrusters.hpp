@@ -373,6 +373,7 @@ class ActuationModelFloatingBaseThrustersTpl
                                                                       : true;
   }
 
+#ifdef CROCODDYL_WITH_CODEGEN
   // Use for CppAD types
   template <typename Scalar>
   typename std::enable_if<!std::is_floating_point<Scalar>::value, bool>::type
@@ -380,13 +381,13 @@ class ActuationModelFloatingBaseThrustersTpl
     return CppAD::Value(CppAD::fabs(condition)) >=
            CppAD::numeric_limits<Scalar>::epsilon();
   }
+#endif
 };
 
 }  // namespace crocoddyl
 
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseThrustersTpl<double>;
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseThrustersTpl<float>;
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ThrusterTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActuationModelFloatingBaseThrustersTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_

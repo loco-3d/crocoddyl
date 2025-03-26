@@ -129,9 +129,7 @@ class ActivationModelSmooth2NormTpl
 
 }  // namespace crocoddyl
 
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActivationModelSmooth2NormTpl<double>;
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActivationModelSmooth2NormTpl<float>;
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModelSmooth2NormTpl)
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_SMOOTH_2NORM_HPP_

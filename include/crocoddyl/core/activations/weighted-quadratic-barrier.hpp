@@ -121,9 +121,7 @@ class ActivationModelWeightedQuadraticBarrierTpl
 
 }  // namespace crocoddyl
 
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActivationModelWeightedQuadraticBarrierTpl<double>;
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActivationModelWeightedQuadraticBarrierTpl<float>;
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModelWeightedQuadraticBarrierTpl)
 
 #endif  // CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_BARRIER_HPP_
