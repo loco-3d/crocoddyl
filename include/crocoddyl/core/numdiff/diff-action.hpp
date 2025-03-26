@@ -268,4 +268,9 @@ struct DifferentialActionDataNumDiffTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/diff-action.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelNumDiffTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataNumDiffTpl)
+
 #endif  // CROCODDYL_CORE_NUMDIFF_DIFF_ACTION_HPP_

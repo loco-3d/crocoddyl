@@ -125,4 +125,6 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/state.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::StateNumDiffTpl)
+
 #endif  // CROCODDYL_CORE_NUMDIFF_STATE_HPP_
