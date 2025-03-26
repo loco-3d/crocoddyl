@@ -57,7 +57,7 @@ template <typename _Scalar>
 class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(ActionModelBase, ActionModelCodeGenTpl)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(ActionModelBase, ActionModelCodeGenTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
