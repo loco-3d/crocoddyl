@@ -11,6 +11,8 @@
 #ifndef CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
 
+#ifdef CROCODDYL_WITH_CODEGEN
+
 #include <functional>
 
 #include "crocoddyl/core/action-base.hpp"
@@ -483,11 +485,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
  protected:
   ActionModelCodeGenTpl()
       : model_(nullptr),
-        lib_fname_(""),
         nP_(0),
-        updateParams_(EmptyParamsEnv),
+        lib_fname_(""),
         compiler_type_(CLANG),
-        compile_options_("-Ofast -march=native") {
+        compile_options_("-Ofast -march=native"),
+        updateParams_(EmptyParamsEnv) {
     // Add initialization logic if necessary
   }
 
@@ -706,5 +708,7 @@ CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(
     crocoddyl::ActionModelCodeGenTpl)
 CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(
     crocoddyl::ActionDataCodeGenTpl)
+
+#endif  // CROCODDYL_WITH_CODEGEN
 
 #endif  // CROCODDYL_CORE_CODEGEN_ACTION_BASE_HPP_
