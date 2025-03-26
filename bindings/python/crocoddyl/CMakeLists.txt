@@ -46,10 +46,10 @@ foreach(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
     DESTINATION ${${PYWRAP}_INSTALL_DIR})
 endforeach(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
 install(
-  FILES "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.launch"
-  "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.rviz"
-  DESTINATION ${${PYWRAP}_INSTALL_DIR}
-)
+  FILES
+    "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.launch"
+    "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.rviz"
+  DESTINATION ${${PYWRAP}_INSTALL_DIR})
 
 set(${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES __init__.py pendulum.py
                                                 biped.py quadruped.py)
