@@ -3,8 +3,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_HEADERS
 file(GLOB_RECURSE ${PROJECT_NAME}_PYTHON_BINDINGS_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py
-                                          crocoddyl.launch crocoddyl.rviz)
+set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py)
 
 set(PYWRAP "${PROJECT_NAME}_pywrap")
 set(${PYWRAP}_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
@@ -46,6 +45,11 @@ foreach(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
     FILES "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/${python}"
     DESTINATION ${${PYWRAP}_INSTALL_DIR})
 endforeach(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
+install(
+  FILES
+    "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.launch"
+    "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.rviz"
+  DESTINATION ${${PYWRAP}_INSTALL_DIR})
 
 set(${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES __init__.py pendulum.py
                                                 biped.py quadruped.py)
