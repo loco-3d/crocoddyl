@@ -54,6 +54,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       class_name<float>;                                                     \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<ADFloat64>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(class_name)   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(class_name)   \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
 #else
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
@@ -62,6 +74,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       class_name<float>;
 
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(class_name)                 \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(class_name)   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(class_name)   \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<double>;                                                    \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \

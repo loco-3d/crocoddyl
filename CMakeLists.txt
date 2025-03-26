@@ -12,6 +12,7 @@ option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Set up Crocoddyl's scalar types
 set(SCALAR_TYPES float double)
+set(SCALAR_FPTYPES ${SCALAR_TYPES})
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -276,7 +277,7 @@ if(UNIX)
   project_config(crocoddyl crocoddyl)
 
   # Function to sanitize the scalar type for filenames
-  function(sanitize_scalar_name scalar sanitized_name)
+  function(crocoddyl_sanitize_scalar_name scalar sanitized_name)
     string(REPLACE "::" "_" sanitized "${scalar}")
     string(REPLACE "<" "_" sanitized "${sanitized}")
     string(REPLACE ">" "" sanitized "${sanitized}")
@@ -285,33 +286,41 @@ if(UNIX)
         "${sanitized}"
         PARENT_SCOPE)
   endfunction()
-  # Find all .cpp.in template files recursively
-  file(GLOB_RECURSE ETI_TEMPLATE_FILES FOLLOW_SYMLINKS
-       ${CMAKE_SOURCE_DIR}/src/**/*.cpp.in)
-  set(generated_eti_files "")
-  foreach(template_file ${ETI_TEMPLATE_FILES})
-    # Extract the relative path from src/
-    file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/src" "${template_file}")
-    # Remove .in extension and get the subdirectory
-    string(REPLACE ".cpp.in" ".cpp" rel_output_file "${rel_path}")
-    # Generate full output path in the build directory
-    set(output_file "${CMAKE_BINARY_DIR}/src/${rel_output_file}")
-    # Ensure the output subdirectory exists
-    get_filename_component(output_dir "${output_file}" DIRECTORY)
-    file(MAKE_DIRECTORY ${output_dir})
-    # Generate .cpp file from template for each scalar type
-    foreach(scalar ${SCALAR_TYPES})
-      # Sanitize scalar name for filenames
-      sanitize_scalar_name("${scalar}" scalar_filename)
-      string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
-                     "${output_file}")
-      set(SCALAR_TYPE ${scalar})
-      configure_file(${template_file} ${scalar_output_file} @ONLY)
-      list(APPEND generated_eti_files ${scalar_output_file})
+  # Function to generate cpp files
+  function(crocoddyl_generate_cpp_files cpp_format)
+    message("Scalar types received: ${ARGN}")
+    set(scalar_types ${ARGN})
+    # Find all .cpp_format.in template files recursively
+    file(GLOB_RECURSE ETI_TEMPLATE_FILES FOLLOW_SYMLINKS
+         ${CMAKE_SOURCE_DIR}/src/**/*.${cpp_format}.in)
+    set(generated_eti_files "")
+    foreach(template_file ${ETI_TEMPLATE_FILES})
+      # Extract the relative path from src/
+      file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/src" "${template_file}")
+      # Remove .in extension and get the subdirectory
+      string(REPLACE ".${cpp_format}.in" ".cpp" rel_output_file "${rel_path}")
+      # Generate full output path in the build directory
+      set(output_file "${CMAKE_BINARY_DIR}/src/${rel_output_file}")
+      # Ensure the output subdirectory exists
+      get_filename_component(output_dir "${output_file}" DIRECTORY)
+      file(MAKE_DIRECTORY ${output_dir})
+      # Generate .cpp file from template for each scalar type
+      foreach(scalar ${scalar_types})
+        # Sanitize scalar name for filenames
+        crocoddyl_sanitize_scalar_name("${scalar}" scalar_filename)
+        string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
+                       "${output_file}")
+        set(SCALAR_TYPE ${scalar})
+        configure_file(${template_file} ${scalar_output_file} @ONLY)
+        list(APPEND generated_eti_files ${scalar_output_file})
+      endforeach()
     endforeach()
-  endforeach()
-  # Add generated files to the target
-  target_sources(${PROJECT_NAME} PRIVATE ${generated_eti_files})
+    # Add generated files to the target
+    target_sources(${PROJECT_NAME} PRIVATE ${generated_eti_files})
+  endfunction()
+
+  crocoddyl_generate_cpp_files(cpp ${SCALAR_TYPES})
+  crocoddyl_generate_cpp_files(cpp_fptype ${SCALAR_FPTYPES})
 
   install(
     TARGETS ${PROJECT_NAME}
