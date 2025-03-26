@@ -372,4 +372,7 @@ struct IntegratedActionDataRKTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integrator/rk.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::IntegratedActionModelRKTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::IntegratedActionDataRKTpl)
+
 #endif  // CROCODDYL_CORE_INTEGRATOR_RK4_HPP_

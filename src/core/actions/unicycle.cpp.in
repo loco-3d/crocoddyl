@@ -1,0 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/actions/unicycle.hpp"
+
+namespace crocoddyl {
+
+template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ActionModelUnicycleTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ActionDataUnicycleTpl<@SCALAR_TYPE@>;
+
+}  // namespace crocoddyl

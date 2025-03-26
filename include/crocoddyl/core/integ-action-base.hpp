@@ -212,4 +212,9 @@ struct IntegratedActionDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integ-action-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::IntegratedActionModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::IntegratedActionDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_INTEGRATED_ACTION_BASE_HPP_

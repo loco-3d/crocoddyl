@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -127,12 +126,6 @@ struct ShootingProblemVisitor
                       "dimension of state tuple")
         .add_property("ndx", bp::make_function(&Problem::get_ndx),
                       "dimension of the tangent space of the state manifold")
-        .add_property(
-            "nu_max",
-            bp::make_function(&Problem::get_nu_max,
-                              deprecated<>("Compute yourself the maximum "
-                                           "dimension of the control vector")),
-            "dimension of the maximum control vector")
         .add_property("is_updated", bp::make_function(&Problem::is_updated),
                       "Returns True if the shooting problem has been updated, "
                       "otherwise False");
@@ -165,14 +158,7 @@ struct ShootingProblemVisitor
       .def(CopyableVisitor<Problem>());
 
 void exposeShootingProblem() {
-// TODO: Remove once the deprecated update call has been removed in a future
-// release
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
   CROCODDYL_PYTHON_SCALARS(CROCODDYL_SHOOTING_PROBLEM_PYTHON_BINDINGS)
-
-#pragma GCC diagnostic pop
 }
 
 }  // namespace python

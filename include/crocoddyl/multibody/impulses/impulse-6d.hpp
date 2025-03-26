@@ -180,4 +180,7 @@ struct ImpulseData6DTpl : public ImpulseDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulses/impulse-6d.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ImpulseModel6DTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseData6DTpl)
+
 #endif  // CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_6D_HPP_

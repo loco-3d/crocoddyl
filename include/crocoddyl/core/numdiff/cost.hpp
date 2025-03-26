@@ -247,4 +247,7 @@ struct CostDataNumDiffTpl : public CostDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/cost.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CostModelNumDiffTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostDataNumDiffTpl)
+
 #endif  // CROCODDYL_CORE_NUMDIFF_COST_HPP_

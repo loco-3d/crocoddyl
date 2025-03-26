@@ -115,4 +115,7 @@ struct ActionDataUnicycleTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actions/unicycle.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelUnicycleTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActionDataUnicycleTpl)
+
 #endif  // CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_

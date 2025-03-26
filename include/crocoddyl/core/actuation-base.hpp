@@ -222,4 +222,7 @@ struct ActuationDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actuation-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActuationModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActuationDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_ACTUATION_BASE_HPP_

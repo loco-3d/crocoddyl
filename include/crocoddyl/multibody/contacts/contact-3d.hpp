@@ -270,4 +270,7 @@ struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contacts/contact-3d.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ContactModel3DTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactData3DTpl)
+
 #endif  // CROCODDYL_MULTIBODY_CONTACTS_CONTACT_3D_HPP_

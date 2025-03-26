@@ -76,4 +76,12 @@ struct DataCollectorJointActMultibodyInContactTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorMultibodyInContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorActMultibodyInContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActMultibodyInContactTpl)
+
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_CONTACT_HPP_

@@ -381,4 +381,8 @@ struct ContactDataMultipleTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contacts/multiple-contacts.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ContactModelMultipleTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactDataMultipleTpl)
+
 #endif  // CROCODDYL_MULTIBODY_CONTACTS_MULTIPLE_CONTACTS_HPP_

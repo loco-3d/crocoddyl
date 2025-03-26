@@ -205,4 +205,9 @@ struct ResidualDataFrameTranslationTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/frame-translation.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelFrameTranslationTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataFrameTranslationTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_FRAME_TRANSLATION_HPP_

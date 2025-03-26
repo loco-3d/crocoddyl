@@ -27,16 +27,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
       nthreads_(1),
       is_updated_(false) {
-  for (std::size_t i = 1; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
-    if (nu_max_ < nu) {
-      nu_max_ = nu;
-    }
-  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -90,15 +82,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
       nthreads_(1) {
-  for (std::size_t i = 1; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
-    if (nu_max_ < nu) {
-      nu_max_ = nu;
-    }
-  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -154,8 +138,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(problem.get_runningModels()),
       running_datas_(problem.get_runningDatas()),
       nx_(problem.get_nx()),
-      ndx_(problem.get_ndx()),
-      nu_max_(problem.get_nu_max()) {}
+      ndx_(problem.get_ndx()) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
@@ -543,11 +526,6 @@ std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
 template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
-}
-
-template <typename Scalar>
-std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
-  return nu_max_;
 }
 
 template <typename Scalar>

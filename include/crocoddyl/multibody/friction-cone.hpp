@@ -215,4 +215,6 @@ class FrictionConeTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/friction-cone.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::FrictionConeTpl)
+
 #endif  // CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_

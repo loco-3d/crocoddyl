@@ -173,4 +173,7 @@ struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulses/impulse-3d.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ImpulseModel3DTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseData3DTpl)
+
 #endif  // CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_

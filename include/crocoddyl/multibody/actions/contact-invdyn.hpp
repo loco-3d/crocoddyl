@@ -792,4 +792,9 @@ struct DifferentialActionDataContactInvDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/contact-invdyn.hxx>
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelContactInvDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataContactInvDynamicsTpl)
+
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_INVDYN_HPP_

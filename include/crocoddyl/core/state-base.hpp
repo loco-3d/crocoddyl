@@ -352,4 +352,6 @@ class StateAbstractTpl : public StateBase {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/state-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::StateAbstractTpl)
+
 #endif  // CROCODDYL_CORE_STATE_BASE_HPP_

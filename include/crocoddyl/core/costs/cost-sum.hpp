@@ -438,4 +438,8 @@ struct CostDataSumTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/costs/cost-sum.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CostModelSumTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostDataSumTpl)
+
 #endif  // CROCODDYL_CORE_COSTS_COST_SUM_HPP_

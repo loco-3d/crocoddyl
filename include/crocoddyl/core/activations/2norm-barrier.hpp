@@ -191,4 +191,9 @@ struct ActivationData2NormBarrierTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModel2NormBarrierTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ActivationData2NormBarrierTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_2NORM_BARRIER_HPP_

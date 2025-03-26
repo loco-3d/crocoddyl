@@ -58,4 +58,10 @@ struct DataCollectorJointActMultibodyTpl : DataCollectorActMultibodyTpl<Scalar>,
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorMultibodyTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorActMultibodyTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActMultibodyTpl)
+
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_HPP_

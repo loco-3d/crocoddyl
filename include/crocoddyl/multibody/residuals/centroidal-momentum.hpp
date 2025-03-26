@@ -193,4 +193,9 @@ struct ResidualDataCentroidalMomentumTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelCentroidalMomentumTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataCentroidalMomentumTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_MOMENTUM_HPP_

@@ -228,4 +228,7 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contact-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ContactModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactDataAbstractTpl)
+
 #endif  // CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_

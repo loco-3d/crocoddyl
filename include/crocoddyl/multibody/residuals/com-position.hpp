@@ -175,4 +175,7 @@ struct ResidualDataCoMPositionTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/com-position.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ResidualModelCoMPositionTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ResidualDataCoMPositionTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_COM_POSITION_HPP_

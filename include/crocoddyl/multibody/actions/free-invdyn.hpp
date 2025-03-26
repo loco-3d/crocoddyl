@@ -519,4 +519,9 @@ struct DifferentialActionDataFreeInvDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/free-invdyn.hxx>
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelFreeInvDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataFreeInvDynamicsTpl)
+
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_

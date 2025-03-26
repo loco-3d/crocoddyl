@@ -216,7 +216,7 @@ void FrictionConeTpl<Scalar>::set_R(const Matrix3s& R) {
 
 template <typename Scalar>
 void FrictionConeTpl<Scalar>::set_nsurf(const Vector3s& nsurf) {
-  Eigen::Vector3d normal = nsurf;
+  Vector3s normal = nsurf;
   // Sanity checks
   if (!nsurf.isUnitary()) {
     normal /= nsurf.norm();

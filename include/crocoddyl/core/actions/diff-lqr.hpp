@@ -367,4 +367,10 @@ struct DifferentialActionDataLQRTpl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actions/diff-lqr.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelLQRTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataLQRTpl)
+
 #endif  // CROCODDYL_CORE_ACTIONS_DIFF_LQR_HPP_

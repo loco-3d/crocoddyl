@@ -78,4 +78,6 @@ class StateVectorTpl : public StateAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/states/euclidean.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::StateVectorTpl)
+
 #endif  // CROCODDYL_CORE_STATES_EUCLIDEAN_HPP_

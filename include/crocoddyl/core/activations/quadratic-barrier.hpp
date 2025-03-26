@@ -231,4 +231,10 @@ struct ActivationDataQuadraticBarrierTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActivationBoundsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModelQuadraticBarrierTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ActivationDataQuadraticBarrierTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_BARRIER_HPP_

@@ -347,4 +347,7 @@ struct ActionDataLQRTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/actions/lqr.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelLQRTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActionDataLQRTpl)
+
 #endif  // CROCODDYL_CORE_ACTIONS_LQR_HPP_

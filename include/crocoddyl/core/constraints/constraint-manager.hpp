@@ -483,4 +483,8 @@ struct ConstraintDataManagerTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/constraints/constraint-manager.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ConstraintItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ConstraintModelManagerTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ConstraintDataManagerTpl)
+
 #endif  // CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_

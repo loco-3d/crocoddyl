@@ -44,7 +44,7 @@ jobs:
         # os: ["ubuntu-latest", "macos-latest"]
         os: ["macos-latest"]
         build_type: [Release, Debug]
-        python-version: ["3.8", "3.12"]
+        # python-version: ["3.8", "3.12"]
         compiler: [clang]
 
         include:

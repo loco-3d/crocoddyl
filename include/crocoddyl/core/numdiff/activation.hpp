@@ -155,4 +155,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/activation.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActivationModelNumDiffTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActivationDataNumDiffTpl)
+
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_

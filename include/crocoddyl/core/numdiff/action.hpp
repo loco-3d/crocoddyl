@@ -269,4 +269,7 @@ struct ActionDataNumDiffTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/action.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelNumDiffTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActionDataNumDiffTpl)
+
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTION_HPP_

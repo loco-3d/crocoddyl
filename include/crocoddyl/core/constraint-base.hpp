@@ -318,4 +318,7 @@ struct ConstraintDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/constraint-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ConstraintModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ConstraintDataAbstractTpl)
+
 #endif  // CROCODDYL_CORE_CONSTRAINT_BASE_HPP_

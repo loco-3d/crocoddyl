@@ -210,4 +210,9 @@ struct ResidualDataFramePlacementTpl : public ResidualDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/frame-placement.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelFramePlacementTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataFramePlacementTpl)
+
 #endif  // CROCODDYL_MULTIBODY_RESIDUALS_FRAME_PLACEMENT_HPP_

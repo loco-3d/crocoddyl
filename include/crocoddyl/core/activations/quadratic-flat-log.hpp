@@ -170,4 +170,9 @@ struct ActivationDataQuadFlatLogTpl
 
 }  // namespace crocoddyl
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActivationModelQuadFlatLogTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ActivationDataQuadFlatLogTpl)
+
 #endif  // CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_FLAT_LOG_HPP_

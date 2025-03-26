@@ -210,4 +210,9 @@ struct ControlParametrizationDataPolyTwoRKTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/controls/poly-two-rk.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ControlParametrizationModelPolyTwoRKTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ControlParametrizationDataPolyTwoRKTpl)
+
 #endif  // CROCODDYL_CORE_CONTROLS_POLY_TWO_RK_HPP_

@@ -211,4 +211,9 @@ struct ResidualDataJointAccelerationTpl
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/residuals/joint-acceleration.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ResidualModelJointAccelerationTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::ResidualDataJointAccelerationTpl)
+
 #endif  // CROCODDYL_CORE_RESIDUALS_JOINT_ACCELERATION_HPP_

@@ -40,6 +40,37 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 
 #ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
                                        // when supporting codegen
+#define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;                                                    \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<ADFloat64>;
+
+#define CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(class_name)                 \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;                                                     \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<ADFloat64>;
+#else
+#define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(class_name)                 \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+#endif
+
+#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
+                                       // when supporting codegen
 #define CROCODDYL_BASE_CAST(base_class, class)                              \
   template <typename Scalar>                                                \
   std::shared_ptr<class<Scalar>> cast() const {                             \

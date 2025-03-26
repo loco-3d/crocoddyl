@@ -154,4 +154,9 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActuationModelFullTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ActuationModelFullTpl<float>;
+
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FULL_HPP_
