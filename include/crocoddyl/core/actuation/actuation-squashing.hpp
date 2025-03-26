@@ -69,7 +69,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
                    << "tau has wrong dimension (it should be " +
                           std::to_string(this->state_->get_nv()) + ")");
     }
-    this->torqueTransform(data, x, tau);
+    torqueTransform(data, x, tau);
     data->u.noalias() = data->Mtau * tau;
   }
 
@@ -94,6 +94,7 @@ class ActuationSquashingModelTpl : public ActuationModelAbstractTpl<_Scalar> {
   std::shared_ptr<SquashingModelAbstract> squashing_;
   std::shared_ptr<Base> actuation_;
   using Base::nu_;
+  using Base::torqueTransform;
 };
 
 template <typename _Scalar>
