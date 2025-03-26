@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed error message building crocoddyl.launch crocoddyl.rviz as Python files in https://github.com/loco-3d/crocoddyl/pull/1369
 * Created Python bindings for (diff)-action getters in https://github.com/loco-3d/crocoddyl/pull/1362
 * Enabled casting and multi-scalar Python bindings in https://github.com/loco-3d/crocoddyl/pull/1346
 * Compute LU decomposition using permutationP in https://github.com/loco-3d/crocoddyl/pull/1351
