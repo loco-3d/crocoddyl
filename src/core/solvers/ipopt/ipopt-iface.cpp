@@ -6,13 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
-#include <iostream>
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#include <omp.h>
-#endif  // CROCODDYL_WITH_MULTITHREADING
-
 #include "crocoddyl/core/solvers/ipopt/ipopt-iface.hpp"
+
+#include <cmath>
 
 namespace crocoddyl {
 

@@ -14,8 +14,6 @@
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
-#include <pinocchio/multibody/geometry.hpp>
-
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"

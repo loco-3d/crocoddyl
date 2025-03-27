@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 
-#include <Eigen/Cholesky>
-#include <vector>
-
 #include "crocoddyl/core/solvers/ddp.hpp"
 
 namespace crocoddyl {

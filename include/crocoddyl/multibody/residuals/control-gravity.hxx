@@ -6,9 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-
 namespace crocoddyl {
 
 template <typename Scalar>

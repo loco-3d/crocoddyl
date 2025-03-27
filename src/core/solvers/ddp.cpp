@@ -9,8 +9,6 @@
 
 #include "crocoddyl/core/solvers/ddp.hpp"
 
-#include <iostream>
-
 namespace crocoddyl {
 
 SolverDDP::SolverDDP(std::shared_ptr<ShootingProblem> problem)

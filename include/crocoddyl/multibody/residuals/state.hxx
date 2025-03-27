@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/state.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

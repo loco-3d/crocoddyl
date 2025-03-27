@@ -12,7 +12,6 @@
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/to_python_converter.hpp>
-#include <map>
 
 #include "python/crocoddyl/utils/vector-converter.hpp"
 

@@ -7,10 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#include <omp.h>
-#endif  // CROCODDYL_WITH_MULTITHREADING
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {

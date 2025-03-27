@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_CORE_UTILS_MATH_HPP_
 #define CROCODDYL_CORE_UTILS_MATH_HPP_
 
+#include <Eigen/Cholesky>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
@@ -86,10 +87,10 @@ MatrixLike pseudoInverse(
 
 template <typename Scalar>
 typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
-checkPSD(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& L_) {
+checkPSD(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& a) {
   Eigen::SelfAdjointEigenSolver<
       Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>
-      eig(L_);
+      eig(a);
   if (eig.info() != Eigen::Success ||
       eig.eigenvalues().minCoeff() < ScaleNumerics<Scalar>(-1e-9)) {
     return false;

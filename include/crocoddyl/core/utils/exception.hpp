@@ -11,7 +11,6 @@
 #define CROCODDYL_CORE_UTILS_EXCEPTION_HPP_
 
 #include <exception>
-#include <iostream>
 #include <sstream>
 
 #define NOEXCEPT noexcept

@@ -8,12 +8,6 @@
 
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 
-#include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <utility>
-
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"

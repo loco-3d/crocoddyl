@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_RESIDUALS_FRAME_VELOCITY_HPP_
 #define CROCODDYL_MULTIBODY_RESIDUALS_FRAME_VELOCITY_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-#include <pinocchio/spatial/motion.hpp>
-
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"

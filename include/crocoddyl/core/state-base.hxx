@@ -7,10 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/core/demangle.hpp>
-
-#include "crocoddyl/core/mathbase.hpp"
-
 namespace crocoddyl {
 template <typename Scalar>
 StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t nx,

@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTUATION_HPP_
 
-#include <iostream>
-#include <vector>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

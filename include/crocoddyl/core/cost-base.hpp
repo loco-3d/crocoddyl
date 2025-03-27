@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_COST_BASE_HPP_
 #define CROCODDYL_CORE_COST_BASE_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"

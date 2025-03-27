@@ -22,7 +22,6 @@
 #include <boost/test/execution_monitor.hpp>  // for execution_exception
 #include <boost/test/included/unit_test.hpp>
 #include <iterator>
-#include <string>
 
 #include "crocoddyl/core/utils/exception.hpp"
 #include "random_generator.hpp"

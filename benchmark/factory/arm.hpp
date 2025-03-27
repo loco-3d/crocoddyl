@@ -11,14 +11,12 @@
 #define CROCODDYL_ARM_FACTORY_HPP_
 
 #include <example-robot-data/path.hpp>
-#include <pinocchio/algorithm/model.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/full.hpp"

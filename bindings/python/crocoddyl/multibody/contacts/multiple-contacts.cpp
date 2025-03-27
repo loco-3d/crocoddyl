@@ -9,10 +9,6 @@
 
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 
-#include <functional>
-#include <map>
-#include <memory>
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "python/crocoddyl/utils/set-converter.hpp"

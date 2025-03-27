@@ -297,6 +297,12 @@ if(UNIX)
 
   project_config(crocoddyl crocoddyl)
 
+  # Added pre-compiled headers
+  target_precompile_headers(
+    ${PROJECT_NAME} PRIVATE
+    ${PROJECT_SOURCE_DIR}/include/crocoddyl/core/pch.hpp
+    ${PROJECT_SOURCE_DIR}/include/crocoddyl/multibody/pch.hpp)
+
   # Function to sanitize the scalar type for filenames
   function(crocoddyl_sanitize_scalar_name scalar sanitized_name)
     string(REPLACE "::" "_" sanitized "${scalar}")

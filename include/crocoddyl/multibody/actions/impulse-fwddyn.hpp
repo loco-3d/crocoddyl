@@ -10,14 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_IMPULSE_FWDDYN_HPP_
 
-#include <pinocchio/algorithm/centroidal.hpp>
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/contact-dynamics.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <stdexcept>
-
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"

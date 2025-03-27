@@ -9,8 +9,6 @@
 
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
-#include <memory>
-
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {

@@ -9,12 +9,6 @@
 
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 
-#include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <utility>
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 

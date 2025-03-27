@@ -6,10 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/frames.hpp>
-
-#include "crocoddyl/multibody/residuals/frame-placement.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

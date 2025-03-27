@@ -9,10 +9,6 @@
 #ifndef CROCODDYL_MULTIBODY_FORCE_BASE_HPP_
 #define CROCODDYL_MULTIBODY_FORCE_BASE_HPP_
 
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/spatial/force.hpp>
-
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
 namespace crocoddyl {

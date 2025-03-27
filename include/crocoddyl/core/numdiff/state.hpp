@@ -11,8 +11,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 #define CROCODDYL_CORE_NUMDIFF_STATE_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 

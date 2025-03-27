@@ -10,12 +10,7 @@
 #ifndef CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 #define CROCODDYL_CORE_ACTIVATION_BASE_HPP_
 
-#include <boost/core/demangle.hpp>
-#include <memory>
-#include <stdexcept>
-
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 

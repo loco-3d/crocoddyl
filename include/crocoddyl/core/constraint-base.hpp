@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 #define CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/fwd.hpp"
 //
 #include "crocoddyl/core/data-collector-base.hpp"

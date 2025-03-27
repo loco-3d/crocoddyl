@@ -9,10 +9,6 @@
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-#include <pinocchio/spatial/se3.hpp>
-#include <vector>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"

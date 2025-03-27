@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_MATHBASE_HPP_
 #define CROCODDYL_CORE_MATHBASE_HPP_
 
-#include <Eigen/Dense>
-
 #include "crocoddyl/core/utils/math.hpp"
 
 namespace crocoddyl {

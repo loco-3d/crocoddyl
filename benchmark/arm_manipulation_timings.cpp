@@ -15,7 +15,6 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/integrator/rk.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/utils/timer.hpp"

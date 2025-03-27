@@ -8,11 +8,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

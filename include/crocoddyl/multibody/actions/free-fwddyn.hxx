@@ -7,18 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/aba-derivatives.hpp>
-#include <pinocchio/algorithm/aba.hpp>
-#include <pinocchio/algorithm/cholesky.hpp>
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

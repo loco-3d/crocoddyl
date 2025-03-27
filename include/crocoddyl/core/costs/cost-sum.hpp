@@ -10,11 +10,6 @@
 #ifndef CROCODDYL_CORE_COSTS_COST_SUM_HPP_
 #define CROCODDYL_CORE_COSTS_COST_SUM_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

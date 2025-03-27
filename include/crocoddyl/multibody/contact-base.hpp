@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 #define CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/force-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"

@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_ACTION_BASE_HPP_
 #define CROCODDYL_CORE_ACTION_BASE_HPP_
 
-#include <memory>
-#include <stdexcept>
-
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 

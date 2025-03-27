@@ -10,13 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_FREE_FWDDYN_HPP_
 
-#include <stdexcept>
-
-#ifdef PINOCCHIO_WITH_CPPAD_SUPPORT  // TODO(cmastalli): Removed after merging
-                                     // Pinocchio v.2.4.8
-#include <pinocchio/codegen/cppadcg.hpp>
-#endif
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"

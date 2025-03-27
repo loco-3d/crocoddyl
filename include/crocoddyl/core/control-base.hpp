@@ -10,10 +10,7 @@
 #ifndef CROCODDYL_CORE_CONTROL_BASE_HPP_
 #define CROCODDYL_CORE_CONTROL_BASE_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 

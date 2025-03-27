@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
-
 namespace crocoddyl {
 
 template <typename _Scalar>

@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 
-#include <stdexcept>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"

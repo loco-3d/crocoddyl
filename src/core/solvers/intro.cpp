@@ -8,8 +8,6 @@
 
 #include "crocoddyl/core/solvers/intro.hpp"
 
-#include <iostream>
-
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {

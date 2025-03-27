@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_QUADRATIC_HPP_
 
-#include <stdexcept>
-
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

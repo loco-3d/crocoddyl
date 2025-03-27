@@ -10,11 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_MULTIPLE_CONTACTS_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_MULTIPLE_CONTACTS_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 

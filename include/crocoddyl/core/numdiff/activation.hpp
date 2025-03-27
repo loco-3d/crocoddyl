@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 
-#include <iostream>
-#include <vector>
-
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

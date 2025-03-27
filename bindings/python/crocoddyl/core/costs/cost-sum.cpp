@@ -9,10 +9,6 @@
 
 #include "crocoddyl/core/costs/cost-sum.hpp"
 
-#include <functional>
-#include <map>
-#include <memory>
-
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/diff-action-base.hpp"

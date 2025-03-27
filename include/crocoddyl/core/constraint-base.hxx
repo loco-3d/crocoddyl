@@ -6,9 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/core/demangle.hpp>
-#include <limits>
-
 namespace crocoddyl {
 
 template <typename Scalar>

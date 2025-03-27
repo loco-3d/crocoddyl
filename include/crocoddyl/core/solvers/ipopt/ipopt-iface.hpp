@@ -13,7 +13,6 @@
 #include <IpTNLP.hpp>
 #undef HAVE_CSTDDEF
 
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
 namespace crocoddyl {

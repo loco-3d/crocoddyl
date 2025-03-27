@@ -11,9 +11,6 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-#include <memory>
-#include <vector>
-
 #include "crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 

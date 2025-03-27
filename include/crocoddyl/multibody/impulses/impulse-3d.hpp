@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/spatial/motion.hpp>
-
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 

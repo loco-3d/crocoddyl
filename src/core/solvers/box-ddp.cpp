@@ -8,8 +8,6 @@
 
 #include "crocoddyl/core/solvers/box-ddp.hpp"
 
-#include <iostream>
-
 namespace crocoddyl {
 
 SolverBoxDDP::SolverBoxDDP(std::shared_ptr<ShootingProblem> problem)

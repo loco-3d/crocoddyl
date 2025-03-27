@@ -11,7 +11,6 @@
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
 #include <iomanip>
-#include <iostream>
 
 #include "crocoddyl/core/solver-base.hpp"
 

@@ -10,7 +10,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <pinocchio/algorithm/model.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/parsers/urdf.hpp>
@@ -21,7 +20,6 @@
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"

@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_CONTROL_HPP_
 #define CROCODDYL_CORE_NUMDIFF_CONTROL_HPP_
 
-#include <memory>
-#include <vector>
-
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 
