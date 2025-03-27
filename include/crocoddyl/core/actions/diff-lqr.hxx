@@ -447,7 +447,7 @@ void DifferentialActionModelLQRTpl<Scalar>::set_LQR(
   }
   L_ = MatrixXs::Zero(2 * nq + nu_, 2 * nq + nu_);
   L_ << Q, N, N.transpose(), R;
-  if (checkPSD(L_)) {
+  if (!checkPSD(L_)) {
     throw_pretty("Invalid argument "
                  << "[Q, N; N.T, R] is not positive semi-definite");
   }

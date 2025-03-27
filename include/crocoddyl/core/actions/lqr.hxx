@@ -419,7 +419,7 @@ void ActionModelLQRTpl<Scalar>::set_LQR(const MatrixXs& A, const MatrixXs& B,
   }
   L_ = MatrixXs::Zero(nx + nu_, nx + nu_);
   L_ << Q, N, N.transpose(), R;
-  if (checkPSD(L_)) {
+  if (!checkPSD(L_)) {
     throw_pretty("Invalid argument "
                  << "[Q, N; N.T, R] is not positive semi-definite");
   }
