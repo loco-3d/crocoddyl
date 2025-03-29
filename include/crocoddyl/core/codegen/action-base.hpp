@@ -110,16 +110,21 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
         nX_T_(state_->get_nx() + nP_),
+        nX3_(state_->get_nx()),
         nY1_(1 + state_->get_nx() + ng_ + nh_),
         nY1_T_(1 + ng_T_ + nh_T_),
+        nY3_(nu_),
         ad_X_(nX_),
         ad_X_T_(nX_T_),
+        ad_X3_(nX3_),
         ad_Y1_(nY1_),
         ad_Y1_T_(nY1_T_),
+        ad_Y3_(nY3_),
         Y1fun_name_("calc"),
         Y1Tfun_name_("calc_T"),
         Y2fun_name_("calcDiff"),
         Y2Tfun_name_("calcDiff_T"),
+        Y3fun_name_("quasiStatic"),
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
@@ -127,7 +132,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_calc_(std::make_unique<ADFun>()),
         ad_calc_T_(std::make_unique<ADFun>()),
         ad_calcDiff_(std::make_unique<ADFun>()),
-        ad_calcDiff_T_(std::make_unique<ADFun>()) {
+        ad_calcDiff_T_(std::make_unique<ADFun>()),
+        ad_quasiStatic_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
            nu_;                                     // cost and dynamics
@@ -164,16 +170,21 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
         nX_T_(state_->get_nx() + nP_),
+        nX3_(state_->get_nx()),
         nY1_(1 + state_->get_nx() + ng_ + nh_),
         nY1_T_(1 + ng_T_ + nh_T_),
+        nY3_(nu_),
         ad_X_(nX_),
         ad_X_T_(nX_T_),
+        ad_X3_(nX3_),
         ad_Y1_(nY1_),
         ad_Y1_T_(nY1_T_),
+        ad_Y3_(nY3_),
         Y1fun_name_("calc"),
         Y1Tfun_name_("calc_T"),
         Y2fun_name_("calcDiff"),
         Y2Tfun_name_("calcDiff_T"),
+        Y3fun_name_("quasiStatic"),
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
@@ -181,7 +192,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_calc_(std::make_unique<ADFun>()),
         ad_calc_T_(std::make_unique<ADFun>()),
         ad_calcDiff_(std::make_unique<ADFun>()),
-        ad_calcDiff_T_(std::make_unique<ADFun>()) {
+        ad_calcDiff_T_(std::make_unique<ADFun>()),
+        ad_quasiStatic_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
            nu_;                                     // cost and dynamics
@@ -205,20 +217,25 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         nP_(other.nP_),
         nX_(other.nX_),
         nX_T_(other.nX_T_),
+        nX3_(other.nX3_),
         nY1_(other.nY1_),
         nY1_T_(other.nY1_T_),
         nY2_(other.nY2_),
         nY2_T_(other.nY2_T_),
+        nY3_(other.nY3_),
         ad_X_(other.nX_),
         ad_X_T_(other.nX_T_),
+        ad_X3_(other.nX3_),
         ad_Y1_(other.nY1_),
         ad_Y1_T_(other.nY1_T_),
         ad_Y2_(other.nY2_),
         ad_Y2_T_(other.nY2_T_),
+        ad_Y3_(other.nY3_),
         Y1fun_name_(other.Y1fun_name_),
         Y1Tfun_name_(other.Y1Tfun_name_),
         Y2fun_name_(other.Y2fun_name_),
         Y2Tfun_name_(other.Y2Tfun_name_),
+        Y3fun_name_(other.Y3fun_name_),
         lib_fname_(other.lib_fname_),
         compiler_type_(other.compiler_type_),
         compile_options_(other.compile_options_),
@@ -227,13 +244,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_calc_T_(clone_adfun(*other.ad_calc_T_)),
         ad_calcDiff_(clone_adfun(*other.ad_calcDiff_)),
         ad_calcDiff_T_(clone_adfun(*other.ad_calcDiff_T_)),
+        ad_quasiStatic_(clone_adfun(*other.ad_quasiStatic_)),
         calcCG_(std::make_unique<CSourceGen>(*ad_calc_, Y1fun_name_)),
         calcCG_T_(std::make_unique<CSourceGen>(*ad_calc_T_, Y1Tfun_name_)),
         calcDiffCG_(std::make_unique<CSourceGen>(*ad_calcDiff_, Y2fun_name_)),
         calcDiffCG_T_(
             std::make_unique<CSourceGen>(*ad_calcDiff_T_, Y2Tfun_name_)),
-        libCG_(std::make_unique<LibraryCSourceGen>(
-            *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_)),
+        quasiStaticCG_(
+            std::make_unique<CSourceGen>(*ad_quasiStatic_, Y3fun_name_)),
+        libCG_(std::make_unique<LibraryCSourceGen>(*calcCG_, *calcCG_T_,
+                                                   *calcDiffCG_, *calcDiffCG_T_,
+                                                   *quasiStaticCG_)),
         dynLibManager_(
             std::make_unique<LibraryProcessor>(*other.libCG_, lib_fname_)) {
     loadLib(false);
@@ -270,9 +291,15 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         new CSourceGen(*ad_calcDiff_T_.get(), Y2Tfun_name_));
     calcDiffCG_T_->setCreateForwardZero(true);
     calcDiffCG_T_->setCreateJacobian(false);
+    // Generate source code for quasiStatic
+    recordQuasiStatic();
+    quasiStaticCG_ = std::unique_ptr<CSourceGen>(
+        new CSourceGen(*ad_quasiStatic_.get(), Y3fun_name_));
+    quasiStaticCG_->setCreateForwardZero(true);
+    quasiStaticCG_->setCreateJacobian(false);
     // Generate library for calc and calcDiff
     libCG_ = std::unique_ptr<LibraryCSourceGen>(new LibraryCSourceGen(
-        *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_));
+        *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_, *quasiStaticCG_));
     // Create dynamic library manager
     dynLibManager_ = std::unique_ptr<LibraryProcessor>(
         new LibraryProcessor(*libCG_, lib_fname_));
@@ -339,6 +366,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     calcFun_T_ = dynLib_->model(Y1Tfun_name_.c_str());
     calcDiffFun_ = dynLib_->model(Y2fun_name_.c_str());
     calcDiffFun_T_ = dynLib_->model(Y2Tfun_name_.c_str());
+    quasiStaticFun_ = dynLib_->model(Y3fun_name_.c_str());
   }
 
   void set_parameters(const std::shared_ptr<ActionDataAbstract>& data,
@@ -459,16 +487,22 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] data    Action data
    * @param[out] u      Quasic static commands
    * @param[in] x       State point (velocity has to be zero)
-   * @param[in] maxiter Maximum allowed number of iterations
-   * @param[in] tol     Tolerance
+   * @param[in] maxiter Maximum allowed number of iterations (default 100)
+   * @param[in] tol     Tolerance (default 1e-9)
    */
   virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
                            Eigen::Ref<VectorXs> u,
                            const Eigen::Ref<const VectorXs>& x,
-                           const std::size_t maxiter,
-                           const Scalar tol) override {
+                           const std::size_t /*maxiter = 100*/,
+                           const Scalar /*tol*/) override {
+    START_PROFILER("ActionModelCodeGen::quasiStatic");
     Data* d = static_cast<Data*>(data.get());
-    model_->quasiStatic(d->action, u, x, maxiter, tol);
+    d->X3 = x;
+    START_PROFILER("ActionModelCodeGen::quasiStatic::ForwardZero");
+    quasiStaticFun_->ForwardZero(d->X3, d->Y3);
+    STOP_PROFILER("ActionModelCodeGen::quasiStatic::ForwardZero");
+    u = Eigen::Map<VectorXs>(d->Y3.data(), nu_);
+    STOP_PROFILER("ActionModelCodeGen::quasiStatic");
   }
 
   /**
@@ -542,27 +576,40 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::size_t get_nX_T() const { return nX_T_; }
 
   /**
-   * @brief Return the dimension of the independent vector used by calc function
+   * @brief Return the dimension of the dependent vector used by the quasiStatic
+   * function
+   */
+  std::size_t get_nX3() const { return nX3_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by the calc
+   * function
    */
   std::size_t get_nY1() const { return nY1_; }
 
   /**
-   * @brief Return the dimension of the independent vector used by calc function
-   * in terminal nodes
+   * @brief Return the dimension of the independent vector used by the calc
+   * function in terminal nodes
    */
   std::size_t get_nY1_T() const { return nY1_T_; }
 
   /**
-   * @brief Return the dimension of the independent vector used by calcDiff
+   * @brief Return the dimension of the independent vector used by the calcDiff
    * function
    */
   std::size_t get_nY2() const { return nY2_; }
 
   /**
-   * @brief Return the dimension of the independent vector used by calcDiff
+   * @brief Return the dimension of the independent vector used by the calcDiff
    * function in terminal nodes
    */
   std::size_t get_nY2_T() const { return nY2_T_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by the
+   * quasiStatic function
+   */
+  std::size_t get_nY3() const { return nY3_; }
 
   /**
    * @brief Print relevant information of the action model
@@ -595,30 +642,39 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::shared_ptr<ADActionDataAbstract>
       ad_data_;  //! Action data needed for code generation
 
-  std::size_t nP_;  //!< Dimension of the parameter variables in calc and
+  std::size_t nP_;  //!< Dimension of the parameter variables in the calc and
                     //!< calcDiff functions
-  std::size_t nX_;  //!< Dimension of the independent variables used by calc and
-                    //!< calcDiff functions
-  std::size_t nX_T_;  //!< Dimension of the independent variables used by calc
-                      //!< and calcDiff functions in terminal nodes
+  std::size_t nX_;  //!< Dimension of the independent variables used by the calc
+                    //!< and calcDiff functions
+  std::size_t nX_T_;  //!< Dimension of the independent variables used by the
+                      //!< calc and calcDiff functions in terminal nodes
+  std::size_t nX3_;   //!< Dimension of the independent variables used by the
+                      //!< quasiStatic function
   std::size_t
-      nY1_;  //!< Dimension of the dependent variables used by calc function
-  std::size_t nY1_T_;  //!< Dimension of the dependent variables used by calc
-                       //!< function in terminal nodes
-  std::size_t
-      nY2_;  //!< Dimension of the dependent variables used by calcDiff function
-  std::size_t nY2_T_;  //!< Dimension of the dependent variables used by
-                       //!< calcDiff function in terminal nodes
-  ADVectorXs ad_X_;    //!< Independent variables used to tape calc and calcDiff
-                       //!< functions
-  ADVectorXs ad_X_T_;  //!< Independent variables used to tape calc and calcDiff
-                       //!< functions in terminal nodes
-  ADVectorXs ad_Y1_;   //!< Dependent variables used to tape calc function
-  ADVectorXs ad_Y1_T_;  //!< Dependent variables used to tape calc function in
-                        //!< terminal nodes
-  ADVectorXs ad_Y2_;    //!< Dependent variables used to tape calcDiff function
-  ADVectorXs ad_Y2_T_;  //!< Dependent variables used to tape calcDiff function
+      nY1_;  //!< Dimension of the dependent variables used by the calc function
+  std::size_t nY1_T_;   //!< Dimension of the dependent variables used by the
+                        //!< calc function in terminal nodes
+  std::size_t nY2_;     //!< Dimension of the dependent variables used by the
+                        //!< calcDiff function
+  std::size_t nY2_T_;   //!< Dimension of the dependent variables used by the
+                        //!< calcDiff function in terminal nodes
+  std::size_t nY3_;     //!< Dimension of the dependent variables used by the
+                        //!< quasiStatic function
+  ADVectorXs ad_X_;     //!< Independent variables used to tape the calc and
+                        //!< calcDiff functions
+  ADVectorXs ad_X_T_;   //!< Independent variables used to tape the calc and
+                        //!< calcDiff functions in terminal nodes
+  ADVectorXs ad_X3_;    //!< Independent variables used to tape quasiStatic
+                        //!< function
+  ADVectorXs ad_Y1_;    //!< Dependent variables used to tape the calc function
+  ADVectorXs ad_Y1_T_;  //!< Dependent variables used to tape the calc function
                         //!< in terminal nodes
+  ADVectorXs
+      ad_Y2_;  //!< Dependent variables used to tape the calcDiff function
+  ADVectorXs ad_Y2_T_;  //!< Dependent variables used to tape the calcDiff
+                        //!< function in terminal nodes
+  ADVectorXs
+      ad_Y3_;  //!< Dependent variables used to tape the quasiStatic function
 
   const std::string Y1fun_name_;  //!< Name of the calc function
   const std::string
@@ -626,6 +682,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   const std::string Y2fun_name_;  //!< Name of the calcDiff function
   const std::string
       Y2Tfun_name_;  //!< Name of the calcDiff function used in terminal nodes
+  const std::string Y3fun_name_;       //!< Name of the quasiStatic function
   const std::string lib_fname_;        //!< Name of the code generated library
   CompilerType compiler_type_;         //!< Type of compiler
   const std::string compile_options_;  //!< Compilation options
@@ -639,16 +696,21 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::unique_ptr<ADFun>
       ad_calcDiff_;  //!< Function used to code generate calcDiff
   std::unique_ptr<ADFun> ad_calcDiff_T_;  //!< Function used to code generate
-                                          //!< calcDiff in terminal nodes
+                                          //!< the calcDiff in terminal nodes
+  std::unique_ptr<ADFun>
+      ad_quasiStatic_;  //! < Function used to code generate quasiStatic
   std::unique_ptr<CSourceGen>
-      calcCG_;  //!< Code generated source code of calc function
-  std::unique_ptr<CSourceGen> calcCG_T_;  //!< Code generated source code of
-                                          //!< calc function in terminal nodes
+      calcCG_;  //!< Code generated source code of the calc function
   std::unique_ptr<CSourceGen>
-      calcDiffCG_;  //!< Code generated source code of calcDiff function
+      calcCG_T_;  //!< Code generated source code of
+                  //!< the calc function in terminal nodes
   std::unique_ptr<CSourceGen>
-      calcDiffCG_T_;  //!< Code generated source code of calcDiff function in
-                      //!< terminal nodes
+      calcDiffCG_;  //!< Code generated source code of the calcDiff function
+  std::unique_ptr<CSourceGen>
+      calcDiffCG_T_;  //!< Code generated source code of the calcDiff function
+                      //!< in terminal nodes
+  std::unique_ptr<CSourceGen> quasiStaticCG_;  //!< Code generated source code
+                                               //!< of the quasiStatic function
   std::unique_ptr<LibraryCSourceGen>
       libCG_;  //!< Library of the code generated source code
   std::unique_ptr<LibraryProcessor>
@@ -661,6 +723,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       calcDiffFun_;  //!< Code generated calcDiff function
   std::unique_ptr<GenericModel>
       calcDiffFun_T_;  //!< Code generated calcDiff function in terminal nodes
+  std::unique_ptr<GenericModel>
+      quasiStaticFun_;  //!< Code generated quasiStatic function
 
  private:
   void recordCalc() {
@@ -719,6 +783,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // Define calcDiff's output as the dependent variable
     ad_calcDiff_T_->Dependent(ad_X_T_, ad_Y2_T_);
     ad_calcDiff_T_->optimize("no_compare_op");
+  }
+
+  void recordQuasiStatic() {
+    const std::size_t nx = state_->get_nx();
+    // Define the quasiStatic's input as the independent variables
+    CppAD::Independent(ad_X3_);
+    // Collect computation in quasiStatic
+    ad_model_->quasiStatic(ad_data_, ad_Y3_, ad_X3_.head(nx), 100);
+    // Define quasiStatic's output as the dependent variable
+    ad_quasiStatic_->Dependent(ad_X3_, ad_Y3_);
+    ad_quasiStatic_->optimize("no_compare_op");
   }
 
   void tapeCalcOutput() {
@@ -800,16 +875,20 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
     X_T.resize(m->get_nX_T());
+    X3.resize(m->get_nX3());
     Y1.resize(m->get_nY1());
     Y1_T.resize(m->get_nY1_T());
     Y2.resize(m->get_nY2());
     Y2_T.resize(m->get_nY2_T());
+    Y3.resize(m->get_nY3());
     X.setZero();
     X_T.setZero();
+    X3.setZero();
     Y1.setZero();
     Y1_T.setZero();
     Y2.setZero();
     Y2_T.setZero();
+    Y3.setZero();
   }
 
   using Base::cost;
@@ -829,15 +908,18 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::r;
   using Base::xnext;
 
-  VectorXs X;    //!< Independent variables used by calc and calcDiff functions
-  VectorXs X_T;  //!< Independent variables used by calc and calcDiff functions
-                 //!< in terminal nodes
-  VectorXs Y1;   //!< Dependent variables used by calc function
   VectorXs
-      Y1_T;     //!< Dependent variables used by calc function in terminal nodes
-  VectorXs Y2;  //!< Dependent variables used by calcDiff function
-  VectorXs Y2_T;  //!< Dependent variables used by calcDiff function in terminal
+      X;  //!< Independent variables used by the calc and calcDiff functions
+  VectorXs X_T;   //!< Independent variables used by the calc and calcDiff
+                  //!< functions in terminal nodes
+  VectorXs X3;    //!< Independent variables used by the quasiStatic function
+  VectorXs Y1;    //!< Dependent variables used by the calc function
+  VectorXs Y1_T;  //!< Dependent variables used by the calc function in terminal
                   //!< nodes
+  VectorXs Y2;    //!< Dependent variables used by the calcDiff function
+  VectorXs Y2_T;  //!< Dependent variables used by the calcDiff function in
+                  //!< terminal nodes
+  VectorXs Y3;    //!< Dependent variables used by the quasiStatic function
   std::shared_ptr<Base> action;  //!< Action data
 
   void set_Y1() {
