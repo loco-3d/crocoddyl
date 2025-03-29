@@ -348,15 +348,15 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   /**
-   * @brief Compute the next state and cost value from a code-generated library
+   * @brief Compute the next state and cost value using a code-generated library
    *
    * @param[in] data  Action data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calc(const std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u) override {
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) override {
     START_PROFILER("ActionModelCodeGen::calc");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
@@ -369,8 +369,12 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     STOP_PROFILER("ActionModelCodeGen::calc");
   }
 
-  void calc(const std::shared_ptr<ActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x) override {
+  /**
+   * @brief Compute the cost value and constraint infeasibilities for terminal
+   * nodes using a code-generated library
+   */
+  virtual void calc(const std::shared_ptr<ActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x) override {
     START_PROFILER("ActionModelCodeGen::calc_T");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
@@ -384,7 +388,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   /**
-   * @brief Compute the derivatives of the dynamics and cost functions from a
+   * @brief Compute the derivatives of the dynamics and cost functions using a
    * code-generated library
    *
    * In contrast to action models, this code-generated calcDiff doesn't assumes
@@ -396,9 +400,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    * @param[in] u     Control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$
    */
-  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x,
-                const Eigen::Ref<const VectorXs>& u) override {
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x,
+                        const Eigen::Ref<const VectorXs>& u) override {
     START_PROFILER("ActionModelCodeGen::calcDiff");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
@@ -411,8 +415,12 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     STOP_PROFILER("ActionModelCodeGen::calcDiff");
   }
 
-  void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& x) override {
+  /**
+   * @brief Compute the derivatives of cost functions for terminal nodes using a
+   * code-generated library
+   */
+  virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& x) override {
     START_PROFILER("ActionModelCodeGen::calcDiff_T");
     Data* d = static_cast<Data*>(data.get());
     const std::size_t nx = state_->get_nx();
@@ -429,14 +437,15 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @return the action data
    */
-  std::shared_ptr<ActionDataAbstract> createData() override {
+  virtual std::shared_ptr<ActionDataAbstract> createData() override {
     return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
   }
 
   /**
    * @brief Checks that a specific data belongs to this model
    */
-  bool checkData(const std::shared_ptr<ActionDataAbstract>& data) override {
+  virtual bool checkData(
+      const std::shared_ptr<ActionDataAbstract>& data) override {
     return model_->checkData(data);
   }
 
@@ -453,9 +462,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] maxiter Maximum allowed number of iterations
    * @param[in] tol     Tolerance
    */
-  void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
-                   Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-                   const std::size_t maxiter, const Scalar tol) override {
+  virtual void quasiStatic(const std::shared_ptr<ActionDataAbstract>& data,
+                           Eigen::Ref<VectorXs> u,
+                           const Eigen::Ref<const VectorXs>& x,
+                           const std::size_t maxiter,
+                           const Scalar tol) override {
     Data* d = static_cast<Data*>(data.get());
     model_->quasiStatic(d->action, u, x, maxiter, tol);
   }
@@ -487,32 +498,36 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   /**
    * @brief Return the number of inequality constraints
    */
-  std::size_t get_ng() const override { return model_->get_ng(); }
+  virtual std::size_t get_ng() const override { return model_->get_ng(); }
 
   /**
    * @brief Return the number of equality constraints
    */
-  std::size_t get_nh() const override { return model_->get_nh(); }
+  virtual std::size_t get_nh() const override { return model_->get_nh(); }
 
   /**
    * @brief Return the number of inequality terminal constraints
    */
-  std::size_t get_ng_T() const override { return model_->get_ng_T(); }
+  virtual std::size_t get_ng_T() const override { return model_->get_ng_T(); }
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  std::size_t get_nh_T() const override { return model_->get_nh_T(); }
+  virtual std::size_t get_nh_T() const override { return model_->get_nh_T(); }
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  const VectorXs& get_g_lb() const override { return model_->get_g_lb(); }
+  virtual const VectorXs& get_g_lb() const override {
+    return model_->get_g_lb();
+  }
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  const VectorXs& get_g_ub() const override { return model_->get_g_ub(); }
+  virtual const VectorXs& get_g_ub() const override {
+    return model_->get_g_ub();
+  }
 
   /**
    * @brief Return the dimension of the dependent vector used by calc and
@@ -554,7 +569,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param[out] os  Output stream object
    */
-  void print(std::ostream& os) const override { model_->print(os); }
+  virtual void print(std::ostream& os) const override { model_->print(os); }
 
  protected:
   ActionModelCodeGenTpl()
