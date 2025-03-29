@@ -95,10 +95,22 @@ struct ActionModelCodeGenVisitor
                       "calcDiff functions")
         .add_property(
             "nY1", bp::make_function(&Model::get_nY1),
-            "dimension of the independent vector used by calc function")
+            "dimension of the independent vector used by the calc function")
+        .add_property("nY1_T", bp::make_function(&Model::get_nY1),
+                      "dimension of the independent vector used by the calc "
+                      "function in terminal nodes")
         .add_property(
             "nY2", bp::make_function(&Model::get_nY2),
-            "dimension of the independent vector used by calcDiff function");
+            "dimension of the independent vector used by the calcDiff function")
+        .add_property("nY2_T", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "calcDiff function in terminal nodes")
+        .add_property("nY3", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "quasiStati function")
+        .add_property("nY3_T", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "quasiStati function in terminal nodes");
   }
 };
 
@@ -109,13 +121,28 @@ struct ActionDataCodeGeneVisitor
   void visit(PyClass& cl) const {
     cl.add_property(
           "X", bp::make_getter(&Data::X, bp::return_internal_reference<>()),
-          "independent variables used by calc and calcDiff function")
+          "independent variables used by the calc and calcDiff function")
+        .add_property(
+            "X3", bp::make_getter(&Data::X3, bp::return_internal_reference<>()),
+            "dependent variables used by the quasiStatic function")
         .add_property(
             "Y1", bp::make_getter(&Data::Y1, bp::return_internal_reference<>()),
-            "dependent variables used by calc functione")
+            "dependent variables used by the calc function")
+        .add_property(
+            "Y1_T",
+            bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()),
+            "dependent variables used by the calc function in terminal nodes")
         .add_property(
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
-            "dependent variables used by calcDiff functione")
+            "dependent variables used by the calcDiff function")
+        .add_property(
+            "Y2_T",
+            bp::make_getter(&Data::Y2_T, bp::return_internal_reference<>()),
+            "dependent variables used by the calcDiff function in terminal "
+            "nodes")
+        .add_property(
+            "Y3", bp::make_getter(&Data::Y3, bp::return_internal_reference<>()),
+            "dependent variables used by the quasiStatic function")
         .add_property(
             "action",
             bp::make_getter(&Data::action,
