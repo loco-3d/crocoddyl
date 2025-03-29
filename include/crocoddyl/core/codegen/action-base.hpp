@@ -109,22 +109,33 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_data_(ad_model_->createData()),
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
+        nX_T_(state_->get_nx() + nP_),
         nY1_(1 + state_->get_nx() + ng_ + nh_),
+        nY1_T_(1 + ng_T_ + nh_T_),
         ad_X_(nX_),
+        ad_X_T_(nX_T_),
         ad_Y1_(nY1_),
+        ad_Y1_T_(nY1_T_),
         Y1fun_name_("calc"),
+        Y1Tfun_name_("calc_T"),
         Y2fun_name_("calcDiff"),
+        Y2Tfun_name_("calcDiff_T"),
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
         updateParams_(updateParams),
         ad_calc_(std::make_unique<ADFun>()),
-        ad_calcDiff_(std::make_unique<ADFun>()) {
+        ad_calc_T_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()),
+        ad_calcDiff_T_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
            nu_;                                     // cost and dynamics
     nY2_ += ng_ * (ndx + nu_) + nh_ * (ndx + nu_);  // constraints
+    nY2_T_ = ndx * ndx + ndx;                       // cost and dynamics
+    nY2_T_ += (ng_T_ + nh_T_) * ndx;                // constraints
     ad_Y2_.resize(nY2_);
+    ad_Y2_T_.resize(nY2_T_);
     initLib();
     loadLib();
   }
@@ -152,22 +163,33 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_data_(ad_model_->createData()),
         nP_(nP),
         nX_(state_->get_nx() + nu_ + nP_),
+        nX_T_(state_->get_nx() + nP_),
         nY1_(1 + state_->get_nx() + ng_ + nh_),
+        nY1_T_(1 + ng_T_ + nh_T_),
         ad_X_(nX_),
+        ad_X_T_(nX_T_),
         ad_Y1_(nY1_),
+        ad_Y1_T_(nY1_T_),
         Y1fun_name_("calc"),
+        Y1Tfun_name_("calc_T"),
         Y2fun_name_("calcDiff"),
+        Y2Tfun_name_("calcDiff_T"),
         lib_fname_(lib_fname),
         compiler_type_(compiler),
         compile_options_(compile_options),
         updateParams_(updateParams),
         ad_calc_(std::make_unique<ADFun>()),
-        ad_calcDiff_(std::make_unique<ADFun>()) {
+        ad_calc_T_(std::make_unique<ADFun>()),
+        ad_calcDiff_(std::make_unique<ADFun>()),
+        ad_calcDiff_T_(std::make_unique<ADFun>()) {
     const std::size_t ndx = state_->get_ndx();
     nY2_ = 2 * ndx * ndx + 2 * ndx * nu_ + nu_ * nu_ + ndx +
            nu_;                                     // cost and dynamics
     nY2_ += ng_ * (ndx + nu_) + nh_ * (ndx + nu_);  // constraints
+    nY2_T_ = ndx * ndx + ndx;                       // cost and dynamics
+    nY2_T_ += (ng_T_ + nh_T_) * ndx;                // constraints
     ad_Y2_.resize(nY2_);
+    ad_Y2_T_.resize(nY2_T_);
     initLib();
     loadLib();
   }
@@ -182,22 +204,36 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_model_(other.ad_model_),
         nP_(other.nP_),
         nX_(other.nX_),
+        nX_T_(other.nX_T_),
         nY1_(other.nY1_),
+        nY1_T_(other.nY1_T_),
         nY2_(other.nY2_),
+        nY2_T_(other.nY2_T_),
         ad_X_(other.nX_),
+        ad_X_T_(other.nX_T_),
         ad_Y1_(other.nY1_),
+        ad_Y1_T_(other.nY1_T_),
         ad_Y2_(other.nY2_),
+        ad_Y2_T_(other.nY2_T_),
         Y1fun_name_(other.Y1fun_name_),
+        Y1Tfun_name_(other.Y1Tfun_name_),
         Y2fun_name_(other.Y2fun_name_),
+        Y2Tfun_name_(other.Y2Tfun_name_),
         lib_fname_(other.lib_fname_),
         compiler_type_(other.compiler_type_),
         compile_options_(other.compile_options_),
         updateParams_(other.updateParams_),
         ad_calc_(clone_adfun(*other.ad_calc_)),
+        ad_calc_T_(clone_adfun(*other.ad_calc_T_)),
         ad_calcDiff_(clone_adfun(*other.ad_calcDiff_)),
+        ad_calcDiff_T_(clone_adfun(*other.ad_calcDiff_T_)),
         calcCG_(std::make_unique<CSourceGen>(*ad_calc_, Y1fun_name_)),
+        calcCG_T_(std::make_unique<CSourceGen>(*ad_calc_T_, Y1Tfun_name_)),
         calcDiffCG_(std::make_unique<CSourceGen>(*ad_calcDiff_, Y2fun_name_)),
-        libCG_(std::make_unique<LibraryCSourceGen>(*calcCG_, *calcDiffCG_)),
+        calcDiffCG_T_(
+            std::make_unique<CSourceGen>(*ad_calcDiff_T_, Y2Tfun_name_)),
+        libCG_(std::make_unique<LibraryCSourceGen>(
+            *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_)),
         dynLibManager_(
             std::make_unique<LibraryProcessor>(*other.libCG_, lib_fname_)) {
     loadLib(false);
@@ -210,21 +246,33 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   void initLib() {
     START_PROFILER("ActionModelCodeGen::initLib");
-    recordCalc();
     // Generate source code for calc
+    recordCalc();
     calcCG_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calc_.get(), Y1fun_name_));
     calcCG_->setCreateForwardZero(true);
     calcCG_->setCreateJacobian(false);
+    // Generate source code for calc in terminal nodes
+    recordCalc_T();
+    calcCG_T_ = std::unique_ptr<CSourceGen>(
+        new CSourceGen(*ad_calc_T_.get(), Y1Tfun_name_));
+    calcCG_T_->setCreateForwardZero(true);
+    calcCG_T_->setCreateJacobian(false);
     // Generate source code for calcDiff
     recordCalcDiff();
     calcDiffCG_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calcDiff_.get(), Y2fun_name_));
     calcDiffCG_->setCreateForwardZero(true);
     calcDiffCG_->setCreateJacobian(false);
+    // Generate source code for calcDiff in terminal nodes
+    recordCalcDiff_T();
+    calcDiffCG_T_ = std::unique_ptr<CSourceGen>(
+        new CSourceGen(*ad_calcDiff_T_.get(), Y2Tfun_name_));
+    calcDiffCG_T_->setCreateForwardZero(true);
+    calcDiffCG_T_->setCreateJacobian(false);
     // Generate library for calc and calcDiff
-    libCG_ = std::unique_ptr<LibraryCSourceGen>(
-        new LibraryCSourceGen(*calcCG_, *calcDiffCG_));
+    libCG_ = std::unique_ptr<LibraryCSourceGen>(new LibraryCSourceGen(
+        *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_));
     // Create dynamic library manager
     dynLibManager_ = std::unique_ptr<LibraryProcessor>(
         new LibraryProcessor(*libCG_, lib_fname_));
@@ -288,7 +336,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       dynLib_.reset(new LinuxDynamicLib(filename, dlOpenMode));
     }
     calcFun_ = dynLib_->model(Y1fun_name_.c_str());
+    calcFun_T_ = dynLib_->model(Y1Tfun_name_.c_str());
     calcDiffFun_ = dynLib_->model(Y2fun_name_.c_str());
+    calcDiffFun_T_ = dynLib_->model(Y2Tfun_name_.c_str());
   }
 
   void set_parameters(const std::shared_ptr<ActionDataAbstract>& data,
@@ -321,11 +371,16 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void calc(const std::shared_ptr<ActionDataAbstract>& data,
             const Eigen::Ref<const VectorXs>& x) override {
+    START_PROFILER("ActionModelCodeGen::calc_T");
     Data* d = static_cast<Data*>(data.get());
-    model_->calc(d->action, x);
-    d->cost = d->action->cost;
-    d->g = d->action->g;
-    d->h = d->action->h;
+    const std::size_t nx = state_->get_nx();
+    d->X_T.head(nx) = x;
+    START_PROFILER("ActionModelCodeGen::calc_T::ForwardZero");
+    calcFun_T_->ForwardZero(d->X_T, d->Y1_T);
+    STOP_PROFILER("ActionModelCodeGen::calc_T::ForwardZero");
+    d->xnext = x;
+    d->set_Y1_T();
+    STOP_PROFILER("ActionModelCodeGen::calc_T");
   }
 
   /**
@@ -358,12 +413,15 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                 const Eigen::Ref<const VectorXs>& x) override {
+    START_PROFILER("ActionModelCodeGen::calcDiff_T");
     Data* d = static_cast<Data*>(data.get());
-    model_->calcDiff(d->action, x);
-    d->Lx = d->action->Lx;
-    d->Lxx = d->action->Lxx;
-    d->Gx = d->action->Gx;
-    d->Hx = d->action->Hx;
+    const std::size_t nx = state_->get_nx();
+    d->X_T.head(nx) = x;
+    START_PROFILER("ActionModelCodeGen::calcDiff_T::ForwardZero");
+    calcDiffFun_T_->ForwardZero(d->X_T, d->Y2_T);
+    STOP_PROFILER("ActionModelCodeGen::calcDiff_T::ForwardZero");
+    d->set_Y2_T();
+    STOP_PROFILER("ActionModelCodeGen::calcDiff_T");
   }
 
   /**
@@ -463,15 +521,33 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::size_t get_nX() const { return nX_; }
 
   /**
+   * @brief Return the dimension of the dependent vector used by calc and
+   * calcDiff functions in terminal nodes
+   */
+  std::size_t get_nX_T() const { return nX_T_; }
+
+  /**
    * @brief Return the dimension of the independent vector used by calc function
    */
   std::size_t get_nY1() const { return nY1_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by calc function
+   * in terminal nodes
+   */
+  std::size_t get_nY1_T() const { return nY1_T_; }
 
   /**
    * @brief Return the dimension of the independent vector used by calcDiff
    * function
    */
   std::size_t get_nY2() const { return nY2_; }
+
+  /**
+   * @brief Return the dimension of the independent vector used by calcDiff
+   * function in terminal nodes
+   */
+  std::size_t get_nY2_T() const { return nY2_T_; }
 
   /**
    * @brief Print relevant information of the action model
@@ -492,7 +568,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   }
 
   using Base::ng_;     //!< Number of inequality constraints
+  using Base::ng_T_;   //!< Number of inequality constraints in terminal nodes
   using Base::nh_;     //!< Number of equality constraints
+  using Base::nh_T_;   //!< Number of equality constraints in terminal nodes
   using Base::nu_;     //!< Control dimension
   using Base::state_;  //!< Model of the state
 
@@ -506,17 +584,33 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
                     //!< calcDiff functions
   std::size_t nX_;  //!< Dimension of the independent variables used by calc and
                     //!< calcDiff functions
+  std::size_t nX_T_;  //!< Dimension of the independent variables used by calc
+                      //!< and calcDiff functions in terminal nodes
   std::size_t
       nY1_;  //!< Dimension of the dependent variables used by calc function
+  std::size_t nY1_T_;  //!< Dimension of the dependent variables used by calc
+                       //!< function in terminal nodes
   std::size_t
       nY2_;  //!< Dimension of the dependent variables used by calcDiff function
-  ADVectorXs ad_X_;   //!< Independent variables used to tape calc and calcDiff
-                      //!< functions
-  ADVectorXs ad_Y1_;  //!< Dependent variables used to tape calc function
-  ADVectorXs ad_Y2_;  //!< Dependent variables used to tape calcDiff function
+  std::size_t nY2_T_;  //!< Dimension of the dependent variables used by
+                       //!< calcDiff function in terminal nodes
+  ADVectorXs ad_X_;    //!< Independent variables used to tape calc and calcDiff
+                       //!< functions
+  ADVectorXs ad_X_T_;  //!< Independent variables used to tape calc and calcDiff
+                       //!< functions in terminal nodes
+  ADVectorXs ad_Y1_;   //!< Dependent variables used to tape calc function
+  ADVectorXs ad_Y1_T_;  //!< Dependent variables used to tape calc function in
+                        //!< terminal nodes
+  ADVectorXs ad_Y2_;    //!< Dependent variables used to tape calcDiff function
+  ADVectorXs ad_Y2_T_;  //!< Dependent variables used to tape calcDiff function
+                        //!< in terminal nodes
 
-  const std::string Y1fun_name_;       //!< Name of the calc function
-  const std::string Y2fun_name_;       //!< Name of the calcDiff function
+  const std::string Y1fun_name_;  //!< Name of the calc function
+  const std::string
+      Y1Tfun_name_;  //!< Name of the calc function used in terminal nodes
+  const std::string Y2fun_name_;  //!< Name of the calcDiff function
+  const std::string
+      Y2Tfun_name_;  //!< Name of the calcDiff function used in terminal nodes
   const std::string lib_fname_;        //!< Name of the code generated library
   CompilerType compiler_type_;         //!< Type of compiler
   const std::string compile_options_;  //!< Compilation options
@@ -526,11 +620,20 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   std::unique_ptr<ADFun> ad_calc_;  //! < Function used to code generate calc
   std::unique_ptr<ADFun>
+      ad_calc_T_;  //! < Function used to code generate calc in terminal nodes
+  std::unique_ptr<ADFun>
       ad_calcDiff_;  //!< Function used to code generate calcDiff
+  std::unique_ptr<ADFun> ad_calcDiff_T_;  //!< Function used to code generate
+                                          //!< calcDiff in terminal nodes
   std::unique_ptr<CSourceGen>
       calcCG_;  //!< Code generated source code of calc function
+  std::unique_ptr<CSourceGen> calcCG_T_;  //!< Code generated source code of
+                                          //!< calc function in terminal nodes
   std::unique_ptr<CSourceGen>
       calcDiffCG_;  //!< Code generated source code of calcDiff function
+  std::unique_ptr<CSourceGen>
+      calcDiffCG_T_;  //!< Code generated source code of calcDiff function in
+                      //!< terminal nodes
   std::unique_ptr<LibraryCSourceGen>
       libCG_;  //!< Library of the code generated source code
   std::unique_ptr<LibraryProcessor>
@@ -538,7 +641,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::unique_ptr<DynamicLib> dynLib_;
   std::unique_ptr<GenericModel> calcFun_;  //!< Code generated calc function
   std::unique_ptr<GenericModel>
+      calcFun_T_;  //!< Code generated calc function in terminal nodes
+  std::unique_ptr<GenericModel>
       calcDiffFun_;  //!< Code generated calcDiff function
+  std::unique_ptr<GenericModel>
+      calcDiffFun_T_;  //!< Code generated calcDiff function in terminal nodes
 
  private:
   void recordCalc() {
@@ -553,6 +660,20 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     // Define calc's output as the dependent variable
     ad_calc_->Dependent(ad_X_, ad_Y1_);
     ad_calc_->optimize("no_compare_op");
+  }
+
+  void recordCalc_T() {
+    const std::size_t nx = state_->get_nx();
+    // Define the calc's input as the independent variables
+    CppAD::Independent(ad_X_T_);
+    // Record the calc's environment variables
+    updateParams_(ad_model_, ad_X_T_.tail(nP_));
+    // Collect computation in calc
+    ad_model_->calc(ad_data_, ad_X_T_.head(nx));
+    tapeCalcOutput_T();
+    // Define calc's output as the dependent variable
+    ad_calc_T_->Dependent(ad_X_T_, ad_Y1_T_);
+    ad_calc_T_->optimize("no_compare_op");
   }
 
   void recordCalcDiff() {
@@ -570,6 +691,21 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     ad_calcDiff_->optimize("no_compare_op");
   }
 
+  void recordCalcDiff_T() {
+    const std::size_t nx = state_->get_nx();
+    // Define the calcDiff's input as the independent variables
+    CppAD::Independent(ad_X_T_);
+    // Record the calcDiff's environment variables
+    updateParams_(ad_model_, ad_X_T_.tail(nP_));
+    // Collect computation in calcDiff
+    ad_model_->calc(ad_data_, ad_X_T_.head(nx));
+    ad_model_->calcDiff(ad_data_, ad_X_T_.head(nx));
+    tapeCalcDiffOutput_T();
+    // Define calcDiff's output as the dependent variable
+    ad_calcDiff_T_->Dependent(ad_X_T_, ad_Y2_T_);
+    ad_calcDiff_T_->optimize("no_compare_op");
+  }
+
   void tapeCalcOutput() {
     Eigen::DenseIndex it_Y1 = 0;
     ad_Y1_[it_Y1] = ad_data_->cost;
@@ -579,6 +715,15 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     ad_Y1_.segment(it_Y1, ng_) = ad_data_->g;
     it_Y1 += ng_;
     ad_Y1_.segment(it_Y1, nh_) = ad_data_->h;
+  }
+
+  void tapeCalcOutput_T() {
+    Eigen::DenseIndex it_Y1 = 0;
+    ad_Y1_T_[it_Y1] = ad_data_->cost;
+    it_Y1 += 1;
+    ad_Y1_T_.segment(it_Y1, ng_T_) = ad_data_->g;
+    it_Y1 += ng_T_;
+    ad_Y1_T_.segment(it_Y1, nh_T_) = ad_data_->h;
   }
 
   void tapeCalcDiffOutput() {
@@ -607,6 +752,18 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nh_, nu_) = ad_data_->Hu;
   }
 
+  void tapeCalcDiffOutput_T() {
+    const std::size_t ndx = state_->get_ndx();
+    Eigen::DenseIndex it_Y2 = 0;
+    Eigen::Map<ADVectorXs>(ad_Y2_T_.data() + it_Y2, ndx) = ad_data_->Lx;
+    it_Y2 += ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, ndx, ndx) = ad_data_->Lxx;
+    it_Y2 += ndx * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, ng_, ndx) = ad_data_->Gx;
+    it_Y2 += ng_T_ * ndx;
+    Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, nh_, ndx) = ad_data_->Hx;
+  }
+
   static void EmptyParamsEnv(std::shared_ptr<ADBase>,
                              const Eigen::Ref<const ADVectorXs>&) {}
 };
@@ -627,11 +784,17 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     ActionModelCodeGenTpl<Scalar>* m =
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
+    X_T.resize(m->get_nX_T());
     Y1.resize(m->get_nY1());
+    Y1_T.resize(m->get_nY1_T());
     Y2.resize(m->get_nY2());
+    Y2_T.resize(m->get_nY2_T());
     X.setZero();
+    X_T.setZero();
     Y1.setZero();
+    Y1_T.setZero();
     Y2.setZero();
+    Y2_T.setZero();
   }
 
   using Base::cost;
@@ -651,9 +814,15 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   using Base::r;
   using Base::xnext;
 
-  VectorXs X;   //!< Independent variables used by calc and calcDiff functions
-  VectorXs Y1;  //!< Dependent variables used by calc function
+  VectorXs X;    //!< Independent variables used by calc and calcDiff functions
+  VectorXs X_T;  //!< Independent variables used by calc and calcDiff functions
+                 //!< in terminal nodes
+  VectorXs Y1;   //!< Dependent variables used by calc function
+  VectorXs
+      Y1_T;     //!< Dependent variables used by calc function in terminal nodes
   VectorXs Y2;  //!< Dependent variables used by calcDiff function
+  VectorXs Y2_T;  //!< Dependent variables used by calcDiff function in terminal
+                  //!< nodes
   std::shared_ptr<Base> action;  //!< Action data
 
   void set_Y1() {
@@ -668,6 +837,17 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     g = Y1.segment(it_Y1, ng);
     it_Y1 += ng;
     h = Y1.segment(it_Y1, nh);
+  }
+
+  void set_Y1_T() {
+    Eigen::DenseIndex it_Y1 = 0;
+    const std::size_t ng = g.size();
+    const std::size_t nh = h.size();
+    cost = Y1_T[it_Y1];
+    it_Y1 += 1;
+    g = Y1_T.segment(it_Y1, ng);
+    it_Y1 += ng;
+    h = Y1_T.segment(it_Y1, nh);
   }
 
   void set_Y2() {
@@ -697,6 +877,20 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Hx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, ndx);
     it_Y2 += nh * ndx;
     Hu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, nu);
+  }
+
+  void set_Y2_T() {
+    const std::size_t ndx = Fx.cols();
+    const std::size_t ng = g.size();
+    const std::size_t nh = h.size();
+    Eigen::DenseIndex it_Y2 = 0;
+    Lx = Eigen::Map<VectorXs>(Y2_T.data() + it_Y2, ndx);
+    it_Y2 += ndx;
+    Lxx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ndx, ndx);
+    it_Y2 += ndx * ndx;
+    Gx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ng, ndx);
+    it_Y2 += ng * ndx;
+    Hx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, nh, ndx);
   }
 };
 
