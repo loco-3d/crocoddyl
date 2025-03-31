@@ -501,7 +501,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @return the action data
    */
   virtual std::shared_ptr<ActionDataAbstract> createData() override {
-    return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    const std::shared_ptr<ActionDataAbstract>& data =
+        std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    enableMultithreading() = true;  // This enables multithreading in Python
+    return data;
   }
 
   /**
