@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/core/actions/diff-lqr.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>
