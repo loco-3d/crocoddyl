@@ -281,34 +281,26 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
     calcCG_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calc_.get(), Y1fun_name_));
     calcCG_->setCreateForwardZero(true);
-    if (autodiff_) {
-      calcCG_->setCreateJacobian(true);
-      calcCG_->setCreateHessian(true);
-    } else {
-      calcCG_->setCreateJacobian(false);
-    }
+    calcCG_->setCreateJacobian(autodiff_);
+    calcCG_->setCreateHessian(autodiff_);
     // Generate source code for calc in terminal nodes
     recordCalc_T();
     calcCG_T_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calc_T_.get(), Y1Tfun_name_));
     calcCG_T_->setCreateForwardZero(true);
-    if (autodiff_) {
-      calcCG_T_->setCreateJacobian(true);
-      calcCG_T_->setCreateHessian(true);
-    } else {
-      calcCG_T_->setCreateJacobian(false);
-    }
+    calcCG_T_->setCreateJacobian(autodiff_);
+    calcCG_T_->setCreateHessian(autodiff_);
     // Generate source code for calcDiff
     recordCalcDiff();
     calcDiffCG_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calcDiff_.get(), Y2fun_name_));
-    calcDiffCG_->setCreateForwardZero(true);
+    calcDiffCG_->setCreateForwardZero(!autodiff_);
     calcDiffCG_->setCreateJacobian(false);
     // Generate source code for calcDiff in terminal nodes
     recordCalcDiff_T();
     calcDiffCG_T_ = std::unique_ptr<CSourceGen>(
         new CSourceGen(*ad_calcDiff_T_.get(), Y2Tfun_name_));
-    calcDiffCG_T_->setCreateForwardZero(true);
+    calcDiffCG_T_->setCreateForwardZero(!autodiff_);
     calcDiffCG_T_->setCreateJacobian(false);
     // Generate source code for quasiStatic
     recordQuasiStatic();
@@ -470,8 +462,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       calcDiffFun_->ForwardZero(d->X, d->Y2);
       STOP_PROFILER("ActionModelCodeGen::calcDiff::ForwardZero");
       d->set_Y2(this);
-      STOP_PROFILER("ActionModelCodeGen::calcDiff");
     }
+    STOP_PROFILER("ActionModelCodeGen::calcDiff");
   }
 
   /**
