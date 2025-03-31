@@ -15,7 +15,7 @@
 #endif
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include "crocoddyl/core/codegen/action-base.hpp"
+#include "crocoddyl/core/codegen/action.hpp"
 #endif
 
 #include "crocoddyl/core/solvers/fddp.hpp"
