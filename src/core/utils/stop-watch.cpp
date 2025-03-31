@@ -207,7 +207,8 @@ void Stopwatch::report_all(int precision, std::ostream& output) {
   output << std::setw(STOP_WATCH_TIME_WIDTH) << "nSamples"
          << " ";
   output << std::setw(STOP_WATCH_TIME_WIDTH) << "totalTime"
-         << " ***\n";
+         << " ***\n"
+         << std::flush;
   map<string, PerformanceData>::iterator it;
   for (it = records_of->begin(); it != records_of->end(); ++it) {
     if (it->second.stops > 0) report(it->first, precision, output);
@@ -269,7 +270,8 @@ void Stopwatch::report(const string& perf_name, int precision,
          << std::setw(STOP_WATCH_TIME_WIDTH) << perf_info.stops << " ";
   output << std::fixed << std::setprecision(precision)
          << std::setw(STOP_WATCH_TIME_WIDTH) << perf_info.total_time * 1e3
-         << std::endl;
+         << std::endl
+         << std::flush;
 }
 
 long double Stopwatch::get_time_so_far(const string& perf_name) {
