@@ -93,6 +93,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] lib_fname     Name of the code generated library
    * @param[in] autodiff      Generate autodiff Jacobians and Hessians (default
    * false)
+   * @param[in] np            Dimension of the parameter variables in the calc
+   * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
    * parameters (default empty function)
    * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
@@ -101,7 +103,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   ActionModelCodeGenTpl(
       std::shared_ptr<Base> model, const std::string& lib_fname,
-      bool autodiff = false, const std::size_t nP = 0,
+      bool autodiff = false, const std::size_t np = 0,
       ParamsEnvironment updateParams = EmptyParamsEnv,
       CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
@@ -111,7 +113,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_model_(model->template cast<ADScalar>()),
         ad_data_(ad_model_->createData()),
         autodiff_(autodiff),
-        np_(nP),
+        np_(np),
         nX_(state_->get_nx() + nu_ + np_),
         nX_T_(state_->get_nx() + np_),
         nX3_(state_->get_nx()),
@@ -157,6 +159,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] lib_fname     Name of the code generated library
    * @param[in] autodiff      Generate autodiff Jacobians and Hessians (default
    * false)
+   * @param[in] np            Dimension of the parameter variables in the calc
+   * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
    * parameters (default empty function)
    * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
@@ -165,7 +169,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   ActionModelCodeGenTpl(
       std::shared_ptr<ADBase> ad_model, const std::string& lib_fname,
-      bool autodiff = false, const std::size_t nP = 0,
+      bool autodiff = false, const std::size_t np = 0,
       ParamsEnvironment updateParams = EmptyParamsEnv,
       CompilerType compiler = CLANG,
       const std::string& compile_options = "-Ofast -march=native")
@@ -175,7 +179,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
         ad_model_(ad_model),
         ad_data_(ad_model_->createData()),
         autodiff_(autodiff),
-        np_(nP),
+        np_(np),
         nX_(state_->get_nx() + nu_ + np_),
         nX_T_(state_->get_nx() + np_),
         nX3_(state_->get_nx()),
