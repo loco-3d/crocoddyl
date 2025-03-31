@@ -28,13 +28,15 @@ struct ActionModelCodeGenVisitor
   void visit(PyClass& cl) const {
     cl
         .def(bp::init<std::shared_ptr<ADModel>, std::string,
-                      bp::optional<std::size_t, ParamsEnvironment, CompilerType,
-                                   std::string>>(
-            bp::args("self", "ad_model", "lib_fname", "updateParams",
-                     "compiler", "compile_options"),
+                      bp::optional<bool, std::size_t, ParamsEnvironment,
+                                   CompilerType, std::string>>(
+            bp::args("self", "ad_model", "lib_fname", "autodiff",
+                     "updateParams", "compiler", "compile_options"),
             "Initialize the action codegen action model.\n\n"
             ":param ad_model: action model used to code generate\n"
             ":param lib_fname: name of the code generated library\n"
+            ":param autodiff: Generate autodiff Jacobians and Hessians "
+            "(default False)\n"
             ":param updateParams: function used to update the calc and "
             "calcDiff's parameters (default empty function)\n"
             ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"
@@ -163,13 +165,15 @@ struct ActionDataCodeGeneVisitor
       "functions for initializing, compiling and loading the library. "        \
       "Additionally, it is possible to configure the compiler and its flags.", \
       bp::init<std::shared_ptr<ModelBase>, std::string,                        \
-               bp::optional<std::size_t, ParamsEnvironment, CompilerType,      \
-                            std::string>>(                                     \
-          bp::args("self", "model", "lib_fname", "updateParams", "compiler",   \
-                   "compile_options"),                                         \
+               bp::optional<bool, std::size_t, ParamsEnvironment,              \
+                            CompilerType, std::string>>(                       \
+          bp::args("self", "model", "lib_fname", "autodiff", "updateParams",   \
+                   "compiler", "compile_options"),                             \
           "Initialize the action codegen action model.\n\n"                    \
           ":param model: action model model which we want to code generate\n"  \
           ":param lib_fname: name of the code generated library\n"             \
+          ":param autodiff: Generate autodiff Jacobians and Hessians "         \
+          "(default False)\n"                                                  \
           ":param updateParams: function used to update the calc and "         \
           "calcDiff's parameters (default empty function)\n"                   \
           ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"  \

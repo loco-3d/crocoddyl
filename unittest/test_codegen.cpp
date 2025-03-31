@@ -390,7 +390,7 @@ void test_codegen_4DoFArm() {
   // variable, and the function setting the environment variable as arguments.
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       std::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(
-          runningModelAD, "pyrene_arm_running", 3, change_env<ADScalar>);
+          runningModelAD, "pyrene_arm_running", false, 3, change_env<ADScalar>);
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
