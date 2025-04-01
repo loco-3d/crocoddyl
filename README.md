@@ -141,13 +141,13 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
 
 ## :mag: Documentation
 
-Crocoddyl's Doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. Start in the following order.
-- [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/unicycle_towards_origin.ipynb)
-- [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/arm_manipulation.ipynb)
-- [examples/notebooks/whole_body_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/whole_body_manipulation.ipynb)
-- [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/bipedal_walking.ipynb)
-- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/introduction_to_crocoddyl.ipynb)
+Crocoddyl's Doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. We suggest to explore at least these notebooks:
+- [notebooks/01_introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/01_introduction_to_crocoddyl.ipynb)
+- [notebooks/02_optimizing_a_cartpole_swingup.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/02_optimizing_a_cartpole_swingup.ipynb)
+- [notebooks/03_optimizing_an_unicycle.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/03_optimizing_an_unicycle.py)
+- [notebooks/04_actuating_an_acrobot.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/04_actuating_an_acrobot.ipynb)
+- [notebooks/05_codegenerating_a_cartpole.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/05_codegenerating_a_cartpole.ipynb)
+- [notebooks/06_scaling_to_robotics.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/06_scaling_to_robotics.ipynb)
 
 Moreover, after installation, you could run the examples as follows:
 ```bash
