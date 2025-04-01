@@ -272,6 +272,7 @@ void ActionModelCodeGenTpl<Scalar>::update_p(
     const Eigen::Ref<const VectorXs>& p) const {
   Data* d = static_cast<Data*>(data.get());
   d->X.tail(np_) = p;
+  d->X_T.tail(np_) = p;
 }
 
 template <typename Scalar>
