@@ -270,6 +270,11 @@ template <typename Scalar>
 void ActionModelCodeGenTpl<Scalar>::update_p(
     const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& p) const {
+  if (static_cast<std::size_t>(p.size()) != np_) {
+    throw_pretty(
+        "Invalid argument: " << "p has wrong dimension (it should be " +
+                                    std::to_string(np_) + ")");
+  }
   Data* d = static_cast<Data*>(data.get());
   d->X.tail(np_) = p;
   d->X_T.tail(np_) = p;
