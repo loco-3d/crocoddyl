@@ -79,6 +79,8 @@ struct ActionModelCodeGenVisitor
                                          const Eigen::Ref<const VectorXs>&)>(
                  &Model::calcDiff),
              bp::args("self", "data", "x"))
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the action parameters")
         .def("createData", &Model::createData, bp::args("self"),
              "Create the action codegen data.")
         .def("initLib", &Model::initLib, bp::args("self"),
@@ -93,6 +95,9 @@ struct ActionModelCodeGenVisitor
              "load the code-generated library\n\n"
              ":param generate_if_exist: true for compiling the library when it "
              "exists (default True)")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of the parameter variables in the calc and "
+                      "calcDiff functions")
         .add_property("nX", bp::make_function(&Model::get_nX),
                       "dimension of the dependent vector used by calc and "
                       "calcDiff functions")
@@ -132,9 +137,23 @@ struct ActionDataCodeGeneVisitor
             "Y1", bp::make_getter(&Data::Y1, bp::return_internal_reference<>()),
             "dependent variables used by the calc function")
         .add_property(
+            "J1", bp::make_getter(&Data::J1, bp::return_internal_reference<>()),
+            "autodiff Jacobian of the the calc function")
+        .add_property(
+            "H1", bp::make_getter(&Data::H1, bp::return_internal_reference<>()),
+            "autodiff Hessian of the the calc function")
+        .add_property(
             "Y1_T",
             bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()),
             "dependent variables used by the calc function in terminal nodes")
+        .add_property(
+            "J1_T",
+            bp::make_getter(&Data::J1_T, bp::return_internal_reference<>()),
+            "autodiff Jacobian of the the calc function in terminal nodes")
+        .add_property(
+            "H1_T",
+            bp::make_getter(&Data::H1_T, bp::return_internal_reference<>()),
+            "autodiff Hessian of the the calc function in terminal nodes")
         .add_property(
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
             "dependent variables used by the calcDiff function")
