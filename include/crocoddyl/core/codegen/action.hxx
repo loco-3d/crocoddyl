@@ -263,7 +263,7 @@ void ActionModelCodeGenTpl<Scalar>::loadLib(const bool generate_if_exist) {
 }
 
 template <typename Scalar>
-void ActionModelCodeGenTpl<Scalar>::set_parameters(
+void ActionModelCodeGenTpl<Scalar>::update_p(
     const std::shared_ptr<ActionDataAbstract>& data,
     const Eigen::Ref<const VectorXs>& p) const {
   Data* d = static_cast<Data*>(data.get());

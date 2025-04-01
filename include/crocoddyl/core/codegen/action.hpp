@@ -162,8 +162,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   void loadLib(const bool generate_if_exist = true);
 
-  void set_parameters(const std::shared_ptr<ActionDataAbstract>& data,
-                      const Eigen::Ref<const VectorXs>& p) const;
+  /**
+   * @brief Update the parameters of the codegen action
+   *
+   * @param data  Action data
+   * @param p     Parameters vector (dimension np)
+   */
+  void update_p(const std::shared_ptr<ActionDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& p) const;
 
   /**
    * @brief Compute the next state and cost value using a code-generated library

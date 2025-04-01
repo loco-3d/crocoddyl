@@ -405,7 +405,7 @@ void test_codegen_4DoFArm() {
   crocoddyl::ActionModelCodeGenTpl<Scalar>* rmcg =
       static_cast<crocoddyl::ActionModelCodeGenTpl<Scalar>*>(
           runningModelCG.get());
-  rmcg->set_parameters(runningDataCG, new_ref);
+  rmcg->update_p(runningDataCG, new_ref);
   crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m =
       static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(
           runningModelD.get());
