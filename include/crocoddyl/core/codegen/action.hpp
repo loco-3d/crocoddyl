@@ -463,6 +463,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void tapeCalcDiffOutput();
   void tapeCalcDiffOutput_T();
 
+  VectorXs wCostHess_;
+  VectorXs wCostHess_T_;
+
   static void EmptyParamsEnv(std::shared_ptr<ADBase>,
                              const Eigen::Ref<const ADVectorXs>&);
 };

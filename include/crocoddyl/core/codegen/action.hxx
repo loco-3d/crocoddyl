@@ -61,6 +61,10 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
   ad_Y2_T_.resize(nY2_T_);
   initLib();
   loadLib();
+  wCostHess_ = VectorXs::Zero(nY1_);
+  wCostHess_(0) = Scalar(1.);
+  wCostHess_T_ = VectorXs::Zero(nY1_T_);
+  wCostHess_T_(0) = Scalar(1.);
 }
 
 template <typename Scalar>
@@ -316,9 +320,9 @@ void ActionModelCodeGenTpl<Scalar>::calcDiff(
     d->J1 = calcFun_->Jacobian(d->X);
     STOP_PROFILER("ActionModelCodeGen::calcDiff::Jacobian");
     START_PROFILER("ActionModelCodeGen::calcDiff::Hessian");
-    VectorXs w = VectorXs::Zero(nY1_);
-    w(0) = Scalar(1.);
-    d->H1 = calcFun_->Hessian(d->X, w);
+    wCostHess_ = VectorXs::Zero(nY1_);
+    wCostHess_(0) = Scalar(1.);
+    d->H1 = calcFun_->Hessian(d->X, wCostHess_);
     STOP_PROFILER("ActionModelCodeGen::calcDiff::Hessian");
     d->set_D1(this);
   } else {
@@ -343,9 +347,9 @@ void ActionModelCodeGenTpl<Scalar>::calcDiff(
     d->J1_T = calcFun_T_->Jacobian(d->X_T);
     STOP_PROFILER("ActionModelCodeGen::calcDiff_T::Jacobian");
     START_PROFILER("ActionModelCodeGen::calcDiff_T::Hessian");
-    VectorXs w = VectorXs::Zero(nY1_T_);
-    w(0) = Scalar(1.);
-    d->H1_T = calcFun_T_->Hessian(d->X_T, w);
+    wCostHess_T_ = VectorXs::Zero(nY1_T_);
+    wCostHess_T_(0) = Scalar(1.);
+    d->H1_T = calcFun_T_->Hessian(d->X_T, wCostHess_T_);
     STOP_PROFILER("ActionModelCodeGen::calcDiff_T::Hessian");
     d->set_D1_T(this);
   } else {
