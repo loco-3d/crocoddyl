@@ -22,13 +22,12 @@ struct ActionModelCodeGenVisitor
   typedef typename Model::ADBase ADModel;
   typedef typename Model::Base ModelBase;
   typedef typename Model::VectorXs VectorXs;
-  typedef typename Model::ParamsEnvironment ParamsEnvironment;
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl
         .def(bp::init<std::shared_ptr<ADModel>, std::string,
-                      bp::optional<bool, std::size_t, ParamsEnvironment,
-                                   CompilerType, std::string>>(
+                      bp::optional<bool, std::size_t, bp::object, CompilerType,
+                                   std::string>>(
             bp::args("self", "ad_model", "lib_fname", "autodiff", "np",
                      "updateParams", "compiler", "compile_options"),
             "Initialize the action codegen action model.\n\n"
@@ -175,7 +174,6 @@ struct ActionDataCodeGeneVisitor
 #define CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(Scalar)                 \
   typedef ActionModelCodeGenTpl<Scalar> Model;                                 \
   typedef ActionModelAbstractTpl<Scalar> ModelBase;                            \
-  typedef typename Model::ParamsEnvironment ParamsEnvironment;                 \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model, bp::bases<ModelBase>>(                                     \
       "ActionModelCodeGen",                                                    \
@@ -185,8 +183,8 @@ struct ActionDataCodeGeneVisitor
       "functions for initializing, compiling and loading the library. "        \
       "Additionally, it is possible to configure the compiler and its flags.", \
       bp::init<std::shared_ptr<ModelBase>, std::string,                        \
-               bp::optional<bool, std::size_t, ParamsEnvironment,              \
-                            CompilerType, std::string>>(                       \
+               bp::optional<bool, std::size_t, bp::object, CompilerType,       \
+                            std::string>>(                                     \
           bp::args("self", "model", "lib_fname", "autodiff", "np",             \
                    "updateParams", "compiler", "compile_options"),             \
           "Initialize the action codegen action model.\n\n"                    \
