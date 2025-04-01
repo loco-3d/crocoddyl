@@ -1,6 +1,8 @@
 *.pyc
 *.pyd
 *.pyo
+*.so
+*.dylib
 *~
 *.orig
 *.ipynb_checkpoints
