@@ -182,8 +182,6 @@ if(BUILD_WITH_CODEGEN_SUPPORT)
                         ${CMAKE_MODULE_PATH})
   add_project_dependency(cppad 20200000.0 REQUIRED FIND_EXTERNAL cppad)
   add_project_dependency(cppadcg 2.4.1 REQUIRED)
-  add_project_dependency(pycppad 1.2.4 REQUIRED PKG_CONFIG_REQUIRES
-                         "pycppad >= 1.2.4")
   add_definitions(-DCROCODDYL_WITH_CODEGEN)
   # Pinocchio codegen related preproccessor defs.
   add_definitions(-DPINOCCHIO_WITH_CPPADCG_SUPPORT)

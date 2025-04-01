@@ -12,11 +12,6 @@
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
-#ifdef CROCODDYL_WITH_CODEGEN
-#include <pycppad/cast.hpp>
-#include <pycppad/cppad.hpp>
-#endif
-
 namespace crocoddyl {
 namespace python {
 
@@ -36,7 +31,6 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
 
   eigenpy::enableEigenPy();
 #ifdef CROCODDYL_WITH_CODEGEN
-  pycppad::enablePyCppAD();
   bp::scope().attr("WITH_CODEGEN") = true;
 #else
   bp::scope().attr("WITH_CODEGEN") = false;
