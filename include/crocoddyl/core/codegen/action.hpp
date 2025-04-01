@@ -70,7 +70,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef MathBaseTpl<ADScalar> ADMathBase;
-  typedef crocoddyl::ActionModelAbstractTpl<ADScalar> ADBase;
+  typedef ActionModelAbstractTpl<ADScalar> ADBase;
   typedef ActionDataAbstractTpl<ADScalar> ADActionDataAbstract;
   typedef typename ADMathBase::VectorXs ADVectorXs;
   typedef typename ADMathBase::MatrixXs ADMatrixXs;
