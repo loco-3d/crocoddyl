@@ -3,7 +3,8 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - boost
+  - libboost-devel
+  - libboost-python-devel
   - numpy
   - scipy
   - python
