@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef CROCODDYL_WITH_CODEGEN
+
 #include "crocoddyl/core/codegen/action.hpp"
 
 #include "crocoddyl/multibody/codegen/pinocchio_cast.hpp"
@@ -229,3 +231,5 @@ void exposeActionCodeGen() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_WITH_CODEGEN

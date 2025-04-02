@@ -10,6 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <pinocchio/algorithm/model.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/parsers/urdf.hpp>
