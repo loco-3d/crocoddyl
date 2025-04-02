@@ -315,7 +315,7 @@ if(UNIX)
   function(crocoddyl_generate_cpp_files cpp_format)
     set(scalar_types ${ARGN})
     # Find all .cpp_format.in template files recursively
-    file(GLOB_RECURSE ETI_TEMPLATE_FILES FOLLOW_SYMLINKS
+    file(GLOB_RECURSE ETI_TEMPLATE_FILES CONFIGURE_DEPENDS
          ${CMAKE_SOURCE_DIR}/src/**/*.${cpp_format}.in)
     set(generated_eti_files "")
     foreach(template_file ${ETI_TEMPLATE_FILES})
