@@ -481,8 +481,7 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataCodeGenTpl(Model<Scalar>* const model)
-      : Base(model), action(model->get_model()->createData()) {
+  explicit ActionDataCodeGenTpl(Model<Scalar>* const model) : Base(model) {
     ActionModelCodeGenTpl<Scalar>* m =
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
@@ -544,7 +543,6 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs Y2_T;  //!< Dependent variables used by the calcDiff function in
                   //!< terminal nodes
   VectorXs Y3;    //!< Dependent variables used by the quasiStatic function
-  std::shared_ptr<Base> action;  //!< Action data
 
   template <template <typename Scalar> class Model>
   void set_Y1(Model<Scalar>* const model) {

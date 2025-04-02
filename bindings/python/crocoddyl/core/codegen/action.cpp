@@ -165,11 +165,7 @@ struct ActionDataCodeGeneVisitor
             "nodes")
         .add_property(
             "Y3", bp::make_getter(&Data::Y3, bp::return_internal_reference<>()),
-            "dependent variables used by the quasiStatic function")
-        .add_property(
-            "action",
-            bp::make_getter(&Data::action,
-                            bp::return_value_policy<bp::return_by_value>()));
+            "dependent variables used by the quasiStatic function");
   }
 };
 
