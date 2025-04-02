@@ -8,10 +8,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <boost/core/demangle.hpp>
-#include <iostream>
-#include <typeinfo>
-
 #include "crocoddyl/core/controls/poly-zero.hpp"
 #include "crocoddyl/core/integ-action-base.hpp"
 

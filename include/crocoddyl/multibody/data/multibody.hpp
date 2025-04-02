@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_MULTIBODY_HPP_
 #define CROCODDYL_CORE_DATA_MULTIBODY_HPP_
 
-#include <pinocchio/multibody/data.hpp>
-
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
 #include "crocoddyl/core/data/joint.hpp"

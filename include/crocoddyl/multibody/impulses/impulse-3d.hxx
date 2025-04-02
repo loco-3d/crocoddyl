@@ -7,11 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

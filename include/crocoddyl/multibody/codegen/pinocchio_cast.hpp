@@ -11,6 +11,8 @@
 
 #include <pinocchio/autodiff/cppad.hpp>
 
+#include "crocoddyl/multibody/fwd.hpp"
+
 namespace pinocchio {
 // Implement missing casting in Pinocchio
 template <typename NewScalar, typename Scalar>

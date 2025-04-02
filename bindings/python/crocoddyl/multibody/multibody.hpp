@@ -12,6 +12,10 @@
 
 #include <pinocchio/fwd.hpp>
 
+#ifdef CROCODDYL_WITH_CODEGEN
+#include <pinocchio/codegen/cppadcg.hpp>
+#endif
+
 #include "python/crocoddyl/fwd.hpp"
 
 namespace crocoddyl {

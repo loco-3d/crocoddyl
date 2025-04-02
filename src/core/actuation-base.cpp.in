@@ -12,12 +12,8 @@
 namespace crocoddyl {
 
 template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActuationModelAbstractTpl<double>;
-template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActuationModelAbstractTpl<float>;
+    ActuationModelAbstractTpl<@SCALAR_TYPE@>;
 template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActuationDataAbstractTpl<double>;
-template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActuationDataAbstractTpl<float>;
+    ActuationDataAbstractTpl<@SCALAR_TYPE@>;
 
 }  // namespace crocoddyl

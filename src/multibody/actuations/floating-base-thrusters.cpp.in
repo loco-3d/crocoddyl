@@ -11,6 +11,8 @@
 
 namespace crocoddyl {
 
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ThrusterTpl<@SCALAR_TYPE@>;
 template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     ActuationModelFloatingBaseThrustersTpl<@SCALAR_TYPE@>;
 

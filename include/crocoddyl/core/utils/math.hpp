@@ -9,11 +9,14 @@
 #ifndef CROCODDYL_CORE_UTILS_MATH_HPP_
 #define CROCODDYL_CORE_UTILS_MATH_HPP_
 
+#include <Eigen/Cholesky>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <type_traits>
+
+#include "crocoddyl/core/utils/scalar.hpp"
 
 #ifdef CROCODDYL_WITH_CODEGEN
 #include <cppad/cg/support/cppadcg_eigen.hpp>
@@ -80,6 +83,26 @@ MatrixLike pseudoInverse(
     const typename MatrixLike::RealScalar& epsilon =
         Eigen::NumTraits<typename MatrixLike::Scalar>::dummy_precision()) {
   return pseudoInverseAlgo<MatrixLike>::run(a, epsilon);
+}
+
+template <typename Scalar>
+typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+checkPSD(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& a) {
+  Eigen::SelfAdjointEigenSolver<
+      Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>
+      eig(a);
+  if (eig.info() != Eigen::Success ||
+      eig.eigenvalues().minCoeff() < ScaleNumerics<Scalar>(-1e-9)) {
+    return false;
+  }
+  return true;
+}
+
+template <typename Scalar>
+typename std::enable_if<!std::is_floating_point<Scalar>::value, bool>::type
+checkPSD(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>&) {
+  // Do nothing for AD types
+  return true;
 }
 
 }  // namespace crocoddyl

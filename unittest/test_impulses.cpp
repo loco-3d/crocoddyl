@@ -12,10 +12,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include <memory>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 #include "factory/impulse.hpp"

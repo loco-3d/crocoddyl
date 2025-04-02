@@ -7,10 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/centroidal-derivatives.hpp>
-
-#include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

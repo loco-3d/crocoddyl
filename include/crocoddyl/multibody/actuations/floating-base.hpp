@@ -188,9 +188,7 @@ class ActuationModelFloatingBaseTpl
 
 }  // namespace crocoddyl
 
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseTpl<double>;
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseTpl<float>;
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActuationModelFloatingBaseTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_FLOATING_BASE_HPP_

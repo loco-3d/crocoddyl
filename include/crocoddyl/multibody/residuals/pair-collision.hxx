@@ -9,10 +9,6 @@
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 
-#include <pinocchio/algorithm/geometry.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/multibody/fcl.hpp>
-
 namespace crocoddyl {
 
 template <typename Scalar>

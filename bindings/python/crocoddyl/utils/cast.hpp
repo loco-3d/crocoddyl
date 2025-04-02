@@ -34,15 +34,32 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model>> {
   }
 
  private:
+  // Helper function for casting, using std::enable_if to handle specific types
+  template <typename ScalarType>
+  static bp::object cast_instance_impl(const Model& self, std::true_type) {
+    // No cast needed if ScalarType is the correct type
+    return bp::object(self);
+  }
+
+  template <typename ScalarType>
+  static bp::object cast_instance_impl(const Model& self, std::false_type) {
+    // Otherwise, perform the cast to the requested type
+    return bp::object(self.template cast<ScalarType>());
+  }
+
+  // Main cast instance function that uses SFINAE
   static bp::object cast_instance(const Model& self, DType dtype) {
     switch (dtype) {
       case DType::Float64:
-        return bp::object(self.template cast<Float64>());
+        return cast_instance_impl<Float64>(
+            self, std::is_same<typename Model::Scalar, Float64>());
       case DType::Float32:
-        return bp::object(self.template cast<Float32>());
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE
+        return cast_instance_impl<Float32>(
+            self, std::is_same<typename Model::Scalar, Float32>());
+#ifdef CROCODDYL_WITH_CODEGEN
       case DType::ADFloat64:
-        return bp::object(self.template cast<ADFloat64>());
+        return cast_instance_impl<ADFloat64>(
+            self, std::is_same<typename Model::Scalar, ADFloat64>());
 #endif
       default:
         PyErr_SetString(PyExc_TypeError, "Unsupported dtype.");

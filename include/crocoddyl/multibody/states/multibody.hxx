@@ -6,10 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/joint-configuration.hpp>
-
-#include "crocoddyl/multibody/states/multibody.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

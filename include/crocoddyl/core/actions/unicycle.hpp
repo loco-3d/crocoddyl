@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 #define CROCODDYL_CORE_ACTIONS_UNICYCLE_HPP_
 
-#include <stdexcept>
-
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"

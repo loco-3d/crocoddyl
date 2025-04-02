@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_SMOOTH_1NORM_HPP_
 
-#include <iostream>
-#include <stdexcept>
-
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

@@ -12,6 +12,7 @@ add_library(${PYWRAP} SHARED ${${PROJECT_NAME}_PYTHON_BINDINGS_SOURCES}
 set_target_properties(${PYWRAP} PROPERTIES SUFFIX ${PYTHON_EXT_SUFFIX})
 
 target_link_libraries(${PYWRAP} ${PROJECT_NAME} eigenpy::eigenpy)
+
 # BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS spews conversion warnings from int to
 # long unsigned int. Unfortunately, using literals does not work in a macro. As
 # such, this turns them off for the entire wrapper:

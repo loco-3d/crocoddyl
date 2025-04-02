@@ -8,8 +8,6 @@
 
 #include "crocoddyl/core/solvers/box-qp.hpp"
 
-#include <iostream>
-
 namespace crocoddyl {
 
 BoxQP::BoxQP(const std::size_t nx, const std::size_t maxiter,

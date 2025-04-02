@@ -9,7 +9,7 @@
 #ifdef CROCODDYL_WITH_CODEGEN
 
 // Auto-generated file for @SCALAR_TYPE@
-#include "crocoddyl/core/codegen/action-base.hpp"
+#include "crocoddyl/core/codegen/action.hpp"
 
 namespace crocoddyl {
 

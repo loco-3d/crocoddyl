@@ -6,8 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 namespace crocoddyl {
 
 template <typename Scalar>

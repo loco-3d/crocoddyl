@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/residuals/com-position.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

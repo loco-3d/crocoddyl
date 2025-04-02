@@ -10,12 +10,7 @@
 #ifndef CROCODDYL_CORE_STATE_BASE_HPP_
 #define CROCODDYL_CORE_STATE_BASE_HPP_
 
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
 

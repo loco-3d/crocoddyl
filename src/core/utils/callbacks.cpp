@@ -132,7 +132,7 @@ void CallbackVerbose::update_header() {
 
 void CallbackVerbose::operator()(SolverAbstract& solver) {
   if (solver.get_iter() % 10 == 0) {
-    std::cout << header_ << std::endl;
+    std::cout << header_ << std::endl << std::flush;
   }
   auto space_sign = [this](const double value) {
     std::stringstream stream;

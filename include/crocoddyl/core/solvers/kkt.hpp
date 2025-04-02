@@ -11,9 +11,6 @@
 #ifndef CROCODDYL_CORE_SOLVERS_KKT_HPP_
 #define CROCODDYL_CORE_SOLVERS_KKT_HPP_
 
-#include <Eigen/Cholesky>
-#include <Eigen/Dense>
-
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {

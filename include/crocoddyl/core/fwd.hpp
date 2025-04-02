@@ -9,14 +9,7 @@
 
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
-
-#include "crocoddyl/config.hpp"
-#include "crocoddyl/core/macros.hpp"
-#include "crocoddyl/core/utils/conversions.hpp"
-#include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/core/utils/math.hpp"
-#include "crocoddyl/core/utils/scalar.hpp"
+#include "crocoddyl/core/pch.hpp"
 
 namespace crocoddyl {
 

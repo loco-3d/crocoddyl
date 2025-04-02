@@ -9,10 +9,6 @@
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-#include <pinocchio/spatial/se3.hpp>
-#include <vector>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -360,21 +356,34 @@ class ActuationModelFloatingBaseThrustersTpl
     data->Mtau = Mtau_;
     const std::size_t nv = state_->get_nv();
     for (std::size_t k = 0; k < nv; ++k) {
-      if (fabs(S_(k, k)) < std::numeric_limits<Scalar>::epsilon()) {
-        data->tau_set[k] = false;
-      } else {
-        data->tau_set[k] = true;
-      }
+      data->tau_set[k] = if_static(S_(k, k));
     }
     update_data_ = false;
   }
+
+  // Use for floating-point types
+  template <typename Scalar>
+  typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return (fabs(condition) < std::numeric_limits<Scalar>::epsilon()) ? false
+                                                                      : true;
+  }
+
+#ifdef CROCODDYL_WITH_CODEGEN
+  // Use for CppAD types
+  template <typename Scalar>
+  typename std::enable_if<!std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return CppAD::Value(CppAD::fabs(condition)) >=
+           CppAD::numeric_limits<Scalar>::epsilon();
+  }
+#endif
 };
 
 }  // namespace crocoddyl
 
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseThrustersTpl<double>;
-extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
-    crocoddyl::ActuationModelFloatingBaseThrustersTpl<float>;
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ThrusterTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActuationModelFloatingBaseThrustersTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_

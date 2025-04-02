@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/contact-base.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

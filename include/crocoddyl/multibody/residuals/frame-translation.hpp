@@ -11,8 +11,6 @@
 #ifndef CROCODDYL_MULTIBODY_RESIDUALS_FRAME_TRANSLATION_HPP_
 #define CROCODDYL_MULTIBODY_RESIDUALS_FRAME_TRANSLATION_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"

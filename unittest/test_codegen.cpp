@@ -17,11 +17,10 @@
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
-#include "crocoddyl/core/codegen/action-base.hpp"
+#include "crocoddyl/core/codegen/action.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
@@ -392,7 +391,7 @@ void test_codegen_4DoFArm() {
   // variable, and the function setting the environment variable as arguments.
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelCG =
       std::make_shared<crocoddyl::ActionModelCodeGenTpl<Scalar> >(
-          runningModelAD, "pyrene_arm_running", 3, change_env<ADScalar>);
+          runningModelAD, "pyrene_arm_running", false, 3, change_env<ADScalar>);
 
   // Check that code-generated action model is the same as original.
   /**************************************************************************/
@@ -407,7 +406,7 @@ void test_codegen_4DoFArm() {
   crocoddyl::ActionModelCodeGenTpl<Scalar>* rmcg =
       static_cast<crocoddyl::ActionModelCodeGenTpl<Scalar>*>(
           runningModelCG.get());
-  rmcg->set_parameters(runningDataCG, new_ref);
+  rmcg->update_p(runningDataCG, new_ref);
   crocoddyl::IntegratedActionModelEulerTpl<Scalar>* m =
       static_cast<crocoddyl::IntegratedActionModelEulerTpl<Scalar>*>(
           runningModelD.get());

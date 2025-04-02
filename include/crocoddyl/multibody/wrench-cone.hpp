@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 #define CROCODDYL_MULTIBODY_WRENCH_CONE_HPP_
 
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 

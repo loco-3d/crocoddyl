@@ -9,9 +9,6 @@
 #ifndef CROCODDYL_CONTACTS_FACTORY_HPP_
 #define CROCODDYL_CONTACTS_FACTORY_HPP_
 
-#include <iostream>
-#include <limits>
-
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/numdiff/contact.hpp"

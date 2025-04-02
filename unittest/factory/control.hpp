@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CONTROL_FACTORY_HPP_
 #define CROCODDYL_CONTROL_FACTORY_HPP_
 
-#include <vector>
-
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

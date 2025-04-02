@@ -7,8 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

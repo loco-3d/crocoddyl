@@ -7,10 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/frames.hpp>
-
-#include "crocoddyl/multibody/residuals/frame-rotation.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

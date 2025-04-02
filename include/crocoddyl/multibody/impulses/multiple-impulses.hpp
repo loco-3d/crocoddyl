@@ -10,11 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 

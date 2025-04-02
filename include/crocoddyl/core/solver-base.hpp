@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
-#include <vector>
-
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"

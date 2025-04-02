@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_6D_HPP_
 
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/spatial/motion.hpp>
-
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"

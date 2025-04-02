@@ -11,8 +11,6 @@
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTION_HPP_
 
-#include <vector>
-
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 

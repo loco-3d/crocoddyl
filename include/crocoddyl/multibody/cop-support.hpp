@@ -10,7 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 #define CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
 

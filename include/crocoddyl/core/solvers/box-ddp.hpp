@@ -9,9 +9,6 @@
 #ifndef CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_BOX_DDP_HPP_
 
-#include <Eigen/Cholesky>
-#include <vector>
-
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "crocoddyl/core/solvers/ddp.hpp"
 

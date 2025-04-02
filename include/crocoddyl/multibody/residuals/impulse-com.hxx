@@ -7,11 +7,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/center-of-mass-derivatives.hpp>
-#include <pinocchio/algorithm/center-of-mass.hpp>
-
-#include "crocoddyl/multibody/residuals/impulse-com.hpp"
-
 namespace crocoddyl {
 
 template <typename Scalar>

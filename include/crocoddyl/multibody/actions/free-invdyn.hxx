@@ -6,12 +6,6 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pinocchio/algorithm/compute-all-terms.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-
 #include "crocoddyl/core/constraints/residual.hpp"
 
 namespace crocoddyl {

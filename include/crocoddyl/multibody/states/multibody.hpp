@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 #define CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
 
-#include <pinocchio/multibody/model.hpp>
-
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 

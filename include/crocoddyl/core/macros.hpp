@@ -38,8 +38,7 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }  // namespace std
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
+#ifdef CROCODDYL_WITH_CODEGEN
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<double>;                                                   \
@@ -55,6 +54,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       class_name<float>;                                                     \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<ADFloat64>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(class_name)   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(class_name)   \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
 #else
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(class_name)                 \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
@@ -67,10 +78,21 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       class_name<double>;                                                    \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(class_name)   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                   \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
+
+#define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(class_name)   \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<double>;                                                    \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<float>;
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN_DISABLE  // TODO: Change to CROCODDYL_WITH_CODEGEN
-                                       // when supporting codegen
+#ifdef CROCODDYL_WITH_CODEGEN
 #define CROCODDYL_BASE_CAST(base_class, class)                              \
   template <typename Scalar>                                                \
   std::shared_ptr<class<Scalar>> cast() const {                             \
@@ -120,21 +142,21 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::make_shared<derived_class<ADFloat64>>(*this);      \
   }
 
-#define CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(base_class, derived_class) \
-  template <typename NewScalar>                                           \
-  explicit derived_class(const derived_class<NewScalar>& other)           \
-      : derived_class(std::move(other.template cast<Scalar>())) {}        \
-  /* Implements casting by overriding `cloneAsFloat` */                   \
-  std::shared_ptr<base_class> cloneAsDouble() const override {            \
-    return std::make_shared<derived_class<double>>(*this);                \
-  }                                                                       \
-  std::shared_ptr<base_class> cloneAsFloat() const override {             \
-    return std::make_shared<derived_class<float>>(*this);                 \
-  }                                                                       \
-  std::shared_ptr<base_class> cloneAsADDouble() const override {          \
-    std::cout << "Unsupported casting: retuning to double as default"     \
-              << std::endl;                                               \
-    return cloneAsDouble();                                               \
+#define CROCODDYL_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
+  template <typename NewScalar>                                         \
+  explicit derived_class(const derived_class<NewScalar>& other)         \
+      : derived_class(std::move(other.template cast<Scalar>())) {}      \
+  /* Implements casting by overriding `cloneAsFloat` */                 \
+  std::shared_ptr<base_class> cloneAsDouble() const override {          \
+    return std::make_shared<derived_class<double>>(*this);              \
+  }                                                                     \
+  std::shared_ptr<base_class> cloneAsFloat() const override {           \
+    return std::make_shared<derived_class<float>>(*this);               \
+  }                                                                     \
+  std::shared_ptr<base_class> cloneAsADDouble() const override {        \
+    std::cout << "Unsupported casting: retuning to double as default"   \
+              << std::endl;                                             \
+    return cloneAsDouble();                                             \
   }
 
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class)   \
@@ -213,16 +235,16 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::make_shared<derived_class<float>>(*this);          \
   }
 
-#define CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(base_class, derived_class) \
-  template <typename NewScalar>                                           \
-  explicit derived_class(const derived_class<NewScalar>& other)           \
-      : derived_class(std::move(other.template cast<Scalar>())) {}        \
-  /* Implements casting by overriding `cloneAsFloat` */                   \
-  std::shared_ptr<base_class> cloneAsDouble() const override {            \
-    return std::make_shared<derived_class<double>>(*this);                \
-  }                                                                       \
-  std::shared_ptr<base_class> cloneAsFloat() const override {             \
-    return std::make_shared<derived_class<float>>(*this);                 \
+#define CROCODDYL_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
+  template <typename NewScalar>                                         \
+  explicit derived_class(const derived_class<NewScalar>& other)         \
+      : derived_class(std::move(other.template cast<Scalar>())) {}      \
+  /* Implements casting by overriding `cloneAsFloat` */                 \
+  std::shared_ptr<base_class> cloneAsDouble() const override {          \
+    return std::make_shared<derived_class<double>>(*this);              \
+  }                                                                     \
+  std::shared_ptr<base_class> cloneAsFloat() const override {           \
+    return std::make_shared<derived_class<float>>(*this);               \
   }
 
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class) \
