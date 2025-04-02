@@ -313,7 +313,6 @@ if(UNIX)
   endfunction()
   # Function to generate cpp files
   function(crocoddyl_generate_cpp_files cpp_format)
-    message("Scalar types received: ${ARGN}")
     set(scalar_types ${ARGN})
     # Find all .cpp_format.in template files recursively
     file(GLOB_RECURSE ETI_TEMPLATE_FILES FOLLOW_SYMLINKS
