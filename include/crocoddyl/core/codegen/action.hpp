@@ -587,39 +587,27 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
     const std::size_t np = model->get_np();
+    const std::size_t nxu = ndx + nu + np;
     Eigen::DenseIndex it_J1 = 0;
     Lx = Eigen::Map<VectorXs>(J1.data() + it_J1, ndx);
     it_J1 += ndx;
     Lu = Eigen::Map<VectorXs>(J1.data() + it_J1, nu);
     it_J1 += nu + np;
-    Fx = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, ndx)
-             .topRows(ndx)
-             .transpose();
-    Fu = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, ndx)
-             .middleRows(ndx, nu)
-             .transpose();
-    it_J1 += ndx * (ndx + nu + np);
-    Gx = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, ng)
-             .topRows(ndx)
-             .transpose();
-    Gu = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, ng)
-             .middleRows(ndx, nu)
-             .transpose();
-    it_J1 += ng * (ndx + nu + np);
-    Hx = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, nh)
-             .topRows(ndx)
-             .transpose();
-    Hu = Eigen::Map<MatrixXs>(J1.data() + it_J1, ndx + nu + np, nh)
-             .middleRows(ndx, nu)
-             .transpose();
-    Lxx = Eigen::Map<MatrixXs>(H1.data(), ndx + nu + np, ndx + nu + np)
-              .topLeftCorner(ndx, ndx);
-    Luu = Eigen::Map<MatrixXs>(H1.data(), ndx + nu + np, ndx + nu + np)
-              .middleCols(ndx, nu)
-              .middleRows(ndx, nu);
-    Lxu = Eigen::Map<MatrixXs>(H1.data(), ndx + nu + np, ndx + nu + np)
-              .middleCols(ndx, nu)
-              .topRows(ndx);
+    Eigen::Map<MatrixXs> J1_map(J1.data() + it_J1, nxu, ndx);
+    Fx = J1_map.topRows(ndx).transpose();
+    Fu = J1_map.middleRows(ndx, nu).transpose();
+    it_J1 += ndx * nxu;
+    Eigen::Map<MatrixXs> G_map(J1.data() + it_J1, nxu, ng);
+    Gx = G_map.topRows(ndx).transpose();
+    Gu = G_map.middleRows(ndx, nu).transpose();
+    it_J1 += ng * nxu;
+    Eigen::Map<MatrixXs> H_map(J1.data() + it_J1, nxu, nh);
+    Hx = H_map.topRows(ndx).transpose();
+    Hu = H_map.middleRows(ndx, nu).transpose();
+    Eigen::Map<MatrixXs> H1_map(H1.data(), nxu, nxu);
+    Lxx = H1_map.topLeftCorner(ndx, ndx);
+    Luu = H1_map.middleCols(ndx, nu).middleRows(ndx, nu);
+    Lxu = H1_map.middleCols(ndx, nu).topRows(ndx);
   }
 
   template <template <typename Scalar> class Model>
@@ -639,18 +627,18 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t ng = model->get_ng();
     const std::size_t np = model->get_np();
+    const std::size_t nxp = ndx + np;
     Eigen::DenseIndex it_J1 = 0;
     Lx = Eigen::Map<VectorXs>(J1_T.data() + it_J1, ndx);
-    it_J1 += ndx + np;
-    Gx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, ndx + np, ng)
+    it_J1 += nxp;
+    Gx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, nxp, ng)
              .topRows(ndx)
              .transpose();
-    it_J1 += ng * (ndx + np);
-    Hx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, ndx + np, ng)
+    it_J1 += ng * nxp;
+    Hx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, nxp, ng)
              .topRows(ndx)
              .transpose();
-    Lxx = Eigen::Map<MatrixXs>(H1_T.data(), ndx + np, ndx + np)
-              .topLeftCorner(ndx, ndx);
+    Lxx = Eigen::Map<MatrixXs>(H1_T.data(), nxp, nxp).topLeftCorner(ndx, ndx);
   }
 
   template <template <typename Scalar> class Model>
