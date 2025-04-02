@@ -88,14 +88,14 @@ struct ActionModelCodeGenVisitor
              "initialize the code-generated library")
         .def("compileLib", &Model::compileLib, bp::args("self"),
              "compile the code-generated library")
-        .def("existLib", &Model::existLib, bp::args("self"),
+        .def("existLib", &Model::existLib, bp::args("self", "lib_fname"),
              "check if the code-generated library exists\n\n"
+             ":param lib_fname: name of the code generated library\n"
              ":return True if the code-generated library exists, otherwise "
              "false.")
-        .def("loadLib", &Model::loadLib, bp::args("self", "generate_if_exist"),
+        .def("loadLib", &Model::loadLib, bp::args("self", "lib_fname"),
              "load the code-generated library\n\n"
-             ":param generate_if_exist: true for compiling the library when it "
-             "exists (default True)")
+             ":param lib_fname: name of the code generated library")
         .add_property("np", bp::make_function(&Model::get_np),
                       "dimension of the parameter variables in the calc and "
                       "calcDiff functions")

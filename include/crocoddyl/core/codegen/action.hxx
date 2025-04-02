@@ -60,7 +60,8 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
   ad_Y2_.resize(nY2_);
   ad_Y2_T_.resize(nY2_T_);
   initLib();
-  loadLib();
+  compileLib();
+  loadLib(lib_fname_);
   wCostHess_ = VectorXs::Zero(nY1_);
   wCostHess_(0) = Scalar(1.);
   wCostHess_T_ = VectorXs::Zero(nY1_T_);
@@ -114,7 +115,8 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
   ad_Y2_.resize(nY2_);
   ad_Y2_T_.resize(nY2_T_);
   initLib();
-  loadLib();
+  compileLib();
+  loadLib(lib_fname_);
 }
 
 template <typename Scalar>
@@ -166,7 +168,7 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
           *calcCG_, *calcCG_T_, *calcDiffCG_, *calcDiffCG_T_, *quasiStaticCG_)),
       dynLibManager_(
           std::make_unique<LibraryProcessor>(*other.libCG_, lib_fname_)) {
-  loadLib(false);
+  loadLib(lib_fname_);
 }
 
 template <typename Scalar>
@@ -216,6 +218,11 @@ void ActionModelCodeGenTpl<Scalar>::initLib() {
 template <typename Scalar>
 void ActionModelCodeGenTpl<Scalar>::compileLib() {
   START_PROFILER("ActionModelCodeGen::compileLib");
+  if (!dynLibManager_) {
+    throw_pretty("The library "
+                 << lib_fname_ + SystemInfo::DYNAMIC_LIB_EXTENSION
+                 << " should not be compiled again");
+  }
   switch (compiler_type_) {
     case GCC: {
       CppAD::cg::GccCompiler<Scalar> compiler("/usr/bin/gcc");
@@ -238,26 +245,30 @@ void ActionModelCodeGenTpl<Scalar>::compileLib() {
 }
 
 template <typename Scalar>
-bool ActionModelCodeGenTpl<Scalar>::existLib() const {
-  const std::string filename =
-      dynLibManager_->getLibraryName() + SystemInfo::DYNAMIC_LIB_EXTENSION;
+bool ActionModelCodeGenTpl<Scalar>::existLib(
+    const std::string& lib_fname) const {
+  const std::string filename = lib_fname + SystemInfo::DYNAMIC_LIB_EXTENSION;
   std::ifstream file(filename.c_str());
   return file.good();
 }
 
 template <typename Scalar>
-void ActionModelCodeGenTpl<Scalar>::loadLib(const bool generate_if_exist) {
-  if (!existLib() || generate_if_exist) {
-    compileLib();
+void ActionModelCodeGenTpl<Scalar>::loadLib(const std::string& lib_fname) {
+  if (!existLib(lib_fname)) {
+    throw_pretty("The library " << lib_fname + SystemInfo::DYNAMIC_LIB_EXTENSION
+                                << " doesn't exist");
   }
-  const auto it = dynLibManager_->getOptions().find("dlOpenMode");
-  const std::string filename =
-      dynLibManager_->getLibraryName() + SystemInfo::DYNAMIC_LIB_EXTENSION;
-  if (it == dynLibManager_->getOptions().end()) {
-    dynLib_.reset(new LinuxDynamicLib(filename));
+  const std::string filename = lib_fname + SystemInfo::DYNAMIC_LIB_EXTENSION;
+  if (dynLibManager_) {
+    const auto it = dynLibManager_->getOptions().find("dlOpenMode");
+    if (it == dynLibManager_->getOptions().end()) {
+      dynLib_.reset(new LinuxDynamicLib(filename));
+    } else {
+      int dlOpenMode = std::stoi(it->second);
+      dynLib_.reset(new LinuxDynamicLib(filename, dlOpenMode));
+    }
   } else {
-    int dlOpenMode = std::stoi(it->second);
-    dynLib_.reset(new LinuxDynamicLib(filename, dlOpenMode));
+    dynLib_.reset(new LinuxDynamicLib(filename));
   }
   calcFun_ = dynLib_->model(Y1fun_name_.c_str());
   calcFun_T_ = dynLib_->model(Y1Tfun_name_.c_str());

@@ -151,16 +151,17 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   /**
    * @brief Check if the code-generated library exists
    *
+   * @param lib_fname  Name of the code generated library
    * @return Return true if the code-generated library exists, otherwise false.
    */
-  bool existLib() const;
+  bool existLib(const std::string& lib_fname) const;
 
   /**
    * @brief Load the code-generated library
    *
-   * @param generate_if_exist  True for compiling the library when it exists
+   * @param lib_fname  Name of the code generated library
    */
-  void loadLib(const bool generate_if_exist = true);
+  void loadLib(const std::string& lib_fname);
 
   /**
    * @brief Update the parameters of the codegen action
