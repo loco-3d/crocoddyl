@@ -172,6 +172,136 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
 }
 
 template <typename Scalar>
+ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
+    const std::string& lib_fname, std::shared_ptr<Base> model)
+    : Base(model->get_state()->template cast<Scalar>(), model->get_nu(),
+           model->get_nr(), model->get_ng(), model->get_nh()),
+      model_(model),
+      Y1fun_name_("calc"),
+      Y1Tfun_name_("calc_T"),
+      Y2fun_name_("calcDiff"),
+      Y2Tfun_name_("calcDiff_T"),
+      Y3fun_name_("quasiStatic"),
+      lib_fname_(lib_fname),
+      ad_calc_(std::make_unique<ADFun>()),
+      ad_calc_T_(std::make_unique<ADFun>()),
+      ad_calcDiff_(std::make_unique<ADFun>()),
+      ad_calcDiff_T_(std::make_unique<ADFun>()),
+      ad_quasiStatic_(std::make_unique<ADFun>()) {
+  loadLib(lib_fname_);
+  nX_ = calcFun_->Domain();
+  nX_T_ = calcFun_T_->Domain();
+  nY1_ = calcFun_->Range();
+  nY1_T_ = calcFun_T_->Range();
+  nY2_ = calcDiffFun_->Range();
+  nY2_T_ = calcDiffFun_T_->Range();
+  nY3_ = quasiStaticFun_->Range();
+  nX3_ = quasiStaticFun_->Domain();
+  np_ = nX_T_ - state_->get_nx();
+  const std::size_t nx = model_->get_state()->get_nx();
+  if (nX_ != nx + nu_ + np_) {
+    throw_pretty(
+        "The number of independent variables nX in the code generated library "
+        "is not equal to the number of independent variables in the model");
+  }
+  if (nX_T_ != nx + np_) {
+    throw_pretty(
+        "The number of independent variables nX_T in the code generated "
+        "library is not equal to the number of independent variables in the "
+        "model");
+  }
+  if (nY1_ != 1 + nx + ng_ + nh_) {
+    throw_pretty(
+        "The number of dependent variables nY1 in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  if (nY1_T_ != 1 + ng_T_ + nh_T_) {
+    throw_pretty(
+        "The number of dependent variables nY1_T in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  if (nY3_ != nu_) {
+    throw_pretty(
+        "The number of dependent variables nY3 in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  ad_X_.resize(nX_);
+  ad_X_T_.resize(nX_T_);
+  ad_X3_.resize(nX3_);
+  ad_Y1_.resize(nY1_);
+  ad_Y1_T_.resize(nY1_T_);
+  ad_Y2_.resize(nY2_);
+  ad_Y2_T_.resize(nY2_T_);
+  ad_Y3_.resize(nY3_);
+  autodiff_ = calcFun_->isJacobianAvailable() && calcFun_->isHessianAvailable();
+}
+
+template <typename Scalar>
+ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl(
+    const std::string& lib_fname, std::shared_ptr<ADBase> ad_model)
+    : Base(ad_model->get_state()->template cast<Scalar>(), ad_model->get_nu(),
+           ad_model->get_nr(), ad_model->get_ng(), ad_model->get_nh()),
+      model_(ad_model->template cast<Scalar>()),
+      Y1fun_name_("calc"),
+      Y1Tfun_name_("calc_T"),
+      Y2fun_name_("calcDiff"),
+      Y2Tfun_name_("calcDiff_T"),
+      Y3fun_name_("quasiStatic"),
+      lib_fname_(lib_fname),
+      ad_calc_(std::make_unique<ADFun>()),
+      ad_calc_T_(std::make_unique<ADFun>()),
+      ad_calcDiff_(std::make_unique<ADFun>()),
+      ad_calcDiff_T_(std::make_unique<ADFun>()),
+      ad_quasiStatic_(std::make_unique<ADFun>()) {
+  loadLib(lib_fname_);
+  nX_ = calcFun_->Domain();
+  nX_T_ = calcFun_T_->Domain();
+  nY1_ = calcFun_->Range();
+  nY1_T_ = calcFun_T_->Range();
+  nY2_ = calcDiffFun_->Range();
+  nY2_T_ = calcDiffFun_T_->Range();
+  nY3_ = quasiStaticFun_->Range();
+  nX3_ = quasiStaticFun_->Domain();
+  np_ = nX_T_ - state_->get_nx();
+  const std::size_t nx = model_->get_state()->get_nx();
+  if (nX_ != nx + nu_ + np_) {
+    throw_pretty(
+        "The number of independent variables nX in the code generated library "
+        "is not equal to the number of independent variables in the model");
+  }
+  if (nX_T_ != nx + np_) {
+    throw_pretty(
+        "The number of independent variables nX_T in the code generated "
+        "library is not equal to the number of independent variables in the "
+        "model");
+  }
+  if (nY1_ != 1 + nx + ng_ + nh_) {
+    throw_pretty(
+        "The number of dependent variables nY1 in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  if (nY1_T_ != 1 + ng_T_ + nh_T_) {
+    throw_pretty(
+        "The number of dependent variables nY1_T in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  if (nY3_ != nu_) {
+    throw_pretty(
+        "The number of dependent variables nY3 in the code generated library "
+        "is not equal to the number of dependent variables in the model");
+  }
+  ad_X_.resize(nX_);
+  ad_X_T_.resize(nX_T_);
+  ad_X3_.resize(nX3_);
+  ad_Y1_.resize(nY1_);
+  ad_Y1_T_.resize(nY1_T_);
+  ad_Y2_.resize(nY2_);
+  ad_Y2_T_.resize(nY2_T_);
+  ad_Y3_.resize(nY3_);
+  autodiff_ = calcFun_->isJacobianAvailable() && calcFun_->isHessianAvailable();
+}
+
+template <typename Scalar>
 void ActionModelCodeGenTpl<Scalar>::initLib() {
   START_PROFILER("ActionModelCodeGen::initLib");
   // Generate source code for calc

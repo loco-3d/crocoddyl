@@ -131,6 +131,26 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       const std::string& compile_options = "-Ofast -march=native");
 
   /**
+   * @brief Initialize the code generated action model from an pre-compiled
+   * library
+   *
+   * @param lib_fname  Name of the code generated library
+   * @param model      Action model which we want to code generate
+   */
+  ActionModelCodeGenTpl(const std::string& lib_fname,
+                        std::shared_ptr<Base> model);
+
+  /**
+   * @brief Initialize the code generated action model from an pre-compiled
+   * library
+   *
+   * @param lib_fname  Name of the code generated library
+   * @param model      Action model which we want to code generate
+   */
+  ActionModelCodeGenTpl(const std::string& lib_fname,
+                        std::shared_ptr<ADBase> ad_model);
+
+  /**
    * @brief Copy constructor
    * @param other  Action model to be copied
    */

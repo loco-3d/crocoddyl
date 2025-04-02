@@ -44,6 +44,18 @@ struct ActionModelCodeGenVisitor
             ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"
             ":param compile_options: Compilation flags (default: '-Ofast "
             "-march=native')"))
+        .def(bp::init<std::string, std::shared_ptr<Model>>(
+            bp::args("self", "lib_fname", "model"),
+            "Initialize the code generated action model from an pre-compiled "
+            "library.\n\n"
+            ":param lib_fname: name of the code generated library\n"
+            ":param model: action model model which we want to code generate"))
+        .def(bp::init<std::string, std::shared_ptr<ADModel>>(
+            bp::args("self", "lib_fname", "ad_model"),
+            "Initialize the code generated action model from an pre-compiled "
+            "library.\n\n"
+            ":param lib_fname: name of the code generated library\n"
+            ":param ad_model: action model used to code generate"))
         .def(
             "calc",
             static_cast<void (Model::*)(
