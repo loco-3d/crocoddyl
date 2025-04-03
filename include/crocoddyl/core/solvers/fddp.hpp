@@ -70,7 +70,7 @@ template <typename _Scalar>
 class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverFDDPTpl)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(SolverBase, SolverFDDPTpl)
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;

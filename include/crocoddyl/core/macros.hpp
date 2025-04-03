@@ -168,6 +168,18 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::shared_ptr<base_class>(nullptr);                 \
   }
 
+#define CROCODDYL_BASE_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
+  /* Implements casting by overriding `cloneAsFloat` */                      \
+  std::shared_ptr<base_class> cloneAsDouble() const override {               \
+    return std::shared_ptr<base_class>(nullptr);                             \
+  }                                                                          \
+  std::shared_ptr<base_class> cloneAsFloat() const override {                \
+    return std::shared_ptr<base_class>(nullptr);                             \
+  }                                                                          \
+  std::shared_ptr<base_class> cloneAsADDouble() const override {             \
+    return std::shared_ptr<base_class>(nullptr);                             \
+  }
+
 #define CROCODDYL_INNER_DERIVED_CAST(base_class, inner_class, derived_class) \
   template <typename NewScalar>                                              \
   explicit derived_class(                                                    \
@@ -253,13 +265,13 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::shared_ptr<base_class>(nullptr);               \
   }
 
-#define CROCODDYL_BASE_DERIVED_CAST_WITHOUT_CODEGEN(base_class, derived_class) \
-  /* Implements casting by overriding `cloneAsFloat` */                        \
-  std::shared_ptr<base_class> cloneAsDouble() const override {                 \
-    return std::shared_ptr<base_class>(nullptr);                               \
-  }                                                                            \
-  std::shared_ptr<base_class> cloneAsFloat() const override {                  \
-    return std::shared_ptr<base_class>(nullptr);                               \
+#define CROCODDYL_BASE_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
+  /* Implements casting by overriding `cloneAsFloat` */                      \
+  std::shared_ptr<base_class> cloneAsDouble() const override {               \
+    return std::shared_ptr<base_class>(nullptr);                             \
+  }                                                                          \
+  std::shared_ptr<base_class> cloneAsFloat() const override {                \
+    return std::shared_ptr<base_class>(nullptr);                             \
   }
 
 #define CROCODDYL_INNER_DERIVED_CAST(base_class, inner_class, derived_class) \

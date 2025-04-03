@@ -36,6 +36,29 @@ scalar_cast(const Scalar& x) {
   return static_cast<NewScalar>(x);
 }
 
+#ifdef CROCODDYL_WITH_CODEGEN
+
+// Casting to CppAD types from floating-point types
+template <typename NewScalar, typename Scalar>
+static typename std::enable_if<
+    std::is_floating_point<Scalar>::value &&
+        (std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<double>>>::value ||
+         std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<float>>>::value),
+    NewScalar>::type
+scalar_cast(const Scalar& x) {
+  return static_cast<NewScalar>(x);
+}
+
+// Casting to floating-point types from CppAD types
+template <typename NewScalar, typename Scalar>
+static inline typename std::enable_if<std::is_floating_point<Scalar>::value,
+                                      NewScalar>::type
+scalar_cast(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
+  return static_cast<NewScalar>(CppAD::Value(x).getValue());
+}
+
+#endif  // CROCODDYL_WITH_CODEGEN
+
 template <typename NewScalar, typename Scalar>
 std::vector<NewScalar> vector_cast(const std::vector<Scalar>& in) {
   std::vector<NewScalar> out;
@@ -157,29 +180,6 @@ struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>,
 
 }  // namespace internal
 }  // namespace Eigen
-
-namespace crocoddyl {
-
-// Casting to CppAD types from floating-point types
-template <typename NewScalar, typename Scalar>
-static typename std::enable_if<
-    std::is_floating_point<Scalar>::value &&
-        (std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<double>>>::value ||
-         std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<float>>>::value),
-    NewScalar>::type
-scalar_cast(const Scalar& x) {
-  return static_cast<NewScalar>(x);
-}
-
-// Casting to floating-point types from CppAD types
-template <typename NewScalar, typename Scalar>
-static inline typename std::enable_if<std::is_floating_point<Scalar>::value,
-                                      NewScalar>::type
-scalar_cast(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
-  return static_cast<NewScalar>(CppAD::Value(x).getValue());
-}
-
-}  // namespace crocoddyl
 
 #endif
 

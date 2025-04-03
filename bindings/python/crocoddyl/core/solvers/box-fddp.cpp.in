@@ -46,7 +46,7 @@ struct SolverBoxQPVisitor : public bp::def_visitor<SolverBoxQPVisitor<Model>> {
           ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"    \
           ":param term_solver: type of terminal solver (default LuNull)"))     \
       .def(SolverBoxQPVisitor<Model>())                                        \
-      .def(CastVisitor<Model>())                                               \
+      .def(CastVisitor<Model, true>())                                         \
       .def(CopyableVisitor<Model>());
 
 void exposeSolverBoxFDDP() {

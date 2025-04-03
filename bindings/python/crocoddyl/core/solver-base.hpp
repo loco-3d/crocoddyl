@@ -22,7 +22,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
                                public bp::wrapper<SolverAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST(SolverBase, SolverAbstractTpl_wrap)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(SolverBase, SolverAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
@@ -118,7 +118,7 @@ class CallbackAbstractTpl_wrap
       public bp::wrapper<CallbackAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST(CallbackBase, CallbackAbstractTpl_wrap)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(CallbackBase, CallbackAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;

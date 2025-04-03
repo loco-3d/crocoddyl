@@ -10,8 +10,6 @@
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 
-#include <iomanip>
-
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
@@ -33,7 +31,7 @@ template <typename _Scalar>
 class CallbackVerboseTpl : public CallbackAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(CallbackBase, CallbackVerboseTpl)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(CallbackBase, CallbackVerboseTpl)
 
   typedef _Scalar Scalar;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;

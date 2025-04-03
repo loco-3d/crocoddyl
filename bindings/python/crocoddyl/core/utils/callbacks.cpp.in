@@ -44,7 +44,7 @@ struct CallbackVerboseVisitor
           ":param level: verbose level (default _4)\n"                         \
           ":param precision: precision of floating point output (default 5)")) \
       .def(CallbackVerboseVisitor<Model>())                                    \
-      .def(CastVisitor<Model>())                                               \
+      .def(CastVisitor<Model, true>())                                         \
       .def(CopyableVisitor<Model>());
 
 void exposeCallbacks() {

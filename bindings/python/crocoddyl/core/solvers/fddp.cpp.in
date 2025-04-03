@@ -428,7 +428,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
           ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"    \
           ":param term_solver: type of terminal solver (defaul LuNull)"))      \
       .def(SolverFDDPVisitor<Model>())                                         \
-      .def(CastVisitor<Model>())                                               \
+      .def(CastVisitor<Model, true>())                                         \
       .def(CopyableVisitor<Model>());
 
 void exposeSolverFDDP() {

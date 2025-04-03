@@ -18,7 +18,7 @@ template <typename _Scalar>
 class SolverBoxFDDPTpl : public SolverFDDPTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST_WITHOUT_CODEGEN(SolverBase, SolverBoxFDDPTpl)
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(SolverBase, SolverBoxFDDPTpl)
 
   typedef _Scalar Scalar;
   typedef SolverFDDPTpl<Scalar> SolverFDDP;

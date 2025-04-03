@@ -132,7 +132,7 @@ struct SolverIntroVisitor : public bp::def_visitor<SolverIntroVisitor<Model>> {
           ":param dyn_solver: type of dynamic solver (default FeasShoot).\n" \
           ":param eq_solver: type of dynamic solver (default LuNull)."))     \
       .def(SolverIntroVisitor<Model>())                                      \
-      .def(CastVisitor<Model>())                                             \
+      .def(CastVisitor<Model, true>())                                       \
       .def(CopyableVisitor<Model>());
 
 void exposeSolverIntro() {
