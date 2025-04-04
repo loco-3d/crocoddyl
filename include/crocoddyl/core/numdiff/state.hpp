@@ -100,6 +100,13 @@ class StateNumDiffTpl : public StateAbstractTpl<_Scalar> {
    */
   void set_disturbance(const Scalar disturbance);
 
+  /**
+   * @brief Print relevant information of the state numdiff
+   *
+   * @param[out] os  Output stream object
+   */
+  virtual void print(std::ostream& os) const override;
+
  private:
   std::shared_ptr<Base>
       state_;     //!< state we need to compute the numerical differentiation

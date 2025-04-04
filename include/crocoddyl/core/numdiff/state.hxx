@@ -231,4 +231,9 @@ void StateNumDiffTpl<Scalar>::set_disturbance(Scalar disturbance) {
   e_jac_ = disturbance;
 }
 
+template <typename Scalar>
+void StateNumDiffTpl<Scalar>::print(std::ostream& os) const {
+  os << "StateNumDiff {state=" << *state_ << "}";
+}
+
 }  // namespace crocoddyl

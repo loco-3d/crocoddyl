@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,80 +15,104 @@
 namespace crocoddyl {
 namespace python {
 
-void exposeActivationNumDiff() {
-  bp::register_ptr_to_python<std::shared_ptr<ActivationModelNumDiff> >();
-
-  bp::class_<ActivationModelNumDiff, bp::bases<ActivationModelAbstract> >(
-      "ActivationModelNumDiff",
-      "Abstract class for computing calcDiff by using numerical "
-      "differentiation.\n\n",
-      bp::init<std::shared_ptr<ActivationModelAbstract> >(
-          bp::args("self", "model"),
-          "Initialize the activation model NumDiff.\n\n"
-          ":param model: activation model where we compute the derivatives "
-          "through NumDiff"))
-      .def("calc", &ActivationModelNumDiff::calc, bp::args("self", "data", "r"),
+template <typename Model>
+struct ActivationModelNumDiffVisitor
+    : public bp::def_visitor<ActivationModelNumDiffVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "r"),
            "Compute the activation value.\n\n"
            "The activation evolution is described in model.\n"
            ":param data: NumDiff action data\n"
            ":param r: residual vector")
-      .def("calcDiff", &ActivationModelNumDiff::calcDiff,
-           bp::args("self", "data", "r"),
-           "Compute the derivatives of the residual.\n\n"
-           "It computes the Jacobian and Hessian using numerical "
-           "differentiation.\n"
-           "It assumes that calc has been run first.\n"
-           ":param data: NumDiff action data\n"
-           ":param r: residual vector\n")
-      .def("createData", &ActivationModelNumDiff::createData, bp::args("self"),
-           "Create the activation data.\n\n"
-           "Each activation model (AM) has its own data that needs to be "
-           "allocated.\n"
-           "This function returns the allocated data for a predefined AM.\n"
-           ":return AM data.")
-      .add_property(
-          "model",
-          bp::make_function(&ActivationModelNumDiff::get_model,
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "r"),
+             "Compute the derivatives of the residual.\n\n"
+             "It computes the Jacobian and Hessian using numerical "
+             "differentiation.\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: NumDiff action data\n"
+             ":param r: residual vector\n")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the activation data.\n\n"
+             "Each activation model (AM) has its own data that needs to be "
+             "allocated.\n"
+             "This function returns the allocated data for a predefined AM.\n"
+             ":return AM data.")
+        .add_property(
+            "model",
+            bp::make_function(&Model::get_model,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "action model")
+        .add_property(
+            "disturbance", bp::make_function(&Model::get_disturbance),
+            "disturbance constant used in the numerical differentiation");
+  }
+};
+
+template <typename Data>
+struct ActivationDataNumDiffVisitor
+    : public bp::def_visitor<ActivationDataNumDiffVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "dr", bp::make_getter(&Data::dr, bp::return_internal_reference<>()),
+          "disturbance.")
+        .add_property(
+            "rp", bp::make_getter(&Data::rp, bp::return_internal_reference<>()),
+            "input plus the disturbance.")
+        .add_property(
+            "data_0",
+            bp::make_getter(&Data::data_0,
                             bp::return_value_policy<bp::return_by_value>()),
-          "action model")
-      .add_property(
-          "disturbance",
-          bp::make_function(&ActivationModelNumDiff::get_disturbance),
-          "disturbance constant used in the numerical differentiation")
-      .def(CopyableVisitor<ActivationModelNumDiff>());
+            "data that contains the final results")
+        .add_property(
+            "data_rp",
+            bp::make_getter(&Data::data_rp,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "temporary data associated with the input variation")
+        .add_property(
+            "data_r2p",
+            bp::make_getter(&Data::data_r2p,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "temporary data associated with the input variation");
+  }
+};
 
-  bp::register_ptr_to_python<std::shared_ptr<ActivationDataNumDiff> >();
+#define CROCODDYL_ACTIVATION_MODEL_NUMDIFF_PYTHON_BINDINGS(Scalar)           \
+  typedef ActivationModelNumDiffTpl<Scalar> Model;                           \
+  typedef ActivationModelAbstractTpl<Scalar> ModelBase;                      \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ActivationModelNumDiff",                                              \
+      "Abstract class for computing calcDiff by using numerical "            \
+      "differentiation.\n\n",                                                \
+      bp::init<std::shared_ptr<ModelBase>>(                                  \
+          bp::args("self", "model"),                                         \
+          "Initialize the activation model NumDiff.\n\n"                     \
+          ":param model: activation model where we compute the derivatives " \
+          "through NumDiff"))                                                \
+      .def(ActivationModelNumDiffVisitor<Model>())                           \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
 
-  bp::class_<ActivationDataNumDiff, bp::bases<ActivationDataAbstract> >(
-      "ActivationDataNumDiff", "Numerical differentiation activation data.",
-      bp::init<ActivationModelNumDiff*>(
-          bp::args("self", "model"),
-          "Create numerical differentiation activation data.\n\n"
-          ":param model: numdiff activation model"))
-      .add_property("dr",
-                    bp::make_getter(&ActivationDataNumDiff::dr,
-                                    bp::return_internal_reference<>()),
-                    "disturbance.")
-      .add_property("rp",
-                    bp::make_getter(&ActivationDataNumDiff::rp,
-                                    bp::return_internal_reference<>()),
-                    "input plus the disturbance.")
-      .add_property(
-          "data_0",
-          bp::make_getter(&ActivationDataNumDiff::data_0,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "data that contains the final results")
-      .add_property(
-          "data_rp",
-          bp::make_getter(&ActivationDataNumDiff::data_rp,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "temporary data associated with the input variation")
-      .add_property(
-          "data_r2p",
-          bp::make_getter(&ActivationDataNumDiff::data_r2p,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "temporary data associated with the input variation")
-      .def(CopyableVisitor<ActivationDataNumDiff>());
+#define CROCODDYL_ACTIVATION_DATA_NUMDIFF_PYTHON_BINDINGS(Scalar)              \
+  typedef ActivationDataNumDiffTpl<Scalar> Data;                               \
+  typedef ActivationDataAbstractTpl<Scalar> DataBase;                          \
+  typedef ActivationModelNumDiffTpl<Scalar> Model;                             \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ActivationDataNumDiff", "Numerical differentiation activation data.",   \
+      bp::init<Model*>(bp::args("self", "model"),                              \
+                       "Create numerical differentiation activation data.\n\n" \
+                       ":param model: numdiff activation model"))              \
+      .def(ActivationDataNumDiffVisitor<Data>())                               \
+      .def(CopyableVisitor<Data>());
+
+void exposeActivationNumDiff() {
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_ACTIVATION_MODEL_NUMDIFF_PYTHON_BINDINGS)
+  CROCODDYL_PYTHON_SCALARS(CROCODDYL_ACTIVATION_DATA_NUMDIFF_PYTHON_BINDINGS)
 }
 
 }  // namespace python
