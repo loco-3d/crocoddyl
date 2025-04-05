@@ -1,0 +1,134 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC
+//                          Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/actuation/actuation-squashing.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ActuationModelSquashingVisitor
+    : public bp::def_visitor<ActuationModelSquashingVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::ActuationDataAbstract Data;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(
+               const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+           bp::args("self", "data", "x", "u"),
+           "Compute the actuation signal from the squashing input u.\n\n"
+           "It describes the time-continuos evolution of the actuation model.\n"
+           ":param data: actuation data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: squashing function input")
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the actuation model.\n\n"
+            "It computes the partial derivatives of the actuation model which "
+            "is\n"
+            "describes in continouos time. It assumes that calc has been run "
+            "first.\n"
+            ":param data: actuation data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu).")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the actuation squashing data.\n\n"
+             "Each actuation model (AM) has its own data that needs to be "
+             "allocated.\n"
+             "This function returns the allocated data for a predefined AM.\n"
+             ":return AM data.")
+        .add_property(
+            "squashing",
+            bp::make_function(&Model::get_squashing,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "squashing")
+        .add_property(
+            "actuation",
+            bp::make_function(&Model::get_actuation,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "actuation");
+  }
+};
+
+template <typename Data>
+struct ActuationDataSquashingVisitor
+    : public bp::def_visitor<ActuationDataSquashingVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "squashing",
+          bp::make_getter(&Data::squashing,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&Data::squashing),
+          "Data of the associated squashing model")
+        .add_property(
+            "actuation",
+            bp::make_getter(&Data::actuation,
+                            bp::return_value_policy<bp::return_by_value>()),
+            bp::make_setter(&Data::actuation),
+            "Data of the associated actuation model");
+  }
+};
+
+#define CROCODDYL_ACTUATION_MODEL_SQUASHING_PYTHON_BINDINGS(Scalar)     \
+  typedef ActuationSquashingModelTpl<Scalar> Model;                     \
+  typedef ActuationModelAbstractTpl<Scalar> ModelBase;                  \
+  typedef SquashingModelAbstractTpl<Scalar> Squashing;                  \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                 \
+  bp::class_<Model, bp::bases<ModelBase>>(                              \
+      "ActuationSquashingModel",                                        \
+      "Class for squashing an actuation model.\n\n",                    \
+      bp::init<std::shared_ptr<ModelBase>, std::shared_ptr<Squashing>,  \
+               std::size_t>(                                            \
+          bp::args("self", "actuation", "squashing", "nu"),             \
+          "Initialize the actuation model with squashing function.\n\n" \
+          ":param actuation: actuation model to be squashed.\n"         \
+          ":param squashing: squashing function.\n"                     \
+          ":param nu: number of controls"))                             \
+      .def(ActuationModelSquashingVisitor<Model>())                     \
+      .def(CastVisitor<Model>())                                        \
+      .def(PrintableVisitor<Model>())                                   \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTUATION_DATA_SQUASHING_PYTHON_BINDINGS(Scalar)             \
+  typedef ActuationSquashingDataTpl<Scalar> Data;                              \
+  typedef ActuationDataAbstractTpl<Scalar> DataBase;                           \
+  typedef ActuationSquashingModelTpl<Scalar> Model;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ActuationSquashingData",                                                \
+      "Class for actuation datas using squashing functions.\n\n"               \
+      "In crocoddyl, an actuation data contains all the required information " \
+      "for processing an user-defined actuation model. The actuation data "    \
+      "typically is allocated onces by running via model.createData().",       \
+      bp::init<Model*>(                                                        \
+          bp::args("self", "model"),                                           \
+          "Create common data shared between actuation models.\n\n"            \
+          "The actuation data uses the model in order to first process it.\n"  \
+          ":param model: actuation model"))                                    \
+      .def(ActuationDataSquashingVisitor<Data>())                              \
+      .def(CopyableVisitor<Data>());
+
+void exposeActuationSquashing() {
+  CROCODDYL_ACTUATION_MODEL_SQUASHING_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTUATION_DATA_SQUASHING_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

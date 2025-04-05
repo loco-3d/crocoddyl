@@ -1,0 +1,125 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, University of Edinburgh, University of Oxford,
+//                          Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/friction-cone.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct FrictionConeVisitor
+    : public bp::def_visitor<FrictionConeVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::Vector3s Vector3s;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<>(bp::args("self"),
+                      "Default initialization of the friction cone."))
+        .def("update", static_cast<void (Model::*)()>(&Model::update),
+             bp::args("self"),
+             "Update the linear inequality (matrix and bounds).\n\n"
+             "Run this function if you have changed one of the parameters.")
+        .def("update",
+             static_cast<void (Model::*)(const Vector3s&, const Scalar,
+                                         const bool, const Scalar,
+                                         const Scalar)>(&Model::update),
+             deprecated<>("Deprecated. Use update()."),
+             bp::args("self", "nsurf", "mu", "inner_appr", "min_nforce",
+                      "max_nforce"),
+             "Update the linear inequality (matrix and bounds).\n\n"
+             ":param nsurf: surface normal vector (it defines the cone "
+             "orientation)\n"
+             ":param mu: friction coefficient\n"
+             ":param inner_appr: inner or outer approximation (default True)\n"
+             ":param min_nforce: minimum normal force (default 0.)\n"
+             ":param max_nforce: maximum normal force (default "
+             "sys.float_info.max)")
+        .add_property(
+            "A",
+            bp::make_function(&Model::get_A, bp::return_internal_reference<>()),
+            "inequality matrix")
+        .add_property("ub",
+                      bp::make_function(&Model::get_ub,
+                                        bp::return_internal_reference<>()),
+                      "inequality upper bound")
+        .add_property("lb",
+                      bp::make_function(&Model::get_lb,
+                                        bp::return_internal_reference<>()),
+                      "inequality lower bound")
+        .add_property(
+            "nf",
+            bp::make_function(&Model::get_nf,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "number of facets (run update() if you have changed the value)")
+        .add_property(
+            "R",
+            bp::make_function(&Model::get_R, bp::return_internal_reference<>()),
+            bp::make_function(&Model::set_R),
+            "rotation matrix that defines the cone orientation w.r.t. "
+            "the inertial frame (run update() if you "
+            "have changed the value)")
+        .add_property(
+            "mu", bp::make_function(&Model::get_mu),
+            bp::make_function(&Model::set_mu),
+            "friction coefficient (run update() if you have changed the value)")
+        .add_property("inner_appr", bp::make_function(&Model::get_inner_appr),
+                      bp::make_function(&Model::set_inner_appr),
+                      "type of cone approximation (run update() if you have "
+                      "changed the value)")
+        .add_property(
+            "min_nforce", bp::make_function(&Model::get_min_nforce),
+            bp::make_function(&Model::set_min_nforce),
+            "minimum normal force (run update() if you have changed the value)")
+        .add_property("max_nforce", bp::make_function(&Model::get_max_nforce),
+                      bp::make_function(&Model::set_max_nforce),
+                      "maximum normal force (run update() if you have changed "
+                      "the value)");
+  }
+};
+
+#define CROCODDYL_FRICTION_CONE_PYTHON_BINDINGS(Scalar)                      \
+  typedef FrictionConeTpl<Scalar> Model;                                     \
+  typedef typename Model::Matrix3s Matrix3s;                                 \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model>(                                                         \
+      "FrictionCone", "Model of the friction cone as lb <= Af <= ub",        \
+      bp::init<Matrix3s, Scalar,                                             \
+               bp::optional<std::size_t, bool, Scalar, Scalar>>(             \
+          bp::args("self", "R", "mu", "nf", "inner_appr", "min_nforce",      \
+                   "max_nforce"),                                            \
+          "Initialize the linearize friction cone.\n\n"                      \
+          ":param R: rotation matrix that defines the cone orientation "     \
+          "w.r.t. the inertial frame\n"                                      \
+          ":param mu: friction coefficient\n"                                \
+          ":param nf: number of facets (default 4)\n"                        \
+          ":param inner_appr: inner or outer approximation (default True)\n" \
+          ":param min_nforce: minimum normal force (default 0.)\n"           \
+          ":param max_nforce: maximum normal force (default "                \
+          "sys.float_info.max)"))                                            \
+      .def(FrictionConeVisitor<Model>())                                     \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+void exposeFrictionCone() {
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
+                             // been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+  CROCODDYL_FRICTION_CONE_PYTHON_BINDINGS(@SCALAR_TYPE@)
+
+#pragma GCC diagnostic pop
+}
+
+}  // namespace python
+}  // namespace crocoddyl

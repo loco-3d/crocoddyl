@@ -8,8 +8,8 @@ import numpy as np
 import pinocchio
 from pinocchio.visualize import MeshcatVisualizer
 
-from .libcrocoddyl_pywrap import *  # noqa: F403
-from .libcrocoddyl_pywrap import __raw_version__, __version__  # noqa: F401
+from .libcrocoddyl_pywrap_float64 import *  # noqa: F403
+from .libcrocoddyl_pywrap_float64 import __raw_version__, __version__  # noqa: F401
 
 
 def rotationMatrixFromTwoVectors(a, b):

@@ -1,0 +1,341 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
+
+#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/utils/map-converter.hpp"
+#include "python/crocoddyl/utils/set-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ConstraintItemVisitor
+    : public bp::def_visitor<ConstraintItemVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def_readwrite("name", &Model::name, "constraint name")
+        .add_property(
+            "constraint",
+            bp::make_getter(&Model::constraint,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint model")
+        .def_readwrite("active", &Model::active, "constraint status");
+  }
+};
+
+template <typename Model>
+struct ConstraintModelManagerVisitor
+    : public bp::def_visitor<ConstraintModelManagerVisitor<Model>> {
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+      ConstraintModelManager_addConstraint_wrap, Model::addConstraint, 2, 3)
+  typedef typename Model::ConstraintDataManager Data;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, std::size_t>(
+               bp::args("self", "state", "nu"),
+               "Initialize the total constraint model.\n\n"
+               "For this case the default nu is equals to model.nv.\n"
+               ":param state: state description\n"
+               ":param nu: dimension of control vector"))
+        .def(bp::init<std::shared_ptr<State>>(
+            bp::args("self", "state"),
+            "Initialize the total constraint model.\n\n"
+            "For this case the default nu is equals to model.nv.\n"
+            ":param state: state description"))
+        .def("addConstraint", &Model::addConstraint,
+             ConstraintModelManager_addConstraint_wrap(
+                 bp::args("self", "name", "constraint", "active"),
+                 "Add a constraint item.\n\n"
+                 ":param name: constraint name\n"
+                 ":param constraint: constraint model\n"
+                 ":param active: True if the constraint is activated (default "
+                 "true)"))
+        .def("removeConstraint", &Model::removeConstraint,
+             bp::args("self", "name"),
+             "Remove a constraint item.\n\n"
+             ":param name: constraint name")
+        .def("changeConstraintStatus", &Model::changeConstraintStatus,
+             bp::args("self", "name", "active"),
+             "Change the constraint status.\n\n"
+             ":param name: constraint name\n"
+             ":param active: constraint status (true for active and false for "
+             "inactive)")
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the total constraint.\n\n"
+            ":param data: constraint-manager data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"),
+             "Compute the total constraint value for nodes that depends only "
+             "on the state.\n\n"
+             "It updates the total constraint based on the state only. This "
+             "function is used in the terminal nodes of an optimal control "
+             "problem.\n"
+             ":param data: constraint-manager data\n"
+             ":param x: state point (dim. state.nx)")
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the total constraint.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: constraint-manager data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)\n")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"),
+             "Compute the Jacobian of the total constraint for nodes that "
+             "depends on the state only.\n\n"
+             "It updates the Jacobian of the total constraint based on the "
+             "state only. This function is used in the terminal nodes of an "
+             "optimal control problem.\n"
+             ":param data: constraint-manager data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the total constraint data.\n\n"
+             ":param data: shared data\n"
+             ":return total constraint data.")
+        .add_property(
+            "state",
+            bp::make_function(&Model::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state description")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "stack of constraints")
+        .add_property("nu", bp::make_function(&Model::get_nu),
+                      "dimension of control vector")
+        .add_property("ng", bp::make_function(&Model::get_ng),
+                      "number of active inequality constraints")
+        .add_property("nh", bp::make_function(&Model::get_nh),
+                      "number of active equality constraints")
+        .add_property("ng_T", bp::make_function(&Model::get_ng_T),
+                      "number of active inequality terminal constraints")
+        .add_property("nh_T", bp::make_function(&Model::get_nh_T),
+                      "number of active equality terminal constraints")
+        .add_property(
+            "active_set",
+            bp::make_function(&Model::get_active_set,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "name of the active set of constraint items")
+        .add_property(
+            "inactive_set",
+            bp::make_function(&Model::get_inactive_set,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "name of the inactive set of constraint items")
+        .add_property("g_lb",
+                      bp::make_function(&Model::get_lb,
+                                        bp::return_internal_reference<>()),
+                      "lower bound of the inequality constraints")
+        .add_property("g_ub",
+                      bp::make_function(&Model::get_ub,
+                                        bp::return_internal_reference<>()),
+                      "upper bound of the inequality constraints")
+        .def("getConstraintStatus", &Model::getConstraintStatus,
+             bp::args("self", "name"),
+             "Return the constraint status of a given constraint name.\n\n"
+             ":param name: constraint name");
+  }
+};
+
+template <typename Data>
+struct ConstraintDataManagerVisitor
+    : public bp::def_visitor<ConstraintDataManagerVisitor<Data>> {
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConstraintDataManager_resizeConst_wrap,
+                                         Data::resize, 1, 2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ConstraintDataManager_resize_wrap,
+                                         Data::resize, 2, 3)
+  typedef typename Data::Scalar Scalar;
+  typedef ConstraintModelManagerTpl<Scalar> Model;
+  typedef DifferentialActionModelAbstractTpl<Scalar> DifferentialActionModel;
+  typedef DifferentialActionDataAbstractTpl<Scalar> DifferentialActionData;
+  typedef ActionModelAbstractTpl<Scalar> ActionModel;
+  typedef ActionDataAbstractTpl<Scalar> ActionData;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(
+          "shareMemory", &Data::template shareMemory<DifferentialActionData>,
+          bp::args("self", "data"),
+          "Share memory with a given differential action data\n\n"
+          ":param model: differential action data that we want to share memory")
+        .def("shareMemory", &Data::template shareMemory<ActionData>,
+             bp::args("self", "data"),
+             "Share memory with a given action data\n\n"
+             ":param model: action data that we want to share memory")
+        .def("resize", &Data::template resize<Model>,
+             bp::with_custodian_and_ward_postcall<0, 1>(),
+             ConstraintDataManager_resizeConst_wrap(
+                 bp::args("self", "model", "running_node"),
+                 "Resize the data given differential action data\n\n"
+                 ":param model: constraint manager model that defines how to "
+                 "resize "
+                 "the data\n"
+                 ":param running_node: true if we are resizing for a running "
+                 "node, false for terminal ones (default true)"))
+        .def(
+            "resize",
+            &Data::template resize<DifferentialActionModel,
+                                   DifferentialActionData>,
+            bp::with_custodian_and_ward_postcall<0, 2>(),
+            ConstraintDataManager_resize_wrap(
+                bp::args("self", "model", "data", "running_node"),
+                "Resize the data given differential action data\n\n"
+                ":param model: differential action model that defines how to "
+                "resize "
+                "the data\n"
+                ":param data: differential action data that we want to resize\n"
+                ":param running_node: true if we are resizing for a running "
+                "node, false for terminal ones (default true)"))
+        .def("resize", &Data::template resize<ActionModel, ActionData>,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             ConstraintDataManager_resize_wrap(
+                 bp::args("self", "model", "data", "running_node"),
+                 "Resize the data given action data\n\n"
+                 ":param model: action model that defines how to resize the "
+                 "data\n"
+                 ":param data: action data that we want to resize\n"
+                 ":param running_node: true if we are resizing for a running "
+                 "node, false for terminal ones (default true)"))
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "stack of constraints data")
+        .add_property(
+            "shared",
+            bp::make_getter(&Data::shared, bp::return_internal_reference<>()),
+            "shared data")
+        .add_property(
+            "g",
+            bp::make_function(&Data::get_g,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_g), "Inequality constraint residual")
+        .add_property(
+            "Gx",
+            bp::make_function(&Data::get_Gx,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Gx),
+            "Jacobian of the inequality constraint")
+        .add_property(
+            "Gu",
+            bp::make_function(&Data::get_Gu,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Gu),
+            "Jacobian of the inequality constraint")
+        .add_property(
+            "h",
+            bp::make_function(&Data::get_h,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_h), "Equality constraint residual")
+        .add_property(
+            "Hx",
+            bp::make_function(&Data::get_Hx,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Hx),
+            "Jacobian of the equality constraint")
+        .add_property(
+            "Hu",
+            bp::make_function(&Data::get_Hu,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Hu),
+            "Jacobian of the equality constraint");
+  }
+};
+
+#define CROCODDYL_CONSTRAINT_ITEM_PYTHON_BINDINGS(Scalar)                     \
+  typedef ConstraintItemTpl<Scalar> Item;                                    \
+  typedef Item::ConstraintModelAbstract ConstraintModel;                     \
+  typedef std::shared_ptr<Item> ConstraintItemPtr;                           \
+  StdMapPythonVisitor<                                                        \
+      std::string, ConstraintItemPtr, std::less<std::string>,                 \
+      std::allocator<std::pair<const std::string, ConstraintItemPtr>>,        \
+      true>::expose("StdMap_ConstraintItem");                                 \
+  typedef ConstraintDataAbstractTpl<Scalar> ConstraintData;                   \
+  typedef std::shared_ptr<ConstraintData> ConstraintDataPtr;                  \
+  StdMapPythonVisitor<                                                        \
+      std::string, ConstraintDataPtr, std::less<std::string>,                 \
+      std::allocator<std::pair<const std::string, ConstraintDataPtr>>,        \
+      true>::expose("StdMap_ConstraintData");                                 \
+  bp::register_ptr_to_python<std::shared_ptr<Item>>();                       \
+  bp::class_<Item>("ConstraintItem", "Describe a constraint item.\n\n",      \
+                    bp::init<std::string, std::shared_ptr<ConstraintModel>,   \
+                             bp::optional<bool>>(                             \
+                        bp::args("self", "name", "constraint", "active"),     \
+                        "Initialize the constraint item.\n\n"                 \
+                        ":param name: constraint name\n"                      \
+                        ":param constraint: constraint model\n"               \
+                        ":param active: True if the constraint is activated " \
+                        "(default true)"))                                    \
+      .def(ConstraintItemVisitor<Item>())                                    \
+      .def(CastVisitor<Item>())                                              \
+      .def(PrintableVisitor<Item>())                                         \
+      .def(CopyableVisitor<Item>());
+
+#define CROCODDYL_CONSTRAINT_MODEL_MANAGER_PYTHON_BINDINGS(Scalar)   \
+  typedef ConstraintModelManagerTpl<Scalar> Model;                   \
+  typedef Model::StateAbstract State;                                \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();              \
+  bp::class_<Model>("ConstraintModelManager",                        \
+                    bp::init<std::shared_ptr<State>, std::size_t>(   \
+                        bp::args("self", "state", "nu"),             \
+                        "Initialize the total constraint model.\n\n" \
+                        ":param state: state description\n"          \
+                        ":param nu: dimension of control vector"))   \
+      .def(ConstraintModelManagerVisitor<Model>())                   \
+      .def(CastVisitor<Model>())                                     \
+      .def(PrintableVisitor<Model>())                                \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_CONSTRAINT_DATA_MANAGER_PYTHON_BINDINGS(Scalar)           \
+  typedef ConstraintDataManagerTpl<Scalar> Data;                            \
+  typedef ConstraintModelManagerTpl<Scalar> Model;                          \
+  typedef Model::DataCollectorAbstract DataCollector;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                      \
+  bp::class_<Data>(                                                         \
+      "ConstraintDataManager", "Class for total constraint data.\n\n",      \
+      bp::init<Model*, DataCollector*>(                                     \
+          bp::args("self", "model", "data"),                                \
+          "Create total constraint data.\n\n"                               \
+          ":param model: total constraint model\n"                          \
+          ":param data: shared data")[bp::with_custodian_and_ward<1, 3>()]) \
+      .def(ConstraintDataManagerVisitor<Data>())                            \
+      .def(CopyableVisitor<Data>());
+
+void exposeConstraintManager() {
+  CROCODDYL_CONSTRAINT_ITEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_CONSTRAINT_MODEL_MANAGER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_CONSTRAINT_DATA_MANAGER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

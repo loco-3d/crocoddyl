@@ -1,0 +1,110 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/residuals/control.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelControlVisitor
+    : public bp::def_visitor<ResidualModelControlVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, std::size_t>(
+               bp::args("self", "state", "nu"),
+               "Initialize the control residual model.\n\n"
+               "The default reference control is obtained from np.zero(nu).\n"
+               ":param state: state description\n"
+               ":param nu: dimension of the control vector"))
+        .def(bp::init<std::shared_ptr<State>>(
+            bp::args("self", "state"),
+            "Initialize the control residual model.\n\n"
+            "The default reference control is obtained from np.zero(nu).\n"
+            ":param state: state description"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the control residual.\n\n"
+            ":param data: residual data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the Jacobians of the control residual.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def(
+            "calcDiff",
+            static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                            const Eigen::Ref<const VectorXs>&)>(
+                &ModelBase::calcDiff),
+            bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the control residual data.\n\n"
+             "Each residual model has its own data that needs to be allocated. "
+             "This function returns the allocated data for the control "
+             "residual.\n"
+             ":param data: shared data\n"
+             ":return residual data.")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_reference, "reference control vector");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_CONTROL_PYTHON_BINDINGS(Scalar)             \
+  typedef ResidualModelControlTpl<Scalar> Model;                             \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef typename ModelBase::StateAbstract State;                           \
+  typedef typename ModelBase::VectorXs VectorXs;                             \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ResidualModelControl",                                                \
+      "This residual function defines a residual vector as r = u - uref, "   \
+      "with u and uref as the current and reference control, respectively.", \
+      bp::init<std::shared_ptr<State>, VectorXs>(                            \
+          bp::args("self", "state", "uref"),                                 \
+          "Initialize the control residual model.\n\n"                       \
+          ":param state: state description\n"                                \
+          ":param uref: reference control"))                                 \
+      .def(ResidualModelControlVisitor<Model>())                             \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+void exposeResidualControl() {
+  CROCODDYL_RESIDUAL_MODEL_CONTROL_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

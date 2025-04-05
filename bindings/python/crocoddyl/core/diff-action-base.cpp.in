@@ -1,0 +1,266 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/diff-action-base.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DifferentialActionModelAbstractVisitor
+    : public bp::def_visitor<DifferentialActionModelAbstractVisitor<Model>> {
+  typedef typename Model::DifferentialActionModel ActionModel;
+  typedef typename Model::DifferentialActionData ActionData;
+  typedef typename Model::VectorXs VectorXs;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
+      DifferentialActionModel_quasiStatic_wraps, ActionModel::quasiStatic_x, 2,
+      4)
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc),
+           bp::args("self", "data", "x", "u"),
+           "Compute the system acceleration and cost value.\n\n"
+           ":param data: differential action data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (ActionModel::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&)>(&ActionModel::calc),
+             bp::args("self", "data", "x"),
+             "Compute the total cost value for nodes that depends only on the "
+             "state.\n\n"
+             "It updates the total cost and the system acceleration is not "
+             "updated as the control input is undefined. This function is used "
+             "in the terminal nodes of an optimal control problem.\n"
+             ":param data: differential action data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the dynamics and cost functions.\n\n"
+             "It computes the partial derivatives of the dynamical system and "
+             "the cost function. It assumes that calc has been run first. This "
+             "function builds a quadratic approximation of the time-continuous "
+             "action model (i.e. dynamical system and cost function).\n"
+             ":param data: differential action data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (ActionModel::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&)>(&ActionModel::calcDiff),
+             bp::args("self", "data", "x"),
+             "Compute the derivatives of the cost functions with respect to "
+             "the state only.\n\n"
+             "It updates the derivatives of the cost function with respect to "
+             "the state only. This function is used in the terminal nodes of "
+             "an optimal control problem.\n"
+             ":param data: action data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the differential action data.\n\n"
+             "Each differential action model has its own data that needs to be "
+             "allocated. This function returns the allocated data for a "
+             "predefined DAM.\n"
+             ":return DAM data.")
+        .def("quasiStatic", &Model::quasiStatic_x,
+             DifferentialActionModel_quasiStatic_wraps(
+                 bp::args("self", "data", "x", "maxiter", "tol"),
+                 "Compute the quasic-static control given a state.\n\n"
+                 "It runs an iterative Newton step in order to compute the "
+                 "quasic-static regime given a state configuration.\n"
+                 ":param data: action data\n"
+                 ":param x: discrete-time state vector\n"
+                 ":param maxiter: maximum allowed number of iterations\n"
+                 ":param tol: stopping tolerance criteria (default 1e-9)\n"
+                 ":return u: quasic-static control"))
+        .def("quasiStatic", &Model::quasiStatic, &Model::default_quasiStatic,
+             bp::args("self", "data", "u", "x", "maxiter", "tol"))
+        .add_property("nu", bp::make_function(&Model::get_nu),
+                      "dimension of control vector")
+        .add_property("nr", bp::make_function(&Model::get_nr),
+                      "dimension of cost-residual vector")
+        .add_property("ng", bp::make_function(&Model::get_ng),
+                      "number of inequality constraints")
+        .add_property("nh", bp::make_function(&Model::get_nh),
+                      "number of equality constraints")
+        .add_property("ng_T", bp::make_function(&Model::get_ng_T),
+                      "number of inequality terminal constraints")
+        .add_property("nh_T", bp::make_function(&Model::get_nh_T),
+                      "number of equality terminal constraints")
+        .add_property(
+            "state",
+            bp::make_function(&Model::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state")
+        .add_property("g_lb",
+                      bp::make_function(&Model::get_g_lb,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_g_lb,
+                      "lower bound of the inequality constraints")
+        .add_property("g_ub",
+                      bp::make_function(&Model::get_g_ub,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_g_ub,
+                      "upper bound of the inequality constraints")
+        .add_property("u_lb",
+                      bp::make_function(&Model::get_u_lb,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_u_lb, "lower control limits")
+        .add_property("u_ub",
+                      bp::make_function(&Model::get_u_ub,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_u_ub, "upper control limits")
+        .add_property("has_control_limits",
+                      bp::make_function(&Model::get_has_control_limits),
+                      "indicates whether problem has finite control limits");
+  }
+};
+
+template <typename Data>
+struct DifferentialActionDataAbstractVisitor
+    : public bp::def_visitor<DifferentialActionDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "cost",
+          bp::make_getter(&Data::cost,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&Data::cost), "cost value")
+        .add_property(
+            "xout",
+            bp::make_getter(&Data::xout, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::xout), "evolution state")
+        .add_property(
+            "r", bp::make_getter(&Data::r, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::r), "cost residual")
+        .add_property(
+            "Fx", bp::make_getter(&Data::Fx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fx),
+            "Jacobian of the dynamics w.r.t. the state")
+        .add_property(
+            "Fu", bp::make_getter(&Data::Fu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fu),
+            "Jacobian of the dynamics w.r.t. the control")
+        .add_property(
+            "Lx", bp::make_getter(&Data::Lx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lx), "Jacobian of the cost w.r.t. the state")
+        .add_property(
+            "Lu", bp::make_getter(&Data::Lu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lu),
+            "Jacobian of the cost w.r.t. the control")
+        .add_property(
+            "Lxx",
+            bp::make_getter(&Data::Lxx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lxx), "Hessian of the cost w.r.t. the state")
+        .add_property(
+            "Lxu",
+            bp::make_getter(&Data::Lxu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lxu),
+            "Hessian of the cost w.r.t. the state and control")
+        .add_property(
+            "Luu",
+            bp::make_getter(&Data::Luu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Luu),
+            "Hessian of the cost w.r.t. the control")
+        .add_property(
+            "g", bp::make_getter(&Data::g, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::g), "Inequality constraint values")
+        .add_property(
+            "Gx", bp::make_getter(&Data::Gx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gx),
+            "Jacobian of the inequality constraint w.r.t. the state")
+        .add_property(
+            "Gu", bp::make_getter(&Data::Gu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gu),
+            "Jacobian of the inequality constraint w.r.t. the control")
+        .add_property(
+            "h", bp::make_getter(&Data::h, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::h), "Equality constraint values")
+        .add_property(
+            "Hx", bp::make_getter(&Data::Hx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hx),
+            "Jacobian of the equality constraint w.r.t. the state")
+        .add_property(
+            "Hu", bp::make_getter(&Data::Hu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hu),
+            "Jacobian of the equality constraint w.r.t. the control");
+  }
+};
+
+#define CROCODDYL_DIFFACTION_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)            \
+  typedef DifferentialActionModelAbstractTpl<Scalar> Model;                    \
+  typedef DifferentialActionModelAbstractTpl_wrap<Scalar> Model_wrap;          \
+  typedef StateAbstractTpl<Scalar> State;                                      \
+  typedef std::shared_ptr<Model> DifferentialActionModelPtr;                   \
+  StdVectorPythonVisitor<std::vector<DifferentialActionModelPtr>,              \
+                         true>::expose("StdVec_DiffActionModel");              \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model_wrap, boost::noncopyable>(                                  \
+      "DifferentialActionModelAbstract",                                       \
+      "Abstract class for the differential action model.\n\n"                  \
+      "A differential action model is the time-continuous version of an "      \
+      "action model. Each node, in our optimal control problem, is described " \
+      "through an action model. Every time that we want describe a problem, "  \
+      "we need to provide ways of computing the dynamics, cost functions, "    \
+      "constraints and their derivatives. These computations are mainly "      \
+      "carried out inside calc() and calcDiff(), respectively.",               \
+      bp::init<std::shared_ptr<State>, std::size_t,                            \
+               bp::optional<std::size_t, std::size_t, std::size_t,             \
+                            std::size_t, std::size_t>>(                        \
+          bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T"),   \
+          "Initialize the differential action model.\n\n"                      \
+          "We can also describe autonomous systems by setting nu = 0.\n"       \
+          ":param state: state\n"                                              \
+          ":param nu: dimension of control vector\n"                           \
+          ":param nr: dimension of cost-residual vector (default 1)\n"         \
+          ":param ng: number of inequality constraints (default 0)\n"          \
+          ":param nh: number of equality constraints (default 0)\n"            \
+          ":param ng_T: number of inequality terminal constraints (default "   \
+          "0)\n"                                                               \
+          ":param nh_T: number of equality terminal constraints (default 0)")) \
+      .def(DifferentialActionModelAbstractVisitor<Model_wrap>())               \
+      .def(PrintableVisitor<Model_wrap>())                                     \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_DIFFACTION_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)             \
+  typedef DifferentialActionDataAbstractTpl<Scalar> Data;                      \
+  typedef DifferentialActionModelAbstractTpl<Scalar> Model;                    \
+  typedef std::shared_ptr<Data> DifferentialActionDataPtr;                     \
+  StdVectorPythonVisitor<std::vector<DifferentialActionDataPtr>,               \
+                         true>::expose("StdVec_DiffActionData");               \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, boost::noncopyable>(                                        \
+      "DifferentialActionDataAbstract",                                        \
+      "Abstract class for differential action data.\n\n"                       \
+      "In crocoddyl, an action data contains all the required information "    \
+      "for processing an user-defined action model. The action data "          \
+      "typically is allocated onces by running model.createData() and "        \
+      "contains the first- and second-order derivatives of the dynamics and "  \
+      "cost function, respectively.",                                          \
+      bp::init<Model*>(bp::args("self", "model"),                              \
+                       "Create common data shared between DAMs.\n\n"           \
+                       "The differential action data uses the model in order " \
+                       "to first process it.\n"                                \
+                       ":param model: differential action model"))             \
+      .def(DifferentialActionDataAbstractVisitor<Data>())                      \
+      .def(CopyableVisitor<Data>());
+
+void exposeDifferentialActionAbstract() {
+  CROCODDYL_DIFFACTION_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DIFFACTION_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

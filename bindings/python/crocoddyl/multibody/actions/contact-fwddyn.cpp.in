@@ -1,0 +1,231 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
+
+#include "python/crocoddyl/core/diff-action-base.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DifferentialActionModelContactFwdDynamicsVisitor
+    : public bp::def_visitor<
+          DifferentialActionModelContactFwdDynamicsVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::DifferentialActionDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::ActuationModelAbstract Actuation;
+  typedef typename Model::ContactModelMultiple Contacts;
+  typedef typename Model::CostModelSum Costs;
+  typedef typename Model::ConstraintModelManager Constraints;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl
+        .def(bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,
+                      std::shared_ptr<Contacts>, std::shared_ptr<Costs>,
+                      std::shared_ptr<Constraints>, bp::optional<Scalar, bool>>(
+            bp::args("self", "state", "actuation", "contacts", "costs",
+                     "constraints", "inv_damping", "enable_force"),
+            "Initialize the constrained forward-dynamics action model.\n\n"
+            "The damping factor is needed when the contact Jacobian is not "
+            "full-rank. Otherwise, a good damping factor could be 1e-12. In "
+            "addition, if you have cost based on forces, you need to enable "
+            "the computation of the force Jacobians (i.e. enable_force=True).\n"
+            ":param state: multibody state\n"
+            ":param actuation: actuation model\n"
+            ":param contacts: multiple contact model\n"
+            ":param costs: stack of cost functions\n"
+            ":param constraints: stack of constraint functions\n"
+            ":param inv_damping: Damping factor for cholesky decomposition of "
+            "JMinvJt (default 0.)\n"
+            ":param enable_force: Enable the computation of force Jacobians "
+            "(default False)"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the next state and cost value.\n\n"
+            "It describes the time-continuous evolution of the multibody "
+            "system with contact. The contacts are modelled as holonomic "
+            "constraints. Additionally it computes the cost value associated "
+            "to this state and control pair.\n"
+            ":param data: contact forward-dynamics action data\n"
+            ":param x: time-continuous state vector\n"
+            ":param u: time-continuous control input")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the differential multibody system and "
+            "its cost functions.\n\n"
+            "It computes the partial derivatives of the differential multibody "
+            "system and the cost function. It assumes that calc has been run "
+            "first. This function builds a quadratic approximation of the "
+            "action model (i.e. dynamical system and cost function).\n"
+            ":param data: contact forward-dynamics action data\n"
+            ":param x: time-continuous state vector\n"
+            ":param u: time-continuous control input\n")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the contact forward dynamics differential action data.")
+        .add_property("pinocchio",
+                      bp::make_function(&Model::get_pinocchio,
+                                        bp::return_internal_reference<>()),
+                      "multibody model (i.e. pinocchio model)")
+        .add_property(
+            "actuation",
+            bp::make_function(&Model::get_actuation,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "actuation model")
+        .add_property(
+            "contacts",
+            bp::make_function(&Model::get_contacts,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "multiple contact model")
+        .add_property(
+            "costs",
+            bp::make_function(&Model::get_costs,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "total cost model")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "constraint model manager")
+        .add_property(
+            "armature",
+            bp::make_function(&Model::get_armature,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_armature),
+            "set an armature mechanism in the joints")
+        .add_property("JMinvJt_damping",
+                      bp::make_function(&Model::get_damping_factor),
+                      bp::make_function(&Model::set_damping_factor),
+                      "Damping factor for cholesky decomposition of JMinvJt");
+  }
+};
+
+template <typename Data>
+struct DifferentialActionDataContactFwdDynamicsVisitor
+    : public bp::def_visitor<
+          DifferentialActionDataContactFwdDynamicsVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "pinocchio",
+          bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+        .add_property("multibody",
+                      bp::make_getter(&Data::multibody,
+                                      bp::return_internal_reference<>()),
+                      "multibody data")
+        .add_property(
+            "costs",
+            bp::make_getter(&Data::costs,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "total cost data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint data")
+        .add_property(
+            "Kinv",
+            bp::make_getter(&Data::Kinv, bp::return_internal_reference<>()),
+            "inverse of the KKT matrix")
+        .add_property(
+            "df_dx",
+            bp::make_getter(&Data::df_dx, bp::return_internal_reference<>()),
+            "Jacobian of the contact force")
+        .add_property(
+            "df_du",
+            bp::make_getter(&Data::df_du, bp::return_internal_reference<>()),
+            "Jacobian of the contact force");
+  }
+};
+
+#define CROCODDYL_ACTION_MODEL_CONTACT_FWDDYN_PYTHON_BINDINGS(Scalar)          \
+  typedef DifferentialActionModelContactFwdDynamicsTpl<Scalar> Model;          \
+  typedef DifferentialActionModelAbstractTpl<Scalar> ModelBase;                \
+  typedef typename Model::StateMultibody State;                                \
+  typedef typename Model::ActuationModelAbstract Actuation;                    \
+  typedef typename Model::ContactModelMultiple Contacts;                       \
+  typedef typename Model::CostModelSum Costs;                                  \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "DifferentialActionModelContactFwdDynamics",                             \
+      "Differential action model for contact forward dynamics in multibody "   \
+      "systems.\n\n"                                                           \
+      "The contact is modelled as holonomic constraits in the contact frame. " \
+      "There is also a custom implementation in case of system with "          \
+      "armatures. If you want to include the armature, you need to use "       \
+      "set_armature(). On the other hand, the stack of cost functions are "    \
+      "implemented in CostModelSum().",                                        \
+      bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,             \
+               std::shared_ptr<Contacts>, std::shared_ptr<Costs>,              \
+               bp::optional<Scalar, bool>>(                                    \
+          bp::args("self", "state", "actuation", "contacts", "costs",          \
+                   "inv_damping", "enable_force"),                             \
+          "Initialize the constrained forward-dynamics action model.\n\n"      \
+          "The damping factor is needed when the contact Jacobian is not "     \
+          "full-rank. Otherwise, a good damping factor could be 1e-12. In "    \
+          "addition, if you have cost based on forces, you need to enable "    \
+          "the computation of the force Jacobians (i.e., "                     \
+          "enable_force=True).\n"                                              \
+          ":param state: multibody state\n"                                    \
+          ":param actuation: actuation model\n"                                \
+          ":param contacts: multiple contact model\n"                          \
+          ":param costs: stack of cost functions\n"                            \
+          ":param inv_damping: Damping factor for cholesky decomposition of "  \
+          "JMinvJt (default 0.)\n"                                             \
+          ":param enable_force: Enable the computation of force Jacobians "    \
+          "(default False)"))                                                  \
+      .def(DifferentialActionModelContactFwdDynamicsVisitor<Model>())          \
+      .def(CastVisitor<Model>())                                               \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTION_DATA_CONTACT_FWDDYN_PYTHON_BINDINGS(Scalar)           \
+  typedef DifferentialActionDataContactFwdDynamicsTpl<Scalar> Data;            \
+  typedef DifferentialActionDataAbstractTpl<Scalar> DataBase;                  \
+  typedef DifferentialActionModelContactFwdDynamicsTpl<Scalar> Model;          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "DifferentialActionDataContactFwdDynamics",                              \
+      "Action data for the contact forward dynamics system.",                  \
+      bp::init<Model*>(bp::args("self", "model"),                              \
+                       "Create contact forward-dynamics action data.\n\n"      \
+                       ":param model: contact forward-dynamics action model")) \
+      .def(DifferentialActionDataContactFwdDynamicsVisitor<Data>())            \
+      .def(CopyableVisitor<Data>());
+
+void exposeDifferentialActionContactFwdDynamics() {
+  CROCODDYL_ACTION_MODEL_CONTACT_FWDDYN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTION_DATA_CONTACT_FWDDYN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

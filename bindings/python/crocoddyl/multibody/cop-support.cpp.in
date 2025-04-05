@@ -1,0 +1,79 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/cop-support.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct CoPSupportVisitor : public bp::def_visitor<CoPSupportVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<>(bp::args("self"),
+                      "Default initialization of the CoP support."))
+        .def("update", &Model::update, bp::args("self"),
+             "Update the linear inequality (matrix and bounds).\n\n"
+             "Run this function if you have changed one of the parameters.")
+        .add_property(
+            "A",
+            bp::make_function(&Model::get_A, bp::return_internal_reference<>()),
+            "inequality matrix")
+        .add_property("ub",
+                      bp::make_function(&Model::get_ub,
+                                        bp::return_internal_reference<>()),
+                      "inequality upper bound")
+        .add_property("lb",
+                      bp::make_function(&Model::get_lb,
+                                        bp::return_internal_reference<>()),
+                      "inequality lower bound")
+        .add_property(
+            "R",
+            bp::make_function(&Model::get_R, bp::return_internal_reference<>()),
+            bp::make_function(&Model::set_R), "rotation matrix")
+        .add_property("box",
+                      bp::make_function(&Model::get_box,
+                                        bp::return_internal_reference<>()),
+                      bp::make_function(&Model::set_box),
+                      "box size used to define the sole");
+  }
+};
+
+#define CROCODDYL_COP_SUPPORT_PYTHON_BINDINGS(Scalar)                     \
+  typedef CoPSupportTpl<Scalar> Model;                                    \
+  typedef typename Model::Matrix3s Matrix3s;                              \
+  typedef typename Model::Vector2s Vector2s;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                   \
+  bp::class_<Model>(                                                      \
+      "CoPSupport", "Model of the CoP support as lb <= Af <= ub",         \
+      bp::init<Matrix3s, Vector2s>(                                       \
+          bp::args("self", "R", "box"),                                   \
+          "Initialize the CoP support.\n\n"                               \
+          ":param R: rotation matrix that defines the cone orientation\n" \
+          ":param box: dimension of the foot surface dim = (length, "     \
+          "width)\n"))                                                    \
+      .def(CoPSupportVisitor<Model>())                                    \
+      .def(CastVisitor<Model>())                                          \
+      .def(PrintableVisitor<Model>())                                     \
+      .def(CopyableVisitor<Model>());
+
+void exposeCoPSupport() {
+#pragma GCC diagnostic push  // TODO: Remove once the deprecated update call has
+                             // been removed in a future release
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+  CROCODDYL_COP_SUPPORT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+
+#pragma GCC diagnostic pop
+}
+
+}  // namespace python
+}  // namespace crocoddyl
