@@ -27,6 +27,10 @@ namespace python {
 
 typedef double Float64;
 typedef float Float32;
+#ifdef CROCODDYL_WITH_CODEGEN
+typedef CppAD::cg::CG<Float64> CGFloat64;
+typedef CppAD::AD<CGFloat64> ADFloat64;
+#endif
 
 enum class DType {
   Float64,
@@ -36,35 +40,6 @@ enum class DType {
   ADFloat64
 #endif
 };
-
-#define CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(macro)               \
-  {                                                                 \
-    macro(Float64)                                                  \
-  }                                                                 \
-  {                                                                 \
-    bp::scope float_scope = getOrCreatePythonNamespace("scalar32"); \
-    macro(Float32)                                                  \
-  }
-
-#ifdef CROCODDYL_WITH_CODEGEN
-typedef CppAD::cg::CG<Float64> CGFloat64;
-typedef CppAD::AD<CGFloat64> ADFloat64;
-#define CROCODDYL_PYTHON_SCALARS(macro)                             \
-  {                                                                 \
-    macro(Float64)                                                  \
-  }                                                                 \
-  {                                                                 \
-    bp::scope float_scope = getOrCreatePythonNamespace("scalar32"); \
-    macro(Float32)                                                  \
-  }                                                                 \
-  {                                                                 \
-    bp::scope cg_scope = getOrCreatePythonNamespace("cgscalar");    \
-    macro(ADFloat64)                                                \
-  }
-#else
-#define CROCODDYL_PYTHON_SCALARS(macro) \
-  CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(macro)
-#endif
 
 }  // namespace python
 }  // namespace crocoddyl
