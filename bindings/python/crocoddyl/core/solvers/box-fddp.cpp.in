@@ -11,10 +11,13 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+
 namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxFDDP() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverBoxFDDP> >();
 
   bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP> >(
@@ -33,6 +36,7 @@ void exposeSolverBoxFDDP() {
               bp::return_value_policy<bp::reference_existing_object>()),
           "inverse of the Quu computed by the box QP")
       .def(CopyableVisitor<SolverBoxFDDP>());
+#endif
 }
 
 }  // namespace python

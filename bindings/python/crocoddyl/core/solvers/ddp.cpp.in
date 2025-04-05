@@ -13,6 +13,8 @@
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+
 namespace crocoddyl {
 namespace python {
 
@@ -23,6 +25,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverDDP_trySteps, SolverDDP::tryStep,
                                        0, 1)
 
 void exposeSolverDDP() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverDDP> >();
 
   bp::class_<SolverDDP, bp::bases<SolverAbstract> >(
@@ -248,6 +251,7 @@ void exposeSolverDDP() {
           bp::make_function(&SolverDDP::set_alphas),
           "list of step length (alpha) values")
       .def(CopyableVisitor<SolverDDP>());
+#endif
 }
 
 }  // namespace python

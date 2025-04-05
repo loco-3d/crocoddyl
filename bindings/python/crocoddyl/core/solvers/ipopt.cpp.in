@@ -1,5 +1,7 @@
 #ifdef CROCODDYL_WITH_IPOPT
 
+#define SCALAR_@SCALAR_NAME@
+
 #include "crocoddyl/core/solvers/ipopt.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
@@ -12,6 +14,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve,
                                        0, 5)
 
 void exposeSolverIpopt() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverIpopt>>();
   bp::class_<SolverIpopt, bp::bases<SolverAbstract>>(
       "SolverIpopt",
@@ -54,6 +57,7 @@ void exposeSolverIpopt() {
                     bp::make_function(&SolverIpopt::set_th_stop),
                     "threshold for stopping criteria")
       .def(CopyableVisitor<SolverIpopt>());
+#endif
 }
 
 }  // namespace python

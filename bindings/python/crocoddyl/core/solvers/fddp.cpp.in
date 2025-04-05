@@ -12,6 +12,8 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+
 namespace crocoddyl {
 namespace python {
 
@@ -21,6 +23,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                        SolverDDP::computeDirection, 0, 1)
 
 void exposeSolverFDDP() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverFDDP> >();
 
   bp::class_<SolverFDDP, bp::bases<SolverDDP> >(
@@ -75,6 +78,7 @@ void exposeSolverFDDP() {
                     bp::make_function(&SolverFDDP::set_th_acceptnegstep),
                     "threshold for step acceptance in ascent direction")
       .def(CopyableVisitor<SolverFDDP>());
+#endif
 }
 
 }  // namespace python

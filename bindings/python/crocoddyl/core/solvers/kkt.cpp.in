@@ -11,6 +11,8 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+
 namespace crocoddyl {
 namespace python {
 
@@ -21,6 +23,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_trySteps, SolverKKT::tryStep,
                                        0, 1)
 
 void exposeSolverKKT() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverKKT> >();
 
   bp::class_<SolverKKT, bp::bases<SolverAbstract> >(
@@ -121,6 +124,7 @@ void exposeSolverKKT() {
               bp::return_value_policy<bp::reference_existing_object>()),
           "dus")
       .def(CopyableVisitor<SolverKKT>());
+#endif
 }
 
 }  // namespace python

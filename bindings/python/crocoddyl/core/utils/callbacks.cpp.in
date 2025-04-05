@@ -12,10 +12,13 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+
 namespace crocoddyl {
 namespace python {
 
 void exposeCallbacks() {
+#ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<CallbackAbstract> >();
 
   bp::enum_<VerboseLevel>("VerboseLevel")
@@ -40,6 +43,7 @@ void exposeCallbacks() {
       .add_property("precision", &CallbackVerbose::get_precision,
                     &CallbackVerbose::set_precision, "precision")
       .def(CopyableVisitor<CallbackVerbose>());
+#endif
 }
 
 }  // namespace python
