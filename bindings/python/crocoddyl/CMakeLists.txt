@@ -51,6 +51,13 @@ function(crocoddyl_python_library_for_scalar scalar)
     generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/.. ${PROJECT_NAME}
                    ${PYTHON_SITELIB} ${PYWRAP})
   endif()
+  # Determine if the scalar type is a floating-point type
+  list(FIND SCALAR_FPTYPES "${scalar}" scalar_index)
+  if(NOT scalar_index EQUAL -1)
+    set(FP_TYPE TRUE)
+  else()
+    set(FP_TYPE FALSE)
+  endif()
   # Generate the scalar-specific C++ files
   crocoddyl_generate_cpp_files(${PYWRAP} cpp bindings/python ${scalar})
   # Install the Boost.Python wrapper target

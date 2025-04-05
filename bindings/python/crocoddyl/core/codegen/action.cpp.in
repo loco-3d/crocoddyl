@@ -8,11 +8,15 @@
 
 #ifdef CROCODDYL_WITH_CODEGEN
 
+// Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/core/codegen/action.hpp"
 
 #include "crocoddyl/multibody/codegen/pinocchio_cast.hpp"
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
@@ -227,14 +231,16 @@ struct ActionDataCodeGeneVisitor
       .def(CopyableVisitor<Data>());
 
 void exposeActionCodeGen() {
+#ifdef SCALAR_float64
   bp::enum_<CompilerType>("CompilerType")
       .value("GCC", CompilerType::GCC)
       .value("CLANG", CompilerType::CLANG);
+#endif
 
-  CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(
-      CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS)
-  CROCODDYL_PYTHON_FLOATINGPOINT_SCALARS(
-      CROCODDYL_ACTION_DATA_CODEGEN_PYTHON_BINDINGS)
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTION_DATA_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
 }
 
 }  // namespace python
