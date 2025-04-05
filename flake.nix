@@ -34,6 +34,7 @@
                   ./benchmark
                   ./bindings
                   ./CMakeLists.txt
+                  ./crocoddyl.cmake
                   ./doc
                   ./examples
                   ./include
