@@ -7,6 +7,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_FILES __init__.py deprecated.py)
 
 # Define the python installation directory
 set(CROCODDYL_PYTHON_INSTALL_DIR ${PYTHON_SITELIB}/${PROJECT_NAME})
+set(STUBGEN_DEPENDENCIES "${PROJECT_NAME}_pywrap_float64")
 
 # Function to build Python bindings for a given scalar type
 function(crocoddyl_python_library_for_scalar scalar)
@@ -22,6 +23,7 @@ function(crocoddyl_python_library_for_scalar scalar)
   endif()
   # Define the Boost.Python wrapper target name
   set(PYWRAP "${PROJECT_NAME}_pywrap_${SCALAR_NAME}")
+  list(APPEND STUBGEN_DEPENDENCIES "${PYWRAP}")
   # Add the shared library for Boost.Python wrapper
   add_library(${PYWRAP} SHARED ${${PROJECT_NAME}_PYTHON_BINDINGS_SOURCES}
                                ${${PROJECT_NAME}_PYTHON_BINDINGS_HEADERS})
@@ -44,12 +46,6 @@ function(crocoddyl_python_library_for_scalar scalar)
     get_relative_rpath(${CROCODDYL_PYTHON_INSTALL_DIR} ${PYWRAP}_INSTALL_RPATH)
     set_target_properties(${PYWRAP} PROPERTIES INSTALL_RPATH
                                                "${${PYWRAP}_INSTALL_RPATH}")
-  endif()
-  # Generate Python type stubs if enabled
-  if(GENERATE_PYTHON_STUBS)
-    load_stubgen()
-    generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/.. ${PROJECT_NAME}
-                   ${PYTHON_SITELIB} ${PYWRAP})
   endif()
   # Determine if the scalar type is a floating-point type
   list(FIND SCALAR_FPTYPES "${scalar}" scalar_index)
@@ -76,6 +72,14 @@ endfunction()
 foreach(scalar ${SCALAR_TYPES})
   crocoddyl_python_library_for_scalar(${scalar})
 endforeach()
+
+# Generate Python type stubs if enabled
+if(GENERATE_PYTHON_STUBS)
+  load_stubgen()
+  generate_stubs(
+    ${CMAKE_CURRENT_BINARY_DIR}/.. ${PROJECT_NAME} ${PYTHON_SITELIB}
+    ${PYWRAP}_float64 ${PROJECT_NAME}_float64 ${STUBGEN_DEPENDENCIES})
+endif()
 
 # Install the main Python binding files
 foreach(python ${${PROJECT_NAME}_PYTHON_BINDINGS_FILES})
