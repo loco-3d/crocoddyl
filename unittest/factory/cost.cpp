@@ -232,7 +232,6 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
 
   std::shared_ptr<pinocchio::GeometryModel> geometry =
       std::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
@@ -246,38 +245,15 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
               .parentJoint,
           CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)),
           frame_SE3_obstacle));
-#else
-  pinocchio::GeomIndex ig_frame =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "frame", frame_index,
-          state->get_pinocchio()->frames[frame_index].parent,
-          CollisionGeometryPtr(new hpp::fcl::Capsule(0, alpha)), frame_SE3));
-  pinocchio::GeomIndex ig_obs =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "obs", state->get_pinocchio()->getFrameId("universe"),
-          state->get_pinocchio()
-              ->frames[state->get_pinocchio()->getFrameId("universe")]
-              .parent,
-          CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)),
-          frame_SE3_obstacle));
-#endif
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
 
   switch (cost_type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
       cost = std::make_shared<crocoddyl::CostModelResidual>(
           state, std::make_shared<crocoddyl::ActivationModelQuad>(3),
           std::make_shared<crocoddyl::ResidualModelPairCollision>(
               state, nu, geometry, 0,
               state->get_pinocchio()->frames[frame_index].parentJoint));
-#else
-      cost = std::make_shared<crocoddyl::CostModelResidual>(
-          state, std::make_shared<crocoddyl::ActivationModelQuad>(3),
-          std::make_shared<crocoddyl::ResidualModelPairCollision>(
-              state, nu, geometry, 0,
-              state->get_pinocchio()->frames[frame_index].parent));
-#endif
       break;
     default:
       throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");

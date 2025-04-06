@@ -130,10 +130,7 @@ class DisplayAbstract(ABC):
                     thrusters.append(model.differential.actuation.thrusters)
         for n in frameNames:
             frameId = self.robot.model.getFrameId(n)
-            if tuple(int(i) for i in pinocchio.__version__.split(".")) >= (3, 0, 0):
-                parentId = self.robot.model.frames[frameId].parentJoint
-            else:
-                parentId = self.robot.model.frames[frameId].parent
+            parentId = self.robot.model.frames[frameId].parentJoint
             self.activeContacts[str(parentId)] = True
             self.frictionMu[str(parentId)] = 0.7
             self.frameTrajNames.append(str(frameId))

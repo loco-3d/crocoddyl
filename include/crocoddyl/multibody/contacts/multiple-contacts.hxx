@@ -250,13 +250,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
         const pinocchio::JointIndex joint =
             state_->get_pinocchio()->frames[d_i->frame].parentJoint;
-#else
-        const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
-#endif
         data->fext[joint] = d_i->fext;
       } else {
         m_i->contact->setZeroForce(d_i);
@@ -276,13 +271,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
         const pinocchio::JointIndex joint =
             state_->get_pinocchio()->frames[d_i->frame].parentJoint;
-#else
-        const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
-#endif
         data->fext[joint] = d_i->fext;
         nc += nc_i;
       } else {
