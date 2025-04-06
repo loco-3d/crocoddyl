@@ -11,7 +11,7 @@ set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Set up Crocoddyl's scalar types
-set(SCALAR_TYPES float double)
+set(SCALAR_TYPES double float)
 set(SCALAR_FPTYPES ${SCALAR_TYPES})
 
 # Check if the submodule cmake have been initialized
