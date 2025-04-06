@@ -14,6 +14,8 @@
 #include "crocoddyl/multibody/fwd.hpp"
 
 namespace pinocchio {
+
+#if !PINOCCHIO_VERSION_AT_LEAST(3, 5, 0)
 // Implement missing casting in Pinocchio
 template <typename NewScalar, typename Scalar>
 struct ScalarCast<NewScalar, CppAD::cg::CG<Scalar>> {
@@ -21,6 +23,8 @@ struct ScalarCast<NewScalar, CppAD::cg::CG<Scalar>> {
     return static_cast<NewScalar>(cg_value.getValue());
   }
 };
+#endif
+
 }  // namespace pinocchio
 
 #endif  // CROCODDYL_MULTIBODY_CODEGEN_PINOCCHIO_CAST_HPP_
