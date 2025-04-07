@@ -1,0 +1,152 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelContactFrictionConeVisitor
+    : public bp::def_visitor<ResidualModelContactFrictionConeVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::FrictionCone Cone;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Cone>(
+               bp::args("self", "state", "id", "fref"),
+               "Initialize the contact friction cone residual model.\n\n"
+               "The default nu is obtained from state.nv. Note that this "
+               "constructor can be used for forward-dynamics\n"
+               "cases only.\n"
+               ":param state: state of the multibody system\n"
+               ":param id: reference frame id\n"
+               ":param fref: frame friction cone"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            "Compute the contact friction cone residual.\n\n"
+            ":param data: residual data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the Jacobians of the contact friction cone residual.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the contact friction cone residual data.\n\n"
+             "Each residual model has its own data that needs to be allocated. "
+             "This function\n"
+             "returns the allocated data for the contact friction cone "
+             "residual.\n"
+             ":param data: shared data\n"
+             ":return residual data.")
+        .add_property(
+            "id", bp::make_function(&Model::get_id),
+            bp::make_function(&Model::set_id,
+                              deprecated<>("Deprecated. Do not use set_id, "
+                                           "instead create a new model")),
+            "reference frame id")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_reference, "reference contact friction cone");
+  }
+};
+
+template <typename Data>
+struct ResidualDataContactFrictionConeVisitor
+    : public bp::def_visitor<ResidualDataContactFrictionConeVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "contact",
+        bp::make_getter(&Data::contact,
+                        bp::return_value_policy<bp::return_by_value>()),
+        bp::make_setter(&Data::contact),
+        "contact data associated with the current residual");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_CONTACT_FRICTION_CONE_PYTHON_BINDINGS(Scalar) \
+  typedef ResidualModelContactFrictionConeTpl<Scalar> Model;                   \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                          \
+  typedef typename Model::StateMultibody State;                                \
+  typedef typename Model::FrictionCone Cone;                                   \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ResidualModelContactFrictionCone",                                      \
+      "This residual function is defined as r = A*f, where A, f describe the " \
+      "linearized friction cone and the spatial force, respectively.",         \
+      bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, Cone,            \
+               std::size_t, bp::optional<bool>>(                               \
+          bp::args("self", "state", "id", "fref", "nu", "fwddyn"),             \
+          "Initialize the contact friction cone residual model.\n\n"           \
+          ":param state: state of the multibody system\n"                      \
+          ":param id: reference frame id\n"                                    \
+          ":param fref: frame friction cone\n"                                 \
+          ":param nu: dimension of control vector\n"                           \
+          ":param fwddyn: indicate if we have a forward dynamics problem "     \
+          "(True) or inverse dynamics problem (False) (default True)"))        \
+      .def(ResidualModelContactFrictionConeVisitor<Model>())                   \
+      .def(CastVisitor<Model>())                                               \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_RESIDUAL_DATA_CONTACT_FRICTION_CONE_PYTHON_BINDINGS(Scalar) \
+  typedef ResidualDataContactFrictionConeTpl<Scalar> Data;                    \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                           \
+  typedef ResidualModelContactFrictionConeTpl<Scalar> Model;                  \
+  typedef Model::DataCollectorAbstract DataCollector;                         \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+  bp::class_<Data, bp::bases<DataBase>>(                                      \
+      "ResidualDataContactFrictionCone",                                      \
+      "Data for contact friction cone residual.\n\n",                         \
+      bp::init<Model*, DataCollector*>(                                       \
+          bp::args("self", "model", "data"),                                  \
+          "Create contact friction cone residual data.\n\n"                   \
+          ":param model: contact friction cone residual model\n"              \
+          ":param data: shared data")[bp::with_custodian_and_ward<            \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                        \
+      .def(ResidualDataContactFrictionConeVisitor<Data>())                    \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualContactFrictionCone() {
+  CROCODDYL_RESIDUAL_MODEL_CONTACT_FRICTION_CONE_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_RESIDUAL_DATA_CONTACT_FRICTION_CONE_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

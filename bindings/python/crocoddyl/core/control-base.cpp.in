@@ -1,0 +1,155 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Trento, Heriot-Watt University
+// Copyright note valid unless otherwise controld in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/control-base.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ControlParametrizationModelAbstractVisitor
+    : public bp::def_visitor<
+          ControlParametrizationModelAbstractVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "t", "u"),
+           "Compute the control inputs.\n\n"
+           ":param data: control-parametrization data\n"
+           ":param t: normalized time in [0, 1]\n"
+           ":param u: control parameters (dim control.nu)")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "t", "u"),
+             "Compute the Jacobian of the control inputs with respect to the "
+             "control parameters.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param u: control parameters (dim control.nu)")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the control-parametrization data.\n\n"
+             "Each control parametrization model has its own data that needs "
+             "to be allocated. This function returns the allocated data for a "
+             "predefined control parametrization model.\n"
+             ":return data.")
+        .def("params", pure_virtual(&Model::params),
+             bp::args("self", "data", "t", "w"),
+             "Update the control parameters u for a specified time t given the "
+             "control input w.\n\n"
+             ":param data: control-parametrization data\n"
+             ":param t: normalized time in [0, 1]\n"
+             ":param w: control inputs (dim control.nw)")
+        .def("convertBounds", pure_virtual(&Model::convertBounds_wrap),
+             bp::args("self", "w_lb", "w_ub"),
+             "Convert the bounds on the control inputs w to bounds on the "
+             "control parameters u.\n\n"
+             ":param w_lb: control lower bounds (dim control.nw)\n"
+             ":param w_ub: control upper bounds (dim control.nw)\n"
+             ":return p_lb, p_ub: lower and upper bounds on the control "
+             "parameters (dim control.nu)")
+        .def("multiplyByJacobian",
+             pure_virtual(&Model::multiplyByJacobian_wrap),
+             bp::args("self", "data", "A"),
+             "Compute the product between the given matrix A and the "
+             "derivative of the control input with respect to the control "
+             "parameters (i.e., A*dw_du).\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: control-parametrization data\n"
+             ":param A: matrix to multiply (dim na x control.nw)\n"
+             ":return Product between A and the partial derivative of the calc "
+             "function (dim na x control.nu)")
+        .def("multiplyJacobianTransposeBy",
+             pure_virtual(&Model::multiplyJacobianTransposeBy_wrap),
+             bp::args("self", "data", "A"),
+             "Compute the product between the transpose of the derivative of "
+             "the control input with respect to the control parameters and a "
+             "given matrix A (i.e., dw_du^T*A).\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: control-parametrization data\n"
+             ":param A: matrix to multiply (dim control.nw x na)\n"
+             ":return Product between the partial derivative of the calc "
+             "function (transposed) and A (dim control.nu x "
+             "na)")
+        .add_property("nw", bp::make_function(&Model::get_nw),
+                      "dimension of control inputs")
+        .add_property("nu", bp::make_function(&Model::get_nu),
+                      "dimension of the control parameters");
+  }
+};
+
+template <typename Data>
+struct ControlParametrizationDataAbstractVisitor
+    : public bp::def_visitor<ControlParametrizationDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "w", bp::make_getter(&Data::w, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::w), "differential control")
+        .add_property(
+            "u", bp::make_getter(&Data::u, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::u), "control parameters")
+        .add_property(
+            "dw_du",
+            bp::make_getter(&Data::dw_du, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dw_du),
+            "Jacobian of the differential control wrt the control parameters");
+  }
+};
+
+#define CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_ABSTRACT_PYTHON_BINDINGS(      \
+    Scalar)                                                                    \
+  typedef ControlParametrizationModelAbstractTpl<Scalar> Model;                \
+  typedef ControlParametrizationModelAbstractTpl_wrap<Scalar> Model_wrap;      \
+  typedef std::shared_ptr<Model> ModelPtr;                                     \
+  StdVectorPythonVisitor<std::vector<ModelPtr>, true>::expose(                 \
+      "StdVec_ControlParametrizationModel");                                   \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model_wrap, boost::noncopyable>(                                  \
+      "ControlParametrizationModelAbstract",                                   \
+      "Abstract class for the control parametrization.\n\n"                    \
+      "A control is a function of time (normalized in [0,1]) and the control " \
+      "parameters u.",                                                         \
+      bp::init<std::size_t, std::size_t>(                                      \
+          bp::args("self", "nw", "nu"),                                        \
+          "Initialize the control dimensions.\n\n"                             \
+          ":param nw: dimension of control inputs\n"                           \
+          ":param nu: dimension of control parameters"))                       \
+      .def(ControlParametrizationModelAbstractVisitor<Model_wrap>())           \
+      .def(CopyableVisitor<Model_wrap>());
+//   .def(PrintableVisitor<Model_wrap>())
+
+#define CROCODDYL_CONTROL_PARAMETRIZATION_DATA_ABSTRACT_PYTHON_BINDINGS( \
+    Scalar)                                                              \
+  typedef ControlParametrizationDataAbstractTpl<Scalar> Data;            \
+  typedef ControlParametrizationModelAbstractTpl<Scalar> Model;          \
+  typedef std::shared_ptr<Data> DataPtr;                                 \
+  StdVectorPythonVisitor<std::vector<DataPtr>, true>::expose(            \
+      "StdVec_ControlParametrizationData");                              \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                   \
+  bp::class_<Data>(                                                      \
+      "ControlParametrizationDataAbstract",                              \
+      "Abstract class for control parametrization data.\n",              \
+      bp::init<Model*>(bp::args("self", "model"),                        \
+                       "Create common data shared between control "      \
+                       "parametrization models.\n\n"                     \
+                       ":param model: control parametrization model"))   \
+      .def(ControlParametrizationDataAbstractVisitor<Data>())            \
+      .def(CopyableVisitor<Data>());
+
+void exposeControlParametrizationAbstract() {
+  CROCODDYL_CONTROL_PARAMETRIZATION_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_CONTROL_PARAMETRIZATION_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

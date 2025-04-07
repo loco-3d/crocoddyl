@@ -1,0 +1,141 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/impulse-com.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelImpulseCoMVisitor
+    : public bp::def_visitor<ResidualModelImpulseCoMVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(
+               const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+           bp::args("self", "data", "x", "u"),
+           "Compute the CoM position residual.\n\n"
+           ":param data: residual data\n"
+           ":param x: state point (dim. state.nx)")
+        .def(
+            "calc",
+            static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                            const Eigen::Ref<const VectorXs>&)>(
+                &ModelBase::calc),
+            bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the CoM position residual for impulse "
+            "dynamics.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)")
+        .def(
+            "calcDiff",
+            static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                            const Eigen::Ref<const VectorXs>&)>(
+                &ModelBase::calcDiff),
+            bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the CoM position residual data.\n\n"
+             "Each residual model has its own data that needs to be allocated. "
+             "This function returns the allocated data for the impulse CoM "
+             "residual.\n"
+             ":param data: shared data\n"
+             ":return residual data.");
+  }
+};
+
+template <typename Data>
+struct ResidualDataImpulseCoMVisitor
+    : public bp::def_visitor<ResidualDataImpulseCoMVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "pinocchio",
+          bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+        .add_property(
+            "impulses",
+            bp::make_getter(&Data::impulses,
+                            bp::return_value_policy<bp::return_by_value>()),
+            bp::make_setter(&Data::impulses),
+            "impulses data associated with the current residual")
+        .add_property(
+            "dvc_dq",
+            bp::make_getter(&Data::dvc_dq, bp::return_internal_reference<>()),
+            "Jacobian of the CoM velocity")
+        .add_property(
+            "ddv_dv",
+            bp::make_getter(&Data::ddv_dv, bp::return_internal_reference<>()),
+            "Jacobian of the impulse velocity")
+        .add_property("pinocchio_internal",
+                      bp::make_getter(&Data::pinocchio_internal,
+                                      bp::return_internal_reference<>()),
+                      "internal pinocchio data used for extra computations");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_IMPULSE_COM_PYTHON_BINDINGS(Scalar)         \
+  typedef ResidualModelImpulseCoMTpl<Scalar> Model;                          \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef typename Model::StateMultibody State;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "ResidualModelImpulseCoM",                                             \
+      "This residual function defines a residual vector as r = Jcom * "      \
+      "(vnext-v), with Jcom as the CoM Jacobian, and vnext the velocity "    \
+      "after impact and v the velocity before impact, respectively.",        \
+      bp::init<std::shared_ptr<State>>(                                      \
+          bp::args("self", "state"),                                         \
+          "Initialize the CoM position cost model for impulse dynamics.\n\n" \
+          "The default nu is obtained from state.nv.\n"                      \
+          ":param state: state of the multibody system"))                    \
+      .def(ResidualModelImpulseCoMVisitor<Model>())                          \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_RESIDUAL_DATA_IMPULSE_COM_PYTHON_BINDINGS(Scalar)   \
+  typedef ResidualDataImpulseCoMTpl<Scalar> Data;                     \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                   \
+  typedef ResidualModelImpulseCoMTpl<Scalar> Model;                   \
+  typedef Model::DataCollectorAbstract DataCollector;                 \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                \
+  bp::class_<Data, bp::bases<DataBase>>(                              \
+      "ResidualDataImpulseCoM", "Data for impulse CoM residual.\n\n", \
+      bp::init<Model*, DataCollector*>(                               \
+          bp::args("self", "model", "data"),                          \
+          "Create contact force residual data.\n\n"                   \
+          ":param model: impulse CoM residual model\n"                \
+          ":param data: shared data")[bp::with_custodian_and_ward<    \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                \
+      .def(ResidualDataImpulseCoMVisitor<Data>())                     \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualImpulseCoM() {
+  CROCODDYL_RESIDUAL_MODEL_IMPULSE_COM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_RESIDUAL_DATA_IMPULSE_COM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

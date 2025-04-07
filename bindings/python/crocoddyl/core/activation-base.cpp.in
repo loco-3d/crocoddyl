@@ -1,0 +1,96 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/activation-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ActivationModelAbstractVisitor
+    : public bp::def_visitor<ActivationModelAbstractVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "data", "r"),
+           "Compute the activation value.\n\n"
+           ":param data: activation data\n"
+           ":param r: residual vector")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "r"),
+             "Compute the derivatives of the residual.\n\n"
+             "It computes the partial derivatives of the residual vector "
+             "function.\n"
+             ":param data: activation data\n"
+             ":param r: residual vector \n")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"), "Create the activation data.\n\n")
+        .add_property("nr", bp::make_function(&Model::get_nr),
+                      "dimension of cost-residual vector");
+  }
+};
+
+template <typename Data>
+struct ActivationDataAbstractVisitor
+    : public bp::def_visitor<ActivationDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "a_value",
+          bp::make_getter(&Data::a_value,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&Data::a_value), "cost value")
+        .add_property(
+            "Ar", bp::make_getter(&Data::Ar, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Ar), "Jacobian of the residual")
+        .add_property("Arr", &Data::getHessianMatrix, &Data::setHessianMatrix,
+                      "Hessian of the residual");
+  }
+};
+
+#define CROCODDYL_ACTIVATION_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)            \
+  typedef ActivationModelAbstractTpl<Scalar> Model;                            \
+  typedef ActivationModelAbstractTpl_wrap<Scalar> Model_wrap;                  \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model_wrap, boost::noncopyable>(                                  \
+      "ActivationModelAbstract",                                               \
+      "Abstract class for activation models.\n\n"                              \
+      "In crocoddyl, an activation model takes the residual vector and "       \
+      "computes the activation value and its derivatives from it. Activation " \
+      "value and its derivatives are computed by calc() and calcDiff(), "      \
+      "respectively.",                                                         \
+      bp::init<std::size_t>(                                                   \
+          bp::args("self", "nr"),                                              \
+          "Initialize the activation model.\n\n"                               \
+          ":param nr: dimension of the cost-residual vector"))                 \
+      .def(ActivationModelAbstractVisitor<Model_wrap>())                       \
+      .def(PrintableVisitor<Model_wrap>())                                     \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_ACTIVATION_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)         \
+  typedef ActivationDataAbstractTpl<Scalar> Data;                          \
+  typedef ActivationModelAbstractTpl<Scalar> Model;                        \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                     \
+  bp::class_<Data>(                                                        \
+      "ActivationDataAbstract", "Abstract class for activation data.\n\n", \
+      bp::init<Model*>(                                                    \
+          bp::args("self", "model"),                                       \
+          "Create common data shared between AMs.\n\n"                     \
+          "The action data uses the model in order to first process it.\n" \
+          ":param model: action model"))                                   \
+      .def(ActivationDataAbstractVisitor<Data>())                          \
+      .def(CopyableVisitor<Data>());
+
+void exposeActivationAbstract() {
+  CROCODDYL_ACTIVATION_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTIVATION_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

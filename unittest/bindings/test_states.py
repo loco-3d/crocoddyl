@@ -67,7 +67,7 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking that both Jdiff functions agree
         J1, J2 = self.STATE.Jdiff(x0, x1)
         J1d, J2d = self.STATE_DER.Jdiff(x0, x1)
-        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
+        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap_float64.StateMultibody:
             nv = self.STATE.nv
             self.assertTrue(
                 np.allclose(J1[nv:, nv:], J1d[nv:, nv:], atol=1e-9),
@@ -94,7 +94,7 @@ class StateAbstractTestCase(unittest.TestCase):
         # Checking that both Jintegrate functions agree
         J1, J2 = self.STATE.Jintegrate(x, dx)
         J1d, J2d = self.STATE_DER.Jintegrate(x, dx)
-        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap.StateMultibody:
+        if self.STATE.__class__ == crocoddyl.libcrocoddyl_pywrap_float64.StateMultibody:
             nv = self.STATE.nv
             self.assertTrue(
                 np.allclose(J1[nv:, nv:], J1d[nv:, nv:], atol=1e-9),

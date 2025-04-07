@@ -1,0 +1,112 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, University of Edinburgh, IRI: CSIC-UPC,
+//                          Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/actuation/squashing-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct SquashingModelAbstractVisitor
+    : public bp::def_visitor<SquashingModelAbstractVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "data", "s"),
+           "Compute the squashing value for a given value of u, "
+           "component-wise. \n\n"
+           ":param data: squashing data\n"
+           ":param s: squashing input")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "s"),
+             "Compute the derivative of the squashing function.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: squashing data\n"
+             ":param u: squashing input")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the squashing data.\n\n")
+        .add_property(
+            "ns",
+            bp::make_function(&Model::get_ns,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "dimension of the squashing vector")
+        .add_property(
+            "s_lb",
+            bp::make_function(&Model::get_s_lb,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_s_lb),
+            "lower bound for the active zone of the squashing function")
+        .add_property(
+            "s_ub",
+            bp::make_function(&Model::get_s_ub,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_s_ub),
+            "upper bound for the active zone of the squashing function");
+  }
+};
+
+template <typename Data>
+struct SquashingDataAbstractVisitor
+    : public bp::def_visitor<SquashingDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "u", bp::make_getter(&Data::u, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::u), "squashing-output")
+        .add_property(
+            "du_ds",
+            bp::make_getter(&Data::du_ds, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::du_ds),
+            "Jacobian of the squashing function");
+  }
+};
+
+#define CROCODDYL_SQUASHING_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)          \
+  typedef SquashingModelAbstractTpl<Scalar> Model;                          \
+  typedef SquashingModelAbstractTpl_wrap<Scalar> Model_wrap;                \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model_wrap, boost::noncopyable>(                               \
+      "SquashingModelAbstract",                                             \
+      "Abstract class for squashing functions.\n\n"                         \
+      "A squashing function is any sigmoid function that maps from R to a " \
+      "bounded domain Its input can be any value and its output will be a " \
+      "value between a lower bound and an upper bound. The computation of " \
+      "the output value is done using calc() while its derivative is "      \
+      "computed using calcDiff(), respectively.",                           \
+      bp::init<std::size_t>(bp::args("self", "ns"),                         \
+                            "Initialize the squashing model.\n\n"           \
+                            ":param ns: dimension of the input vector"))    \
+      .def(SquashingModelAbstractVisitor<Model_wrap>())                     \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_SQUASHING_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)              \
+  typedef SquashingDataAbstractTpl<Scalar> Data;                               \
+  typedef SquashingModelAbstractTpl<Scalar> Model;                             \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data>(                                                            \
+      "SquashingDataAbstract",                                                 \
+      "Abstract class for squashing datas.\n\n"                                \
+      "In crocoddyl, an squashing data contains all the required information " \
+      "for processing a user-defined squashing model. The squashing data is "  \
+      "typically allocated once per running via model.createData().",          \
+      bp::init<Model*>(                                                        \
+          bp::args("self", "model"),                                           \
+          "Create common data shared between squashing models.\n\n"            \
+          "The squashing data uses the model in order to first process it.\n"  \
+          ":param model: squashing model"))                                    \
+      .def(SquashingDataAbstractVisitor<Data>())                               \
+      .def(CopyableVisitor<Data>());
+
+void exposeSquashingAbstract() {
+  CROCODDYL_SQUASHING_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_SQUASHING_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

@@ -1,0 +1,2 @@
+from ..libcrocoddyl_pywrap_@SCALAR_TYPE@ import *  # noqa: F403
+from ..libcrocoddyl_pywrap_@SCALAR_TYPE@ import __raw_version__, __version__  # noqa: F401

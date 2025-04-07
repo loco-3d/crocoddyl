@@ -24,6 +24,7 @@
 
 #define DEFAULT_SCALAR double
 typedef double Float64;
+typedef float Float32;
 #ifdef CROCODDYL_WITH_CODEGEN
 typedef CppAD::cg::CG<Float64> CGFloat64;
 typedef CppAD::AD<CGFloat64> ADFloat64;

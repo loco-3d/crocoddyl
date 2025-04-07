@@ -12,8 +12,7 @@ dependencies:
   - eigenpy
   - hpp-fcl
   - urdfdom
-  # last cppadcodegen is not compatible with cppad 20240000
-  - cppad<=20230000
+  - cppad
   - cppadcodegen
   - pinocchio
   - ipopt

@@ -1,0 +1,249 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef CROCODDYL_WITH_CODEGEN
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/codegen/action.hpp"
+
+#include "crocoddyl/multibody/codegen/pinocchio_cast.hpp"
+#include "python/crocoddyl/core/action-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ActionModelCodeGenVisitor
+    : public bp::def_visitor<ActionModelCodeGenVisitor<Model>> {
+  typedef typename Model::ActionDataAbstract Data;
+  typedef typename Model::ADBase ADModel;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl
+        .def(bp::init<std::shared_ptr<ADModel>, std::string,
+                      bp::optional<bool, std::size_t, bp::object, CompilerType,
+                                   std::string>>(
+            bp::args("self", "ad_model", "lib_fname", "autodiff", "np",
+                     "updateParams", "compiler", "compile_options"),
+            "Initialize the action codegen action model.\n\n"
+            ":param ad_model: action model used to code generate\n"
+            ":param lib_fname: name of the code generated library\n"
+            ":param autodiff: Generate autodiff Jacobians and Hessians "
+            "(default False)\n"
+            ":param np: Dimension of the parameter variables in the calc and "
+            "calcDiff functions\n"
+            ":param updateParams: function used to update the calc and "
+            "calcDiff's parameters (default empty function)\n"
+            ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"
+            ":param compile_options: Compilation flags (default: '-Ofast "
+            "-march=native')"))
+        .def(bp::init<std::string, std::shared_ptr<Model>>(
+            bp::args("self", "lib_fname", "model"),
+            "Initialize the code generated action model from an pre-compiled "
+            "library.\n\n"
+            ":param lib_fname: name of the code generated library\n"
+            ":param model: action model model which we want to code generate"))
+        .def(bp::init<std::string, std::shared_ptr<ADModel>>(
+            bp::args("self", "lib_fname", "ad_model"),
+            "Initialize the code generated action model from an pre-compiled "
+            "library.\n\n"
+            ":param lib_fname: name of the code generated library\n"
+            ":param ad_model: action model used to code generate"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the next state and cost value from a code-generated "
+            "library.\n\n"
+            ":param data: action data\n"
+            ":param x: time-continuous state vector\n"
+            ":param u: time-continuous control input")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the dynamics and cost functions from a "
+            "code-generated library\n\n"
+            "In contrast to action models, this code-generated calcDiff "
+            "doesn't assumes that `calc()` has been run first. This function "
+            "builds a linear-quadratic approximation of the action model (i.e. "
+            "dynamical system and cost function).\n"
+            ":param data: action data\n"
+            ":param x: time-continuous state vector\n"
+            ":param u: time-continuous control input\n")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the action parameters")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the action codegen data.")
+        .def("initLib", &Model::initLib, bp::args("self"),
+             "initialize the code-generated library")
+        .def("compileLib", &Model::compileLib, bp::args("self"),
+             "compile the code-generated library")
+        .def("existLib", &Model::existLib, bp::args("self", "lib_fname"),
+             "check if the code-generated library exists\n\n"
+             ":param lib_fname: name of the code generated library\n"
+             ":return True if the code-generated library exists, otherwise "
+             "false.")
+        .def("loadLib", &Model::loadLib, bp::args("self", "lib_fname"),
+             "load the code-generated library\n\n"
+             ":param lib_fname: name of the code generated library")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of the parameter variables in the calc and "
+                      "calcDiff functions")
+        .add_property("nX", bp::make_function(&Model::get_nX),
+                      "dimension of the dependent vector used by calc and "
+                      "calcDiff functions")
+        .add_property(
+            "nY1", bp::make_function(&Model::get_nY1),
+            "dimension of the independent vector used by the calc function")
+        .add_property("nY1_T", bp::make_function(&Model::get_nY1),
+                      "dimension of the independent vector used by the calc "
+                      "function in terminal nodes")
+        .add_property(
+            "nY2", bp::make_function(&Model::get_nY2),
+            "dimension of the independent vector used by the calcDiff function")
+        .add_property("nY2_T", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "calcDiff function in terminal nodes")
+        .add_property("nY3", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "quasiStati function")
+        .add_property("nY3_T", bp::make_function(&Model::get_nY2),
+                      "dimension of the independent vector used by the "
+                      "quasiStati function in terminal nodes");
+  }
+};
+
+template <typename Data>
+struct ActionDataCodeGeneVisitor
+    : public bp::def_visitor<ActionDataCodeGeneVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "X", bp::make_getter(&Data::X, bp::return_internal_reference<>()),
+          "independent variables used by the calc and calcDiff function")
+        .add_property(
+            "X3", bp::make_getter(&Data::X3, bp::return_internal_reference<>()),
+            "dependent variables used by the quasiStatic function")
+        .add_property(
+            "Y1", bp::make_getter(&Data::Y1, bp::return_internal_reference<>()),
+            "dependent variables used by the calc function")
+        .add_property(
+            "J1", bp::make_getter(&Data::J1, bp::return_internal_reference<>()),
+            "autodiff Jacobian of the the calc function")
+        .add_property(
+            "H1", bp::make_getter(&Data::H1, bp::return_internal_reference<>()),
+            "autodiff Hessian of the the calc function")
+        .add_property(
+            "Y1_T",
+            bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()),
+            "dependent variables used by the calc function in terminal nodes")
+        .add_property(
+            "J1_T",
+            bp::make_getter(&Data::J1_T, bp::return_internal_reference<>()),
+            "autodiff Jacobian of the the calc function in terminal nodes")
+        .add_property(
+            "H1_T",
+            bp::make_getter(&Data::H1_T, bp::return_internal_reference<>()),
+            "autodiff Hessian of the the calc function in terminal nodes")
+        .add_property(
+            "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
+            "dependent variables used by the calcDiff function")
+        .add_property(
+            "Y2_T",
+            bp::make_getter(&Data::Y2_T, bp::return_internal_reference<>()),
+            "dependent variables used by the calcDiff function in terminal "
+            "nodes")
+        .add_property(
+            "Y3", bp::make_getter(&Data::Y3, bp::return_internal_reference<>()),
+            "dependent variables used by the quasiStatic function");
+  }
+};
+
+#define CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(Scalar)                 \
+  typedef ActionModelCodeGenTpl<Scalar> Model;                                 \
+  typedef ActionModelAbstractTpl<Scalar> ModelBase;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ActionModelCodeGen",                                                    \
+      "Action model used to code generate an action model.\n\n"                \
+      "This class relies on CppADCodeGen to generate source code and library " \
+      "for a defined action model. To handle this easily, it contains "        \
+      "functions for initializing, compiling and loading the library. "        \
+      "Additionally, it is possible to configure the compiler and its flags.", \
+      bp::init<std::shared_ptr<ModelBase>, std::string,                        \
+               bp::optional<bool, std::size_t, bp::object, CompilerType,       \
+                            std::string>>(                                     \
+          bp::args("self", "model", "lib_fname", "autodiff", "np",             \
+                   "updateParams", "compiler", "compile_options"),             \
+          "Initialize the action codegen action model.\n\n"                    \
+          ":param model: action model model which we want to code generate\n"  \
+          ":param lib_fname: name of the code generated library\n"             \
+          ":param autodiff: Generate autodiff Jacobians and Hessians "         \
+          "(default False)\n"                                                  \
+          ":param np: Dimension of the parameter variables in the calc and "   \
+          "calcDiff functions\n"                                               \
+          ":param updateParams: function used to update the calc and "         \
+          "calcDiff's parameters (default empty function)\n"                   \
+          ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"  \
+          ":param compile_options: Compilation flags (default: '-Ofast "       \
+          "-march=native')"))                                                  \
+      .def(ActionModelCodeGenVisitor<Model>())                                 \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTION_DATA_CODEGEN_PYTHON_BINDINGS(Scalar)           \
+  typedef ActionDataCodeGenTpl<Scalar> Data;                            \
+  typedef ActionDataAbstractTpl<Scalar> DataBase;                       \
+  typedef ActionModelCodeGenTpl<Scalar> Model;                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                  \
+  bp::class_<Data, bp::bases<DataBase>>(                                \
+      "ActionDataCodeGen", "Action data for the codegen action model.", \
+      bp::init<Model*>(bp::args("self", "model"),                       \
+                       "Create codegen action data.\n\n"                \
+                       ":param model: codegen action model"))           \
+      .def(ActionDataCodeGeneVisitor<Data>())                           \
+      .def(CopyableVisitor<Data>());
+
+void exposeActionCodeGen() {
+#ifdef SCALAR_float64
+  bp::enum_<CompilerType>("CompilerType")
+      .value("GCC", CompilerType::GCC)
+      .value("CLANG", CompilerType::CLANG);
+#endif
+
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTION_DATA_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl
+
+#endif  // CROCODDYL_WITH_CODEGEN

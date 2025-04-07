@@ -1,0 +1,123 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2022-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/data/joint.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Data>
+struct JointDataAbstractVisitor
+    : public bp::def_visitor<JointDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "tau", bp::make_getter(&Data::tau, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::tau), "joint efforts")
+        .add_property(
+            "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::a), "generalized joint accelerations")
+        .add_property(
+            "dtau_dx",
+            bp::make_getter(&Data::dtau_dx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dtau_dx),
+            "partial derivatives of the joint efforts w.r.t. the state point")
+        .add_property(
+            "dtau_du",
+            bp::make_getter(&Data::dtau_du, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dtau_du),
+            "partial derivatives of the joint efforts w.r.t. the control input")
+        .add_property(
+            "da_dx",
+            bp::make_getter(&Data::da_dx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::da_dx),
+            "partial derivatives of the generalized joint accelerations w.r.t. "
+            "the state point")
+        .add_property(
+            "da_du",
+            bp::make_getter(&Data::da_du, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::da_du),
+            "partial derivatives of the generalized joint accelerations w.r.t. "
+            "the control input");
+  }
+};
+
+template <typename Data>
+struct DataCollectorJointVisitor
+    : public bp::def_visitor<DataCollectorJointVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "joint",
+        bp::make_getter(&Data::joint,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "joint data");
+  }
+};
+
+#define CROCODDYL_JOINT_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)                  \
+  typedef JointDataAbstractTpl<Scalar> JointData;                                   \
+  typedef typename JointData::StateAbstract State;                                  \
+  typedef typename JointData::ActuationModelAbstract Actuation;                     \
+  bp::register_ptr_to_python<std::shared_ptr<JointData>>();                         \
+  bp::class_<JointData>(                                                            \
+      "JointDataAbstract",                                                     \
+      "Abstract class for joint datas.\n\n"                                    \
+      "A joint data contains all the required information about joint "        \
+      "efforts and accelerations. The joint data typically is allocated once " \
+      "by running model.createData().",                                        \
+      bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,             \
+               std::size_t>(                                                   \
+          bp::args("self", "state", "actuation", "nu"),                        \
+          "Create the joint data.\n\n"                                         \
+          "The joint data uses the model in order to first process it.\n"      \
+          ":param state: state description\n"                                  \
+          ":param actuation: actuation model\n"                                \
+          ":param nu: dimension of control vector."))                          \
+      .def(JointDataAbstractVisitor<JointData>())                                   \
+      .def(CopyableVisitor<JointData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_PYTHON_BINDINGS(Scalar)                 \
+  typedef DataCollectorJointTpl<Scalar> Data;                                  \
+  typedef DataCollectorAbstractTpl<Scalar> DataBase;                           \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "DataCollectorJoint", "Joint data collector.\n\n",                       \
+      bp::init<std::shared_ptr<JointData>>(bp::args("self", "joint"),          \
+                                           "Create joint data collection.\n\n" \
+                                           ":param joint: joint data"))        \
+      .def(DataCollectorJointVisitor<Data>())                                  \
+      .def(CopyableVisitor<Data>());
+
+#define CROCODDYL_DATA_COLLECTOR_ACTUATION_PYTHON_BINDINGS(Scalar)          \
+  typedef DataCollectorJointActuationTpl<Scalar> AData;                      \
+  typedef DataCollectorActuationTpl<Scalar> ADataBase;                       \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                   \
+  typedef JointDataAbstractTpl<Scalar> JointData;                           \
+  bp::register_ptr_to_python<std::shared_ptr<AData>>();                      \
+  bp::class_<AData, bp::bases<ADataBase>>(                                    \
+      "DataCollectorJointActuation", "Joint-actuation data collector.\n\n", \
+      bp::init<std::shared_ptr<ActuationData>, std::shared_ptr<JointData>>( \
+          bp::args("self", "actuation", "joint"),                           \
+          "Create joint-actuation data collection.\n\n"                     \
+          ":param actuation: actuation data"                                \
+          ":param joint: joint data"))                                      \
+      .def(CopyableVisitor<AData>());
+
+void exposeDataCollectorJoint() {
+  CROCODDYL_JOINT_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTUATION_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

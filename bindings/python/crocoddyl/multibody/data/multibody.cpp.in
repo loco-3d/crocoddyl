@@ -1,0 +1,88 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+#include "crocoddyl/multibody/data/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Data>
+struct DataCollectorMultibodyVisitor
+    : public bp::def_visitor<DataCollectorMultibodyVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "pinocchio",
+        bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+        "pinocchio data");
+  }
+};
+
+#define CROCODDYL_DATA_COLLECTOR_MULTIBODY_PYTHON_BINDINGS(Scalar)             \
+  typedef DataCollectorMultibodyTpl<Scalar> Data;                              \
+  typedef DataCollectorAbstractTpl<Scalar> DataBase;                           \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "DataCollectorMultibody", "Data collector for multibody systems.\n\n",   \
+      bp::init<PinocchioData*>(                                                \
+          bp::args("self", "pinocchio"),                                       \
+          "Create multibody data collection.\n\n"                              \
+          ":param data: Pinocchio data")[bp::with_custodian_and_ward<1, 2>()]) \
+      .def(DataCollectorMultibodyVisitor<Data>())                              \
+      .def(CopyableVisitor<Data>());
+
+#define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_PYTHON_BINDINGS(Scalar) \
+  typedef DataCollectorActMultibodyTpl<Scalar> AData;                  \
+  typedef DataCollectorMultibodyTpl<Scalar> ADataBase1;                \
+  typedef DataCollectorActuationTpl<Scalar> ADataBase2;                \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                   \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;             \
+  bp::register_ptr_to_python<std::shared_ptr<AData>>();                \
+  bp::class_<AData, bp::bases<ADataBase1, ADataBase2>>(                  \
+      "DataCollectorActMultibody",                                    \
+      "Data collector for actuated multibody systems.\n\n",           \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>>(       \
+          bp::args("self", "pinocchio", "actuation"),                 \
+          "Create multibody data collection.\n\n"                     \
+          ":param pinocchio: Pinocchio data\n"                        \
+          ":param actuation: actuation data")                         \
+          [bp::with_custodian_and_ward<1, 2>()])                      \
+      .def(CopyableVisitor<AData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_PYTHON_BINDINGS(Scalar) \
+  typedef DataCollectorJointActMultibodyTpl<Scalar> JAData;                   \
+  typedef DataCollectorActMultibodyTpl<Scalar> JADataBase1;                   \
+  typedef DataCollectorJointTpl<Scalar> JADataBase2;                          \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                         \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                   \
+  typedef JointDataAbstractTpl<Scalar> JointData;                           \
+  bp::register_ptr_to_python<std::shared_ptr<JAData>>();                      \
+  bp::class_<JAData, bp::bases<JADataBase1, JADataBase2>>(                        \
+      "DataCollectorJointActMultibody",                                     \
+      "Data collector for actuated-joint multibody systems.\n\n",           \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,              \
+               std::shared_ptr<JointData>>(                                 \
+          bp::args("self", "pinocchio", "actuation", "joint"),              \
+          "Create multibody data collection.\n\n"                           \
+          ":param pinocchio: Pinocchio data\n"                              \
+          ":param actuation: actuation data\n"                              \
+          ":param joint: joint data")[bp::with_custodian_and_ward<1, 2>()]) \
+      .def(CopyableVisitor<JAData>());
+
+void exposeDataCollectorMultibody() {
+  CROCODDYL_DATA_COLLECTOR_MULTIBODY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

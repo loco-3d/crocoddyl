@@ -11,7 +11,7 @@ set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Set up Crocoddyl's scalar types
-set(SCALAR_TYPES float double)
+set(SCALAR_TYPES double float)
 set(SCALAR_FPTYPES ${SCALAR_TYPES})
 
 # Check if the submodule cmake have been initialized
@@ -72,6 +72,7 @@ include("${JRL_CMAKE_MODULES}/boost.cmake")
 include("${JRL_CMAKE_MODULES}/apple.cmake")
 include("${JRL_CMAKE_MODULES}/stubs.cmake")
 include("${JRL_CMAKE_MODULES}/python-helpers.cmake")
+include("crocoddyl.cmake")
 
 # Print initial message
 message(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
@@ -301,50 +302,8 @@ if(UNIX)
     ${PROJECT_SOURCE_DIR}/include/crocoddyl/core/pch.hpp
     ${PROJECT_SOURCE_DIR}/include/crocoddyl/multibody/pch.hpp)
 
-  # Function to sanitize the scalar type for filenames
-  function(crocoddyl_sanitize_scalar_name scalar sanitized_name)
-    string(REPLACE "::" "_" sanitized "${scalar}")
-    string(REPLACE "<" "_" sanitized "${sanitized}")
-    string(REPLACE ">" "" sanitized "${sanitized}")
-    string(REPLACE "," "_" sanitized "${sanitized}")
-    set(${sanitized_name}
-        "${sanitized}"
-        PARENT_SCOPE)
-  endfunction()
-  # Function to generate cpp files
-  function(crocoddyl_generate_cpp_files cpp_format)
-    set(scalar_types ${ARGN})
-    # Find all .cpp_format.in template files recursively
-    file(GLOB_RECURSE ETI_TEMPLATE_FILES CONFIGURE_DEPENDS
-         ${CMAKE_SOURCE_DIR}/src/**/*.${cpp_format}.in)
-    set(generated_eti_files "")
-    foreach(template_file ${ETI_TEMPLATE_FILES})
-      # Extract the relative path from src/
-      file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/src" "${template_file}")
-      # Remove .in extension and get the subdirectory
-      string(REPLACE ".${cpp_format}.in" ".cpp" rel_output_file "${rel_path}")
-      # Generate full output path in the build directory
-      set(output_file "${CMAKE_BINARY_DIR}/src/${rel_output_file}")
-      # Ensure the output subdirectory exists
-      get_filename_component(output_dir "${output_file}" DIRECTORY)
-      file(MAKE_DIRECTORY ${output_dir})
-      # Generate .cpp file from template for each scalar type
-      foreach(scalar ${scalar_types})
-        # Sanitize scalar name for filenames
-        crocoddyl_sanitize_scalar_name("${scalar}" scalar_filename)
-        string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
-                       "${output_file}")
-        set(SCALAR_TYPE ${scalar})
-        configure_file(${template_file} ${scalar_output_file} @ONLY)
-        list(APPEND generated_eti_files ${scalar_output_file})
-      endforeach()
-    endforeach()
-    # Add generated files to the target
-    target_sources(${PROJECT_NAME} PRIVATE ${generated_eti_files})
-  endfunction()
-
-  crocoddyl_generate_cpp_files(cpp ${SCALAR_TYPES})
-  crocoddyl_generate_cpp_files(cpp_fptype ${SCALAR_FPTYPES})
+  crocoddyl_generate_cpp_files(${PROJECT_NAME} cpp src ${SCALAR_TYPES})
+  crocoddyl_generate_cpp_files(${PROJECT_NAME} cpp_fptype src ${SCALAR_FPTYPES})
 
   install(
     TARGETS ${PROJECT_NAME}

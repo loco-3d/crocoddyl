@@ -1,0 +1,165 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2024-2025, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ThrustersVisitor : public bp::def_visitor<ThrustersVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<Scalar, bp::optional<ThrusterType, Scalar, Scalar>>(
+               bp::args("self", "ctorque", "type", "min_thrust", "max_thrust"),
+               "Initialize the thruster in a give pose from the root joint.\n\n"
+               ":param ctorque: coefficient of generated torque per thrust\n"
+               ":param type: type of thruster (clockwise or counterclockwise, "
+               "default clockwise)\n"
+               ":param min_thrust: minimum thrust (default 0.)\n"
+               ":param max_thrust: maximum thrust (default np.inf)"))
+        .def_readwrite("pose", &Model::pose,
+                       "thruster pose (traslation, rotation)")
+        .def_readwrite("ctorque", &Model::ctorque,
+                       "coefficient of generated torque per thrust")
+        .def_readwrite("type", &Model::type,
+                       "type of thruster (clockwise or counterclockwise)")
+        .def_readwrite("min_thrust", &Model::min_thrust, "minimum thrust")
+        .def_readwrite("max_thrust", &Model::min_thrust, "maximum thrust");
+  }
+};
+
+template <typename Model>
+struct ActuationModelFloatingBaseThrustersVisitor
+    : public bp::def_visitor<
+          ActuationModelFloatingBaseThrustersVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::Data Data;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(
+               const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+           bp::args("self", "data", "x", "u"),
+           "Compute the actuation signal and actuation set from the thrust "
+           "forces and joint torque inputs u.\n\n"
+           ":param data: floating base thrusters actuation data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: joint torque input (dim. nu)")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the actuation model.\n\n"
+             "It computes the partial derivatives of the thruster actuation. "
+             "It assumes that calc has been run first. The reason is that the "
+             "derivatives are constant and defined in createData. The Hessian "
+             "is constant, so we don't write again this value.\n"
+             ":param data: floating base thrusters actuation data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: joint torque input (dim. nu)")
+        .def("commands", &Model::commands, bp::args("self", "data", "x", "tau"),
+             "Compute the thrust and joint torque commands from the "
+             "generalized torques.\n\n"
+             "It stores the results in data.u.\n"
+             ":param data: actuation data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param tau: generalized torques (dim state.nv)")
+        .def("torqueTransform", &Model::torqueTransform,
+             bp::args("self", "data", "x", "tau"),
+             "Compute the torque transform from generalized torques to thrust "
+             "and joint torque inputs.\n\n"
+             "It stores the results in data.Mtau.\n"
+             ":param data: floating base thrusters actuation data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param tau: generalized torques (dim state.nv)")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the floating base thrusters actuation data.")
+        .add_property(
+            "thrusters",
+            bp::make_function(&Model::get_thrusters,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_thrusters), "vector of thrusters")
+        .add_property("nthrusters", bp::make_function(&Model::get_nthrusters),
+                      "number of thrusters")
+        .add_property(
+            "Wthrust",
+            bp::make_function(&Model::get_Wthrust,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "matrix mapping from thrusts to thruster wrenches")
+        .add_property(
+            "S",
+            bp::make_function(&Model::get_S,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "selection matrix for under-actuation part");
+  }
+};
+
+#define CROCODDYL_THRUSTER_BINDINGS(Scalar)                                    \
+  typedef ThrusterTpl<Scalar> Thurster;                                           \
+  typedef typename pinocchio::SE3Tpl<Scalar> SE3;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Thurster>>();                        \
+  StdVectorPythonVisitor<std::vector<Thurster>, true>::expose("StdVec_Thruster"); \
+  bp::class_<Thurster>(                                                           \
+      "Thruster", "Model for thrusters",                                       \
+      bp::init<SE3, Scalar, bp::optional<ThrusterType, Scalar, Scalar>>(       \
+          bp::args("self", "M", "ctorque", "type", "min_thrust",               \
+                   "max_thrust"),                                              \
+          "Initialize the thruster in a give pose from the root joint.\n\n"    \
+          ":param M: pose from root joint\n"                                   \
+          ":param ctorque: coefficient of generated torque per thrust\n"       \
+          ":param type: type of thruster (clockwise or counterclockwise, "     \
+          "default clockwise)\n"                                               \
+          ":param min_thrust: minimum thrust (default 0.)\n"                   \
+          ":param max_thrust: maximum thrust (default np.inf)"))               \
+      .def(ThrustersVisitor<Thurster>())                                          \
+      .def(CastVisitor<Thurster>())                                               \
+      .def(PrintableVisitor<Thurster>())                                          \
+      .def(CopyableVisitor<Thurster>());
+
+#define CROCODDYL_ACTUATION_MODEL_FLOATINGBASE_THRUSTERS_PYTHON_BINDINGS(   \
+    Scalar)                                                                 \
+  typedef ActuationModelFloatingBaseThrustersTpl<Scalar> Model;             \
+  typedef ActuationModelAbstractTpl<Scalar> ModelBase;                      \
+  typedef ThrusterTpl<Scalar> Thruster;                                    \
+  typedef StateMultibodyTpl<Scalar> StateMultibody;                         \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model, bp::bases<ModelBase>>(                                  \
+      "ActuationModelFloatingBaseThrusters",                                \
+      "Actuation models for floating base systems actuated with thrusters " \
+      "(e.g. aerial manipulators).",                                        \
+      bp::init<std::shared_ptr<StateMultibody>, std::vector<Thruster>>(    \
+          bp::args("self", "state", "thrusters"),                           \
+          "Initialize the floating base actuation model equipped with "     \
+          "thrusters.\n\n"                                                  \
+          ":param state: state of multibody system\n"                       \
+          ":param thrusters: vector of thrusters"))                         \
+      .def(ActuationModelFloatingBaseThrustersVisitor<Model>())             \
+      .def(CastVisitor<Model>())                                            \
+      .def(PrintableVisitor<Model>())                                       \
+      .def(CopyableVisitor<Model>());
+
+void exposeActuationFloatingBaseThruster() {
+#ifdef SCALAR_float64
+  bp::enum_<ThrusterType>("ThrusterType")
+      .value("CW", CW)
+      .value("CCW", CCW)
+      .export_values();
+#endif
+
+  CROCODDYL_THRUSTER_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTUATION_MODEL_FLOATINGBASE_THRUSTERS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
