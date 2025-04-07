@@ -73,7 +73,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
   bp::scope().attr("WITH_CODEGEN") = false;
 #endif
 
-  CROCODDYL_PYTHON_SCALARS(CROCODDYL_STD_VECTOR_EIGEN_BINDINGS)
+  CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(@SCALAR_TYPE@)
 
 #ifdef SCALAR_float64
   // Register converters between std::set and Python set

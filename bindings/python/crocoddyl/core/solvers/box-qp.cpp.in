@@ -95,11 +95,11 @@ struct BoxQPVisitor : public bp::def_visitor<BoxQPVisitor<Model>> {
 };
 
 #define CROCODDYL_BOXQP_SOLUTION_PYTHON_BINDINGS(Scalar)                      \
-  typedef BoxQPSolutionTpl<Scalar> Model;                                     \
-  typedef typename Model::VectorXs VectorXs;                                  \
-  typedef typename Model::MatrixXs MatrixXs;                                  \
-  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
-  bp::class_<Model>(                                                          \
+  typedef BoxQPSolutionTpl<Scalar> ModelSolution;                             \
+  typedef typename ModelSolution::VectorXs VectorXs;                          \
+  typedef typename ModelSolution::MatrixXs MatrixXs;                          \
+  bp::register_ptr_to_python<std::shared_ptr<ModelSolution>>();               \
+  bp::class_<ModelSolution>(                                                  \
       "BoxQPSolution", "Solution data of the box QP.\n\n",                    \
       bp::init<MatrixXs, VectorXs, std::vector<size_t>, std::vector<size_t>>( \
           bp::args("self", "Hff_inv", "x", "free_idx", "clamped_idx"),        \
@@ -108,9 +108,9 @@ struct BoxQPVisitor : public bp::def_visitor<BoxQPVisitor<Model>> {
           ":param x: decision variable\n"                                     \
           ":param free_idx: free indexes\n"                                   \
           ":param clamped_idx: clamped indexes"))                             \
-      .def(BoxQPSolutionVisitor<Model>())                                     \
-      .def(CastVisitor<Model>())                                              \
-      .def(CopyableVisitor<Model>());
+      .def(BoxQPSolutionVisitor<ModelSolution>())                             \
+      .def(CastVisitor<ModelSolution>())                                      \
+      .def(CopyableVisitor<ModelSolution>());
 
 #define CROCODDYL_BOXQP_PYTHON_BINDINGS(Scalar)                             \
   typedef BoxQPTpl<Scalar> Model;                                           \
