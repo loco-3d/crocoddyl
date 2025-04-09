@@ -100,7 +100,7 @@ struct ActionModelAbstractVisitor
             bp::make_setter(
                 &Model::ng_,
                 deprecated<bp::return_internal_reference<>>(
-                    "Deprecated. Contraint dimension should not be modified.")),
+                    "Deprecated. Constraint dimension should not be modified.")),
             "number of inequality constraints")
         .def("get_ng", &Model::get_ng, &Model::default_get_ng,
              "Return the number of inequality constraints.")
@@ -109,7 +109,7 @@ struct ActionModelAbstractVisitor
             bp::make_setter(
                 &Model::nh_,
                 deprecated<bp::return_internal_reference<>>(
-                    "Deprecated. Contraint dimension should not be modified.")),
+                    "Deprecated. Constraint dimension should not be modified.")),
             "number of equality constraints")
         .def("get_nh", &Model::get_nh, &Model::default_get_nh,
              "Return the number of equality constraints.")
@@ -118,7 +118,7 @@ struct ActionModelAbstractVisitor
             bp::make_setter(
                 &Model::ng_T_,
                 deprecated<bp::return_internal_reference<>>(
-                    "Deprecated. Contraint dimension should not be modified.")),
+                    "Deprecated. Constraint dimension should not be modified.")),
             "number of inequality terminal constraints")
         .def("get_ng_T", &Model::get_ng_T, &Model::default_get_ng_T,
              "Return the number of inequality terminal constraints.")
@@ -127,7 +127,7 @@ struct ActionModelAbstractVisitor
             bp::make_setter(
                 &Model::nh_T_,
                 deprecated<bp::return_internal_reference<>>(
-                    "Deprecated. Contraint dimension should not be modified.")),
+                    "Deprecated. Constraint dimension should not be modified.")),
             "number of equality terminal constraints")
         .def("get_nh_T", &Model::get_nh_T, &Model::default_get_nh_T,
              "Return the number of equality terminal constraints.")
