@@ -105,7 +105,6 @@ struct StateMultibodyVisitor
   typedef StateAbstractTpl<Scalar> StateBase;                                \
   typedef pinocchio::ModelTpl<Scalar> Model;                                 \
   bp::register_ptr_to_python<std::shared_ptr<State>>();                      \
-  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
   bp::class_<State, bp::bases<StateBase>>(                                   \
       "StateMultibody",                                                      \
       "Multibody state defined using Pinocchio.\n\n"                         \
