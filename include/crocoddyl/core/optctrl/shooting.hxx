@@ -163,22 +163,13 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
   terminal_model_->calc(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);
-  // Apply SIMD only for floating-point types
-  if (std::is_floating_point<Scalar>::value) {
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp simd reduction(+ : cost_)
 #endif
-    for (std::size_t i = 0; i < T_; ++i) {
-      cost_ += running_datas_[i]->cost;
-    }
-    cost_ += terminal_data_->cost;
-  } else {  // For non-floating-point types (e.g., CppAD types), use the normal
-            // loop without SIMD
-    for (std::size_t i = 0; i < T_; ++i) {
-      cost_ += running_datas_[i]->cost;
-    }
-    cost_ += terminal_data_->cost;
+  for (std::size_t i = 0; i < T_; ++i) {
+    cost_ += running_datas_[i]->cost;
   }
+  cost_ += terminal_data_->cost;
   STOP_PROFILER("ShootingProblem::calc");
   return cost_;
 }
