@@ -168,6 +168,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
             np.allclose(self.DATA.Lxx, self.DATA_DER.Lxx, atol=1e-9), "Wrong Lxx."
         )
 
+    def test_getters(self):
+        # Enforce to run getters
+        _, _, _, _ = self.MODEL.ng, self.MODEL.ng_T, self.MODEL.nh, self.MODEL.nh_T
+
 
 class UnicycleTest(ActionModelAbstractTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fix Python bindings of action getters in https://github.com/loco-3d/crocoddyl/pull/1374
 * Created independent Python modules associated to each scalar in https://github.com/loco-3d/crocoddyl/pull/1372
 * Introduced CodeGen and AutoDiff in Python + pre-compiled headers in https://github.com/loco-3d/crocoddyl/pull/1370
 * Introduced explicit template instantiation in https://github.com/loco-3d/crocoddyl/pull/1367

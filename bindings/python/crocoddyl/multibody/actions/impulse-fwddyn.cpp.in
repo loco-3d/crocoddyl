@@ -90,6 +90,14 @@ struct ActionModelImpulseFwdDynamicsVisitor
              bp::args("self", "data", "x"))
         .def("createData", &Model::createData, bp::args("self"),
              "Create the impulse forward dynamics differential action data.")
+        .add_property(
+            "ng", bp::make_function(&Model::get_ng), "number of equality constraints")
+        .add_property(
+            "nh", bp::make_function(&Model::get_nh), "number of inequality constraints")
+        .add_property(
+            "ng_T", bp::make_function(&Model::get_ng_T), "number of equality terminal constraints")
+        .add_property(
+            "nh_T", bp::make_function(&Model::get_nh_T), "number of inequality terminal constraints")
         .add_property("pinocchio",
                       bp::make_function(&Model::get_pinocchio,
                                         bp::return_internal_reference<>()),

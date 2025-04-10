@@ -22,6 +22,16 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
   # Find all .cpp_format.in template files recursively
   file(GLOB_RECURSE ETI_TEMPLATE_FILES CONFIGURE_DEPENDS
        ${CMAKE_SOURCE_DIR}/${source_dir}/**/*.${cpp_format}.in)
+  # Remove action codegen if not supported code generation.
+  if(NOT BUILD_WITH_CODEGEN_SUPPORT)
+    file(GLOB_RECURSE EXCLUDE_TEMPLATES CONFIGURE_DEPENDS
+         ${CMAKE_SOURCE_DIR}/${source_dir}/**/*codegen*/*.${cpp_format}.in
+         ${CMAKE_SOURCE_DIR}/${source_dir}/**/**/*codegen*/*.${cpp_format}.in)
+    foreach(exclude_file ${EXCLUDE_TEMPLATES})
+      list(REMOVE_ITEM ETI_TEMPLATE_FILES ${exclude_file})
+      list(FIND ETI_TEMPLATE_FILES ${exclude_file} index)
+    endforeach()
+  endif()
   set(generated_eti_files "")
   foreach(template_file ${ETI_TEMPLATE_FILES})
     # Extract the relative path from ${source_dir}/
