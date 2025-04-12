@@ -38,6 +38,7 @@
                   ./doc
                   ./examples
                   ./include
+                  ./notebooks
                   ./package.xml
                   ./src
                   ./unittest
