@@ -18,11 +18,18 @@ foreach(NOTEBOOK ${${PROJECT_NAME}_NOTEBOOK_TESTS})
     ${PYTHON_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/run_notebook.py
     ${CMAKE_CURRENT_SOURCE_DIR}/${NOTEBOOK}.ipynb)
+  # Add a test for the notebook
   add_test(
     NAME "notebook-${NOTEBOOK}"
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_notebook.py
             ${CMAKE_CURRENT_SOURCE_DIR}/${NOTEBOOK}.ipynb
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  # Set the Python path for the test
+  set_tests_properties(
+    "notebook-${NOTEBOOK}"
+    PROPERTIES
+      ENVIRONMENT
+      "PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH}")
   install(FILES ${NOTEBOOK}.ipynb
           DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/notebooks)
 endforeach(NOTEBOOK ${${PROJECT_NAME}_NOTEBOOK_TESTS})
