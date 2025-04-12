@@ -23,11 +23,11 @@
           };
           devShells.default = pkgs.mkShell {
             inputsFrom = [ self'.packages.default ];
-            packages = [ (pkgs.python3.withPackages (p: [p.tomlkit])) ]; # for "make release"
+            packages = [ (pkgs.python3.withPackages (p: [ p.tomlkit ])) ]; # for "make release"
           };
           packages = {
             default = self'.packages.crocoddyl;
-            crocoddyl = pkgs.python3Packages.crocoddyl.overrideAttrs (_: {
+            crocoddyl = pkgs.python3Packages.crocoddyl.overrideAttrs (super: {
               src = pkgs.lib.fileset.toSource {
                 root = ./.;
                 fileset = pkgs.lib.fileset.unions [
@@ -38,11 +38,16 @@
                   ./doc
                   ./examples
                   ./include
+                  ./notebooks
                   ./package.xml
                   ./src
                   ./unittest
                 ];
               };
+              checkInputs = (super.checkInputs or [ ]) ++ [
+                pkgs.python3Packages.nbconvert
+                pkgs.python3Packages.nbformat
+              ];
             });
           };
         };
