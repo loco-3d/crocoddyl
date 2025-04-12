@@ -87,7 +87,8 @@ message(STATUS "")
 message(STATUS " Maintainers:")
 message(STATUS "   - RoMI Lab @ Heriot-Watt (https://www.romilab.org)")
 message(
-  STATUS "   - Gepetto team @ LAAS-CNRS (http://projects.laas.fr/gepetto/)")
+  STATUS
+    "   - Gepetto team @ LAAS-CNRS (https://www.laas.fr/fr/equipes/gepetto/)")
 message(
   STATUS "   - Willow team @ INRIA (https://www.di.ens.fr/willow/) ${Reset}")
 message(
@@ -197,8 +198,7 @@ if(BUILD_WITH_CODEGEN_SUPPORT)
                         ${CMAKE_MODULE_PATH})
   add_project_dependency(cppad 20200000.0 REQUIRED FIND_EXTERNAL cppad)
   add_project_dependency(cppadcg 2.4.1 REQUIRED)
-  add_project_dependency(pycppad 1.2.4 REQUIRED PKG_CONFIG_REQUIRES
-                         "pycppad >= 1.2.4")
+  add_project_dependency(pycppad 1.2.4 REQUIRED)
   add_definitions(-DCROCODDYL_WITH_CODEGEN)
   # Pinocchio codegen related preproccessor defs.
   add_definitions(-DPINOCCHIO_WITH_CPPADCG_SUPPORT)
