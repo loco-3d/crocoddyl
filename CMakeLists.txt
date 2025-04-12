@@ -339,6 +339,11 @@ if(BUILD_TESTING)
   add_subdirectory(unittest)
 endif()
 
+# Build notebooks
+if(BUILD_PYTHON_INTERFACE)
+  add_subdirectory(notebooks)
+endif()
+
 # Build the benchmark
 if(BUILD_BENCHMARK)
   add_subdirectory(benchmark)
