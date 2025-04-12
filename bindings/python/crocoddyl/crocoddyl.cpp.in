@@ -36,6 +36,15 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
 
   eigenpy::enableEigenPy();
 #ifdef CROCODDYL_WITH_CODEGEN
+  // Check if pycppad module is already importable
+  PyObject* pycppad_module = PyImport_ImportModule("pycppad");
+  if (pycppad_module != nullptr) {
+    Py_DECREF(pycppad_module);  // don't leak
+    // Do not call enablePyCppAD, already imported
+  } else {
+    PyErr_Clear();  // clear the error if import failed
+    // pycppad::enablePyCppAD();  // not found, so we register the converters
+  }
   bp::scope().attr("WITH_CODEGEN") = true;
 #else
   bp::scope().attr("WITH_CODEGEN") = false;
