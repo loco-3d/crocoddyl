@@ -44,7 +44,10 @@
                   ./unittest
                 ];
               };
-              checkInputs = (super.checkInputs or [ ]) ++ [ pkgs.python3Packages.nbformat ];
+              checkInputs = (super.checkInputs or [ ]) ++ [
+                pkgs.python3Packages.nbconvert
+                pkgs.python3Packages.nbformat
+              ];
             });
           };
         };
