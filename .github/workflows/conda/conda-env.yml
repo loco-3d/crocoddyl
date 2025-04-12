@@ -14,5 +14,6 @@ dependencies:
   - urdfdom
   - cppad
   - cppadcodegen
+  - pycppad
   - pinocchio
   - ipopt
