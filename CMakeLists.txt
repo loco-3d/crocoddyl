@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+if(CMAKE_VERSION VERSION_GREATER "3.12")
+  cmake_policy(SET CMP0074 NEW)
+endif()
 
 # Set up project properties
 set(PROJECT_NAMESPACE loco-3d)
@@ -7,8 +11,6 @@ set(PROJECT_DESCRIPTION
     "Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)"
 )
 set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
-
-option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 # Set up Crocoddyl's scalar types
 set(SCALAR_TYPES double float)
@@ -100,6 +102,7 @@ option(BUILD_EXAMPLES "Build the examples" ON)
 option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
+option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
 
 if(ENABLE_VECTORIZATION)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")

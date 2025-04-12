@@ -9,6 +9,7 @@
 
 #ifndef CROCODDYL_CORE_FWD_HPP_
 #define CROCODDYL_CORE_FWD_HPP_
+
 #include "crocoddyl/core/pch.hpp"
 
 namespace crocoddyl {
