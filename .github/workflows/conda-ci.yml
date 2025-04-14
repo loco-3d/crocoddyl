@@ -114,7 +114,7 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_FLAGS_DEBUG="" \
           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
+          -DBUILD_WITH_CODEGEN_SUPPORT=${{ matrix.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
           -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DGENERATE_PYTHON_STUBS=ON \
           -DOpenMP_ROOT=$CONDA_PREFIX
         make
