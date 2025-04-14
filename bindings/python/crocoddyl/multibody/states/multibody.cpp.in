@@ -16,6 +16,13 @@
 namespace crocoddyl {
 namespace python {
 
+#if PINOCCHIO_VERSION_AT_LEAST(3, 4, 1)
+  #define _CROCODDYL_CONDITIONAL_PINOCCHIO_MODEL_REGISTER
+#else
+  #define _CROCODDYL_CONDITIONAL_PINOCCHIO_MODEL_REGISTER \
+    bp::register_ptr_to_python<std::shared_ptr<Model>>();
+#endif
+
 template <typename State>
 struct StateMultibodyVisitor
     : public bp::def_visitor<StateMultibodyVisitor<State>> {
@@ -105,7 +112,7 @@ struct StateMultibodyVisitor
   typedef StateAbstractTpl<Scalar> StateBase;                                \
   typedef pinocchio::ModelTpl<Scalar> Model;                                 \
   bp::register_ptr_to_python<std::shared_ptr<State>>();                      \
-  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  _CROCODDYL_CONDITIONAL_PINOCCHIO_MODEL_REGISTER                            \
   bp::class_<State, bp::bases<StateBase>>(                                   \
       "StateMultibody",                                                      \
       "Multibody state defined using Pinocchio.\n\n"                         \
