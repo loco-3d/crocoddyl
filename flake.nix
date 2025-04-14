@@ -48,6 +48,7 @@
                 pkgs.python3Packages.nbconvert
                 pkgs.python3Packages.nbformat
                 pkgs.python3Packages.ipykernel
+                pkgs.python3Packages.matplotlib
               ];
             });
           };
