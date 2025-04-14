@@ -84,6 +84,7 @@ jobs:
         conda activate crocoddyl
         conda install cmake ccache -c conda-forge
         conda install llvm-openmp libcxx -c conda-forge
+        conda install ffmpeg -c conda-forge
         conda list
 
     - name: Install example-robot-data
