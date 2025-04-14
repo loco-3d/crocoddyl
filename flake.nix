@@ -47,6 +47,7 @@
               checkInputs = (super.checkInputs or [ ]) ++ [
                 pkgs.python3Packages.nbconvert
                 pkgs.python3Packages.nbformat
+                pkgs.python3Packages.ipykernel
               ];
             });
           };
