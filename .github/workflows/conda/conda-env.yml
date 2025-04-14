@@ -19,3 +19,4 @@ dependencies:
   - ipopt
   - nbformat
   - nbconvert
+  - ipykernel
