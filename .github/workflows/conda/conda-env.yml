@@ -15,5 +15,5 @@ dependencies:
   - cppad
   - cppadcodegen
   - pycppad
-  - pinocchio
+  - pinocchio>=3.1.0
   - ipopt
