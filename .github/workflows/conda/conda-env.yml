@@ -17,3 +17,5 @@ dependencies:
   - pycppad
   - pinocchio>=3.1.0
   - ipopt
+  - nbformat
+  - nbconvert
