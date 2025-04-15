@@ -11,7 +11,6 @@
 
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
-#include "crocoddyl/core/utils/conversions.hpp"
 #include "factory/action.hpp"
 #include "factory/diff_action.hpp"
 #include "factory/integrator.hpp"
