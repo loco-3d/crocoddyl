@@ -14,12 +14,8 @@
 #include <vector>
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/support/cppadcg_eigen.hpp>
-#include <cppad/cppad.hpp>
-#endif
-
-#ifdef CROCODDYL_WITH_CODEGEN
 #include <cppad/cg/cppadcg.hpp>
+#include <cppad/cg/support/cppadcg_eigen.hpp>
 #endif
 
 #define DEFAULT_SCALAR double

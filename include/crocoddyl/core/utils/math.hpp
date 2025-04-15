@@ -19,12 +19,8 @@
 #include "crocoddyl/core/utils/scalar.hpp"
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/support/cppadcg_eigen.hpp>
-#endif
-
-#ifdef CROCODDYL_WITH_CODEGEN
 #include <cppad/cg/cppadcg.hpp>
-#include <cppad/cppad.hpp>
+#include <cppad/cg/support/cppadcg_eigen.hpp>
 #endif
 
 namespace crocoddyl {
