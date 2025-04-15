@@ -21,3 +21,4 @@ dependencies:
   - nbconvert
   - ipykernel
   - matplotlib
+  - cxx-compiler

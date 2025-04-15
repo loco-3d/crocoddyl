@@ -97,12 +97,6 @@ jobs:
         cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
         make install
 
-    - name: Install compilers for macOS
-      shell: bash -l {0}
-      if: contains(matrix.os, 'macos-latest')
-      run: |
-        conda install compilers -c conda-forge
-
     - name: Build Crocoddyl
       shell: bash -l {0}
       run: |
