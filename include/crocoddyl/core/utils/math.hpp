@@ -23,7 +23,7 @@
 #endif
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cg.hpp>
+#include <cppad/cg/cppadcg.hpp>
 #include <cppad/cppad.hpp>
 #endif
 

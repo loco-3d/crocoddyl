@@ -19,7 +19,7 @@
 #endif
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cg.hpp>
+#include <cppad/cg/cppadcg.hpp>
 #endif
 
 #define DEFAULT_SCALAR double
