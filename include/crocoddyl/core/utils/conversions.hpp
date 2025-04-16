@@ -12,8 +12,8 @@
 #include <vector>
 
 #ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cppadcg.hpp>
 #include <cppad/cg/support/cppadcg_eigen.hpp>
+#include <cppad/cppad.hpp>
 #endif
 
 #include "crocoddyl/core/mathbase.hpp"
