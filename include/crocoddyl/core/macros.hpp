@@ -18,10 +18,6 @@
 #include <cppad/cppad.hpp>
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cg.hpp>
-#endif
-
 #define DEFAULT_SCALAR double
 typedef double Float64;
 typedef float Float32;

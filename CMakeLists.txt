@@ -18,9 +18,7 @@ set(SCALAR_FPTYPES ${SCALAR_TYPES})
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
-if(EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
-  message(STATUS "JRL cmakemodules found in 'cmake/' git submodule")
-else()
+if(NOT EXISTS "${JRL_CMAKE_MODULES}/base.cmake")
   find_package(jrl-cmakemodules QUIET CONFIG)
   if(jrl-cmakemodules_FOUND)
     get_property(
@@ -77,12 +75,26 @@ include("${JRL_CMAKE_MODULES}/python-helpers.cmake")
 include("crocoddyl.cmake")
 
 # Print initial message
-message(STATUS "${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
 message(
-  STATUS "Copyright (C) 2018-2025 CNRS-LAAS, University of Edinburgh, INRIA")
-message(STATUS "                        Heriot-Watt University")
+  STATUS
+    "============================================================================================="
+)
+message(STATUS "${Bold}${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
+message(STATUS "Copyright (C) 2018-2025, Heriot-Watt University • CNRS-LAAS.")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
+message(STATUS "")
+message(STATUS " Maintainers:")
+message(STATUS "   - RoMI Lab @ Heriot-Watt (https://www.romilab.org)")
+message(
+  STATUS
+    "   - Gepetto team @ LAAS-CNRS (https://www.laas.fr/fr/equipes/gepetto/)")
+message(
+  STATUS "   - Willow team @ INRIA (https://www.di.ens.fr/willow/) ${Reset}")
+message(
+  STATUS
+    "============================================================================================="
+)
 
 # Set a default build type to 'Release' if none was specified
 set_default_cmake_build_type("Release")
@@ -186,6 +198,7 @@ if(BUILD_WITH_CODEGEN_SUPPORT)
                         ${CMAKE_MODULE_PATH})
   add_project_dependency(cppad 20200000.0 REQUIRED FIND_EXTERNAL cppad)
   add_project_dependency(cppadcg 2.4.1 REQUIRED)
+  add_project_dependency(pycppad 1.2.4 REQUIRED)
   add_definitions(-DCROCODDYL_WITH_CODEGEN)
   # Pinocchio codegen related preproccessor defs.
   add_definitions(-DPINOCCHIO_WITH_CPPADCG_SUPPORT)
@@ -324,6 +337,11 @@ endif()
 # Build the unit tests
 if(BUILD_TESTING)
   add_subdirectory(unittest)
+endif()
+
+# Build notebooks
+if(BUILD_PYTHON_INTERFACE)
+  add_subdirectory(notebooks)
 endif()
 
 # Build the benchmark

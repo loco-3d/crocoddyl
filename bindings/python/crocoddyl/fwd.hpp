@@ -12,6 +12,10 @@
 
 #include <eigenpy/eigenpy.hpp>
 
+#ifdef PNINQP_WITH_CODEGEN
+#include <pycppad/cppad.hpp>
+#endif
+
 #include "python/crocoddyl/utils/cast.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"

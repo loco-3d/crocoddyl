@@ -14,5 +14,11 @@ dependencies:
   - urdfdom
   - cppad
   - cppadcodegen
-  - pinocchio
+  - pycppad
+  - pinocchio>=3.1.0
   - ipopt
+  - nbformat
+  - nbconvert
+  - ipykernel
+  - matplotlib
+  - cxx-compiler

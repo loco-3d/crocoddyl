@@ -12,7 +12,6 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {

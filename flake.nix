@@ -23,11 +23,23 @@
           };
           devShells.default = pkgs.mkShell {
             inputsFrom = [ self'.packages.default ];
-            packages = [ (pkgs.python3.withPackages (p: [p.tomlkit])) ]; # for "make release"
+            packages = with pkgs; [
+              ffmpeg
+              (python3.withPackages (p: [
+                p.tomlkit
+                p.matplotlib
+                p.nbconvert
+                p.nbformat
+                p.ipykernel
+              ]))
+            ];
+            shellHook = ''
+              export PATH=${pkgs.ffmpeg}/bin:$PATH
+            '';
           };
           packages = {
             default = self'.packages.crocoddyl;
-            crocoddyl = pkgs.python3Packages.crocoddyl.overrideAttrs (_: {
+            crocoddyl = pkgs.python3Packages.crocoddyl.overrideAttrs (super: {
               src = pkgs.lib.fileset.toSource {
                 root = ./.;
                 fileset = pkgs.lib.fileset.unions [
@@ -38,11 +50,22 @@
                   ./doc
                   ./examples
                   ./include
+                  ./notebooks
                   ./package.xml
                   ./src
                   ./unittest
                 ];
               };
+              checkInputs = (super.checkInputs or [ ]) ++ [
+                pkgs.python3Packages.nbconvert
+                pkgs.python3Packages.nbformat
+                pkgs.python3Packages.ipykernel
+                pkgs.python3Packages.matplotlib
+                pkgs.ffmpeg
+              ];
+              preCheck = ''
+                export PATH=${pkgs.ffmpeg}/bin:$PATH
+              '';
             });
           };
         };

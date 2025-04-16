@@ -1,3 +1,8 @@
+# Define ANSY font
+string(ASCII 27 Esc)
+set(Reset "${Esc}[0m")
+set(Bold "${Esc}[1m")
+
 # Function to sanitize the scalar type for filenames
 function(crocoddyl_sanitize_scalar_name scalar sanitized_name)
   string(REPLACE "::" "_" sanitized "${scalar}")

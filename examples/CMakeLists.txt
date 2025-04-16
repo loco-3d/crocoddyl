@@ -23,7 +23,7 @@ foreach(EXAMPLES ${${PROJECT_NAME}_EXAMPLES_PYTHON})
   install(FILES ${EXAMPLES}.py
           DESTINATION ${PYTHON_SITELIB}/${PROJECT_NAME}/examples)
   add_custom_target(
-    "examples-${EXAMPLES}"
+    "example-${EXAMPLES}"
     ${CMAKE_COMMAND}
     -E
     env

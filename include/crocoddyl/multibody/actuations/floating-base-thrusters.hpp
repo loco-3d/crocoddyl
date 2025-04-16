@@ -10,7 +10,6 @@
 #define CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {

@@ -84,6 +84,7 @@ jobs:
         conda activate crocoddyl
         conda install cmake ccache -c conda-forge
         conda install llvm-openmp libcxx -c conda-forge
+        conda install ffmpeg -c conda-forge
         conda list
 
     - name: Install example-robot-data
@@ -96,12 +97,6 @@ jobs:
         cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
         make install
 
-    - name: Install compilers for macOS
-      shell: bash -l {0}
-      if: contains(matrix.os, 'macos-latest')
-      run: |
-        conda install compilers -c conda-forge
-
     - name: Build Crocoddyl
       shell: bash -l {0}
       run: |
@@ -113,7 +108,7 @@ jobs:
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_FLAGS_DEBUG="" \
           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DBUILD_WITH_CODEGEN_SUPPORT=${{ env.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
+          -DBUILD_WITH_CODEGEN_SUPPORT=${{ matrix.codegen_support }} -DPYTHON_EXECUTABLE=$(which python3) \
           -DBUILD_WITH_MULTITHREADS=ON -DINSTALL_DOCUMENTATION=ON -DGENERATE_PYTHON_STUBS=ON \
           -DOpenMP_ROOT=$CONDA_PREFIX
         make

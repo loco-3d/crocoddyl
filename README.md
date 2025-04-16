@@ -124,6 +124,7 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
 2. (optional) Install Crocoddyl's optional dependencies
    * [OpenMP](https://www.openmp.org/) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for multi-threading support)
    * [CppADCoGen](https://github.com/joaoleal/CppADCodeGen) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
+   * [pycppad](https://github.com/Simple-Robotics/pycppad) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for code-generation support)
    * [Ipopt](https://github.com/coin-or/Ipopt) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for Ipopt support)
    * [example-robot-data](https://github.com/gepetto/example-robot-data) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for robotic examples, install Python loaders)
    * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(for display in Gepetto viewer, i.e., `GepettoDisplay`)
@@ -180,9 +181,9 @@ To cite **Crocoddyl** in your academic research, please use the following BibTeX
 Please consider citing our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
 
 **Crocoddyl's** contributions extend beyond efficient software development. Please also consider citing the algorithm contributions of our different solvers and formulations:
- - Feasibility-driven DDP (FDDP): [[1]](#1)
- - Control-limited feasibility-driven DDP (Box-FDDP): [[2]](#2)
- - Inverse-dynamics trajectory optimization and equality-constrained DDP solver (Intro solver): [[3]](#3)
+ - Feasibility-driven solvers (FDDP and Box-FDDP): [[1]](#1), [[2]](#2)
+ - Inverse-dynamics trajectory optimization and endpoint constrains: [[3]](#3) [[4]](#4)
+ - Multi-Contact Inertial Parameters Estimation and Localization in Legged Robots: [[5]](#5)
 
 
 Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**, which contributes to the efficient implementation of rigid body algorithms and their derivatives. For more details on how to cite Pinocchio visit: [https://github.com/stack-of-tasks/pinocchio](https://github.com/stack-of-tasks/pinocchio).
@@ -190,22 +191,19 @@ Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-t
 
 ### :open_book:  Selected publications
 
-<a id="1">[1]</a> C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
+<a id="1">[1]</a> C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar and N. Mansard. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020.
 
-<a id="2">[2]</a> C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard and S. Vijayakumar. [A Feasibility-Driven Approach
-to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), Autonomous Robots, 2022
+<a id="2">[2]</a> C. Mastalli, W. Merkt, J. Marti-Saumell, H. Ferrolho, J. Sola, N. Mansard and S. Vijayakumar. [A Feasibility-Driven Approach to Control-Limited DDP](https://arxiv.org/pdf/2010.00411.pdf), Autonomous Robots, 2022.
 
-<a id="3">[3]</a> C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonneau and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), IEEE Transactions on Robotics, 2023
+<a id="3">[3]</a> C. Mastalli, S. P. Chhatoi, T. Corbères, S. Tonneau and S. Vijayakumar. [Inverse-Dynamics MPC via Nullspace Resolution](https://arxiv.org/pdf/2209.05375.pdf), IEEE Transactions on Robotics, 2023.
 
+<a id="4">[4]</a> M. Parilli, S. Martinez, and C.Mastall. [Endpoint-Explicit Differential Dynamic Programming via Exact Resolution](https://arxiv.org/pdf/2503.03897), IEEE International Conference on Robotics and Automation (ICRA), 2025.
+
+<a id="5">[5]</a> S. Martinez, R. Griffin, and C.Mastalli. [Multi-Contact Inertial Parameters Estimation and Localization in Legged Robots](https://arxiv.org/pdf/2403.17161), IEEE Robotics and Automation Letters (RAL), 2025.
 
 ## :computer:  Questions and Issues
 
-You have a question or an issue? Please open a [new issue](https://github.com/loco-3d/crocoddyl/issues).
-
-
-## :mag: Steering Committee
-
-**Crocoddyl** is managed by a steering committee which meets every two weeks to discuss ongoing developments. The committee is led by [Carlos Mastalli](https://cmastalli.github.io/), [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard), [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) and [Justin Carpentier](https://jcarpent.github.io/) are other members of the committee.
+You have a question or an issue? Please open a [new issue](https://github.com/loco-3d/crocoddyl/issues) or a [discussion](https://github.com/loco-3d/crocoddyl/discussions).
 
 
 ## :copyright: Credits

@@ -10,7 +10,6 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/core/actions/lqr.hpp"
-#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"

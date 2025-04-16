@@ -16,10 +16,6 @@
 #include <cppad/cppad.hpp>
 #endif
 
-#ifdef CROCODDYL_WITH_CODEGEN
-#include <cppad/cg/cg.hpp>
-#endif
-
 #include "crocoddyl/core/mathbase.hpp"
 
 namespace crocoddyl {
