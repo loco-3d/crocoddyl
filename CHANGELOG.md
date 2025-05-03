@@ -6,8 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-* Updated the rotation transpose in contact wrench cone to re-use the same object to avoid additional transpose operations.
-* Switched to a multiply operation instead of divide for efficiency.
+* Updated the rotation transpose in contact wrench cone to re-use the same object to avoid additional transpose operations. https://github.com/loco-3d/crocoddyl/pull/1343
+* Switched to a multiply operation instead of divide for efficiency. https://github.com/loco-3d/crocoddyl/pull/1343
 * Fix Python bindings of action getters in https://github.com/loco-3d/crocoddyl/pull/1374
 * Created independent Python modules associated to each scalar in https://github.com/loco-3d/crocoddyl/pull/1372
 * Introduced CodeGen and AutoDiff in Python + pre-compiled headers in https://github.com/loco-3d/crocoddyl/pull/1370

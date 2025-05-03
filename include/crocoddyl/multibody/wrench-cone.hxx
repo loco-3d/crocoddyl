@@ -145,6 +145,10 @@ void WrenchConeTpl<Scalar>::update() {
 
   // Create a temporary object for computation
   Matrix3s R_transpose = R_.transpose();
+  // There are blocks of the A matrix that are repeated. By separating it this way, we can
+  // reduced computation.
+  MatrixX3s A_left = A_.leftCols(nf_);
+  MatrixX3s A_right = A_.rightCols(nf_);
 
   // Friction cone information
   // This segment of matrix is defined as
@@ -153,13 +157,14 @@ void WrenchConeTpl<Scalar>::update() {
   //   0  1 -mu  0  0  0;
   //   0 -1 -mu  0  0  0;
   //   0  0   1  0  0  0]
+  Vector3s mu_nsurf = -mu * Vector3s::UnitZ(); // We can pull this out because it's reused.
+  std::size_t row = 0;
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     Scalar theta_i = theta * static_cast<Scalar>(i);
     Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
-    Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
-    A_.row(2 * i).template head<3>() =
+    A_.row(row++).template head<3>() =
         (mu_nsurf + tsurf_i).transpose() * R_transpose;
-    A_.row(2 * i + 1).template head<3>() =
+    A_.row(row++).template head<3>() =
         (mu_nsurf - tsurf_i).transpose() * R_transpose;
   }
   A_.row(nf_).template head<3>() = R_transpose.row(2);
@@ -175,9 +180,11 @@ void WrenchConeTpl<Scalar>::update() {
   //  0  0 -L  0  1  0;
   //  0  0 -L  0 -1  0]
   A_.row(nf_ + 1) << -W * R_transpose.row(2), R_transpose.row(0);
-  A_.row(nf_ + 2) << -W * R_transpose.row(2), -R_transpose.row(0);
+  A_left.row(nf_ + 2) = A_left.row(nf_ + 1);
+  A_right.row(nf_ + 2) = -R_transepose.row(0);
   A_.row(nf_ + 3) << -L * R_transpose.row(2), R_transpose.row(1);
-  A_.row(nf_ + 4) << -L * R_transpose.row(2), -R_transpose.row(1);
+  A_left.row(nf_ + 4) = A_left.row(nf_ + 3);
+  A_right.row(nf_ + 4) = -R_transpose.row(1);
 
   // Yaw-tau information
   const Scalar mu_LW = -mu * (L + W);
@@ -199,14 +206,11 @@ void WrenchConeTpl<Scalar>::update() {
   //   W -L -mu*(L+W)  mu -mu 1;
   //  -W  L -mu*(L+W) -mu  mu 1;
   //  -W -L -mu*(L+W) -mu -mu 1]
-  A_.row(nf_ + 9) << Vector3s(W, L, mu_LW).transpose() * R_transpose,
-      Vector3s(mu, mu, Scalar(1.)).transpose() * R_transpose;
-  A_.row(nf_ + 10) << Vector3s(W, -L, mu_LW).transpose() * R_transpose,
-      Vector3s(mu, -mu, Scalar(1.)).transpose() * R_transpose;
-  A_.row(nf_ + 11) << Vector3s(-W, L, mu_LW).transpose() * R_transpose,
-      Vector3s(-mu, mu, Scalar(1.)).transpose() * R_transpose;
-  A_.row(nf_ + 12) << Vector3s(-W, -L, mu_LW).transpose() * R_transpose,
-      Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_transpose;
+  A_left.rows(nf_ + 9, 4) = A_left.rows(nf_ + 5, 4);
+  A_right.row(nf_ + 9) = Vector3s(mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_right.row(nf_ + 10) = Vector3s(mu, -mu, Scalar(1.)).transpose() * R_transpose;
+  A_right.row(nf_ + 11) = Vector3s(-mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_right.row(nf_ + 12) = Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_transpose;
 }
 
 template <typename Scalar>
