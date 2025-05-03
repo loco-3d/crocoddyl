@@ -342,6 +342,20 @@ void test_negative_force_along_wrench_cone_normal() {
   BOOST_CHECK(casted_data->a_value > 0.);
 }
 
+void test_setter() {
+  // Create the wrench cone
+  Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+  double mu = random_real_in_range(0.01, 1.);
+  Eigen::Vector2d cone_box = Eigen::Vector2d(random_real_in_range(0.01, 0.1),
+                                             random_real_in_range(0.01, 0.1));
+  crocoddyl::WrenchCone cone(R, mu, cone_box);
+
+  mu = random_real_in_range(0.01, 1.);
+  cone.set_mu(mu);
+
+  BOOST_CHECK(cone.get_mu() == mu);
+}
+
 void test_force_parallel_to_wrench_cone_normal() {
   // Create the wrench cone
   Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
@@ -390,6 +404,8 @@ void register_unit_tests() {
       boost::bind(&test_negative_force_along_wrench_cone_normal)));
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_force_parallel_to_wrench_cone_normal)));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(boost::bind(&test_setter)));
 }
 
 bool init_function() {
