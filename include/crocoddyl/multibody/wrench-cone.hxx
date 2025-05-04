@@ -221,10 +221,12 @@ void WrenchConeTpl<Scalar>::update() {
   // Box dimensions
   const Scalar L = box_(0) * Scalar(0.5);
   const Scalar W = box_(1) * Scalar(0.5);
-  const Scalar left_bound = W + center_(1);
-  const Scalar right_bound = -W + center_(1);
-  const Scalar front_bound = L + center_(0);
-  const Scalar back_bound = -L + center_(0);
+  const Scalar x = center_(0);
+  const Scalar y = center_(1);
+  const Scalar left_bound =   W + y;
+  const Scalar right_bound = -W + y;
+  const Scalar front_bound =  L + x;
+  const Scalar back_bound =  -L + x;
 
   // CoP information
   // This segment of matrix is defined as
@@ -238,30 +240,36 @@ void WrenchConeTpl<Scalar>::update() {
   A_.row(nf_ + 4) << -front_bound * R_transpose.row(2), -R_transpose.row(1);
 
   // Yaw-tau information
-  const Scalar mu_LW = -mu * (L + W); // Todo there's probably a bug in this.
+  // Here, we use the transformation between the sole frame (0, 0) and the center of this polygon r = (x, y). The CWC
+  // constraints are formulated for this polygon, which has a torque tau_hat. We know then that
+  // tau_hat = tau - center X f.
+  const Scalar mu_LW = -mu * (L + W);
   // The segment of the matrix that encodes the minimum torque is defined as
-  // [ W  L -mu*(L+W) -mu -mu -1;
-  //   W -L -mu*(L+W) -mu  mu -1;
-  //  -W  L -mu*(L+W)  mu -mu -1;
-  //  -W -L -mu*(L+W)  mu  mu -1]
-  A_.row(nf_ + 5) << Vector3s(left_bound, front_bound, mu_LW).transpose() * R_transpose,
+  // [ W  L -mu*(L+W) -mu -mu -1;   ->  (W-y)  (L+x) -mu*(L+W+x-y) -mu -mu -1;
+  //   W -L -mu*(L+W) -mu  mu -1;   ->  (W-y) -(L-x) -mu*(L+W-x-y) -mu  mu -1;
+  //  -W  L -mu*(L+W)  mu -mu -1;   -> -(W+y)  (L+x) -mu*(L+W+x+y)  mu -mu -1;
+  //  -W -L -mu*(L+W)  mu  mu -1]   -> -(W+y) -(L-x) -mu*(L+W-x+y)  mu  mu -1]
+  A_.row(nf_ + 5) << Vector3s(W - y, L + x, mu_LW - mu * (x - y)).transpose() * R_transpose,
       Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_transpose;
-  A_.row(nf_ + 6) << Vector3s(left_bound, -back_bound, mu_LW).transpose() * R_transpose,
+  A_.row(nf_ + 6) << Vector3s(W - y, -(L - x), mu_LW + mu * (x + y)).transpose() * R_transpose,
       Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_transpose;
-  A_.row(nf_ + 7) << Vector3s(right_bound, front_bound, mu_LW).transpose() * R_transpose,
+  A_.row(nf_ + 7) << Vector3s(-(W + y), L + x, mu_LW - mu * (x + y)).transpose() * R_transpose,
       Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_transpose;
-  A_.row(nf_ + 8) << Vector3s(right_bound, back_bound, mu_LW).transpose() * R_transpose,
+  A_.row(nf_ + 8) << Vector3s(-(W + y), -(L - x), mu_LW - mu * (y - x)).transpose() * R_transpose,
       Vector3s(mu, mu, Scalar(-1.)).transpose() * R_transpose;
   // The segment of the matrix that encodes the infinity torque is defined as
-  // [ W  L -mu*(L+W)  mu  mu 1;
-  //   W -L -mu*(L+W)  mu -mu 1;
-  //  -W  L -mu*(L+W) -mu  mu 1;
-  //  -W -L -mu*(L+W) -mu -mu 1]
-  A_left.rows(nf_ + 9, 4) = A_left.rows(nf_ + 5, 4);
-  A_right.row(nf_ + 9) = Vector3s(mu, mu, Scalar(1.)).transpose() * R_transpose;
-  A_right.row(nf_ + 10) = Vector3s(mu, -mu, Scalar(1.)).transpose() * R_transpose;
-  A_right.row(nf_ + 11) = Vector3s(-mu, mu, Scalar(1.)).transpose() * R_transpose;
-  A_right.row(nf_ + 12) = Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_transpose;
+  // [ W  L -mu*(L+W)  mu  mu 1;    ->  (W+y)  (L-x) -mu*(L+W-x+y)  mu  mu 1;
+  //   W -L -mu*(L+W)  mu -mu 1;    ->  (W+y) -(L+x) -mu*(L+W+x+y)  mu -mu 1;
+  //  -W  L -mu*(L+W) -mu  mu 1;    -> -(W-y)  (L-x) -mu*(L+W-x-y) -mu  mu 1;
+  //  -W -L -mu*(L+W) -mu -mu 1]    -> -(W-y) -(L+x) -mu*(L+W+x-y) -mu -mu 1]
+  A_.row(nf_ + 9) << Vector3s(W + y, L - x, mu_LW - mu * (y - x)).transpose() * R_transpose,
+      Vector3s(mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 10) << Vector3s(W + y, -(L + x), mu_LW - mu * (x + y)).transpose() * R_transpose,
+      Vector3s(mu, -mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 11) << Vector3s(-(W - y), L - x, mu_LW + mu * (x + y)).transpose() * R_transpose,
+      Vector3s(-mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 12) << Vector3s(-(W - y), -(L + x), mu_LW - mu * (x - y)).transpose() * R_transpose,
+      Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_transpose;
 }
 
 template <typename Scalar>
