@@ -40,6 +40,7 @@ struct CostModelSumVisitor
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CostModelSum_addCost_wrap,
                                          Model::addCost, 3, 4)
   typedef typename Model::CostDataSum Data;
+  typedef typename Model::CostItem CostItem;
   typedef typename Model::StateAbstract State;
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
@@ -63,6 +64,12 @@ struct CostModelSumVisitor
                  ":param cost: cost model\n"
                  ":param weight: cost weight\n"
                  ":param active: True if the cost is activated (default true)"))
+        .def("addCost",
+                    static_cast<void (Model::*)(
+                        const std::shared_ptr<CostItem>&)>(&Model::calc),
+                    bp::args("self", "cost_item"),
+                    "Add a cost item.\n\n"
+                    ":param cost_item: cost item")
         .def("removeCost", &Model::removeCost, bp::args("self", "name"),
              "Remove a cost item.\n\n"
              ":param name: cost name")

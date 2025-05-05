@@ -45,6 +45,50 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
   A_ = MatrixX6s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
+  center_ = Vector2s::Zero();
+
+  // Update the inequality matrix and bounds
+  update();
+}
+
+  template <typename Scalar>
+  WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
+                                       const Vector2s& box, const Vector2s& center,
+                                       const std::size_t nf,
+                                       const bool inner_appr,
+                                       const Scalar min_nforce,
+                                       const Scalar max_nforce)
+      : nf_(nf),
+        R_(R),
+        box_(box),
+        center_(center),
+        mu_(mu),
+        inner_appr_(inner_appr),
+        min_nforce_(min_nforce),
+        max_nforce_(max_nforce) {
+  if (nf_ % 2 != 0) {
+    nf_ = 4;
+    std::cerr << "Warning: nf has to be an even number, set to 4" << std::endl;
+  }
+  if (mu < Scalar(0.)) {
+    mu_ = Scalar(1.);
+    std::cerr << "Warning: mu has to be a positive value, set to 1."
+              << std::endl;
+  }
+  if (min_nforce < Scalar(0.)) {
+    min_nforce_ = Scalar(0.);
+    std::cerr << "Warning: min_nforce has to be a positive value, set to 0"
+              << std::endl;
+  }
+  if (max_nforce < Scalar(0.)) {
+    max_nforce_ = std::numeric_limits<Scalar>::infinity();
+    std::cerr << "Warning: max_nforce has to be a positive value, set to "
+                 "infinity value"
+              << std::endl;
+  }
+  A_ = MatrixX6s::Zero(nf_ + 13, 6);
+  ub_ = VectorXs::Zero(nf_ + 13);
+  lb_ = VectorXs::Zero(nf_ + 13);
 
   // Update the inequality matrix and bounds
   update();
@@ -85,6 +129,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const Matrix3s& R, const Scalar mu,
   A_ = MatrixX6s::Zero(nf_ + 13, 6);
   ub_ = VectorXs::Zero(nf_ + 13);
   lb_ = VectorXs::Zero(nf_ + 13);
+  center_ = Vector2s::Zero();
 
   // Update the inequality matrix and bounds
   update();
@@ -98,6 +143,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl(const WrenchConeTpl<Scalar>& cone)
       lb_(cone.get_lb()),
       R_(cone.get_R()),
       box_(cone.get_box()),
+      center_(cone.get_center()),
       mu_(cone.get_mu()),
       inner_appr_(cone.get_inner_appr()),
       min_nforce_(cone.get_min_nforce()),
@@ -112,6 +158,7 @@ WrenchConeTpl<Scalar>::WrenchConeTpl()
       R_(Matrix3s::Identity()),
       box_(std::numeric_limits<Scalar>::infinity(),
            std::numeric_limits<Scalar>::infinity()),
+      center_(Vector2s::Zero()),
       mu_(Scalar(0.7)),
       inner_appr_(true),
       min_nforce_(Scalar(0.)),
@@ -140,70 +187,89 @@ void WrenchConeTpl<Scalar>::update() {
   Scalar theta =
       static_cast<Scalar>(2.0) * pi<Scalar>() / static_cast<Scalar>(nf_);
   if (inner_appr_) {
-    mu *= cos(theta / Scalar(2.));
+    mu *= cos(theta * Scalar(0.5));
   }
+
+  // Create a temporary object for computation
+  Matrix3s R_transpose = R_.transpose();
+  // There are blocks of the A matrix that are repeated. By separating it this way, we can
+  // reduced computation.
+  MatrixX3s A_left = A_.template leftCols<nf_>();
+  MatrixX3s A_right = A_.template rightCols<nf_>() ;
 
   // Friction cone information
   // This segment of matrix is defined as
-  // [ 1  0 -mu  0  0  0;
-  //  -1  0 -mu  0  0  0;
-  //   0  1 -mu  0  0  0;
-  //   0 -1 -mu  0  0  0;
-  //   0  0   1  0  0  0]
+  // [ 1  0 -mu  0  0  0;     fx <= mu fz  = fx_max
+  //  -1  0 -mu  0  0  0;     fx >= -mu fz = fx_min
+  //   0  1 -mu  0  0  0;     fy <= mu fz  = fy_max
+  //   0 -1 -mu  0  0  0;     fy >= -mu fz = fy_min
+  //   0  0   1  0  0  0]     fz >= 0      = fz_min
+  Vector3s mu_nsurf = -mu * Vector3s::UnitZ(); // We can pull this out because it's reused.
+  std::size_t row = 0;
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     Scalar theta_i = theta * static_cast<Scalar>(i);
     Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
-    Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
-    A_.row(2 * i).template head<3>() =
-        (mu_nsurf + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1).template head<3>() =
-        (mu_nsurf - tsurf_i).transpose() * R_.transpose();
+    A_.row(row++).template head<3>() =
+        (mu_nsurf + tsurf_i).transpose() * R_transpose;
+    A_.row(row++).template head<3>() =
+        (mu_nsurf - tsurf_i).transpose() * R_transpose;
   }
-  A_.row(nf_).template head<3>() = R_.col(2).transpose();
+  A_.row(nf_).template head<3>() = R_transpose.row(2);
   lb_(nf_) = min_nforce_;
   ub_(nf_) = max_nforce_;
 
+  // Box dimensions
+  const Scalar L = box_(0) * Scalar(0.5);
+  const Scalar W = box_(1) * Scalar(0.5);
+  const Scalar x = center_(0);
+  const Scalar y = center_(1);
+  const Scalar left_bound =   W + y;
+  const Scalar right_bound = -W + y;
+  const Scalar front_bound =  L + x;
+  const Scalar back_bound =  -L + x;
+
   // CoP information
-  const Scalar L = box_(0) / Scalar(2.);
-  const Scalar W = box_(1) / Scalar(2.);
   // This segment of matrix is defined as
-  // [0  0 -W  1  0  0;
-  //  0  0 -W -1  0  0;
-  //  0  0 -L  0  1  0;
-  //  0  0 -L  0 -1  0]
-  A_.row(nf_ + 1) << -W * R_.col(2).transpose(), R_.col(0).transpose();
-  A_.row(nf_ + 2) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
-  A_.row(nf_ + 3) << -L * R_.col(2).transpose(), R_.col(1).transpose();
-  A_.row(nf_ + 4) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
+  // [0  0 -W  1  0  0;   -W fz + tau_x <= 0 ->  tau_x <= W fz,                   = tau_x_max, so W is the left_bound
+  //  0  0 -W -1  0  0;   -W fz - tau_x <= 0 -> -tau_x <= W fz -> tau_x >= -W fz, = tau_x_min, so -W is the right_bound
+  //  0  0 -L  0  1  0;   -L fz + tau_y <= 0 ->  tau_y <= L fz,                   = tau_y_max, so L is -back_bound
+  //  0  0 -L  0 -1  0]   -L fz - tau_y <= 0 -> -tau_y <= L fz -> tau_y >= -L fz, = tau_y_min, so L is front_bound
+  A_.row(nf_ + 1) << -left_bound  * R_transpose.row(2),  R_transpose.row(0);
+  A_.row(nf_ + 2) <<  right_bound * R_transpose.row(2), -R_transepose.row(0);
+  A_.row(nf_ + 3) <<  back_bound  * R_transpose.row(2),  R_transpose.row(1);
+  A_.row(nf_ + 4) << -front_bound * R_transpose.row(2), -R_transpose.row(1);
 
   // Yaw-tau information
+  // Here, we use the transformation between the sole frame (0, 0) and the center of this polygon r = (x, y). The CWC
+  // constraints are formulated for this polygon, which has a torque tau_hat. We know then that
+  // tau_hat = tau - center X f.
   const Scalar mu_LW = -mu * (L + W);
   // The segment of the matrix that encodes the minimum torque is defined as
-  // [ W  L -mu*(L+W) -mu -mu -1;
-  //   W -L -mu*(L+W) -mu  mu -1;
-  //  -W  L -mu*(L+W)  mu -mu -1;
-  //  -W -L -mu*(L+W)  mu  mu -1]
-  A_.row(nf_ + 5) << Vector3s(W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 6) << Vector3s(W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 7) << Vector3s(-W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 8) << Vector3s(-W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, mu, Scalar(-1.)).transpose() * R_.transpose();
+  // [ W  L -mu*(L+W) -mu -mu -1;   ->  (W-y)  (L+x) -mu*(L+W+x-y) -mu -mu -1;
+  //   W -L -mu*(L+W) -mu  mu -1;   ->  (W-y) -(L-x) -mu*(L+W-x-y) -mu  mu -1;
+  //  -W  L -mu*(L+W)  mu -mu -1;   -> -(W+y)  (L+x) -mu*(L+W+x+y)  mu -mu -1;
+  //  -W -L -mu*(L+W)  mu  mu -1]   -> -(W+y) -(L-x) -mu*(L+W-x+y)  mu  mu -1]
+  A_.row(nf_ + 5) << Vector3s(W - y, L + x, mu_LW - mu * (x - y)).transpose() * R_transpose,
+      Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 6) << Vector3s(W - y, -(L - x), mu_LW + mu * (x + y)).transpose() * R_transpose,
+      Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 7) << Vector3s(-(W + y), L + x, mu_LW - mu * (x + y)).transpose() * R_transpose,
+      Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 8) << Vector3s(-(W + y), -(L - x), mu_LW - mu * (y - x)).transpose() * R_transpose,
+      Vector3s(mu, mu, Scalar(-1.)).transpose() * R_transpose;
   // The segment of the matrix that encodes the infinity torque is defined as
-  // [ W  L -mu*(L+W)  mu  mu 1;
-  //   W -L -mu*(L+W)  mu -mu 1;
-  //  -W  L -mu*(L+W) -mu  mu 1;
-  //  -W -L -mu*(L+W) -mu -mu 1]
-  A_.row(nf_ + 9) << Vector3s(W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 10) << Vector3s(W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, -mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 11) << Vector3s(-W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 12) << Vector3s(-W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_.transpose();
+  // [ W  L -mu*(L+W)  mu  mu 1;    ->  (W+y)  (L-x) -mu*(L+W-x+y)  mu  mu 1;
+  //   W -L -mu*(L+W)  mu -mu 1;    ->  (W+y) -(L+x) -mu*(L+W+x+y)  mu -mu 1;
+  //  -W  L -mu*(L+W) -mu  mu 1;    -> -(W-y)  (L-x) -mu*(L+W-x-y) -mu  mu 1;
+  //  -W -L -mu*(L+W) -mu -mu 1]    -> -(W-y) -(L+x) -mu*(L+W+x-y) -mu -mu 1]
+  A_.row(nf_ + 9) << Vector3s(W + y, L - x, mu_LW - mu * (y - x)).transpose() * R_transpose,
+      Vector3s(mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 10) << Vector3s(W + y, -(L + x), mu_LW - mu * (x + y)).transpose() * R_transpose,
+      Vector3s(mu, -mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 11) << Vector3s(-(W - y), L - x, mu_LW + mu * (x + y)).transpose() * R_transpose,
+      Vector3s(-mu, mu, Scalar(1.)).transpose() * R_transpose;
+  A_.row(nf_ + 12) << Vector3s(-(W - y), -(L + x), mu_LW - mu * (x - y)).transpose() * R_transpose,
+      Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_transpose;
 }
 
 template <typename Scalar>

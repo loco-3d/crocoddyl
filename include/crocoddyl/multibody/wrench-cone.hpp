@@ -143,6 +143,11 @@ class WrenchConeTpl {
   const Vector2s& get_box() const;
 
   /**
+    * @brief Return center of the constraint box in the contact frame (x, y)
+    */
+  const Vector2s& get_box() const;
+
+  /**
    * @brief Return friction coefficient
    */
   const Scalar get_mu() const;
@@ -179,6 +184,14 @@ class WrenchConeTpl {
    * bounds.
    */
   void set_box(const Vector2s& box);
+
+  /**
+    * @brief Modify the center of the foot constraint box in the contact frame (x, y)
+    *
+    * Note that you need to run `update` for updating the inequality matrix and
+    * bounds.
+    */
+  void set_center(const Vector2s& center);
 
   /**
    * @brief Modify friction coefficient
@@ -226,6 +239,7 @@ class WrenchConeTpl {
   VectorXs lb_;      //!< Lower bound of the wrench cone
   Matrix3s R_;       //!< Rotation of the wrench cone w.r.t. the inertial frame
   Vector2s box_;     //!< Dimension of the foot surface (length, width)
+  Vector2s center_;     //!< Center of the foot surface w.r.t. the contact frame (x, y)
   Scalar mu_;        //!< Friction coefficient
   bool inner_appr_;  //!< Label that describes the type of friction cone
                      //!< approximation (inner/outer)
