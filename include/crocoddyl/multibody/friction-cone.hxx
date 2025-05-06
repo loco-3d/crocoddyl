@@ -95,8 +95,11 @@ void FrictionConeTpl<Scalar>::update() {
   const Scalar theta =
       static_cast<Scalar>(2.0) * pi<Scalar>() / static_cast<Scalar>(nf_);
   if (inner_appr_) {
-    mu *= cos(theta / Scalar(2.));
+    mu *= cos(theta * Scalar(0.5));
   }
+
+  // Create a temporary object for computation
+  Matrix3s R_transpose = R_.transpose();
 
   // Update the inequality matrix and the bounds
   // This matrix is defined as
@@ -107,15 +110,16 @@ void FrictionConeTpl<Scalar>::update() {
   //   0  0   1]
   Scalar theta_i;
   Vector3s tsurf_i;
+  Vector3s mu_nsurf =
+      -mu * Vector3s::UnitZ();  // We can pull this out because it's reused.
+  std::size_t row = 0;
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     theta_i = theta * static_cast<Scalar>(i);
     tsurf_i << cos(theta_i), sin(theta_i), Scalar(0.);
-    A_.row(2 * i) =
-        (-mu * Vector3s::UnitZ() + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1) =
-        (-mu * Vector3s::UnitZ() - tsurf_i).transpose() * R_.transpose();
+    A_.row(row++) = (mu_nsurf + tsurf_i).transpose() * R_transpose;
+    A_.row(row++) = (mu_nsurf - tsurf_i).transpose() * R_transpose;
   }
-  A_.row(nf_) = R_.col(2).transpose();
+  A_.row(nf_) = R_transpose.row(2);
   lb_(nf_) = min_nforce_;
   ub_(nf_) = max_nforce_;
 }

@@ -140,8 +140,17 @@ void WrenchConeTpl<Scalar>::update() {
   Scalar theta =
       static_cast<Scalar>(2.0) * pi<Scalar>() / static_cast<Scalar>(nf_);
   if (inner_appr_) {
-    mu *= cos(theta / Scalar(2.));
+    mu *= cos(theta * Scalar(0.5));
   }
+
+  // Create a temporary object for computation
+  Matrix3s R_transpose = R_.transpose();
+  // There are blocks of the A matrix that are repeated. By separating it this
+  // way, we can reduced computation.
+  Eigen::Block<MatrixX6s, Eigen::Dynamic, 3, true> A_left =
+      A_.template leftCols<3>();
+  Eigen::Block<MatrixX6s, Eigen::Dynamic, 3, true> A_right =
+      A_.template rightCols<3>();
 
   // Friction cone information
   // This segment of matrix is defined as
@@ -150,31 +159,35 @@ void WrenchConeTpl<Scalar>::update() {
   //   0  1 -mu  0  0  0;
   //   0 -1 -mu  0  0  0;
   //   0  0   1  0  0  0]
+  Vector3s mu_nsurf =
+      -mu * Vector3s::UnitZ();  // We can pull this out because it's reused.
+  std::size_t row = 0;
   for (std::size_t i = 0; i < nf_ / 2; ++i) {
     Scalar theta_i = theta * static_cast<Scalar>(i);
     Vector3s tsurf_i = Vector3s(cos(theta_i), sin(theta_i), Scalar(0.));
-    Vector3s mu_nsurf = -mu * Vector3s::UnitZ();
-    A_.row(2 * i).template head<3>() =
-        (mu_nsurf + tsurf_i).transpose() * R_.transpose();
-    A_.row(2 * i + 1).template head<3>() =
-        (mu_nsurf - tsurf_i).transpose() * R_.transpose();
+    A_.row(row++).template head<3>() =
+        (mu_nsurf + tsurf_i).transpose() * R_transpose;
+    A_.row(row++).template head<3>() =
+        (mu_nsurf - tsurf_i).transpose() * R_transpose;
   }
-  A_.row(nf_).template head<3>() = R_.col(2).transpose();
+  A_.row(nf_).template head<3>() = R_transpose.row(2);
   lb_(nf_) = min_nforce_;
   ub_(nf_) = max_nforce_;
 
   // CoP information
-  const Scalar L = box_(0) / Scalar(2.);
-  const Scalar W = box_(1) / Scalar(2.);
+  const Scalar L = box_(0) * Scalar(0.5);
+  const Scalar W = box_(1) * Scalar(0.5);
   // This segment of matrix is defined as
   // [0  0 -W  1  0  0;
   //  0  0 -W -1  0  0;
   //  0  0 -L  0  1  0;
   //  0  0 -L  0 -1  0]
-  A_.row(nf_ + 1) << -W * R_.col(2).transpose(), R_.col(0).transpose();
-  A_.row(nf_ + 2) << -W * R_.col(2).transpose(), -R_.col(0).transpose();
-  A_.row(nf_ + 3) << -L * R_.col(2).transpose(), R_.col(1).transpose();
-  A_.row(nf_ + 4) << -L * R_.col(2).transpose(), -R_.col(1).transpose();
+  A_.row(nf_ + 1) << -W * R_transpose.row(2), R_transpose.row(0);
+  A_left.row(nf_ + 2) = A_left.row(nf_ + 1);
+  A_right.row(nf_ + 2) = -R_transpose.row(0);
+  A_.row(nf_ + 3) << -L * R_transpose.row(2), R_transpose.row(1);
+  A_left.row(nf_ + 4) = A_left.row(nf_ + 3);
+  A_right.row(nf_ + 4) = -R_transpose.row(1);
 
   // Yaw-tau information
   const Scalar mu_LW = -mu * (L + W);
@@ -183,27 +196,27 @@ void WrenchConeTpl<Scalar>::update() {
   //   W -L -mu*(L+W) -mu  mu -1;
   //  -W  L -mu*(L+W)  mu -mu -1;
   //  -W -L -mu*(L+W)  mu  mu -1]
-  A_.row(nf_ + 5) << Vector3s(W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 6) << Vector3s(W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 7) << Vector3s(-W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 8) << Vector3s(-W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, mu, Scalar(-1.)).transpose() * R_.transpose();
+  A_.row(nf_ + 5) << Vector3s(W, L, mu_LW).transpose() * R_transpose,
+      Vector3s(-mu, -mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 6) << Vector3s(W, -L, mu_LW).transpose() * R_transpose,
+      Vector3s(-mu, mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 7) << Vector3s(-W, L, mu_LW).transpose() * R_transpose,
+      Vector3s(mu, -mu, Scalar(-1.)).transpose() * R_transpose;
+  A_.row(nf_ + 8) << Vector3s(-W, -L, mu_LW).transpose() * R_transpose,
+      Vector3s(mu, mu, Scalar(-1.)).transpose() * R_transpose;
   // The segment of the matrix that encodes the infinity torque is defined as
   // [ W  L -mu*(L+W)  mu  mu 1;
   //   W -L -mu*(L+W)  mu -mu 1;
   //  -W  L -mu*(L+W) -mu  mu 1;
   //  -W -L -mu*(L+W) -mu -mu 1]
-  A_.row(nf_ + 9) << Vector3s(W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 10) << Vector3s(W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(mu, -mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 11) << Vector3s(-W, L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, mu, Scalar(1.)).transpose() * R_.transpose();
-  A_.row(nf_ + 12) << Vector3s(-W, -L, mu_LW).transpose() * R_.transpose(),
-      Vector3s(-mu, -mu, Scalar(1.)).transpose() * R_.transpose();
+  A_left.row(nf_ + 9) = A_left.row(nf_ + 5);
+  A_right.row(nf_ + 9) = -A_right.row(nf_ + 5);
+  A_left.row(nf_ + 10) = A_left.row(nf_ + 6);
+  A_right.row(nf_ + 10) = -A_right.row(nf_ + 6);
+  A_left.row(nf_ + 11) = A_left.row(nf_ + 7);
+  A_right.row(nf_ + 11) = -A_right.row(nf_ + 7);
+  A_left.row(nf_ + 12) = A_left.row(nf_ + 8);
+  A_right.row(nf_ + 12) = -A_right.row(nf_ + 8);
 }
 
 template <typename Scalar>
