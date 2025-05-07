@@ -83,8 +83,8 @@ struct DataCollectorContactVisitor
 #define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PYTHON_BINDINGS(   \
     Scalar)                                                                    \
   typedef DataCollectorJointActMultibodyInContactTpl<Scalar> JAMData;             \
-  typedef DataCollectorMultibodyInContactTpl<Scalar> JAMDataBase1;                \
-  typedef DataCollectorActuationTpl<Scalar> JAMDataBase2;                         \
+  typedef DataCollectorActMultibodyInContactTpl<Scalar> JAMDataBase1;                \
+  typedef DataCollectorJointTpl<Scalar> JAMDataBase2;                         \
   typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
   typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
   typedef JointDataAbstractTpl<Scalar> JointData;                              \
