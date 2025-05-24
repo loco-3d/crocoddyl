@@ -142,7 +142,7 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
 ## :mag: Documentation
 
 Crocoddyl's Doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. We suggest to explore at least these notebooks:
-- [notebooks/01_introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/examples/notebooks/01_introduction_to_crocoddyl.ipynb)
+- [notebooks/01_introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/01_introduction_to_crocoddyl.ipynb)
 - [notebooks/02_optimizing_a_cartpole_swingup.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/02_optimizing_a_cartpole_swingup.ipynb)
 - [notebooks/03_optimizing_an_unicycle.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/03_optimizing_an_unicycle.py)
 - [notebooks/04_actuating_an_acrobot.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/04_actuating_an_acrobot.ipynb)
