@@ -17,9 +17,25 @@
           ...
         }:
         {
-          apps.default = {
-            type = "app";
-            program = pkgs.python3.withPackages (_: [ self'.packages.default ]);
+          apps = {
+            default = {
+              type = "app";
+              program = pkgs.python3.withPackages (_: [ self'.packages.default ]);
+            };
+            jupyter = {
+              type = "app";
+              program = pkgs.writeShellApplication {
+                name = "jupyter-crocoddyl";
+                text = "jupyter lab";
+                runtimeInputs = [
+                  (pkgs.python3.withPackages (p: [
+                    p.jupyterlab
+                    p.meshcat
+                    self'.packages.default
+                  ]))
+                ];
+              };
+            };
           };
           devShells.default = pkgs.mkShell {
             inputsFrom = [ self'.packages.default ];
