@@ -460,7 +460,7 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<std::shared_ptr<ActionModelAbstract> >& models) {
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = models[i];
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -478,6 +478,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
   running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
     const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    running_models_.push_back(model);
     running_datas_.push_back(model->createData());
   }
 }
