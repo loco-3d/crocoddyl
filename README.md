@@ -138,6 +138,7 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
    ```bash
    cmake .. && make && make install
    ```
+You can disable the tests, examples, and benchmarks using the following CMake options: `BUILD_TESTING`, `BUILD_EXAMPLES`, and `BUILD_BENCHMARK`. Note that the tests, examples or benchmarks require [example-robot-data](https://github.com/gepetto/example-robot-data).
 
 ## :mag: Documentation
 
