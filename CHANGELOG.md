@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Enabled casting and multi-scalar Python bindings in https://github.com/loco-3d/crocoddyl/pull/1346
 * Compute LU decomposition using permutationP in https://github.com/loco-3d/crocoddyl/pull/1351
 * Force DifferentialActionDataContactInvDynamics to update df_du for all contacts in  https://github.com/loco-3d/crocoddyl/pull/1348
+* Add a nix shortcut start jupyter lab, with eg. `nix run .#jupyter in https://github.com/loco-3d/crocoddyl/pull/1396
 
 ## [3.0.1] - 2025-03-21
 
