@@ -118,7 +118,7 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
 
 1. Install Crocoddyl's mandatory dependencies:
    * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-   * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+   * [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
    * [eigenpy](https://github.com/stack-of-tasks/eigenpy)
    * [Boost](https://www.boost.org/)
 2. (optional) Install Crocoddyl's optional dependencies
@@ -138,16 +138,17 @@ Just clone it (with `--recursive`) into a catkin workspace and compile it.
    ```bash
    cmake .. && make && make install
    ```
+You can disable the tests, examples, and benchmarks using the following CMake options: `BUILD_TESTING`, `BUILD_EXAMPLES`, and `BUILD_BENCHMARK`. Note that the tests, examples or benchmarks require [example-robot-data](https://github.com/gepetto/example-robot-data).
 
 ## :mag: Documentation
 
 Crocoddyl's Doxygen documentation is available [here](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/master/doxygen-html/). Alternatively, you can also check out the Jupyter notebooks. We suggest to explore at least these notebooks:
-- [notebooks/01_introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/01_introduction_to_crocoddyl.ipynb)
-- [notebooks/02_optimizing_a_cartpole_swingup.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/02_optimizing_a_cartpole_swingup.ipynb)
-- [notebooks/03_optimizing_an_unicycle.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/03_optimizing_an_unicycle.py)
-- [notebooks/04_actuating_an_acrobot.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/04_actuating_an_acrobot.ipynb)
-- [notebooks/05_codegenerating_a_cartpole.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/05_codegenerating_a_cartpole.ipynb)
-- [notebooks/06_scaling_to_robotics.ipynb](https://github.com/loco-3d/crocoddyl/blob/master/notebooks/06_scaling_to_robotics.ipynb)
+- [notebooks/01_introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/01_introduction_to_crocoddyl.ipynb)
+- [notebooks/02_optimizing_a_cartpole_swingup.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/02_optimizing_a_cartpole_swingup.ipynb)
+- [notebooks/03_optimizing_an_unicycle.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/03_optimizing_an_unicycle.ipynb)
+- [notebooks/04_actuating_an_acrobot.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/04_actuating_an_acrobot.ipynb)
+- [notebooks/05_codegenerating_a_cartpole.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/05_codegenerating_a_cartpole.ipynb)
+- [notebooks/06_scaling_to_robotics.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/notebooks/06_scaling_to_robotics.ipynb)
 
 Moreover, after installation, you could run the examples as follows:
 ```bash
@@ -178,7 +179,7 @@ To cite **Crocoddyl** in your academic research, please use the following BibTeX
   year={2020}
 }
 ```
-Please consider citing our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/master/PUBLICATIONS.md).
+Please consider citing our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/devel/PUBLICATIONS.md).
 
 **Crocoddyl's** contributions extend beyond efficient software development. Please also consider citing the algorithm contributions of our different solvers and formulations:
  - Feasibility-driven solvers (FDDP and Box-FDDP): [[1]](#1), [[2]](#2)
