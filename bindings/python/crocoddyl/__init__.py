@@ -294,7 +294,7 @@ class DisplayAbstract(ABC):
                 DifferentialActionDataContactFwdDynamics,
             ) or isinstance(
                 data.differential,
-                DifferentialActionDataContactInvDynamics,
+                DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
             ):
                 return True
         elif isinstance(data, ActionDataImpulseFwdDynamics):
@@ -307,7 +307,7 @@ class DisplayAbstract(ABC):
                 DifferentialActionDataContactFwdDynamics,
             ) or isinstance(
                 data.differential,
-                DifferentialActionDataContactInvDynamics,
+                DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
             ):
                 return (
                     model.differential.contacts.contacts,
@@ -320,7 +320,7 @@ class DisplayAbstract(ABC):
                 )
                 or isinstance(
                     data.differential,
-                    DifferentialActionDataContactInvDynamics,
+                    DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
                 )
             ):
                 return (
