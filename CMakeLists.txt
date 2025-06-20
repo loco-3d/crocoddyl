@@ -196,7 +196,7 @@ endif()
 if(BUILD_WITH_CODEGEN_SUPPORT)
   set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/"
                         ${CMAKE_MODULE_PATH})
-  add_project_dependency(cppad 20200000.0 REQUIRED FIND_EXTERNAL cppad)
+  add_project_dependency(cppad 20200000.0 REQUIRED FIND_EXTERNAL CppAD)
   add_project_dependency(cppadcg 2.4.1 REQUIRED)
   add_project_dependency(pycppad 1.2.4 REQUIRED)
   add_definitions(-DCROCODDYL_WITH_CODEGEN)
