@@ -1,4 +1,3 @@
-# flake8: noqa: E203
 # ref. https://github.com/PyCQA/pycodestyle/issues/373, remove this for ruff
 import numpy as np
 import pinocchio
