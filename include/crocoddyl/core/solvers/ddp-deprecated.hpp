@@ -48,7 +48,7 @@ namespace crocoddyl {
  *
  * \sa SolverAbstract(), `backwardPass()` and `forwardPass()`
  */
-class SolverDDP : public SolverFDDP {
+class SolverDDP : public SolverFDDPTpl<double> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -60,11 +60,11 @@ class SolverDDP : public SolverFDDP {
   DEPRECATED(
       "Do not use SolverDDP. Instead, you should use SolverFDDP(problem, "
       "DynamicsSolverType::SingleShoot)",
-      explicit SolverDDP(std::shared_ptr<ShootingProblem> problem) : SolverFDDP(
-          problem){};)
+      explicit SolverDDP(std::shared_ptr<ShootingProblemTpl<double>>
+                             problem) : SolverFDDPTpl<double>(problem){};)
   virtual ~SolverDDP() = default;
 
-  virtual void calcDiff() { return SolverFDDP::calcDir(); }
+  virtual void calcDiff() { return SolverFDDPTpl<double>::calcDir(); }
 };
 
 }  // namespace crocoddyl
