@@ -628,4 +628,6 @@ bool raiseIfNaN(const Scalar value);
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solver-base.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverAbstractTpl)
+
 #endif  // CROCODDYL_CORE_SOLVER_BASE_HPP_

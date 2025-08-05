@@ -894,4 +894,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/fddp.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverFDDPTpl)
+
 #endif  // CROCODDYL_CORE_SOLVERS_FDDP_HPP_

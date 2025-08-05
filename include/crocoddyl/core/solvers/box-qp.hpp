@@ -256,4 +256,6 @@ class BoxQPTpl {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/box-qp.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::BoxQPTpl)
+
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_

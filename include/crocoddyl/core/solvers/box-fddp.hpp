@@ -108,4 +108,6 @@ class SolverBoxFDDPTpl : public SolverFDDPTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/box-fddp.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverBoxFDDPTpl)
+
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_FDDP_HPP_

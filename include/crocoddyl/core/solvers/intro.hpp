@@ -272,4 +272,6 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/intro.hxx"
 
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverIntroTpl)
+
 #endif  // CROCODDYL_CORE_SOLVERS_INTRO_HPP_
