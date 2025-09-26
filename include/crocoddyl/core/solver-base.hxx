@@ -118,15 +118,15 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
 
 template <typename Scalar>
 void SolverAbstractTpl<Scalar>::resizeData() {
-  START_PROFILER("SolverAbstractTpl<Scalar>::resizeData");
+  START_PROFILER("SolverAbstract::resizeData");
   resizeRunningData();
   resizeTerminalData();
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::resizeData");
+  STOP_PROFILER("SolverAbstract::resizeData");
 }
 
 template <typename Scalar>
 void SolverAbstractTpl<Scalar>::resizeRunningData() {
-  START_PROFILER("SolverAbstractTpl<Scalar>::resizeRunningData");
+  START_PROFILER("SolverAbstract::resizeRunningData");
   const std::size_t T = problem_->get_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
@@ -140,7 +140,7 @@ void SolverAbstractTpl<Scalar>::resizeRunningData() {
     g_adj_[t].conservativeResize(ng);
   }
   g_adj_.back().conservativeResize(ng_T);
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::resizeRunningData");
+  STOP_PROFILER("SolverAbstract::resizeRunningData");
 }
 
 template <typename Scalar>
@@ -168,7 +168,7 @@ Scalar SolverAbstractTpl<Scalar>::computeFeasibility(
 
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeDynamicFeasibility() {
-  START_PROFILER("SolverAbstractTpl<Scalar>::computeDynamicFeasibility");
+  START_PROFILER("SolverAbstract::computeDynamicFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
   const VectorXs& x0 = problem_->get_x0();
@@ -202,13 +202,13 @@ Scalar SolverAbstractTpl<Scalar>::computeDynamicFeasibility() {
       }
       break;
   }
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeDynamicFeasibility");
+  STOP_PROFILER("SolverAbstract::computeDynamicFeasibility");
   return tmp_feas_;
 }
 
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
-  START_PROFILER("SolverAbstractTpl<Scalar>::computeInequalityFeasibility");
+  START_PROFILER("SolverAbstract::computeInequalityFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
@@ -256,13 +256,13 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
       }
       break;
   }
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeInequalityFeasibility");
+  STOP_PROFILER("SolverAbstract::computeInequalityFeasibility");
   return tmp_feas_;
 }
 
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
-  START_PROFILER("SolverAbstractTpl<Scalar>::computeEqualityFeasibility");
+  START_PROFILER("SolverAbstract::computeEqualityFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
@@ -294,7 +294,7 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
       }
       break;
   }
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::computeEqualityFeasibility");
+  STOP_PROFILER("SolverAbstract::computeEqualityFeasibility");
   return tmp_feas_;
 }
 
@@ -302,7 +302,7 @@ template <typename Scalar>
 void SolverAbstractTpl<Scalar>::setCandidate(
     const std::vector<VectorXs>& xs_warm, const std::vector<VectorXs>& us_warm,
     bool is_feasible) {
-  START_PROFILER("SolverAbstractTpl<Scalar>::setCandidate");
+  START_PROFILER("SolverAbstract::setCandidate");
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
@@ -368,7 +368,7 @@ void SolverAbstractTpl<Scalar>::setCandidate(
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());
   }
   is_feasible_ = is_feasible;
-  STOP_PROFILER("SolverAbstractTpl<Scalar>::setCandidate");
+  STOP_PROFILER("SolverAbstract::setCandidate");
 }
 
 template <typename Scalar>
