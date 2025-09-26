@@ -17,25 +17,22 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       term_solver_(term_solver),
       reg_incfactor_(Scalar(10.)),
       reg_decfactor_(Scalar(5.)),
-      reg_min_(ScaleNumerics<Scalar>(1e-9)),
-      reg_max_(ScaleNumerics<Scalar>(1e9, 1e-4)),
       th_grad_(ScaleNumerics<Scalar>(1e-12)),
       th_noimprovement_(
-          std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))),
-      th_stepdec_(Scalar(0.25)),
-      th_stepinc_(Scalar(0.25)),
-      th_minimprove_(Scalar(1e-2)),
-      th_acceptnegstep_(Scalar(8)),
-      th_acceptminstep_(Scalar(0.01)),
-      rho_(Scalar(0.3)),
-      th_minfeas_(std::sqrt(std::numeric_limits<Scalar>::epsilon() /
-                            (Scalar(1.) - rho_))),
-      upsilon_(Scalar(0.)),
-      upsilon_decfactor_(Scalar(0.5)),
-      zero_upsilon_(false),
-      nh_T_(problem->get_terminalModel()->get_nh_T()),
-      acceptstep_(false),
-      recalcdir_(true) {
+          std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))) {
+  nh_T_ = problem->get_terminalModel()->get_nh_T();
+  th_minfeas_ = std::sqrt(std::numeric_limits<Scalar>::epsilon() / (Scalar(1.) - rho_));
+  reg_min_ = ScaleNumerics<Scalar>(1e-9);
+  reg_max_ = ScaleNumerics<Scalar>(1e9, 1e-4);
+  rho_ = Scalar(0.3);
+  th_stepdec_ = Scalar(0.25);
+  th_stepinc_ = Scalar(0.25);
+  th_minimprove_ = Scalar(1e-2);
+  th_acceptnegstep_ = Scalar(8);
+  th_acceptminstep_ = Scalar(0.01);
+  upsilon_ = Scalar(0.);
+  upsilon_decfactor_ = Scalar(0.5);
+  zero_upsilon_ = false; //TODO: define in abstract
   // Allocating the solver's data
   allocateData();
   // Setting the dynamics solver
@@ -58,109 +55,19 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
     alphas_[n] = Scalar(1.) / pow(Scalar(2.), static_cast<Scalar>(n));
   }
 }
-
 template <typename Scalar>
-bool SolverFDDPTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
-                                  const std::vector<VectorXs>& init_us,
-                                  const std::size_t maxiter, const bool,
-                                  const Scalar init_reg) {
-  START_PROFILER("SolverFDDP::solve");
-  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
-  if (problem_->is_updated()) {
-    resizeData();
-  } else if (nh_T_ != nh_T && nh_T != 0) {  // we need to update terminal data
-    nh_T_ = nh_T;
-    resizeTerminalData();
+void SolverFDDPTpl<Scalar>::updateMeritFunction() {
+  // Update the penalty parameter for computing the merit function and its
+  // directional derivative For more details see Section 3 of "An Interior
+  // Point Algorithm for Large Scale Nonlinear Programming"
+  if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
+    // We incorporate a barrier-reduction strategy that still maintains a the
+    // directional derivative be sufficiently negative (as explained in
+    // Nocedal's texbook page 542) while allowing for a reduction when it is
+    // possible.
+    upsilon_ = std::max(upsilon_ * upsilon_decfactor_,
+                        dVexp_full_ / ((Scalar(1.) - rho_) * feas_));
   }
-  // TODO: Deprecate isfeasible_. Update setCandidate API.
-  setCandidate(init_xs, init_us, false);
-  // Initialize the value used for primal and dual regularization
-  if (std::isnan(init_reg)) {
-    preg_ = reg_min_;
-    dreg_ = reg_min_;
-  } else {
-    preg_ = init_reg;
-    dreg_ = init_reg;
-  }
-  if (zero_upsilon_) {
-    upsilon_ = 0.;
-  }
-  acceptstep_ = false;
-  for (iter_ = 0; iter_ < maxiter; ++iter_) {
-    recalcdir_ = true;
-    // Compute search direction
-    while (true) {
-      try {
-        computeDirection(recalcdir_);
-      } catch (std::exception& e) {
-        recalcdir_ = false;
-        increaseRegularization();
-        if (preg_ == reg_max_) {
-          return false;
-        } else {
-          continue;
-        }
-      }
-      break;
-    }
-    // Estimate the expected improvement
-    expectedImprovement();
-    dVexp_full_ = DV_[0] + DV_[1] + Scalar(0.5) * DV_[2];
-    // Update the penalty parameter for computing the merit function and its
-    // directional derivative For more details see Section 3 of "An Interior
-    // Point Algorithm for Large Scale Nonlinear Programming"
-    if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
-      // We incorporate a barrier-reduction strategy that still maintains a the
-      // directional derivative be sufficiently negative (as explained in
-      // Nocedal's texbook page 542) while allowing for a reduction when it is
-      // possible.
-      upsilon_ = std::max(upsilon_ * upsilon_decfactor_,
-                          dVexp_full_ / ((Scalar(1.) - rho_) * feas_));
-    }
-    // Try and evaluate the search direction
-    for (typename std::vector<Scalar>::const_iterator it = alphas_.begin();
-         it != alphas_.end(); ++it) {
-      // TODO: break the forward pass if the allocated time has been reached
-      // (c++)
-      steplength_ = *it;
-      try {
-        tryStep(steplength_);
-      } catch (std::exception& e) {
-        continue;
-      }
-      dImpr_ = std::max(dV_, dPhi_);
-      checkAcceptance();
-      // Set candidate guess, cost and feasibilities if we accept the step
-      if (acceptstep_) {
-        setCandidate(xs_try_, us_try_, false);
-        updateCandidate();
-        break;
-      }
-    }
-    stoppingCriteria();
-    const std::size_t n_callbacks = callbacks_.size();
-    for (std::size_t c = 0; c < n_callbacks; ++c) {
-      CallbackAbstract& callback = *callbacks_[c];
-      callback(*this);
-    }
-    if (steplength_ >= th_stepdec_ && std::abs(dImpr_) > th_minimprove_) {
-      decreaseRegularization();
-    }
-    if ((steplength_ >= th_stepinc_ && std::abs(dImpr_) <= th_minimprove_) ||
-        !acceptstep_) {
-      if (preg_ == reg_max_) {
-        STOP_PROFILER("SolverFDDP::solve");
-        return false;
-      }
-      increaseRegularization();
-    }
-    if (stop_ < th_stop_) {
-      STOP_PROFILER("SolverFDDP::solve");
-      return true;
-    }
-  }
-  STOP_PROFILER("SolverFDDP::solve");
-  return false;
 }
 
 template <typename Scalar>

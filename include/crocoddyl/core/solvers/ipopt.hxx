@@ -48,6 +48,16 @@ inline void SolverIpopt::resizeData() {
   ipopt_iface_->resizeData();
 }
 
+inline void SolverIpopt::increaseRegularization() {}
+
+inline void SolverIpopt::decreaseRegularization() {}
+
+inline void SolverIpopt::updateCandidate() {}
+
+inline bool SolverIpopt::checkAcceptance() { return true; }
+
+inline void SolverIpopt::updateMeritFunction() {}
+
 inline void SolverIpopt::computeDirection(const bool) {}
 
 inline Scalar SolverIpopt::tryStep(const Scalar) { return Scalar(0.); }

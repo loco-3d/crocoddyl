@@ -22,13 +22,17 @@ template <typename Model>
 struct SolverAbstractVisitor
     : public bp::def_visitor<SolverAbstractVisitor<Model>> {
   typedef typename Model::SolverAbstract SolverAbstract;
+  typedef typename SolverAbstract::Scalar Scalar;
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads,
                                          SolverAbstract::setCandidate, 0, 3)
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def("solve", pure_virtual(&Model::solve),
-           bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible",
-                    "regInit"),
+    cl.def("solve", &Model::solve, &Model::default_solve,
+           (bp::arg("init_xs")    = DefaultVector<Scalar>::value,
+               bp::arg("init_us")    = DefaultVector<Scalar>::value,
+               bp::arg("maxiter")    = 100,
+               bp::arg("is_feasible")= false,
+               bp::arg("reg_init")   = std::numeric_limits<Scalar>::quiet_NaN() ),
            "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
            "terms.\n\n"
            "From an initial guess init_xs,init_us (feasible or not), iterate "
@@ -138,6 +142,24 @@ struct SolverAbstractVisitor
              "Each iteration, the solver calls these set of functions in order "
              "to allowed user the diagnostic of the its performance.\n"
              ":param callbacks: set of callback functions.")
+        .def("increaseRegularization",
+             pure_virtual(&Model::increaseRegularization), bp::args("self"),
+             "Increase the state and control regularization values by a "
+             "regfactor_.")
+        .def("decreaseRegularization",
+             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
+             "Decrease the state and control regularization values by a "
+             "regfactor_.")
+        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
+             bp::args("self"),
+             "Update the candidate solution: cost, feasibilities, and merit "
+             "value.")
+        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
+             bp::args("self"),
+             "Check if the current step should be accepted.")
+        .def("updateMeritFunction",
+             pure_virtual(&Model::updateMeritFunction), bp::args("self"),
+             "Update the merit function value for the current guess.")
         .def("getCallbacks", &Model::getCallbacks,
              bp::return_value_policy<bp::copy_const_reference>(),
              bp::args("self"),

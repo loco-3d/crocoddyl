@@ -104,14 +104,9 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual ~SolverFDDPTpl() = default;
 
   /**
-   * @copybrief SolverAbstract::solve
+   * @brief Update the merit function value for the current guess
    */
-  virtual bool solve(
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar init_reg =
-          std::numeric_limits<Scalar>::quiet_NaN()) override;
+  virtual void updateMeritFunction() override;
 
   /**
    * @copybrief SolverAbstract::computeDirection
@@ -151,7 +146,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    *
    * @return True if we should accept the step. False otherwise
    */
-  virtual bool checkAcceptance();
+  virtual bool checkAcceptance() override;
 
   /**
    * @copybrief SolverAbstract::stoppingCriteria
@@ -355,18 +350,18 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * @brief Increase the state and control regularization values by a
    * `regfactor_` factor
    */
-  void increaseRegularization();
+  void increaseRegularization() override;
 
   /**
    * @brief Decrease the state and control regularization values by a
    * `regfactor_` factor
    */
-  void decreaseRegularization();
+  void decreaseRegularization() override;
 
   /**
    * @brief Update the candidate solution: cost, feasibilities, and merit value
    */
-  void updateCandidate();
+  void updateCandidate() override;
 
   /**
    * @brief Cast the FDDP solver to a different scalar type.
@@ -721,38 +716,14 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 
   DynamicsSolverType dyn_solver_;   //!< Type of dynamics solver
   EqualitySolverType term_solver_;  //!< Type of terminal solver
-  std::vector<Scalar>
-      alphas_;  //!< Set of step lengths using by the line-search procedure
   Scalar reg_incfactor_;  //!< Regularization factor used to increase the
                           //!< damping value
   Scalar reg_decfactor_;  //!< Regularization factor used to decrease the
                           //!< damping value
-  Scalar reg_min_;        //!< Minimum allowed regularization value
-  Scalar reg_max_;        //!< Maximum allowed regularization value
   Scalar th_grad_;  //!< Tolerance of the expected gradient used for testing the
                     //!< step
   Scalar th_noimprovement_;  //!< Threshold used to accept steps that cannot be
                              //!< be improved due to numerical errors
-  Scalar
-      th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  Scalar
-      th_stepinc_;  //!< Step-length threshold used to increase regularization
-  Scalar th_minimprove_;     //!< Minimum improvement threshold used in the
-                             //!< regularization scheme
-  Scalar th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
-                             //!< direction
-  Scalar th_acceptminstep_;  //!< Threshold used for accepting step along with a
-                             //!< minimum length
-  Scalar rho_;         //!< Parameter used in the merit function to predict the
-                       //!< expected reduction
-  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
-  Scalar
-      upsilon_;  //!< Estimated penalty parameter that balances relative
-                 //!< contribution of the cost function and equality constraints
-  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
-                              //!< decrease its value
-  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
-                       //!< (upsilon) to zero when solve is called.
   std::vector<std::size_t> Ts_;  //!< Index that describes the hybrid shoots
 
   // allocate data
@@ -805,7 +776,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
       Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each
               //!< running node
 
-  std::size_t nh_T_;      //!< Dimension of terminal constraints
   std::size_t dHc_rank_;  //!< Rank of the Jacobian of the terminal constraint
   std::vector<MatrixXs>
       Vxc_;  //!< Gradient of the Value function \f$\mathbf{V_{xc}}\f$
@@ -848,6 +818,20 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
       "Do not use this member",
       Scalar dv_;)  //!< Internal data for computing the expected improvement
 
+  using SolverAbstract::alphas_;
+  using SolverAbstract::reg_min_;
+  using SolverAbstract::reg_max_;
+  using SolverAbstract::th_stepdec_;
+  using SolverAbstract::th_stepinc_;
+  using SolverAbstract::th_minimprove_;
+  using SolverAbstract::th_acceptnegstep_;
+  using SolverAbstract::th_acceptminstep_;
+  using SolverAbstract::rho_;
+  using SolverAbstract::th_minfeas_;
+  using SolverAbstract::upsilon_;
+  using SolverAbstract::upsilon_decfactor_;
+  using SolverAbstract::zero_upsilon_;
+  using SolverAbstract::nh_T_;
   using SolverAbstract::callbacks_;
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
@@ -882,9 +866,9 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
 
+  using SolverAbstract::acceptstep_;
+  using SolverAbstract::recalcdir_;
  private:
-  bool acceptstep_;
-  bool recalcdir_;
 };
 
 }  // namespace crocoddyl

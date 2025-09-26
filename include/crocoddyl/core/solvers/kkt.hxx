@@ -323,6 +323,17 @@ void SolverKKTTpl<Scalar>::decreaseRegularization() {
 }
 
 template <typename Scalar>
+void SolverKKTTpl<Scalar>::updateCandidate() {}
+
+template <typename Scalar>
+bool SolverKKTTpl<Scalar>::checkAcceptance() {
+  return true;
+}
+
+template <typename Scalar>
+void SolverKKTTpl<Scalar>::updateMeritFunction() {}
+
+template <typename Scalar>
 void SolverKKTTpl<Scalar>::allocateData() {
   const std::size_t T = problem_->get_T();
   dxs_.resize(T + 1);

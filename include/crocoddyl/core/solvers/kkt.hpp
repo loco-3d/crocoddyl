@@ -45,6 +45,11 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;
   virtual const Vector2s& expectedImprovement() override;
+  virtual void increaseRegularization() override;
+  virtual void decreaseRegularization() override;
+  virtual void updateCandidate() override;
+  virtual bool checkAcceptance() override;
+  virtual void updateMeritFunction() override;
 
   /**
    * @brief Cast the KKT solver to a different scalar type.
@@ -132,8 +137,6 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
  private:
   Scalar calcDiff();
   void computePrimalDual();
-  void increaseRegularization();
-  void decreaseRegularization();
 
   std::size_t nx_;
   std::size_t ndx_;

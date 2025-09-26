@@ -65,11 +65,18 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstractTpl_wrap() = default;
 
-  bool solve(const std::vector<VectorXs>& init_xs,
-             const std::vector<VectorXs>& init_us, const std::size_t maxiter,
-             const bool is_feasible, const Scalar reg_init) override {
-    return bp::call<bool>(this->get_override("solve").ptr(), init_xs, init_us,
-                          maxiter, is_feasible, reg_init);
+  bool solve(
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init =
+          std::numeric_limits<Scalar>::quiet_NaN()) override {
+    if (bp::override solve = this->get_override("solve")) {
+      return bp::call<bool>(solve.ptr(), init_xs, init_us, maxiter,
+                            is_feasible, reg_init);
+    }
+    return this->SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
+                                       reg_init);
   }
 
   void computeDirection(const bool recalc = true) override {
@@ -85,11 +92,40 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     return stop_;
   }
 
+  void increaseRegularization() override {
+    bp::call<void>(this->get_override("increaseRegularization").ptr());
+  }
+
+  void decreaseRegularization() override {
+    bp::call<void>(this->get_override("decreaseRegularization").ptr());
+  }
+
+  void updateCandidate() override {
+    bp::call<void>(this->get_override("updateCandidate").ptr());
+  }
+
+  bool checkAcceptance() override {
+    return bp::call<bool>(this->get_override("checkAcceptance").ptr());
+  }
+
+  void updateMeritFunction() override {
+    bp::call<void>(this->get_override("updateMeritFunction").ptr());
+  }
+
   const Vector2s& expectedImprovement() override {
     bp::list exp_impr =
         bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
     d_ << bp::extract<Scalar>(exp_impr[0]), bp::extract<Scalar>(exp_impr[1]);
     return d_;
+  }
+
+  bool default_solve(
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN()) {
+    return this->SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
+                                       reg_init);
   }
 
   void allocateData() { SolverAbstract::allocateData(); }
