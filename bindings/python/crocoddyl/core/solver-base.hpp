@@ -72,8 +72,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
       const Scalar reg_init =
           std::numeric_limits<Scalar>::quiet_NaN()) override {
     if (bp::override solve = this->get_override("solve")) {
-      return bp::call<bool>(solve.ptr(), init_xs, init_us, maxiter,
-                            is_feasible, reg_init);
+      return bp::call<bool>(solve.ptr(), init_xs, init_us, maxiter, is_feasible,
+                            reg_init);
     }
     return this->SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
                                        reg_init);
@@ -113,9 +113,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   const Vector2s& expectedImprovement() override {
-    bp::list exp_impr =
-        bp::call<bp::list>(this->get_override("expectedImprovement").ptr());
-    d_ << bp::extract<Scalar>(exp_impr[0]), bp::extract<Scalar>(exp_impr[1]);
+    d_ << bp::call<Eigen::Matrix<Scalar, 2, 1>>(
+        this->get_override("expectedImprovement").ptr());
     return d_;
   }
 
@@ -129,14 +128,6 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   void allocateData() { SolverAbstract::allocateData(); }
-
-  bp::list expectedImprovement_wrap() {
-    expectedImprovement();
-    bp::list exp_impr;
-    exp_impr.append(d_[0]);
-    exp_impr.append(d_[1]);
-    return exp_impr;
-  }
 
   template <typename NewScalar>
   SolverAbstractTpl_wrap<NewScalar> cast() const {
