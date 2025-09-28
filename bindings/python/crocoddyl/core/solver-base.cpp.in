@@ -65,11 +65,13 @@ struct SolverAbstractVisitor
         .def(
             "tryStep", pure_virtual(&Model::tryStep),
             (bp::args("stepLength") = Scalar(1.)),
-            "Try a predefined step length and compute its cost and merit improvements.\n\n"
+            "Try a predefined step length and compute its cost and merit "
+            "improvements.\n\n"
             "It uses the search direction found by computeDirection to try a "
             "determined step length; so you need to first run "
             "computeDirection. Additionally it returns the cost improvement "
-            "along the predefined step length. Internally, it updates the cost improvement dV and merit improvement dPhi.\n"
+            "along the predefined step length. Internally, it updates the cost "
+            "improvement dV and merit improvement dPhi.\n"
             ":param stepLength: step length (default 1).\n"
             ":returns the cost improvement.")
         .def("stoppingCriteria", pure_virtual(&Model::stoppingCriteria),
@@ -90,10 +92,10 @@ struct SolverAbstractVisitor
              "For computing the expected improvement, you need to compute "
              "first the search direction by running computeDirection.")
         .def("updateMeritFunction",
-             pure_virtual(&Model::updateMeritFunction), bp::args("self"),
-             "Update the merit function value for the current guess.")
-        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
-             bp::args("self"),
+             &Model::updateMeritFunction, &Model::default_updateMeritFunction,
+             bp::args("self"), "Update the merit function value for the current guess.")
+        .def("checkAcceptance", &Model::checkAcceptance,
+             &Model::default_checkAcceptance, bp::args("self"),
              "Check if the current step should be accepted.\n\n"
              ":return true if we accept the step, otherwise false")
         .def("allocateData", &Model::allocateData, bp::args("self"),
@@ -110,22 +112,26 @@ struct SolverAbstractVisitor
                  ":param us: control trajectory of T elements (default []).\n"
                  ":param isFeasible: true if the xs are obtained from "
                  "integrating the us (rollout)."))
-        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
-             bp::args("self"),
+        .def("updateCandidate", &Model::updateCandidate,
+             &Model::default_updateCandidate, bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
              "value.")
         .def("increaseRegularizationCriteria",
-             &Model::increaseRegularizationCriteria, &Model::default_increaseRegularizationCriteria, bp::args("self"),
+             &Model::increaseRegularizationCriteria,
+             &Model::default_increaseRegularizationCriteria, bp::args("self"),
              "Criteria used to increase regularization")
         .def("decreaseRegularizationCriteria",
-             &Model::decreaseRegularizationCriteria, &Model::default_decreaseRegularizationCriteria, bp::args("self"),
+             &Model::decreaseRegularizationCriteria,
+             &Model::default_decreaseRegularizationCriteria, bp::args("self"),
              "Criteria used to decrease regularization")
         .def("increaseRegularization",
-             pure_virtual(&Model::increaseRegularization), bp::args("self"),
+             &Model::increaseRegularization,
+             &Model::default_increaseRegularization, bp::args("self"),
              "Increase the state and control regularization values by a "
              "regfactor_.")
         .def("decreaseRegularization",
-             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
+             &Model::decreaseRegularization,
+             &Model::default_decreaseRegularization, bp::args("self"),
              "Decrease the state and control regularization values by a "
              "regfactor_.")
         .def(

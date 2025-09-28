@@ -197,6 +197,17 @@ void SolverAbstractTpl<Scalar>::setCandidate(
 }
 
 template <typename Scalar>
+void SolverAbstractTpl<Scalar>::updateMeritFunction() {}
+
+template <typename Scalar>
+bool SolverAbstractTpl<Scalar>::checkAcceptance() {
+  return true;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::updateCandidate() {}
+
+template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::increaseRegularizationCriteria() {
   return false;
 }
@@ -205,6 +216,12 @@ template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::decreaseRegularizationCriteria() {
   return false;
 }
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::increaseRegularization() {}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::decreaseRegularization() {}
 
 template <typename Scalar>
 void SolverAbstractTpl<Scalar>::resizeData() {

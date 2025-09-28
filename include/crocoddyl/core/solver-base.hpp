@@ -176,14 +176,14 @@ class SolverAbstractTpl : public SolverBase {
   /**
    * @brief Update the merit function value for the current guess
    */
-  virtual void updateMeritFunction() = 0;
+  virtual void updateMeritFunction();
 
   /**
    * @brief Check if we should accept or not the step
    *
    * @return True if we should accept the step. False otherwise
    */
-  virtual bool checkAcceptance() = 0;
+  virtual bool checkAcceptance();
 
   /**
    * @brief Set the solver candidate trajectories
@@ -209,7 +209,7 @@ class SolverAbstractTpl : public SolverBase {
   /**
    * @brief Update the candidate solution: cost, feasibilities, and merit value
    */
-  virtual void updateCandidate() = 0;
+  virtual void updateCandidate();
 
   /**
    * @brief Criteria used to decrease regularization
@@ -225,13 +225,13 @@ class SolverAbstractTpl : public SolverBase {
    * @brief Increase the state and control regularization values by a
    * `regfactor_` factor
    */
-  virtual void increaseRegularization() = 0;
+  virtual void increaseRegularization();
 
   /**
    * @brief Decrease the state and control regularization values by a
    * `regfactor_` factor
    */
-  virtual void decreaseRegularization() = 0;
+  virtual void decreaseRegularization();
 
   /**
    * @brief Resizing the solver data

@@ -305,35 +305,6 @@ void SolverKKTTpl<Scalar>::computePrimalDual() {
 }
 
 template <typename Scalar>
-void SolverKKTTpl<Scalar>::increaseRegularization() {
-  preg_ *= reg_incfactor_;
-  if (preg_ > reg_max_) {
-    preg_ = reg_max_;
-  }
-  dreg_ = preg_;
-}
-
-template <typename Scalar>
-void SolverKKTTpl<Scalar>::decreaseRegularization() {
-  preg_ /= reg_decfactor_;
-  if (preg_ < reg_min_) {
-    preg_ = reg_min_;
-  }
-  dreg_ = preg_;
-}
-
-template <typename Scalar>
-void SolverKKTTpl<Scalar>::updateCandidate() {}
-
-template <typename Scalar>
-bool SolverKKTTpl<Scalar>::checkAcceptance() {
-  return true;
-}
-
-template <typename Scalar>
-void SolverKKTTpl<Scalar>::updateMeritFunction() {}
-
-template <typename Scalar>
 void SolverKKTTpl<Scalar>::allocateData() {
   const std::size_t T = problem_->get_T();
   dxs_.resize(T + 1);

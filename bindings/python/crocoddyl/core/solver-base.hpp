@@ -99,15 +99,25 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   void updateMeritFunction() override {
-    bp::call<void>(this->get_override("updateMeritFunction").ptr());
+    if (bp::override updateMeritFunction =
+            this->get_override("updateMeritFunction")) {
+      return bp::call<void>(updateMeritFunction.ptr());
+    }
+    return this->SolverAbstract::updateMeritFunction();
   }
 
   bool checkAcceptance() override {
-    return bp::call<bool>(this->get_override("checkAcceptance").ptr());
+    if (bp::override checkAcceptance = this->get_override("checkAcceptance")) {
+      return bp::call<bool>(checkAcceptance.ptr());
+    }
+    return this->SolverAbstract::checkAcceptance();
   }
 
   void updateCandidate() override {
-    bp::call<void>(this->get_override("updateCandidate").ptr());
+    if (bp::override updateCandidate = this->get_override("updateCandidate")) {
+      return bp::call<void>(updateCandidate.ptr());
+    }
+    return this->SolverAbstract::updateCandidate();
   }
 
   bool increaseRegularizationCriteria() override {
@@ -127,11 +137,18 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   void increaseRegularization() override {
-    bp::call<void>(this->get_override("increaseRegularization").ptr());
+    if (bp::override increaseRegularization =
+            this->get_override("increaseRegularization")) {
+      return bp::call<void>(increaseRegularization.ptr());
+    }
+    return this->SolverAbstract::increaseRegularization();
   }
 
   void decreaseRegularization() override {
-    bp::call<void>(this->get_override("decreaseRegularization").ptr());
+    if (bp::override decreaseRegularization =
+            this->get_override("decreaseRegularization")) {
+      return bp::call<void>(decreaseRegularization.ptr());
+    }
   }
 
   bool default_solve(
@@ -143,12 +160,32 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
                                        reg_init);
   }
 
+  void default_updateMeritFunction() {
+    return this->SolverAbstract::updateMeritFunction();
+  }
+
+  bool default_checkAcceptance() {
+    return this->SolverAbstract::checkAcceptance();
+  }
+
+  void default_updateCandidate() {
+    return this->SolverAbstract::updateCandidate();
+  }
+
   bool default_increaseRegularizationCriteria() {
     return this->SolverAbstract::increaseRegularizationCriteria();
   }
 
   bool default_decreaseRegularizationCriteria() {
     return this->SolverAbstract::decreaseRegularizationCriteria();
+  }
+
+  void default_increaseRegularization() {
+    return this->SolverAbstract::increaseRegularization();
+  }
+
+  void default_decreaseRegularization() {
+    return this->SolverAbstract::decreaseRegularization();
   }
 
   void allocateData() { SolverAbstract::allocateData(); }

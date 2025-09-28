@@ -56,11 +56,6 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
       const std::size_t maxiter = 100, const bool is_feasible = false,
       const Scalar reg_init = Scalar(1e-9)) override;
   virtual void resizeData() override;
-  virtual void increaseRegularization() override;
-  virtual void decreaseRegularization() override;
-  virtual void updateCandidate() override;
-  virtual bool checkAcceptance() override;
-  virtual void updateMeritFunction() override;
 
   /**
    * @brief Set a string ipopt option
