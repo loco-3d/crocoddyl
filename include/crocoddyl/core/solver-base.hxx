@@ -123,6 +123,79 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
 }
 
 template <typename Scalar>
+void SolverAbstractTpl<Scalar>::setCandidate(
+    const std::vector<VectorXs>& xs_warm, const std::vector<VectorXs>& us_warm,
+    bool is_feasible) {
+  START_PROFILER("SolverAbstract::setCandidate");
+  const std::size_t T = problem_->get_T();
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
+      problem_->get_runningModels();
+  if (xs_warm.size() == 0) {
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      xs_[t] = model->get_state()->zero();
+    }
+    xs_.back() = problem_->get_terminalModel()->get_state()->zero();
+  } else {
+    if (xs_warm.size() != T + 1) {
+      throw_pretty("Warm start state vector has wrong dimension, got "
+                   << xs_warm.size() << " expecting " << (T + 1));
+    }
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::size_t nx = models[t]->get_state()->get_nx();
+      if (static_cast<std::size_t>(xs_warm[t].size()) != nx) {
+        throw_pretty("Invalid argument: "
+                     << "xs_init[" + std::to_string(t) +
+                            "] has wrong dimension ("
+                     << xs_warm[t].size()
+                     << " provided - it should be equal to " +
+                            std::to_string(nx) + "). ActionModel: "
+                     << *models[t]);
+      }
+    }
+    const std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
+    if (static_cast<std::size_t>(xs_warm[T].size()) != nx) {
+      throw_pretty("Invalid argument: "
+                   << "xs_init[" + std::to_string(T) +
+                          "] (terminal state) has wrong dimension ("
+                   << xs_warm[T].size()
+                   << " provided - it should be equal to " +
+                          std::to_string(nx) + "). ActionModel: "
+                   << *problem_->get_terminalModel());
+    }
+    std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
+  }
+  if (us_warm.size() == 0) {
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::size_t nu = model->get_nu();
+      us_[t] = VectorXs::Zero(nu);
+    }
+  } else {
+    if (us_warm.size() != T) {
+      throw_pretty("Warm start control has wrong dimension, got "
+                   << us_warm.size() << " expecting " << T);
+    }
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      const std::size_t nu = model->get_nu();
+      if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
+        throw_pretty("Invalid argument: "
+                     << "us_init[" + std::to_string(t) +
+                            "] has wrong dimension ("
+                     << us_warm[t].size()
+                     << " provided - it should be equal to " +
+                            std::to_string(nu) + "). ActionModel: "
+                     << *model);
+      }
+    }
+    std::copy(us_warm.begin(), us_warm.end(), us_.begin());
+  }
+  is_feasible_ = is_feasible;
+  STOP_PROFILER("SolverAbstract::setCandidate");
+}
+
+template <typename Scalar>
 void SolverAbstractTpl<Scalar>::resizeData() {
   START_PROFILER("SolverAbstract::resizeData");
   resizeRunningData();
@@ -302,79 +375,6 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
   }
   STOP_PROFILER("SolverAbstract::computeEqualityFeasibility");
   return tmp_feas_;
-}
-
-template <typename Scalar>
-void SolverAbstractTpl<Scalar>::setCandidate(
-    const std::vector<VectorXs>& xs_warm, const std::vector<VectorXs>& us_warm,
-    bool is_feasible) {
-  START_PROFILER("SolverAbstract::setCandidate");
-  const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
-      problem_->get_runningModels();
-  if (xs_warm.size() == 0) {
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::shared_ptr<ActionModelAbstract>& model = models[t];
-      xs_[t] = model->get_state()->zero();
-    }
-    xs_.back() = problem_->get_terminalModel()->get_state()->zero();
-  } else {
-    if (xs_warm.size() != T + 1) {
-      throw_pretty("Warm start state vector has wrong dimension, got "
-                   << xs_warm.size() << " expecting " << (T + 1));
-    }
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::size_t nx = models[t]->get_state()->get_nx();
-      if (static_cast<std::size_t>(xs_warm[t].size()) != nx) {
-        throw_pretty("Invalid argument: "
-                     << "xs_init[" + std::to_string(t) +
-                            "] has wrong dimension ("
-                     << xs_warm[t].size()
-                     << " provided - it should be equal to " +
-                            std::to_string(nx) + "). ActionModel: "
-                     << *models[t]);
-      }
-    }
-    const std::size_t nx = problem_->get_terminalModel()->get_state()->get_nx();
-    if (static_cast<std::size_t>(xs_warm[T].size()) != nx) {
-      throw_pretty("Invalid argument: "
-                   << "xs_init[" + std::to_string(T) +
-                          "] (terminal state) has wrong dimension ("
-                   << xs_warm[T].size()
-                   << " provided - it should be equal to " +
-                          std::to_string(nx) + "). ActionModel: "
-                   << *problem_->get_terminalModel());
-    }
-    std::copy(xs_warm.begin(), xs_warm.end(), xs_.begin());
-  }
-  if (us_warm.size() == 0) {
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::shared_ptr<ActionModelAbstract>& model = models[t];
-      const std::size_t nu = model->get_nu();
-      us_[t] = VectorXs::Zero(nu);
-    }
-  } else {
-    if (us_warm.size() != T) {
-      throw_pretty("Warm start control has wrong dimension, got "
-                   << us_warm.size() << " expecting " << T);
-    }
-    for (std::size_t t = 0; t < T; ++t) {
-      const std::shared_ptr<ActionModelAbstract>& model = models[t];
-      const std::size_t nu = model->get_nu();
-      if (static_cast<std::size_t>(us_warm[t].size()) != nu) {
-        throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) +
-                            "] has wrong dimension ("
-                     << us_warm[t].size()
-                     << " provided - it should be equal to " +
-                            std::to_string(nu) + "). ActionModel: "
-                     << *model);
-      }
-    }
-    std::copy(us_warm.begin(), us_warm.end(), us_.begin());
-  }
-  is_feasible_ = is_feasible;
-  STOP_PROFILER("SolverAbstract::setCandidate");
 }
 
 template <typename Scalar>

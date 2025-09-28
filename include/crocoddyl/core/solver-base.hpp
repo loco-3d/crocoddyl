@@ -173,6 +173,56 @@ class SolverAbstractTpl : public SolverBase {
   virtual const Vector2s& expectedImprovement() = 0;
 
   /**
+   * @brief Update the merit function value for the current guess
+   */
+  virtual void updateMeritFunction() = 0;
+
+  /**
+   * @brief Check if we should accept or not the step
+   *
+   * @return True if we should accept the step. False otherwise
+   */
+  virtual bool checkAcceptance() = 0;
+
+  /**
+   * @brief Set the solver candidate trajectories
+   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
+   *
+   * The solver candidates are defined as a state and control trajectories
+   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
+   * respectively. Additionally, we need to define the dynamic feasibility of
+   * the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ pair. Note that the trajectories are
+   * feasible if \f$\mathbf{x}_s\f$ is the resulting trajectory from the system
+   * rollout with \f$\mathbf{u}_s\f$ inputs.
+   *
+   * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
+   * @param[in] us          control trajectory of \f$T\f$ elements (default [])
+   * @param[in] isFeasible  true if the \p xs are obtained from integrating the
+   * \p us (rollout)
+   */
+  void setCandidate(
+      const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
+      const bool is_feasible = false);
+
+  /**
+   * @brief Update the candidate solution: cost, feasibilities, and merit value
+   */
+  virtual void updateCandidate() = 0;
+
+  /**
+   * @brief Increase the state and control regularization values by a
+   * `regfactor_` factor
+   */
+  virtual void increaseRegularization() = 0;
+
+  /**
+   * @brief Decrease the state and control regularization values by a
+   * `regfactor_` factor
+   */
+  virtual void decreaseRegularization() = 0;
+
+  /**
    * @brief Resizing the solver data
    *
    * If the shooting problem has changed after construction, then this function
@@ -232,27 +282,6 @@ class SolverAbstractTpl : public SolverBase {
   Scalar computeEqualityFeasibility();
 
   /**
-   * @brief Set the solver candidate trajectories
-   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
-   *
-   * The solver candidates are defined as a state and control trajectories
-   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
-   * respectively. Additionally, we need to define the dynamic feasibility of
-   * the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ pair. Note that the trajectories are
-   * feasible if \f$\mathbf{x}_s\f$ is the resulting trajectory from the system
-   * rollout with \f$\mathbf{u}_s\f$ inputs.
-   *
-   * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
-   * @param[in] us          control trajectory of \f$T\f$ elements (default [])
-   * @param[in] isFeasible  true if the \p xs are obtained from integrating the
-   * \p us (rollout)
-   */
-  void setCandidate(
-      const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
-      const bool is_feasible = false);
-
-  /**
    * @brief Set a list of callback functions using for the solver diagnostic
    *
    * Each iteration, the solver calls these set of functions in order to allowed
@@ -262,35 +291,6 @@ class SolverAbstractTpl : public SolverBase {
    */
   void setCallbacks(
       const std::vector<std::shared_ptr<CallbackAbstract>>& callbacks);
-
-  /**
-   * @brief Increase the state and control regularization values by a
-   * `regfactor_` factor
-   */
-  virtual void increaseRegularization() = 0;
-
-  /**
-   * @brief Decrease the state and control regularization values by a
-   * `regfactor_` factor
-   */
-  virtual void decreaseRegularization() = 0;
-
-  /**
-   * @brief Update the candidate solution: cost, feasibilities, and merit value
-   */
-  virtual void updateCandidate() = 0;
-
-  /**
-   * @brief Check if we should accept or not the step
-   *
-   * @return True if we should accept the step. False otherwise
-   */
-  virtual bool checkAcceptance() = 0;
-
-  /**
-   * @brief Update the merit function value for the current guess
-   */
-  virtual void updateMeritFunction() = 0;
 
   /**
    * @brief Return the list of callback functions using for diagnostic
@@ -559,34 +559,16 @@ class SolverAbstractTpl : public SolverBase {
       callbacks_;  //!< Callback functions
   std::vector<Scalar>
       alphas_;  //!< Set of step lengths using by the line-search procedure
-  Scalar th_acceptstep_;  //!< Threshold used for accepting step
-  Scalar th_stop_;        //!< Tolerance for stopping the algorithm
-  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
-             Scalar th_gaptol_;)   //!< Threshold limit to check non-zero gaps
-  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
-                                   //!< dynamics and constraints feasibility
-  Scalar reg_min_;                 //!< Minimum allowed regularization value
-  Scalar reg_max_;                 //!< Maximum allowed regularization value
-  Scalar
-      th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  Scalar
-      th_stepinc_;  //!< Step-length threshold used to increase regularization
-  Scalar th_minimprove_;     //!< Minimum improvement threshold used in the
-                             //!< regularization scheme
+  Scalar th_acceptstep_;     //!< Threshold used for accepting step
+  Scalar th_stop_;           //!< Tolerance for stopping the algorithm
   Scalar th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
                              //!< direction
   Scalar th_acceptminstep_;  //!< Threshold used for accepting step along with a
                              //!< minimum length
-  Scalar rho_;         //!< Parameter used in the merit function to predict the
-                       //!< expected reduction
-  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
-  Scalar
-      upsilon_;  //!< Estimated penalty parameter that balances relative
-                 //!< contribution of the cost function and equality constraints
-  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
-                              //!< decrease its value
-  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
-                       //!< (upsilon) to zero when solve is called.
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             Scalar th_gaptol_;)   //!< Threshold limit to check non-zero gaps
+  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
+                                   //!< dynamics and constraints feasibility
 
   // allocate data
   Scalar dImpr_;  //!< Reduction in the iteration improvement (i.e., maximum
@@ -639,10 +621,28 @@ class SolverAbstractTpl : public SolverBase {
   DEPRECATED("Use preg_ for primal-variable regularization",
              Scalar xreg_;)  //!< Current state regularization value
   DEPRECATED("Use dreg_ for primal-variable regularization",
-             Scalar ureg_;)      //!< Current control regularization values
+             Scalar ureg_;)  //!< Current control regularization values
+  Scalar reg_min_;           //!< Minimum allowed regularization value
+  Scalar reg_max_;           //!< Maximum allowed regularization value
+  Scalar
+      th_stepdec_;  //!< Step-length threshold used to decrease regularization
+  Scalar
+      th_stepinc_;  //!< Step-length threshold used to increase regularization
+  Scalar th_minimprove_;         //!< Minimum improvement threshold used in the
+                                 //!< regularization scheme
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
-  std::size_t nh_T_;             //!< Dimension of terminal constraints
+  Scalar rho_;         //!< Parameter used in the merit function to predict the
+                       //!< expected reduction
+  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
+  Scalar
+      upsilon_;  //!< Estimated penalty parameter that balances relative
+                 //!< contribution of the cost function and equality constraints
+  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
+                              //!< decrease its value
+  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
+                       //!< (upsilon) to zero when solve is called.
+  std::size_t nh_T_;   //!< Dimension of terminal constraints
 
   bool acceptstep_;
   bool recalcdir_;

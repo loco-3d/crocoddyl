@@ -89,6 +89,13 @@ struct SolverAbstractVisitor
              "direction.\n\n"
              "For computing the expected improvement, you need to compute "
              "first the search direction by running computeDirection.")
+        .def("updateMeritFunction",
+             pure_virtual(&Model::updateMeritFunction), bp::args("self"),
+             "Update the merit function value for the current guess.")
+        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
+             bp::args("self"),
+             "Check if the current step should be accepted.\n\n"
+             ":return true if we accept the step, otherwise false")
         .def("allocateData", &Model::allocateData, bp::args("self"),
              "Allocate the data used by the solver.")
         .def("setCandidate", &Model::setCandidate,
@@ -103,6 +110,18 @@ struct SolverAbstractVisitor
                  ":param us: control trajectory of T elements (default []).\n"
                  ":param isFeasible: true if the xs are obtained from "
                  "integrating the us (rollout)."))
+        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
+             bp::args("self"),
+             "Update the candidate solution: cost, feasibilities, and merit "
+             "value.")
+        .def("increaseRegularization",
+             pure_virtual(&Model::increaseRegularization), bp::args("self"),
+             "Increase the state and control regularization values by a "
+             "regfactor_.")
+        .def("decreaseRegularization",
+             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
+             "Decrease the state and control regularization values by a "
+             "regfactor_.")
         .def(
             "computeFeasibility", &Model::computeFeasibility, bp::args("self"),
             "Compute the feasibility from a given residual vector.\n\n"
@@ -143,24 +162,6 @@ struct SolverAbstractVisitor
              "Each iteration, the solver calls these set of functions in order "
              "to allowed user the diagnostic of the its performance.\n"
              ":param callbacks: set of callback functions.")
-        .def("increaseRegularization",
-             pure_virtual(&Model::increaseRegularization), bp::args("self"),
-             "Increase the state and control regularization values by a "
-             "regfactor_.")
-        .def("decreaseRegularization",
-             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
-             "Decrease the state and control regularization values by a "
-             "regfactor_.")
-        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
-             bp::args("self"),
-             "Update the candidate solution: cost, feasibilities, and merit "
-             "value.")
-        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
-             bp::args("self"),
-             "Check if the current step should be accepted.")
-        .def("updateMeritFunction",
-             pure_virtual(&Model::updateMeritFunction), bp::args("self"),
-             "Update the merit function value for the current guess.")
         .def("getCallbacks", &Model::getCallbacks,
              bp::return_value_policy<bp::copy_const_reference>(),
              bp::args("self"),

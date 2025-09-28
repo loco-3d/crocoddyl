@@ -92,30 +92,30 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     return stop_;
   }
 
-  void increaseRegularization() override {
-    bp::call<void>(this->get_override("increaseRegularization").ptr());
-  }
-
-  void decreaseRegularization() override {
-    bp::call<void>(this->get_override("decreaseRegularization").ptr());
-  }
-
-  void updateCandidate() override {
-    bp::call<void>(this->get_override("updateCandidate").ptr());
-  }
-
-  bool checkAcceptance() override {
-    return bp::call<bool>(this->get_override("checkAcceptance").ptr());
+  const Vector2s& expectedImprovement() override {
+    d_ << bp::call<Eigen::Matrix<Scalar, 2, 1>>(
+        this->get_override("expectedImprovement").ptr());
+    return d_;
   }
 
   void updateMeritFunction() override {
     bp::call<void>(this->get_override("updateMeritFunction").ptr());
   }
 
-  const Vector2s& expectedImprovement() override {
-    d_ << bp::call<Eigen::Matrix<Scalar, 2, 1>>(
-        this->get_override("expectedImprovement").ptr());
-    return d_;
+  bool checkAcceptance() override {
+    return bp::call<bool>(this->get_override("checkAcceptance").ptr());
+  }
+
+  void updateCandidate() override {
+    bp::call<void>(this->get_override("updateCandidate").ptr());
+  }
+
+  void increaseRegularization() override {
+    bp::call<void>(this->get_override("increaseRegularization").ptr());
+  }
+
+  void decreaseRegularization() override {
+    bp::call<void>(this->get_override("decreaseRegularization").ptr());
   }
 
   bool default_solve(
