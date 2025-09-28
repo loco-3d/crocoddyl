@@ -64,7 +64,7 @@ struct SolverAbstractVisitor
              "lists of T+1, T and T+1 lengths.")
         .def(
             "tryStep", pure_virtual(&Model::tryStep),
-            bp::args("self", "stepLength"),
+            (bp::args("stepLength") = Scalar(1.)),
             "Try a predefined step length and compute its cost improvement.\n\n"
             "It uses the search direction found by computeDirection to try a "
             "determined step length; so you need to first run "
@@ -171,6 +171,13 @@ struct SolverAbstractVisitor
                           &Model::get_problem,
                           bp::return_value_policy<bp::copy_const_reference>()),
                       "shooting problem")
+        .add_property(
+            "alphas",
+            bp::make_function(
+                &Model::get_alphas,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            bp::make_function(&Model::set_alphas),
+            "list of step length (alpha) values")
         .def_readwrite("xs", &Model::xs_, "state trajectory")
         .def_readwrite("us", &Model::us_, "control sequence")
         .def_readwrite("fs", &Model::fs_, "dynamics gaps")

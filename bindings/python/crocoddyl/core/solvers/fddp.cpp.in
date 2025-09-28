@@ -213,13 +213,6 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  ":param Tshoot: number of shooting nodes used in the "
                  "hybrid-shooting solver (default 0)"))
         .add_property(
-            "alphas",
-            bp::make_function(
-                &Model::get_alphas,
-                bp::return_value_policy<bp::reference_existing_object>()),
-            bp::make_function(&Model::set_alphas),
-            "list of step length (alpha) values")
-        .add_property(
             "reg_incFactor", bp::make_function(&Model::get_reg_incfactor),
             bp::make_function(&Model::set_reg_incfactor),
             "regularization factor used for increasing the damping value.")

@@ -21,7 +21,8 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       th_noimprovement_(
           std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))) {
   nh_T_ = problem->get_terminalModel()->get_nh_T();
-  th_minfeas_ = std::sqrt(std::numeric_limits<Scalar>::epsilon() / (Scalar(1.) - rho_));
+  th_minfeas_ =
+      std::sqrt(std::numeric_limits<Scalar>::epsilon() / (Scalar(1.) - rho_));
   reg_min_ = ScaleNumerics<Scalar>(1e-9);
   reg_max_ = ScaleNumerics<Scalar>(1e9, 1e-4);
   rho_ = Scalar(0.3);
@@ -32,7 +33,7 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
   th_acceptminstep_ = Scalar(0.01);
   upsilon_ = Scalar(0.);
   upsilon_decfactor_ = Scalar(0.5);
-  zero_upsilon_ = false; //TODO: define in abstract
+  zero_upsilon_ = false;  // TODO: define in abstract
   // Allocating the solver's data
   allocateData();
   // Setting the dynamics solver
@@ -1047,11 +1048,6 @@ EqualitySolverType SolverFDDPTpl<Scalar>::get_terminal_solver() const {
 }
 
 template <typename Scalar>
-const std::vector<Scalar>& SolverFDDPTpl<Scalar>::get_alphas() const {
-  return alphas_;
-}
-
-template <typename Scalar>
 Scalar SolverFDDPTpl<Scalar>::get_reg_incfactor() const {
   return reg_incfactor_;
 }
@@ -1249,26 +1245,6 @@ template <typename Scalar>
 const typename MathBaseTpl<Scalar>::VectorXs&
 SolverFDDPTpl<Scalar>::get_beta_plus() const {
   return beta_plus_;
-}
-
-template <typename Scalar>
-void SolverFDDPTpl<Scalar>::set_alphas(const std::vector<Scalar>& alphas) {
-  Scalar prev_alpha = alphas[0];
-  if (prev_alpha != Scalar(1.)) {
-    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
-  }
-  for (std::size_t i = 1; i < alphas.size(); ++i) {
-    Scalar alpha = alphas[i];
-    if (Scalar(0.) >= alpha) {
-      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
-    }
-    if (alpha >= prev_alpha) {
-      throw_pretty(
-          "Invalid argument: " << "alpha values are monotonously decreasing.");
-    }
-    prev_alpha = alpha;
-  }
-  alphas_ = alphas;
 }
 
 template <typename Scalar>

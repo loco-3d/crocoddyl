@@ -20,6 +20,12 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
       iter_(0),
       tmp_feas_(Scalar(0.)) {
   allocateData();
+  // Defining the list of step lengths used in the linear search routine
+  const std::size_t n_alphas = 10;
+  alphas_.resize(n_alphas);
+  for (std::size_t n = 0; n < n_alphas; ++n) {
+    alphas_[n] = Scalar(1.) / pow(Scalar(2.), static_cast<Scalar>(n));
+  }
 }
 
 template <typename Scalar>
@@ -82,7 +88,7 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
         continue;
       }
       dImpr_ = std::max(dV_, dPhi_);
-      checkAcceptance();
+      acceptstep_ = checkAcceptance();
       // Set candidate guess, cost and feasibilities if we accept the step
       if (acceptstep_) {
         setCandidate(xs_try_, us_try_, false);
@@ -456,6 +462,11 @@ SolverAbstractTpl<Scalar>::get_problem() const {
 }
 
 template <typename Scalar>
+const std::vector<Scalar>& SolverAbstractTpl<Scalar>::get_alphas() const {
+  return alphas_;
+}
+
+template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
 SolverAbstractTpl<Scalar>::get_xs() const {
   return xs_;
@@ -610,6 +621,26 @@ FeasibilityNorm SolverAbstractTpl<Scalar>::get_feasnorm() const {
 template <typename Scalar>
 std::size_t SolverAbstractTpl<Scalar>::get_iter() const {
   return iter_;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_alphas(const std::vector<Scalar>& alphas) {
+  Scalar prev_alpha = alphas[0];
+  if (prev_alpha != Scalar(1.)) {
+    std::cerr << "Warning: alpha[0] should be 1" << std::endl;
+  }
+  for (std::size_t i = 1; i < alphas.size(); ++i) {
+    Scalar alpha = alphas[i];
+    if (Scalar(0.) >= alpha) {
+      throw_pretty("Invalid argument: " << "alpha values has to be positive.");
+    }
+    if (alpha >= prev_alpha) {
+      throw_pretty(
+          "Invalid argument: " << "alpha values are monotonously decreasing.");
+    }
+    prev_alpha = alpha;
+  }
+  alphas_ = alphas;
 }
 
 template <typename Scalar>

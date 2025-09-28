@@ -385,11 +385,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   EqualitySolverType get_terminal_solver() const;
 
   /**
-   * @brief Return the set of step lengths using by the line-search procedure
-   */
-  const std::vector<Scalar>& get_alphas() const;
-
-  /**
    * @brief Return the regularization factor used to increase the damping value
    */
   Scalar get_reg_incfactor() const;
@@ -607,11 +602,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   void set_terminal_solver(const EqualitySolverType type);
 
   /**
-   * @brief Modify the set of step lengths using by the line-search procedure
-   */
-  void set_alphas(const std::vector<Scalar>& alphas);
-
-  /**
    * @brief Modify the regularization factor used to increase the damping value
    */
   void set_reg_incfactor(const Scalar reg_factor);
@@ -819,19 +809,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
       Scalar dv_;)  //!< Internal data for computing the expected improvement
 
   using SolverAbstract::alphas_;
-  using SolverAbstract::reg_min_;
-  using SolverAbstract::reg_max_;
-  using SolverAbstract::th_stepdec_;
-  using SolverAbstract::th_stepinc_;
-  using SolverAbstract::th_minimprove_;
-  using SolverAbstract::th_acceptnegstep_;
-  using SolverAbstract::th_acceptminstep_;
-  using SolverAbstract::rho_;
-  using SolverAbstract::th_minfeas_;
-  using SolverAbstract::upsilon_;
-  using SolverAbstract::upsilon_decfactor_;
-  using SolverAbstract::zero_upsilon_;
-  using SolverAbstract::nh_T_;
   using SolverAbstract::callbacks_;
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
@@ -855,19 +832,33 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::hfeas_try_;
   using SolverAbstract::iter_;
   using SolverAbstract::merit_;
+  using SolverAbstract::nh_T_;
   using SolverAbstract::preg_;
   using SolverAbstract::problem_;
+  using SolverAbstract::reg_max_;
+  using SolverAbstract::reg_min_;
+  using SolverAbstract::rho_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
+  using SolverAbstract::th_acceptminstep_;
+  using SolverAbstract::th_acceptnegstep_;
   using SolverAbstract::th_acceptstep_;
+  using SolverAbstract::th_minfeas_;
+  using SolverAbstract::th_minimprove_;
+  using SolverAbstract::th_stepdec_;
+  using SolverAbstract::th_stepinc_;
   using SolverAbstract::th_stop_;
+  using SolverAbstract::upsilon_;
+  using SolverAbstract::upsilon_decfactor_;
   using SolverAbstract::us_;
   using SolverAbstract::us_try_;
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
+  using SolverAbstract::zero_upsilon_;
 
   using SolverAbstract::acceptstep_;
   using SolverAbstract::recalcdir_;
+
  private:
 };
 

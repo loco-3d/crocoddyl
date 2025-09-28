@@ -263,7 +263,7 @@ class SolverAbstractTpl : public SolverBase {
   void setCallbacks(
       const std::vector<std::shared_ptr<CallbackAbstract>>& callbacks);
 
-   /**
+  /**
    * @brief Increase the state and control regularization values by a
    * `regfactor_` factor
    */
@@ -301,6 +301,11 @@ class SolverAbstractTpl : public SolverBase {
    * @brief Return the shooting problem
    */
   const std::shared_ptr<ShootingProblem>& get_problem() const;
+
+  /**
+   * @brief Return the set of step lengths using by the line-search procedure
+   */
+  const std::vector<Scalar>& get_alphas() const;
 
   /**
    * @brief Return the state trajectory \f$\mathbf{x}_s\f$
@@ -474,6 +479,11 @@ class SolverAbstractTpl : public SolverBase {
   std::size_t get_iter() const;
 
   /**
+   * @brief Modify the set of step lengths using by the line-search procedure
+   */
+  void set_alphas(const std::vector<Scalar>& alphas);
+
+  /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
    */
   void set_xs(const std::vector<VectorXs>& xs);
@@ -546,7 +556,7 @@ class SolverAbstractTpl : public SolverBase {
 
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
   std::vector<std::shared_ptr<CallbackAbstract>>
-      callbacks_;         //!< Callback functions
+      callbacks_;  //!< Callback functions
   std::vector<Scalar>
       alphas_;  //!< Set of step lengths using by the line-search procedure
   Scalar th_acceptstep_;  //!< Threshold used for accepting step
@@ -555,8 +565,8 @@ class SolverAbstractTpl : public SolverBase {
              Scalar th_gaptol_;)   //!< Threshold limit to check non-zero gaps
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
                                    //!< dynamics and constraints feasibility
-  Scalar reg_min_;        //!< Minimum allowed regularization value
-  Scalar reg_max_;        //!< Maximum allowed regularization value
+  Scalar reg_min_;                 //!< Minimum allowed regularization value
+  Scalar reg_max_;                 //!< Maximum allowed regularization value
   Scalar
       th_stepdec_;  //!< Step-length threshold used to decrease regularization
   Scalar
@@ -579,8 +589,8 @@ class SolverAbstractTpl : public SolverBase {
                        //!< (upsilon) to zero when solve is called.
 
   // allocate data
-  Scalar dImpr_;      //!< Reduction in the iteration improvement (i.e., maximum
-                      //!< between cost and merit values)
+  Scalar dImpr_;  //!< Reduction in the iteration improvement (i.e., maximum
+                  //!< between cost and merit values)
   std::vector<VectorXs> xs_;  //!< State trajectory
   std::vector<VectorXs> us_;  //!< Control trajectory
   std::vector<VectorXs> fs_;  //!< Dynamics gaps in each node
@@ -632,11 +642,12 @@ class SolverAbstractTpl : public SolverBase {
              Scalar ureg_;)      //!< Current control regularization values
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
-  std::size_t nh_T_;      //!< Dimension of terminal constraints
+  std::size_t nh_T_;             //!< Dimension of terminal constraints
 
   bool acceptstep_;
   bool recalcdir_;
-  private:
+
+ private:
   SolverAbstractTpl() : problem_(nullptr) {}
 };
 
