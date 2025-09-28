@@ -110,6 +110,22 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     bp::call<void>(this->get_override("updateCandidate").ptr());
   }
 
+  bool increaseRegularizationCriteria() override {
+    if (bp::override increaseRegularizationCriteria =
+            this->get_override("increaseRegularizationCriteria")) {
+      return bp::call<bool>(increaseRegularizationCriteria.ptr());
+    }
+    return this->SolverAbstract::increaseRegularizationCriteria();
+  }
+
+  bool decreaseRegularizationCriteria() override {
+    if (bp::override decreaseRegularizationCriteria =
+            this->get_override("decreaseRegularizationCriteria")) {
+      return bp::call<bool>(decreaseRegularizationCriteria.ptr());
+    }
+    return this->SolverAbstract::decreaseRegularizationCriteria();
+  }
+
   void increaseRegularization() override {
     bp::call<void>(this->get_override("increaseRegularization").ptr());
   }
@@ -125,6 +141,14 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
       const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN()) {
     return this->SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
                                        reg_init);
+  }
+
+  bool default_increaseRegularizationCriteria() {
+    return this->SolverAbstract::increaseRegularizationCriteria();
+  }
+
+  bool default_decreaseRegularizationCriteria() {
+    return this->SolverAbstract::decreaseRegularizationCriteria();
   }
 
   void allocateData() { SolverAbstract::allocateData(); }

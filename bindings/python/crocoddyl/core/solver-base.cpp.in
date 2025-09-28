@@ -65,11 +65,11 @@ struct SolverAbstractVisitor
         .def(
             "tryStep", pure_virtual(&Model::tryStep),
             (bp::args("stepLength") = Scalar(1.)),
-            "Try a predefined step length and compute its cost improvement.\n\n"
+            "Try a predefined step length and compute its cost and merit improvements.\n\n"
             "It uses the search direction found by computeDirection to try a "
             "determined step length; so you need to first run "
             "computeDirection. Additionally it returns the cost improvement "
-            "along the predefined step length.\n"
+            "along the predefined step length. Internally, it updates the cost improvement dV and merit improvement dPhi.\n"
             ":param stepLength: step length (default 1).\n"
             ":returns the cost improvement.")
         .def("stoppingCriteria", pure_virtual(&Model::stoppingCriteria),
@@ -114,6 +114,12 @@ struct SolverAbstractVisitor
              bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
              "value.")
+        .def("increaseRegularizationCriteria",
+             &Model::increaseRegularizationCriteria, &Model::default_increaseRegularizationCriteria, bp::args("self"),
+             "Criteria used to increase regularization")
+        .def("decreaseRegularizationCriteria",
+             &Model::decreaseRegularizationCriteria, &Model::default_decreaseRegularizationCriteria, bp::args("self"),
+             "Criteria used to decrease regularization")
         .def("increaseRegularization",
              pure_virtual(&Model::increaseRegularization), bp::args("self"),
              "Increase the state and control regularization values by a "
@@ -239,6 +245,12 @@ struct SolverAbstractVisitor
         .add_property("dreg", bp::make_function(&Model::get_dreg),
                       bp::make_function(&Model::set_dreg),
                       "dual-variable regularization")
+        .add_property("reg_min", bp::make_function(&Model::get_reg_min),
+                      bp::make_function(&Model::set_reg_min),
+                      "minimum regularization value.")
+        .add_property("reg_max", bp::make_function(&Model::get_reg_max),
+                      bp::make_function(&Model::set_reg_max),
+                      "maximum regularization value.")
         .add_property(
             "x_reg",
             bp::make_function(

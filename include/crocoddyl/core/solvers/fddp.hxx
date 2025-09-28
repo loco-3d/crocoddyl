@@ -19,21 +19,18 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       reg_decfactor_(Scalar(5.)),
       th_grad_(ScaleNumerics<Scalar>(1e-12)),
       th_noimprovement_(
-          std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))) {
-  nh_T_ = problem->get_terminalModel()->get_nh_T();
-  th_minfeas_ =
-      std::sqrt(std::numeric_limits<Scalar>::epsilon() / (Scalar(1.) - rho_));
-  reg_min_ = ScaleNumerics<Scalar>(1e-9);
-  reg_max_ = ScaleNumerics<Scalar>(1e9, 1e-4);
-  rho_ = Scalar(0.3);
-  th_stepdec_ = Scalar(0.25);
-  th_stepinc_ = Scalar(0.25);
-  th_minimprove_ = Scalar(1e-2);
-  th_acceptnegstep_ = Scalar(8);
-  th_acceptminstep_ = Scalar(0.01);
-  upsilon_ = Scalar(0.);
-  upsilon_decfactor_ = Scalar(0.5);
-  zero_upsilon_ = false;  // TODO: define in abstract
+          std::pow(std::numeric_limits<Scalar>::epsilon(), Scalar(0.8))),
+      th_stepdec_(Scalar(0.25)),
+      th_stepinc_(Scalar(0.25)),
+      th_minimprove_(Scalar(1e-2)),
+      th_acceptnegstep_(Scalar(8)),
+      th_acceptminstep_(Scalar(0.01)),
+      rho_(Scalar(0.3)),
+      th_minfeas_(std::sqrt(std::numeric_limits<Scalar>::epsilon() /
+                            (Scalar(1.) - rho_))),
+      upsilon_(Scalar(0.)),
+      upsilon_decfactor_(Scalar(0.5)),
+      zero_upsilon_(false) {
   // Allocating the solver's data
   allocateData();
   // Setting the dynamics solver
@@ -49,18 +46,15 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       set_dynamics_solver(dyn_solver, 0);
       break;
   }
-  // Defining the list of step lengths used in the linear search routine
-  const std::size_t n_alphas = 10;
-  alphas_.resize(n_alphas);
-  for (std::size_t n = 0; n < n_alphas; ++n) {
-    alphas_[n] = Scalar(1.) / pow(Scalar(2.), static_cast<Scalar>(n));
-  }
 }
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::updateMeritFunction() {
   // Update the penalty parameter for computing the merit function and its
   // directional derivative For more details see Section 3 of "An Interior
   // Point Algorithm for Large Scale Nonlinear Programming"
+  if (iter_ == 0 && zero_upsilon_) {
+    upsilon_ = 0.;
+  }
   if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
     // We incorporate a barrier-reduction strategy that still maintains a the
     // directional derivative be sufficiently negative (as explained in
@@ -839,6 +833,17 @@ void SolverFDDPTpl<Scalar>::increaseRegularization() {
 }
 
 template <typename Scalar>
+bool SolverFDDPTpl<Scalar>::decreaseRegularizationCriteria() {
+  return (steplength_ >= th_stepdec_ && std::abs(dImpr_) > th_minimprove_);
+}
+
+template <typename Scalar>
+bool SolverFDDPTpl<Scalar>::increaseRegularizationCriteria() {
+  return ((steplength_ >= th_stepinc_ && std::abs(dImpr_) <= th_minimprove_) ||
+          !acceptstep_);
+}
+
+template <typename Scalar>
 void SolverFDDPTpl<Scalar>::decreaseRegularization() {
   preg_ /= reg_decfactor_;
   if (preg_ < reg_min_) {
@@ -915,7 +920,6 @@ template <typename Scalar>
 void SolverFDDPTpl<Scalar>::allocateData() {
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
-  dImpr_ = Scalar(0.);
   Vxx_tmp_ = MatrixXs::Zero(ndx, ndx);
   Vxx_.resize(T + 1);
   Vxx_f_.resize(T + 1);
@@ -1055,16 +1059,6 @@ Scalar SolverFDDPTpl<Scalar>::get_reg_incfactor() const {
 template <typename Scalar>
 Scalar SolverFDDPTpl<Scalar>::get_reg_decfactor() const {
   return reg_decfactor_;
-}
-
-template <typename Scalar>
-Scalar SolverFDDPTpl<Scalar>::get_reg_min() const {
-  return reg_min_;
-}
-
-template <typename Scalar>
-Scalar SolverFDDPTpl<Scalar>::get_reg_max() const {
-  return reg_max_;
 }
 
 template <typename Scalar>
@@ -1263,22 +1257,6 @@ void SolverFDDPTpl<Scalar>::set_reg_decfactor(const Scalar regfactor) {
         "Invalid argument: " << "reg_decfactor value is higher than 1.");
   }
   reg_decfactor_ = regfactor;
-}
-
-template <typename Scalar>
-void SolverFDDPTpl<Scalar>::set_reg_min(const Scalar regmin) {
-  if (Scalar(0.) > regmin) {
-    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
-  }
-  reg_min_ = regmin;
-}
-
-template <typename Scalar>
-void SolverFDDPTpl<Scalar>::set_reg_max(const Scalar regmax) {
-  if (Scalar(0.) > regmax) {
-    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
-  }
-  reg_max_ = regmax;
 }
 
 template <typename Scalar>

@@ -141,12 +141,13 @@ class SolverAbstractTpl : public SolverBase {
 
   /**
    * @brief Try a predefined step length \f$\alpha\f$ and compute its cost
-   * improvement \f$dV\f$.
+   * improvement \f$dV\f$ and merit improvement \f$d\Phi\f$.
    *
    * It uses the search direction found by `computeDirection()` to try a
    * determined step length \f$\alpha\f$. Therefore, it assumes that we have run
    * `computeDirection()` first. Additionally, it returns the cost improvement
-   * \f$dV\f$ along the predefined step length \f$\alpha\f$.
+   * \f$dV\f$ along the predefined step length \f$\alpha\f$. Internally, it
+   * updates the cost improvement \f$dV\f$ and merit improvement \f$d\Phi\f$.
    *
    * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
    * @return  the cost improvement
@@ -209,6 +210,16 @@ class SolverAbstractTpl : public SolverBase {
    * @brief Update the candidate solution: cost, feasibilities, and merit value
    */
   virtual void updateCandidate() = 0;
+
+  /**
+   * @brief Criteria used to decrease regularization
+   */
+  virtual bool decreaseRegularizationCriteria();
+
+  /**
+   * @brief Criteria used to increase regularization
+   */
+  virtual bool increaseRegularizationCriteria();
 
   /**
    * @brief Increase the state and control regularization values by a
@@ -446,6 +457,16 @@ class SolverAbstractTpl : public SolverBase {
       Scalar get_ureg() const { return preg_; })
 
   /**
+   * @brief Return the minimum regularization value
+   */
+  Scalar get_reg_min() const;
+
+  /**
+   * @brief Return the maximum regularization value
+   */
+  Scalar get_reg_max() const;
+
+  /**
    * @brief Return the step length \f$\alpha\f$
    */
   Scalar get_steplength() const;
@@ -503,6 +524,16 @@ class SolverAbstractTpl : public SolverBase {
    */
   void set_dreg(const Scalar dreg);
 
+  /**
+   * @brief Modify the minimum regularization value
+   */
+  void set_reg_min(const Scalar regmin);
+
+  /**
+   * @brief Modify the maximum regularization value
+   */
+  void set_reg_max(const Scalar regmax);
+
   DEPRECATED(
       "Use set_preg for primal-variable regularization",
       void set_xreg(const Scalar xreg) {
@@ -559,12 +590,8 @@ class SolverAbstractTpl : public SolverBase {
       callbacks_;  //!< Callback functions
   std::vector<Scalar>
       alphas_;  //!< Set of step lengths using by the line-search procedure
-  Scalar th_acceptstep_;     //!< Threshold used for accepting step
-  Scalar th_stop_;           //!< Tolerance for stopping the algorithm
-  Scalar th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
-                             //!< direction
-  Scalar th_acceptminstep_;  //!< Threshold used for accepting step along with a
-                             //!< minimum length
+  Scalar th_acceptstep_;  //!< Threshold used for accepting step
+  Scalar th_stop_;        //!< Tolerance for stopping the algorithm
   DEPRECATED("Do not use this threshold. It is not needed by our solvers",
              Scalar th_gaptol_;)   //!< Threshold limit to check non-zero gaps
   enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
@@ -621,28 +648,12 @@ class SolverAbstractTpl : public SolverBase {
   DEPRECATED("Use preg_ for primal-variable regularization",
              Scalar xreg_;)  //!< Current state regularization value
   DEPRECATED("Use dreg_ for primal-variable regularization",
-             Scalar ureg_;)  //!< Current control regularization values
-  Scalar reg_min_;           //!< Minimum allowed regularization value
-  Scalar reg_max_;           //!< Maximum allowed regularization value
-  Scalar
-      th_stepdec_;  //!< Step-length threshold used to decrease regularization
-  Scalar
-      th_stepinc_;  //!< Step-length threshold used to increase regularization
-  Scalar th_minimprove_;         //!< Minimum improvement threshold used in the
-                                 //!< regularization scheme
+             Scalar ureg_;)      //!< Current control regularization values
+  Scalar reg_min_;               //!< Minimum allowed regularization value
+  Scalar reg_max_;               //!< Maximum allowed regularization value
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
-  Scalar rho_;         //!< Parameter used in the merit function to predict the
-                       //!< expected reduction
-  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
-  Scalar
-      upsilon_;  //!< Estimated penalty parameter that balances relative
-                 //!< contribution of the cost function and equality constraints
-  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
-                              //!< decrease its value
-  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
-                       //!< (upsilon) to zero when solve is called.
-  std::size_t nh_T_;   //!< Dimension of terminal constraints
+  std::size_t nh_T_;             //!< Dimension of terminal constraints
 
   bool acceptstep_;
   bool recalcdir_;

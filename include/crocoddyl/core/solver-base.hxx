@@ -18,7 +18,12 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
       th_gaptol_(Scalar(1e-16)),
       feasnorm_(LInf),
       iter_(0),
-      tmp_feas_(Scalar(0.)) {
+      tmp_feas_(Scalar(0.)),
+      reg_min_(ScaleNumerics<Scalar>(1e-9)),
+      reg_max_(ScaleNumerics<Scalar>(1e9, 1e-4)),
+      nh_T_(problem->get_terminalModel()->get_nh_T()),
+      acceptstep_(false),
+      recalcdir_(true) {
   allocateData();
   // Defining the list of step lengths used in the linear search routine
   const std::size_t n_alphas = 10;
@@ -50,9 +55,6 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
   } else {
     preg_ = init_reg;
     dreg_ = init_reg;
-  }
-  if (zero_upsilon_) {
-    upsilon_ = 0.;
   }
   acceptstep_ = false;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
@@ -102,11 +104,10 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
       CallbackAbstract& callback = *callbacks_[c];
       callback(*this);
     }
-    if (steplength_ >= th_stepdec_ && std::abs(dImpr_) > th_minimprove_) {
+    if (decreaseRegularizationCriteria()) {
       decreaseRegularization();
     }
-    if ((steplength_ >= th_stepinc_ && std::abs(dImpr_) <= th_minimprove_) ||
-        !acceptstep_) {
+    if (increaseRegularizationCriteria()) {
       if (preg_ == reg_max_) {
         STOP_PROFILER("SolverAbstract::solve");
         return false;
@@ -193,6 +194,16 @@ void SolverAbstractTpl<Scalar>::setCandidate(
   }
   is_feasible_ = is_feasible;
   STOP_PROFILER("SolverAbstract::setCandidate");
+}
+
+template <typename Scalar>
+bool SolverAbstractTpl<Scalar>::increaseRegularizationCriteria() {
+  return false;
+}
+
+template <typename Scalar>
+bool SolverAbstractTpl<Scalar>::decreaseRegularizationCriteria() {
+  return false;
 }
 
 template <typename Scalar>
@@ -424,6 +435,7 @@ void SolverAbstractTpl<Scalar>::allocateData() {
   CROCODDYL_ENABLE_WARNING_DEPRECATED
   dV_ = Scalar(0.);
   dPhi_ = Scalar(0.);
+  dImpr_ = Scalar(0.);
   dVexp_full_ = Scalar(0.);
   dVexp_ = Scalar(0.);
   dPhiexp_ = Scalar(0.);
@@ -599,6 +611,16 @@ Scalar SolverAbstractTpl<Scalar>::get_dreg() const {
 }
 
 template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_reg_min() const {
+  return reg_min_;
+}
+
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::get_reg_max() const {
+  return reg_max_;
+}
+
+template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::get_steplength() const {
   return steplength_;
 }
@@ -705,6 +727,22 @@ void SolverAbstractTpl<Scalar>::set_dreg(const Scalar dreg) {
     throw_pretty("Invalid argument: " << "dreg value has to be positive.");
   }
   dreg_ = dreg;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_reg_min(const Scalar regmin) {
+  if (Scalar(0.) > regmin) {
+    throw_pretty("Invalid argument: " << "regmin value has to be positive.");
+  }
+  reg_min_ = regmin;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::set_reg_max(const Scalar regmax) {
+  if (Scalar(0.) > regmax) {
+    throw_pretty("Invalid argument: " << "regmax value has to be positive.");
+  }
+  reg_max_ = regmax;
 }
 
 template <typename Scalar>

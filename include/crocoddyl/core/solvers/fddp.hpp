@@ -347,6 +347,16 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual void singleShootForwardPass(const Scalar steplength);
 
   /**
+   * @brief Criteria used to decrease regularization
+   */
+  bool decreaseRegularizationCriteria() override;
+
+  /**
+   * @brief Criteria used to increase regularization
+   */
+  bool increaseRegularizationCriteria() override;
+
+  /**
    * @brief Increase the state and control regularization values by a
    * `regfactor_` factor
    */
@@ -393,16 +403,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * @brief Return the regularization factor used to decrease the damping value
    */
   Scalar get_reg_decfactor() const;
-
-  /**
-   * @brief Return the minimum regularization value
-   */
-  Scalar get_reg_min() const;
-
-  /**
-   * @brief Return the maximum regularization value
-   */
-  Scalar get_reg_max() const;
 
   /**
    * @brief Return the tolerance of the expected gradient used for testing the
@@ -612,16 +612,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   void set_reg_decfactor(const Scalar reg_factor);
 
   /**
-   * @brief Modify the minimum regularization value
-   */
-  void set_reg_min(const Scalar regmin);
-
-  /**
-   * @brief Modify the maximum regularization value
-   */
-  void set_reg_max(const Scalar regmax);
-
-  /**
    * @brief Modify the tolerance of the expected gradient used for testing the
    * step
    */
@@ -714,11 +704,29 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
                     //!< step
   Scalar th_noimprovement_;  //!< Threshold used to accept steps that cannot be
                              //!< be improved due to numerical errors
+  Scalar
+      th_stepdec_;  //!< Step-length threshold used to decrease regularization
+  Scalar
+      th_stepinc_;  //!< Step-length threshold used to increase regularization
+  Scalar th_minimprove_;     //!< Minimum improvement threshold used in the
+                             //!< regularization scheme
+  Scalar th_acceptnegstep_;  //!< Threshold used for accepting step along ascent
+                             //!< direction
+  Scalar th_acceptminstep_;  //!< Threshold used for accepting step along with a
+                             //!< minimum length
+  Scalar rho_;         //!< Parameter used in the merit function to predict the
+                       //!< expected reduction
+  Scalar th_minfeas_;  //!< Threshold for switching to feasibility
+  Scalar
+      upsilon_;  //!< Estimated penalty parameter that balances relative
+                 //!< contribution of the cost function and equality constraints
+  Scalar upsilon_decfactor_;  //!< Estimated penalty parameter factor used to
+                              //!< decrease its value
+  bool zero_upsilon_;  //!< True if we wish to set estimated penalty parameter
+                       //!< (upsilon) to zero when solve is called.
   std::vector<std::size_t> Ts_;  //!< Index that describes the hybrid shoots
 
   // allocate data
-  Scalar dImpr_;      //!< Reduction in the iteration improvement (i.e., maximum
-                      //!< between cost and merit values)
   MatrixXs Vxx_tmp_;  //!< Temporary variable for ensuring symmetry of Vxx
   std::vector<MatrixXs>
       Vxx_;  //!< Hessian of the Value function \f$\mathbf{V_{xx}}\f$
@@ -814,6 +822,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::cost_try_;
   using SolverAbstract::d_;
   using SolverAbstract::dfeas_;
+  using SolverAbstract::dImpr_;
   using SolverAbstract::dPhi_;
   using SolverAbstract::dPhiexp_;
   using SolverAbstract::dreg_;
@@ -837,29 +846,17 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::problem_;
   using SolverAbstract::reg_max_;
   using SolverAbstract::reg_min_;
-  using SolverAbstract::rho_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
-  using SolverAbstract::th_acceptminstep_;
-  using SolverAbstract::th_acceptnegstep_;
   using SolverAbstract::th_acceptstep_;
-  using SolverAbstract::th_minfeas_;
-  using SolverAbstract::th_minimprove_;
-  using SolverAbstract::th_stepdec_;
-  using SolverAbstract::th_stepinc_;
   using SolverAbstract::th_stop_;
-  using SolverAbstract::upsilon_;
-  using SolverAbstract::upsilon_decfactor_;
   using SolverAbstract::us_;
   using SolverAbstract::us_try_;
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
-  using SolverAbstract::zero_upsilon_;
 
   using SolverAbstract::acceptstep_;
   using SolverAbstract::recalcdir_;
-
- private:
 };
 
 }  // namespace crocoddyl

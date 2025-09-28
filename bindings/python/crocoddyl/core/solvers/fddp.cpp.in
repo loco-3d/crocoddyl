@@ -220,12 +220,6 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             "reg_decFactor", bp::make_function(&Model::get_reg_decfactor),
             bp::make_function(&Model::set_reg_decfactor),
             "regularization factor used for decreasing the damping value.")
-        .add_property("reg_min", bp::make_function(&Model::get_reg_min),
-                      bp::make_function(&Model::set_reg_min),
-                      "minimum regularization value.")
-        .add_property("reg_max", bp::make_function(&Model::get_reg_max),
-                      bp::make_function(&Model::set_reg_max),
-                      "maximum regularization value.")
         .add_property("th_grad", bp::make_function(&Model::get_th_grad),
                       bp::make_function(&Model::set_th_grad),
                       "threshold for accepting step which gradients is lower "
