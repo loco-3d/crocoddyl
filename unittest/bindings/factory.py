@@ -1700,21 +1700,17 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         term_solver=crocoddyl.EqualitySolverType.LuNull,
     ):
         crocoddyl.SolverAbstract.__init__(self, problem)
-        self.dImpr = 0.0
         # Allocate data
         self.allocateData()
         # Search and convergence parameters
         Ts = int(self.problem.T / max(3, self.problem.nthreads))
         self.setDynamicsSolver(dyn_solver, Ts)
         self.term_solver = term_solver
-        self.alphas = [2 ** (-n) for n in range(10)]
         self.th_grad = 1e-12
         self.th_noImprovement = np.finfo(float).eps ** 0.8
         # Regularization parameters
         self.reg_incFactor = 10
         self.reg_decFactor = 5
-        self.reg_max = 1e9
-        self.reg_min = 1e-9
         self.th_stepDec = 0.25
         self.th_stepInc = 0.25
         self.th_minImprove = 1e-2  # [0, 100.]
@@ -1726,86 +1722,8 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.upsilon = 0.0
         self.upsilon_decFactor = 0.5
         self.zero_upsilon = False
-        # Recalc parameters and acceptance
+        # Acceptance step
         self._acceptStep = False
-        self._recalcDir = True
-
-    def solve(self, init_xs=[], init_us=[], maxiter=100, regInit=None):
-        self.setCandidate(
-            init_xs, init_us, False
-        )  # TODO: update Crocoddyl API (let's remove the feasibility boolean)
-        self.preg = regInit if regInit is not None else self.reg_min
-        self.dreg = regInit if regInit is not None else self.reg_min
-        if self.zero_upsilon:
-            self.upsilon = 0.0
-        # Start iteration
-        self._acceptStep = False
-        for iter in range(maxiter):
-            self.iter = iter
-            self._recalcDir = True
-            # Compute search direction
-            while True:
-                try:
-                    self.computeDirection(recalc=self._recalcDir)
-                except ArithmeticError:
-                    self._recalcDir = False
-                    self.increaseRegularization()
-                    if self.preg == self.reg_max:
-                        return False
-                    else:
-                        continue
-                break
-            # Estimate the expected improvement
-            self.expectedImprovement()
-            self.dVexp_full = self.DV[0] + self.DV[1] + 0.5 * self.DV[2]
-            # Update the penalty parameter for computing the merit function and its
-            # directional derivative For more details see Section 3.3 of "An Interior
-            # Point Algorithm for Large Scale Nonlinear Programming"
-            if (
-                self.feas >= self.th_minffeas
-                and self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot
-            ):
-                # We incorporate a barrier-reduction strategy that still maintains a
-                # the directional derivative be sufficiently negative (as explained
-                # in Nocedal's texbook page 542) while allowing for a reduction when
-                # it is possible.
-                self.upsilon = max(
-                    self.upsilon * self.upsilon_decFactor,
-                    self.dVexp_full / ((1 - self.rho) * self.feas),
-                )
-            # Try and evaluate the search direction
-            for a in self.alphas:
-                self.stepLength = a
-                try:
-                    self.tryStep(a)
-                except ArithmeticError:
-                    continue
-                # Set candidate guess, cost and feasibilities if we accept the step
-                self.dImpr = max(self.dV, self.dPhi)
-                self.checkAcceptance()
-                if self._acceptStep:
-                    self.setCandidate(self.xs_try, self.us_try, False)
-                    self.updateCandidate()
-                    break
-            self.stoppingCriteria()
-            callbacks = self.getCallbacks()
-            if callbacks is not None:
-                [c(self) for c in callbacks]
-            if (
-                self.stepLength >= self.th_stepDec
-                and abs(self.dImpr) > self.th_minImprove
-            ):
-                self.decreaseRegularization()
-            if (
-                self.stepLength >= self.th_stepInc
-                and abs(self.dImpr) <= self.th_minImprove
-            ) or not self._acceptStep:
-                if self.preg == self.reg_max:
-                    return False
-                self.increaseRegularization()
-            if self.stop < self.th_stop:
-                return True
-        return False
 
     def computeDirection(self, recalc=True):
         # Update the batch's derivatives
@@ -1821,7 +1739,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         elif self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot:
             self.linearRollout()
 
-    def tryStep(self, stepLength=1):
+    def tryStep(self, stepLength=1.0):
         # Update primal, dual and slack variables
         self.forwardPass(stepLength)
         self.updateDualsAndSlacks(stepLength)
@@ -1865,44 +1783,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         # Update the dual variables and slacks
         pass
 
-    # This is a virtual function
-    def checkAcceptance(self):
-        # Check if we should accept or not the step. The criterio is as follows.
-        # When expected to decrease the merit function value (dPhiexp > 0), we analyse
-        # if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and define different
-        # criterio. For the first case (dPhi > 0), we use the Armijo condition with the
-        # merit function. Instead, for the second case, we use the Armijo condition with the
-        # cost function as this encourage progress and the possibility of increasing the cost
-        # when expectations are unrealistic. Moreover, when it is expected to increase the
-        # merit function, our strategy is to accept an increment in the merit function if
-        # the feasibility passes our stopping criteria or in the cost function otherwise. This
-        # approach enables our solver to increase both infeasibility and cost in order to
-        # ensure convergence; it increases the algorithm's globalization. Finally, we accept
-        # any improvement for step lengths smaller than th_acceptMinStep. This ensures
-        # any possible progress in the iteration.
-        self._acceptStep = False
-        if self.dPhiexp >= 0.0:
-            if self.dPhi > 0.0:
-                if (
-                    self.dPhi > self.th_acceptStep * self.dPhiexp
-                    or abs(self.DV[1]) < self.th_grad
-                ):
-                    self._acceptStep = True
-            elif (
-                self.dV > self.th_acceptStep * self.dVexp
-                or abs(self.DV[1]) < self.th_grad
-            ):
-                self._acceptStep = True
-        else:
-            if self.feas <= self.th_stop:
-                if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
-                    self._acceptStep = True
-            elif self.dV > self.th_acceptNegStep * self.dVexp:
-                self._acceptStep = True
-        # TODO: accept dImpr > 0 when allocated time has been reached (c++)
-        if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
-            self._acceptStep = True
-
     def stoppingCriteria(self):
         self.feas = self.ffeas + self.gfeas + self.hfeas
         self.stop = max(self.feas, abs(self.dVexp_full) / (1.0 + abs(self.cost)))
@@ -1940,6 +1820,70 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.DV[1] -= self.dxs[-1].T @ d.Lx
             self.DV[2] -= self.dxs[-1].T @ self.Lxx_dx[-1]
         return copy.deepcopy(self.DV[1:])
+
+    # This is a virtual function
+    def checkAcceptance(self):
+        # Check if we should accept or not the step. The criterio is as follows.
+        # When expected to decrease the merit function value (dPhiexp > 0), we analyse
+        # if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and define different
+        # criterio. For the first case (dPhi > 0), we use the Armijo condition with the
+        # merit function. Instead, for the second case, we use the Armijo condition with the
+        # cost function as this encourage progress and the possibility of increasing the cost
+        # when expectations are unrealistic. Moreover, when it is expected to increase the
+        # merit function, our strategy is to accept an increment in the merit function if
+        # the feasibility passes our stopping criteria or in the cost function otherwise. This
+        # approach enables our solver to increase both infeasibility and cost in order to
+        # ensure convergence; it increases the algorithm's globalization. Finally, we accept
+        # any improvement for step lengths smaller than th_acceptMinStep. This ensures
+        # any possible progress in the iteration.
+        self._acceptStep = False
+        if (
+            abs(self.dPhi) <= self.th_noImprovement
+            and abs(self.dPhiexp) <= self.th_noImprovement
+        ):
+            self._acceptStep = True
+        elif self.dPhiexp >= 0.0:
+            if self.dPhi > 0.0:
+                if (
+                    self.dPhi > self.th_acceptStep * self.dPhiexp
+                    or abs(self.DV[1]) < self.th_grad
+                ):
+                    self._acceptStep = True
+            elif (
+                self.dV > self.th_acceptStep * self.dVexp
+                or abs(self.DV[1]) < self.th_grad
+            ):
+                self._acceptStep = True
+        else:
+            if self.feas <= self.th_stop:
+                if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
+                    self._acceptStep = True
+            elif self.dV > self.th_acceptNegStep * self.dVexp:
+                self._acceptStep = True
+        # TODO: accept dImpr > 0 when allocated time has been reached (c++)
+        if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
+            self._acceptStep = True
+        return self._acceptStep
+
+    # This is a virtual function
+    def updateMeritFunction(self):
+        # Update the penalty parameter for computing the merit function and its
+        # directional derivative For more details see Section 3.3 of "An Interior
+        # Point Algorithm for Large Scale Nonlinear Programming"
+        if self.iter == 0 and self.zero_upsilon:
+            self.upsilon = 0.0
+        if (
+            self.feas >= self.th_minffeas
+            and self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot
+        ):
+            # We incorporate a barrier-reduction strategy that still maintains a
+            # the directional derivative be sufficiently negative (as explained
+            # in Nocedal's texbook page 542) while allowing for a reduction when
+            # it is possible.
+            self.upsilon = max(
+                self.upsilon * self.upsilon_decFactor,
+                self.dVexp_full / ((1 - self.rho) * self.feas),
+            )
 
     # This is virtual function
     def calcDir(self):
@@ -2261,18 +2205,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.YdHcY_inv_YHc[:] = scl.cho_solve(self.YdHcY_llt, self.Yhc)
         self.beta_plus[:] = self.Yc @ self.YdHcY_inv_YHc
 
-    def increaseRegularization(self):
-        self.preg *= self.reg_incFactor
-        if self.preg > self.reg_max:
-            self.preg = self.reg_max
-        self.dreg = self.preg
-
-    def decreaseRegularization(self):
-        self.preg /= self.reg_decFactor
-        if self.preg < self.reg_min:
-            self.preg = self.reg_min
-        self.dreg = self.preg
-
     def updateCandidate(self):
         self.cost = copy.deepcopy(self.cost_try)
         if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
@@ -2282,6 +2214,28 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.gfeas = copy.deepcopy(self.gfeas_try)
         self.hfeas = copy.deepcopy(self.hfeas_try)
         self.merit = self.cost + self.upsilon * (self.ffeas + self.gfeas + self.hfeas)
+
+    def decreaseRegularizationCriteria(self):
+        return (
+            self.stepLength >= self.th_stepDec and abs(self.dImpr) > self.th_minImprove
+        )
+
+    def increaseRegularizationCriteria(self):
+        return (
+            self.stepLength >= self.th_stepInc and abs(self.dImpr) <= self.th_minImprove
+        ) or not self._acceptStep
+
+    def decreaseRegularization(self):
+        self.preg /= self.reg_decFactor
+        if self.preg < self.reg_min:
+            self.preg = self.reg_min
+        self.dreg = self.preg
+
+    def increaseRegularization(self):
+        self.preg *= self.reg_incFactor
+        if self.preg > self.reg_max:
+            self.preg = self.reg_max
+        self.dreg = self.preg
 
     # This is virtual function
     def allocateData(self):
