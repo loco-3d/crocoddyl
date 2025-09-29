@@ -97,9 +97,6 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "Update the dual and slack variables with a predefined step "
                  "length.\n\n"
                  ":param stepLength: step length (default 1)"))
-        .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
-             "Check if we should accept or not the step\n\n"
-             ":return True if we should accept the step. False otherwise.")
         .def("stoppingCriteria", &Model::stoppingCriteria, bp::args("self"),
              "Return a sum of positive parameters whose sum quantifies the "
              "FDDP termination.")
@@ -112,6 +109,11 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
              "quadratic improvement model is described as dV = DV_0 + DV_1 + "
              "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
              "and quadraticm terms, respectively")
+        .def("updateMeritFunction", &Model::updateMeritFunction,
+             bp::args("self"), "Update the merit function value for the current guess.")
+        .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
+             "Check if we should accept or not the step\n\n"
+             ":return True if we should accept the step. False otherwise.")
         .def(
             "calcDir", &Model::calcDir, bp::args("self"),
             "Update the Jacobian and Hessian of the optimal control problem\n\n"
@@ -198,6 +200,20 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
         .def("updateCandidate", &Model::updateCandidate, bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
              "value")
+        .def("increaseRegularizationCriteria",
+             &Model::increaseRegularizationCriteria, bp::args("self"),
+             "Criteria used to increase regularization")
+        .def("decreaseRegularizationCriteria",
+             &Model::decreaseRegularizationCriteria, bp::args("self"),
+             "Criteria used to decrease regularization")
+        .def("increaseRegularization",
+             &Model::increaseRegularization, bp::args("self"),
+             "Increase the state and control regularization values by a "
+             "regfactor_.")
+        .def("decreaseRegularization",
+             &Model::decreaseRegularization, bp::args("self"),
+             "Decrease the state and control regularization values by a "
+             "regfactor_.")
         .add_property(
             "dyn_solver", bp::make_function(&Model::get_dynamics_solver),
             "type of solver used for handling the dynamics constraints.")

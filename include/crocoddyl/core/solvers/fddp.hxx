@@ -47,23 +47,6 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
       break;
   }
 }
-template <typename Scalar>
-void SolverFDDPTpl<Scalar>::updateMeritFunction() {
-  // Update the penalty parameter for computing the merit function and its
-  // directional derivative For more details see Section 3 of "An Interior
-  // Point Algorithm for Large Scale Nonlinear Programming"
-  if (iter_ == 0 && zero_upsilon_) {
-    upsilon_ = 0.;
-  }
-  if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
-    // We incorporate a barrier-reduction strategy that still maintains a the
-    // directional derivative be sufficiently negative (as explained in
-    // Nocedal's texbook page 542) while allowing for a reduction when it is
-    // possible.
-    upsilon_ = std::max(upsilon_ * upsilon_decfactor_,
-                        dVexp_full_ / ((Scalar(1.) - rho_) * feas_));
-  }
-}
 
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
@@ -150,50 +133,6 @@ void SolverFDDPTpl<Scalar>::updateDualsAndSlacks(
     const Scalar /**steplength**/) {}
 
 template <typename Scalar>
-bool SolverFDDPTpl<Scalar>::checkAcceptance() {
-  // Check if we should accept or not the step. The criterio is as follows.
-  // When expected to decrease the merit function value (dPhiexp > 0), we
-  // analyse if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and
-  // define different criterio. For the first case (dPhi > 0), we use the
-  // Armijo condition with the merit function. Instead, for the second case,
-  // we use the Armijo condition with the cost function as this encourage
-  // progress and the possibility of increasing the cost when expectations
-  // are unrealistic. Moreover, when it is expected to increase the merit if
-  // the feasibility passes our stopping criteria or in the cost function
-  // otherwise. This approach enables our solver to increase both
-  // infeasibility and cost in order to ensure convergence; it increases the
-  // algorithm's globalization. Finally, we accept any improvement for step
-  // lengths smaller than th_acceptMinStep. This ensures any possible
-  // progress in the iteration.
-  acceptstep_ = false;
-  if ((std::abs(dPhi_) <= th_noimprovement_) &&
-      (std::abs(dPhiexp_) <= th_noimprovement_)) {
-    acceptstep_ = true;  // we can't make further improvement
-  } else if (dPhiexp_ >= Scalar(0.)) {
-    if (dPhi_ > Scalar(0.)) {
-      if (dPhi_ > th_acceptstep_ * dPhiexp_ || std::abs(DV_[1]) < th_grad_) {
-        acceptstep_ = true;
-      }
-    } else if (dV_ > th_acceptstep_ * dVexp_ || std::abs(DV_[1]) < th_grad_) {
-      acceptstep_ = true;
-    }
-  } else {
-    if (feas_ <= th_stop_) {
-      if (dPhi_ > th_acceptnegstep_ * dPhiexp_) {
-        acceptstep_ = true;
-      }
-    } else if (dV_ > th_acceptnegstep_ * dVexp_) {
-      acceptstep_ = true;
-    }
-  }
-  // TODO: accept dPhi > 0 when allocated time has been reached (c++)
-  if (steplength_ <= th_acceptminstep_ && dImpr_ > Scalar(0.)) {
-    acceptstep_ = true;
-  }
-  return acceptstep_;
-}
-
-template <typename Scalar>
 Scalar SolverFDDPTpl<Scalar>::stoppingCriteria() {
   feas_ = ffeas_ + gfeas_ + hfeas_;
   stop_ =
@@ -250,6 +189,68 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
   d_[1] = DV_[2];
   return d_;
   CROCODDYL_ENABLE_WARNING_DEPRECATED
+}
+
+template <typename Scalar>
+bool SolverFDDPTpl<Scalar>::checkAcceptance() {
+  // Check if we should accept or not the step. The criterio is as follows.
+  // When expected to decrease the merit function value (dPhiexp > 0), we
+  // analyse if we are actually decreasing or not (dPhi > 0 or dPhi < 0) and
+  // define different criterio. For the first case (dPhi > 0), we use the
+  // Armijo condition with the merit function. Instead, for the second case,
+  // we use the Armijo condition with the cost function as this encourage
+  // progress and the possibility of increasing the cost when expectations
+  // are unrealistic. Moreover, when it is expected to increase the merit if
+  // the feasibility passes our stopping criteria or in the cost function
+  // otherwise. This approach enables our solver to increase both
+  // infeasibility and cost in order to ensure convergence; it increases the
+  // algorithm's globalization. Finally, we accept any improvement for step
+  // lengths smaller than th_acceptMinStep. This ensures any possible
+  // progress in the iteration.
+  acceptstep_ = false;
+  if ((std::abs(dPhi_) <= th_noimprovement_) &&
+      (std::abs(dPhiexp_) <= th_noimprovement_)) {
+    acceptstep_ = true;  // we can't make further improvement
+  } else if (dPhiexp_ >= Scalar(0.)) {
+    if (dPhi_ > Scalar(0.)) {
+      if (dPhi_ > th_acceptstep_ * dPhiexp_ || std::abs(DV_[1]) < th_grad_) {
+        acceptstep_ = true;
+      }
+    } else if (dV_ > th_acceptstep_ * dVexp_ || std::abs(DV_[1]) < th_grad_) {
+      acceptstep_ = true;
+    }
+  } else {
+    if (feas_ <= th_stop_) {
+      if (dPhi_ > th_acceptnegstep_ * dPhiexp_) {
+        acceptstep_ = true;
+      }
+    } else if (dV_ > th_acceptnegstep_ * dVexp_) {
+      acceptstep_ = true;
+    }
+  }
+  // TODO: accept dImpr > 0 when allocated time has been reached (c++)
+  if (steplength_ <= th_acceptminstep_ && dImpr_ > Scalar(0.)) {
+    acceptstep_ = true;
+  }
+  return acceptstep_;
+}
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::updateMeritFunction() {
+  // Update the penalty parameter for computing the merit function and its
+  // directional derivative For more details see Section 3 of "An Interior
+  // Point Algorithm for Large Scale Nonlinear Programming"
+  if (iter_ == 0 && zero_upsilon_) {
+    upsilon_ = 0.;
+  }
+  if (feas_ >= th_minfeas_ && dyn_solver_ != SingleShoot) {
+    // We incorporate a barrier-reduction strategy that still maintains a the
+    // directional derivative be sufficiently negative (as explained in
+    // Nocedal's texbook page 542) while allowing for a reduction when it is
+    // possible.
+    upsilon_ = std::max(upsilon_ * upsilon_decfactor_,
+                        dVexp_full_ / ((Scalar(1.) - rho_) * feas_));
+  }
 }
 
 template <typename Scalar>
@@ -824,12 +825,19 @@ void SolverFDDPTpl<Scalar>::computeNullTerminalMultiplier() {
 }
 
 template <typename Scalar>
-void SolverFDDPTpl<Scalar>::increaseRegularization() {
-  preg_ *= reg_incfactor_;
-  if (preg_ > reg_max_) {
-    preg_ = reg_max_;
+void SolverFDDPTpl<Scalar>::updateCandidate() {
+  cost_ = cost_try_;
+  switch (dyn_solver_) {
+    case SingleShoot:
+      ffeas_ = 0.;
+      break;
+    default:
+      ffeas_ = ffeas_try_;
+      break;
   }
-  dreg_ = preg_;
+  gfeas_ = gfeas_try_;
+  hfeas_ = hfeas_try_;
+  merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
 }
 
 template <typename Scalar>
@@ -853,19 +861,12 @@ void SolverFDDPTpl<Scalar>::decreaseRegularization() {
 }
 
 template <typename Scalar>
-void SolverFDDPTpl<Scalar>::updateCandidate() {
-  cost_ = cost_try_;
-  switch (dyn_solver_) {
-    case SingleShoot:
-      ffeas_ = 0.;
-      break;
-    default:
-      ffeas_ = ffeas_try_;
-      break;
+void SolverFDDPTpl<Scalar>::increaseRegularization() {
+  preg_ *= reg_incfactor_;
+  if (preg_ > reg_max_) {
+    preg_ = reg_max_;
   }
-  gfeas_ = gfeas_try_;
-  hfeas_ = hfeas_try_;
-  merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
+  dreg_ = preg_;
 }
 
 template <typename Scalar>

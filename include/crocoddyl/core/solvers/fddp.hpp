@@ -104,11 +104,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual ~SolverFDDPTpl() = default;
 
   /**
-   * @brief Update the merit function value for the current guess
-   */
-  virtual void updateMeritFunction() override;
-
-  /**
    * @copybrief SolverAbstract::computeDirection
    */
   virtual void computeDirection(const bool recalc = true) override;
@@ -142,13 +137,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual void updateDualsAndSlacks(const Scalar stepLength = Scalar(1.));
 
   /**
-   * @brief Check if we should accept or not the step
-   *
-   * @return True if we should accept the step. False otherwise
-   */
-  virtual bool checkAcceptance() override;
-
-  /**
    * @copybrief SolverAbstract::stoppingCriteria
    */
   virtual Scalar stoppingCriteria() override;
@@ -168,6 +156,18 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
    */
   virtual const Vector2s& expectedImprovement() override;
+
+  /**
+   * @brief Update the merit function value for the current guess
+   */
+  virtual void updateMeritFunction() override;
+
+  /**
+   * @brief Check if we should accept or not the step
+   *
+   * @return True if we should accept the step. False otherwise
+   */
+  virtual bool checkAcceptance() override;
 
   /**
    * @brief Update the Jacobian, Hessian and feasibility of the optimal control
@@ -347,6 +347,11 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual void singleShootForwardPass(const Scalar steplength);
 
   /**
+   * @brief Update the candidate solution: cost, feasibilities, and merit value
+   */
+  void updateCandidate() override;
+
+  /**
    * @brief Criteria used to decrease regularization
    */
   bool decreaseRegularizationCriteria() override;
@@ -367,11 +372,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * `regfactor_` factor
    */
   void decreaseRegularization() override;
-
-  /**
-   * @brief Update the candidate solution: cost, feasibilities, and merit value
-   */
-  void updateCandidate() override;
 
   /**
    * @brief Cast the FDDP solver to a different scalar type.

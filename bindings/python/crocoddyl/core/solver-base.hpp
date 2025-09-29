@@ -35,6 +35,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::cost_try_;
   using SolverAbstract::d_;
   using SolverAbstract::dfeas_;
+  using SolverAbstract::dImpr_;
   using SolverAbstract::dPhi_;
   using SolverAbstract::dPhiexp_;
   using SolverAbstract::DV_;

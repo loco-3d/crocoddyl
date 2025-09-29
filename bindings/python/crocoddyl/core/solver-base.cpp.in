@@ -191,6 +191,9 @@ struct SolverAbstractVisitor
                 bp::return_value_policy<bp::reference_existing_object>()),
             bp::make_function(&Model::set_alphas),
             "list of step length (alpha) values")
+        .def_readwrite("dImpr", &Model::dImpr_,
+                      "Reduction in the iteration improvement (i.e., maximum "
+                      "between cost and merit values)")
         .def_readwrite("xs", &Model::xs_, "state trajectory")
         .def_readwrite("us", &Model::us_, "control sequence")
         .def_readwrite("fs", &Model::fs_, "dynamics gaps")
