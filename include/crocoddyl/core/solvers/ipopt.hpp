@@ -38,7 +38,7 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
   typedef IpoptInterfaceTpl<Scalar> IpoptInterface;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Vector3s Vector3s;
   using SolverAbstract::resizeData;
   using SolverAbstract::setCandidate;
 
@@ -83,10 +83,10 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
   virtual void computeDirection(const bool recalc) override;
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;
-  virtual Vector2s expectedImprovement() override;
+  virtual Vector3s expectedImprovement() override;
 
   using SolverAbstract::cost_;
-  using SolverAbstract::d_;
+  using SolverAbstract::DV_;
   using SolverAbstract::iter_;
   using SolverAbstract::problem_;
   using SolverAbstract::th_stop_;

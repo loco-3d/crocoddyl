@@ -29,11 +29,10 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Vector3s Vector3s;
 
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
-  using SolverAbstract::d_;
   using SolverAbstract::dfeas_;
   using SolverAbstract::dImpr_;
   using SolverAbstract::dPhi_;
@@ -93,10 +92,10 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     return stop_;
   }
 
-  Vector2s expectedImprovement() override {
-    d_ << bp::call<Eigen::Matrix<Scalar, 2, 1>>(
+  Vector3s expectedImprovement() override {
+    DV_ << bp::call<Eigen::Matrix<Scalar, 3, 1>>(
         this->get_override("expectedImprovement").ptr());
-    return d_;
+    return DV_;
   }
 
   void updateMeritFunction() override {

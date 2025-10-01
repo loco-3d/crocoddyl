@@ -20,6 +20,7 @@ namespace python {
 
 #define CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(Scalar)                      \
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2;                           \
+  typedef Eigen::Matrix<Scalar, 3, 1> Vector3;                           \
   typedef Eigen::Matrix<Scalar, 4, 1> Vector4;                           \
   typedef Eigen::Matrix<Scalar, 6, 1> Vector6;                           \
   typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;                          \
@@ -31,6 +32,7 @@ namespace python {
                         Eigen::RowMajor>                                 \
       RowMatrixX;                                                        \
   eigenpy::enableEigenPySpecific<Vector2>();                             \
+  eigenpy::enableEigenPySpecific<Vector3>();                             \
   eigenpy::enableEigenPySpecific<Vector4>();                             \
   eigenpy::enableEigenPySpecific<Vector6>();                             \
   eigenpy::enableEigenPySpecific<Matrix46>();                            \

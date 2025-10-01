@@ -85,7 +85,6 @@ class SolverAbstractTpl : public SolverBase {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::Vector2s Vector2s;
 
   /**
    * @brief Initialize the solver
@@ -171,9 +170,9 @@ class SolverAbstractTpl : public SolverBase {
    * For computing the expected improvement, you need to compute the search
    * direction first via `computeDirection()`. The quadratic improvement model
    * is described as dV = DV_0 + DV_1 + 0.5 * DV_2, where DV_0, DV_1, and DV_2
-   * are the constant, linear, and quadraticm terms, respectively
+   * are the constant, linear, and quadratic terms, respectively.
    */
-  virtual Vector2s expectedImprovement() = 0;
+  virtual Vector3s expectedImprovement() = 0;
 
   /**
    * @brief Update the merit function value for the current guess
@@ -376,8 +375,6 @@ class SolverAbstractTpl : public SolverBase {
    * improvement
    */
   const Vector3s& get_DV() const;
-
-  DEPRECATED("Used get_DV()", const Vector2s& get_d() const { return d_; })
 
   /**
    * @brief Return the reduction in the cost function \f$\Delta V\f$
@@ -620,8 +617,6 @@ class SolverAbstractTpl : public SolverBase {
   Scalar stop_;        //!< Value computed by `stoppingCriteria()`
   std::size_t iter_;   //!< Number of iteration performed by the solver
   Vector3s DV_;        //!< LQ approximation of the expected improvement
-  DEPRECATED("Use DV_",
-             Vector2s d_;)  //!< LQ approximation of the expected improvement
   Scalar dV_;    //!< Reduction in the cost function computed by `tryStep()`
   Scalar dPhi_;  //!< Reduction in the merit function computed by `tryStep()`
   Scalar dVexp_full_;  //!< Expected reduction in the cost function for a full

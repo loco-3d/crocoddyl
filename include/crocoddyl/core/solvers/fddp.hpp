@@ -81,7 +81,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Vector3s Vector3s;
-  typedef typename MathBase::Vector2s Vector2s;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
   using SolverAbstract::computeDynamicFeasibility;
@@ -154,7 +153,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * \mathbf{\bar{f}}_k^\top(2 V_{\mathbf{xx}_k}\mathbf{x}_k
    * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
    */
-  virtual Vector2s expectedImprovement() override;
+  virtual Vector3s expectedImprovement() override;
 
   /**
    * @brief Update the merit function value for the current guess
@@ -819,7 +818,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::callbacks_;
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
-  using SolverAbstract::d_;
   using SolverAbstract::dfeas_;
   using SolverAbstract::dImpr_;
   using SolverAbstract::dPhi_;

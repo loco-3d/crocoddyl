@@ -30,7 +30,7 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
-  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Vector3s Vector3s;
   using SolverAbstract::setCandidate;
 
   explicit SolverKKTTpl(std::shared_ptr<ShootingProblem> problem);
@@ -44,7 +44,7 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   virtual void computeDirection(const bool recalc = true) override;
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;
-  virtual Vector2s expectedImprovement() override;
+  virtual Vector3s expectedImprovement() override;
 
   /**
    * @brief Cast the KKT solver to a different scalar type.
@@ -103,7 +103,6 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::callbacks_;
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
-  using SolverAbstract::d_;
   using SolverAbstract::dreg_;
   using SolverAbstract::DV_;
   using SolverAbstract::dV_;

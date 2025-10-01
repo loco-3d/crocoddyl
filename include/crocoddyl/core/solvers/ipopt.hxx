@@ -54,9 +54,9 @@ inline Scalar SolverIpopt::tryStep(const Scalar) { return Scalar(0.); }
 
 inline Scalar SolverIpopt::stoppingCriteria() { return Scalar(0.); }
 
-inline const typename MathBaseTpl<Scalar>::Vector2s&
+inline typename MathBaseTpl<Scalar>::Vector3s
 SolverIpopt::expectedImprovement() {
-  return d_;
+  return DV_;
 }
 
 inline void SolverIpopt::setStringIpoptOption(const std::string& tag,

@@ -1819,7 +1819,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.Lxx_dx[-1][:] = d.Lxx @ self.dxs[-1]
             self.DV[1] -= self.dxs[-1].T @ d.Lx
             self.DV[2] -= self.dxs[-1].T @ self.Lxx_dx[-1]
-        return copy.deepcopy(self.DV[1:])
+        return self.DV
 
     # This is a virtual function
     def checkAcceptance(self):
