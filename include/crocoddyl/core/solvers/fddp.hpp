@@ -814,6 +814,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
       "Do not use this member",
       Scalar dv_;)  //!< Internal data for computing the expected improvement
 
+  using SolverAbstract::acceptstep_;
   using SolverAbstract::alphas_;
   using SolverAbstract::callbacks_;
   using SolverAbstract::cost_;
@@ -851,9 +852,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::us_try_;
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
-
-  using SolverAbstract::acceptstep_;
-  using SolverAbstract::recalcdir_;
 };
 
 }  // namespace crocoddyl
