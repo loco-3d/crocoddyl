@@ -169,9 +169,11 @@ class SolverAbstractTpl : public SolverBase {
    * search direction \f$(\delta\mathbf{x}^k,\delta\mathbf{u}^k)\f$
    *
    * For computing the expected improvement, you need to compute the search
-   * direction first via `computeDirection()`.
+   * direction first via `computeDirection()`. The quadratic improvement model
+   * is described as dV = DV_0 + DV_1 + 0.5 * DV_2, where DV_0, DV_1, and DV_2
+   * are the constant, linear, and quadraticm terms, respectively
    */
-  virtual const Vector2s& expectedImprovement() = 0;
+  virtual Vector2s expectedImprovement() = 0;
 
   /**
    * @brief Update the merit function value for the current guess

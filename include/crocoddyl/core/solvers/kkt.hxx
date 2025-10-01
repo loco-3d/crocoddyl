@@ -161,7 +161,7 @@ Scalar SolverKKTTpl<Scalar>::stoppingCriteria() {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s&
+typename MathBaseTpl<Scalar>::Vector2s
 SolverKKTTpl<Scalar>::expectedImprovement() {
   DV_.setZero();
   // -grad^T.primal

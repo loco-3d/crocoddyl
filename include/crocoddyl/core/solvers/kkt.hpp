@@ -44,7 +44,7 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   virtual void computeDirection(const bool recalc = true) override;
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;
-  virtual const Vector2s& expectedImprovement() override;
+  virtual Vector2s expectedImprovement() override;
 
   /**
    * @brief Cast the KKT solver to a different scalar type.

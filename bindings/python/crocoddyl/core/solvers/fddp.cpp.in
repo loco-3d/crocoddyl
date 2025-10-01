@@ -101,7 +101,6 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
              "Return a sum of positive parameters whose sum quantifies the "
              "FDDP termination.")
         .def("expectedImprovement", &Model::expectedImprovement,
-             bp::return_value_policy<bp::reference_existing_object>(),
              bp::args("self"),
              "Return two scalars denoting the quadratic improvement model\n\n"
              "For computing the expected improvement, you need to compute "

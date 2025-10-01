@@ -85,12 +85,14 @@ struct SolverAbstractVisitor
              "(calculated by computeDirection) but it could also depend on the "
              "chosen step length, tested by tryStep.")
         .def("expectedImprovement",
-             pure_virtual(&Model::expectedImprovement),
-             bp::return_value_policy<bp::copy_const_reference>(), bp::args("self"),
+             pure_virtual(&Model::expectedImprovement), bp::args("self"),
              "Return the expected improvement from a given current search "
              "direction.\n\n"
              "For computing the expected improvement, you need to compute "
-             "first the search direction by running computeDirection.")
+             "first the search direction by running computeDirection. The "
+             "quadratic improvement model is described as dV = DV_0 + DV_1 + "
+             "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
+             "and quadraticm terms, respectively")
         .def("updateMeritFunction",
              &Model::updateMeritFunction, &Model::default_updateMeritFunction,
              bp::args("self"), "Update the merit function value for the current guess.")

@@ -80,7 +80,6 @@ void exposeSolverKKT() {
            "Return a sum of positive parameters whose sum quantifies the DDP "
            "termination.")
       .def("expectedImprovement", &SolverKKT::expectedImprovement,
-           bp::return_value_policy<bp::reference_existing_object>(),
            bp::args("self"),
            "Return two scalars denoting the quadratic improvement model\n\n"
            "For computing the expected improvement, you need to compute first\n"

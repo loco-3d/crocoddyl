@@ -63,8 +63,8 @@ enum EqualitySolverType {
  * For more details about the feasibility-driven differential dynamic
  * programming algorithm see: \include mastalli-icra20.bib
  *
- * \sa `SolverAbstract()`, `backwardPass()`, `forwardPass()`,
- * `expectedImprovement()` and `updateExpectedImprovement()`
+ * \sa `SolverAbstract()`, `backwardPass()`, `forwardPass()`, and
+ * `expectedImprovement()`.
  */
 template <typename _Scalar>
 class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
@@ -144,8 +144,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   /**
    * @copybrief SolverAbstract::expectedImprovement
    *
-   * This function requires to first run `updateExpectedImprovement()`. The
-   * expected improvement computation considers the gaps in the dynamics:
+   * The expected improvement computation considers the gaps in the dynamics:
    * \f{equation} \Delta J(\alpha) = \Delta_1\alpha +
    * \frac{1}{2}\Delta_2\alpha^2, \f} with \f{eqnarray} \Delta_1 =
    * \sum_{k=0}^{N-1} \mathbf{k}_k^\top\mathbf{Q}_{\mathbf{u}_k}
@@ -155,7 +154,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * \mathbf{\bar{f}}_k^\top(2 V_{\mathbf{xx}_k}\mathbf{x}_k
    * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
    */
-  virtual const Vector2s& expectedImprovement() override;
+  virtual Vector2s expectedImprovement() override;
 
   /**
    * @brief Update the merit function value for the current guess

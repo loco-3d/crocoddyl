@@ -93,7 +93,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     return stop_;
   }
 
-  const Vector2s& expectedImprovement() override {
+  Vector2s expectedImprovement() override {
     d_ << bp::call<Eigen::Matrix<Scalar, 2, 1>>(
         this->get_override("expectedImprovement").ptr());
     return d_;

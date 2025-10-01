@@ -83,7 +83,7 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
   virtual void computeDirection(const bool recalc) override;
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;
-  virtual const Vector2s& expectedImprovement() override;
+  virtual Vector2s expectedImprovement() override;
 
   using SolverAbstract::cost_;
   using SolverAbstract::d_;

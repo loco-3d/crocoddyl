@@ -141,7 +141,7 @@ Scalar SolverFDDPTpl<Scalar>::stoppingCriteria() {
 }
 
 template <typename Scalar>
-const typename MathBaseTpl<Scalar>::Vector2s&
+typename MathBaseTpl<Scalar>::Vector2s
 SolverFDDPTpl<Scalar>::expectedImprovement() {
   // We define dVexp = Vexp - Vexptry as done for dV
   const std::size_t T = problem_->get_T();
