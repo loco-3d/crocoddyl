@@ -52,7 +52,7 @@ struct SolverAbstractVisitor
            "init_us).\n"
            ":returns A boolean that describes if convergence was reached.")
         .def("computeDirection", pure_virtual(&Model::computeDirection),
-             bp::args("self", "recalc"),
+            (bp::args("recalc") = true),
              "Compute the search direction (dx, du) for the current guess (xs, "
              "us).\n\n"
              "You must call setCandidate first in order to define the current "
@@ -63,7 +63,7 @@ struct SolverAbstractVisitor
              ":returns the search direction dx, du and the dual lambdas as "
              "lists of T+1, T and T+1 lengths.")
         .def(
-            "tryStep", pure_virtual(&Model::tryStep),
+            "tryStep", &Model::tryStep, &Model::default_tryStep,
             (bp::args("stepLength") = Scalar(1.)),
             "Try a predefined step length and compute its cost and merit "
             "improvements.\n\n"
@@ -74,6 +74,15 @@ struct SolverAbstractVisitor
             "improvement dV and merit improvement dPhi.\n"
             ":param stepLength: step length (default 1).\n"
             ":returns the cost improvement.")
+        .def("computeCandidate",
+             pure_virtual(&Model::computeCandidate), (bp::args("stepLength") = Scalar(1.)),
+             "Compute new candidate solution using step length.\n\n"
+             "This method updates the candidate primal and dual variables "
+             "by taking a step from the current solution along the computed "
+             "search direction, scaled by the step length `alpha`. It "
+             "prepares a candidate point that is evaluated before being "
+             "accepted by the solver.\n"
+             ":param stepLength: step length.")
         .def("stoppingCriteria", pure_virtual(&Model::stoppingCriteria),
              bp::args("self"),
              "Return a positive value that quantifies the algorithm "
@@ -93,11 +102,25 @@ struct SolverAbstractVisitor
              "quadratic improvement model is described as dV = DV_0 + DV_1 + "
              "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
              "and quadraticm terms, respectively")
+        .def("computeMeritFunctionImprovement",
+             pure_virtual(&Model::computeMeritFunctionImprovement),
+             bp::args("self"),
+             "Compute the merit function improvement for the current step.\n\n"
+             "This function computes the current merit function improvement "
+             "given the current cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
+        .def("computeExpectedMeritFunctionImprovement",
+             pure_virtual(&Model::computeExpectedMeritFunctionImprovement),
+             bp::args("self"),
+             "Compute the expected merit function improvement for the current step.\n\n"
+             "This function computes the expected merit function improvement "
+             "given the expected cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
         .def("updateMeritFunction",
-             &Model::updateMeritFunction, &Model::default_updateMeritFunction,
+             pure_virtual(&Model::updateMeritFunction),
              bp::args("self"), "Update the merit function value for the current guess.")
-        .def("checkAcceptance", &Model::checkAcceptance,
-             &Model::default_checkAcceptance, bp::args("self"),
+        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
+             bp::args("self"),
              "Check if the current step should be accepted.\n\n"
              ":return true if we accept the step, otherwise false")
         .def("allocateData", &Model::allocateData, bp::args("self"),
@@ -114,26 +137,22 @@ struct SolverAbstractVisitor
                  ":param us: control trajectory of T elements (default []).\n"
                  ":param isFeasible: true if the xs are obtained from "
                  "integrating the us (rollout)."))
-        .def("updateCandidate", &Model::updateCandidate,
-             &Model::default_updateCandidate, bp::args("self"),
+        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
+             bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
              "value.")
         .def("increaseRegularizationCriteria",
-             &Model::increaseRegularizationCriteria,
-             &Model::default_increaseRegularizationCriteria, bp::args("self"),
+             pure_virtual(&Model::increaseRegularizationCriteria), bp::args("self"),
              "Criteria used to increase regularization")
         .def("decreaseRegularizationCriteria",
-             &Model::decreaseRegularizationCriteria,
-             &Model::default_decreaseRegularizationCriteria, bp::args("self"),
+             pure_virtual(&Model::decreaseRegularizationCriteria), bp::args("self"),
              "Criteria used to decrease regularization")
         .def("increaseRegularization",
-             &Model::increaseRegularization,
-             &Model::default_increaseRegularization, bp::args("self"),
+             pure_virtual(&Model::increaseRegularization), bp::args("self"),
              "Increase the state and control regularization values by a "
              "regfactor_.")
         .def("decreaseRegularization",
-             &Model::decreaseRegularization,
-             &Model::default_decreaseRegularization, bp::args("self"),
+             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
              "Decrease the state and control regularization values by a "
              "regfactor_.")
         .def(
@@ -306,7 +325,9 @@ struct SolverAbstractVisitor
             bp::make_function(&Model::set_feasnorm),
             "norm used to compute the dynamic and constraints feasibility")
         .def_readwrite("iter", &Model::iter_,
-                       "number of iterations runned in solve()");
+                       "number of iterations runned in solve()")
+        .def_readwrite("acceptStep", &Model::acceptstep_,
+                       "true if the last step is accepted");
   }
 };
 

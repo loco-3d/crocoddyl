@@ -31,6 +31,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Vector3s Vector3s;
 
+  using SolverAbstract::acceptstep_;
   using SolverAbstract::cost_;
   using SolverAbstract::cost_try_;
   using SolverAbstract::dfeas_;
@@ -80,74 +81,170 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   void computeDirection(const bool recalc = true) override {
-    return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
+    if (bp::override computeDirection =
+            this->get_override("computeDirection")) {
+      return bp::call<void>(computeDirection.ptr(), recalc);
+    } else {
+      PyErr_SetString(
+          PyExc_NotImplementedError,
+          "SolverAbstract.computeDirection() must be implemented in subclass.");
+      bp::throw_error_already_set();
+    }
   }
 
   Scalar tryStep(const Scalar step_length = Scalar(1.)) override {
-    return bp::call<Scalar>(this->get_override("tryStep").ptr(), step_length);
+    if (bp::override tryStep = this->get_override("tryStep")) {
+      return bp::call<Scalar>(tryStep.ptr(), step_length);
+    } else {
+      return this->SolverAbstract::tryStep(step_length);
+    }
+  }
+
+  void computeCandidate(const Scalar step_length = Scalar(1.)) override {
+    if (bp::override computeCandidate =
+            this->get_override("computeCandidate")) {
+      return bp::call<void>(this->get_override("computeCandidate").ptr(),
+                            step_length);
+    } else {
+      PyErr_SetString(
+          PyExc_NotImplementedError,
+          "SolverAbstract.computeCandidate() must be implemented in subclass.");
+      bp::throw_error_already_set();
+    }
   }
 
   Scalar stoppingCriteria() override {
-    stop_ = bp::call<Scalar>(this->get_override("stoppingCriteria").ptr());
+    if (bp::override stoppingCriteria =
+            this->get_override("stoppingCriteria")) {
+      stop_ = bp::call<Scalar>(stoppingCriteria.ptr());
+    } else {
+      PyErr_SetString(
+          PyExc_NotImplementedError,
+          "SolverAbstract.stoppingCriteria() must be implemented in subclass.");
+      bp::throw_error_already_set();
+    }
     return stop_;
   }
 
   Vector3s expectedImprovement() override {
-    DV_ << bp::call<Eigen::Matrix<Scalar, 3, 1>>(
-        this->get_override("expectedImprovement").ptr());
+    if (bp::override expectedImprovement =
+            this->get_override("expectedImprovement")) {
+      DV_ = bp::call<Vector3s>(expectedImprovement.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.expectedImprovement() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
+    }
     return DV_;
+  }
+
+  void computeMeritFunctionImprovement() override {
+    if (bp::override computeMeritFunctionImprovement =
+            this->get_override("computeMeritFunctionImprovement")) {
+      return bp::call<void>(computeMeritFunctionImprovement.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.computeMeritFunctionImprovement() must "
+                      "be implemented in subclass.");
+      bp::throw_error_already_set();
+    }
+  }
+
+  void computeExpectedMeritFunctionImprovement() override {
+    if (bp::override computeExpectedMeritFunctionImprovement =
+            this->get_override("computeExpectedMeritFunctionImprovement")) {
+      return bp::call<void>(computeExpectedMeritFunctionImprovement.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.computeExpectedMeritFunctionImprovement()"
+                      " must be implemented in subclass.");
+      bp::throw_error_already_set();
+    }
   }
 
   void updateMeritFunction() override {
     if (bp::override updateMeritFunction =
             this->get_override("updateMeritFunction")) {
       return bp::call<void>(updateMeritFunction.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.updateMeritFunction() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::updateMeritFunction();
   }
 
   bool checkAcceptance() override {
     if (bp::override checkAcceptance = this->get_override("checkAcceptance")) {
       return bp::call<bool>(checkAcceptance.ptr());
+    } else {
+      PyErr_SetString(
+          PyExc_NotImplementedError,
+          "SolverAbstract.checkAcceptance() must be implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::checkAcceptance();
+    return false;
   }
 
   void updateCandidate() override {
     if (bp::override updateCandidate = this->get_override("updateCandidate")) {
       return bp::call<void>(updateCandidate.ptr());
+    } else {
+      PyErr_SetString(
+          PyExc_NotImplementedError,
+          "SolverAbstract.updateCandidate() must be implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::updateCandidate();
   }
 
   bool increaseRegularizationCriteria() override {
     if (bp::override increaseRegularizationCriteria =
             this->get_override("increaseRegularizationCriteria")) {
       return bp::call<bool>(increaseRegularizationCriteria.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.increaseRegularizationCriteria() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::increaseRegularizationCriteria();
+    return false;
   }
 
   bool decreaseRegularizationCriteria() override {
     if (bp::override decreaseRegularizationCriteria =
             this->get_override("decreaseRegularizationCriteria")) {
       return bp::call<bool>(decreaseRegularizationCriteria.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.decreaseRegularizationCriteria() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::decreaseRegularizationCriteria();
+    return false;
   }
 
   void increaseRegularization() override {
     if (bp::override increaseRegularization =
             this->get_override("increaseRegularization")) {
       return bp::call<void>(increaseRegularization.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.increaseRegularization() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
     }
-    return this->SolverAbstract::increaseRegularization();
   }
 
   void decreaseRegularization() override {
     if (bp::override decreaseRegularization =
             this->get_override("decreaseRegularization")) {
       return bp::call<void>(decreaseRegularization.ptr());
+    } else {
+      PyErr_SetString(PyExc_NotImplementedError,
+                      "SolverAbstract.decreaseRegularization() must be "
+                      "implemented in subclass.");
+      bp::throw_error_already_set();
     }
   }
 
@@ -160,32 +257,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
                                        reg_init);
   }
 
-  void default_updateMeritFunction() {
-    return this->SolverAbstract::updateMeritFunction();
-  }
-
-  bool default_checkAcceptance() {
-    return this->SolverAbstract::checkAcceptance();
-  }
-
-  void default_updateCandidate() {
-    return this->SolverAbstract::updateCandidate();
-  }
-
-  bool default_increaseRegularizationCriteria() {
-    return this->SolverAbstract::increaseRegularizationCriteria();
-  }
-
-  bool default_decreaseRegularizationCriteria() {
-    return this->SolverAbstract::decreaseRegularizationCriteria();
-  }
-
-  void default_increaseRegularization() {
-    return this->SolverAbstract::increaseRegularization();
-  }
-
-  void default_decreaseRegularization() {
-    return this->SolverAbstract::decreaseRegularization();
+  Scalar default_tryStep(const Scalar step_length = Scalar(1.)) {
+    return this->SolverAbstract::tryStep(step_length);
   }
 
   void allocateData() { SolverAbstract::allocateData(); }

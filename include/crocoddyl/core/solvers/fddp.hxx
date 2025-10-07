@@ -72,37 +72,12 @@ void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
 }
 
 template <typename Scalar>
-Scalar SolverFDDPTpl<Scalar>::tryStep(const Scalar steplength) {
-  START_PROFILER("SolverFDDP::tryStep");
+void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
+  START_PROFILER("SolverFDDP::computeCandidate");
   // Update primal, dual and slack variables
   forwardPass(steplength);
   updateDualsAndSlacks(steplength);
-  // Compute the expected and current value function improvements
-  dVexp_ = DV_[0] + steplength * (DV_[1] + Scalar(0.5) * steplength * DV_[2]);
-  dV_ = cost_ - cost_try_;
-  // Compute the expected and current merit function improvements
-  ffeas_try_ = computeFeasibility(fs_try_);
-  gfeas_try_ = computeInequalityFeasibility();
-  hfeas_try_ = computeEqualityFeasibility();
-  // Using the expected reduction in the infeasibilities lead to higher
-  // convergence for both feasibility-driven and classical multi-shooting
-  // approach.
-  switch (dyn_solver_) {
-    case SingleShoot:
-      ffeas_ = Scalar(0.);
-      ffeas_try_ = Scalar(0.);
-      dfeas_ = Scalar(0.);
-      break;
-    default:
-      dfeas_ = ffeas_ - ffeas_try_;
-      break;
-  }
-  dfeas_ += gfeas_ - gfeas_try_;
-  dfeas_ += hfeas_ - hfeas_try_;
-  dPhiexp_ = dVexp_ + steplength_ * upsilon_ * dfeas_;
-  dPhi_ = dV_ + upsilon_ * dfeas_;
-  STOP_PROFILER("SolverFDDP::tryStep");
-  return dV_;
+  STOP_PROFILER("SolverFDDP::computeCandidate");
 }
 
 template <typename Scalar>
@@ -184,6 +159,27 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
       break;
   }
   return DV_;
+}
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::computeMeritFunctionImprovement() {
+  // In single shooting, we do not consider the dynamics feasibility in the
+  // merit function. This is because the dynamics are always satisfied.
+  switch (dyn_solver_) {
+    case SingleShoot:
+      ffeas_ = Scalar(0.);
+      ffeas_try_ = Scalar(0.);
+      dfeas_ -= ffeas_ - ffeas_try_;
+      break;
+    default:
+      break;
+  }
+  dPhi_ = dV_ + upsilon_ * dfeas_;
+}
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::computeExpectedMeritFunctionImprovement() {
+  dPhiexp_ = dVexp_ + steplength_ * upsilon_ * dfeas_;
 }
 
 template <typename Scalar>

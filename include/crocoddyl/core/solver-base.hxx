@@ -87,6 +87,12 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
       try {
         tryStep(steplength_);
       } catch (std::exception& e) {
+        std::string msg = e.what();
+        if (msg.find("must be implemented in subclass.") != std::string::npos) {
+          std::cerr << msg << std::endl;
+          STOP_PROFILER("SolverAbstract::solve");
+          return false;
+        }
         continue;
       }
       dImpr_ = std::max(dV_, dPhi_);
@@ -121,6 +127,41 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
   }
   STOP_PROFILER("SolverAbstract::solve");
   return false;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::computeDirection(const bool) {
+  throw_pretty(
+      "SolverAbstract.computeDirection(): must be implemented in subclass.");
+}
+
+template <typename Scalar>
+Scalar SolverAbstractTpl<Scalar>::tryStep(const Scalar steplength) {
+  START_PROFILER("SolverAbstract::tryStep");
+  // Update primal, dual and slack variables
+  computeCandidate(steplength);
+  // Compute the expected and current value function improvements
+  dVexp_ = DV_[0] + steplength * (DV_[1] + Scalar(0.5) * steplength * DV_[2]);
+  dV_ = cost_ - cost_try_;
+  // Compute the new infeasibilities
+  ffeas_try_ = computeFeasibility(fs_try_);
+  gfeas_try_ = computeInequalityFeasibility();
+  hfeas_try_ = computeEqualityFeasibility();
+  // Compute the infeasibility improvements
+  dfeas_ = ffeas_ - ffeas_try_;
+  dfeas_ += gfeas_ - gfeas_try_;
+  dfeas_ += hfeas_ - hfeas_try_;
+  // Compute the expected and current merit function improvements
+  computeMeritFunctionImprovement();
+  computeExpectedMeritFunctionImprovement();
+  STOP_PROFILER("SolverAbstract::tryStep");
+  return dV_;
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::computeCandidate(const Scalar) {
+  throw_pretty(
+      "SolverAbstract.computeCandidate(): must be implemented in subclass.");
 }
 
 template <typename Scalar>
@@ -197,31 +238,67 @@ void SolverAbstractTpl<Scalar>::setCandidate(
 }
 
 template <typename Scalar>
-void SolverAbstractTpl<Scalar>::updateMeritFunction() {}
+void SolverAbstractTpl<Scalar>::computeMeritFunctionImprovement() {
+  throw_pretty(
+      "SolverAbstract.computeMeritFunctionImprovement(): must be implemented "
+      "in subclass.");
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::computeExpectedMeritFunctionImprovement() {
+  throw_pretty(
+      "SolverAbstract.computeExpectedMeritFunctionImprovement(): must be "
+      "implemented in subclass.");
+}
+
+template <typename Scalar>
+void SolverAbstractTpl<Scalar>::updateMeritFunction() {
+  throw_pretty(
+      "SolverAbstract.updateMeritFunction(): must be implemented in subclass.");
+}
 
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::checkAcceptance() {
+  throw_pretty(
+      "SolverAbstract.checkAcceptance(): must be implemented in subclass.");
   return true;
 }
 
 template <typename Scalar>
-void SolverAbstractTpl<Scalar>::updateCandidate() {}
+void SolverAbstractTpl<Scalar>::updateCandidate() {
+  throw_pretty(
+      "SolverAbstract.updateCandidate(): must be implemented in subclass.");
+}
 
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::increaseRegularizationCriteria() {
+  throw_pretty(
+      "SolverAbstract.increaseRegularizationCriteria(): must be implemented in "
+      "subclass.");
   return false;
 }
 
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::decreaseRegularizationCriteria() {
+  throw_pretty(
+      "SolverAbstract.decreaseRegularizationCriteria(): must be implemented in "
+      "subclass.");
   return false;
 }
 
 template <typename Scalar>
-void SolverAbstractTpl<Scalar>::increaseRegularization() {}
+void SolverAbstractTpl<Scalar>::increaseRegularization() {
+  throw_pretty(
+      "SolverAbstract.increaseRegularization(): must be implemented in "
+      "subclass.");
+}
 
 template <typename Scalar>
-void SolverAbstractTpl<Scalar>::decreaseRegularization() {}
+void SolverAbstractTpl<Scalar>::decreaseRegularization() {
+  throw_pretty(
+      "SolverAbstract.decreaseRegularization(): must be implemented in "
+      "subclass.");
+}
 
 template <typename Scalar>
 void SolverAbstractTpl<Scalar>::resizeData() {

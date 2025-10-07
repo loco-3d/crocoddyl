@@ -108,9 +108,9 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual void computeDirection(const bool recalc = true) override;
 
   /**
-   * @copybrief SolverAbstract::tryStep
+   * @copybrief SolverAbstract::computeCandidate
    */
-  virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
+  virtual void computeCandidate(const Scalar step_length = Scalar(1.)) override;
 
   /**
    * @brief Perform a forward pass with a predefined step length
@@ -154,6 +154,16 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
    */
   virtual Vector3s expectedImprovement() override;
+
+  /**
+   * @copybrief SolverAbstract::computeMeritFunctionImprovement
+   */
+  virtual void computeMeritFunctionImprovement() override;
+
+  /**
+   * @copybrief SolverAbstract::computeExpectedMeritFunctionImprovement
+   */
+  virtual void computeExpectedMeritFunctionImprovement() override;
 
   /**
    * @brief Update the merit function value for the current guess

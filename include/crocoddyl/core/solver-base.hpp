@@ -148,10 +148,24 @@ class SolverAbstractTpl : public SolverBase {
    * \f$dV\f$ along the predefined step length \f$\alpha\f$. Internally, it
    * updates the cost improvement \f$dV\f$ and merit improvement \f$d\Phi\f$.
    *
-   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$, with 1
+   * as default)
    * @return  the cost improvement
    */
-  virtual Scalar tryStep(const Scalar steplength) = 0;
+  virtual Scalar tryStep(const Scalar steplength = Scalar(1.));
+
+  /**
+   * @brief Compute new candidate solution using step length.
+   *
+   * This method updates the candidate primal and dual variables by taking a
+   * step from the current solution along the computed search direction, scaled
+   * by the step length `alpha`. It prepares a candidate point that is
+   * evaluated before being accepted by the solver.
+   *
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$, with 1
+   * as default)
+   */
+  virtual void computeCandidate(const Scalar steplength = Scalar(1.));
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -173,6 +187,25 @@ class SolverAbstractTpl : public SolverBase {
    * are the constant, linear, and quadratic terms, respectively.
    */
   virtual Vector3s expectedImprovement() = 0;
+
+  /**
+   * @brief Compute the merit function improvement for the current step.
+   *
+   * This function computes the current merit function improvement given the
+   * current cost improvement and feasibility improvement. The feasibility
+   * improvement are stored in dfeas_.
+   */
+  virtual void computeMeritFunctionImprovement();
+
+  /**
+   * @brief Compute the expected merit function improvement for the current
+   * step.
+   *
+   * This function computes the expected merit function improvement given the
+   * expected cost improvement and feasibility improvement. The feasibility
+   * improvement are stored in dfeas_.
+   */
+  virtual void computeExpectedMeritFunctionImprovement();
 
   /**
    * @brief Update the merit function value for the current guess

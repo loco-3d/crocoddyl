@@ -25,6 +25,8 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                                          Model::computeDirection, 0, 1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, Model::tryStep, 0,
                                          1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeCandidate, Model::computeCandidate, 0,
+                                         1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
                                          Model::forwardPass, 0, 1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_updateDualsAndSlacks,
@@ -72,6 +74,18 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "lists of T+1, T and T+1 lengths."))
         .def("tryStep", &Model::tryStep,
              SolverFDDP_trySteps(
+                 bp::args("self", "stepLength"),
+                 "Try a predefined step length and compute its cost and merit "
+                 "improvements.\n\n"
+                 "It uses the search direction found by computeDirection to try a "
+                 "determined step length; so you need to first run "
+                 "computeDirection. Additionally it returns the cost improvement "
+                 "along the predefined step length. Internally, it updates the cost "
+                 "improvement dV and merit improvement dPhi.\n"
+                 ":param stepLength: step length (default 1).\n"
+                 ":returns the cost improvement."))
+        .def("computeCandidate", &Model::computeCandidate,
+             SolverFDDP_computeCandidate(
                  bp::args("self", "stepLength"),
                  "Rollout the system with a predefined step length.\n\n"
                  ":param stepLength: step length (default 1)\n"

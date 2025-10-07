@@ -1722,8 +1722,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         self.upsilon = 0.0
         self.upsilon_decFactor = 0.5
         self.zero_upsilon = False
-        # Acceptance step
-        self._acceptStep = False
 
     def computeDirection(self, recalc=True):
         # Update the batch's derivatives
@@ -1739,32 +1737,10 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         elif self.dyn_solver != crocoddyl.DynamicsSolverType.SingleShoot:
             self.linearRollout()
 
-    def tryStep(self, stepLength=1.0):
+    def computeCandidate(self, stepLength=1.0):
         # Update primal, dual and slack variables
         self.forwardPass(stepLength)
         self.updateDualsAndSlacks(stepLength)
-        # Compute the expected and current value function improvements
-        self.dVexp = self.DV[0] + stepLength * (
-            self.DV[1] + 0.5 * stepLength * self.DV[2]
-        )
-        self.dV = self.cost - self.cost_try
-        # Compute the expected and current merit function improvements
-        self.ffeas_try = self.computeFeasibility(self.fs_try)
-        self.gfeas_try = self.computeInequalityFeasibility()
-        self.hfeas_try = self.computeEqualityFeasibility()
-        # Using the expected reduction in the infeasibilities lead to higher convergence for
-        # both feasibility-driven and classical multi-shooting approach.
-        if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
-            self.ffeas = 0.0
-            self.ffeas_try = 0.0
-            self.dfeas = 0.0
-        else:
-            self.dfeas = self.ffeas - self.ffeas_try
-        self.dfeas += self.gfeas - self.gfeas_try
-        self.dfeas += self.hfeas - self.hfeas_try
-        self.dPhiexp = self.dVexp + stepLength * self.upsilon * self.dfeas
-        self.dPhi = self.dV + self.upsilon * self.dfeas
-        return self.dV
 
     def forwardPass(self, stepLength=1):
         if self.dyn_solver == crocoddyl.DynamicsSolverType.FeasShoot:
@@ -1821,6 +1797,18 @@ class SolverFDDP(crocoddyl.SolverAbstract):
             self.DV[2] -= self.dxs[-1].T @ self.Lxx_dx[-1]
         return self.DV
 
+    def computeMeritFunctionImprovement(self):
+        # In single shooting, we do not consider the dynamics feasibility in the merit
+        # function. This is because the dynamics are always satisfied.
+        if self.dyn_solver == crocoddyl.DynamicsSolverType.SingleShoot:
+            self.ffeas = 0.0
+            self.ffeas_try = 0.0
+            self.dfeas -= self.ffeas - self.ffeas_try
+        self.dPhi = self.dV + self.upsilon * self.dfeas
+
+    def computeExpectedMeritFunctionImprovement(self):
+        self.dPhiexp = self.dVexp + self.stepLength * self.upsilon * self.dfeas
+
     # This is a virtual function
     def checkAcceptance(self):
         # Check if we should accept or not the step. The criterio is as follows.
@@ -1836,34 +1824,34 @@ class SolverFDDP(crocoddyl.SolverAbstract):
         # ensure convergence; it increases the algorithm's globalization. Finally, we accept
         # any improvement for step lengths smaller than th_acceptMinStep. This ensures
         # any possible progress in the iteration.
-        self._acceptStep = False
+        acceptStep = False
         if (
             abs(self.dPhi) <= self.th_noImprovement
             and abs(self.dPhiexp) <= self.th_noImprovement
         ):
-            self._acceptStep = True
+            acceptStep = True
         elif self.dPhiexp >= 0.0:
             if self.dPhi > 0.0:
                 if (
                     self.dPhi > self.th_acceptStep * self.dPhiexp
                     or abs(self.DV[1]) < self.th_grad
                 ):
-                    self._acceptStep = True
+                    acceptStep = True
             elif (
                 self.dV > self.th_acceptStep * self.dVexp
                 or abs(self.DV[1]) < self.th_grad
             ):
-                self._acceptStep = True
+                acceptStep = True
         else:
             if self.feas <= self.th_stop:
                 if self.dPhi > self.th_acceptNegStep * self.dPhiexp:
-                    self._acceptStep = True
+                    acceptStep = True
             elif self.dV > self.th_acceptNegStep * self.dVexp:
-                self._acceptStep = True
+                acceptStep = True
         # TODO: accept dImpr > 0 when allocated time has been reached (c++)
         if self.stepLength <= self.th_acceptMinStep and self.dImpr > 0.0:
-            self._acceptStep = True
-        return self._acceptStep
+            acceptStep = True
+        return acceptStep
 
     # This is a virtual function
     def updateMeritFunction(self):
@@ -1887,7 +1875,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     # This is virtual function
     def calcDir(self):
-        if not self._acceptStep:
+        if not self.acceptStep:
             self.problem.calc(self.xs, self.us)
         self.cost = self.problem.calcDiff(self.xs, self.us)
         self.ffeas = self.computeDynamicFeasibility()
@@ -2223,7 +2211,7 @@ class SolverFDDP(crocoddyl.SolverAbstract):
     def increaseRegularizationCriteria(self):
         return (
             self.stepLength >= self.th_stepInc and abs(self.dImpr) <= self.th_minImprove
-        ) or not self._acceptStep
+        ) or not self.acceptStep
 
     def decreaseRegularization(self):
         self.preg /= self.reg_decFactor
