@@ -265,6 +265,20 @@ bool SolverAbstractTpl<Scalar>::checkAcceptance() {
 }
 
 template <typename Scalar>
+void SolverAbstractTpl<Scalar>::calcDir() {
+  START_PROFILER("SolverAbstract::calcDir");
+  if (!acceptstep_) {
+    problem_->calc(xs_, us_);
+  }
+  cost_ = problem_->calcDiff(xs_, us_);
+  ffeas_ = computeDynamicFeasibility();
+  gfeas_ = computeInequalityFeasibility();
+  hfeas_ = computeEqualityFeasibility();
+  feas_ = ffeas_ + gfeas_ + hfeas_;
+  STOP_PROFILER("SolverAbstract::calcDir");
+}
+
+template <typename Scalar>
 void SolverAbstractTpl<Scalar>::updateCandidate() {
   throw_pretty(
       "SolverAbstract.updateCandidate(): must be implemented in subclass.");

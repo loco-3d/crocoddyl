@@ -220,6 +220,15 @@ class SolverAbstractTpl : public SolverBase {
   virtual bool checkAcceptance();
 
   /**
+   * @brief Update the Jacobian, Hessian and feasibility of the optimal control
+   * problem
+   *
+   * These derivatives are computed around the guess state and control
+   * trajectory. These trajectory can be set by using `setCandidate()`.
+   */
+  virtual void calcDir();
+
+  /**
    * @brief Set the solver candidate trajectories
    * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
    *

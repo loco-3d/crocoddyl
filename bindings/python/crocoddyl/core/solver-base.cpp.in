@@ -123,6 +123,12 @@ struct SolverAbstractVisitor
              bp::args("self"),
              "Check if the current step should be accepted.\n\n"
              ":return true if we accept the step, otherwise false")
+        .def(
+            "calcDir", &Model::calcDir, &Model::default_calcDir, bp::args("self"),
+            "Update the Jacobian and Hessian of the optimal control problem\n\n"
+            "These derivatives are computed around the guess state and control "
+            "trajectory. These trajectory can be set by using setCandidate.\n"
+            ":return the total cost around the guess trajectory.")
         .def("allocateData", &Model::allocateData, bp::args("self"),
              "Allocate the data used by the solver.")
         .def("setCandidate", &Model::setCandidate,

@@ -44,9 +44,14 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   virtual ~SolverIntroTpl() = default;
 
   /**
-   * @copybrief SolverFDDP::calcDir
+   * @copybrief SolverAbstract::calcDir
    */
   virtual void calcDir() override;
+
+  /**
+   * @copybrief SolverFDDP::computeDirection
+   */
+  virtual void computeDirection(const bool recalc = true) override;
 
   /**
    * @copybrief SolverFDDP::computePolicy

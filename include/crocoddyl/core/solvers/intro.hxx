@@ -82,6 +82,16 @@ void SolverIntroTpl<Scalar>::calcDir() {
 }
 
 template <typename Scalar>
+void SolverIntroTpl<Scalar>::computeDirection(const bool recalc) {
+  START_PROFILER("SolverIntro::computeDirection");
+  if (recalc) {
+    calcDir();
+  }
+  SolverFDDP::computeDirection(false);
+  STOP_PROFILER("SolverIntro::computeDirection");
+}
+
+template <typename Scalar>
 void SolverIntroTpl<Scalar>::computePolicy(const std::size_t t) {
   START_PROFILER("SolverIntro::computePolicy");
   switch (eq_solver_) {

@@ -53,7 +53,7 @@ void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
   START_PROFILER("SolverFDDP::computeDirection");
   // Update the batch's derivatives
   if (recalc) {
-    calcDir();
+    SolverAbstract::calcDir();
   }
   // Update the search direction associated with the batch's internal
   // constraints
@@ -300,20 +300,6 @@ void SolverFDDPTpl<Scalar>::resizeTerminalData() {
   YdHcY_.conservativeResize(nh_T, nh_T);
   beta_plus_.conservativeResize(nh_T);
   STOP_PROFILER("SolverFDDP::resizeTerminalData");
-}
-
-template <typename Scalar>
-void SolverFDDPTpl<Scalar>::calcDir() {
-  START_PROFILER("SolverFDDP::calcDir");
-  if (!acceptstep_) {
-    problem_->calc(xs_, us_);
-  }
-  cost_ = problem_->calcDiff(xs_, us_);
-  ffeas_ = computeDynamicFeasibility();
-  gfeas_ = computeInequalityFeasibility();
-  hfeas_ = computeEqualityFeasibility();
-  feas_ = ffeas_ + gfeas_ + hfeas_;
-  STOP_PROFILER("SolverFDDP::calcDir");
 }
 
 template <typename Scalar>

@@ -127,13 +127,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
         .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
              "Check if we should accept or not the step\n\n"
              ":return True if we should accept the step. False otherwise.")
-        .def(
-            "calcDir", &Model::calcDir, bp::args("self"),
-            "Update the Jacobian and Hessian of the optimal control problem\n\n"
-            "These derivatives are computed around the guess state and control "
-            "trajectory. These trajectory can be set by using setCandidate.\n"
-            ":return the total cost around the guess trajectory.")
-        .def("linearRollout", &Model::calcDir, bp::args("self"),
+        .def("linearRollout", &Model::linearRollout, bp::args("self"),
              "Perform a linear rollout give the current control policy\n\n"
              "The results of this linear rollout are stored in dxs and dus.")
         .def("backwardPass", &Model::backwardPass, bp::args("self"),

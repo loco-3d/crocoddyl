@@ -178,15 +178,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   virtual bool checkAcceptance() override;
 
   /**
-   * @brief Update the Jacobian, Hessian and feasibility of the optimal control
-   * problem
-   *
-   * These derivatives are computed around the guess state and control
-   * trajectory. These trajectory can be set by using `setCandidate()`.
-   */
-  virtual void calcDir();
-
-  /**
    * @brief Run the backward pass (Riccati sweep)
    *
    * It assumes that the Jacobian and Hessians of the optimal control problem

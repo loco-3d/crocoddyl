@@ -1873,16 +1873,6 @@ class SolverFDDP(crocoddyl.SolverAbstract):
                 self.dVexp_full / ((1 - self.rho) * self.feas),
             )
 
-    # This is virtual function
-    def calcDir(self):
-        if not self.acceptStep:
-            self.problem.calc(self.xs, self.us)
-        self.cost = self.problem.calcDiff(self.xs, self.us)
-        self.ffeas = self.computeDynamicFeasibility()
-        self.gfeas = self.computeInequalityFeasibility()
-        self.hfeas = self.computeEqualityFeasibility()
-        self.feas = self.ffeas + self.gfeas + self.hfeas
-
     def backwardPass(self):
         self.Vx[-1][:] = self.problem.terminalData.Lx
         self.Vxx[-1][:, :] = self.problem.terminalData.Lxx

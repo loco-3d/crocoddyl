@@ -189,6 +189,14 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     return false;
   }
 
+  void calcDir() override {
+    if (bp::override calcDir = this->get_override("calcDir")) {
+      return bp::call<void>(calcDir.ptr());
+    } else {
+      return this->SolverAbstract::calcDir();
+    }
+  }
+
   void updateCandidate() override {
     if (bp::override updateCandidate = this->get_override("updateCandidate")) {
       return bp::call<void>(updateCandidate.ptr());
@@ -262,6 +270,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   Scalar default_tryStep(const Scalar step_length = Scalar(1.)) {
     return this->SolverAbstract::tryStep(step_length);
   }
+
+  void default_calcDir() { return this->SolverAbstract::calcDir(); }
 
   void allocateData() { SolverAbstract::allocateData(); }
 
