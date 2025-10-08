@@ -352,18 +352,6 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                 bp::return_value_policy<bp::reference_existing_object>()),
             "k")
         .add_property(
-            "dxs",
-            make_function(
-                &Model::get_dxs,
-                bp::return_value_policy<bp::reference_existing_object>()),
-            "linear changes in the state trajectory.")
-        .add_property(
-            "dus",
-            make_function(
-                &Model::get_dus,
-                bp::return_value_policy<bp::reference_existing_object>()),
-            "linear changes in the control trajectory.")
-        .add_property(
             "Vxc",
             make_function(
                 &Model::get_Vxc,

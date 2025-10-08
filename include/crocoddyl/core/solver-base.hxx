@@ -321,6 +321,7 @@ void SolverAbstractTpl<Scalar>::resizeRunningData() {
     const std::size_t ng = model->get_ng();
     us_[t].conservativeResize(nu);
     us_try_[t].conservativeResize(nu);
+    dus_[t].conservativeResize(nu);
     g_adj_[t].conservativeResize(ng);
   }
   g_adj_.back().conservativeResize(ng_T);
@@ -494,6 +495,8 @@ void SolverAbstractTpl<Scalar>::allocateData() {
   us_try_.resize(T);
   fs_.resize(T + 1);
   fs_try_.resize(T + 1);
+  dxs_.resize(T + 1);
+  dus_.resize(T);
   g_adj_.resize(T + 1);
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
@@ -507,12 +510,15 @@ void SolverAbstractTpl<Scalar>::allocateData() {
     us_try_[t] = VectorXs::Zero(nu);
     fs_[t] = VectorXs::Zero(ndx);
     fs_try_[t] = VectorXs::Zero(ndx);
+    dxs_[t] = VectorXs::Zero(ndx);
+    dus_[t] = VectorXs::Zero(nu);
     g_adj_[t] = VectorXs::Zero(ng);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
   fs_.back() = VectorXs::Zero(ndx);
   fs_try_.back() = VectorXs::Zero(ndx);
+  dxs_.back() = VectorXs::Zero(ndx);
   g_adj_.back() = VectorXs::Zero(ng_T);
   // Cost, merit and convergence
   is_feasible_ = false;
@@ -584,6 +590,18 @@ template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
 SolverAbstractTpl<Scalar>::get_fs() const {
   return fs_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_dxs() const {
+  return dxs_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverAbstractTpl<Scalar>::get_dus() const {
+  return dus_;
 }
 
 template <typename Scalar>

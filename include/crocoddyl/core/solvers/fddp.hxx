@@ -263,7 +263,6 @@ void SolverFDDPTpl<Scalar>::resizeRunningData() {
     K_[t].conservativeResize(nu, ndx);
     k_[t].conservativeResize(nu);
     us_try_[t].conservativeResize(nu);
-    dus_[t].conservativeResize(nu);
     FuTVxx_p_[t].conservativeResize(nu, ndx);
     Quuk_[t].conservativeResize(nu);
     if (nu != 0) {
@@ -927,8 +926,6 @@ void SolverFDDPTpl<Scalar>::allocateData() {
   K_.resize(T);
   k_.resize(T);
   dx_.resize(T);
-  dxs_.resize(T + 1);
-  dus_.resize(T);
   FxTVxx_p_.resize(T);
   FuTVxx_p_.resize(T);
   Quu_llt_.resize(T);
@@ -952,8 +949,6 @@ void SolverFDDPTpl<Scalar>::allocateData() {
     K_[t] = MatrixXsRowMajor::Zero(nu, ndx);
     k_[t] = VectorXs::Zero(nu);
     dx_[t] = VectorXs::Zero(ndx);
-    dxs_[t] = VectorXs::Zero(ndx);
-    dus_[t] = VectorXs::Zero(nu);
     FxTVxx_p_[t] = MatrixXsRowMajor::Zero(ndx, ndx);
     FuTVxx_p_[t] = MatrixXsRowMajor::Zero(nu, ndx);
     Quu_llt_[t] = Eigen::LLT<MatrixXs>(nu);
@@ -962,7 +957,6 @@ void SolverFDDPTpl<Scalar>::allocateData() {
   Vxx_.back() = MatrixXs::Zero(ndx, ndx);
   Vx_.back() = VectorXs::Zero(ndx);
   Lxx_dx_.back() = VectorXs::Zero(ndx);
-  dxs_.back() = VectorXs::Zero(ndx);
   fTVxx_p_ = VectorXs::Zero(ndx);
   // Terminal constraint data
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
@@ -1165,18 +1159,6 @@ template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
 SolverFDDPTpl<Scalar>::get_k() const {
   return k_;
-}
-
-template <typename Scalar>
-const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
-SolverFDDPTpl<Scalar>::get_dxs() const {
-  return dxs_;
-}
-
-template <typename Scalar>
-const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
-SolverFDDPTpl<Scalar>::get_dus() const {
-  return dus_;
 }
 
 template <typename Scalar>

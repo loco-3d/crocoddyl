@@ -38,10 +38,12 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::dImpr_;
   using SolverAbstract::dPhi_;
   using SolverAbstract::dPhiexp_;
+  using SolverAbstract::dus_;
   using SolverAbstract::DV_;
   using SolverAbstract::dV_;
   using SolverAbstract::dVexp_;
   using SolverAbstract::dVexp_full_;
+  using SolverAbstract::dxs_;
   using SolverAbstract::feas_;
   using SolverAbstract::ffeas_;
   using SolverAbstract::ffeas_try_;

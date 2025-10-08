@@ -368,6 +368,16 @@ class SolverAbstractTpl : public SolverBase {
   const std::vector<VectorXs>& get_fs() const;
 
   /**
+   * @brief Return the linear update in \f$\delta\mathbf{x}_s\f$
+   */
+  const std::vector<VectorXs>& get_dxs() const;
+
+  /**
+   * @brief Return the feedforward gains \f$\delta\mathbf{u}_s\f$
+   */
+  const std::vector<VectorXs>& get_dus() const;
+
+  /**
    * @brief Return the trial state trajectory \f$\mathbf{x}_s\f$
    */
   const std::vector<VectorXs>& get_xs_try() const;
@@ -641,6 +651,8 @@ class SolverAbstractTpl : public SolverBase {
       us_try_;  //!< Control trajectory computed by line-search procedure
   std::vector<VectorXs> fs_try_;  //!< Dynamics gaps in each node computed by
                                   //!< the line-search procedure
+  std::vector<VectorXs> dxs_;     //!< Linear state direction (size T + 1)
+  std::vector<VectorXs> dus_;     //!< Linear control direction (size T)
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was
                        //!< feasible

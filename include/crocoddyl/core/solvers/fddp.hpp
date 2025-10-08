@@ -530,16 +530,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   const std::vector<VectorXs>& get_k() const;
 
   /**
-   * @brief Return the linear update in \f$\delta\mathbf{x}_s\f$
-   */
-  const std::vector<VectorXs>& get_dxs() const;
-
-  /**
-   * @brief Return the feedforward gains \f$\delta\mathbf{u}_s\f$
-   */
-  const std::vector<VectorXs>& get_dus() const;
-
-  /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xc}_s}\f$
    */
   const std::vector<MatrixXs>& get_Vxc() const;
@@ -766,8 +756,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   std::vector<VectorXs> k_;          //!< Feed-forward terms \f$\mathbf{l}\f$
   std::vector<VectorXs>
       dx_;  //!< State error during the roll-out/forward-pass (size T)
-  std::vector<VectorXs> dxs_;  //!< Linear state direction (size T + 1)
-  std::vector<VectorXs> dus_;  //!< Linear control direction (size T)
   std::vector<MatrixXsRowMajor>
       FxTVxx_p_;  //!< Store the value of
                   //!< \f$\mathbf{f_x}^T\mathbf{V_{xx}}^{'}\f$
@@ -834,10 +822,12 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::dPhi_;
   using SolverAbstract::dPhiexp_;
   using SolverAbstract::dreg_;
+  using SolverAbstract::dus_;
   using SolverAbstract::DV_;
   using SolverAbstract::dV_;
   using SolverAbstract::dVexp_;
   using SolverAbstract::dVexp_full_;
+  using SolverAbstract::dxs_;
   using SolverAbstract::feas_;
   using SolverAbstract::ffeas_;
   using SolverAbstract::ffeas_try_;

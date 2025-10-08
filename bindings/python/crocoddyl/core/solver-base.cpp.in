@@ -218,6 +218,8 @@ struct SolverAbstractVisitor
         .def_readwrite("xs", &Model::xs_, "state trajectory")
         .def_readwrite("us", &Model::us_, "control sequence")
         .def_readwrite("fs", &Model::fs_, "dynamics gaps")
+        .def_readwrite("dxs", &Model::dxs_, "linear changes in the state trajectory")
+        .def_readwrite("dus", &Model::dus_, "linear changes in the control trajectory")
         .def_readwrite("xs_try", &Model::xs_try_,
                        "state trajectory computed in the line-search procedure")
         .def_readwrite("us_try", &Model::us_try_,
