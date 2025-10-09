@@ -56,6 +56,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::merit_;
+  using SolverAbstract::ng_T_;
+  using SolverAbstract::nh_T_;
   using SolverAbstract::problem_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;

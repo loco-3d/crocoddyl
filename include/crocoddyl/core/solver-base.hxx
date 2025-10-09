@@ -22,6 +22,7 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
       reg_min_(ScaleNumerics<Scalar>(1e-9)),
       reg_max_(ScaleNumerics<Scalar>(1e9, 1e-4)),
       nh_T_(problem->get_terminalModel()->get_nh_T()),
+      ng_T_(problem->get_terminalModel()->get_ng_T()),
       acceptstep_(false),
       recalcdir_(true) {
   allocateData();
@@ -40,11 +41,14 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                       const Scalar init_reg) {
   START_PROFILER("SolverAbstract::solve");
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   if (problem_->is_updated()) {
     resizeData();
-  } else if (nh_T_ != nh_T && nh_T != 0) {  // we need to update terminal data
-    nh_T_ = nh_T;
+  } else if ((nh_T_ != nh_T && nh_T != 0) ||
+             (ng_T_ != ng_T && ng_T != 0)) {  // we need to update terminal data
     resizeTerminalData();
+    nh_T_ = nh_T;
+    ng_T_ = ng_T;
   }
   // TODO: Deprecate isfeasible_. Update setCandidate API.
   setCandidate(init_xs, init_us, false);

@@ -360,7 +360,11 @@ struct SolverAbstractVisitor
         .def_readwrite("iter", &Model::iter_,
                        "number of iterations runned in solve()")
         .def_readwrite("acceptStep", &Model::acceptstep_,
-                       "true if the last step is accepted");
+                       "true if the last step is accepted")
+        .def_readonly("nh_T", &Model::nh_T_,
+                        "dimension of terminal equality constraints")
+        .def_readonly("ng_T", &Model::ng_T_,
+                        "dimension of terminal inequality constraints");
   }
 };
 

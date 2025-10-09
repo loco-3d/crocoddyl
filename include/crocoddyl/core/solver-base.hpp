@@ -731,7 +731,8 @@ class SolverAbstractTpl : public SolverBase {
   Scalar reg_max_;               //!< Maximum allowed regularization value
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
-  std::size_t nh_T_;             //!< Dimension of terminal constraints
+  std::size_t nh_T_;             //!< Dimension of terminal equality constraints
+  std::size_t ng_T_;  //!< Dimension of termianl inequality constraints
 
   bool acceptstep_;
   bool recalcdir_;
