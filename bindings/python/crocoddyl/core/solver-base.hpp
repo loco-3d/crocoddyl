@@ -197,6 +197,17 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     }
   }
 
+  void setCandidate(
+      const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
+      const bool is_feasible = false) override {
+    if (bp::override setCandidate = this->get_override("setCandidate")) {
+      return bp::call<void>(setCandidate.ptr(), xs_warm, us_warm, is_feasible);
+    } else {
+      return this->SolverAbstract::setCandidate(xs_warm, us_warm, is_feasible);
+    }
+  }
+
   void updateCandidate() override {
     if (bp::override updateCandidate = this->get_override("updateCandidate")) {
       return bp::call<void>(updateCandidate.ptr());
@@ -272,6 +283,13 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   }
 
   void default_calcDir() { return this->SolverAbstract::calcDir(); }
+
+  void default_setCandidate(
+      const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
+      const bool is_feasible = false) {
+    return this->SolverAbstract::setCandidate(xs_warm, us_warm, is_feasible);
+  }
 
   void allocateData() { SolverAbstract::allocateData(); }
 

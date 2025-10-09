@@ -244,7 +244,7 @@ class SolverAbstractTpl : public SolverBase {
    * @param[in] isFeasible  true if the \p xs are obtained from integrating the
    * \p us (rollout)
    */
-  void setCandidate(
+  virtual void setCandidate(
       const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
       const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
       const bool is_feasible = false);

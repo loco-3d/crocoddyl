@@ -23,16 +23,14 @@ struct SolverAbstractVisitor
     : public bp::def_visitor<SolverAbstractVisitor<Model>> {
   typedef typename Model::SolverAbstract SolverAbstract;
   typedef typename SolverAbstract::Scalar Scalar;
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setCandidate_overloads,
-                                         SolverAbstract::setCandidate, 0, 3)
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def("solve", &Model::solve, &Model::default_solve,
-           (bp::arg("init_xs")    = DefaultVector<Scalar>::value,
-               bp::arg("init_us")    = DefaultVector<Scalar>::value,
-               bp::arg("maxiter")    = 100,
-               bp::arg("is_feasible")= false,
-               bp::arg("reg_init")   = std::numeric_limits<Scalar>::quiet_NaN() ),
+           (bp::arg("init_xs") = DefaultVector<Scalar>::value,
+            bp::arg("init_us") = DefaultVector<Scalar>::value,
+            bp::arg("maxiter") = 100,
+            bp::arg("is_feasible") = false,
+            bp::arg("reg_init") = std::numeric_limits<Scalar>::quiet_NaN()),
            "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
            "terms.\n\n"
            "From an initial guess init_xs,init_us (feasible or not), iterate "
@@ -131,9 +129,9 @@ struct SolverAbstractVisitor
             ":return the total cost around the guess trajectory.")
         .def("allocateData", &Model::allocateData, bp::args("self"),
              "Allocate the data used by the solver.")
-        .def("setCandidate", &Model::setCandidate,
-             setCandidate_overloads(
-                 bp::args("self", "xs", "us", "isFeasible"),
+        .def("setCandidate", &Model::setCandidate, &Model::default_setCandidate,
+             (bp::arg("xs") = DefaultVector<Scalar>::value,
+              bp::arg("us") = DefaultVector<Scalar>::value, bp::arg("isFeasible") = true),
                  "Set the solver candidate warm-point values (xs, us).\n\n"
                  "The solver candidates are defined as a state and control "
                  "trajectory (xs, us) of T+1 and T elements, respectively. "
@@ -142,7 +140,7 @@ struct SolverAbstractVisitor
                  ":param xs: state trajectory of T+1 elements (default []).\n"
                  ":param us: control trajectory of T elements (default []).\n"
                  ":param isFeasible: true if the xs are obtained from "
-                 "integrating the us (rollout)."))
+                 "integrating the us (rollout).")
         .def("updateCandidate", pure_virtual(&Model::updateCandidate),
              bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
