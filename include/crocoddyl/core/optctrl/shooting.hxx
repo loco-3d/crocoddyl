@@ -524,6 +524,11 @@ void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
 }
 
 template <typename Scalar>
+void ShootingProblemTpl<Scalar>::set_is_updated(const bool is_updated) {
+  is_updated_ = is_updated;
+}
+
+template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
   return nx_;
 }

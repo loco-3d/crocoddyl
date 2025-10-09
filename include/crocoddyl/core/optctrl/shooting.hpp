@@ -258,6 +258,11 @@ class ShootingProblemTpl {
   void set_nthreads(const int nthreads);
 
   /**
+   * @brief Modify the is_updated flag
+   */
+  void set_is_updated(const bool is_updated);
+
+  /**
    * @brief Return the dimension of the state tuple
    */
   std::size_t get_nx() const;
