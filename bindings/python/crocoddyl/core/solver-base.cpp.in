@@ -138,6 +138,22 @@ struct SolverAbstractVisitor
             "instance before computeDirection(False)).")
         .def("allocateData", &Model::allocateData, bp::args("self"),
              "Allocate the data used by the solver.")
+        .def(
+            "resizeRunningData", &Model::resizeRunningData,
+            &Model::default_resizeRunningData, bp::args("self"),
+            "Resize data associated with the running nodes of the shooting "
+            "problem.\n\n"
+            "This function is invoked by resizeData() whenever the horizon or "
+            "the running action models change. Derived classes can override it "
+            "to adjust their own storage before the solver resumes.")
+        .def(
+            "resizeTerminalData", &Model::resizeTerminalData,
+            &Model::default_resizeTerminalData, bp::args("self"),
+            "Resize data associated with the terminal model of the shooting "
+            "problem.\n\n"
+            "This function is invoked by resizeData() whenever the terminal "
+            "model changes. Derived classes can override it to resize custom "
+            "storage that depends on the terminal constraints or cost.")
         .def("setCandidate", &Model::setCandidate, &Model::default_setCandidate,
              (bp::arg("xs") = DefaultVector<Scalar>::value,
               bp::arg("us") = DefaultVector<Scalar>::value, bp::arg("isFeasible") = true),

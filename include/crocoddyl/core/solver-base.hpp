@@ -642,7 +642,25 @@ class SolverAbstractTpl : public SolverBase {
    * @brief Allocate all the basic data needed in solvers
    */
   void allocateData();
+
+  /**
+   * @brief Resize data associated with the running models of the shooting
+   * problem.
+   *
+   * This function is invoked by `resizeData()` whenever the horizon or the
+   * running action models change. Derived classes can override it to adjust
+   * their own storage before the solver resumes.
+   */
   virtual void resizeRunningData();
+
+  /**
+   * @brief Resize data associated with the terminal model of the shooting
+   * problem.
+   *
+   * This function is invoked by `resizeData()` whenever the terminal model
+   * changes. Derived classes can override it to resize custom storage that
+   * depends on the terminal constraints or cost.
+   */
   virtual void resizeTerminalData();
 
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem

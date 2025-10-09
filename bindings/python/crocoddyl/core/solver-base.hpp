@@ -269,6 +269,24 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
     }
   }
 
+  void resizeRunningData() override {
+    if (bp::override resizeRunningData =
+            this->get_override("resizeRunningData")) {
+      return bp::call<void>(resizeRunningData.ptr());
+    } else {
+      return this->SolverAbstract::resizeRunningData();
+    }
+  }
+
+  void resizeTerminalData() override {
+    if (bp::override resizeTerminalData =
+            this->get_override("resizeTerminalData")) {
+      return bp::call<void>(resizeTerminalData.ptr());
+    } else {
+      return this->SolverAbstract::resizeTerminalData();
+    }
+  }
+
   bool default_solve(
       const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
       const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
@@ -289,6 +307,14 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
       const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
       const bool is_feasible = false) {
     return this->SolverAbstract::setCandidate(xs_warm, us_warm, is_feasible);
+  }
+
+  void default_resizeRunningData() {
+    return this->SolverAbstract::resizeRunningData();
+  }
+
+  void default_resizeTerminalData() {
+    return this->SolverAbstract::resizeTerminalData();
   }
 
   void allocateData() { SolverAbstract::allocateData(); }
