@@ -50,16 +50,20 @@ struct SolverAbstractVisitor
            "init_us).\n"
            ":returns A boolean that describes if convergence was reached.")
         .def("computeDirection", pure_virtual(&Model::computeDirection),
-            (bp::args("recalc") = true),
+             (bp::args("recalc") = true),
              "Compute the search direction (dx, du) for the current guess (xs, "
              "us).\n\n"
              "You must call setCandidate first in order to define the current "
              "guess. A current guess defines a state and control trajectory "
-             "(xs, us) of T+1 and T elements, respectively.\n"
-             ":params recalc: true for recalculating the derivatives at "
-             "current state and control.\n"
-             ":returns the search direction dx, du and the dual lambdas as "
-             "lists of T+1, T and T+1 lengths.")
+             "(xs, us) of T+1 and T elements, respectively. When `recalc` is "
+             "True (the default), the method refreshes the linearization by "
+             "calling calcDir() before running the backward pass. Setting "
+             "`recalc=False` reuses the most recent derivatives, which is "
+             "useful when calcDir() has already been triggered explicitly. "
+             "The resulting state, control, and dual variations are stored in "
+             "the solver data structures (e.g., dxs_, dus_, lambdas_).\n"
+             ":param recalc: request a fresh derivative computation before "
+             "building the search direction (default True).")
         .def(
             "tryStep", &Model::tryStep, &Model::default_tryStep,
             (bp::args("stepLength") = Scalar(1.)),
@@ -123,24 +127,31 @@ struct SolverAbstractVisitor
              ":return true if we accept the step, otherwise false")
         .def(
             "calcDir", &Model::calcDir, &Model::default_calcDir, bp::args("self"),
-            "Update the Jacobian and Hessian of the optimal control problem\n\n"
-            "These derivatives are computed around the guess state and control "
-            "trajectory. These trajectory can be set by using setCandidate.\n"
-            ":return the total cost around the guess trajectory.")
+            "Refresh the linearization of the optimal control problem around "
+            "the current candidate.\n\n"
+            "The routine evaluates the cost, dynamics, and constraint models "
+            "along the trajectories stored in xs and us, updating the "
+            "first- and second-order derivatives together with the solver's "
+            "feasibility measures. The main solve loop calls calcDir() "
+            "automatically when a new linearization is required, but the "
+            "method remains available when driving the solver manually (for "
+            "instance before computeDirection(False)).")
         .def("allocateData", &Model::allocateData, bp::args("self"),
              "Allocate the data used by the solver.")
         .def("setCandidate", &Model::setCandidate, &Model::default_setCandidate,
              (bp::arg("xs") = DefaultVector<Scalar>::value,
               bp::arg("us") = DefaultVector<Scalar>::value, bp::arg("isFeasible") = true),
-                 "Set the solver candidate warm-point values (xs, us).\n\n"
-                 "The solver candidates are defined as a state and control "
-                 "trajectory (xs, us) of T+1 and T elements, respectively. "
-                 "Additionally, we need to define is (xs,us) pair is feasible, "
-                 "this means that the dynamics rollout give us produces xs.\n"
-                 ":param xs: state trajectory of T+1 elements (default []).\n"
-                 ":param us: control trajectory of T elements (default []).\n"
-                 ":param isFeasible: true if the xs are obtained from "
-                 "integrating the us (rollout).")
+             "Set the solver candidate warm-point values (xs, us).\n\n"
+             "The solver candidates are defined as a state and control "
+             "trajectory (xs, us) of T+1 and T elements, respectively. "
+             "Additionally, we need to specify whether the pair is feasible, "
+             "i.e., whether integrating us produces xs. Updating the "
+             "candidate invalidates the previous linearization, so the next "
+             "search-direction computation will refresh the derivatives on "
+             "demand.\n"
+             ":param xs: state trajectory of T+1 elements (default []).\n"
+             ":param us: control trajectory of T elements (default []).\n"
+             ":param isFeasible: true if xs results from integrating us (rollout).")
         .def("updateCandidate", pure_virtual(&Model::updateCandidate),
              bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "

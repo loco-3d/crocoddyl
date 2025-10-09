@@ -44,7 +44,13 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   virtual ~SolverIntroTpl() = default;
 
   /**
-   * @copybrief SolverAbstract::calcDir
+   * @brief Refresh the Intro linearization and constraint factorizations.
+   *
+   * The method first delegates to `SolverFDDP::calcDir()` to update the
+   * first- and second-order derivatives of the shooting problem. It then
+   * processes the control-equality constraints according to the selected
+   * equality solver (null-space or Schur complement), storing the factors that
+   * are reused during the backward pass.
    */
   virtual void calcDir() override;
 

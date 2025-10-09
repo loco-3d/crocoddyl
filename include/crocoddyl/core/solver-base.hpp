@@ -128,13 +128,16 @@ class SolverAbstractTpl : public SolverBase {
    * You must call `setCandidate()` first in order to define the current guess.
    * A current guess defines a state and control trajectory
    * \f$(\mathbf{x}^k_s,\mathbf{u}^k_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
-   * respectively.
+   * respectively. When \p recalc is true (the default in the provided
+   * algorithms), the method refreshes the linearization by calling
+   * `calcDir()` before running the backward pass. Setting \p recalc to false
+   * reuses the most recent derivatives, which is useful when `calcDir()` has
+   * already been triggered explicitly. The resulting state and control
+   * variations, together with the dynamics multipliers, are stored in the
+   * solver data structures (e.g., `dxs_`, `dus_`, and `lambdas_`).
    *
-   * @param[in] recalc  true for recalculating the derivatives at current state
-   * and control
-   * @return  The search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ and
-   * the dual lambdas as lists of \f$T+1\f$, \f$T\f$ and \f$T+1\f$ lengths,
-   * respectively
+   * @param[in] recalc  true to refresh the derivatives before computing the
+   * search direction
    */
   virtual void computeDirection(const bool recalc) = 0;
 
@@ -220,11 +223,15 @@ class SolverAbstractTpl : public SolverBase {
   virtual bool checkAcceptance();
 
   /**
-   * @brief Update the Jacobian, Hessian and feasibility of the optimal control
-   * problem
+   * @brief Refresh the linearization of the optimal control problem around the
+   * current candidate.
    *
-   * These derivatives are computed around the guess state and control
-   * trajectory. These trajectory can be set by using `setCandidate()`.
+   * This routine evaluates the shooting problem along the candidate
+   * trajectories `(xs_, us_)` to update the cost, dynamics, and constraint
+   * derivatives together with the feasibility metrics used by the solver. The
+   * main `solve()` loop invokes `calcDir()` automatically whenever a new
+   * linearization is required, but the method remains available when driving
+   * the solver manually (e.g., before calling `computeDirection(false)`).
    */
   virtual void calcDir();
 
@@ -237,7 +244,9 @@ class SolverAbstractTpl : public SolverBase {
    * respectively. Additionally, we need to define the dynamic feasibility of
    * the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ pair. Note that the trajectories are
    * feasible if \f$\mathbf{x}_s\f$ is the resulting trajectory from the system
-   * rollout with \f$\mathbf{u}_s\f$ inputs.
+   * rollout with \f$\mathbf{u}_s\f$ inputs. Updating the candidate invalidates
+   * any previously computed linearization; the next call to
+   * `computeDirection()` will therefore refresh the derivatives on demand.
    *
    * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
    * @param[in] us          control trajectory of \f$T\f$ elements (default [])

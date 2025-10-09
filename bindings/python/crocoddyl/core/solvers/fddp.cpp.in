@@ -25,6 +25,8 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                                          Model::computeDirection, 0, 1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, Model::tryStep, 0,
                                          1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setCandidate,
+                                         Model::setCandidate, 0, 3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeCandidate, Model::computeCandidate, 0,
                                          1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
@@ -65,13 +67,16 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "Compute the search direction (dx, du) for the current guess "
                  "(xs, us).\n\n"
                  "You must call setCandidate first in order to define the "
-                 "current\n"
-                 "guess. A current guess defines a state and control "
-                 "trajectory (xs, us) of T+1 and T elements, respectively.\n"
-                 ":params recalc: true for recalculating the derivatives at "
-                 "current state and control.\n"
-                 ":returns the search direction dx, du and the dual lambdas as "
-                 "lists of T+1, T and T+1 lengths."))
+                 "current guess. A current guess defines a state and control "
+                 "trajectory (xs, us) of T+1 and T elements, respectively. When "
+                 "`recalc` is True (the default), the method refreshes the "
+                 "linearization by calling calcDir() before running the Riccati "
+                 "backward pass. Setting `recalc=False` reuses the most recent "
+                 "derivatives, which is useful when calcDir() has already been "
+                 "triggered explicitly. The resulting state, control, and dual "
+                 "variations are stored internally (dxs_, dus_, lambdas_).\n"
+                 ":param recalc: request a fresh derivative computation before "
+                 "building the search direction (default True)."))
         .def("tryStep", &Model::tryStep,
              SolverFDDP_trySteps(
                  bp::args("self", "stepLength"),
@@ -84,12 +89,29 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "improvement dV and merit improvement dPhi.\n"
                  ":param stepLength: step length (default 1).\n"
                  ":returns the cost improvement."))
+        .def("setCandidate", &Model::setCandidate,
+             SolverFDDP_setCandidate(
+                 bp::args("self", "xs", "us", "isFeasible"),
+             "Set the solver candidate warm-point values (xs, us).\n\n"
+             "The solver candidates are defined as a state and control "
+             "trajectory (xs, us) of T+1 and T elements, respectively. "
+             "Additionally, we need to specify whether the pair is feasible, "
+             "i.e., whether integrating us produces xs. Updating the "
+             "candidate invalidates the previous linearization, so the next "
+             "search-direction computation will refresh the derivatives on "
+             "demand.\n"
+             ":param xs: state trajectory of T+1 elements (default []).\n"
+             ":param us: control trajectory of T elements (default []).\n"
+             ":param isFeasible: true if xs results from integrating us (rollout)."))
         .def("computeCandidate", &Model::computeCandidate,
              SolverFDDP_computeCandidate(
                  bp::args("self", "stepLength"),
-                 "Rollout the system with a predefined step length.\n\n"
-                 ":param stepLength: step length (default 1)\n"
-                 ":returns the cost improvement."))
+                 "Compute new candidate trajectories using a predefined step "
+                 "length.\n\n"
+                 "The method rolls the system forward along the current policy "
+                 "and updates the candidate primal/dual variables so that they "
+                 "can be evaluated before acceptance.\n"
+                 ":param stepLength: step length (default 1)."))
         .def("forwardPass", &Model::forwardPass,
              SolverFDDP_forwardPass(
                  bp::args("self", "stepLength"),
@@ -133,8 +155,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
         .def("backwardPass", &Model::backwardPass, bp::args("self"),
              "Run the backward pass (Riccati sweep)\n\n"
              "It assumes that the Jacobian and Hessians of the optimal control "
-             "problem have been compute. These terms are computed by running "
-             "calc.")
+             "problem have already been refreshed (see calcDir()).")
         .def("batchPass", &Model::batchPass, bp::args("self"),
              "Run the batch pass to account for its constraints\n\n"
              "Update the direction and feed-forward term to account for the "

@@ -88,7 +88,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::computeFeasibility;
   using SolverAbstract::computeInequalityFeasibility;
   using SolverAbstract::resizeData;
-  using SolverAbstract::setCandidate;
 
   /**
    * @brief Initialize the FDDP solver

@@ -22,10 +22,12 @@ struct SolverIntroVisitor : public bp::def_visitor<SolverIntroVisitor<Model>> {
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def("calcDir", &Model::calcDir, bp::args("self"),
-           "Update the Jacobian and Hessian of the optimal control problem\n\n"
-           "These derivatives are computed around the guess state and control "
-           "trajectory. These trajectory can be set by using setCandidate.\n"
-           ":return the total cost around the guess trajectory.")
+           "Refresh the Intro linearization and constraint factorizations.\n\n"
+           "The method first delegates to SolverFDDP.calcDir() to update the "
+           "first- and second-order derivatives along the current candidate. It "
+           "then processes the control-equality constraints according to the "
+           "selected equality solver, storing the factors reused during the "
+           "backward pass.")
         .def("computePolicy", &Model::computePolicy, bp::args("self", "t"),
              "Compute the local policy.\n\n"
              "This function is called in the backward pass after updating the "
