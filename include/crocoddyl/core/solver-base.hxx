@@ -365,6 +365,11 @@ Scalar SolverAbstractTpl<Scalar>::computeFeasibility(
         tmp_feas_ += fs_[t].template lpNorm<1>();
       }
       break;
+    case L2:
+      for (std::size_t t = 0; t < fs.size(); ++t) {
+        tmp_feas_ += fs_[t].template lpNorm<2>();
+      }
+      break;
   }
   return tmp_feas_;
 }
@@ -404,6 +409,12 @@ Scalar SolverAbstractTpl<Scalar>::computeDynamicFeasibility() {
         tmp_feas_ += fs_[t + 1].template lpNorm<1>();
       }
       break;
+    case L2:
+      tmp_feas_ = fs_[0].template lpNorm<2>();
+      for (std::size_t t = 0; t < T; ++t) {
+        tmp_feas_ += fs_[t + 1].template lpNorm<2>();
+      }
+      break;
   }
   STOP_PROFILER("SolverAbstract::computeDynamicFeasibility");
   return tmp_feas_;
@@ -418,23 +429,28 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
+  for (std::size_t t = 0; t < T; ++t) {
+    if (models[t]->get_ng() > 0) {
+      g_adj_[t] = datas[t]
+                      ->g.cwiseMax(models[t]->get_g_lb())
+                      .cwiseMin(models[t]->get_g_ub());
+    }
+  }
+  if (problem_->get_terminalModel()->get_ng_T() > 0) {
+    g_adj_.back() = problem_->get_terminalData()
+                        ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
+                        .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+  }
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          g_adj_[t] = datas[t]
-                          ->g.cwiseMax(models[t]->get_g_lb())
-                          .cwiseMin(models[t]->get_g_ub());
           tmp_feas_ = std::max(
               tmp_feas_,
               (datas[t]->g - g_adj_[t]).template lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        g_adj_.back() =
-            problem_->get_terminalData()
-                ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
-                .cwiseMin(problem_->get_terminalModel()->get_g_ub());
         tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
                          .template lpNorm<Eigen::Infinity>();
       }
@@ -442,20 +458,25 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          g_adj_[t] = datas[t]
-                          ->g.cwiseMax(models[t]->get_g_lb())
-                          .cwiseMin(models[t]->get_g_ub());
           tmp_feas_ = std::max(tmp_feas_,
                                (datas[t]->g - g_adj_[t]).template lpNorm<1>());
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        g_adj_.back() =
-            problem_->get_terminalData()
-                ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
-                .cwiseMin(problem_->get_terminalModel()->get_g_ub());
         tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
                          .template lpNorm<1>();
+      }
+      break;
+    case L2:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_ng() > 0) {
+          tmp_feas_ = std::max(tmp_feas_,
+                               (datas[t]->g - g_adj_[t]).template lpNorm<2>());
+        }
+      }
+      if (problem_->get_terminalModel()->get_ng_T() > 0) {
+        tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
+                         .template lpNorm<2>();
       }
       break;
   }
@@ -494,6 +515,16 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
       }
       if (problem_->get_terminalModel()->get_nh_T() > 0) {
         tmp_feas_ += problem_->get_terminalData()->h.template lpNorm<1>();
+      }
+      break;
+    case L2:
+      for (std::size_t t = 0; t < T; ++t) {
+        if (models[t]->get_nh() > 0) {
+          tmp_feas_ += datas[t]->h.template lpNorm<2>();
+        }
+      }
+      if (problem_->get_terminalModel()->get_nh_T() > 0) {
+        tmp_feas_ += problem_->get_terminalData()->h.template lpNorm<2>();
       }
       break;
   }

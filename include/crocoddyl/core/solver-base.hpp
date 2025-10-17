@@ -27,7 +27,7 @@ const std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>
 
 #define DEFAULT_VECTOR DefaultVector<double>::value
 
-enum FeasibilityNorm { LInf = 0, L1 };
+enum FeasibilityNorm { LInf = 0, L1 = 1, L2 = 2 };
 
 class SolverBase {
  public:

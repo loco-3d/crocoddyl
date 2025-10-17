@@ -418,6 +418,7 @@ void exposeSolverAbstract() {
   bp::enum_<FeasibilityNorm>("FeasibilityNorm")
       .value("LInf", LInf)
       .value("L1", L1)
+      .value("L2", L2)
       .export_values();
 #endif
 
