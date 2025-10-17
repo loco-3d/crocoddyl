@@ -302,6 +302,8 @@ struct SolverAbstractVisitor
         .def_readwrite("hfeas_try", &Model::hfeas_try_,
                        "feasibility of the equality constraint for the current "
                        "step length")
+        .def_readwrite("g_adj", &Model::g_adj_,
+                       "adjusted inequality bound")
         .add_property("preg", bp::make_function(&Model::get_preg),
                       bp::make_function(&Model::set_preg),
                       "primal-variable regularization")

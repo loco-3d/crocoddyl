@@ -49,6 +49,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::ffeas_try_;
   using SolverAbstract::fs_;
   using SolverAbstract::fs_try_;
+  using SolverAbstract::g_adj_;
   using SolverAbstract::gfeas_;
   using SolverAbstract::gfeas_try_;
   using SolverAbstract::hfeas_;
