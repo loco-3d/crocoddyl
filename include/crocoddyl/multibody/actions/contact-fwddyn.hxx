@@ -7,6 +7,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <limits>
+
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -76,6 +78,21 @@ void DifferentialActionModelContactFwdDynamicsTpl<Scalar>::init() {
 
   Base::set_u_lb(Scalar(-1.) * pinocchio_->effortLimit.tail(nu_));
   Base::set_u_ub(Scalar(+1.) * pinocchio_->effortLimit.tail(nu_));
+
+  VectorXs u_lb = Base::get_u_lb();
+  VectorXs u_ub = Base::get_u_ub();
+
+  for (std::size_t i = 0; i < static_cast<std::size_t>(u_lb.size()); ++i) {
+    if (u_lb[i] <= -std::numeric_limits<Scalar>::max()) {
+      u_lb[i] = -std::numeric_limits<Scalar>::quiet_NaN();
+    }
+    if (u_ub[i] >= std::numeric_limits<Scalar>::max()) {
+      u_ub[i] = std::numeric_limits<Scalar>::quiet_NaN();
+    }
+  }
+
+  Base::set_u_lb(u_lb);
+  Base::set_u_ub(u_ub);
 }
 
 template <typename Scalar>

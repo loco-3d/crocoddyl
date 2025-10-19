@@ -27,6 +27,21 @@ template <typename State>
 struct StateMultibodyVisitor
     : public bp::def_visitor<StateMultibodyVisitor<State>> {
   typedef typename State::Scalar Scalar;
+  typedef typename State::VectorXs VectorXs;
+
+  static VectorXs safe_diff_dx(const State& state, const VectorXs& x0,
+                               const VectorXs& x1) {
+    VectorXs dx(state.get_ndx());
+    state.safe_diff(x0, x1, dx);
+    return dx;
+  }
+
+  static VectorXs safe_integrate_x(const State& state, const VectorXs& x,
+                                   const VectorXs& dx) {
+    VectorXs xout(state.get_nx());
+    state.safe_integrate(x, dx, xout);
+    return xout;
+  }
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Jdiffs,
                                          StateAbstractTpl<Scalar>::Jdiff_Js, 2,
                                          3)
@@ -58,6 +73,21 @@ struct StateMultibodyVisitor
              ":param x: current state (dim state.nx()).\n"
              ":param dx: displacement of the state (dim state.ndx()).\n"
              ":return x + dx value (dim state.nx()).")
+        .def("safe_diff", &safe_diff_dx, bp::args("self", "x0", "x1"),
+            "Sanitised diff operator that neutralises invalid components and "
+            "propagates NaNs where the result cannot be trusted.\n\n"
+            ":param x0: current state (dim state.nx()).\n"
+            ":param x1: next state (dim state.nx()).\n"
+            ":return x1 - x0 value with NaNs on invalid entries (dim "
+            "state.ndx()).")
+        .def("safe_integrate", &safe_integrate_x,
+             bp::args("self", "x", "dx"),
+             "Sanitised integrate operator that clamps invalid inputs and "
+             "marks affected configuration or velocity entries with NaNs.\n\n"
+             ":param x: current state (dim state.nx()).\n"
+             ":param dx: displacement of the state (dim state.ndx()).\n"
+             ":return x + dx value with NaNs on invalid entries (dim "
+             "state.nx()).")
         .def("Jdiff", &State::Jdiff_Js,
              Jdiffs(bp::args("self", "x0", "x1", "firstsecond"),
                     "Compute the partial derivatives of the diff operator.\n\n"

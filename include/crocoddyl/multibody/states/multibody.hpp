@@ -73,6 +73,12 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   virtual void integrate(const Eigen::Ref<const VectorXs>& x,
                          const Eigen::Ref<const VectorXs>& dx,
                          Eigen::Ref<VectorXs> xout) const override;
+  void safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                 const Eigen::Ref<const VectorXs>& x1,
+                 Eigen::Ref<VectorXs> dxout) const;
+  void safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                      const Eigen::Ref<const VectorXs>& dx,
+                      Eigen::Ref<VectorXs> xout) const;
   virtual void Jdiff(const Eigen::Ref<const VectorXs>&,
                      const Eigen::Ref<const VectorXs>&,
                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
@@ -116,6 +122,16 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  private:
   std::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
   VectorXs x0_;                                //!< Zero state
+  mutable VectorXs q0_tmp_;                    //!< Scratch configuration copy
+  mutable VectorXs q1_tmp_;                    //!< Scratch configuration copy
+  mutable VectorXs v0_tmp_;                    //!< Scratch velocity copy
+  mutable VectorXs v1_tmp_;                    //!< Scratch velocity copy
+  mutable std::vector<bool>
+      invalid_cfg_mask_;  //!< Mask for invalid config tangents
+  mutable std::vector<bool>
+      invalid_vel_mask_;  //!< Mask for invalid velocity components
+  mutable std::vector<bool>
+      invalid_cfg_pos_mask_;  //!< Mask for invalid configuration entries
 };
 
 }  // namespace crocoddyl
