@@ -262,7 +262,6 @@ void SolverFDDPTpl<Scalar>::resizeRunningData() {
     Qu_[t].conservativeResize(nu);
     K_[t].conservativeResize(nu, ndx);
     k_[t].conservativeResize(nu);
-    us_try_[t].conservativeResize(nu);
     FuTVxx_p_[t].conservativeResize(nu, ndx);
     Quuk_[t].conservativeResize(nu);
     if (nu != 0) {
