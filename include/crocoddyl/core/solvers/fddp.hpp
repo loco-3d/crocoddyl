@@ -851,6 +851,10 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/fddp.hxx"
 
+CROCODDYL_DISABLE_WARNING_DEPRECATED
+
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverFDDPTpl)
+
+CROCODDYL_ENABLE_WARNING_DEPRECATED
 
 #endif  // CROCODDYL_CORE_SOLVERS_FDDP_HPP_
