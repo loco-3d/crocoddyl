@@ -101,6 +101,7 @@ option(ENABLE_VECTORIZATION
        "Enable vectorization and further processor-related optimizations" OFF)
 option(BUILD_BENCHMARK "Build the benchmark" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
+option(BUILD_WITH_ODYN "Build the ODYN wrapper." ON)
 option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
@@ -155,6 +156,10 @@ if(BUILD_EXAMPLES
       GIT_TAG v4.4.0)
     FetchContent_MakeAvailable("example-robot-data")
   endif()
+endif()
+
+if(BUILD_WITH_ODYN)
+  add_optional_dependency(odyn)
 endif()
 
 if(BUILD_WITH_IPOPT)
@@ -227,6 +232,12 @@ if(BUILD_WITH_MULTITHREADS)
       "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_MULTITHREADING -DCROCODDYL_WITH_NTHREADS=${BUILD_WITH_NTHREADS})"
   )
   set(OMP_NUM_THREADS ${BUILD_WITH_NTHREADS})
+endif()
+
+# Add Odyn
+if(BUILD_WITH_ODYN AND ODYN_FOUND)
+  add_definitions(-DCROCODDYL_WITH_ODYN)
+  link_directories(${ODYN_LIBRARY_DIRS})
 endif()
 
 # Add Ipopt
@@ -310,6 +321,10 @@ if(UNIX AND NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
+  endif()
+
+  if(BUILD_WITH_ODYN AND ODYN_FOUND)
+    target_link_libraries(${PROJECT_NAME} odyn::odyn)
   endif()
 
   if(BUILD_WITH_IPOPT AND IPOPT_FOUND)
