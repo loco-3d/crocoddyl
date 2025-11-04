@@ -175,14 +175,14 @@ void StateMultibodyTpl<Scalar>::safe_diff(const Eigen::Ref<const VectorXs>& x0,
       // Check for invalid quaternion components
       bool quat_invalid = false;
       for (std::size_t k = 0; k < 4; ++k) {
-        quat_invalid = quat_invalid || !std::isfinite(q0_clean_[iq_quat + k]) ||
-                       !std::isfinite(q1_clean_[iq_quat + k]);
+        quat_invalid = quat_invalid || !isfinite(q0_clean_[iq_quat + k]) ||
+                       !isfinite(q1_clean_[iq_quat + k]);
       }
       bool trans_invalid = false;
       if (freeflyer) {
         for (std::size_t k = 0; k < 3; ++k) {
-          trans_invalid = trans_invalid || !std::isfinite(q0_clean_[iq + k]) ||
-                          !std::isfinite(q1_clean_[iq + k]);
+          trans_invalid = trans_invalid || !isfinite(q0_clean_[iq + k]) ||
+                          !isfinite(q1_clean_[iq + k]);
         }
       }
       if (quat_invalid) {
@@ -206,8 +206,8 @@ void StateMultibodyTpl<Scalar>::safe_diff(const Eigen::Ref<const VectorXs>& x0,
     } else {
       bool joint_invalid = false;
       for (std::size_t k = 0; k < nqj; ++k) {
-        joint_invalid = joint_invalid || !std::isfinite(q0_clean_[iq + k]) ||
-                        !std::isfinite(q1_clean_[iq + k]);
+        joint_invalid = joint_invalid || !isfinite(q0_clean_[iq + k]) ||
+                        !isfinite(q1_clean_[iq + k]);
       }
       if (joint_invalid) {
         q0_clean_.segment(iq, nqj) = q1_clean_.segment(iq, nqj);
@@ -219,7 +219,7 @@ void StateMultibodyTpl<Scalar>::safe_diff(const Eigen::Ref<const VectorXs>& x0,
     // Velocity mask per component
     for (std::size_t k = 0; k < nvj; ++k) {
       const std::size_t idx = iv + k;
-      if (!std::isfinite(v0_clean_[idx]) || !std::isfinite(v1_clean_[idx])) {
+      if (!isfinite(v0_clean_[idx]) || !isfinite(v1_clean_[idx])) {
         v0_clean_[idx] = v1_clean_[idx];  // neutralize
         invalid_vel_mask_[idx] = true;    // mask later
       }
@@ -278,12 +278,12 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
       // Check for invalid quaternion and translation components
       bool quat_invalid = false;
       for (std::size_t k = 0; k < 4; ++k) {
-        quat_invalid = quat_invalid || !std::isfinite(q0_clean_[iq_quat + k]);
+        quat_invalid = quat_invalid || !isfinite(q0_clean_[iq_quat + k]);
       }
       bool trans_invalid = false;
       if (freeflyer) {
         for (std::size_t k = 0; k < 3; ++k) {
-          trans_invalid = trans_invalid || !std::isfinite(q0_clean_[iq + k]);
+          trans_invalid = trans_invalid || !isfinite(q0_clean_[iq + k]);
         }
       }
       // Fix invalid quaternion and translation
@@ -305,7 +305,7 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
       // Check and fix velocity and delta velocity validity
       for (std::size_t k = 0; k < nvj; ++k) {
         const std::size_t idx = iv + k;
-        if (!std::isfinite(q1_clean_[idx])) {
+        if (!isfinite(q1_clean_[idx])) {
           q1_clean_[idx] = Scalar(0);
           invalid_cfg_mask_[idx] = true;
           if (freeflyer && k < 3) {
@@ -315,11 +315,11 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
               invalid_cfg_pos_mask_[iq_quat + m] = true;
           }
         }
-        if (!std::isfinite(v0_clean_[idx])) {
+        if (!isfinite(v0_clean_[idx])) {
           v0_clean_[idx] = v_zero[idx];
           invalid_vel_mask_[idx] = true;
         }
-        if (!std::isfinite(v1_clean_[idx])) {
+        if (!isfinite(v1_clean_[idx])) {
           v1_clean_[idx] = Scalar(0);
           invalid_vel_mask_[idx] = true;
         }
@@ -328,7 +328,7 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
       // Check joint position validity
       bool joint_invalid = false;
       for (std::size_t k = 0; k < nqj; ++k) {
-        joint_invalid = joint_invalid || !std::isfinite(q0_clean_[iq + k]);
+        joint_invalid = joint_invalid || !isfinite(q0_clean_[iq + k]);
       }
       // Fix invalid joint position
       if (joint_invalid) {
@@ -340,17 +340,17 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
       // Check and fix velocity and delta velocity validity
       for (std::size_t k = 0; k < nvj; ++k) {
         const std::size_t idx = iv + k;
-        if (!std::isfinite(q1_clean_[idx])) {
+        if (!isfinite(q1_clean_[idx])) {
           q1_clean_[idx] = Scalar(0);
           invalid_cfg_mask_[idx] = true;
           for (std::size_t m = 0; m < nqj; ++m)
             invalid_cfg_pos_mask_[iq + m] = true;
         }
-        if (!std::isfinite(v0_clean_[idx])) {
+        if (!isfinite(v0_clean_[idx])) {
           v0_clean_[idx] = v_zero[idx];
           invalid_vel_mask_[idx] = true;
         }
-        if (!std::isfinite(v1_clean_[idx])) {
+        if (!isfinite(v1_clean_[idx])) {
           v1_clean_[idx] = Scalar(0);
           invalid_vel_mask_[idx] = true;
         }
