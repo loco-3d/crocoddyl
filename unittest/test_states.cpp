@@ -69,9 +69,10 @@ void test_integrate_against_difference(StateModelTypes::Type state_type) {
   Eigen::VectorXd dxi(state->get_ndx());
   state->diff(x1, x2, dx);
   state->integrate(x1, dx, x2i);
-  state->diff(x2i, x2, dxi);
-
   // Checking that both states agree
+  state->diff(x2i, x2, dxi);
+  BOOST_CHECK(dxi.isZero(1e-9));
+  state->safe_diff(x2i, x2, dxi);
   BOOST_CHECK(dxi.isZero(1e-9));
 
   // Checking that casted computation is the same
@@ -103,9 +104,10 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   Eigen::VectorXd xidx(state->get_nx());
   Eigen::VectorXd dxd(state->get_ndx());
   state->integrate(x, dx, xidx);
-  state->diff(x, xidx, dxd);
-
   // Checking that both states agree
+  state->diff(x, xidx, dxd);
+  BOOST_CHECK((dxd - dx).isZero(1e-9));
+  state->safe_diff(x, xidx, dxd);
   BOOST_CHECK((dxd - dx).isZero(1e-9));
 
   // Checking that casted computation is the same
