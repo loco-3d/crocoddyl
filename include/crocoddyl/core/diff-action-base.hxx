@@ -207,6 +207,11 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_u_lb(
                         std::to_string(nu_) + ")");
   }
   u_lb_ = u_lb;
+  for (std::size_t i = 0; i < nu_; ++i) {
+    if (u_lb_[i] <= -std::numeric_limits<Scalar>::max()) {
+      u_lb_[i] = -std::numeric_limits<Scalar>::infinity();
+    }
+  }
   update_has_control_limits();
 }
 
@@ -219,6 +224,11 @@ void DifferentialActionModelAbstractTpl<Scalar>::set_u_ub(
                         std::to_string(nu_) + ")");
   }
   u_ub_ = u_ub;
+  for (std::size_t i = 0; i < nu_; ++i) {
+    if (u_ub_[i] >= std::numeric_limits<Scalar>::max()) {
+      u_ub_[i] = std::numeric_limits<Scalar>::infinity();
+    }
+  }
   update_has_control_limits();
 }
 
