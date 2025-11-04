@@ -123,10 +123,10 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
  private:
   std::shared_ptr<PinocchioModel> pinocchio_;  //!< Pinocchio model
   VectorXs x0_;                                //!< Zero state
-  mutable VectorXs q0_tmp_;                    //!< Scratch configuration copy
-  mutable VectorXs q1_tmp_;                    //!< Scratch configuration copy
-  mutable VectorXs v0_tmp_;                    //!< Scratch velocity copy
-  mutable VectorXs v1_tmp_;                    //!< Scratch velocity copy
+  mutable VectorXs q0_clean_;                  //!< Scratch configuration copy
+  mutable VectorXs q1_clean_;                  //!< Scratch configuration copy
+  mutable VectorXs v0_clean_;                  //!< Scratch velocity copy
+  mutable VectorXs v1_clean_;                  //!< Scratch velocity copy
   mutable std::vector<bool>
       invalid_cfg_mask_;  //!< Mask for invalid config tangents
   mutable std::vector<bool>

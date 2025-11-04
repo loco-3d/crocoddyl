@@ -19,10 +19,10 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(
     : Base(model->nq + model->nv, 2 * model->nv),
       pinocchio_(model),
       x0_(VectorXs::Zero(model->nq + model->nv)),
-      q0_tmp_(VectorXs::Zero(model->nq)),
-      q1_tmp_(VectorXs::Zero(model->nq)),
-      v0_tmp_(VectorXs::Zero(model->nv)),
-      v1_tmp_(VectorXs::Zero(model->nv)),
+      q0_clean_(VectorXs::Zero(model->nq)),
+      q1_clean_(VectorXs::Zero(model->nq)),
+      v0_clean_(VectorXs::Zero(model->nv)),
+      v1_clean_(VectorXs::Zero(model->nv)),
       invalid_cfg_mask_(model->nv, false),
       invalid_vel_mask_(model->nv, false),
       invalid_cfg_pos_mask_(model->nq, false) {
@@ -55,7 +55,7 @@ StateMultibodyTpl<Scalar>::StateMultibodyTpl(
   }
   lb_.tail(nv_) = -pinocchio_->velocityLimit;
   ub_.tail(nv_) = pinocchio_->velocityLimit;
-  for (std::size_t i = 0; i < lb_.size(); ++i) {
+  for (std::size_t i = 0; i < static_cast<std::size_t>(lb_.size()); ++i) {
     if (lb_[i] <= -std::numeric_limits<Scalar>::max()) {
       lb_[i] = -std::numeric_limits<Scalar>::quiet_NaN();
     }
@@ -70,10 +70,10 @@ template <typename Scalar>
 StateMultibodyTpl<Scalar>::StateMultibodyTpl()
     : Base(),
       x0_(VectorXs::Zero(0)),
-      q0_tmp_(VectorXs::Zero(0)),
-      q1_tmp_(VectorXs::Zero(0)),
-      v0_tmp_(VectorXs::Zero(0)),
-      v1_tmp_(VectorXs::Zero(0)),
+      q0_clean_(VectorXs::Zero(0)),
+      q1_clean_(VectorXs::Zero(0)),
+      v0_clean_(VectorXs::Zero(0)),
+      v1_clean_(VectorXs::Zero(0)),
       invalid_cfg_mask_(),
       invalid_vel_mask_(),
       invalid_cfg_pos_mask_() {}
@@ -153,105 +153,87 @@ void StateMultibodyTpl<Scalar>::safe_diff(const Eigen::Ref<const VectorXs>& x0,
     throw_pretty("Invalid argument: dxout has wrong dimension (it should be " +
                  std::to_string(ndx_) + ")");
   }
-
-  const Scalar invalid_value = std::numeric_limits<Scalar>::quiet_NaN();
-
-  VectorXs& q0_clean = q0_tmp_;
-  VectorXs& q1_clean = q1_tmp_;
-  VectorXs& v0_clean = v0_tmp_;
-  VectorXs& v1_clean = v1_tmp_;
-
-  q0_clean = x0.head(nq_);
-  q1_clean = x1.head(nq_);
-  v0_clean = x0.tail(nv_);
-  v1_clean = x1.tail(nv_);
-
+  q0_clean_ = x0.head(nq_);
+  q1_clean_ = x1.head(nq_);
+  v0_clean_ = x0.tail(nv_);
+  v1_clean_ = x1.tail(nv_);
   std::fill(invalid_cfg_mask_.begin(), invalid_cfg_mask_.end(), false);
   std::fill(invalid_vel_mask_.begin(), invalid_vel_mask_.end(), false);
-
-  auto& invalid_cfg_tangent = invalid_cfg_mask_;
-  auto& invalid_vel_component = invalid_vel_mask_;
-
   for (pinocchio::JointIndex jid = 1; jid < pinocchio_->joints.size(); ++jid) {
     const auto& j = pinocchio_->joints[jid];
     const std::size_t iq = j.idx_q();
     const std::size_t nqj = j.nq();
     const std::size_t iv = j.idx_v();
     const std::size_t nvj = j.nv();
-
+    // Handle the joint
     const bool quat_joint = (nqj == nvj + 1) && (nvj == 3 || nvj == 6);
-    const bool freeflyer = quat_joint && (nvj == 6);
-
     if (quat_joint) {
-      // Config layout: FF q = [t(3), quat(4 as x,y,z,w)], Spherical q = [quat(4
-      // as x,y,z,w)]
-      const std::size_t iq_quat =
-          freeflyer ? (iq + 3) : iq;  // start of [x,y,z,w]
-      // Tangent layout in Crocoddyl for FF: [linear(3), angular(3)]
+      const bool freeflyer = quat_joint && (nvj == 6);
+      const std::size_t iq_quat = freeflyer ? (iq + 3) : iq;
       const std::size_t iv_lin = freeflyer ? (iv + 0) : iv;  // linear (FF only)
       const std::size_t iv_ang = freeflyer ? (iv + 3) : iv;  // angular
-
+      // Check for invalid quaternion components
       bool quat_invalid = false;
       for (std::size_t k = 0; k < 4; ++k) {
-        quat_invalid = quat_invalid || !std::isfinite(q0_clean[iq_quat + k]) ||
-                       !std::isfinite(q1_clean[iq_quat + k]);
+        quat_invalid = quat_invalid || !std::isfinite(q0_clean_[iq_quat + k]) ||
+                       !std::isfinite(q1_clean_[iq_quat + k]);
       }
-
       bool trans_invalid = false;
       if (freeflyer) {
         for (std::size_t k = 0; k < 3; ++k) {
-          trans_invalid = trans_invalid || !std::isfinite(q0_clean[iq + k]) ||
-                          !std::isfinite(q1_clean[iq + k]);
+          trans_invalid = trans_invalid || !std::isfinite(q0_clean_[iq + k]) ||
+                          !std::isfinite(q1_clean_[iq + k]);
         }
       }
-
       if (quat_invalid) {
         // Write identity quaternion in Pinocchio order [x,y,z,w] = [0,0,0,1]
-        q0_clean.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
+        q0_clean_.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
             Scalar(1);
-        q1_clean.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
+        q1_clean_.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
             Scalar(1);
         // Mask ONLY the angular tangent components
-        for (std::size_t k = 0; k < 3; ++k)
-          invalid_cfg_tangent[iv_ang + k] = true;
+        for (std::size_t k = 0; k < 3; ++k) {
+          invalid_cfg_mask_[iv_ang + k] = true;
+        }
       }
-
       if (freeflyer && trans_invalid) {
         // Neutralize translation contribution
-        q0_clean.segment(iq, 3) = q1_clean.segment(iq, 3);
-        for (std::size_t k = 0; k < 3; ++k)
-          invalid_cfg_tangent[iv_lin + k] = true;
+        q0_clean_.segment(iq, 3) = q1_clean_.segment(iq, 3);
+        for (std::size_t k = 0; k < 3; ++k) {
+          invalid_cfg_mask_[iv_lin + k] = true;
+        }
       }
-
     } else {
       bool joint_invalid = false;
       for (std::size_t k = 0; k < nqj; ++k) {
-        joint_invalid = joint_invalid || !std::isfinite(q0_clean[iq + k]) ||
-                        !std::isfinite(q1_clean[iq + k]);
+        joint_invalid = joint_invalid || !std::isfinite(q0_clean_[iq + k]) ||
+                        !std::isfinite(q1_clean_[iq + k]);
       }
       if (joint_invalid) {
-        q0_clean.segment(iq, nqj) = q1_clean.segment(iq, nqj);
-        for (std::size_t k = 0; k < nvj; ++k)
-          invalid_cfg_tangent[iv + k] = true;
+        q0_clean_.segment(iq, nqj) = q1_clean_.segment(iq, nqj);
+        for (std::size_t k = 0; k < nvj; ++k) {
+          invalid_cfg_mask_[iv + k] = true;
+        }
       }
     }
-
     // Velocity mask per component
     for (std::size_t k = 0; k < nvj; ++k) {
       const std::size_t idx = iv + k;
-      if (!std::isfinite(v0_clean[idx]) || !std::isfinite(v1_clean[idx])) {
-        v0_clean[idx] = v1_clean[idx];      // neutralize
-        invalid_vel_component[idx] = true;  // mask later
+      if (!std::isfinite(v0_clean_[idx]) || !std::isfinite(v1_clean_[idx])) {
+        v0_clean_[idx] = v1_clean_[idx];  // neutralize
+        invalid_vel_mask_[idx] = true;    // mask later
       }
     }
   }
-
-  pinocchio::difference(*pinocchio_.get(), q0_clean, q1_clean, dxout.head(nv_));
-  dxout.tail(nv_) = v1_clean - v0_clean;
-
+  // Perform the diff with the cleaned states
+  pinocchio::difference(*pinocchio_.get(), q0_clean_, q1_clean_,
+                        dxout.head(nv_));
+  dxout.tail(nv_) = v1_clean_ - v0_clean_;
   for (std::size_t i = 0; i < nv_; ++i) {
-    if (invalid_cfg_tangent[i]) dxout[i] = invalid_value;
-    if (invalid_vel_component[i]) dxout[nv_ + i] = invalid_value;
+    if (invalid_cfg_mask_[i])
+      dxout[i] = std::numeric_limits<Scalar>::quiet_NaN();
+    if (invalid_vel_mask_[i])
+      dxout[nv_ + i] = std::numeric_limits<Scalar>::quiet_NaN();
   }
 }
 
@@ -271,74 +253,60 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
     throw_pretty("Invalid argument: xout has wrong dimension (it should be " +
                  std::to_string(nx_) + ")");
   }
-
-  const Scalar invalid_value = std::numeric_limits<Scalar>::quiet_NaN();
-
-  VectorXs& q_clean = q0_tmp_;
-  VectorXs& dq_clean = q1_tmp_;
-  VectorXs& v_clean = v0_tmp_;
-  VectorXs& dv_clean = v1_tmp_;
-
-  q_clean = x.head(nq_);
-  v_clean = x.tail(nv_);
-  dq_clean.head(nv_) = dx.head(nv_);
-  dv_clean = dx.tail(nv_);
-
+  q0_clean_ = x.head(nq_);
+  v0_clean_ = x.tail(nv_);
+  q1_clean_.head(nv_) = dx.head(nv_);
+  v1_clean_ = dx.tail(nv_);
   std::fill(invalid_cfg_mask_.begin(), invalid_cfg_mask_.end(), false);
   std::fill(invalid_cfg_pos_mask_.begin(), invalid_cfg_pos_mask_.end(), false);
   std::fill(invalid_vel_mask_.begin(), invalid_vel_mask_.end(), false);
-
   const VectorXs q_zero = x0_.head(nq_);
   const VectorXs v_zero = x0_.tail(nv_);
-
   for (pinocchio::JointIndex jid = 1; jid < pinocchio_->joints.size(); ++jid) {
     const auto& j = pinocchio_->joints[jid];
     const std::size_t iq = j.idx_q();
     const std::size_t nqj = j.nq();
     const std::size_t iv = j.idx_v();
     const std::size_t nvj = j.nv();
-
+    // Handle the joint
     const bool quat_joint = (nqj == nvj + 1) && (nvj == 3 || nvj == 6);
-    const bool freeflyer = quat_joint && (nvj == 6);
-
     if (quat_joint) {
+      const bool freeflyer = quat_joint && (nvj == 6);
       const std::size_t iq_quat = freeflyer ? (iq + 3) : iq;
       const std::size_t iv_lin = freeflyer ? (iv + 0) : iv;
       const std::size_t iv_ang = freeflyer ? (iv + 3) : iv;
-
+      // Check for invalid quaternion and translation components
       bool quat_invalid = false;
       for (std::size_t k = 0; k < 4; ++k) {
-        quat_invalid = quat_invalid || !std::isfinite(q_clean[iq_quat + k]);
+        quat_invalid = quat_invalid || !std::isfinite(q0_clean_[iq_quat + k]);
       }
-
       bool trans_invalid = false;
       if (freeflyer) {
         for (std::size_t k = 0; k < 3; ++k) {
-          trans_invalid = trans_invalid || !std::isfinite(q_clean[iq + k]);
+          trans_invalid = trans_invalid || !std::isfinite(q0_clean_[iq + k]);
         }
       }
-
+      // Fix invalid quaternion and translation
       if (quat_invalid) {
-        q_clean.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
+        q0_clean_.segment(iq_quat, 4) << Scalar(0), Scalar(0), Scalar(0),
             Scalar(1);
         for (std::size_t k = 0; k < 4; ++k)
           invalid_cfg_pos_mask_[iq_quat + k] = true;
         for (std::size_t k = 0; k < 3; ++k)
           invalid_cfg_mask_[iv_ang + k] = true;
       }
-
       if (freeflyer && trans_invalid) {
-        q_clean.segment(iq, 3) = q_zero.segment(iq, 3);
+        q0_clean_.segment(iq, 3) = q_zero.segment(iq, 3);
         for (std::size_t k = 0; k < 3; ++k) {
           invalid_cfg_pos_mask_[iq + k] = true;
           invalid_cfg_mask_[iv_lin + k] = true;
         }
       }
-
+      // Check and fix velocity and delta velocity validity
       for (std::size_t k = 0; k < nvj; ++k) {
         const std::size_t idx = iv + k;
-        if (!std::isfinite(dq_clean[idx])) {
-          dq_clean[idx] = Scalar(0);
+        if (!std::isfinite(q1_clean_[idx])) {
+          q1_clean_[idx] = Scalar(0);
           invalid_cfg_mask_[idx] = true;
           if (freeflyer && k < 3) {
             invalid_cfg_pos_mask_[iq + k] = true;
@@ -347,56 +315,62 @@ void StateMultibodyTpl<Scalar>::safe_integrate(
               invalid_cfg_pos_mask_[iq_quat + m] = true;
           }
         }
-        if (!std::isfinite(v_clean[idx])) {
-          v_clean[idx] = v_zero[idx];
+        if (!std::isfinite(v0_clean_[idx])) {
+          v0_clean_[idx] = v_zero[idx];
           invalid_vel_mask_[idx] = true;
         }
-        if (!std::isfinite(dv_clean[idx])) {
-          dv_clean[idx] = Scalar(0);
+        if (!std::isfinite(v1_clean_[idx])) {
+          v1_clean_[idx] = Scalar(0);
           invalid_vel_mask_[idx] = true;
         }
       }
     } else {
+      // Check joint position validity
       bool joint_invalid = false;
       for (std::size_t k = 0; k < nqj; ++k) {
-        joint_invalid = joint_invalid || !std::isfinite(q_clean[iq + k]);
+        joint_invalid = joint_invalid || !std::isfinite(q0_clean_[iq + k]);
       }
+      // Fix invalid joint position
       if (joint_invalid) {
-        q_clean.segment(iq, nqj) = q_zero.segment(iq, nqj);
+        q0_clean_.segment(iq, nqj) = q_zero.segment(iq, nqj);
         for (std::size_t k = 0; k < nqj; ++k)
           invalid_cfg_pos_mask_[iq + k] = true;
         for (std::size_t k = 0; k < nvj; ++k) invalid_cfg_mask_[iv + k] = true;
       }
-
+      // Check and fix velocity and delta velocity validity
       for (std::size_t k = 0; k < nvj; ++k) {
         const std::size_t idx = iv + k;
-        if (!std::isfinite(dq_clean[idx])) {
-          dq_clean[idx] = Scalar(0);
+        if (!std::isfinite(q1_clean_[idx])) {
+          q1_clean_[idx] = Scalar(0);
           invalid_cfg_mask_[idx] = true;
           for (std::size_t m = 0; m < nqj; ++m)
             invalid_cfg_pos_mask_[iq + m] = true;
         }
-        if (!std::isfinite(v_clean[idx])) {
-          v_clean[idx] = v_zero[idx];
+        if (!std::isfinite(v0_clean_[idx])) {
+          v0_clean_[idx] = v_zero[idx];
           invalid_vel_mask_[idx] = true;
         }
-        if (!std::isfinite(dv_clean[idx])) {
-          dv_clean[idx] = Scalar(0);
+        if (!std::isfinite(v1_clean_[idx])) {
+          v1_clean_[idx] = Scalar(0);
           invalid_vel_mask_[idx] = true;
         }
       }
     }
   }
-
-  pinocchio::integrate(*pinocchio_.get(), q_clean, dq_clean.head(nv_),
+  // Perform the integration with the cleaned states
+  pinocchio::integrate(*pinocchio_.get(), q0_clean_, q1_clean_.head(nv_),
                        xout.head(nq_));
-  xout.tail(nv_) = v_clean + dv_clean;
+  xout.tail(nv_) = v0_clean_ + v1_clean_;
 
   for (std::size_t i = 0; i < nq_; ++i) {
-    if (invalid_cfg_pos_mask_[i]) xout[i] = invalid_value;
+    if (invalid_cfg_pos_mask_[i]) {
+      xout[i] = std::numeric_limits<Scalar>::quiet_NaN();
+    }
   }
   for (std::size_t i = 0; i < nv_; ++i) {
-    if (invalid_vel_mask_[i]) xout[nq_ + i] = invalid_value;
+    if (invalid_vel_mask_[i]) {
+      xout[nq_ + i] = std::numeric_limits<Scalar>::quiet_NaN();
+    }
   }
 }
 
