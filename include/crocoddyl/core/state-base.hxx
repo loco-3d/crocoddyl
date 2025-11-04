@@ -34,6 +34,44 @@ template <typename Scalar>
 StateAbstractTpl<Scalar>::~StateAbstractTpl() {}
 
 template <typename Scalar>
+void StateAbstractTpl<Scalar>::safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                                         const Eigen::Ref<const VectorXs>& x1,
+                                         Eigen::Ref<VectorXs> dxout) const {
+  if (static_cast<std::size_t>(x0.size()) != nx_) {
+    throw_pretty("Invalid argument: x0 has wrong dimension (it should be " +
+                 std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(x1.size()) != nx_) {
+    throw_pretty("Invalid argument: x1 has wrong dimension (it should be " +
+                 std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+    throw_pretty("Invalid argument: dxout has wrong dimension (it should be " +
+                 std::to_string(ndx_) + ")");
+  }
+  diff(x0, x1, dxout);
+}
+
+template <typename Scalar>
+void StateAbstractTpl<Scalar>::safe_integrate(
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+    Eigen::Ref<VectorXs> xout) const {
+  if (static_cast<std::size_t>(x.size()) != nx_) {
+    throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                 std::to_string(nx_) + ")");
+  }
+  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+    throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                 std::to_string(ndx_) + ")");
+  }
+  if (static_cast<std::size_t>(xout.size()) != nx_) {
+    throw_pretty("Invalid argument: xout has wrong dimension (it should be " +
+                 std::to_string(nx_) + ")");
+  }
+  integrate(x, dx, xout);
+}
+
+template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateAbstractTpl<Scalar>::diff_dx(
     const Eigen::Ref<const VectorXs>& x0,
     const Eigen::Ref<const VectorXs>& x1) {

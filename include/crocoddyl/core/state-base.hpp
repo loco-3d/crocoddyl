@@ -116,6 +116,30 @@ class StateAbstractTpl : public StateBase {
                          Eigen::Ref<VectorXs> xout) const = 0;
 
   /**
+   * @brief Sanitized diff operator that neutralises invalid components and
+   * propagates NaNs where the result cannot be trusted"
+   *
+   * @param x0     Current state (size `nx`).
+   * @param x1     Next state (size `nx`)
+   * @param dxout  x1 - x0 value with NaNs on invalid entries (size `ndx`)
+   */
+  virtual void safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                         const Eigen::Ref<const VectorXs>& x1,
+                         Eigen::Ref<VectorXs> dxout) const;
+
+  /**
+   * @brief Sanitized integrate operator that clamps invalid inputs and marks
+   * affected configuration or velocity entries with NaNs.
+   *
+   * @param x     Current state (size `nx`).
+   * @param dx    Displacement of the state (size `ndx`).
+   * @param xout  x + dx value with NaNs on invalid entries (size `nx`).
+   */
+  virtual void safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                              const Eigen::Ref<const VectorXs>& dx,
+                              Eigen::Ref<VectorXs> xout) const;
+
+  /**
    * @brief Compute the Jacobian of the state manifold differentiation.
    *
    * The state differentiation is defined as:

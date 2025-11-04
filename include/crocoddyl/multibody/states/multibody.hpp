@@ -73,17 +73,18 @@ class StateMultibodyTpl : public StateAbstractTpl<_Scalar> {
   virtual void integrate(const Eigen::Ref<const VectorXs>& x,
                          const Eigen::Ref<const VectorXs>& dx,
                          Eigen::Ref<VectorXs> xout) const override;
-  void safe_diff(const Eigen::Ref<const VectorXs>& x0,
-                 const Eigen::Ref<const VectorXs>& x1,
-                 Eigen::Ref<VectorXs> dxout) const;
-  void safe_integrate(const Eigen::Ref<const VectorXs>& x,
-                      const Eigen::Ref<const VectorXs>& dx,
-                      Eigen::Ref<VectorXs> xout) const;
+
+  virtual void safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                         const Eigen::Ref<const VectorXs>& x1,
+                         Eigen::Ref<VectorXs> dxout) const override;
+  virtual void safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                              const Eigen::Ref<const VectorXs>& dx,
+                              Eigen::Ref<VectorXs> xout) const override;
+
   virtual void Jdiff(const Eigen::Ref<const VectorXs>&,
                      const Eigen::Ref<const VectorXs>&,
                      Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                      const Jcomponent firstsecond = both) const override;
-
   virtual void Jintegrate(const Eigen::Ref<const VectorXs>& x,
                           const Eigen::Ref<const VectorXs>& dx,
                           Eigen::Ref<MatrixXs> Jfirst,

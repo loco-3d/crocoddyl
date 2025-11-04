@@ -90,6 +90,79 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
     x1out = integrate_wrap(x, dx);
   }
 
+  VectorXs safe_diff_wrap(const Eigen::Ref<const VectorXs>& x0,
+                          const Eigen::Ref<const VectorXs>& x1) const {
+    VectorXs dxout(ndx_);
+    State::safe_diff(x0, x1, dxout);
+    return dxout;
+  }
+
+  void safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                 const Eigen::Ref<const VectorXs>& x1,
+                 Eigen::Ref<VectorXs> dxout) const override {
+    if (static_cast<std::size_t>(x0.size()) != nx_) {
+      throw_pretty("Invalid argument: x0 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (static_cast<std::size_t>(x1.size()) != nx_) {
+      throw_pretty("Invalid argument: x1 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (boost::python::override safe_diff = this->get_override("safe_diff")) {
+      dxout = bp::call<VectorXs>(this->get_override("safe_diff").ptr(),
+                                 (VectorXs)x0, (VectorXs)x1);
+      if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+        throw_pretty(
+            "Invalid argument: dxout has wrong dimension (it should be " +
+            std::to_string(ndx_) + ")");
+      }
+    }
+    State::safe_diff(x0, x1, dxout);
+  }
+
+  void default_safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                         const Eigen::Ref<const VectorXs>& x1,
+                         Eigen::Ref<VectorXs> dxout) const {
+    safe_diff(x0, x1, dxout);
+  }
+
+  VectorXs safe_integrate_wrap(const Eigen::Ref<const VectorXs>& x,
+                               const Eigen::Ref<const VectorXs>& dx) const {
+    VectorXs xout(nx_);
+    State::safe_integrate(x, dx, xout);
+    return xout;
+  }
+
+  void safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                      const Eigen::Ref<const VectorXs>& dx,
+                      Eigen::Ref<VectorXs> xout) const override {
+    if (static_cast<std::size_t>(x.size()) != nx_) {
+      throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (static_cast<std::size_t>(dx.size()) != ndx_) {
+      throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                   std::to_string(ndx_) + ")");
+    }
+    if (boost::python::override safe_integrate =
+            this->get_override("safe_integrate")) {
+      xout = bp::call<VectorXs>(this->get_override("safe_integrate").ptr(),
+                                (VectorXs)x, (VectorXs)dx);
+      if (static_cast<std::size_t>(xout.size()) != nx_) {
+        throw_pretty(
+            "Invalid argument: xout has wrong dimension (it should be " +
+            std::to_string(nx_) + ")");
+      }
+    }
+    State::safe_integrate(x, dx, xout);
+  }
+
+  void default_safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                              const Eigen::Ref<const VectorXs>& dx,
+                              Eigen::Ref<VectorXs> xout) const {
+    State::safe_integrate(x, dx, xout);
+  }
+
   void Jdiff(const Eigen::Ref<const VectorXs>& x0,
              const Eigen::Ref<const VectorXs>& x1, Eigen::Ref<MatrixXs> Jfirst,
              Eigen::Ref<MatrixXs> Jsecond,

@@ -52,6 +52,38 @@ struct StateAbstractVisitor
              ":param x: state point (dim. state.nx).\n"
              ":param dx: velocity vector (dim state.ndx).\n"
              ":return x [+] dx value (dim state.nx).")
+        .def("safe_diff", &State::safe_diff_wrap,
+            bp::args("self", "x0", "x1"),
+            "Sanitized diff operator that neutralises invalid components and "
+            "propagates NaNs where the result cannot be trusted.\n\n"
+            ":param x0: current state (dim state.nx()).\n"
+            ":param x1: next state (dim state.nx()).\n"
+            ":return x1 - x0 value with NaNs on invalid entries (dim "
+            "state.ndx()).")
+        .def("safe_diff", &State::safe_diff, &State::default_safe_diff,
+            bp::args("self", "x0", "x1", "xout"),
+            "Sanitized diff operator that neutralises invalid components and "
+            "propagates NaNs where the result cannot be trusted.\n\n"
+            ":param x0: current state (dim state.nx()).\n"
+            ":param x1: next state (dim state.nx()).\n"
+            ":param xout: x1 - x0 value with NaNs on invalid entries (dim "
+            "state.ndx()).")
+        .def("safe_integrate", &State::safe_integrate_wrap,
+             bp::args("self", "x", "dx"),
+             "Sanitized integrate operator that clamps invalid inputs and "
+             "marks affected configuration or velocity entries with NaNs.\n\n"
+             ":param x: current state (dim state.nx()).\n"
+             ":param dx: displacement of the state (dim state.ndx()).\n"
+             ":return x + dx value with NaNs on invalid entries (dim "
+             "state.nx()).")
+        .def("safe_integrate", &State::safe_integrate, &State::default_safe_integrate,
+             bp::args("self", "x", "dx", "dxout"),
+             "Sanitized integrate operator that clamps invalid inputs and "
+             "marks affected configuration or velocity entries with NaNs.\n\n"
+             ":param x: current state (dim state.nx()).\n"
+             ":param dx: displacement of the state (dim state.ndx()).\n"
+             ":param dxout: x + dx value with NaNs on invalid entries (dim "
+             "state.nx()).")
         .def("Jdiff", pure_virtual(&State::Jdiff_wrap),
              bp::args("self", "x0", "x1", "firstsecond"),
              "Compute the partial derivatives of difference operator.\n\n"
