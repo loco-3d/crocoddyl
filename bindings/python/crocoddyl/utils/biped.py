@@ -24,6 +24,7 @@ class SimpleBipedGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
+        use_constraints=False,
     ):
         """Construct biped-gait problem.
 
@@ -45,6 +46,7 @@ class SimpleBipedGaitProblem:
         self._integrator = integrator
         self._control = control
         self._fwddyn = fwddyn
+        self.use_constraints = use_constraints
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
@@ -287,6 +289,7 @@ class SimpleBipedGaitProblem:
             )
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
+        constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
         if isinstance(comTask, np.ndarray):
             comResidual = crocoddyl.ResidualModelCoMPosition(self.state, comTask, nu)
             comTrack = crocoddyl.CostModelResidual(self.state, comResidual)
@@ -299,23 +302,41 @@ class SimpleBipedGaitProblem:
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(cone.lb, cone.ub)
             )
-            wrenchCone = crocoddyl.CostModelResidual(
-                self.state, wrenchActivation, wrenchResidual
-            )
-            costModel.addCost(
-                self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1
-            )
+            if not self.use_constraints:
+                wrenchCone = crocoddyl.CostModelResidual(
+                    self.state, wrenchActivation, wrenchResidual
+                )
+                costModel.addCost(
+                    self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1
+                )
+            else:
+                wrenchCone = crocoddyl.ConstraintModelResidual(
+                    self.state, wrenchResidual, cone.lb, cone.ub
+                )
+                constraintModel.addConstraint(
+                    self.rmodel.frames[i].name + "_wrenchCone",
+                    wrenchCone,
+                )
         if swingFootTask is not None:
             for i in swingFootTask:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
                     self.state, i[0], i[1], nu
                 )
-                footTrack = crocoddyl.CostModelResidual(
-                    self.state, framePlacementResidual
-                )
-                costModel.addCost(
-                    self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6
-                )
+                if not self.use_constraints:
+                    footTrack = crocoddyl.CostModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    costModel.addCost(
+                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6
+                    )
+                else:
+                    footTrack = crocoddyl.ConstraintModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    constraintModel.addConstraint(
+                        self.rmodel.frames[i[0]].name + "_footTrack",
+                        footTrack,
+                    )
         stateWeights = np.array(
             [0] * 3 + [500.0] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv
         )
@@ -339,11 +360,17 @@ class SimpleBipedGaitProblem:
         # integration scheme
         if self._fwddyn:
             dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                self.state, self.actuation, contactModel, costModel, 0.0, True
+                self.state,
+                self.actuation,
+                contactModel,
+                costModel,
+                constraintModel,
+                0.0,
+                True,
             )
         else:
             dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                self.state, self.actuation, contactModel, costModel
+                self.state, self.actuation, contactModel, costModel, constraintModel
             )
         if self._control == "one":
             control = crocoddyl.ControlParametrizationModelPolyOne(nu)
@@ -528,17 +555,27 @@ class SimpleBipedGaitProblem:
             )
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
+        constraintModel = crocoddyl.ConstraintModelManager(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
                     self.state, i[0], i[1], 0
                 )
-                footTrack = crocoddyl.CostModelResidual(
-                    self.state, framePlacementResidual
-                )
-                costModel.addCost(
-                    self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8
-                )
+                if not self.use_constraints:
+                    footTrack = crocoddyl.CostModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    costModel.addCost(
+                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e8
+                    )
+                else:
+                    footTrack = crocoddyl.ConstraintModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    constraintModel.addConstraint(
+                        self.rmodel.frames[i[0]].name + "_footTrack",
+                        footTrack,
+                    )
         stateWeights = np.array(
             [1.0] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv
         )
@@ -553,7 +590,7 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         model = crocoddyl.ActionModelImpulseFwdDynamics(
-            self.state, impulseModel, costModel
+            self.state, impulseModel, costModel, constraintModel
         )
         model.JMinvJt_damping = JMinvJt_damping
         model.r_coeff = r_coeff
