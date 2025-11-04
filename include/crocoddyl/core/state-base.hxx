@@ -13,8 +13,8 @@ StateAbstractTpl<Scalar>::StateAbstractTpl(const std::size_t nx,
                                            const std::size_t ndx)
     : nx_(nx),
       ndx_(ndx),
-      lb_(VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::quiet_NaN())),
-      ub_(VectorXs::Constant(nx_, std::numeric_limits<Scalar>::quiet_NaN())),
+      lb_(VectorXs::Constant(nx_, -std::numeric_limits<Scalar>::infinity())),
+      ub_(VectorXs::Constant(nx_, std::numeric_limits<Scalar>::infinity())),
       has_limits_(false) {
   nv_ = ndx / 2;
   nq_ = nx_ - nv_;
@@ -25,9 +25,9 @@ StateAbstractTpl<Scalar>::StateAbstractTpl()
     : nx_(0),
       ndx_(0),
       lb_(MathBase::VectorXs::Constant(
-          nx_, -std::numeric_limits<Scalar>::quiet_NaN())),
+          nx_, -std::numeric_limits<Scalar>::infinity())),
       ub_(MathBase::VectorXs::Constant(
-          nx_, std::numeric_limits<Scalar>::quiet_NaN())),
+          nx_, std::numeric_limits<Scalar>::infinity())),
       has_limits_(false) {}
 
 template <typename Scalar>

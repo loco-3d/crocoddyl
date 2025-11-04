@@ -23,11 +23,11 @@ DifferentialActionModelAbstractTpl<Scalar>::DifferentialActionModelAbstractTpl(
       state_(state),
       unone_(VectorXs::Zero(nu)),
       g_lb_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
-                               -std::numeric_limits<Scalar>::quiet_NaN())),
+                               -std::numeric_limits<Scalar>::infinity())),
       g_ub_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
-                               std::numeric_limits<Scalar>::quiet_NaN())),
-      u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::quiet_NaN())),
-      u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::quiet_NaN())),
+                               std::numeric_limits<Scalar>::infinity())),
+      u_lb_(VectorXs::Constant(nu, -std::numeric_limits<Scalar>::infinity())),
+      u_ub_(VectorXs::Constant(nu, std::numeric_limits<Scalar>::infinity())),
       has_control_limits_(false) {}
 
 template <typename Scalar>
