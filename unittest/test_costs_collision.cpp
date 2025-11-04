@@ -10,8 +10,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#ifdef PINOCCHIO_WITH_HPP_FCL
-#ifdef CROCODDYL_WITH_PAIR_COLLISION
+#if defined(PINOCCHIO_WITH_HPP_FCL) && defined(CROCODDYL_WITH_PAIR_COLLISION)
 
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
@@ -268,7 +267,6 @@ int main(int argc, char** argv) {
 
 #else
 
-int main(int, char**) {}
+int main(int, char**) { return 0; }
 
-#endif  // CROCODDYL_WITH_PAIR_COLLISION
-#endif  // PINOCCHIO_WITH_HPP_FCL
+#endif  // PINOCCHIO_WITH_HPP_FCL && CROCODDYL_WITH_PAIR_COLLISION
