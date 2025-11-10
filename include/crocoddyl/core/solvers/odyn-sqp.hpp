@@ -120,6 +120,11 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   virtual void computeExpectedMeritFunctionImprovement() override;
 
   /**
+   * @brief Update the merit function value for the current guess
+   */
+  virtual void updateMeritFunction() override;
+
+  /**
    * @brief Check if we should accept or not the step
    *
    * @return True if we should accept the step. False otherwise
@@ -127,15 +132,36 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   virtual bool checkAcceptance() override;
 
   /**
-   * @brief Update the merit function value for the current guess
-   */
-  virtual void updateMeritFunction() override;
-
-  /**
    * @copybrief SolverAbstract::computeCandidate
    */
   virtual void computeCandidate(const Scalar step_length = Scalar(1.)) override;
 
+  /**
+   * @brief Build the local Quadratic Program (QP) for the current iterate.
+   *
+   * @details The QP has the form
+   * @f[
+   *   \min_{x}\ \tfrac{1}{2}\, x^\top Q\, x \;+\; c^\top x
+   *   \quad\text{s.t.}\quad
+   *   A\,x = b,\;\; G\,x \le h .
+   * @f]
+   * Here, @p x is the full decision vector over the trajectory and controls,
+   * and
+   * @p Q, @p c, @p A, @p b, @p G, @p h are the corresponding (sparse,
+   * structured) cost and constraint matrices/vectors induced by the problem’s
+   * temporal layout.
+   *
+   * Decision vector ordering:
+   * @f[
+   *   x = [\, \Delta x_0,\ \Delta u_0,\ \Delta x_1,\ \Delta
+   * u_1,\ \ldots,\ \Delta x_T \,].
+   * @f]
+   *
+   * The sparsity pattern reflects time-coupling (dynamics and local
+   * costs/constraints).
+   *
+   * @tparam Scalar Scalar type (e.g., float, double).
+   */
   void computeQuadraticModel();
 
   /**
@@ -165,6 +191,11 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    */
   void decreaseRegularization() override;
 
+  /**
+   * @brief Extract the QP direction into the solver data structures
+   *
+   * @param[in] x  decision vector from the QP solver
+   */
   void extractQpDirection(const VectorXs& x);
 
   /**
@@ -179,9 +210,35 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   template <typename NewScalar>
   SolverOdynSQPTpl<NewScalar> cast() const;
 
-  Model& qp_model() noexcept { return qp_model_; }
+  /**
+   * @brief Return the QP model used in the OdynSQP solver
+   */
+  Model& qp_model() noexcept;
 
-  Data& qp_data() noexcept { return qp_data_; }
+  /**
+   * @brief Return the QP data used in the OdynSQP solver
+   */
+  Data& qp_data() noexcept;
+
+  /**
+   * @brief Return the number of decision variables in the SQP
+   */
+  std::size_t get_n() const noexcept;
+
+  /**
+   * @brief Return the number of equality constraints in the SQP
+   */
+  std::size_t get_m() const noexcept;
+
+  /**
+   * @brief Return the number of inequality constraints in the SQP
+   */
+  std::size_t get_p() const noexcept;
+
+  /**
+   * @brief Return the QP params used in the OdynSQP solver
+   */
+  Params& qp_params() noexcept;
 
   /**
    * @brief Return the regularization factor used to increase the damping value
@@ -255,6 +312,9 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    */
   bool get_zero_upsilon() const;
 
+  /**
+   * @brief Modify the QP params used in the OdynSQP solver
+   */
   void set_qp_params(const Params& params);
 
   /**

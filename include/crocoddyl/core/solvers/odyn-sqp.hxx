@@ -582,6 +582,36 @@ void SolverOdynSQPTpl<Scalar>::updateStateAndControlIndex() {
 }
 
 template <typename Scalar>
+odyn::SparseModelTpl<Scalar>& SolverOdynSQPTpl<Scalar>::qp_model() noexcept {
+  return qp_model_;
+}
+
+template <typename Scalar>
+odyn::SparseDataTpl<Scalar>& SolverOdynSQPTpl<Scalar>::qp_data() noexcept {
+  return qp_data_;
+}
+
+template <typename Scalar>
+odyn::ParamsTpl<Scalar>& SolverOdynSQPTpl<Scalar>::qp_params() noexcept {
+  return qp_params_;
+}
+
+template <typename Scalar>
+std::size_t SolverOdynSQPTpl<Scalar>::get_n() const noexcept {
+  return n_;
+}
+
+template <typename Scalar>
+std::size_t SolverOdynSQPTpl<Scalar>::get_m() const noexcept {
+  return m_;
+}
+
+template <typename Scalar>
+std::size_t SolverOdynSQPTpl<Scalar>::get_p() const noexcept {
+  return p_;
+}
+
+template <typename Scalar>
 Scalar SolverOdynSQPTpl<Scalar>::get_reg_incfactor() const {
   return reg_incfactor_;
 }
