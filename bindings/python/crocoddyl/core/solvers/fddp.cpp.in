@@ -89,6 +89,47 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "improvement dV and merit improvement dPhi.\n"
                  ":param stepLength: step length (default 1).\n"
                  ":returns the cost improvement."))
+        .def("stoppingCriteria", &Model::stoppingCriteria, bp::args("self"),
+             "Return a sum of positive parameters whose sum quantifies the "
+             "FDDP termination.")
+        .def("expectedImprovement", &Model::expectedImprovement,
+             bp::args("self"),
+             "Return two scalars denoting the quadratic improvement model\n\n"
+             "For computing the expected improvement, you need to compute "
+             "first the search direction by running computeDirection. The "
+             "quadratic improvement model is described as dV = DV_0 + DV_1 + "
+             "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
+             "and quadraticm terms, respectively")
+        .def("computeMeritFunctionImprovement",
+             &Model::computeMeritFunctionImprovement,
+             bp::args("self"),
+             "Compute the merit function improvement for the current step.\n\n"
+             "This function computes the current merit function improvement "
+             "given the current cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
+        .def("computeExpectedMeritFunctionImprovement",
+             &Model::computeExpectedMeritFunctionImprovement,
+             bp::args("self"),
+             "Compute the expected merit function improvement for the current step.\n\n"
+             "This function computes the expected merit function improvement "
+             "given the expected cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
+        .def("updateMeritFunction", &Model::updateMeritFunction,
+             bp::args("self"), "Update the merit function value for the current guess.")
+        .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
+             "Check if we should accept or not the step\n\n"
+             ":return True if we should accept the step. False otherwise.")
+        .def(
+            "calcDir", &Model::calcDir, bp::args("self"),
+            "Refresh the linearization of the optimal control problem around "
+            "the current candidate.\n\n"
+            "The routine evaluates the cost, dynamics, and constraint models "
+            "along the trajectories stored in xs and us, updating the "
+            "first- and second-order derivatives together with the solver's "
+            "feasibility measures. The main solve loop calls calcDir() "
+            "automatically when a new linearization is required, but the "
+            "method remains available when driving the solver manually (for "
+            "instance before computeDirection(False)).")
         .def("setCandidate", &Model::setCandidate,
              SolverFDDP_setCandidate(
                  bp::args("self", "xs", "us", "isFeasible"),
@@ -133,22 +174,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "Update the dual and slack variables with a predefined step "
                  "length.\n\n"
                  ":param stepLength: step length (default 1)"))
-        .def("stoppingCriteria", &Model::stoppingCriteria, bp::args("self"),
-             "Return a sum of positive parameters whose sum quantifies the "
-             "FDDP termination.")
-        .def("expectedImprovement", &Model::expectedImprovement,
-             bp::args("self"),
-             "Return two scalars denoting the quadratic improvement model\n\n"
-             "For computing the expected improvement, you need to compute "
-             "first the search direction by running computeDirection. The "
-             "quadratic improvement model is described as dV = DV_0 + DV_1 + "
-             "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
-             "and quadraticm terms, respectively")
-        .def("updateMeritFunction", &Model::updateMeritFunction,
-             bp::args("self"), "Update the merit function value for the current guess.")
-        .def("checkAcceptance", &Model::checkAcceptance, bp::args("self"),
-             "Check if we should accept or not the step\n\n"
-             ":return True if we should accept the step. False otherwise.")
+
         .def("linearRollout", &Model::linearRollout, bp::args("self"),
              "Perform a linear rollout give the current control policy\n\n"
              "The results of this linear rollout are stored in dxs and dus.")
