@@ -74,7 +74,6 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
-  using Matrix = typename odyn::SparseBackend<Scalar>::Matrix;
   using Solver = typename odyn::SparseQPTpl<Scalar>;
   using Model = typename odyn::SparseModelTpl<Scalar>;
   using Data = typename odyn::SparseDataTpl<Scalar>;
@@ -380,12 +379,6 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   std::size_t n_;
   std::size_t m_;
   std::size_t p_;
-  Matrix Q_;
-  Matrix A_;
-  Matrix G_;
-  VectorXs c_;
-  VectorXs b_;
-  VectorXs h_;
   VectorXs x_;
   Solver qp_solver_;
   Model qp_model_;

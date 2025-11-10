@@ -238,13 +238,15 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
   if (iter_) {
     updateStateAndControlIndex();
   }
+  // Resize QP model
+  qp_model_.conservativeResize(n_, m_, p_);
   // Building the local QP model
   std::vector<Eigen::Triplet<Scalar>> TQ, TA, TG;
   const std::size_t ndx = problem_->get_ndx();
   std::size_t eq_idx = 0;
   std::size_t ineq_idx = 0;
   addIdentity(TA, eq_idx, xs_idx_[0], ndx, Scalar(1.0));
-  b_.segment(eq_idx, ndx) = fs_[0];
+  qp_model_.b.segment(eq_idx, ndx) = fs_[0];
   eq_idx += ndx;
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model =
@@ -259,12 +261,12 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
     const std::size_t u_idx = us_idx_[t];
     // Quadratic cost
     addBlock(TQ, x_idx, x_idx, data->Lxx);
-    c_.segment(x_idx, ndx) = data->Lx;
+    qp_model_.c.segment(x_idx, ndx) = data->Lx;
     if (nu > 0) {
       addBlock(TQ, u_idx, u_idx, data->Luu);
       addBlock(TQ, x_idx, u_idx, data->Lxu);
       addBlock(TQ, u_idx, x_idx, data->Lxu.transpose());
-      c_.segment(u_idx, nu) = data->Lu;
+      qp_model_.c.segment(u_idx, nu) = data->Lu;
     }
     // Dynamics equalities: Fx dx + Fu du - dxp = -f
     addBlock(TA, eq_idx, x_idx, data->Fx);
@@ -272,7 +274,7 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
       addBlock(TA, eq_idx, u_idx, data->Fu);
     }
     addIdentity(TA, eq_idx, xp_idx, ndx, Scalar(-1.0));
-    b_.segment(eq_idx, ndx) = -fs_[t + 1];
+    qp_model_.b.segment(eq_idx, ndx) = -fs_[t + 1];
     eq_idx += ndx;
     // State-control equalities: Hx dx + Hu du = -h
     if (nh > 0) {
@@ -280,7 +282,7 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
       if (nu > 0) {
         addBlock(TA, eq_idx, u_idx, data->Hu);
       }
-      b_.segment(eq_idx, nh) = -data->h;
+      qp_model_.b.segment(eq_idx, nh) = -data->h;
       eq_idx += nh;
     }
     // State-control inequalities: g_lb - g <= Gx dx + Gu du <= g_ub - g. This
@@ -291,14 +293,14 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
       if (nu > 0) {
         addBlock(TG, ineq_idx, u_idx, data->Gu);
       }
-      h_.segment(ineq_idx, ng) = model->get_g_ub() - data->g;
+      qp_model_.h.segment(ineq_idx, ng) = model->get_g_ub() - data->g;
       ineq_idx += ng;
       // Lower side: -Gx dx - Gu du <= g - g_lb
       addBlock(TG, ineq_idx, x_idx, -data->Gx);
       if (nu > 0) {
         addBlock(TG, ineq_idx, u_idx, -data->Gu);
       }
-      h_.segment(ineq_idx, ng) = data->g - model->get_g_lb();
+      qp_model_.h.segment(ineq_idx, ng) = data->g - model->get_g_lb();
       ineq_idx += ng;
     }
     // State bounds: x_lb - x <= dx <= x_ub - x.
@@ -306,12 +308,12 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
       // Upper bound: dx <= x_ub - x
       addIdentity(TG, ineq_idx, x_idx, ndx, Scalar(1));
       model->get_state()->safe_diff(xs_[t], model->get_state()->get_ub(),
-                                    h_.segment(ineq_idx, ndx));
+                                    qp_model_.h.segment(ineq_idx, ndx));
       ineq_idx += ndx;
       // Lower bound: -dx <= x - x_lb
       addIdentity(TG, ineq_idx, x_idx, ndx, Scalar(-1));
       model->get_state()->safe_diff(model->get_state()->get_lb(), xs_[t],
-                                    h_.segment(ineq_idx, ndx));
+                                    qp_model_.h.segment(ineq_idx, ndx));
       ineq_idx += ndx;
     }
     // Control bounds: u_lb - u <= du <= u_ub - u. This include the bounded
@@ -319,11 +321,11 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
     if (nu > 0) {
       // Upper bound: du <= u_ub - u
       addIdentity(TG, ineq_idx, u_idx, nu, Scalar(1));
-      h_.segment(ineq_idx, nu) = model->get_u_ub() - us_[t];
+      qp_model_.h.segment(ineq_idx, nu) = model->get_u_ub() - us_[t];
       ineq_idx += nu;
       // Lower bound: -du <= u - u_lb
       addIdentity(TG, ineq_idx, u_idx, nu, Scalar(-1));
-      h_.segment(ineq_idx, nu) = us_[t] - model->get_u_lb();
+      qp_model_.h.segment(ineq_idx, nu) = us_[t] - model->get_u_lb();
       ineq_idx += nu;
     }
   }
@@ -336,7 +338,7 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
   const std::size_t x_idx = xs_idx_[T];
   // Terminal cost and regularization
   addBlock(TQ, x_idx, x_idx, data_T->Lxx);
-  c_.segment(x_idx, ndx) = data_T->Lx;
+  qp_model_.c.segment(x_idx, ndx) = data_T->Lx;
   if (preg_ != Scalar(0)) {
     for (std::size_t k = 0; k < n_; ++k) {
       TQ.emplace_back(k, k, preg_);
@@ -345,26 +347,29 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
   // Terminal equalities: Hx_T dx_T = -h_T
   if (nh_T > 0) {
     addBlock(TA, eq_idx, x_idx, data_T->Hx);
-    b_.segment(eq_idx, nh_T) = -data_T->h.head(nh_T);
+    qp_model_.b.segment(eq_idx, nh_T) = -data_T->h.head(nh_T);
     eq_idx += nh_T;
   }
   // Terminal inequalities: g_lb - g <= Gx dx <= g_ub - g
   if (ng_T > 0) {
     // Upper side: Gx dx <= g_ub - g
     addBlock(TG, ineq_idx, x_idx, data_T->Gx);
-    h_.segment(ineq_idx, ng_T) = model_T->get_g_ub() - data_T->g;
+    qp_model_.h.segment(ineq_idx, ng_T) = model_T->get_g_ub() - data_T->g;
     ineq_idx += ng_T;
     // Lower side: -Gx dx <= g - g_lb
     addBlock(TG, ineq_idx, x_idx, -data_T->Gx);
-    h_.segment(ineq_idx, ng_T) = data_T->g - model_T->get_g_lb();
+    qp_model_.h.segment(ineq_idx, ng_T) = data_T->g - model_T->get_g_lb();
     ineq_idx += ng_T;
   }
   // Finalize sparse matrices
-  Q_.setFromTriplets(TQ.begin(), TQ.end());
-  A_.setFromTriplets(TA.begin(), TA.end());
-  G_.setFromTriplets(TG.begin(), TG.end());
+  qp_model_.Q.setFromTriplets(TQ.begin(), TQ.end());
+  qp_model_.A.setFromTriplets(TA.begin(), TA.end());
+  qp_model_.G.setFromTriplets(TG.begin(), TG.end());
+  qp_model_.Q.makeCompressed();
+  qp_model_.A.makeCompressed();
+  qp_model_.G.makeCompressed();
   // Update the QP model and resize its data
-  qp_model_.update(Q_, c_, A_, b_, G_, h_);
+  qp_model_.cropInequalities();
   qp_data_.conservativeResize(qp_model_);
 }
 
@@ -507,13 +512,6 @@ void SolverOdynSQPTpl<Scalar>::allocateData() {
   p_ *= 2;
   // Store xs and us indeces for decision variables
   updateStateAndControlIndex();
-  // Store the QP sparse matrices and vectors
-  Q_ = Matrix(n_, n_);
-  c_ = VectorXs::Zero(n_);
-  A_ = Matrix(m_, n_);
-  b_ = VectorXs::Zero(m_);
-  G_ = Matrix(p_, n_);
-  h_ = VectorXs::Zero(p_);
   // Create the Odyn's sparse QP model and data
   qp_model_ = Model(n_, m_, p_);
   qp_data_.conservativeResize(qp_model_);
@@ -547,12 +545,7 @@ void SolverOdynSQPTpl<Scalar>::resizeRunningData() {
   // Store xs and us indeces for decision variables
   updateStateAndControlIndex();
   // Store the QP sparse matrices and vectors
-  Q_.conservativeResize(n_, n_);
-  c_.conservativeResize(n_);
-  A_.conservativeResize(m_, n_);
-  b_.conservativeResize(m_);
-  G_.conservativeResize(p_, n_);
-  h_.conservativeResize(p_);
+  qp_model_.conservativeResize(n_, m_, p_);
   STOP_PROFILER("SolverOdynSQP::resizeRunningData");
 }
 
@@ -565,12 +558,7 @@ void SolverOdynSQPTpl<Scalar>::resizeTerminalData() {
   p_ += model_T->get_ng_T() - ng_T_;
   p_ *= 2;
   // Store the QP sparse matrices and vectors
-  Q_.conservativeResize(n_, n_);
-  c_.conservativeResize(n_);
-  A_.conservativeResize(m_, n_);
-  b_.conservativeResize(m_);
-  G_.conservativeResize(p_, n_);
-  h_.conservativeResize(p_);
+  qp_model_.conservativeResize(n_, m_, p_);
   STOP_PROFILER("SolverOdynSQP::resizeTerminalData");
 }
 
