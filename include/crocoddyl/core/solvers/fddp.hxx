@@ -256,7 +256,6 @@ void SolverFDDPTpl<Scalar>::resizeRunningData() {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
     Luu_du_[t].conservativeResize(nu);
-    Lxu_du_[t].conservativeResize(nu);
     Qxu_[t].conservativeResize(ndx, nu);
     Quu_[t].conservativeResize(nu, nu);
     Qu_[t].conservativeResize(nu);
@@ -925,7 +924,7 @@ void SolverFDDPTpl<Scalar>::allocateData() {
     Vx_[t] = VectorXs::Zero(ndx);
     Lxx_dx_[t] = VectorXs::Zero(ndx);
     Luu_du_[t] = VectorXs::Zero(nu);
-    Lxu_du_[t] = VectorXs::Zero(nu);
+    Lxu_du_[t] = VectorXs::Zero(ndx);
     Qxx_[t] = MatrixXs::Zero(ndx, ndx);
     Qxu_[t] = MatrixXs::Zero(ndx, nu);
     Quu_[t] = MatrixXs::Zero(nu, nu);
