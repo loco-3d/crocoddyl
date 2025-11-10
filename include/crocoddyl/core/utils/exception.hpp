@@ -15,6 +15,7 @@
 
 #define NOEXCEPT noexcept
 
+#ifndef throw_pretty
 #define throw_pretty(m)                                                 \
   {                                                                     \
     std::stringstream ss;                                               \
@@ -22,8 +23,10 @@
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, \
                                __LINE__);                               \
   }
+#endif
 
 #ifndef NDEBUG
+#ifndef assert_pretty
 #define assert_pretty(condition, m)                                     \
   if (!(condition)) {                                                   \
     std::stringstream ss;                                               \
@@ -31,8 +34,11 @@
     throw crocoddyl::Exception(ss.str(), __FILE__, __PRETTY_FUNCTION__, \
                                __LINE__);                               \
   }
+#endif
 #else
+#ifndef assert_pretty
 #define assert_pretty(condition, m) ((void)0)
+#endif
 #endif
 namespace crocoddyl {
 
