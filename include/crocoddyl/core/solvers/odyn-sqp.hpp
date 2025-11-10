@@ -12,6 +12,7 @@
 #include <odyn/data.hpp>
 #include <odyn/model.hpp>
 #include <odyn/params.hpp>
+#include <odyn/solver.hpp>
 
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
@@ -73,6 +74,11 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixXsRowMajor MatrixXsRowMajor;
+  using Matrix = typename odyn::SparseBackend<Scalar>::Matrix;
+  using Solver = typename odyn::SparseQPTpl<Scalar>;
+  using Model = typename odyn::SparseModelTpl<Scalar>;
+  using Data = typename odyn::SparseDataTpl<Scalar>;
+  using Params = typename odyn::ParamsTpl<Scalar>;
   using SolverAbstract::computeDynamicFeasibility;
   using SolverAbstract::computeEqualityFeasibility;
   using SolverAbstract::computeFeasibility;
@@ -160,6 +166,8 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    */
   void decreaseRegularization() override;
 
+  void extractQpDirection(const VectorXs& x);
+
   /**
    * @brief Cast the OdynSQP solver to a different scalar type.
    *
@@ -171,6 +179,10 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    */
   template <typename NewScalar>
   SolverOdynSQPTpl<NewScalar> cast() const;
+
+  Model& qp_model() noexcept { return qp_model_; }
+
+  Data& qp_data() noexcept { return qp_data_; }
 
   /**
    * @brief Return the regularization factor used to increase the damping value
@@ -243,6 +255,8 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    * is called.
    */
   bool get_zero_upsilon() const;
+
+  void set_qp_params(const Params& params);
 
   /**
    * @brief Modify the regularization factor used to increase the damping value
@@ -366,9 +380,17 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   std::size_t n_;
   std::size_t m_;
   std::size_t p_;
-  odyn::ModelTpl<Scalar, odyn::SparseBackend> model_;
-  odyn::DataTpl<Scalar, odyn::SparseBackend> data_;
-  odyn::ParamsTpl<Scalar> params_;
+  Matrix Q_;
+  Matrix A_;
+  Matrix G_;
+  VectorXs c_;
+  VectorXs b_;
+  VectorXs h_;
+  VectorXs x_;
+  Solver qp_solver_;
+  Model qp_model_;
+  Data qp_data_;
+  Params qp_params_;
   std::vector<std::size_t> xs_idx_;
   std::vector<std::size_t> us_idx_;
   std::vector<VectorXs>
@@ -408,6 +430,7 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::hfeas_try_;
   using SolverAbstract::iter_;
   using SolverAbstract::merit_;
+  using SolverAbstract::ng_T_;
   using SolverAbstract::nh_T_;
   using SolverAbstract::preg_;
   using SolverAbstract::problem_;

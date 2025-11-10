@@ -30,9 +30,6 @@ SolverOdynSQPTpl<Scalar>::SolverOdynSQPTpl(
       zero_upsilon_(false) {
   // Allocating the solver's data
   allocateData();
-  // Create the Odyn solver and parameters
-  // params.max_iter = 200;
-  // params.stop_dinf = 1e-7;
 }
 
 template <typename Scalar>
@@ -43,15 +40,12 @@ void SolverOdynSQPTpl<Scalar>::computeDirection(const bool recalc) {
     SolverAbstract::calcDir();
   }
   computeQuadraticModel();
-  // // Update the QP model and resize its data
-  // model_.update(Q_, c_, A_, b_, G_, h_);
-  // data_.conservativeResize(model_);
-  // // Solve the QP problem using Odyn
-  // // self.params.stop_abs = 1e-4
-  // solver.solve(model_, data_, params_, odyn::VerboseLevel::Silent);
-  // // Unpack primal into dx/du
-  // x_ = model_.get_x(data_);
-  // extractQpDirection(x_);
+  // Solve the QP problem using Odyn
+  // qp_params_.stop_abs = 1e-4
+  qp_solver_.solve(qp_model_, qp_data_, qp_params_, odyn::VerboseLevel::Silent);
+  // Unpack primal into dx/du
+  x_ = qp_model_.get_x(qp_data_);
+  extractQpDirection(x_);
   STOP_PROFILER("SolverOdynSQP::computeDirection");
 }
 
@@ -69,7 +63,7 @@ SolverOdynSQPTpl<Scalar>::expectedImprovement() {
   // We define dVexp = Vexp - Vexptry as done for dV
   const std::size_t T = problem_->get_T();
   DV_.setZero();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -169,9 +163,9 @@ void SolverOdynSQPTpl<Scalar>::computeCandidate(const Scalar steplength) {
                  << "invalid step length, value is between 0. to 1.");
   }
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   // Update the dynamics gap for each node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -216,7 +210,163 @@ void SolverOdynSQPTpl<Scalar>::computeCandidate(const Scalar steplength) {
 }
 
 template <typename Scalar>
-void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {}
+void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
+  auto addBlock = [=](std::vector<Eigen::Triplet<Scalar>>& T, std::size_t i0,
+                      std::size_t j0, const MatrixXs& M,
+                      Scalar eps = Scalar(0)) {
+    const std::size_t r = static_cast<std::size_t>(M.rows());
+    const std::size_t c = static_cast<std::size_t>(M.cols());
+    for (std::size_t j = 0; j < c; ++j) {
+      for (std::size_t i = 0; i < r; ++i) {
+        const Scalar v = M(i, j);
+        if (v != eps) {
+          T.emplace_back(i0 + i, j0 + j, v);
+        }
+      }
+    }
+  };
+  auto addIdentity = [=](std::vector<Eigen::Triplet<Scalar>>& T, std::size_t i0,
+                         std::size_t j0, std::size_t n,
+                         Scalar scale = Scalar(1.0)) {
+    T.reserve(T.size() + n);
+    for (std::size_t k = 0; k < n; ++k) {
+      T.emplace_back(i0 + k, j0 + k, scale);
+    }
+  };
+  const std::size_t T = problem_->get_T();
+  // Update the state and control indeces in the first iteration
+  if (iter_) {
+    updateStateAndControlIndex();
+  }
+  // Building the local QP model
+  std::vector<Eigen::Triplet<Scalar>> TQ, TA, TG;
+  const std::size_t ndx = problem_->get_ndx();
+  std::size_t eq_idx = 0;
+  std::size_t ineq_idx = 0;
+  addIdentity(TA, eq_idx, xs_idx_[0], ndx, Scalar(1.0));
+  b_.segment(eq_idx, ndx) = fs_[0];
+  eq_idx += ndx;
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model =
+        problem_->get_runningModels()[t];
+    const std::shared_ptr<ActionDataAbstract>& data =
+        problem_->get_runningDatas()[t];
+    const std::size_t nu = model->get_nu();
+    const std::size_t nh = model->get_nh();
+    const std::size_t ng = model->get_ng();
+    const std::size_t xp_idx = xs_idx_[t + 1];
+    const std::size_t x_idx = xs_idx_[t];
+    const std::size_t u_idx = us_idx_[t];
+    // Quadratic cost
+    addBlock(TQ, x_idx, x_idx, data->Lxx);
+    c_.segment(x_idx, ndx) = data->Lx;
+    if (nu > 0) {
+      addBlock(TQ, u_idx, u_idx, data->Luu);
+      addBlock(TQ, x_idx, u_idx, data->Lxu);
+      addBlock(TQ, u_idx, x_idx, data->Lxu.transpose());
+      c_.segment(u_idx, nu) = data->Lu;
+    }
+    // Dynamics equalities: Fx dx + Fu du - dxp = -f
+    addBlock(TA, eq_idx, x_idx, data->Fx);
+    if (nu > 0) {
+      addBlock(TA, eq_idx, u_idx, data->Fu);
+    }
+    addIdentity(TA, eq_idx, xp_idx, ndx, Scalar(-1.0));
+    b_.segment(eq_idx, ndx) = -fs_[t + 1];
+    eq_idx += ndx;
+    // State-control equalities: Hx dx + Hu du = -h
+    if (nh > 0) {
+      addBlock(TA, eq_idx, x_idx, data->Hx);
+      if (nu > 0) {
+        addBlock(TA, eq_idx, u_idx, data->Hu);
+      }
+      b_.segment(eq_idx, nh) = -data->h;
+      eq_idx += nh;
+    }
+    // State-control inequalities: g_lb - g <= Gx dx + Gu du <= g_ub - g. This
+    // include the bounded residuals only.
+    if (ng > 0) {
+      // Upper side: Gx dx + Gu du <= g_ub - g
+      addBlock(TG, ineq_idx, x_idx, data->Gx);
+      if (nu > 0) {
+        addBlock(TG, ineq_idx, u_idx, data->Gu);
+      }
+      h_.segment(ineq_idx, ng) = model->get_g_ub() - data->g;
+      ineq_idx += ng;
+      // Lower side: -Gx dx - Gu du <= g - g_lb
+      addBlock(TG, ineq_idx, x_idx, -data->Gx);
+      if (nu > 0) {
+        addBlock(TG, ineq_idx, u_idx, -data->Gu);
+      }
+      h_.segment(ineq_idx, ng) = data->g - model->get_g_lb();
+      ineq_idx += ng;
+    }
+    // State bounds: x_lb - x <= dx <= x_ub - x.
+    if (t > 0 && t < T - 1) {
+      // Upper bound: dx <= x_ub - x
+      addIdentity(TG, ineq_idx, x_idx, ndx, Scalar(1));
+      model->get_state()->safe_diff(xs_[t], model->get_state()->get_ub(),
+                                    h_.segment(ineq_idx, ndx));
+      ineq_idx += ndx;
+      // Lower bound: -dx <= x - x_lb
+      addIdentity(TG, ineq_idx, x_idx, ndx, Scalar(-1));
+      model->get_state()->safe_diff(model->get_state()->get_lb(), xs_[t],
+                                    h_.segment(ineq_idx, ndx));
+      ineq_idx += ndx;
+    }
+    // Control bounds: u_lb - u <= du <= u_ub - u. This include the bounded
+    // residuals only.
+    if (nu > 0) {
+      // Upper bound: du <= u_ub - u
+      addIdentity(TG, ineq_idx, u_idx, nu, Scalar(1));
+      h_.segment(ineq_idx, nu) = model->get_u_ub() - us_[t];
+      ineq_idx += nu;
+      // Lower bound: -du <= u - u_lb
+      addIdentity(TG, ineq_idx, u_idx, nu, Scalar(-1));
+      h_.segment(ineq_idx, nu) = us_[t] - model->get_u_lb();
+      ineq_idx += nu;
+    }
+  }
+  const std::shared_ptr<ActionModelAbstract>& model_T =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& data_T =
+      problem_->get_terminalData();
+  const std::size_t nh_T = model_T->get_nh_T();
+  const std::size_t ng_T = model_T->get_ng_T();
+  const std::size_t x_idx = xs_idx_[T];
+  // Terminal cost and regularization
+  addBlock(TQ, x_idx, x_idx, data_T->Lxx);
+  c_.segment(x_idx, ndx) = data_T->Lx;
+  if (preg_ != Scalar(0)) {
+    for (std::size_t k = 0; k < n_; ++k) {
+      TQ.emplace_back(k, k, preg_);
+    }
+  }
+  // Terminal equalities: Hx_T dx_T = -h_T
+  if (nh_T > 0) {
+    addBlock(TA, eq_idx, x_idx, data_T->Hx);
+    b_.segment(eq_idx, nh_T) = -data_T->h.head(nh_T);
+    eq_idx += nh_T;
+  }
+  // Terminal inequalities: g_lb - g <= Gx dx <= g_ub - g
+  if (ng_T > 0) {
+    // Upper side: Gx dx <= g_ub - g
+    addBlock(TG, ineq_idx, x_idx, data_T->Gx);
+    h_.segment(ineq_idx, ng_T) = model_T->get_g_ub() - data_T->g;
+    ineq_idx += ng_T;
+    // Lower side: -Gx dx <= g - g_lb
+    addBlock(TG, ineq_idx, x_idx, -data_T->Gx);
+    h_.segment(ineq_idx, ng_T) = data_T->g - model_T->get_g_lb();
+    ineq_idx += ng_T;
+  }
+  // Finalize sparse matrices
+  Q_.setFromTriplets(TQ.begin(), TQ.end());
+  A_.setFromTriplets(TA.begin(), TA.end());
+  G_.setFromTriplets(TG.begin(), TG.end());
+  // Update the QP model and resize its data
+  qp_model_.update(Q_, c_, A_, b_, G_, h_);
+  qp_data_.conservativeResize(qp_model_);
+}
 
 template <typename Scalar>
 void SolverOdynSQPTpl<Scalar>::updateCandidate() {
@@ -257,52 +407,66 @@ void SolverOdynSQPTpl<Scalar>::increaseRegularization() {
 }
 
 template <typename Scalar>
+void SolverOdynSQPTpl<Scalar>::extractQpDirection(const VectorXs& x) {
+  const std::size_t T = problem_->get_T();
+  const std::size_t ndx = problem_->get_ndx();
+  for (std::size_t t = 0; t < T; ++t) {
+    const std::shared_ptr<ActionModelAbstract>& model =
+        problem_->get_runningModels()[t];
+    const std::size_t nu = model->get_nu();
+    dxs_[t] = x.segment(xs_idx_[t], ndx);
+    if (nu > 0) {
+      dus_[t] = x.segment(us_idx_[t], nu);
+    }
+  }
+  dxs_.back() = x.segment(xs_idx_[T], ndx);
+}
+
+template <typename Scalar>
 template <typename NewScalar>
 SolverOdynSQPTpl<NewScalar> SolverOdynSQPTpl<Scalar>::cast() const {
   typedef SolverOdynSQPTpl<NewScalar> ReturnType;
   typedef ShootingProblemTpl<NewScalar> ProblemType;
   ReturnType ret(
       std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
-  // // Setting the abstract parameters
-  // ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
-  // ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
-  // ret.set_th_stop(
-  //     std::sqrt(std::numeric_limits<NewScalar>::epsilon()) <
-  //     NewScalar(th_stop_)
-  //         ? scalar_cast<NewScalar>(th_stop_)
-  //         : std::sqrt(
-  //               std::numeric_limits<NewScalar>::
-  //                   epsilon()));  // Stopping threshold shouldn't be lower
-  //                   than
-  //                                 // square root of the machine precision
-  // // Setting the FDDP parameters
-  // ret.set_alphas(vector_cast<NewScalar>(alphas_));
-  // ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
-  // ret.set_reg_decfactor(scalar_cast<NewScalar>(reg_decfactor_));
-  // ret.set_reg_min(
-  //     ScaleNumerics<Scalar>(1e-9) < NewScalar(reg_min_)
-  //         ? scalar_cast<NewScalar>(reg_min_)
-  //         : ScaleNumerics<NewScalar>(
-  //               1e-9));  // Minimum regularization value shouldn't be lower
-  //               than
-  //                        // 1e-9 or 1e-5 for doubles or floats
-  // ret.set_reg_max(
-  //     ScaleNumerics<Scalar>(1e9, 1e-4) > NewScalar(reg_max_)
-  //         ? scalar_cast<NewScalar>(reg_max_)
-  //         : ScaleNumerics<NewScalar>(
-  //               1e9, 1e-4));  // Maximum regularization value shouldn't be
-  //                             // higher than 1e9 or 1e5 for doubles or floats
-  // ret.set_th_grad(scalar_cast<NewScalar>(ScaleNumerics<NewScalar>(th_grad_)));
-  // ret.set_th_noimprovement(scalar_cast<NewScalar>(th_noimprovement_));
-  // ret.set_th_stepdec(scalar_cast<NewScalar>(th_stepdec_));
-  // ret.set_th_stepinc(scalar_cast<NewScalar>(th_stepinc_));
-  // ret.set_th_minimprove(scalar_cast<NewScalar>(th_minimprove_));
-  // ret.set_th_acceptnegstep(scalar_cast<NewScalar>(th_acceptnegstep_));
-  // ret.set_th_acceptminstep(scalar_cast<NewScalar>(th_acceptminstep_));
-  // ret.set_rho(scalar_cast<NewScalar>(rho_));
-  // ret.set_th_minfeas(scalar_cast<NewScalar>(th_minfeas_));
-  // ret.set_upsilon_decfactor(scalar_cast<NewScalar>(upsilon_decfactor_));
-  // ret.set_zero_upsilon(zero_upsilon_);
+  // Setting the abstract parameters
+  ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
+  ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
+  ret.set_th_stop(
+      std::sqrt(std::numeric_limits<NewScalar>::epsilon()) < NewScalar(th_stop_)
+          ? scalar_cast<NewScalar>(th_stop_)
+          : std::sqrt(
+                std::numeric_limits<NewScalar>::
+                    epsilon()));  // Stopping threshold shouldn't be lower than
+                                  // square root of the machine precision
+  // Setting the OdynSQP parameters
+  ret.set_alphas(vector_cast<NewScalar>(alphas_));
+  ret.set_reg_incfactor(scalar_cast<NewScalar>(reg_incfactor_));
+  ret.set_reg_decfactor(scalar_cast<NewScalar>(reg_decfactor_));
+  ret.set_reg_min(
+      ScaleNumerics<Scalar>(1e-9) < NewScalar(reg_min_)
+          ? scalar_cast<NewScalar>(reg_min_)
+          : ScaleNumerics<NewScalar>(
+                1e-9));  // Minimum regularization value shouldn't be lower than
+                         // 1e-9 or 1e-5 for doubles or floats
+  ret.set_reg_max(
+      ScaleNumerics<Scalar>(1e9, 1e-4) > NewScalar(reg_max_)
+          ? scalar_cast<NewScalar>(reg_max_)
+          : ScaleNumerics<NewScalar>(
+                1e9, 1e-4));  // Maximum regularization value shouldn't be
+                              // higher than 1e9 or 1e5 for doubles or floats
+  ret.set_th_grad(scalar_cast<NewScalar>(ScaleNumerics<NewScalar>(th_grad_)));
+  ret.set_th_noimprovement(scalar_cast<NewScalar>(th_noimprovement_));
+  ret.set_th_stepdec(scalar_cast<NewScalar>(th_stepdec_));
+  ret.set_th_stepinc(scalar_cast<NewScalar>(th_stepinc_));
+  ret.set_th_minimprove(scalar_cast<NewScalar>(th_minimprove_));
+  ret.set_th_acceptnegstep(scalar_cast<NewScalar>(th_acceptnegstep_));
+  ret.set_th_acceptminstep(scalar_cast<NewScalar>(th_acceptminstep_));
+  ret.set_rho(scalar_cast<NewScalar>(rho_));
+  ret.set_th_minfeas(scalar_cast<NewScalar>(th_minfeas_));
+  ret.set_upsilon_decfactor(scalar_cast<NewScalar>(upsilon_decfactor_));
+  ret.set_zero_upsilon(zero_upsilon_);
+  ret.set_qp_params(qp_params_.template cast<NewScalar>());
   return ret;
 }
 
@@ -315,8 +479,11 @@ void SolverOdynSQPTpl<Scalar>::allocateData() {
   Lxu_du_.resize(T);
   xs_idx_.resize(T + 1);
   us_idx_.resize(T);
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
+  n_ = 0;
+  m_ = ndx;
+  p_ = 0;
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -341,16 +508,15 @@ void SolverOdynSQPTpl<Scalar>::allocateData() {
   // Store xs and us indeces for decision variables
   updateStateAndControlIndex();
   // Store the QP sparse matrices and vectors
-
-  // Q_ = sp.lil_matrix((self.n, self.n));
-  // c_ = np.zeros(self.n);
-  // A_ = sp.lil_matrix((self.m, self.n));
-  // b_ = np.zeros(self.m);
-  // G_ = sp.lil_matrix((self.p, self.n));
-  // h_ = np.zeros(self.p);
-  // // Create the Odyn's sparse QP model
-  // model_ = odyn.SparseModel(self.Q.tocsc(), self.c, self.A.tocsc(), self.b,
-  // self.G.tocsc(), self.h) data_ = self.model.createData()
+  Q_ = Matrix(n_, n_);
+  c_ = VectorXs::Zero(n_);
+  A_ = Matrix(m_, n_);
+  b_ = VectorXs::Zero(m_);
+  G_ = Matrix(p_, n_);
+  h_ = VectorXs::Zero(p_);
+  // Create the Odyn's sparse QP model and data
+  qp_model_ = Model(n_, m_, p_);
+  qp_data_.conservativeResize(qp_model_);
 }
 
 template <typename Scalar>
@@ -359,36 +525,59 @@ void SolverOdynSQPTpl<Scalar>::resizeRunningData() {
   SolverAbstract::resizeRunningData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
+  n_ = 0;
+  m_ = ndx;
+  p_ = 0;
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
+    n_ += ndx + nu;
+    m_ += ndx + model->get_nh();
+    p_ += model->get_ng() + nu + ndx;
     Luu_du_[t].conservativeResize(nu);
-    Lxu_du_[t].conservativeResize(nu);
   }
+  const std::shared_ptr<ActionModelAbstract>& model_T =
+      problem_->get_terminalModel();
+  n_ += ndx;
+  m_ += model_T->get_nh_T();
+  p_ += model_T->get_ng_T() + ndx;
+  p_ *= 2;
+  // Store xs and us indeces for decision variables
+  updateStateAndControlIndex();
+  // Store the QP sparse matrices and vectors
+  Q_.conservativeResize(n_, n_);
+  c_.conservativeResize(n_);
+  A_.conservativeResize(m_, n_);
+  b_.conservativeResize(m_);
+  G_.conservativeResize(p_, n_);
+  h_.conservativeResize(p_);
   STOP_PROFILER("SolverOdynSQP::resizeRunningData");
 }
 
 template <typename Scalar>
 void SolverOdynSQPTpl<Scalar>::resizeTerminalData() {
   START_PROFILER("SolverOdynSQP::resizeTerminalData");
-  // const std::size_t T = problem_->get_T();
-  // const std::size_t ndx = problem_->get_ndx();
-  // const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
-  // const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
-  //     problem_->get_runningModels();
-  // for (std::size_t t = 0; t < T; ++t) {
-  //   const std::shared_ptr<ActionModelAbstract>& model = models[t];
-  //   const std::size_t nu = model->get_nu();
-  // }
+  const std::shared_ptr<ActionModelAbstract>& model_T =
+      problem_->get_terminalModel();
+  m_ += model_T->get_nh_T() - nh_T_;
+  p_ += model_T->get_ng_T() - ng_T_;
+  p_ *= 2;
+  // Store the QP sparse matrices and vectors
+  Q_.conservativeResize(n_, n_);
+  c_.conservativeResize(n_);
+  A_.conservativeResize(m_, n_);
+  b_.conservativeResize(m_);
+  G_.conservativeResize(p_, n_);
+  h_.conservativeResize(p_);
   STOP_PROFILER("SolverOdynSQP::resizeTerminalData");
 }
 
 template <typename Scalar>
 void SolverOdynSQPTpl<Scalar>::updateStateAndControlIndex() {
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   std::size_t nvar = 0;
   const std::size_t ndx = problem_->get_ndx();
@@ -467,6 +656,12 @@ Scalar SolverOdynSQPTpl<Scalar>::get_upsilon_decfactor() const {
 template <typename Scalar>
 bool SolverOdynSQPTpl<Scalar>::get_zero_upsilon() const {
   return zero_upsilon_;
+}
+
+template <typename Scalar>
+void SolverOdynSQPTpl<Scalar>::set_qp_params(
+    const odyn::ParamsTpl<Scalar>& qp_params) {
+  qp_params_ = qp_params;
 }
 
 template <typename Scalar>

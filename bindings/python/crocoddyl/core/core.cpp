@@ -66,6 +66,7 @@ void exposeCore() {
   exposeSolverKKT();
   exposeSolverDDP();
   exposeSolverFDDP();
+  exposeSolverOdynSQP();
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
   exposeSolverBoxFDDP();
