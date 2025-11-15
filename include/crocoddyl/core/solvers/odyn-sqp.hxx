@@ -211,6 +211,7 @@ void SolverOdynSQPTpl<Scalar>::computeCandidate(const Scalar steplength) {
 
 template <typename Scalar>
 void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
+  START_PROFILER("SolverOdynSQP::computeQuadraticModel");
   auto addBlock = [=](std::vector<Eigen::Triplet<Scalar>>& T, std::size_t i0,
                       std::size_t j0, const MatrixXs& M,
                       Scalar eps = Scalar(0)) {
@@ -371,6 +372,7 @@ void SolverOdynSQPTpl<Scalar>::computeQuadraticModel() {
   // Update the QP model and resize its data
   qp_model_.cropInequalities();
   qp_data_.conservativeResize(qp_model_);
+  STOP_PROFILER("SolverOdynSQP::computeQuadraticModel");
 }
 
 template <typename Scalar>
