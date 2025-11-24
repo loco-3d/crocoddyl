@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef CROCODDYL_WITH_ODYN
+
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/core/solvers/odyn-sqp.hpp"
 
@@ -15,3 +17,5 @@ template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     SolverOdynSQPTpl<@SCALAR_TYPE@>;
 
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_WITH_ODYN

@@ -159,7 +159,7 @@ if(BUILD_EXAMPLES
 endif()
 
 if(BUILD_WITH_ODYN)
-  add_optional_dependency(odyn)
+  add_project_dependency(odyn 0.7.0 PKG_CONFIG_REQUIRES "odyn >= 0.7.0")
 endif()
 
 if(BUILD_WITH_IPOPT)
@@ -235,14 +235,18 @@ if(BUILD_WITH_MULTITHREADS)
 endif()
 
 # Add Odyn
-if(BUILD_WITH_ODYN AND ODYN_FOUND)
+if(BUILD_WITH_ODYN AND odyn_FOUND)
   add_definitions(-DCROCODDYL_WITH_ODYN)
-  link_directories(${ODYN_LIBRARY_DIRS})
+  set(PACKAGE_EXTRA_MACROS
+      "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_ODYN)")
+  link_directories(${odyn_LIBRARY_DIRS})
 endif()
 
 # Add Ipopt
 if(BUILD_WITH_IPOPT AND IPOPT_FOUND)
   add_definitions(-DCROCODDYL_WITH_IPOPT)
+  set(PACKAGE_EXTRA_MACROS
+      "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_IPOPT)")
   link_directories(${IPOPT_LIBRARY_DIRS})
 endif()
 

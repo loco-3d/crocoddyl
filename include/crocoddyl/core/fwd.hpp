@@ -38,6 +38,11 @@ class SolverFDDPTpl;
 template <typename Scalar>
 class SolverIntroTpl;
 
+#ifdef CROCODDYL_WITH_ODYN
+template <typename Scalar>
+class SolverOdynSQPTpl;
+#endif
+
 template <typename Scalar>
 class SolverBoxFDDPTpl;
 
@@ -335,6 +340,9 @@ typedef ShootingProblemTpl<double> ShootingProblem;
 typedef SolverAbstractTpl<double> SolverAbstract;
 typedef SolverFDDPTpl<double> SolverFDDP;
 typedef SolverIntroTpl<double> SolverIntro;
+#ifdef CROCODDYL_WITH_ODYN
+typedef SolverOdynSQPTpl<double> SolverOdynSQP;
+#endif
 typedef SolverBoxFDDPTpl<double> SolverBoxFDDP;
 typedef SolverKKTTpl<double> SolverKKT;
 typedef BoxQPTpl<double> BoxQP;

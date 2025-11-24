@@ -66,7 +66,9 @@ void exposeCore() {
   exposeSolverKKT();
   exposeSolverDDP();
   exposeSolverFDDP();
+#ifdef CROCODDYL_WITH_ODYN
   exposeSolverOdynSQP();
+#endif
   exposeSolverBoxQP();
   exposeSolverBoxDDP();
   exposeSolverBoxFDDP();

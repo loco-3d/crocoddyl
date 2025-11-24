@@ -6,6 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef CROCODDYL_WITH_ODYN
+
 #include "crocoddyl/core/solvers/odyn-sqp.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
@@ -278,3 +280,5 @@ void exposeSolverOdynSQP() {
 
 }  // namespace python
 }  // namespace crocoddyl
+
+#endif  // CROCODDYL_WITH_ODYN
