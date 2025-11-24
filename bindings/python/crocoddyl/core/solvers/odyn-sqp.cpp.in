@@ -255,15 +255,17 @@ struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model, bp::bases<ModelBase>>(                                     \
       "SolverOdynSQP",                                                         \
-      "Odyn Sequential Quadratic Programming (SQP) solver.\n\n"                \
-      "The FDDP solver computes an optimal trajectory and control commands "   \
-      "by iterates running backward and forward passes. The backward-pass "    \
-      "updates locally the quadratic approximation of the problem and "        \
-      "computes descent direction, and the forward-pass rollouts this new "    \
-      "policy by integrating the system dynamics along a tuple of optimized "  \
-      "control commands U*.\n"                                                 \
+      "Odyn-based Sequential Quadratic Programming (SQP) solver.\n\n"          \
+      "This solver wraps Odyn's sparse QP engine to solve Crocoddyl shooting " \
+      "problems with equality and inequality constraints. Each iteration "     \
+      "builds a sparse QP (computeQuadraticModel), solves it with Odyn, and "  \
+      "maps the QP step back to state/control updates "                        \
+      "(computeSearchDirection/tryStep). The try step supports infeasible "    \
+      "iterates (open dynamics gaps) and line-searches them for better "       \
+      "globalization on hard constraints. The expected improvement also "      \
+      "accounts for dynamics gaps.\n"                                          \
       ":param shootingProblem: shooting problem (list of action models along " \
-      "trajectory.)",                                                          \
+      "the trajectory).",                                                      \
       bp::init<std::shared_ptr<ShootingProblem>>(                              \
           bp::args("self", "problem"),                                         \
           "Initialize the vector dimension.\n\n"                               \

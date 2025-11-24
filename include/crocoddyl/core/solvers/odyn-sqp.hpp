@@ -20,42 +20,19 @@
 namespace crocoddyl {
 
 /**
- * @brief Feasibility-driven Differential Dynamic Programming (OdynSQP) solver
+ * @brief Odyn-based Sequential Quadratic Programming (SQP) solver
  *
- * The OdynSQP solver computes an optimal trajectory and control commands by
- * iterates running `backwardPass()` and `forwardPass()`. The backward pass
- * accepts infeasible guess as described in the `SolverOdynSQP::backwardPass()`.
- * Additionally, the forward pass handles infeasibility simulations that
- * resembles the numerical behaviour of a multiple-shooting formulation, i.e.:
- * \f{eqnarray}
- *   \mathbf{\hat{x}}_0 &=& \mathbf{\tilde{x}}_0 - (1 -
- * \alpha)\mathbf{\bar{f}}_0,\\
- *   \mathbf{\hat{u}}_k &=& \mathbf{u}_k + \alpha\mathbf{k}_k +
- * \mathbf{K}_k(\mathbf{\hat{x}}_k-\mathbf{x}_k),\\ \mathbf{\hat{x}}_{k+1} &=&
- * \mathbf{f}_k(\mathbf{\hat{x}}_k,\mathbf{\hat{u}}_k) - (1 -
- * \alpha)\mathbf{\bar{f}}_{k+1}.
- * \f}
- * Note that the forward pass keeps the gaps \f$\mathbf{\bar{f}}_s\f$ open
- * according to the step length \f$\alpha\f$ that has been accepted. This solver
- * has shown empirically greater globalization strategy. Additionally, the
- * expected improvement computation considers the gaps in the dynamics:
- * \f{equation}
- *   \Delta J(\alpha) = \Delta_1\alpha + \frac{1}{2}\Delta_2\alpha^2,
- * \f}
- * with
- * \f{eqnarray}
- *   \Delta_1 = \sum_{k=0}^{N-1} \mathbf{k}_k^\top\mathbf{Q}_{\mathbf{u}_k}
- * +\mathbf{\bar{f}}_k^\top(V_{\mathbf{x}_k} -
- *   V_{\mathbf{xx}_k}\mathbf{x}_k),\nonumber\\ \Delta_2 = \sum_{k=0}^{N-1}
- *   \mathbf{k}_k^\top\mathbf{Q}_{\mathbf{uu}_k}\mathbf{k}_k +
- * \mathbf{\bar{f}}_k^\top(2 V_{\mathbf{xx}_k}\mathbf{x}_k
- * - V_{\mathbf{xx}_k}\mathbf{\bar{f}}_k). \f}
+ * This solver wraps Odyn’s sparse QP engine to solve Crocoddyl shooting
+ * problems with equality and inequality constraints. At each iteration it
+ * builds a sparse QP in `computeQuadraticModel()`, solves it with Odyn, and
+ * then maps the QP step back to state/control updates in
+ * `computeSearchDirection()` / `tryStep()`. The try step supports
+ * infeasible iterates (open dynamics gaps) and line-searches them, which
+ * improves globalization on hard-constrained problems. The expected improvement
+ * calculation also accounts for the dynamics gaps.
  *
- * For more details about the feasibility-driven differential dynamic
- * programming algorithm see: \include mastalli-icra20.bib
- *
- * \sa `SolverAbstract()`, `backwardPass()`, `forwardPass()`, and
- * `expectedImprovement()`.
+ * See `SolverAbstract()`, `computeSearchDirection()`, `tryStep()`, and
+ * `expectedImprovement()` for the main iteration steps.
  */
 template <typename _Scalar>
 class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
