@@ -77,6 +77,19 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
   bp::scope().attr("WITH_CODEGEN") = false;
 #endif
 
+#ifdef CROCODDYL_WITH_ODYN
+  bp::scope().attr("WITH_ODYN") = true;
+#else
+  bp::scope().attr("WITH_ODYN") = false;
+#endif
+
+#ifdef CROCODDYL_WITH_IPOPT
+  bp::scope().attr("WITH_IPOPT") = true;
+#else
+  bp::scope().attr("WITH_IPOPT") = false;
+#endif
+
+
   CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(@SCALAR_TYPE@)
 
 #ifdef SCALAR_float64
