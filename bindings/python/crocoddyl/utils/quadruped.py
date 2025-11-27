@@ -6,15 +6,13 @@ import crocoddyl
 
 
 class SimpleQuadrupedalGaitProblem:
-    """Build simple quadrupedal locomotion problems.
+    """Helper for assembling simple quadrupedal locomotion problems.
 
-    This class aims to build simple locomotion problems used in the examples of
-    Crocoddyl.
-    The scope of this class is purely for academic reasons, and it does not aim to be
-    used in any robotics application.
-    We also do not consider it as part of the API, so changes in this class will not
-    pass through a strict process of deprecation.
-    Thus, we advice any user to DO NOT develop their application based on this class.
+    The class bundles a few canned scenarios used in Crocoddyl examples: walking,
+    trotting, pacing, bounding, jumping and small CoM motions. The models are kept
+    intentionally simple and are **not** meant for real robots or applications
+    beyond tutorial or benchmarking purposes. This file is not part of the public
+    API and can change without deprecation.
     """
 
     def __init__(
@@ -27,21 +25,20 @@ class SimpleQuadrupedalGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
-        use_constraints=False,
     ):
         """Construct quadrupedal-gait problem.
 
-        :param rmodel: robot model
-        :param lfFoot: name of the left-front foot
-        :param rfFoot: name of the right-front foot
-        :param lhFoot: name of the left-hind foot
-        :param rhFoot: name of the right-hind foot
-        :param integrator: type of the integrator
-            (options are: 'euler', and 'rk4')
-        :param control: type of control parametrization
-            (options are: 'zero', 'one', and 'rk4')
-        :param fwddyn: True for forward-dynamics and False for inverse-dynamics
-            formulations
+        :param rmodel: Pinocchio robot model used to build states and costs.
+        :param lfFoot: name of the left-front foot frame in the model.
+        :param rfFoot: name of the right-front foot frame in the model.
+        :param lhFoot: name of the left-hind foot frame in the model.
+        :param rhFoot: name of the right-hind foot frame in the model.
+        :param integrator: discrete integrator for the differential models
+            (``"euler"``, ``"rk2"``, ``"rk3"``, ``"rk4"``).
+        :param control: control parametrization (``"zero"``, ``"one"``, ``"rk3"``,
+            ``"rk4"``); see Crocoddyl control parametrizations for details.
+        :param fwddyn: True for forward-dynamics, False for inverse-dynamics
+            formulations.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -55,7 +52,6 @@ class SimpleQuadrupedalGaitProblem:
         self._integrator = integrator
         self._control = control
         self._fwddyn = fwddyn
-        self.use_constraints = use_constraints
 
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["standing"]
@@ -65,14 +61,17 @@ class SimpleQuadrupedalGaitProblem:
         self.mu = 0.7
         self.Rsurf = np.eye(3)
 
-    def createCoMProblem(self, x0, comGoTo, timeStep, numKnots):
+    def createCoMProblem(self, x0, comGoTo, timeStep, numKnots, constraint=False):
         """Create a shooting problem for a CoM forward/backward task.
 
-        :param x0: initial state
-        :param comGoTo: initial CoM motion
-        :param timeStep: step time for each knot
-        :param numKnots: number of knots per each phase
-        :return shooting problem
+        :param x0: initial state.
+        :param comGoTo: forward displacement of the CoM before returning.
+        :param timeStep: duration of each node.
+        :param numKnots: number of nodes for the forward and backward phases.
+        :param constraint: if True, enforce contact constraints instead of
+            penalizing them.
+        :return: a ``crocoddyl.ShootingProblem`` with forward and backward CoM
+            excursions.
         """
         # Compute the current foot positions
         q0 = x0[: self.rmodel.nq]
@@ -83,7 +82,9 @@ class SimpleQuadrupedalGaitProblem:
         comModels = []
         comForwardModels = [
             self.createSwingFootModel(
-                timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId]
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(numKnots)
         ]
@@ -91,11 +92,14 @@ class SimpleQuadrupedalGaitProblem:
             timeStep,
             [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
             com0 + np.array([comGoTo, 0.0, 0.0]),
+            constraint=constraint,
         )
         comForwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
         comBackwardModels = [
             self.createSwingFootModel(
-                timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId]
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(numKnots)
         ]
@@ -103,6 +107,7 @@ class SimpleQuadrupedalGaitProblem:
             timeStep,
             [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
             com0 + np.array([-comGoTo, 0.0, 0.0]),
+            constraint=constraint,
         )
         comBackwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
         # Adding the CoM tasks
@@ -110,14 +115,16 @@ class SimpleQuadrupedalGaitProblem:
         comModels += [*comBackwardModels, comBackwardTermModel]
         return crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
 
-    def createCoMGoalProblem(self, x0, comGoTo, timeStep, numKnots):
+    def createCoMGoalProblem(self, x0, comGoTo, timeStep, numKnots, constraint=False):
         """Create a shooting problem for a CoM position goal task.
 
-        :param x0: initial state
-        :param comGoTo: CoM position change target
-        :param timeStep: step time for each knot
-        :param numKnots: number of knots per each phase
-        :return shooting problem
+        :param x0: initial state.
+        :param comGoTo: desired CoM displacement along +x.
+        :param timeStep: duration of each node.
+        :param numKnots: number of nodes before the terminal knot.
+        :param constraint: if True, model friction cones and swing tasks as
+            constraints.
+        :return: a ``crocoddyl.ShootingProblem`` that reaches the CoM target.
         """
         # Compute the current foot positions
         q0 = x0[: self.state.nq]
@@ -130,6 +137,7 @@ class SimpleQuadrupedalGaitProblem:
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(numKnots)
         ]
@@ -144,17 +152,26 @@ class SimpleQuadrupedalGaitProblem:
         return crocoddyl.ShootingProblem(x0, comModels[:-1], comModels[-1])
 
     def createWalkingProblem(
-        self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots
+        self,
+        x0,
+        stepLength,
+        stepHeight,
+        timeStep,
+        stepKnots,
+        supportKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a simple walking gait.
 
-        :param x0: initial state
-        :param stepLength: step length
-        :param stepHeight: step height
-        :param timeStep: step time for each knot
-        :param stepKnots: number of knots for step phases
-        :param supportKnots: number of knots for double support phases
-        :return shooting problem
+        :param x0: initial state.
+        :param stepLength: forward displacement of each footstep.
+        :param stepHeight: clearance height during swing.
+        :param timeStep: duration of each node.
+        :param stepKnots: nodes per swing phase.
+        :param supportKnots: nodes for each double-support phase.
+        :param constraint: if True, enforce friction cones and foot tracks as
+            constraints.
+        :return: configured ``crocoddyl.ShootingProblem``.
         """
         # Compute the current foot positions
         q0 = x0[: self.state.nq]
@@ -172,6 +189,7 @@ class SimpleQuadrupedalGaitProblem:
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(supportKnots)
         ]
@@ -185,6 +203,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.rfFootId, self.lhFootId],
                 [self.rhFootId],
+                constraint=constraint,
             )
             rfStep = self.createFootstepModels(
                 comRef,
@@ -195,6 +214,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.lhFootId, self.rhFootId],
                 [self.rfFootId],
+                constraint=constraint,
             )
             self.firstStep = False
         else:
@@ -207,6 +227,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.rfFootId, self.lhFootId],
                 [self.rhFootId],
+                constraint=constraint,
             )
             rfStep = self.createFootstepModels(
                 comRef,
@@ -217,6 +238,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.lhFootId, self.rhFootId],
                 [self.rfFootId],
+                constraint=constraint,
             )
         lhStep = self.createFootstepModels(
             comRef,
@@ -227,6 +249,7 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.lfFootId, self.rfFootId, self.rhFootId],
             [self.lhFootId],
+            constraint=constraint,
         )
         lfStep = self.createFootstepModels(
             comRef,
@@ -237,23 +260,33 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.rfFootId, self.lhFootId, self.rhFootId],
             [self.lfFootId],
+            constraint=constraint,
         )
         loco3dModel += doubleSupport + rhStep + rfStep
         loco3dModel += doubleSupport + lhStep + lfStep + [doubleSupport[0]]
         return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createTrottingProblem(
-        self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots
+        self,
+        x0,
+        stepLength,
+        stepHeight,
+        timeStep,
+        stepKnots,
+        supportKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a simple trotting gait.
 
-        :param x0: initial state
-        :param stepLength: step length
-        :param stepHeight: step height
-        :param timeStep: step time for each knot
-        :param stepKnots: number of knots for step phases
-        :param supportKnots: number of knots for double support phases
-        :return shooting problem
+        :param x0: initial state.
+        :param stepLength: forward displacement of each footstep pair.
+        :param stepHeight: clearance height during swing.
+        :param timeStep: duration of each node.
+        :param stepKnots: nodes per swing phase.
+        :param supportKnots: nodes for each double-support phase.
+        :param constraint: if True, enforce friction cones and foot tracks as
+            constraints.
+        :return: configured ``crocoddyl.ShootingProblem``.
         """
         # Compute the current foot positions
         q0 = x0[: self.rmodel.nq]
@@ -271,6 +304,7 @@ class SimpleQuadrupedalGaitProblem:
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(supportKnots)
         ]
@@ -284,6 +318,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.rhFootId],
                 [self.rfFootId, self.lhFootId],
+                constraint=constraint,
             )
             self.firstStep = False
         else:
@@ -296,6 +331,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.rhFootId],
                 [self.rfFootId, self.lhFootId],
+                constraint=constraint,
             )
         lfrhStep = self.createFootstepModels(
             comRef,
@@ -306,23 +342,33 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.rfFootId, self.lhFootId],
             [self.lfFootId, self.rhFootId],
+            constraint=constraint,
         )
         loco3dModel += doubleSupport + rflhStep
         loco3dModel += doubleSupport + lfrhStep + [doubleSupport[0]]
         return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createPacingProblem(
-        self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots
+        self,
+        x0,
+        stepLength,
+        stepHeight,
+        timeStep,
+        stepKnots,
+        supportKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a simple pacing gait.
 
-        :param x0: initial state
-        :param stepLength: step length
-        :param stepHeight: step height
-        :param timeStep: step time for each knot
-        :param stepKnots: number of knots for step phases
-        :param supportKnots: number of knots for double support phases
-        :return shooting problem
+        :param x0: initial state.
+        :param stepLength: forward displacement of each footstep pair.
+        :param stepHeight: clearance height during swing.
+        :param timeStep: duration of each node.
+        :param stepKnots: nodes per swing phase.
+        :param supportKnots: nodes for each double-support phase.
+        :param constraint: if True, enforce friction cones and foot tracks as
+            constraints.
+        :return: configured ``crocoddyl.ShootingProblem``.
         """
         # Compute the current foot positions
         q0 = x0[: self.rmodel.nq]
@@ -340,6 +386,7 @@ class SimpleQuadrupedalGaitProblem:
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(supportKnots)
         ]
@@ -353,6 +400,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.lhFootId],
                 [self.rfFootId, self.rhFootId],
+                constraint=constraint,
             )
             self.firstStep = False
         else:
@@ -365,6 +413,7 @@ class SimpleQuadrupedalGaitProblem:
                 stepKnots,
                 [self.lfFootId, self.lhFootId],
                 [self.rfFootId, self.rhFootId],
+                constraint=constraint,
             )
         leftSteps = self.createFootstepModels(
             comRef,
@@ -375,23 +424,33 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.rfFootId, self.rhFootId],
             [self.lfFootId, self.lhFootId],
+            constraint=constraint,
         )
         loco3dModel += doubleSupport + rightSteps
         loco3dModel += doubleSupport + leftSteps + [doubleSupport[0]]
         return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createBoundingProblem(
-        self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots
+        self,
+        x0,
+        stepLength,
+        stepHeight,
+        timeStep,
+        stepKnots,
+        supportKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a simple bounding gait.
 
-        :param x0: initial state
-        :param stepLength: step length
-        :param stepHeight: step height
-        :param timeStep: step time for each knot
-        :param stepKnots: number of knots for step phases
-        :param supportKnots: number of knots for double support phases
-        :return shooting problem
+        :param x0: initial state.
+        :param stepLength: forward displacement of each front/hind pair.
+        :param stepHeight: clearance height during swing.
+        :param timeStep: duration of each node.
+        :param stepKnots: nodes per swing phase.
+        :param supportKnots: nodes for each double-support phase.
+        :param constraint: if True, enforce friction cones and foot tracks as
+            constraints.
+        :return: configured ``crocoddyl.ShootingProblem``.
         """
         # Compute the current foot positions
         q0 = x0[: self.rmodel.nq]
@@ -407,7 +466,9 @@ class SimpleQuadrupedalGaitProblem:
         loco3dModel = []
         doubleSupport = [
             self.createSwingFootModel(
-                timeStep, [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId]
+                timeStep,
+                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(supportKnots)
         ]
@@ -420,6 +481,7 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.lhFootId, self.rhFootId],
             [self.lfFootId, self.rfFootId],
+            constraint=constraint,
         )
         frontSteps = self.createFootstepModels(
             comRef,
@@ -430,14 +492,38 @@ class SimpleQuadrupedalGaitProblem:
             stepKnots,
             [self.lfFootId, self.rfFootId],
             [self.lhFootId, self.rhFootId],
+            constraint=constraint,
         )
         loco3dModel += doubleSupport + hindSteps
         loco3dModel += doubleSupport + frontSteps + [doubleSupport[0]]
         return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createJumpingProblem(
-        self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots
+        self,
+        x0,
+        jumpHeight,
+        jumpLength,
+        timeStep,
+        groundKnots,
+        flyingKnots,
+        constraint=False,
     ):
+        """Create a shooting problem for a fixed-length jump.
+
+        The sequence follows: crouch/take-off, ballistic flight (up then down),
+        touchdown with an impulse/pseudo-impulse phase, and stabilization on the
+        landing position.
+
+        :param x0: initial state.
+        :param jumpHeight: desired apex height above the initial foot height.
+        :param jumpLength: 3D displacement applied to every foot at landing.
+        :param timeStep: duration of each node.
+        :param groundKnots: nodes during take-off and landing ground phases.
+        :param flyingKnots: nodes during the up and down flying phases.
+        :param constraint: if True, enforce friction cones and swing tasks as
+            constraints.
+        :return: configured ``crocoddyl.ShootingProblem``.
+        """
         q0 = x0[: self.rmodel.nq]
         pinocchio.forwardKinematics(self.rmodel, self.rdata, q0)
         pinocchio.updateFramePlacements(self.rmodel, self.rdata)
@@ -458,6 +544,7 @@ class SimpleQuadrupedalGaitProblem:
             self.createSwingFootModel(
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+                constraint=constraint,
             )
             for _ in range(groundKnots)
         ]
@@ -475,12 +562,15 @@ class SimpleQuadrupedalGaitProblem:
                 * (k + 1)
                 / flyingKnots
                 + comRef,
+                constraint=constraint,
             )
             for k in range(flyingKnots)
         ]
         flyingDownPhase = []
         for _ in range(flyingKnots):
-            flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
+            flyingDownPhase += [
+                self.createSwingFootModel(timeStep, [], constraint=constraint)
+            ]
         f0 = jumpLength
         footTask = [
             [self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
@@ -493,6 +583,7 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
                 footTask,
                 False,
+                constraint=constraint,
             )
         ]
         f0[2] = df
@@ -501,6 +592,7 @@ class SimpleQuadrupedalGaitProblem:
                 timeStep,
                 [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
                 comTask=comRef + f0,
+                constraint=constraint,
             )
             for _ in range(groundKnots)
         ]
@@ -521,18 +613,21 @@ class SimpleQuadrupedalGaitProblem:
         numKnots,
         supportFootIds,
         swingFootIds,
+        constraint=False,
     ):
         """Action models for a footstep phase.
 
-        :param comPos0, initial CoM position
-        :param feetPos0: initial position of the swinging feet
-        :param stepLength: step length
-        :param stepHeight: step height
-        :param timeStep: time step
-        :param numKnots: number of knots for the footstep phase
-        :param supportFootIds: Ids of the supporting feet
-        :param swingFootIds: Ids of the swinging foot
-        :return footstep action models
+        :param comPos0: initial CoM position.
+        :param feetPos0: initial positions of the swinging feet.
+        :param stepLength: forward displacement of the swing feet.
+        :param stepHeight: clearance height during swing.
+        :param timeStep: duration of each node.
+        :param numKnots: number of nodes for the swing phase.
+        :param supportFootIds: ids of the supporting feet.
+        :param swingFootIds: ids of the swinging feet.
+        :param constraint: if True, enforce friction cones and swing tracks as
+            constraints.
+        :return: list of action models for the swing phase and the switch.
         """
         numLegs = len(supportFootIds) + len(swingFootIds)
         comPercentage = float(len(swingFootIds)) / numLegs
@@ -570,6 +665,7 @@ class SimpleQuadrupedalGaitProblem:
                     supportFootIds,
                     comTask=comTask,
                     swingFootTask=swingFootTask,
+                    constraint=constraint,
                 )
             ]
         # Action model for the foot switch
@@ -581,15 +677,23 @@ class SimpleQuadrupedalGaitProblem:
         return [*footSwingModel, footSwitchModel]
 
     def createSwingFootModel(
-        self, timeStep, supportFootIds, comTask=None, swingFootTask=None
+        self,
+        timeStep,
+        supportFootIds,
+        comTask=None,
+        swingFootTask=None,
+        constraint=False,
     ):
         """Action model for a swing foot phase.
 
-        :param timeStep: step duration of the action model
-        :param supportFootIds: Ids of the constrained feet
-        :param comTask: CoM task
-        :param swingFootTask: swinging foot task
-        :return action model for a swing foot phase
+        :param timeStep: step duration of the action model.
+        :param supportFootIds: ids of the constrained feet.
+        :param comTask: optional CoM translation target.
+        :param swingFootTask: optional list of [frameId, SE3 target] pairs for
+            each swing foot.
+        :param constraint: if True, treat friction cones and swing tasks as
+            constraints instead of costs.
+        :return: integrated action model for the swing phase.
         """
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
@@ -625,7 +729,7 @@ class SimpleQuadrupedalGaitProblem:
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(cone.lb, cone.ub)
             )
-            if not self.use_constraints:
+            if not constraint:
                 frictionCone = crocoddyl.CostModelResidual(
                     self.state, coneActivation, coneResidual
                 )
@@ -644,7 +748,7 @@ class SimpleQuadrupedalGaitProblem:
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
                     self.state, i[0], i[1].translation, nu
                 )
-                if True:  # not self.use_constraints: TODO: evaluate this further with restoring mechanism
+                if True:  # not constraint: TODO: evaluate this further with restoring mechanism
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, frameTranslationResidual
                     )
@@ -689,7 +793,7 @@ class SimpleQuadrupedalGaitProblem:
             [self.state.ub[1 : self.state.nv + 1], self.state.ub[-self.state.nv :]]
         )
         stateBoundsResidual = crocoddyl.ResidualModelState(self.state, nu)
-        if not self.use_constraints:
+        if not constraint:
             stateBoundsActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(lb, ub)
             )
@@ -743,28 +847,36 @@ class SimpleQuadrupedalGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
         return model
 
-    def createFootSwitchModel(self, supportFootIds, swingFootTask, pseudoImpulse=False):
+    def createFootSwitchModel(
+        self, supportFootIds, swingFootTask, pseudoImpulse=False, constraint=False
+    ):
         """Action model for a foot switch phase.
 
-        :param supportFootIds: Ids of the constrained feet
-        :param swingFootTask: swinging foot task
-        :param pseudoImpulse: true for pseudo-impulse models, otherwise it uses the
-            impulse model
-        :return action model for a foot switch phase
+        :param supportFootIds: ids of the constrained feet.
+        :param swingFootTask: swing foot frame ids and landing poses.
+        :param pseudoImpulse: True to use pseudo-impulse (cost-based) model,
+            False to use impulse dynamics.
+        :param constraint: if True, treat swing tasks/friction cones as
+            constraints where applicable.
+        :return: action model for the foot switch phase.
         """
         if pseudoImpulse:
-            return self.createPseudoImpulseModel(supportFootIds, swingFootTask)
+            return self.createPseudoImpulseModel(
+                supportFootIds, swingFootTask, constraint
+            )
         else:
-            return self.createImpulseModel(supportFootIds, swingFootTask)
+            return self.createImpulseModel(supportFootIds, swingFootTask, constraint)
 
-    def createPseudoImpulseModel(self, supportFootIds, swingFootTask):
+    def createPseudoImpulseModel(self, supportFootIds, swingFootTask, constraint):
         """Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact
         velocities.
-        :param supportFootIds: Ids of the constrained feet
-        :param swingFootTask: swinging foot task
-        :return pseudo-impulse differential action model
+        :param supportFootIds: ids of the constrained feet.
+        :param swingFootTask: swing foot frame ids and landing poses.
+        :param constraint: if True, treat swing tasks/friction cones as
+            constraints.
+        :return: pseudo-impulse differential action model.
         """
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
@@ -787,20 +899,29 @@ class SimpleQuadrupedalGaitProblem:
             )
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
+        constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
         for i in supportFootIds:
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             coneResidual = crocoddyl.ResidualModelContactFrictionCone(
                 self.state, i, cone, nu, self._fwddyn
             )
-            coneActivation = crocoddyl.ActivationModelQuadraticBarrier(
-                crocoddyl.ActivationBounds(cone.lb, cone.ub)
-            )
-            frictionCone = crocoddyl.CostModelResidual(
-                self.state, coneActivation, coneResidual
-            )
-            costModel.addCost(
-                self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1
-            )
+            if not constraint:
+                coneActivation = crocoddyl.ActivationModelQuadraticBarrier(
+                    crocoddyl.ActivationBounds(cone.lb, cone.ub)
+                )
+                frictionCone = crocoddyl.CostModelResidual(
+                    self.state, coneActivation, coneResidual
+                )
+                costModel.addCost(
+                    self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1
+                )
+            else:
+                frictionCone = crocoddyl.ConstraintModelResidual(
+                    self.state, coneResidual, cone.lb, cone.ub
+                )
+                constraintModel.addCost(
+                    self.rmodel.frames[i].name + "_frictionCone", frictionCone
+                )
         if swingFootTask is not None:
             for i in swingFootTask:
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
@@ -813,20 +934,35 @@ class SimpleQuadrupedalGaitProblem:
                     pinocchio.LOCAL_WORLD_ALIGNED,
                     nu,
                 )
-                footTrack = crocoddyl.CostModelResidual(
-                    self.state, frameTranslationResidual
-                )
-                impulseFootVelCost = crocoddyl.CostModelResidual(
-                    self.state, frameVelocityResidual
-                )
-                costModel.addCost(
-                    self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7
-                )
-                costModel.addCost(
-                    self.rmodel.frames[i[0]].name + "_impulseVel",
-                    impulseFootVelCost,
-                    1e6,
-                )
+                if not constraint:
+                    footTrack = crocoddyl.CostModelResidual(
+                        self.state, frameTranslationResidual
+                    )
+                    impulseFootVelCost = crocoddyl.CostModelResidual(
+                        self.state, frameVelocityResidual
+                    )
+                    costModel.addCost(
+                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7
+                    )
+                    costModel.addCost(
+                        self.rmodel.frames[i[0]].name + "_impulseVel",
+                        impulseFootVelCost,
+                        1e6,
+                    )
+                else:
+                    footTrack = crocoddyl.ConstraintModelResidual(
+                        self.state, frameTranslationResidual
+                    )
+                    impulseFootVelCost = crocoddyl.ConstraintModelResidual(
+                        self.state, frameVelocityResidual
+                    )
+                    constraintModel.addConstraint(
+                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack
+                    )
+                    constraintModel.addConstraint(
+                        self.rmodel.frames[i[0]].name + "_impulseVel",
+                        impulseFootVelCost,
+                    )
         stateWeights = np.array(
             [0.0] * 3
             + [500.0] * 3
@@ -877,15 +1013,23 @@ class SimpleQuadrupedalGaitProblem:
         return model
 
     def createImpulseModel(
-        self, supportFootIds, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0
+        self,
+        supportFootIds,
+        swingFootTask,
+        JMinvJt_damping=1e-12,
+        r_coeff=0.0,
+        constraint=False,
     ):
         """Action model for impulse models.
 
         An impulse model consists of describing the impulse dynamics against a set of
         contacts.
-        :param supportFootIds: Ids of the constrained feet
-        :param swingFootTask: swinging foot task
-        :return impulse action model
+        :param supportFootIds: ids of the constrained feet.
+        :param swingFootTask: swing foot frame ids and landing poses.
+        :param JMinvJt_damping: damping applied to the impulse dynamics solver.
+        :param r_coeff: restitution coefficient for the impulse dynamics.
+        :param constraint: if True, treat swing tasks as constraints.
+        :return: impulse action model.
         """
         # Creating a 3D multi-contact model, and then including the supporting foot
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
@@ -904,7 +1048,7 @@ class SimpleQuadrupedalGaitProblem:
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
                     self.state, i[0], i[1].translation, 0
                 )
-                if not self.use_constraints:
+                if not constraint:
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, frameTranslationResidual
                     )
@@ -940,6 +1084,7 @@ class SimpleQuadrupedalGaitProblem:
 
 
 def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
+    """Plot joint trajectories, torques and CoM plane for a solver or a list."""
     import matplotlib.pyplot as plt
 
     xs, us, cs = [], [], []
