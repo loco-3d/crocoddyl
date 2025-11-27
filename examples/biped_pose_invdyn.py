@@ -16,15 +16,12 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 # Creates a CoM goal problem using terminal constraints
-def createCoMGoalProblem(model, rfFoot, lfFoot, comGoTo, timeStep, numKnots):
-    gait = SimpleBipedGaitProblem(model, rfFoot, lfFoot, fwddyn=False)
+def createCoMGoalProblem(model, rf, lf, comGoTo, timeStep, numKnots):
+    gait = SimpleBipedGaitProblem(model, rf, lf, fwddyn=False)
     pinocchio.forwardKinematics(gait.rmodel, gait.rdata, q0)
     pinocchio.updateFramePlacements(gait.rmodel, gait.rdata)
     com0 = pinocchio.centerOfMass(gait.rmodel, gait.rdata, q0)
-    comForwardModels = [
-        gait.createSwingFootModel(timeStep, [gait.lfId, gait.rfId])
-        for _ in range(numKnots)
-    ]
+    comForwardModels = [gait.createModel(timeStep, [lf, rf]) for _ in range(numKnots)]
     amodel = comForwardModels[0]
     nu = amodel.nu
     terminalConstraints = crocoddyl.ConstraintModelManager(gait.state, nu)
