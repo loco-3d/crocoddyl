@@ -21,7 +21,6 @@ class SimpleBipedGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
-        use_constraints=False,
     ):
         """Construct biped-gait problem.
 
@@ -34,8 +33,6 @@ class SimpleBipedGaitProblem:
             ``"rk4"``); see Crocoddyl control parametrizations for details.
         :param fwddyn: True for forward-dynamics, False for inverse-dynamics
             formulations.
-        :param use_constraints: if True, model friction cones/swing tasks as
-            constraints instead of soft costs where supported.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -49,7 +46,6 @@ class SimpleBipedGaitProblem:
         self._integrator = integrator
         self._control = control
         self._fwddyn = fwddyn
-        self.use_constraints = use_constraints
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
         self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
@@ -59,7 +55,14 @@ class SimpleBipedGaitProblem:
         self.Rsurf = np.eye(3)
 
     def createWalkingProblem(
-        self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots
+        self,
+        x0,
+        stepLength,
+        stepHeight,
+        timeStep,
+        stepKnots,
+        supportKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a simple walking gait.
 
@@ -69,6 +72,8 @@ class SimpleBipedGaitProblem:
         :param timeStep: duration of each node.
         :param stepKnots: nodes per swing phase.
         :param supportKnots: nodes for each double-support phase.
+        :param constraint: if True, enforce friction cones and swing tracks as
+            constraints.
         :return: configured ``crocoddyl.ShootingProblem``.
         """
         # Compute the current foot positions
@@ -83,7 +88,9 @@ class SimpleBipedGaitProblem:
         loco3dModel = []
         doubleSupport = [
             self.createModel(
-                timeStep=timeStep, footContacts=[self.rightFoot, self.leftFoot]
+                timeStep=timeStep,
+                footContacts=[self.rightFoot, self.leftFoot],
+                constraint=constraint,
             )
             for _ in range(supportKnots)
         ]
@@ -98,6 +105,7 @@ class SimpleBipedGaitProblem:
                 stepKnots,
                 [self.leftFoot],
                 [self.rightFoot],
+                constraint=constraint,
             )
             self.firstStep = False
         else:
@@ -110,6 +118,7 @@ class SimpleBipedGaitProblem:
                 stepKnots,
                 [self.leftFoot],
                 [self.rightFoot],
+                constraint=constraint,
             )
         lStep = self.createFootstepModels(
             comRef,
@@ -120,6 +129,7 @@ class SimpleBipedGaitProblem:
             stepKnots,
             [self.rightFoot],
             [self.leftFoot],
+            constraint=constraint,
         )
         # We defined the problem as:
         loco3dModel += doubleSupport + rStep
@@ -127,7 +137,14 @@ class SimpleBipedGaitProblem:
         return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
 
     def createJumpingProblem(
-        self, x0, jumpHeight, jumpLength, timeStep, groundKnots, flyingKnots
+        self,
+        x0,
+        jumpHeight,
+        jumpLength,
+        timeStep,
+        groundKnots,
+        flyingKnots,
+        constraint=False,
     ):
         """Create a shooting problem for a fixed-length jump.
 
@@ -137,6 +154,8 @@ class SimpleBipedGaitProblem:
         :param timeStep: duration of each node.
         :param groundKnots: nodes during take-off and landing ground phases.
         :param flyingKnots: nodes during the up and down flying phases.
+        :param constraint: if True, enforce friction cones and swing tasks as
+            constraints.
         :return: configured ``crocoddyl.ShootingProblem``.
         """
         q0 = x0[: self.rmodel.nq]
@@ -153,7 +172,9 @@ class SimpleBipedGaitProblem:
         loco3dModel = []
         takeOff = [
             self.createModel(
-                timeStep=timeStep, footContacts=[self.leftFoot, self.rightFoot]
+                timeStep=timeStep,
+                footContacts=[self.leftFoot, self.rightFoot],
+                constraint=constraint,
             )
             for _ in range(groundKnots)
         ]
@@ -171,19 +192,26 @@ class SimpleBipedGaitProblem:
                 * (k + 1)
                 / flyingKnots
                 + comRef,
+                constraint=constraint,
             )
             for k in range(flyingKnots)
         ]
         flyingDownPhase = []
         for _ in range(flyingKnots):
-            flyingDownPhase += [self.createModel(timeStep=timeStep, footContacts=[])]
+            flyingDownPhase += [
+                self.createModel(
+                    timeStep=timeStep, footContacts=[], constraint=constraint
+                )
+            ]
         f0 = jumpLength
         footTask = [
             [self.leftFoot, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
             [self.rightFoot, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
         ]
         landingPhase = [
-            self.createSwitch([self.leftFoot, self.rightFoot], footTask, False)
+            self.createSwitch(
+                [self.leftFoot, self.rightFoot], footTask, False, constraint=constraint
+            )
         ]
         f0[2] = df
         landed = [
@@ -191,6 +219,7 @@ class SimpleBipedGaitProblem:
                 timeStep=timeStep,
                 footContacts=[self.leftFoot, self.rightFoot],
                 comTask=comRef + f0,
+                constraint=constraint,
             )
             for _ in range(int(groundKnots / 2))
         ]
@@ -211,6 +240,7 @@ class SimpleBipedGaitProblem:
         numKnots,
         footContacts,
         swingFootNames,
+        constraint=False,
     ):
         """Action models for a footstep phase.
 
@@ -222,6 +252,8 @@ class SimpleBipedGaitProblem:
         :param numKnots: number of nodes for the footstep phase.
         :param footContacts: names of the supporting feet.
         :param swingFootNames: names of the swinging feet.
+        :param constraint: if True, enforce friction cones and swing tracks as
+            constraints.
         :return: footstep action models.
         """
         numLegs = len(footContacts) + len(swingFootNames)
@@ -263,11 +295,12 @@ class SimpleBipedGaitProblem:
                     footContacts=footContacts,
                     comTask=comTask,
                     swingFootTask=swingFootTask,
+                    constraint=constraint,
                 )
             ]
         # Action model for the foot switch
         footSwitchModel = self.createSwitch(
-            swingFootNames, swingFootTask, pseudoImpulse=False
+            swingFootNames, swingFootTask, pseudoImpulse=False, constraint=constraint
         )
         # Updating the current foot position for next step
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
@@ -275,7 +308,9 @@ class SimpleBipedGaitProblem:
             p += [stepLength, 0.0, 0.0]
         return [*footSwingModel, footSwitchModel]
 
-    def createModel(self, timeStep, footContacts, comTask=None, swingFootTask=None):
+    def createModel(
+        self, timeStep, footContacts, comTask=None, swingFootTask=None, constraint=False
+    ):
         """Action model for a swing foot phase.
 
         :param timeStep: step duration of the action model.
@@ -283,6 +318,8 @@ class SimpleBipedGaitProblem:
         :param comTask: optional CoM task.
         :param swingFootTask: optional list of [frameName, SE3 target] pairs for
             each swing foot.
+        :param constraint: if True, treat friction cones and swing tasks as
+            constraints instead of costs.
         :return: action model for a swing foot phase.
         """
         # Creating a 6D multi-contact model, and then including the supporting
@@ -319,7 +356,7 @@ class SimpleBipedGaitProblem:
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(cone.lb, cone.ub)
             )
-            if not self.use_constraints:
+            if not constraint:
                 wrenchCone = crocoddyl.CostModelResidual(
                     self.state, wrenchActivation, wrenchResidual
                 )
@@ -339,7 +376,7 @@ class SimpleBipedGaitProblem:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
                     self.state, frame_id, placement, nu
                 )
-                if not self.use_constraints:
+                if True:  # not constraint: TODO: evaluate this further with restoring mechanism
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, framePlacementResidual
                     )
@@ -417,26 +454,34 @@ class SimpleBipedGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
         return model
 
-    def createSwitch(self, footContacts, swingFootTask, pseudoImpulse=False):
+    def createSwitch(
+        self, footContacts, swingFootTask, pseudoImpulse=False, constraint=False
+    ):
         """Action model for a foot switch phase.
 
         :param footContacts: names of the constrained feet.
         :param swingFootTask: swing foot frame names and landing poses.
         :param pseudoImpulse: True for pseudo-impulse models, otherwise impulse.
+        :param constraint: if True, treat swing tasks/friction cones as
+            constraints where applicable.
         :return: action model for a foot switch phase.
         """
         if pseudoImpulse:
-            return self.createPseudoImpulseModel(footContacts, swingFootTask)
+            return self.createPseudoImpulseModel(
+                footContacts, swingFootTask, constraint
+            )
         else:
-            return self.createImpulseModel(footContacts, swingFootTask)
+            return self.createImpulseModel(footContacts, swingFootTask, constraint)
 
-    def createPseudoImpulseModel(self, footContacts, swingFootTask):
+    def createPseudoImpulseModel(self, footContacts, swingFootTask, constraint=False):
         """Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact
         velocities.
         :param footContacts: names of the constrained feet.
         :param swingFootTask: swing foot frame names and landing poses.
+        :param constraint: if True, enforce wrench cone and swing tasks as
+            constraints.
         :return: pseudo-impulse differential action model.
         """
         # Creating a 6D multi-contact model, and then including the supporting
@@ -457,8 +502,9 @@ class SimpleBipedGaitProblem:
                 np.array([0.0, 50.0]),
             )
             contactModel.addContact(name + "_contact", supportContactModel)
-        # Creating the cost model for a contact phase
+        # Creating the cost/constraint model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
+        constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
             cone = crocoddyl.WrenchCone(self.Rsurf, self.mu, np.array([0.1, 0.05]))
@@ -468,10 +514,16 @@ class SimpleBipedGaitProblem:
             wrenchActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(cone.lb, cone.ub)
             )
-            wrenchCone = crocoddyl.CostModelResidual(
-                self.state, wrenchActivation, wrenchResidual
-            )
-            costModel.addCost(name + "_wrenchCone", wrenchCone, 1e1)
+            if not constraint:
+                wrenchCone = crocoddyl.CostModelResidual(
+                    self.state, wrenchActivation, wrenchResidual
+                )
+                costModel.addCost(name + "_wrenchCone", wrenchCone, 1e1)
+            else:
+                wrenchCone = crocoddyl.ConstraintModelResidual(
+                    self.state, wrenchResidual, cone.lb, cone.ub
+                )
+                constraintModel.addConstraint(name + "_wrenchCone", wrenchCone)
         if swingFootTask is not None:
             for target in swingFootTask:
                 frame_name, placement = target
@@ -486,14 +538,28 @@ class SimpleBipedGaitProblem:
                     pinocchio.LOCAL_WORLD_ALIGNED,
                     nu,
                 )
-                footTrack = crocoddyl.CostModelResidual(
-                    self.state, framePlacementResidual
-                )
-                impulseFootVelCost = crocoddyl.CostModelResidual(
-                    self.state, frameVelocityResidual
-                )
-                costModel.addCost(frame_name + "_footTrack", footTrack, 1e8)
-                costModel.addCost(frame_name + "_impulseVel", impulseFootVelCost, 1e6)
+                if not constraint:
+                    footTrack = crocoddyl.CostModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    impulseFootVelCost = crocoddyl.CostModelResidual(
+                        self.state, frameVelocityResidual
+                    )
+                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e8)
+                    costModel.addCost(
+                        frame_name + "_impulseVel", impulseFootVelCost, 1e6
+                    )
+                else:
+                    footTrack = crocoddyl.ConstraintModelResidual(
+                        self.state, framePlacementResidual
+                    )
+                    impulseFootVelCost = crocoddyl.ConstraintModelResidual(
+                        self.state, frameVelocityResidual
+                    )
+                    constraintModel.addConstraint(frame_name + "_footTrack", footTrack)
+                    constraintModel.addConstraint(
+                        frame_name + "_impulseVel", impulseFootVelCost
+                    )
         stateWeights = np.array(
             [0.0] * 3
             + [500.0] * 3
@@ -520,11 +586,17 @@ class SimpleBipedGaitProblem:
         # integration scheme
         if self._fwddyn:
             dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                self.state, self.actuation, contactModel, costModel, 0.0, True
+                self.state,
+                self.actuation,
+                contactModel,
+                costModel,
+                constraintModel,
+                0.0,
+                True,
             )
         else:
             dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                self.state, self.actuation, contactModel, costModel
+                self.state, self.actuation, contactModel, costModel, constraintModel
             )
         if self._integrator == "euler":
             model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
@@ -543,7 +615,12 @@ class SimpleBipedGaitProblem:
         return model
 
     def createImpulseModel(
-        self, footContacts, swingFootTask, JMinvJt_damping=1e-12, r_coeff=0.0
+        self,
+        footContacts,
+        swingFootTask,
+        JMinvJt_damping=1e-12,
+        r_coeff=0.0,
+        constraint=False,
     ):
         """Action model for impulse models.
 
@@ -553,6 +630,7 @@ class SimpleBipedGaitProblem:
         :param swingFootTask: swinging foot task.
         :param JMinvJt_damping: damping applied to the impulse dynamics solver.
         :param r_coeff: restitution coefficient for the impulse dynamics.
+        :param constraint: if True, treat swing tasks as constraints.
         :return impulse action model
         """
         # Creating a 6D multi-contact model, and then including the supporting foot
@@ -573,7 +651,7 @@ class SimpleBipedGaitProblem:
                 framePlacementResidual = crocoddyl.ResidualModelFramePlacement(
                     self.state, frame_id, placement, 0
                 )
-                if not self.use_constraints:
+                if not constraint:
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, framePlacementResidual
                     )
