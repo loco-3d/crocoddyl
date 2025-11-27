@@ -26,9 +26,9 @@ def createCoMGoalProblem(
     pinocchio.updateFramePlacements(gait.rmodel, gait.rdata)
     com0 = pinocchio.centerOfMass(gait.rmodel, gait.rdata, q0)
     comForwardModels = [
-        gait.createSwingFootModel(
+        gait.createModel(
             timeStep,
-            [gait.lfFootId, gait.rfFootId, gait.lhFootId, gait.rhFootId],
+            [lfFoot, rfFoot, lhFoot, rhFoot],
         )
         for _ in range(numKnots)
     ]

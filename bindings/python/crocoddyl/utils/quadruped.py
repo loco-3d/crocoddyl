@@ -44,6 +44,10 @@ class SimpleQuadrupedalGaitProblem:
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
         self.actuation = crocoddyl.ActuationModelFloatingBase(self.state)
+        self.lfFoot = lfFoot
+        self.rfFoot = rfFoot
+        self.lhFoot = lhFoot
+        self.rhFoot = rhFoot
         # Getting the frame id for all the legs
         self.lfFootId = self.rmodel.getFrameId(lfFoot)
         self.rfFootId = self.rmodel.getFrameId(rfFoot)
@@ -81,32 +85,32 @@ class SimpleQuadrupedalGaitProblem:
         # Creating the action model for the CoM task
         comModels = []
         comForwardModels = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(numKnots)
         ]
-        comForwardTermModel = self.createSwingFootModel(
-            timeStep,
-            [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            com0 + np.array([comGoTo, 0.0, 0.0]),
+        comForwardTermModel = self.createModel(
+            timeStep=timeStep,
+            footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
+            comTask=com0 + np.array([comGoTo, 0.0, 0.0]),
             constraint=constraint,
         )
         comForwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
         comBackwardModels = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(numKnots)
         ]
-        comBackwardTermModel = self.createSwingFootModel(
-            timeStep,
-            [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            com0 + np.array([-comGoTo, 0.0, 0.0]),
+        comBackwardTermModel = self.createModel(
+            timeStep=timeStep,
+            footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
+            comTask=com0 + np.array([-comGoTo, 0.0, 0.0]),
             constraint=constraint,
         )
         comBackwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
@@ -134,17 +138,17 @@ class SimpleQuadrupedalGaitProblem:
         # Creating the action model for the CoM task
         comModels = []
         comForwardModels = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(numKnots)
         ]
-        comForwardTermModel = self.createSwingFootModel(
-            timeStep,
-            [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
-            com0 + np.array([comGoTo, 0.0, 0.0]),
+        comForwardTermModel = self.createModel(
+            timeStep=timeStep,
+            footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
+            comTask=com0 + np.array([comGoTo, 0.0, 0.0]),
         )
         comForwardTermModel.differential.costs.costs["comTrack"].weight = 1e6
         # Adding the CoM tasks
@@ -186,9 +190,9 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the action models along the time instances
         loco3dModel = []
         doubleSupport = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(supportKnots)
@@ -201,8 +205,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.rfFootId, self.lhFootId],
-                [self.rhFootId],
+                [self.lfFoot, self.rfFoot, self.lhFoot],
+                [self.rhFoot],
                 constraint=constraint,
             )
             rfStep = self.createFootstepModels(
@@ -212,8 +216,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.lhFootId, self.rhFootId],
-                [self.rfFootId],
+                [self.lfFoot, self.lhFoot, self.rhFoot],
+                [self.rfFoot],
                 constraint=constraint,
             )
             self.firstStep = False
@@ -225,8 +229,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.rfFootId, self.lhFootId],
-                [self.rhFootId],
+                [self.lfFoot, self.rfFoot, self.lhFoot],
+                [self.rhFoot],
                 constraint=constraint,
             )
             rfStep = self.createFootstepModels(
@@ -236,8 +240,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.lhFootId, self.rhFootId],
-                [self.rfFootId],
+                [self.lfFoot, self.lhFoot, self.rhFoot],
+                [self.rfFoot],
                 constraint=constraint,
             )
         lhStep = self.createFootstepModels(
@@ -247,8 +251,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.lfFootId, self.rfFootId, self.rhFootId],
-            [self.lhFootId],
+            [self.lfFoot, self.rfFoot, self.rhFoot],
+            [self.lhFoot],
             constraint=constraint,
         )
         lfStep = self.createFootstepModels(
@@ -258,8 +262,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.rfFootId, self.lhFootId, self.rhFootId],
-            [self.lfFootId],
+            [self.rfFoot, self.lhFoot, self.rhFoot],
+            [self.lfFoot],
             constraint=constraint,
         )
         loco3dModel += doubleSupport + rhStep + rfStep
@@ -301,9 +305,9 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the action models along the time instances
         loco3dModel = []
         doubleSupport = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(supportKnots)
@@ -316,8 +320,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.rhFootId],
-                [self.rfFootId, self.lhFootId],
+                [self.lfFoot, self.rhFoot],
+                [self.rfFoot, self.lhFoot],
                 constraint=constraint,
             )
             self.firstStep = False
@@ -329,8 +333,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.rhFootId],
-                [self.rfFootId, self.lhFootId],
+                [self.lfFoot, self.rhFoot],
+                [self.rfFoot, self.lhFoot],
                 constraint=constraint,
             )
         lfrhStep = self.createFootstepModels(
@@ -340,8 +344,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.rfFootId, self.lhFootId],
-            [self.lfFootId, self.rhFootId],
+            [self.rfFoot, self.lhFoot],
+            [self.lfFoot, self.rhFoot],
             constraint=constraint,
         )
         loco3dModel += doubleSupport + rflhStep
@@ -383,9 +387,9 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the action models along the time instances
         loco3dModel = []
         doubleSupport = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(supportKnots)
@@ -398,8 +402,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.lhFootId],
-                [self.rfFootId, self.rhFootId],
+                [self.lfFoot, self.lhFoot],
+                [self.rfFoot, self.rhFoot],
                 constraint=constraint,
             )
             self.firstStep = False
@@ -411,8 +415,8 @@ class SimpleQuadrupedalGaitProblem:
                 stepHeight,
                 timeStep,
                 stepKnots,
-                [self.lfFootId, self.lhFootId],
-                [self.rfFootId, self.rhFootId],
+                [self.lfFoot, self.lhFoot],
+                [self.rfFoot, self.rhFoot],
                 constraint=constraint,
             )
         leftSteps = self.createFootstepModels(
@@ -422,8 +426,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.rfFootId, self.rhFootId],
-            [self.lfFootId, self.lhFootId],
+            [self.rfFoot, self.rhFoot],
+            [self.lfFoot, self.lhFoot],
             constraint=constraint,
         )
         loco3dModel += doubleSupport + rightSteps
@@ -465,9 +469,9 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the action models along the time instances
         loco3dModel = []
         doubleSupport = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(supportKnots)
@@ -479,8 +483,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.lhFootId, self.rhFootId],
-            [self.lfFootId, self.rfFootId],
+            [self.lhFoot, self.rhFoot],
+            [self.lfFoot, self.rfFoot],
             constraint=constraint,
         )
         frontSteps = self.createFootstepModels(
@@ -490,8 +494,8 @@ class SimpleQuadrupedalGaitProblem:
             stepHeight,
             timeStep,
             stepKnots,
-            [self.lfFootId, self.rfFootId],
-            [self.lhFootId, self.rhFootId],
+            [self.lfFoot, self.rfFoot],
+            [self.lhFoot, self.rhFoot],
             constraint=constraint,
         )
         loco3dModel += doubleSupport + hindSteps
@@ -541,18 +545,18 @@ class SimpleQuadrupedalGaitProblem:
         # Create locomotion problem
         loco3dModel = []
         takeOff = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
             )
             for _ in range(groundKnots)
         ]
         flyingUpPhase = [
-            self.createSwingFootModel(
-                timeStep,
-                [],
-                np.array(
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[],
+                comTask=np.array(
                     [
                         jumpLength[0] / 2.0,
                         jumpLength[1] / 2.0,
@@ -569,18 +573,20 @@ class SimpleQuadrupedalGaitProblem:
         flyingDownPhase = []
         for _ in range(flyingKnots):
             flyingDownPhase += [
-                self.createSwingFootModel(timeStep, [], constraint=constraint)
+                self.createModel(
+                    timeStep=timeStep, footContacts=[], constraint=constraint
+                )
             ]
         f0 = jumpLength
         footTask = [
-            [self.lfFootId, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
-            [self.rfFootId, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
-            [self.lhFootId, pinocchio.SE3(np.eye(3), lhFootPos0 + f0)],
-            [self.rhFootId, pinocchio.SE3(np.eye(3), rhFootPos0 + f0)],
+            [self.lfFoot, pinocchio.SE3(np.eye(3), lfFootPos0 + f0)],
+            [self.rfFoot, pinocchio.SE3(np.eye(3), rfFootPos0 + f0)],
+            [self.lhFoot, pinocchio.SE3(np.eye(3), lhFootPos0 + f0)],
+            [self.rhFoot, pinocchio.SE3(np.eye(3), rhFootPos0 + f0)],
         ]
         landingPhase = [
-            self.createFootSwitchModel(
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createSwitch(
+                [self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 footTask,
                 False,
                 constraint=constraint,
@@ -588,9 +594,9 @@ class SimpleQuadrupedalGaitProblem:
         ]
         f0[2] = df
         landed = [
-            self.createSwingFootModel(
-                timeStep,
-                [self.lfFootId, self.rfFootId, self.lhFootId, self.rhFootId],
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 comTask=comRef + f0,
                 constraint=constraint,
             )
@@ -611,8 +617,8 @@ class SimpleQuadrupedalGaitProblem:
         stepHeight,
         timeStep,
         numKnots,
-        supportFootIds,
-        swingFootIds,
+        footContacts,
+        swingFootNames,
         constraint=False,
     ):
         """Action models for a footstep phase.
@@ -623,19 +629,19 @@ class SimpleQuadrupedalGaitProblem:
         :param stepHeight: clearance height during swing.
         :param timeStep: duration of each node.
         :param numKnots: number of nodes for the swing phase.
-        :param supportFootIds: ids of the supporting feet.
-        :param swingFootIds: ids of the swinging feet.
+        :param footContacts: names of the supporting feet.
+        :param swingFootNames: names of the swinging feet.
         :param constraint: if True, enforce friction cones and swing tracks as
             constraints.
         :return: list of action models for the swing phase and the switch.
         """
-        numLegs = len(supportFootIds) + len(swingFootIds)
-        comPercentage = float(len(swingFootIds)) / numLegs
+        numLegs = len(footContacts) + len(swingFootNames)
+        comPercentage = float(len(swingFootNames)) / numLegs
         # Action models for the foot swing
         footSwingModel = []
         for k in range(numKnots):
             swingFootTask = []
-            for i, p in zip(swingFootIds, feetPos0):
+            for name, p in zip(swingFootNames, feetPos0):
                 # Defining a foot swing task given the step length
                 # resKnot = numKnots % 2
                 phKnots = numKnots / 2
@@ -654,32 +660,34 @@ class SimpleQuadrupedalGaitProblem:
                         ]
                     )
                 tref = p + dp
-                swingFootTask += [[i, pinocchio.SE3(np.eye(3), tref)]]
+                swingFootTask += [[name, pinocchio.SE3(np.eye(3), tref)]]
             comTask = (
                 np.array([stepLength * (k + 1) / numKnots, 0.0, 0.0]) * comPercentage
                 + comPos0
             )
             footSwingModel += [
-                self.createSwingFootModel(
-                    timeStep,
-                    supportFootIds,
+                self.createModel(
+                    timeStep=timeStep,
+                    footContacts=footContacts,
                     comTask=comTask,
                     swingFootTask=swingFootTask,
                     constraint=constraint,
                 )
             ]
         # Action model for the foot switch
-        footSwitchModel = self.createFootSwitchModel(swingFootIds, swingFootTask)
+        footSwitchModel = self.createSwitch(
+            swingFootNames, swingFootTask, constraint=constraint
+        )
         # Updating the current foot position for next step
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
         for p in feetPos0:
             p += [stepLength, 0.0, 0.0]
         return [*footSwingModel, footSwitchModel]
 
-    def createSwingFootModel(
+    def createModel(
         self,
         timeStep,
-        supportFootIds,
+        footContacts,
         comTask=None,
         swingFootTask=None,
         constraint=False,
@@ -687,9 +695,9 @@ class SimpleQuadrupedalGaitProblem:
         """Action model for a swing foot phase.
 
         :param timeStep: step duration of the action model.
-        :param supportFootIds: ids of the constrained feet.
+        :param footContacts: names of the constrained feet.
         :param comTask: optional CoM translation target.
-        :param swingFootTask: optional list of [frameId, SE3 target] pairs for
+        :param swingFootTask: optional list of [frameName, SE3 target] pairs for
             each swing foot.
         :param constraint: if True, treat friction cones and swing tasks as
             constraints instead of costs.
@@ -700,20 +708,19 @@ class SimpleQuadrupedalGaitProblem:
         if self._fwddyn:
             nu = self.actuation.nu
         else:
-            nu = self.state.nv + 3 * len(supportFootIds)
+            nu = self.state.nv + 3 * len(footContacts)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
-        for i in supportFootIds:
+        for name in footContacts:
+            frame_id = self.rmodel.getFrameId(name)
             supportContactModel = crocoddyl.ContactModel3D(
                 self.state,
-                i,
+                frame_id,
                 np.array([0.0, 0.0, 0.0]),
                 pinocchio.LOCAL_WORLD_ALIGNED,
                 nu,
                 np.array([0.0, 50.0]),
             )
-            contactModel.addContact(
-                self.rmodel.frames[i].name + "_contact", supportContactModel
-            )
+            contactModel.addContact(name + "_contact", supportContactModel)
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
@@ -721,10 +728,11 @@ class SimpleQuadrupedalGaitProblem:
             comResidual = crocoddyl.ResidualModelCoMPosition(self.state, comTask, nu)
             comTrack = crocoddyl.CostModelResidual(self.state, comResidual)
             costModel.addCost("comTrack", comTrack, 1e6)
-        for i in supportFootIds:
+        for name in footContacts:
+            frame_id = self.rmodel.getFrameId(name)
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             coneResidual = crocoddyl.ResidualModelContactFrictionCone(
-                self.state, i, cone, nu, self._fwddyn
+                self.state, frame_id, cone, nu, self._fwddyn
             )
             coneActivation = crocoddyl.ActivationModelQuadraticBarrier(
                 crocoddyl.ActivationBounds(cone.lb, cone.ub)
@@ -733,35 +741,29 @@ class SimpleQuadrupedalGaitProblem:
                 frictionCone = crocoddyl.CostModelResidual(
                     self.state, coneActivation, coneResidual
                 )
-                costModel.addCost(
-                    self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1
-                )
+                costModel.addCost(name + "_frictionCone", frictionCone, 1e1)
             else:
                 frictionCone = crocoddyl.ConstraintModelResidual(
                     self.state, coneResidual, cone.lb, cone.ub
                 )
-                constraintModel.addConstraint(
-                    self.rmodel.frames[i].name + "_frictionCone", frictionCone
-                )
+                constraintModel.addConstraint(name + "_frictionCone", frictionCone)
         if swingFootTask is not None:
-            for i in swingFootTask:
+            for target in swingFootTask:
+                frame_name, placement = target
+                frame_id = self.rmodel.getFrameId(frame_name)
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
-                    self.state, i[0], i[1].translation, nu
+                    self.state, frame_id, placement.translation, nu
                 )
                 if True:  # not constraint: TODO: evaluate this further with restoring mechanism
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, frameTranslationResidual
                     )
-                    costModel.addCost(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e6
-                    )
+                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e6)
                 else:
                     footTrack = crocoddyl.ConstraintModelResidual(
                         self.state, frameTranslationResidual
                     )
-                    constraintModel.addConstraint(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack
-                    )
+                    constraintModel.addConstraint(frame_name + "_footTrack", footTrack)
         stateWeights = np.array(
             [0.0] * 3
             + [500.0] * 3
@@ -847,13 +849,13 @@ class SimpleQuadrupedalGaitProblem:
             model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
         return model
 
-    def createFootSwitchModel(
-        self, supportFootIds, swingFootTask, pseudoImpulse=False, constraint=False
+    def createSwitch(
+        self, footContacts, swingFootTask, pseudoImpulse=False, constraint=False
     ):
         """Action model for a foot switch phase.
 
-        :param supportFootIds: ids of the constrained feet.
-        :param swingFootTask: swing foot frame ids and landing poses.
+        :param footContacts: names of the constrained feet.
+        :param swingFootTask: swing foot frame names and landing poses.
         :param pseudoImpulse: True to use pseudo-impulse (cost-based) model,
             False to use impulse dynamics.
         :param constraint: if True, treat swing tasks/friction cones as
@@ -862,18 +864,18 @@ class SimpleQuadrupedalGaitProblem:
         """
         if pseudoImpulse:
             return self.createPseudoImpulseModel(
-                supportFootIds, swingFootTask, constraint
+                footContacts, swingFootTask, constraint
             )
         else:
-            return self.createImpulseModel(supportFootIds, swingFootTask, constraint)
+            return self.createImpulseModel(footContacts, swingFootTask, constraint)
 
-    def createPseudoImpulseModel(self, supportFootIds, swingFootTask, constraint):
+    def createPseudoImpulseModel(self, footContacts, swingFootTask, constraint):
         """Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact
         velocities.
-        :param supportFootIds: ids of the constrained feet.
-        :param swingFootTask: swing foot frame ids and landing poses.
+        :param footContacts: names of the constrained feet.
+        :param swingFootTask: swing foot frame names and landing poses.
         :param constraint: if True, treat swing tasks/friction cones as
             constraints.
         :return: pseudo-impulse differential action model.
@@ -883,27 +885,27 @@ class SimpleQuadrupedalGaitProblem:
         if self._fwddyn:
             nu = self.actuation.nu
         else:
-            nu = self.state.nv + 3 * len(supportFootIds)
+            nu = self.state.nv + 3 * len(footContacts)
         contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
-        for i in supportFootIds:
+        for name in footContacts:
+            frame_id = self.rmodel.getFrameId(name)
             supportContactModel = crocoddyl.ContactModel3D(
                 self.state,
-                i,
+                frame_id,
                 np.array([0.0, 0.0, 0.0]),
                 pinocchio.LOCAL_WORLD_ALIGNED,
                 nu,
                 np.array([0.0, 50.0]),
             )
-            contactModel.addContact(
-                self.rmodel.frames[i].name + "_contact", supportContactModel
-            )
+            contactModel.addContact(name + "_contact", supportContactModel)
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
-        for i in supportFootIds:
+        for name in footContacts:
+            frame_id = self.rmodel.getFrameId(name)
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
             coneResidual = crocoddyl.ResidualModelContactFrictionCone(
-                self.state, i, cone, nu, self._fwddyn
+                self.state, frame_id, cone, nu, self._fwddyn
             )
             if not constraint:
                 coneActivation = crocoddyl.ActivationModelQuadraticBarrier(
@@ -912,24 +914,22 @@ class SimpleQuadrupedalGaitProblem:
                 frictionCone = crocoddyl.CostModelResidual(
                     self.state, coneActivation, coneResidual
                 )
-                costModel.addCost(
-                    self.rmodel.frames[i].name + "_frictionCone", frictionCone, 1e1
-                )
+                costModel.addCost(name + "_frictionCone", frictionCone, 1e1)
             else:
                 frictionCone = crocoddyl.ConstraintModelResidual(
                     self.state, coneResidual, cone.lb, cone.ub
                 )
-                constraintModel.addCost(
-                    self.rmodel.frames[i].name + "_frictionCone", frictionCone
-                )
+                constraintModel.addCost(name + "_frictionCone", frictionCone)
         if swingFootTask is not None:
-            for i in swingFootTask:
+            for target in swingFootTask:
+                frame_name, placement = target
+                frame_id = self.rmodel.getFrameId(frame_name)
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
-                    self.state, i[0], i[1].translation, nu
+                    self.state, frame_id, placement.translation, nu
                 )
                 frameVelocityResidual = crocoddyl.ResidualModelFrameVelocity(
                     self.state,
-                    i[0],
+                    frame_id,
                     pinocchio.Motion.Zero(),
                     pinocchio.LOCAL_WORLD_ALIGNED,
                     nu,
@@ -941,13 +941,9 @@ class SimpleQuadrupedalGaitProblem:
                     impulseFootVelCost = crocoddyl.CostModelResidual(
                         self.state, frameVelocityResidual
                     )
+                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e7)
                     costModel.addCost(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7
-                    )
-                    costModel.addCost(
-                        self.rmodel.frames[i[0]].name + "_impulseVel",
-                        impulseFootVelCost,
-                        1e6,
+                        frame_name + "_impulseVel", impulseFootVelCost, 1e6
                     )
                 else:
                     footTrack = crocoddyl.ConstraintModelResidual(
@@ -956,12 +952,9 @@ class SimpleQuadrupedalGaitProblem:
                     impulseFootVelCost = crocoddyl.ConstraintModelResidual(
                         self.state, frameVelocityResidual
                     )
+                    constraintModel.addConstraint(frame_name + "_footTrack", footTrack)
                     constraintModel.addConstraint(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack
-                    )
-                    constraintModel.addConstraint(
-                        self.rmodel.frames[i[0]].name + "_impulseVel",
-                        impulseFootVelCost,
+                        frame_name + "_impulseVel", impulseFootVelCost
                     )
         stateWeights = np.array(
             [0.0] * 3
@@ -1014,7 +1007,7 @@ class SimpleQuadrupedalGaitProblem:
 
     def createImpulseModel(
         self,
-        supportFootIds,
+        footContacts,
         swingFootTask,
         JMinvJt_damping=1e-12,
         r_coeff=0.0,
@@ -1024,8 +1017,8 @@ class SimpleQuadrupedalGaitProblem:
 
         An impulse model consists of describing the impulse dynamics against a set of
         contacts.
-        :param supportFootIds: ids of the constrained feet.
-        :param swingFootTask: swing foot frame ids and landing poses.
+        :param footContacts: names of the constrained feet.
+        :param swingFootTask: swing foot frame names and landing poses.
         :param JMinvJt_damping: damping applied to the impulse dynamics solver.
         :param r_coeff: restitution coefficient for the impulse dynamics.
         :param constraint: if True, treat swing tasks as constraints.
@@ -1033,35 +1026,32 @@ class SimpleQuadrupedalGaitProblem:
         """
         # Creating a 3D multi-contact model, and then including the supporting foot
         impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
-        for i in supportFootIds:
+        for name in footContacts:
+            frame_id = self.rmodel.getFrameId(name)
             supportContactModel = crocoddyl.ImpulseModel3D(
-                self.state, i, pinocchio.LOCAL_WORLD_ALIGNED
+                self.state, frame_id, pinocchio.LOCAL_WORLD_ALIGNED
             )
-            impulseModel.addImpulse(
-                self.rmodel.frames[i].name + "_impulse", supportContactModel
-            )
+            impulseModel.addImpulse(name + "_impulse", supportContactModel)
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, 0)
         if swingFootTask is not None:
-            for i in swingFootTask:
+            for target in swingFootTask:
+                frame_name, placement = target
+                frame_id = self.rmodel.getFrameId(frame_name)
                 frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
-                    self.state, i[0], i[1].translation, 0
+                    self.state, frame_id, placement.translation, 0
                 )
                 if not constraint:
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, frameTranslationResidual
                     )
-                    costModel.addCost(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack, 1e7
-                    )
+                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e7)
                 else:
                     footTrack = crocoddyl.ConstraintModelResidual(
                         self.state, frameTranslationResidual
                     )
-                    constraintModel.addConstraint(
-                        self.rmodel.frames[i[0]].name + "_footTrack", footTrack
-                    )
+                    constraintModel.addConstraint(frame_name + "_footTrack", footTrack)
         stateWeights = np.array(
             [1.0] * 6 + [10.0] * (self.rmodel.nv - 6) + [10.0] * self.rmodel.nv
         )
