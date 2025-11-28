@@ -1,0 +1,186 @@
+#ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_THRUST_FWDDYN_HPP_
+#define CROCODDYL_MULTIBODY_ACTIONS_FREE_THRUST_FWDDYN_HPP_
+
+#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
+#include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
+#include "pinocchio/algorithm/frames.hpp"
+#include "pinocchio/algorithm/kinematics-derivatives.hpp"
+
+namespace crocoddyl {
+
+enum RotorDirection { CLOCKWISE = -1, COUNTERCLOCKWISE = 1 };
+
+template <typename _Scalar>
+struct RotorTpl {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef pinocchio::SE3Tpl<Scalar> SE3;
+  typedef RotorTpl<Scalar> Rotor;
+
+  RotorTpl(const int frame_id, const SE3& joint_M_rotor, const Scalar ctorque,
+           const RotorDirection direction = COUNTERCLOCKWISE,
+           const Scalar min_thrust = Scalar(0.),
+           const Scalar max_thrust = std::numeric_limits<Scalar>::infinity())
+      : frame_id_(frame_id),
+        joint_M_rotor_(joint_M_rotor),
+        ctorque_(ctorque),
+        direction_(direction),
+        min_thrust_(min_thrust),
+        max_thrust_(max_thrust) {}
+
+  template <typename NewScalar>
+  RotorTpl<NewScalar> cast() const {
+    typedef RotorTpl<NewScalar> ReturnType;
+    ReturnType ret(frame_id_, joint_M_rotor_.template cast<NewScalar>(),
+                   scalar_cast<NewScalar>(ctorque_), direction_,
+                   scalar_cast<NewScalar>(min_thrust_),
+                   scalar_cast<NewScalar>(max_thrust_));
+    return ret;
+  }
+
+  int frame_id_;       //!< Rotor frame id
+  SE3 joint_M_rotor_;  //!< Rotor pose in the joint frame
+  Scalar ctorque_;     //!< Coefficient of generated torque per thrust
+  RotorDirection
+      direction_;      //!< Direction of rotor (clockwise or counterclockwise)
+  Scalar min_thrust_;  //!< Minimum thrust
+  Scalar max_thrust_;  //!< Maximum thrust
+};
+
+template <typename _Scalar>
+class DifferentialActionModelFreeThrustFwdDynamicsTpl
+    : public DifferentialActionModelFreeFwdDynamicsTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelFreeThrustFwdDynamicsTpl)
+
+  typedef _Scalar Scalar;
+  typedef DifferentialActionModelAbstractTpl<Scalar> Base;
+  typedef DifferentialActionDataFreeThrustFwdDynamicsTpl<Scalar> Data;
+  typedef DifferentialActionDataAbstractTpl<Scalar>
+      DifferentialActionDataAbstract;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef RotorTpl<Scalar> Rotor;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ActuationModelAbstractTpl<Scalar> ActuationModelAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef pinocchio::ForceTpl<Scalar> Force;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::Vector6s Vector6s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  DifferentialActionModelFreeThrustFwdDynamicsTpl(
+      std::shared_ptr<StateMultibody> state,
+      std::shared_ptr<ActuationModelAbstract> actuation,
+      std::shared_ptr<CostModelSum> costs, std::vector<Rotor> rotors,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr);
+  virtual ~DifferentialActionModelFreeThrustFwdDynamicsTpl() = default;
+
+  virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
+                    const Eigen::Ref<const VectorXs>& x,
+                    const Eigen::Ref<const VectorXs>& u) override;
+
+  virtual void calcDiff(
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
+
+  virtual void quasiStatic(
+      const std::shared_ptr<DifferentialActionDataAbstract>& data,
+      Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
+
+  template <typename NewScalar>
+  DifferentialActionModelFreeThrustFwdDynamicsTpl<NewScalar> cast() const;
+
+  void computeFExtByThrusts(const Eigen::Ref<const VectorXs>& u,
+                            pinocchio::container::aligned_vector<Force>& fext);
+
+ protected:
+  using Base::nu_;     //!< Control dimension
+  using Base::state_;  //!< Model of the state
+
+ private:
+  std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
+  std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
+  std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
+
+  std::vector<Rotor> rotors_;  //!< Rotor models
+
+  int n_thrusts_;
+};
+
+template <typename _Scalar>
+struct DifferentialActionDataFreeThrustFwdDynamicsTpl
+    : public DifferentialActionDataFreeFwdDynamicsTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef DifferentialActionDataAbstractTpl<Scalar> Base;
+  typedef JointDataAbstractTpl<Scalar> JointDataAbstract;
+  typedef DataCollectorJointActMultibodyTpl<Scalar>
+      DataCollectorJointActMultibody;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  template <template <typename Scalar> class Model>
+  explicit DifferentialActionDataFreeThrustFwdDynamicsTpl(
+      Model<Scalar>* const model)
+      : Base(model),
+        pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
+        multibody(
+            &pinocchio, model->get_actuation()->createData(),
+            std::make_shared<JointDataAbstract>(
+                model->get_state(), model->get_actuation(), model->get_nu())),
+        costs(model->get_costs()->createData(&multibody)),
+        dtau_dx(model->get_state()->get_nv(), model->get_state()->get_ndx()),
+        tmp_xstatic(model->get_state()->get_nx()) {
+    multibody.joint->dtau_du.diagonal().setOnes();
+    costs->shareMemory(this);
+    if (model->get_constraints() != nullptr) {
+      constraints = model->get_constraints()->createData(&multibody);
+      constraints->shareMemory(this);
+    }
+    dtau_dx.setZero();
+    tmp_xstatic.setZero();
+  }
+  virtual ~DifferentialActionDataFreeThrustFwdDynamicsTpl() = default;
+
+  pinocchio::DataTpl<Scalar> pinocchio;
+  DataCollectorJointActMultibody multibody;
+  std::shared_ptr<CostDataSumTpl<Scalar> > costs;
+  std::shared_ptr<ConstraintDataManagerTpl<Scalar> > constraints;
+  MatrixXs dtau_dx;
+  VectorXs tmp_xstatic;
+
+  using Base::cost;
+  using Base::Fu;
+  using Base::Fx;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xout;
+};
+
+}  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include <crocoddyl/multibody/actions/free-thrust-fwddyn.hxx>
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelFreeThrustFwdDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataFreeThrustFwdDynamicsTpl)
+
+#endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_THRUST_FWDDYN_HPP_
