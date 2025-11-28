@@ -26,6 +26,9 @@ template <typename Scalar>
 struct ThrusterTpl;
 
 template <typename Scalar>
+struct RotorTpl;
+
+template <typename Scalar>
 class ActuationModelFloatingBaseThrustersTpl;
 
 // force
@@ -258,6 +261,7 @@ struct ImpulseDataMultipleTpl;
 typedef ActuationModelFloatingBaseTpl<double> ActuationModelFloatingBase;
 typedef ActuationModelFullTpl<double> ActuationModelFull;
 typedef ThrusterTpl<double> Thruster;
+typedef RotorTpl<double> Rotor;
 typedef ActuationModelFloatingBaseThrustersTpl<double>
     ActuationModelFloatingBaseThrusters;
 
