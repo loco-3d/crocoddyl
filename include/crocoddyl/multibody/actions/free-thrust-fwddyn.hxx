@@ -9,6 +9,10 @@ DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::
         std::shared_ptr<ConstraintModelManager> constraints)
     : DifferentialActionModelFreeFwdDynamicsTpl<Scalar>(state, actuation, costs,
                                                         constraints),
+      actuation_(actuation),
+      costs_(costs),
+      constraints_(constraints),
+      pinocchio_(state->get_pinocchio().get()),
       rotors_(rotors),
       n_thrusts_(rotors.size()) {
   if (costs_->get_nu() != nu_) {
@@ -20,23 +24,18 @@ DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::
 
   // Set control limits
   // thrust part
-  VectorXs u_lb = VectorXs::Zero(n_thrusts_ + state_->get_nv());
-  VectorXs u_ub = VectorXs::Zero(n_thrusts_ + state_->get_nv());
+  VectorXs u_lb = VectorXs::Zero(nu_);
+  VectorXs u_ub = VectorXs::Zero(nu_);
   for (int i = 0; i < n_thrusts_; ++i) {
-    u_lb[i] = rotors[i].min_thrust_;
-    u_ub[i] = rotors[i].max_thrust_;
+    u_lb(i) = rotors[i].min_thrust_;
+    u_ub(i) = rotors[i].max_thrust_;
   }
 
   // joint torque part
-  u_lb.tail(state_->get_nv()) =
-      Scalar(-1.) * pinocchio_->effortLimit.tail(state_->get_nv());
-  u_ub.tail(state_->get_nv()) =
-      Scalar(+1.) * pinocchio_->effortLimit.tail(state_->get_nv());
-
-  std::cout << "[DiffActionModelFreeThrustFwdDyn] u_lb: " << u_lb.transpose()
-            << std::endl;
-  std::cout << "[DiffActionModelFreeThrustFwdDyn] u_ub: " << u_ub.transpose()
-            << std::endl;
+  u_lb.tail(nu_ - n_thrusts_) =
+      Scalar(-1.) * pinocchio_->effortLimit.tail(nu_ - n_thrusts_);
+  u_ub.tail(nu_ - n_thrusts_) =
+      Scalar(+1.) * pinocchio_->effortLimit.tail(nu_ - n_thrusts_);
 
   Base::set_u_lb(u_lb);
   Base::set_u_ub(u_ub);
@@ -78,7 +77,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calc(
   pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
 
   d->multibody.joint->a = d->xout;
-  d->multibody.joint->tau = u.tail(state_->get_nv());
+  d->multibody.joint->tau = u.tail(nu_ - n_thrusts_);
   costs_->calc(d->costs, x, u);
   d->cost = d->costs->cost;
   if (constraints_ != nullptr) {
@@ -121,9 +120,9 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
       d->Fx.rightCols(nv), d->pinocchio.Minv);
 
   // derivatives w.r.t joint torques
-  d->Fu.rightCols(nv).noalias() =
-      d->pinocchio
-          .Minv;  // TODO: We now assume dtau_du is identity for joint part
+  d->Fu.rightCols(nu_ - n_thrusts_).noalias() = d->pinocchio.Minv.rightCols(
+      nu_ -
+      n_thrusts_);  // TODO: We now assume dtau_du is identity for joint part
 
   // i-th rotor
   for (int i = 0; i < n_thrusts_; i++) {
@@ -162,7 +161,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
       Eigen::Map<const Eigen::Matrix<Scalar, 6, Eigen::Dynamic> >
           rotor_i_parent_joint_hessian_j(ptr, 6, nv);
       d->Fx.col(j).noalias() +=
-          d->pinocchio.Minv * rotor_i_parent_joint_hessian_j *
+          d->pinocchio.Minv * rotor_i_parent_joint_hessian_j.transpose() *
           thrust_wrench_unit_parent_joint.toVector() * u(i);
     }
   }
@@ -200,42 +199,9 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::
 }
 
 template <typename Scalar>
-void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::quasiStatic(
-    const std::shared_ptr<DifferentialActionDataAbstract>& data,
-    Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-    const std::size_t, const Scalar) {
-  if (static_cast<std::size_t>(u.size()) != nu_) {
-    throw_pretty(
-        "Invalid argument: " << "u has wrong dimension (it should be " +
-                                    std::to_string(nu_) + ")");
-  }
-  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
-    throw_pretty(
-        "Invalid argument: " << "x has wrong dimension (it should be " +
-                                    std::to_string(state_->get_nx()) + ")");
-  }
-  // Static casting the data
-  Data* d = static_cast<Data*>(data.get());
-  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
-      x.head(state_->get_nq());
-
-  const std::size_t nq = state_->get_nq();
-  const std::size_t nv = state_->get_nv();
-
-  d->tmp_xstatic.head(nq) = q;
-  d->tmp_xstatic.tail(nv).setZero();
-  u.setZero();
-
-  pinocchio::rnea(*pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
-                  d->tmp_xstatic.tail(nv));
-  actuation_->calc(d->multibody.actuation, d->tmp_xstatic,
-                   u);  // todo only joint part
-  actuation_->calcDiff(d->multibody.actuation, d->tmp_xstatic,
-                       u);  // todo only joint part
-
-  u.noalias() =
-      pseudoInverse(d->multibody.actuation->dtau_du) * d->pinocchio.tau;
-  d->pinocchio.tau.setZero();
+std::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> >
+DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::createData() {
+  return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
 template <typename Scalar>
@@ -265,4 +231,73 @@ DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::cast() const {
   }
 }
 
+template <typename Scalar>
+bool DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::checkData(
+    const std::shared_ptr<DifferentialActionDataAbstract>& data) {
+  std::shared_ptr<Data> d = std::dynamic_pointer_cast<Data>(data);
+  if (d != NULL) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+template <typename Scalar>
+void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::quasiStatic(
+    const std::shared_ptr<DifferentialActionDataAbstract>& data,
+    Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
+    const std::size_t, const Scalar) {
+  if (static_cast<std::size_t>(u.size()) != nu_) {
+    throw_pretty(
+        "Invalid argument: " << "u has wrong dimension (it should be " +
+                                    std::to_string(nu_) + ")");
+  }
+  if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+    throw_pretty(
+        "Invalid argument: " << "x has wrong dimension (it should be " +
+                                    std::to_string(state_->get_nx()) + ")");
+  }
+  // Static casting the data
+  Data* d = static_cast<Data*>(data.get());
+  const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
+      x.head(state_->get_nq());
+
+  const std::size_t nq = state_->get_nq();
+  const std::size_t nv = state_->get_nv();
+
+  d->tmp_xstatic.head(nq) = q;
+  d->tmp_xstatic.tail(nv).setZero();
+  u.setZero();
+
+  pinocchio::rnea(
+      *pinocchio_, d->pinocchio, q, d->tmp_xstatic.tail(nv),
+      d->tmp_xstatic.tail(
+          nv));  // compute tau due to gravity. result is in d->pinocchio.tau
+
+  MatrixXs dtau_du = MatrixXs::Zero(nv, nu_);
+  for (int i = 0; i < n_thrusts_; i++) {
+    // thrust wrench units
+    Force thrust_wrench_unit;
+    thrust_wrench_unit.linear() = Vector3s(0, 0, 1);
+    if (rotors_[i].direction_ == CLOCKWISE)
+      thrust_wrench_unit.angular() = Vector3s(0, 0, rotors_[i].ctorque_);
+    else
+      thrust_wrench_unit.angular() = Vector3s(0, 0, -rotors_[i].ctorque_);
+
+    // rotor frame Jacobian
+    MatrixXs rotor_i_jacobian = MatrixXs::Zero(6, nv);
+    pinocchio::computeFrameJacobian(*pinocchio_, d->pinocchio, q,
+                                    rotors_[i].frame_id_, pinocchio::LOCAL,
+                                    rotor_i_jacobian);
+
+    dtau_du.col(i).noalias() =
+        rotor_i_jacobian.transpose() * thrust_wrench_unit.toVector();
+  }
+
+  dtau_du.bottomRightCorner(nu_ - n_thrusts_, nu_ - n_thrusts_)
+      .diagonal()
+      .setOnes();  // joint torque part
+  u.noalias() = pseudoInverse(dtau_du) * d->pinocchio.tau;
+  d->pinocchio.tau.setZero();
+}
 }  // namespace crocoddyl

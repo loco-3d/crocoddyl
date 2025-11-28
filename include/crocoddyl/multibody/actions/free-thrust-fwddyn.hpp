@@ -89,17 +89,22 @@ class DifferentialActionModelFreeThrustFwdDynamicsTpl
       const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override;
 
+  void computeFExtByThrusts(const Eigen::Ref<const VectorXs>& u,
+                            pinocchio::container::aligned_vector<Force>& fext);
+
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  template <typename NewScalar>
+  DifferentialActionModelFreeThrustFwdDynamicsTpl<NewScalar> cast() const;
+
+  virtual bool checkData(
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
+
   virtual void quasiStatic(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
       const std::size_t maxiter = 100,
       const Scalar tol = Scalar(1e-9)) override;
-
-  template <typename NewScalar>
-  DifferentialActionModelFreeThrustFwdDynamicsTpl<NewScalar> cast() const;
-
-  void computeFExtByThrusts(const Eigen::Ref<const VectorXs>& u,
-                            pinocchio::container::aligned_vector<Force>& fext);
 
  protected:
   using Base::nu_;     //!< Control dimension
@@ -118,7 +123,7 @@ class DifferentialActionModelFreeThrustFwdDynamicsTpl
 
 template <typename _Scalar>
 struct DifferentialActionDataFreeThrustFwdDynamicsTpl
-    : public DifferentialActionDataFreeFwdDynamicsTpl<_Scalar> {
+    : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
