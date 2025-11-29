@@ -62,7 +62,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  actuation_->calc(d->multibody.actuation, x, u);
+  // actuation_->calc(d->multibody.actuation, x, u);
 
   // calculate the effect of thrusts on the system
   pinocchio::container::aligned_vector<Force> fext(pinocchio_->njoints,
@@ -70,9 +70,10 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calc(
   computeFExtByThrusts(u, fext);
 
   // Computing the dynamics using ABA
+  VectorXs tau = VectorXs::Zero(state_->get_nv());
+  tau.tail(nu_ - n_thrusts_) = u.tail(nu_ - n_thrusts_);
   d->xout =
-      pinocchio::aba(*pinocchio_, d->pinocchio, q, v,
-                     d->multibody.actuation->tau.tail(state_->get_nv()),
+      pinocchio::aba(*pinocchio_, d->pinocchio, q, v, tau,
                      fext);  // todo: only joint torque part and consider fext
   pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
 
@@ -109,15 +110,16 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
 
   Data* d = static_cast<Data*>(data.get());
 
-  actuation_->calcDiff(d->multibody.actuation, x, u);
+  // actuation_->calcDiff(d->multibody.actuation, x, u);
 
   pinocchio::computeJointKinematicHessians(*pinocchio_, d->pinocchio, q);
 
   // Computing the dynamics derivatives
-  pinocchio::computeABADerivatives(
-      *pinocchio_, d->pinocchio, q, v,
-      d->multibody.actuation->tau.tail(state_->get_nv()), d->Fx.leftCols(nv),
-      d->Fx.rightCols(nv), d->pinocchio.Minv);
+  VectorXs tau = VectorXs::Zero(state_->get_nv());
+  tau.tail(nu_ - n_thrusts_) = u.tail(nu_ - n_thrusts_);
+  pinocchio::computeABADerivatives(*pinocchio_, d->pinocchio, q, v, tau,
+                                   d->Fx.leftCols(nv), d->Fx.rightCols(nv),
+                                   d->pinocchio.Minv);
 
   // derivatives w.r.t joint torques
   d->Fu.rightCols(nu_ - n_thrusts_).noalias() = d->pinocchio.Minv.rightCols(
@@ -151,6 +153,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
 
     Eigen::Tensor<Scalar, 3> rotor_i_parent_joint_hessian(6, pinocchio_->nv,
                                                           pinocchio_->nv);
+    rotor_i_parent_joint_hessian.setZero();
     pinocchio::getJointKinematicHessian(
         *pinocchio_, d->pinocchio, rotor_parent_joint_index, pinocchio::LOCAL,
         rotor_i_parent_joint_hessian);
