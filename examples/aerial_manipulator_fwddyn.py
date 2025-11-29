@@ -45,12 +45,12 @@ p6 = pinocchio.SE3(
     np.array([d1_p, -d2_p, 0.0]),
 )
 ps = [
-    crocoddyl.Thruster(p1, cm / cf, crocoddyl.ThrusterType.CCW),
-    crocoddyl.Thruster(p2, cm / cf, crocoddyl.ThrusterType.CW),
-    crocoddyl.Thruster(p3, cm / cf, crocoddyl.ThrusterType.CCW),
-    crocoddyl.Thruster(p4, cm / cf, crocoddyl.ThrusterType.CW),
-    crocoddyl.Thruster(p5, cm / cf, crocoddyl.ThrusterType.CCW),
-    crocoddyl.Thruster(p6, cm / cf, crocoddyl.ThrusterType.CW),
+    crocoddyl.Thruster(p1, cm / cf, crocoddyl.ThrusterType.CCW, 0, 10),
+    crocoddyl.Thruster(p2, cm / cf, crocoddyl.ThrusterType.CW, 0, 10),
+    crocoddyl.Thruster(p3, cm / cf, crocoddyl.ThrusterType.CCW, 0, 10),
+    crocoddyl.Thruster(p4, cm / cf, crocoddyl.ThrusterType.CW, 0, 10),
+    crocoddyl.Thruster(p5, cm / cf, crocoddyl.ThrusterType.CCW, 0, 10),
+    crocoddyl.Thruster(p6, cm / cf, crocoddyl.ThrusterType.CW, 0, 10),
 ]
 actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
 nv, nu, dt = state.nv, actuation.nu, 3e-2

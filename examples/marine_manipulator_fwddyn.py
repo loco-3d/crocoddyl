@@ -38,7 +38,7 @@ for name in thrusterNames:
     bMt = bluevolta.model.frames[thrusterId].placement * pinocchio.SE3(
         pinocchio.utils.rpyToMatrix(0.0, np.pi / 2, 0.0), np.zeros(3)
     )
-    ps.append(crocoddyl.Thruster(bMt, cm / cf, crocoddyl.ThrusterType.CCW))
+    ps.append(crocoddyl.Thruster(bMt, cm / cf, crocoddyl.ThrusterType.CCW, 0, 150))
 actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
 nv, nu, dt = state.nv, actuation.nu, 3e-2
 
@@ -220,7 +220,7 @@ if WITHDISPLAY:
     display.rate = -1
     display.freq = 1
     while True:
-        display.displayFromSolver(solver)
+        # display.displayFromSolver(solver)
         if crocoddyl.WITH_ODYN:
             display.displayFromSolver(solverSQP)
         time.sleep(1.0)

@@ -27,21 +27,29 @@ ps = [
         pinocchio.SE3(np.eye(3), np.array([d_cog, 0, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CCW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, d_cog, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([-d_cog, 0, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CCW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, -d_cog, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CW,
+        0,
+        10,
     ),
 ]
 actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
