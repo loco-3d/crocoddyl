@@ -9,6 +9,9 @@ import pinocchio
 
 import crocoddyl
 
+if crocoddyl.WITH_ODYN:
+    from odyn.utils import plotQPsparsity
+
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -20,6 +23,8 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Loading the Kinova manipulator robot
 kinova = example_robot_data.load("kinova")
+kinova.model.lowerPositionLimit[3] = -np.pi
+kinova.model.upperPositionLimit[3] = np.pi
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(kinova.model)
@@ -72,13 +77,22 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the OC solver
 T = 100
-problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
-solver = crocoddyl.SolverFDDP(problem)
+problem_1 = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
+problem_2 = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
+solver = crocoddyl.SolverFDDP(problem_1)
+if crocoddyl.WITH_ODYN:
+    solverSQP = crocoddyl.SolverOdynSQP(problem_2)
 
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks(
+            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()]
+        )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the OC solver
 xs = [x0] * (T + 1)
@@ -92,6 +106,9 @@ Ts = int(solver.problem.T / 3)
 print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, [], 300)
+if crocoddyl.WITH_ODYN:
+    print("*** SOLVE (OdynSQP) ***")
+    solverSQP.solve(xs, [], 300)
 
 # Printing the terminal end-effector pose
 Mterm = pinocchio.SE3ToXYZQUAT(
@@ -112,6 +129,19 @@ if WITHPLOT:
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )
+    if crocoddyl.WITH_ODYN:
+        logSQP = solverSQP.getCallbacks()[1]
+        crocoddyl.plotOCSolution(solverSQP.xs, solverSQP.us, figIndex=3, show=False)
+        crocoddyl.plotConvergence(
+            logSQP.costs,
+            logSQP.pregs,
+            logSQP.dregs,
+            logSQP.stops,
+            logSQP.grads,
+            logSQP.steps,
+            figIndex=4,
+        )
+        plotQPsparsity(solverSQP.qp_model, figIndex=5, show=True)
 
 # Visualizing the solution in gepetto-viewer
 if WITHDISPLAY:
@@ -130,4 +160,6 @@ if WITHDISPLAY:
     display.freq = 1
     while True:
         display.displayFromSolver(solver)
+        if crocoddyl.WITH_ODYN:
+            display.displayFromSolver(solverSQP)
         time.sleep(1.0)

@@ -52,12 +52,19 @@ terminalModel = crocoddyl.ActionModelLQR(A, B, Q, R, N, G, H, f, q, r, g, h)
 # Creating the shooting problem and the optimal-control solver
 T = 50
 x0 = np.array([0.0, 0.5, 0.0, 0.0])
-problem = crocoddyl.ShootingProblem(x0, [model] * T, terminalModel)
-solver = crocoddyl.SolverFDDP(problem, crocoddyl.DynamicsSolverType.MultiShoot)
+problem_1 = crocoddyl.ShootingProblem(x0, [model] * T, terminalModel)
+problem_2 = crocoddyl.ShootingProblem(x0, [model] * T, terminalModel)
+solver = crocoddyl.SolverFDDP(problem_1, crocoddyl.DynamicsSolverType.MultiShoot)
+if crocoddyl.WITH_ODYN:
+    solverSQP = crocoddyl.SolverOdynSQP(problem_2)
 solver.setCallbacks([crocoddyl.CallbackVerbose()])
+if crocoddyl.WITH_ODYN:
+    solverSQP.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the shooting problem
 solver.solve()
+if crocoddyl.WITH_ODYN:
+    solverSQP.solve()
 
 # Printing the terminal state
 print("Target state:", -h)

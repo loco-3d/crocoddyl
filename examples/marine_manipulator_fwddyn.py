@@ -9,6 +9,9 @@ import pinocchio
 
 import crocoddyl
 
+if crocoddyl.WITH_ODYN:
+    from odyn.utils import plotQPsparsity
+
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -79,12 +82,19 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the OC solver
 T = 40
-problem = crocoddyl.ShootingProblem(
+problem_1 = crocoddyl.ShootingProblem(
     np.concatenate([bluevolta.q0, np.zeros(state.nv)]),
     [runningModel] * T,
     terminalModel,
 )
-solver = crocoddyl.SolverFDDP(problem)
+problem_2 = crocoddyl.ShootingProblem(
+    np.concatenate([bluevolta.q0, np.zeros(state.nv)]),
+    [runningModel] * T,
+    terminalModel,
+)
+solver = crocoddyl.SolverFDDP(problem_1)
+if crocoddyl.WITH_ODYN:
+    solverSQP = crocoddyl.SolverOdynSQP(problem_2)
 
 cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
 if WITHDISPLAY:
@@ -112,17 +122,35 @@ if WITHDISPLAY:
                     crocoddyl.CallbackDisplay(display),
                 ]
             )
+            if crocoddyl.WITH_ODYN:
+                solverSQP.setCallbacks(
+                    [
+                        crocoddyl.CallbackVerbose(),
+                        crocoddyl.CallbackLogger(),
+                        crocoddyl.CallbackDisplay(display),
+                    ]
+                )
         else:
             solver.setCallbacks(
                 [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
             )
+            if crocoddyl.WITH_ODYN:
+                solverSQP.setCallbacks(
+                    [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
+                )
     except Exception:
         display = crocoddyl.MeshcatDisplay(bluevolta)
         # display.forceLength = 3
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks(
+            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()]
+        )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the solver
 print("*** SOLVE (FeasShoot) ***")
@@ -131,10 +159,9 @@ solver.solve()
 print("*** SOLVE (MultiShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
 solver.solve([], [], 200)
-# Ts = int(solver.problem.T / 3)
-# print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
-# solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
-# solver.solve()
+if crocoddyl.WITH_ODYN:
+    print("*** SOLVE (OdynSQP) ***")
+    solverSQP.solve([], [], 200)
 
 # Printing the terminal pose
 np.set_printoptions(precision=4, suppress=True)
@@ -154,8 +181,29 @@ if WITHPLOT:
     xs, us = solver.xs, solver.us
     crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
-        log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2
+        log.costs,
+        log.pregs,
+        log.dregs,
+        log.stops,
+        log.grads,
+        log.steps,
+        figIndex=2,
+        show=False,
     )
+    if crocoddyl.WITH_ODYN:
+        logSQP = solverSQP.getCallbacks()[1]
+        crocoddyl.plotOCSolution(solverSQP.xs, solverSQP.us, figIndex=3, show=False)
+        crocoddyl.plotConvergence(
+            logSQP.costs,
+            logSQP.pregs,
+            logSQP.dregs,
+            logSQP.stops,
+            logSQP.grads,
+            logSQP.steps,
+            figIndex=4,
+            show=False,
+        )
+        plotQPsparsity(solverSQP.qp_model, figIndex=5, show=True)
 
 # Display the entire motion
 if WITHDISPLAY:
@@ -173,4 +221,6 @@ if WITHDISPLAY:
     display.freq = 1
     while True:
         display.displayFromSolver(solver)
+        if crocoddyl.WITH_ODYN:
+            display.displayFromSolver(solverSQP)
         time.sleep(1.0)

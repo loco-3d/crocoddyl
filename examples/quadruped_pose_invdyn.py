@@ -8,6 +8,9 @@ import numpy as np
 import pinocchio
 
 import crocoddyl
+
+if crocoddyl.WITH_ODYN:
+    from odyn.utils import plotQPsparsity
 from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
@@ -65,11 +68,15 @@ x0 = np.concatenate([q0, v0])
 # Setting up the 3d walking problem
 comGoTo = np.array([0.1, 0.0, -0.1])
 lfFoot, rfFoot, lhFoot, rhFoot = "LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"
-solver = crocoddyl.SolverIntro(
-    createCoMGoalProblem(
-        anymal.model, lfFoot, rfFoot, lhFoot, rhFoot, comGoTo, 1e-2, 30
-    )
+problem_1 = createCoMGoalProblem(
+    anymal.model, lfFoot, rfFoot, lhFoot, rhFoot, comGoTo, 1e-2, 30
 )
+problem_2 = createCoMGoalProblem(
+    anymal.model, lfFoot, rfFoot, lhFoot, rhFoot, comGoTo, 1e-2, 30
+)
+solver = crocoddyl.SolverIntro(problem_1)
+if crocoddyl.WITH_ODYN:
+    solverSQP = crocoddyl.SolverOdynSQP(problem_2)
 
 # Added the callback functions
 if WITHPLOT:
@@ -79,8 +86,14 @@ if WITHPLOT:
             crocoddyl.CallbackLogger(),
         ]
     )
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks(
+            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()]
+        )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the OC solver
 xs = [x0] * (solver.problem.T + 1)
@@ -95,6 +108,9 @@ Ts = int(solver.problem.T / 3)
 print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, us, 100, False)
+if crocoddyl.WITH_ODYN:
+    print("*** SOLVE (OdynSQP) ***".format_map(locals()))
+    solverSQP.solve(xs, us, 100, False)
 
 # Printing the terminal CoM position
 np.set_printoptions(precision=4, suppress=True)
@@ -120,8 +136,7 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
-    plotSolution(solver, figIndex=1, show=False)
-
+    plotSolution(solver, bounds=False, figIndex=1, show=False)
     log = solver.getCallbacks()[1]
     crocoddyl.plotConvergence(
         log.costs,
@@ -130,7 +145,20 @@ if WITHPLOT:
         log.grads,
         log.stops,
         log.steps,
-        figTitle="CoM tracking",
         figIndex=3,
-        show=True,
+        show=False,
     )
+    if crocoddyl.WITH_ODYN:
+        plotSolution(solverSQP, figIndex=4, show=False)
+        logSQP = solverSQP.getCallbacks()[1]
+        crocoddyl.plotConvergence(
+            logSQP.costs,
+            logSQP.pregs,
+            logSQP.dregs,
+            logSQP.grads,
+            logSQP.stops,
+            logSQP.steps,
+            figIndex=6,
+            show=False,
+        )
+        plotQPsparsity(solverSQP.qp_model, figIndex=7, show=True)
