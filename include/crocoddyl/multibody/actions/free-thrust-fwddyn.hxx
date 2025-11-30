@@ -62,19 +62,13 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
 
-  // actuation_->calc(d->multibody.actuation, x, u);
-
   // calculate the effect of thrusts on the system
-  pinocchio::container::aligned_vector<Force> fext(pinocchio_->njoints,
-                                                   Force::Zero());
-  computeFExtByThrusts(u, fext);
+  computeFExtByThrusts(u, d->fext);
 
   // Computing the dynamics using ABA
   VectorXs tau = VectorXs::Zero(state_->get_nv());
   tau.tail(nu_ - n_thrusts_) = u.tail(nu_ - n_thrusts_);
-  d->xout =
-      pinocchio::aba(*pinocchio_, d->pinocchio, q, v, tau,
-                     fext);  // todo: only joint torque part and consider fext
+  d->xout = pinocchio::aba(*pinocchio_, d->pinocchio, q, v, tau, d->fext);
   pinocchio::updateGlobalPlacements(*pinocchio_, d->pinocchio);
 
   d->multibody.joint->a = d->xout;
@@ -110,8 +104,6 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
 
   Data* d = static_cast<Data*>(data.get());
 
-  // actuation_->calcDiff(d->multibody.actuation, x, u);
-
   pinocchio::computeJointKinematicHessians(*pinocchio_, d->pinocchio, q);
 
   // Computing the dynamics derivatives
@@ -141,16 +133,14 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
     d->Fu.col(i).noalias() = d->pinocchio.Minv * rotor_i_jacobian.transpose() *
                              rotors_[i].thrust_wrench_unit_.toVector();
 
-    Eigen::Tensor<Scalar, 3> rotor_i_parent_joint_hessian(6, pinocchio_->nv,
-                                                          pinocchio_->nv);
-    rotor_i_parent_joint_hessian.setZero();
-    pinocchio::getJointKinematicHessian(
-        *pinocchio_, d->pinocchio, rotor_parent_joint_index, pinocchio::LOCAL,
-        rotor_i_parent_joint_hessian);
+    d->joint_hessian_tmp.setZero();
+    pinocchio::getJointKinematicHessian(*pinocchio_, d->pinocchio,
+                                        rotor_parent_joint_index,
+                                        pinocchio::LOCAL, d->joint_hessian_tmp);
 
     // j-th joint
     for (int j = 0; j < nv; j++) {
-      const Scalar* ptr = rotor_i_parent_joint_hessian.data() + j * 6 * nv;
+      const Scalar* ptr = d->joint_hessian_tmp.data() + j * 6 * nv;
       Eigen::Map<const Eigen::Matrix<Scalar, 6, Eigen::Dynamic> >
           rotor_i_parent_joint_hessian_j(ptr, 6, nv);
       d->Fx.col(j).noalias() +=
