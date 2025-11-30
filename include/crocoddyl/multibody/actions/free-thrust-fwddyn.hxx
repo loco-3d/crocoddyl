@@ -131,16 +131,6 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
     pinocchio::JointIndex rotor_parent_joint_index =
         pinocchio_->frames[rotors_[i].frame_id_].parent;
 
-    // thrust wrench units
-    Force thrust_wrench_unit;
-    thrust_wrench_unit.linear() = Vector3s(0, 0, 1);
-    if (rotors_[i].direction_ == CLOCKWISE)
-      thrust_wrench_unit.angular() = Vector3s(0, 0, rotors_[i].ctorque_);
-    else
-      thrust_wrench_unit.angular() = Vector3s(0, 0, -rotors_[i].ctorque_);
-    Force thrust_wrench_unit_parent_joint =
-        rotors_[i].joint_M_rotor_.act(thrust_wrench_unit);
-
     // rotor frame Jacobian
     MatrixXs rotor_i_jacobian = MatrixXs::Zero(6, nv);
     pinocchio::computeFrameJacobian(*pinocchio_, d->pinocchio, q,
@@ -149,7 +139,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
 
     // derivative w.r.t. thrusts
     d->Fu.col(i).noalias() = d->pinocchio.Minv * rotor_i_jacobian.transpose() *
-                             thrust_wrench_unit.toVector();
+                             rotors_[i].thrust_wrench_unit_.toVector();
 
     Eigen::Tensor<Scalar, 3> rotor_i_parent_joint_hessian(6, pinocchio_->nv,
                                                           pinocchio_->nv);
@@ -165,7 +155,7 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::calcDiff(
           rotor_i_parent_joint_hessian_j(ptr, 6, nv);
       d->Fx.col(j).noalias() +=
           d->pinocchio.Minv * rotor_i_parent_joint_hessian_j.transpose() *
-          thrust_wrench_unit_parent_joint.toVector() * u(i);
+          rotors_[i].thrust_wrench_unit_parent_joint_.toVector() * u(i);
     }
   }
 
@@ -183,21 +173,12 @@ void DifferentialActionModelFreeThrustFwdDynamicsTpl<Scalar>::
                          pinocchio::container::aligned_vector<Force>& fext) {
   // calculate the effect of thrusts on the system
   for (int i = 0; i < n_thrusts_; i++) {
-    // LOCAL
-    Force rotor_frame_wrench;
-    rotor_frame_wrench.linear() = Vector3s(0, 0, u(i));
-    if (rotors_[i].direction_ == CLOCKWISE)
-      rotor_frame_wrench.angular() = Vector3s(0, 0, rotors_[i].ctorque_ * u(i));
-    else
-      rotor_frame_wrench.angular() =
-          Vector3s(0, 0, -rotors_[i].ctorque_ * u(i));
-
-    Force rotor_parent_joint_wrench =
-        rotors_[i].joint_M_rotor_.act(rotor_frame_wrench);
-
     pinocchio::JointIndex rotor_parent_joint_index =
         pinocchio_->frames[rotors_[i].frame_id_].parent;
-    fext.at(rotor_parent_joint_index) += rotor_parent_joint_wrench;
+
+    fext.at(rotor_parent_joint_index) =
+        rotors_[i].thrust_wrench_unit_parent_joint_ *
+        u(i);  // TODO: We now assume only one rotor per joint
   }
 }
 
