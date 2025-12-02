@@ -134,7 +134,7 @@ struct BoxQPVisitor : public bp::def_visitor<BoxQPVisitor<Model>> {
           ":param th_grad: gradient tolerance condition (default 1e-9)\n"   \
           ":param reg: regularization (default 1e-9)"))                     \
       .def(BoxQPVisitor<Model>())                                           \
-      .def(CastVisitor<Model>())                                            \
+      .def(CastVisitor<Model, true>())                                      \
       .def(CopyableVisitor<Model>());
 
 void exposeSolverBoxQP() {
