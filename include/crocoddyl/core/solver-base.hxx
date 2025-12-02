@@ -14,7 +14,7 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
     std::shared_ptr<ShootingProblem> problem)
     : problem_(problem),
       th_acceptstep_(Scalar(0.1)),
-      th_stop_(std::sqrt(std::numeric_limits<Scalar>::epsilon())),
+      th_stop_(sqrt(std::numeric_limits<Scalar>::epsilon())),
       th_gaptol_(Scalar(1e-16)),
       feasnorm_(LInf),
       iter_(0),
@@ -53,7 +53,7 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
   // TODO: Deprecate isfeasible_. Update setCandidate API.
   setCandidate(init_xs, init_us, false);
   // Initialize the value used for primal and dual regularization
-  if (std::isnan(init_reg)) {
+  if (isnan(init_reg)) {
     preg_ = reg_min_;
     dreg_ = reg_min_;
   } else {
