@@ -17,7 +17,7 @@ namespace crocoddyl {
 namespace python {
 
 template <typename Model>
-struct SolverBoxQPVisitor : public bp::def_visitor<SolverBoxQPVisitor<Model>> {
+struct SolverBoxFDDPVisitor : public bp::def_visitor<SolverBoxFDDPVisitor<Model>> {
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.add_property(
@@ -28,7 +28,7 @@ struct SolverBoxQPVisitor : public bp::def_visitor<SolverBoxQPVisitor<Model>> {
   }
 };
 
-#define CROCODDYL_SOLVER_BOXQP_PYTHON_BINDINGS(Scalar)                         \
+#define CROCODDYL_SOLVER_BOXFDDP_PYTHON_BINDINGS(Scalar)                         \
   typedef SolverBoxFDDPTpl<Scalar> Model;                                      \
   typedef SolverFDDPTpl<Scalar> ModelBase;                                     \
   typedef typename ModelBase::ShootingProblem ShootingProblem;                 \
@@ -45,13 +45,13 @@ struct SolverBoxQPVisitor : public bp::def_visitor<SolverBoxQPVisitor<Model>> {
           ":param problem: shooting problem.\n"                                \
           ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"    \
           ":param term_solver: type of terminal solver (default LuNull)"))     \
-      .def(SolverBoxQPVisitor<Model>())                                        \
+      .def(SolverBoxFDDPVisitor<Model>())                                        \
       .def(CastVisitor<Model, true>())                                         \
       .def(CopyableVisitor<Model>());
 
 void exposeSolverBoxFDDP() {
 #ifdef IS_FP_SCALAR_TRUE
-  CROCODDYL_SOLVER_BOXQP_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_SOLVER_BOXFDDP_PYTHON_BINDINGS(@SCALAR_TYPE@)
 #endif
 }
 
