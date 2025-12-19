@@ -1,0 +1,12 @@
+#include "crocoddyl/multibody/actions/free-thrust-fwddyn.hpp"
+
+namespace crocoddyl {
+
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    RotorTpl<@SCALAR_TYPE@>;
+template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DifferentialActionModelFreeThrustFwdDynamicsTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DifferentialActionDataFreeThrustFwdDynamicsTpl<@SCALAR_TYPE@>;
+
+}  // namespace crocoddyl
