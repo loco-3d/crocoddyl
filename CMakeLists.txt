@@ -139,14 +139,24 @@ if(BUILD_PYTHON_INTERFACE)
 endif(BUILD_PYTHON_INTERFACE)
 add_project_dependency(pinocchio 3.1.0 REQUIRED PKG_CONFIG_REQUIRES
                        "pinocchio >= 3.1.0")
+
+# example-robot-data is not available in ROS and it is only used for tests,
+# examples, and benchmarks
 if(BUILD_EXAMPLES
    OR BUILD_TESTING
    OR BUILD_BENCHMARK)
-  add_project_dependency(example-robot-data 4.0.9 REQUIRED PKG_CONFIG_REQUIRES
-                         "example-robot-data >= 4.0.9")
-else()
-  add_optional_dependency(example-robot-data)
+  find_package(example-robot-data 4.0.9 QUIET)
+  if(NOT TARGET example-robot-data::example-robot-data)
+    message(STATUS "example-robot-data not found (>= 4.0.9). Let's fetch it.")
+    include(FetchContent)
+    FetchContent_Declare(
+      "example-robot-data"
+      GIT_REPOSITORY "https://github.com/gepetto/example-robot-data.git"
+      GIT_TAG v4.4.0)
+    FetchContent_MakeAvailable("example-robot-data")
+  endif()
 endif()
+
 if(BUILD_WITH_IPOPT)
   add_optional_dependency(ipopt)
 endif()
