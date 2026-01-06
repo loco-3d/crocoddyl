@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright (C) 2025-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,6 +236,11 @@ struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>
               bp::return_internal_reference<>()),
               +[](Model& self, const typename Model::Params& params) {
               self.set_qp_params(params); }, "Returns the QP parameters")
+        .add_property(
+            "verbose_level",
+            bp::make_function(&Model::get_verbose_level),
+            bp::make_function(&Model::set_verbose_level),
+            "verbose level used in the OdynSQP solver.")
         .add_property(
             "n", bp::make_function(&Model::get_n),
             "dimension of decision variables in the SQP")

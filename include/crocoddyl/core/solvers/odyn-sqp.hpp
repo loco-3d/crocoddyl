@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright (C) 2025-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,6 +218,11 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   Params& qp_params() noexcept;
 
   /**
+   * @brief Return the verbose level used in the OdynSQP solver
+   */
+  odyn::VerboseLevel get_verbose_level() const noexcept;
+
+  /**
    * @brief Return the regularization factor used to increase the damping value
    */
   Scalar get_reg_incfactor() const;
@@ -293,6 +298,11 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
    * @brief Modify the QP params used in the OdynSQP solver
    */
   void set_qp_params(const Params& params);
+
+  /**
+   * @brief Modify the verbose level used in the OdynSQP solver
+   */
+  void set_verbose_level(const odyn::VerboseLevel verbose_level);
 
   /**
    * @brief Modify the regularization factor used to increase the damping value
@@ -421,6 +431,7 @@ class SolverOdynSQPTpl : public SolverAbstractTpl<_Scalar> {
   Model qp_model_;
   Data qp_data_;
   Params qp_params_;
+  odyn::VerboseLevel verbose_level_;
   std::vector<std::size_t> xs_idx_;
   std::vector<std::size_t> us_idx_;
   std::vector<VectorXs>

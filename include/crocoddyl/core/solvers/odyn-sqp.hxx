@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright (C) 2025-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ void SolverOdynSQPTpl<Scalar>::computeDirection(const bool recalc) {
   computeQuadraticModel();
   // Solve the QP problem using Odyn
   // qp_params_.stop_abs = 1e-4
-  qp_solver_.solve(qp_model_, qp_data_, qp_params_, odyn::VerboseLevel::Silent);
+  qp_solver_.solve(qp_model_, qp_data_, qp_params_, verbose_level_);
   // Unpack primal into dx/du
   x_ = qp_model_.get_x(qp_data_);
   extractQpDirection(x_);
@@ -599,6 +599,12 @@ odyn::ParamsTpl<Scalar>& SolverOdynSQPTpl<Scalar>::qp_params() noexcept {
 }
 
 template <typename Scalar>
+odyn::VerboseLevel SolverOdynSQPTpl<Scalar>::get_verbose_level()
+    const noexcept {
+  return verbose_level_;
+}
+
+template <typename Scalar>
 std::size_t SolverOdynSQPTpl<Scalar>::get_n() const noexcept {
   return n_;
 }
@@ -682,6 +688,12 @@ template <typename Scalar>
 void SolverOdynSQPTpl<Scalar>::set_qp_params(
     const odyn::ParamsTpl<Scalar>& qp_params) {
   qp_params_ = qp_params;
+}
+
+template <typename Scalar>
+void SolverOdynSQPTpl<Scalar>::set_verbose_level(
+    const odyn::VerboseLevel verbose_level) {
+  verbose_level_ = verbose_level;
 }
 
 template <typename Scalar>
