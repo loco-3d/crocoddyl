@@ -68,7 +68,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       N_(MatrixXs::Zero(2 * nq, nu)),
       G_(MatrixXs::Zero(0, 2 * nq + nu)),
       H_(MatrixXs::Zero(0, 2 * nq + nu)),
-      f_(drift_free ? VectorXs::Zero(nq) : VectorXs::Ones(nq)),
+      f_(VectorXs::Constant(nq, drift_free ? Scalar(0) : Scalar(1))),
       q_(VectorXs::Ones(2 * nq)),
       r_(VectorXs::Ones(nu)),
       g_(VectorXs::Zero(0)),
