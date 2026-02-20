@@ -50,6 +50,8 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::fs_;
   using SolverAbstract::fs_try_;
   using SolverAbstract::g_adj_;
+  using SolverAbstract::x_adj_;
+  using SolverAbstract::u_adj_;
   using SolverAbstract::gfeas_;
   using SolverAbstract::gfeas_try_;
   using SolverAbstract::hfeas_;
