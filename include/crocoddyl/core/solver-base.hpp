@@ -323,7 +323,8 @@ class SolverAbstractTpl : public SolverBase {
   Scalar computeDynamicFeasibility();
 
   /**
-   * @brief Compute the state box-constraint feasibility from a given state trajectory
+   * @brief Compute the state box-constraint feasibility from a given state
+   * trajectory
    *
    * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
    * `computeEqualityFeasibility`, we can compute the feasibility using
@@ -338,7 +339,8 @@ class SolverAbstractTpl : public SolverBase {
   Scalar computeStateFeasibility(const std::vector<VectorXs>& xs);
 
   /**
-   * @brief Compute the control box-constraint feasibility from a given control trajectory
+   * @brief Compute the control box-constraint feasibility from a given control
+   * trajectory
    *
    * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
    * `computeEqualityFeasibility`, we can compute the feasibility using
