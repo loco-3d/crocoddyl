@@ -187,7 +187,8 @@ struct SolverAbstractVisitor
              "Decrease the state and control regularization values by a "
              "regfactor_.")
         .def(
-            "computeFeasibility", &Model::computeFeasibility, bp::args("self"),
+            "computeFeasibility", &Model::computeFeasibility,
+            bp::args("self", "fs"),
             "Compute the feasibility from a given residual vector.\n\n"
             "As in the computeDynamicFeasibility, computeInequalityFeasibility "
             "or computeEqualityFeasibility, we can compute the feasibility "
@@ -205,7 +206,8 @@ struct SolverAbstractVisitor
              "and l-inf norms. By default we use the l-inf norm, however, we "
              "can use the l-1 norm by defining inffeas as False.")
         .def(
-            "computeStateFeasibility", &Model::computeStateFeasibility, bp::args("self"),
+            "computeStateFeasibility", &Model::computeStateFeasibility,
+            bp::args("self", "xs"),
             "Compute the state box-constraint feasibility from a given state trajectory.\n\n"
             "As in the computeDynamicFeasibility, computeInequalityFeasibility "
             "or computeEqualityFeasibility, we can compute the feasibility "
@@ -217,7 +219,8 @@ struct SolverAbstractVisitor
             "feasibility\n"
             ":return the state trajectory's feasibility")
         .def(
-            "computeControlFeasibility", &Model::computeControlFeasibility, bp::args("self"),
+            "computeControlFeasibility", &Model::computeControlFeasibility,
+            bp::args("self", "us"),
             "Compute the control box-constraint feasibility from a given control trajectory.\n\n"
             "As in the computeDynamicFeasibility, computeInequalityFeasibility "
             "or computeEqualityFeasibility, we can compute the feasibility "
