@@ -436,8 +436,6 @@ Scalar SolverAbstractTpl<Scalar>::computeStateFeasibility(
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
-      problem_->get_runningDatas();
 
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_state()->get_has_limits()) {
@@ -502,8 +500,6 @@ Scalar SolverAbstractTpl<Scalar>::computeControlFeasibility(
   const std::size_t T = problem_->get_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
-      problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_has_control_limits()) {
       u_adj_[t] =
