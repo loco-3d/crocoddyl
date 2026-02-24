@@ -340,6 +340,7 @@ void SolverAbstractTpl<Scalar>::resizeRunningData() {
     us_[t].conservativeResize(nu);
     us_try_[t].conservativeResize(nu);
     dus_[t].conservativeResize(nu);
+    u_adj_[t].conservativeResize(nu);
     g_adj_[t].conservativeResize(ng);
   }
   g_adj_.back().conservativeResize(ng_T);
@@ -660,8 +661,10 @@ void SolverAbstractTpl<Scalar>::allocateData() {
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();
   xs_.resize(T + 1);
   xs_try_.resize(T + 1);
+  x_adj_.resize(T + 1);
   us_.resize(T);
   us_try_.resize(T);
+  u_adj_.resize(T);
   fs_.resize(T + 1);
   fs_try_.resize(T + 1);
   dxs_.resize(T + 1);
@@ -682,9 +685,12 @@ void SolverAbstractTpl<Scalar>::allocateData() {
     dxs_[t] = VectorXs::Zero(ndx);
     dus_[t] = VectorXs::Zero(nu);
     g_adj_[t] = VectorXs::Zero(ng);
+    x_adj_[t] = VectorXs::Zero(ndx);
+    u_adj_[t] = VectorXs::Zero(nu);
   }
   xs_.back() = problem_->get_terminalModel()->get_state()->zero();
   xs_try_.back() = problem_->get_terminalModel()->get_state()->zero();
+  x_adj_.back() = VectorXs::Zero(ndx);
   fs_.back() = VectorXs::Zero(ndx);
   fs_try_.back() = VectorXs::Zero(ndx);
   dxs_.back() = VectorXs::Zero(ndx);
