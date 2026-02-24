@@ -414,23 +414,22 @@ Scalar SolverAbstractTpl<Scalar>::computeDynamicFeasibility() {
       break;
     case L2:
       // Start with the squared norm of the initial state error
-      tmp_feas_ = fs_[0].squaredNorm(); 
+      tmp_feas_ = fs_[0].squaredNorm();
       for (std::size_t t = 0; t < T; ++t) {
         // Accumulate the squared norms of the running state errors
-        tmp_feas_ += fs_[t + 1].squaredNorm(); 
+        tmp_feas_ += fs_[t + 1].squaredNorm();
       }
       // Take the square root of the total sum at the very end
-      tmp_feas_ = std::sqrt(tmp_feas_); 
+      tmp_feas_ = std::sqrt(tmp_feas_);
       break;
   }
   STOP_PROFILER("SolverAbstract::computeDynamicFeasibility");
   return tmp_feas_;
 }
 
-
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeStateFeasibility(
-  const std::vector<VectorXs>& xs) {
+    const std::vector<VectorXs>& xs) {
   START_PROFILER("SolverAbstract::computeStateFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
@@ -438,38 +437,39 @@ Scalar SolverAbstractTpl<Scalar>::computeStateFeasibility(
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
-      
+
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_state()->get_has_limits()) {
-      x_adj_[t] = xs[t].cwiseMax(models[t]->get_state()->get_lb())
+      x_adj_[t] = xs[t]
+                      .cwiseMax(models[t]->get_state()->get_lb())
                       .cwiseMin(models[t]->get_state()->get_ub());
     }
   }
   if (problem_->get_terminalModel()->get_state()->get_has_limits()) {
-    x_adj_.back() = xs[T].cwiseMax(problem_->get_terminalModel()->get_state()->get_lb())
-                        .cwiseMin(problem_->get_terminalModel()->get_state()->get_ub());
+    x_adj_.back() =
+        xs[T]
+            .cwiseMax(problem_->get_terminalModel()->get_state()->get_lb())
+            .cwiseMin(problem_->get_terminalModel()->get_state()->get_ub());
   }
-  
+
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_state()->get_has_limits()) {
-          tmp_feas_ = std::max(
-              tmp_feas_,
-              (xs[t] - x_adj_[t]).template lpNorm<Eigen::Infinity>());
+          tmp_feas_ =
+              std::max(tmp_feas_,
+                       (xs[t] - x_adj_[t]).template lpNorm<Eigen::Infinity>());
         }
       }
       if (problem_->get_terminalModel()->get_state()->get_has_limits()) {
-        // Fixed: Use std::max instead of +=
         tmp_feas_ = std::max(
-            tmp_feas_, 
+            tmp_feas_,
             (xs[T] - x_adj_.back()).template lpNorm<Eigen::Infinity>());
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_state()->get_has_limits()) {
-          // Fixed: Use += instead of std::max
           tmp_feas_ += (xs[t] - x_adj_[t]).template lpNorm<1>();
         }
       }
@@ -480,15 +480,12 @@ Scalar SolverAbstractTpl<Scalar>::computeStateFeasibility(
     case L2:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_state()->get_has_limits()) {
-          // Fixed: Use += and squaredNorm()
           tmp_feas_ += (xs[t] - x_adj_[t]).squaredNorm();
         }
       }
       if (problem_->get_terminalModel()->get_state()->get_has_limits()) {
-        // Fixed: Use squaredNorm()
         tmp_feas_ += (xs[T] - x_adj_.back()).squaredNorm();
       }
-      // Fixed: Take the square root at the end
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
   }
@@ -498,7 +495,7 @@ Scalar SolverAbstractTpl<Scalar>::computeStateFeasibility(
 
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeControlFeasibility(
-  const std::vector<VectorXs>& us) {
+    const std::vector<VectorXs>& us) {
   START_PROFILER("SolverAbstract::computeControlFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
@@ -506,28 +503,25 @@ Scalar SolverAbstractTpl<Scalar>::computeControlFeasibility(
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
-      
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_has_control_limits()) {
-      u_adj_[t] = us[t].cwiseMax(models[t]->get_u_lb())
-                      .cwiseMin(models[t]->get_u_ub());
+      u_adj_[t] =
+          us[t].cwiseMax(models[t]->get_u_lb()).cwiseMin(models[t]->get_u_ub());
     }
   }
-
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_has_control_limits()) {
-          tmp_feas_ = std::max(
-              tmp_feas_,
-              (us[t] - u_adj_[t]).template lpNorm<Eigen::Infinity>());
+          tmp_feas_ =
+              std::max(tmp_feas_,
+                       (us[t] - u_adj_[t]).template lpNorm<Eigen::Infinity>());
         }
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_has_control_limits()) {
-          // Fixed: Use += instead of std::max
           tmp_feas_ += (us[t] - u_adj_[t]).template lpNorm<1>();
         }
       }
@@ -535,18 +529,15 @@ Scalar SolverAbstractTpl<Scalar>::computeControlFeasibility(
     case L2:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_has_control_limits()) {
-          // Fixed: Use += and squaredNorm()
           tmp_feas_ += (us[t] - u_adj_[t]).squaredNorm();
         }
       }
-      // Fixed: Take the square root at the end
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
   }
   STOP_PROFILER("SolverAbstract::computeControlFeasibility");
   return tmp_feas_;
 }
-
 
 template <typename Scalar>
 Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
@@ -557,7 +548,6 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
-      
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_ng() > 0) {
       g_adj_[t] = datas[t]
@@ -570,7 +560,6 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
                         ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
                         .cwiseMin(problem_->get_terminalModel()->get_g_ub());
   }
-  
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
@@ -581,16 +570,14 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        // Fixed: Use std::max instead of +=
-        tmp_feas_ = std::max(
-            tmp_feas_, 
-            (problem_->get_terminalData()->g - g_adj_.back()).template lpNorm<Eigen::Infinity>());
+        tmp_feas_ = std::max(tmp_feas_,
+                             (problem_->get_terminalData()->g - g_adj_.back())
+                                 .template lpNorm<Eigen::Infinity>());
       }
       break;
     case L1:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          // Fixed: Use += instead of std::max
           tmp_feas_ += (datas[t]->g - g_adj_[t]).template lpNorm<1>();
         }
       }
@@ -602,15 +589,13 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
     case L2:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_ng() > 0) {
-          // Fixed: Use += and squaredNorm()
           tmp_feas_ += (datas[t]->g - g_adj_[t]).squaredNorm();
         }
       }
       if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        // Fixed: Use squaredNorm()
-        tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back()).squaredNorm();
+        tmp_feas_ +=
+            (problem_->get_terminalData()->g - g_adj_.back()).squaredNorm();
       }
-      // Fixed: Take the square root at the end
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
   }
@@ -627,7 +612,6 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
-      
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
@@ -655,15 +639,12 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
     case L2:
       for (std::size_t t = 0; t < T; ++t) {
         if (models[t]->get_nh() > 0) {
-          // Fixed: Use squaredNorm()
           tmp_feas_ += datas[t]->h.squaredNorm();
         }
       }
       if (problem_->get_terminalModel()->get_nh_T() > 0) {
-        // Fixed: Use squaredNorm()
         tmp_feas_ += problem_->get_terminalData()->h.squaredNorm();
       }
-      // Fixed: Take the square root at the end
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
   }
