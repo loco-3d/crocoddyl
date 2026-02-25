@@ -414,7 +414,7 @@ DifferentialActionModelContactFwdDynamicsTpl<Scalar>::get_g_ub() const {
   if (constraints_ != nullptr) {
     return constraints_->get_ub();
   } else {
-    return g_lb_;
+    return g_ub_;
   }
 }
 
