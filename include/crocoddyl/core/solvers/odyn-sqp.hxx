@@ -27,7 +27,8 @@ SolverOdynSQPTpl<Scalar>::SolverOdynSQPTpl(
                             (Scalar(1.) - rho_))),
       upsilon_(Scalar(0.)),
       upsilon_decfactor_(Scalar(0.5)),
-      zero_upsilon_(false) {
+      zero_upsilon_(false),
+      verbose_level_(odyn::VerboseLevel::Silent) {
   // Allocating the solver's data
   allocateData();
 }

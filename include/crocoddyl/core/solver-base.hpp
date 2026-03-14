@@ -323,6 +323,38 @@ class SolverAbstractTpl : public SolverBase {
   Scalar computeDynamicFeasibility();
 
   /**
+   * @brief Compute the state box-constraint feasibility from a given state
+   * trajectory
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] xs  Vector state trajectory
+   * feasibility
+   * @return  the state trajectory's feasibility
+   */
+  Scalar computeStateFeasibility(const std::vector<VectorXs>& xs);
+
+  /**
+   * @brief Compute the control box-constraint feasibility from a given control
+   * trajectory
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] us  Vector control trajectory
+   * feasibility
+   * @return  the control trajectory's feasibility
+   */
+  Scalar computeControlFeasibility(const std::vector<VectorXs>& us);
+
+  /**
    * @brief Compute the feasibility of the inequality constraints for the
    * current guess
    *
@@ -731,6 +763,8 @@ class SolverAbstractTpl : public SolverBase {
   Scalar reg_max_;               //!< Maximum allowed regularization value
   Scalar steplength_;            //!< Current applied step length
   std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
+  std::vector<VectorXs> x_adj_;  //!< Adjusted state bound
+  std::vector<VectorXs> u_adj_;  //!< Adjusted control bound
   std::size_t nh_T_;             //!< Dimension of terminal equality constraints
   std::size_t ng_T_;  //!< Dimension of termianl inequality constraints
 

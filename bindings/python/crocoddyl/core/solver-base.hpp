@@ -62,8 +62,10 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::problem_;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
+  using SolverAbstract::u_adj_;
   using SolverAbstract::us_;
   using SolverAbstract::us_try_;
+  using SolverAbstract::x_adj_;
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
 

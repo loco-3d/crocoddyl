@@ -187,7 +187,8 @@ struct SolverAbstractVisitor
              "Decrease the state and control regularization values by a "
              "regfactor_.")
         .def(
-            "computeFeasibility", &Model::computeFeasibility, bp::args("self"),
+            "computeFeasibility", &Model::computeFeasibility,
+            bp::args("self", "fs"),
             "Compute the feasibility from a given residual vector.\n\n"
             "As in the computeDynamicFeasibility, computeInequalityFeasibility "
             "or computeEqualityFeasibility, we can compute the feasibility "
@@ -204,6 +205,32 @@ struct SolverAbstractVisitor
              "The feasibility can be computed using the computed using the l-1 "
              "and l-inf norms. By default we use the l-inf norm, however, we "
              "can use the l-1 norm by defining inffeas as False.")
+        .def(
+            "computeStateFeasibility", &Model::computeStateFeasibility,
+            bp::args("self", "xs"),
+            "Compute the state box-constraint feasibility from a given state trajectory.\n\n"
+            "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+            "or computeEqualityFeasibility, we can compute the feasibility "
+            "using different norms (e.g, l-infty or l-1 norms). By default we "
+            "use the l-infty norm; however, we can change the type of norm "
+            "using set_feasnorm. By default we use the l-inf norm, however, we "
+            "can use the l-1 norm by defining inffeas as False.\n"
+            ":param xs: list of state vectors which we wish to compute the "
+            "feasibility\n"
+            ":return the state trajectory's feasibility")
+        .def(
+            "computeControlFeasibility", &Model::computeControlFeasibility,
+            bp::args("self", "us"),
+            "Compute the control box-constraint feasibility from a given control trajectory.\n\n"
+            "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+            "or computeEqualityFeasibility, we can compute the feasibility "
+            "using different norms (e.g, l-infty or l-1 norms). By default we "
+            "use the l-infty norm; however, we can change the type of norm "
+            "using set_feasnorm. By default we use the l-inf norm, however, we "
+            "can use the l-1 norm by defining inffeas as False.\n"
+            ":param us: list of control vectors which we wish to compute the "
+            "feasibility\n"
+            ":return the control trajectory's feasibility")
         .def("computeInequalityFeasibility",
              &Model::computeInequalityFeasibility, bp::args("self"),
              "Compute the feasibility of the inequality constraint for the "
@@ -304,6 +331,10 @@ struct SolverAbstractVisitor
                        "step length")
         .def_readwrite("g_adj", &Model::g_adj_,
                        "adjusted inequality bound")
+        .def_readwrite("x_adj", &Model::x_adj_,
+                       "adjusted state bound")
+        .def_readwrite("u_adj", &Model::u_adj_,
+                       "adjusted control bound")
         .add_property("preg", bp::make_function(&Model::get_preg),
                       bp::make_function(&Model::set_preg),
                       "primal-variable regularization")
