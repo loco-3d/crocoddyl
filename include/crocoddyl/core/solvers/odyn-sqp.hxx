@@ -507,8 +507,8 @@ void SolverOdynSQPTpl<Scalar>::allocateData() {
   Lxx_dx_.back() = VectorXs::Zero(ndx);
   const std::shared_ptr<ActionModelAbstract>& model_T =
       problem_->get_terminalModel();
-  const std::size_t nh_T = model_T->get_nh();
-  const std::size_t ng_T = model_T->get_ng();
+  const std::size_t nh_T = model_T->get_nh_T();
+  const std::size_t ng_T = model_T->get_ng_T();
   n_ += ndx;
   m_ += nh_T;
   p_ += ng_T + ndx;
