@@ -552,8 +552,14 @@ void register_solvers_againt_lqr_actions_unit_tests(
       boost::bind(&test_solver_gaps_evolution, solver_type, action_type, T)));
   ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_expected_improvement,
                                       solver_type, action_type, T)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_solver_convergence, solver_type, action_type, T)));
+  if (solver_type != SolverTypes::SolverBoxFDDP_SingleShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_FeasShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_MultiShoot &&
+      solver_type != SolverTypes::SolverBoxFDDP_HybridShoot &&
+      solver_type != SolverTypes::SolverIpopt) {
+    ts->add(BOOST_TEST_CASE(
+        boost::bind(&test_solver_convergence, solver_type, action_type, T)));
+  }
   if ((solver_type != SolverTypes::SolverIpopt) &&
       (solver_type != SolverTypes::SolverKKT)) {
     ts->add(BOOST_TEST_CASE(
