@@ -182,7 +182,7 @@ To cite **Crocoddyl** in your academic research, please use the following BibTeX
 Please consider citing our selected publications and contributions described in [PUBLICATIONS.md](https://github.com/loco-3d/crocoddyl/blob/devel/PUBLICATIONS.md).
 
 **Crocoddyl's** contributions extend beyond efficient software development. Please also consider citing the algorithm contributions of our different solvers and formulations:
- - Feasibility-driven solvers (FDDP and Box-FDDP): [[1]](#1), [[2]](#2)
+ - Feasibility-driven solvers (FDDP and Intro): [[1]](#1), [[2]](#2)
  - Inverse-dynamics trajectory optimization and endpoint constrains: [[3]](#3) [[4]](#4)
  - Multi-Contact Inertial Parameters Estimation and Localization in Legged Robots: [[5]](#5)
 
@@ -201,6 +201,7 @@ Finally, please also consider citing **[Pinocchio](https://github.com/stack-of-t
 <a id="4">[4]</a> M. Parilli, S. Martinez, and C.Mastall. [Endpoint-Explicit Differential Dynamic Programming via Exact Resolution](https://arxiv.org/pdf/2503.03897), IEEE International Conference on Robotics and Automation (ICRA), 2025.
 
 <a id="5">[5]</a> S. Martinez, R. Griffin, and C.Mastalli. [Multi-Contact Inertial Parameters Estimation and Localization in Legged Robots](https://arxiv.org/pdf/2403.17161), IEEE Robotics and Automation Letters (RAL), 2025.
+
 
 ## :computer:  Questions and Issues
 
