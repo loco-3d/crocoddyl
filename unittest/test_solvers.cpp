@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -467,9 +467,9 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
 
 //____________________________________________________________________________//
 
-void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
-                                    ActionModelTypes::Type action_type,
-                                    size_t T) {
+void test_solver_against_reference_solver(SolverTypes::Type solver_type,
+                                          ActionModelTypes::Type action_type,
+                                          size_t T) {
   // Create action models
   std::shared_ptr<crocoddyl::ActionModelAbstract> model =
       ActionModelFactory().create(action_type);
@@ -478,14 +478,15 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
   std::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
       ActionModelFactory().create(action_type, ActionModelFactory::Terminal);
 
-  // Create the testing and KKT solvers
+  // Create the testing solver and reference solver
   SolverFactory solver_factory;
   std::shared_ptr<crocoddyl::SolverAbstract> solver =
       solver_factory.create(solver_type, model, model2, modelT, T);
-  std::shared_ptr<crocoddyl::SolverAbstract> kkt =
-      solver_factory.create(SolverTypes::SolverKKT, model, model2, modelT, T);
+  std::shared_ptr<crocoddyl::SolverAbstract> reference = solver_factory.create(
+      SolverTypes::getReferenceSolverType(), model, model2, modelT, T);
 
-  // Get the pointer to the problem so we can create the equivalent kkt solver.
+  // Get the pointer to the problem so we can create the equivalent reference
+  // solver.
   const std::shared_ptr<crocoddyl::ShootingProblem>& problem =
       solver->get_problem();
 
@@ -511,8 +512,8 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
   // solver->setCallbacks(cbs);
   // std::cout << ActionModelTypes::all[action_type] << std::endl;
 
-  // Solve the problem using the KKT solver
-  kkt->solve(xs, us, 100);
+  // Solve the problem using the reference solver
+  reference->solve(xs, us, 100);
 
   // Solve the problem using the solver in testing
   solver->solve(xs, us, 100);
@@ -529,12 +530,13 @@ void test_solver_against_kkt_solver(SolverTypes::Type solver_type,
     const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
         solver->get_problem()->get_runningModels()[t];
     std::size_t nu = model->get_nu();
+    BOOST_CHECK((state->diff_dx(solver->get_xs()[t], reference->get_xs()[t]))
+                    .isZero(1e-9));
     BOOST_CHECK(
-        (state->diff_dx(solver->get_xs()[t], kkt->get_xs()[t])).isZero(1e-9));
-    BOOST_CHECK((solver->get_us()[t].head(nu) - kkt->get_us()[t]).isZero(1e-9));
+        (solver->get_us()[t].head(nu) - reference->get_us()[t]).isZero(1e-9));
   }
-  BOOST_CHECK(
-      (state->diff_dx(solver->get_xs()[T], kkt->get_xs()[T])).isZero(1e-9));
+  BOOST_CHECK((state->diff_dx(solver->get_xs()[T], reference->get_xs()[T]))
+                  .isZero(1e-9));
 }
 
 //____________________________________________________________________________//
@@ -582,14 +584,15 @@ void register_kkt_solver_unit_tests(ActionModelTypes::Type action_type,
   framework::master_test_suite().add(ts);
 }
 
-void register_solvers_againt_kkt_unit_tests(SolverTypes::Type solver_type,
-                                            ActionModelTypes::Type action_type,
-                                            const std::size_t T) {
+void register_solvers_against_reference_unit_tests(
+    SolverTypes::Type solver_type, ActionModelTypes::Type action_type,
+    const std::size_t T) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << solver_type << "_vs_SolverKKT_" << action_type;
+  test_name << "test_" << solver_type << "_vs_"
+            << SolverTypes::getReferenceSolverName() << "_" << action_type;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   std::cout << "Running " << test_name.str() << std::endl;
-  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_kkt_solver,
+  ts->add(BOOST_TEST_CASE(boost::bind(&test_solver_against_reference_solver,
                                       solver_type, action_type, T)));
   framework::master_test_suite().add(ts);
 }
@@ -603,8 +606,15 @@ bool init_function() {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
          i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
       if (SolverTypes::all[s] != SolverTypes::SolverIpopt) {
+#ifdef CROCODDYL_WITH_ODYN
+        if (SolverTypes::all[s] != SolverTypes::SolverOdynSQP) {
+          register_solvers_againt_lqr_actions_unit_tests(
+              SolverTypes::all[s], ActionModelTypes::all[i], T);
+        }
+#else
         register_solvers_againt_lqr_actions_unit_tests(
             SolverTypes::all[s], ActionModelTypes::all[i], T);
+#endif
       }
     }
   }
@@ -617,9 +627,10 @@ bool init_function() {
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
          i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
-      if (!ActionModelTypes::hasTerminalConstraints(ActionModelTypes::all[i])) {
-        register_solvers_againt_kkt_unit_tests(SolverTypes::all[s],
-                                               ActionModelTypes::all[i], T);
+      if (SolverTypes::all[s] != SolverTypes::getReferenceSolverType() &&
+          !ActionModelTypes::hasTerminalConstraints(ActionModelTypes::all[i])) {
+        register_solvers_against_reference_unit_tests(
+            SolverTypes::all[s], ActionModelTypes::all[i], T);
       }
     }
   }

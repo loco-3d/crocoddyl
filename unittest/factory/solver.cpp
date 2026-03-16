@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -111,6 +111,11 @@ std::ostream& operator<<(std::ostream& os, SolverTypes::Type type) {
     case SolverTypes::SolverBoxFDDP_HybridShoot:
       os << "SolverBoxFDDP_HybridShoot";
       break;
+#ifdef CROCODDYL_WITH_ODYN
+    case SolverTypes::SolverOdynSQP:
+      os << "SolverOdynSQP";
+      break;
+#endif
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
       os << "SolverIpopt";
@@ -288,6 +293,11 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
       solver = std::make_shared<crocoddyl::SolverBoxFDDP>(
           problem, crocoddyl::DynamicsSolverType::HybridShoot);
       break;
+#ifdef CROCODDYL_WITH_ODYN
+    case SolverTypes::SolverOdynSQP:
+      solver = std::make_shared<crocoddyl::SolverOdynSQP>(problem);
+      break;
+#endif
 #ifdef CROCODDYL_WITH_IPOPT
     case SolverTypes::SolverIpopt:
       solver = std::make_shared<crocoddyl::SolverIpopt>(problem);

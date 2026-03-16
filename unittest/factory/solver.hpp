@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2026, University of Edinburgh, LAAS-CNRS,
 //                          New York University, Max Planck Gesellschaft,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -14,6 +14,9 @@
 #include "action.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/solvers/kkt.hpp"
+#ifdef CROCODDYL_WITH_ODYN
+#include "crocoddyl/core/solvers/odyn-sqp.hpp"
+#endif
 
 namespace crocoddyl {
 namespace unittest {
@@ -49,6 +52,9 @@ struct SolverTypes {
     SolverBoxFDDP_FeasShoot,
     SolverBoxFDDP_MultiShoot,
     SolverBoxFDDP_HybridShoot,
+#ifdef CROCODDYL_WITH_ODYN
+    SolverOdynSQP,
+#endif
     SolverIpopt,
     NbSolverTypes
   };
@@ -66,6 +72,22 @@ struct SolverTypes {
     return v;
   }
   static const std::vector<Type> all;
+
+  static Type getReferenceSolverType() {
+#ifdef CROCODDYL_WITH_ODYN
+    return SolverTypes::SolverOdynSQP;
+#else
+    return SolverTypes::SolverKKT;
+#endif
+  }
+
+  static std::string getReferenceSolverName() {
+#ifdef CROCODDYL_WITH_ODYN
+    return "SolverOdynSQP";
+#else
+    return "SolverKKT";
+#endif
+  }
 
   static bool isSolverFDDP(Type type) {
     switch (type) {
