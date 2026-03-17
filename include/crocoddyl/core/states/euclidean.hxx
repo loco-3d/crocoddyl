@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -23,7 +23,7 @@ typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::zero() const {
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateVectorTpl<Scalar>::rand() const {
-  return VectorXs::Random(nx_);
+  return vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(nx_);
 }
 
 template <typename Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, Heriot-Watt University
+// Copyright (C) 2019-2026, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,8 @@ typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::zero() const {
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateMultibodyTpl<Scalar>::rand() const {
-  VectorXs xrand = VectorXs::Random(nx_);
+  VectorXs xrand =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(nx_);
   xrand.head(nq_) = pinocchio::randomConfiguration(*pinocchio_.get());
   return xrand;
 }

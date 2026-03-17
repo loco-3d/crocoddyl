@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2024-2025, Heriot-Watt University
+// Copyright (C) 2024-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,6 +106,21 @@ std::vector<std::shared_ptr<ItemTpl<NewScalar>>> vector_cast(
         obj->template cast<NewScalar>()));
   }
   return out;
+}
+
+template <typename Scalar, int Rows, int Cols, int Options, int MaxRows,
+          int MaxCols>
+Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> matrix_random_cast(
+    const Eigen::Index rows, const Eigen::Index cols) {
+  using MatrixXs = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+  return MatrixXs::Random(rows, cols).template cast<Scalar>();
+}
+
+template <typename Scalar, int Rows, int Options, int MaxRows>
+Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, 1> vector_random_cast(
+    const Eigen::Index size) {
+  using VectorXs = Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, 1>;
+  return VectorXs::Random(size).template cast<Scalar>();
 }
 
 }  // namespace crocoddyl
