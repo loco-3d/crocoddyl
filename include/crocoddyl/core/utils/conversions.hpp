@@ -112,15 +112,16 @@ template <typename Scalar, int Rows, int Cols, int Options, int MaxRows,
           int MaxCols>
 Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> matrix_random_cast(
     const Eigen::Index rows, const Eigen::Index cols) {
-  using MatrixXs = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
-  return MatrixXs::Random(rows, cols).template cast<Scalar>();
+  using MatrixDouble =
+      Eigen::Matrix<double, Rows, Cols, Options, MaxRows, MaxCols>;
+  return MatrixDouble::Random(rows, cols).template cast<Scalar>();
 }
 
 template <typename Scalar, int Rows, int Options, int MaxRows>
 Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, 1> vector_random_cast(
     const Eigen::Index size) {
-  using VectorXs = Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, 1>;
-  return VectorXs::Random(size).template cast<Scalar>();
+  using VectorDouble = Eigen::Matrix<double, Rows, 1, Options, MaxRows, 1>;
+  return VectorDouble::Random(size).template cast<Scalar>();
 }
 
 }  // namespace crocoddyl
