@@ -21,16 +21,15 @@ namespace python {
 
 template <typename Model>
 struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>> {
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverOdynSQP_solves, Model::solve, 0, 5)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverOdynSQP_trySteps, Model::tryStep, 0,
-                                         1)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverOdynSQP_setCandidate,
-                                         Model::setCandidate, 0, 3)
   using Scalar = typename Model::Scalar;
+  using VectorXs = typename Model::VectorXs;
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverOdynSQP_solves, solve, 1, 6)
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverOdynSQP_trySteps, tryStep, 1, 2)
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverOdynSQP_setCandidate, setCandidate, 1, 4)
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def(
-          "solve", &Model::solve,
+          "solve", &solve,
           SolverOdynSQP_solves(
               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
                        "init_reg"),
@@ -68,7 +67,7 @@ struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>
                  "variations are stored internally (dxs_, dus_).\n"
                  ":param recalc: request a fresh derivative computation before "
                  "building the search direction (default True).")
-        .def("tryStep", &Model::tryStep,
+        .def("tryStep", &tryStep,
              SolverOdynSQP_trySteps(
                  bp::args("self", "stepLength"),
                  "Try a predefined step length and compute its cost and merit "
@@ -121,7 +120,7 @@ struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>
             "automatically when a new linearization is required, but the "
             "method remains available when driving the solver manually (for "
             "instance before computeDirection(False)).")
-        .def("setCandidate", &Model::setCandidate,
+        .def("setCandidate", &setCandidate,
              SolverOdynSQP_setCandidate(
                  bp::args("self", "xs", "us", "isFeasible"),
              "Set the solver candidate warm-point values (xs, us).\n\n"
@@ -250,6 +249,24 @@ struct SolverOdynSQPVisitor : public bp::def_visitor<SolverOdynSQPVisitor<Model>
         .add_property(
             "p", bp::make_function(&Model::get_p),
             "dimension of inequality constraints in the SQP");
+  }
+  static bool solve(
+      Model& self,
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar init_reg = std::numeric_limits<Scalar>::quiet_NaN()) {
+    return self.solve(init_xs, init_us, maxiter, is_feasible, init_reg);
+  }
+  static Scalar tryStep(Model& self, const Scalar step_length = Scalar(1.)) {
+    return self.tryStep(step_length);
+  }
+  static void setCandidate(
+      Model& self,
+      const std::vector<VectorXs>& xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us = DefaultVector<Scalar>::value,
+      const bool is_feasible = false) {
+    self.setCandidate(xs, us, is_feasible);
   }
 };
 

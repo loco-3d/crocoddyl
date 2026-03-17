@@ -20,13 +20,13 @@ namespace python {
 
 template <typename Model>
 struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_solves, Model::solve, 0, 5)
+  using Scalar = typename Model::Scalar;
+  using VectorXs = typename Model::VectorXs;
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverFDDP_solves, solve, 1, 6)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                          Model::computeDirection, 0, 1)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_trySteps, Model::tryStep, 0,
-                                         1)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_setCandidate,
-                                         Model::setCandidate, 0, 3)
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverFDDP_trySteps, tryStep, 1, 2)
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverFDDP_setCandidate, setCandidate, 1, 4)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeCandidate, Model::computeCandidate, 0,
                                          1)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_forwardPass,
@@ -38,7 +38,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def(
-          "solve", &Model::solve,
+          "solve", &solve,
           SolverFDDP_solves(
               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
                        "init_reg"),
@@ -77,7 +77,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                  "variations are stored internally (dxs_, dus_, lambdas_).\n"
                  ":param recalc: request a fresh derivative computation before "
                  "building the search direction (default True)."))
-        .def("tryStep", &Model::tryStep,
+        .def("tryStep", &tryStep,
              SolverFDDP_trySteps(
                  bp::args("self", "stepLength"),
                  "Try a predefined step length and compute its cost and merit "
@@ -130,7 +130,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             "automatically when a new linearization is required, but the "
             "method remains available when driving the solver manually (for "
             "instance before computeDirection(False)).")
-        .def("setCandidate", &Model::setCandidate,
+        .def("setCandidate", &setCandidate,
              SolverFDDP_setCandidate(
                  bp::args("self", "xs", "us", "isFeasible"),
              "Set the solver candidate warm-point values (xs, us).\n\n"
@@ -446,6 +446,24 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
                 &Model::get_beta_plus,
                 bp::return_value_policy<bp::reference_existing_object>()),
             "beta_plus");
+  }
+  static bool solve(
+      Model& self,
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar init_reg = std::numeric_limits<Scalar>::quiet_NaN()) {
+    return self.solve(init_xs, init_us, maxiter, is_feasible, init_reg);
+  }
+  static Scalar tryStep(Model& self, const Scalar step_length = Scalar(1.)) {
+    return self.tryStep(step_length);
+  }
+  static void setCandidate(
+      Model& self,
+      const std::vector<VectorXs>& xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us = DefaultVector<Scalar>::value,
+      const bool is_feasible = false) {
+    self.setCandidate(xs, us, is_feasible);
   }
 };
 
