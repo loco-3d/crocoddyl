@@ -819,6 +819,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::dVexp_full_;
   using SolverAbstract::dxs_;
   using SolverAbstract::feas_;
+  using SolverAbstract::feasnorm_;
   using SolverAbstract::ffeas_;
   using SolverAbstract::ffeas_try_;
   using SolverAbstract::fs_;
@@ -827,6 +828,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::gfeas_try_;
   using SolverAbstract::hfeas_;
   using SolverAbstract::hfeas_try_;
+  using SolverAbstract::is_feasible_;
   using SolverAbstract::iter_;
   using SolverAbstract::merit_;
   using SolverAbstract::nh_T_;
@@ -837,6 +839,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
   using SolverAbstract::th_acceptstep_;
+  using SolverAbstract::th_gaptol_;
   using SolverAbstract::th_stop_;
   using SolverAbstract::us_;
   using SolverAbstract::us_try_;

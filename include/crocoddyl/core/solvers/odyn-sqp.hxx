@@ -440,6 +440,8 @@ SolverOdynSQPTpl<NewScalar> SolverOdynSQPTpl<Scalar>::cast() const {
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
+  ret.set_th_gaptol(scalar_cast<NewScalar>(th_gaptol_));
+  ret.set_feasnorm(feasnorm_);
   ret.set_th_stop(
       std::sqrt(std::numeric_limits<NewScalar>::epsilon()) < NewScalar(th_stop_)
           ? scalar_cast<NewScalar>(th_stop_)
@@ -475,6 +477,8 @@ SolverOdynSQPTpl<NewScalar> SolverOdynSQPTpl<Scalar>::cast() const {
   ret.set_upsilon_decfactor(scalar_cast<NewScalar>(upsilon_decfactor_));
   ret.set_zero_upsilon(zero_upsilon_);
   ret.set_qp_params(qp_params_.template cast<NewScalar>());
+  ret.setCandidate(vector_cast<NewScalar>(xs_), vector_cast<NewScalar>(us_),
+                   is_feasible_);
   return ret;
 }
 

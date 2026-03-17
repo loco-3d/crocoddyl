@@ -182,6 +182,11 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
    */
   virtual void resizeTerminalData() override;
 
+  using SolverAbstract::feasnorm_;
+  using SolverAbstract::is_feasible_;
+  using SolverAbstract::th_gaptol_;
+  using SolverAbstract::us_;
+  using SolverAbstract::xs_;
   using SolverFDDP::alphas_;
   using SolverFDDP::callbacks_;
   using SolverFDDP::dyn_solver_;
