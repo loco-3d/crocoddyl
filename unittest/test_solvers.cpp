@@ -78,7 +78,7 @@ void test_solver_compute_direction(SolverTypes::Type solver_type,
     a.head(ndx) = f;
     a.tail(ndx) = Vx[i];
     const Eigen::VectorXd& w = -A.inverse() * a;
-    BOOST_CHECK((w - (Vx[i] + Vxx[i] * f)).isZero(1e-9));
+    BOOST_CHECK((w.head(ndx) - (Vx[i] + Vxx[i] * f)).isZero(1e-9));
     BOOST_CHECK((w.tail(ndx) - f).isZero(1e-9));
   }
   // Check the Schur-complement of terminal-constraint direction is Hermite
