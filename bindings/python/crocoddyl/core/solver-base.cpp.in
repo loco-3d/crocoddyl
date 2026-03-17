@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -23,32 +23,34 @@ struct SolverAbstractVisitor
     : public bp::def_visitor<SolverAbstractVisitor<Model>> {
   typedef typename Model::SolverAbstract SolverAbstract;
   typedef typename SolverAbstract::Scalar Scalar;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_solves, Model::solve, 0,
+                                         5)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_setCandidate,
+                                         Model::setCandidate, 0, 3)
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def("solve", &Model::solve, &Model::default_solve,
-           (bp::arg("init_xs") = DefaultVector<Scalar>::value,
-            bp::arg("init_us") = DefaultVector<Scalar>::value,
-            bp::arg("maxiter") = 100,
-            bp::arg("is_feasible") = false,
-            bp::arg("reg_init") = std::numeric_limits<Scalar>::quiet_NaN()),
-           "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
-           "terms.\n\n"
-           "From an initial guess init_xs,init_us (feasible or not), iterate "
-           "over computeDirection and tryStep until stoppingCriteria is below "
-           "threshold. It also describes the globalization strategy used "
-           "during the numerical optimization.\n"
-           ":param init_xs: initial guess for state trajectory with T+1 "
-           "elements (default [])\n"
-           ":param init_us: initial guess for control trajectory with T "
-           "elements (default []).\n"
-           ":param maxiter: maximum allowed number of iterations (default "
-           "100).\n"
-           ":param isFeasible: true if the init_xs are obtained from "
-           "integrating the init_us (rollout) (default False).\n"
-           ":param regInit: initial guess for the regularization value. Very "
-           "low values are typical used with very good guess points (init_xs, "
-           "init_us).\n"
-           ":returns A boolean that describes if convergence was reached.")
+    cl.def("solve", &Model::solve,
+           SolverAbstract_solves(
+               bp::args("self", "init_xs", "init_us", "maxiter",
+                        "is_feasible", "reg_init"),
+               "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
+               "terms.\n\n"
+               "From an initial guess init_xs,init_us (feasible or not), iterate "
+               "over computeDirection and tryStep until stoppingCriteria is below "
+               "threshold. It also describes the globalization strategy used "
+               "during the numerical optimization.\n"
+               ":param init_xs: initial guess for state trajectory with T+1 "
+               "elements (default [])\n"
+               ":param init_us: initial guess for control trajectory with T "
+               "elements (default []).\n"
+               ":param maxiter: maximum allowed number of iterations (default "
+               "100).\n"
+               ":param isFeasible: true if the init_xs are obtained from "
+               "integrating the init_us (rollout) (default False).\n"
+               ":param regInit: initial guess for the regularization value. Very "
+               "low values are typical used with very good guess points (init_xs, "
+               "init_us).\n"
+               ":returns A boolean that describes if convergence was reached."))
         .def("computeDirection", pure_virtual(&Model::computeDirection),
              (bp::args("recalc") = true),
              "Compute the search direction (dx, du) for the current guess (xs, "
@@ -154,20 +156,20 @@ struct SolverAbstractVisitor
             "This function is invoked by resizeData() whenever the terminal "
             "model changes. Derived classes can override it to resize custom "
             "storage that depends on the terminal constraints or cost.")
-        .def("setCandidate", &Model::setCandidate, &Model::default_setCandidate,
-             (bp::arg("xs") = DefaultVector<Scalar>::value,
-              bp::arg("us") = DefaultVector<Scalar>::value, bp::arg("isFeasible") = true),
-             "Set the solver candidate warm-point values (xs, us).\n\n"
-             "The solver candidates are defined as a state and control "
-             "trajectory (xs, us) of T+1 and T elements, respectively. "
-             "Additionally, we need to specify whether the pair is feasible, "
-             "i.e., whether integrating us produces xs. Updating the "
-             "candidate invalidates the previous linearization, so the next "
-             "search-direction computation will refresh the derivatives on "
-             "demand.\n"
-             ":param xs: state trajectory of T+1 elements (default []).\n"
-             ":param us: control trajectory of T elements (default []).\n"
-             ":param isFeasible: true if xs results from integrating us (rollout).")
+        .def("setCandidate", &Model::setCandidate,
+             SolverAbstract_setCandidate(
+                 bp::args("self", "xs", "us", "isFeasible"),
+                 "Set the solver candidate warm-point values (xs, us).\n\n"
+                 "The solver candidates are defined as a state and control "
+                 "trajectory (xs, us) of T+1 and T elements, respectively. "
+                 "Additionally, we need to specify whether the pair is feasible, "
+                 "i.e., whether integrating us produces xs. Updating the "
+                 "candidate invalidates the previous linearization, so the next "
+                 "search-direction computation will refresh the derivatives on "
+                 "demand.\n"
+                 ":param xs: state trajectory of T+1 elements (default []).\n"
+                 ":param us: control trajectory of T elements (default []).\n"
+                 ":param isFeasible: true if xs results from integrating us (rollout)."))
         .def("updateCandidate", pure_virtual(&Model::updateCandidate),
              bp::args("self"),
              "Update the candidate solution: cost, feasibilities, and merit "
