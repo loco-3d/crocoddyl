@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -851,6 +851,9 @@ SolverFDDPTpl<NewScalar> SolverFDDPTpl<Scalar>::cast() const {
   ReturnType ret(
       std::make_shared<ProblemType>(problem_->template cast<NewScalar>()),
       dyn_solver_, term_solver_);
+  if (dyn_solver_ == HybridShoot && Ts_.size() > 1) {
+    ret.set_dynamics_solver(dyn_solver_, Ts_[1] - Ts_[0]);
+  }
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));

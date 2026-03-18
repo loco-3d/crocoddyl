@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,6 +219,7 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   using SolverFDDP::th_stepdec_;
   using SolverFDDP::th_stepinc_;
   using SolverFDDP::th_stop_;
+  using SolverFDDP::Ts_;
   using SolverFDDP::upsilon_decfactor_;
   using SolverFDDP::Vx_;
   using SolverFDDP::Vxc_;
