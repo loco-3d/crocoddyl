@@ -79,8 +79,6 @@ message(
   STATUS
     "   - Gepetto team @ LAAS-CNRS (https://www.laas.fr/fr/equipes/gepetto/)")
 message(
-  STATUS "   - Willow team @ INRIA (https://www.di.ens.fr/willow/) ${Reset}")
-message(
   STATUS
     "============================================================================================="
 )
@@ -311,6 +309,26 @@ if(UNIX AND NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<INSTALL_INTERFACE:include>)
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CROCODDYL_CODEGEN_GCC_EXECUTABLE ${CMAKE_C_COMPILER})
+  else()
+    find_program(CROCODDYL_CODEGEN_GCC_EXECUTABLE NAMES gcc)
+  endif()
+  if(CROCODDYL_CODEGEN_GCC_EXECUTABLE)
+    target_compile_definitions(
+      ${PROJECT_NAME}
+      PUBLIC CROCODDYL_CODEGEN_GCC_COMPILER_PATH="${CROCODDYL_CODEGEN_GCC_EXECUTABLE}")
+  endif()
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(CROCODDYL_CODEGEN_CLANG_EXECUTABLE ${CMAKE_C_COMPILER})
+  else()
+    find_program(CROCODDYL_CODEGEN_CLANG_EXECUTABLE NAMES clang)
+  endif()
+  if(CROCODDYL_CODEGEN_CLANG_EXECUTABLE)
+    target_compile_definitions(
+      ${PROJECT_NAME}
+      PUBLIC CROCODDYL_CODEGEN_CLANG_COMPILER_PATH="${CROCODDYL_CODEGEN_CLANG_EXECUTABLE}")
+  endif()
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
   target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::serialization)
   target_compile_definitions(
