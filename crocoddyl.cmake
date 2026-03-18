@@ -70,9 +70,9 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
       endif()
     endforeach()
   endforeach()
-  # CppADCodeGen defines thread_local static template members in headers.
-  # Some compiler/PCH combinations can trigger redefinition errors; avoid
-  # applying PCH to generated codegen ETI units.
+  # CppADCodeGen defines thread_local static template members in headers. Some
+  # compiler/PCH combinations can trigger redefinition errors; avoid applying
+  # PCH to generated codegen ETI units.
   if(codegen_generated_eti_files)
     set_source_files_properties(${codegen_generated_eti_files}
                                 PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
