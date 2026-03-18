@@ -38,7 +38,14 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
     endforeach()
   endif()
   set(generated_eti_files "")
+  set(codegen_generated_eti_files "")
   foreach(template_file ${ETI_TEMPLATE_FILES})
+    # GCC 11 + recent CppADCodeGen can fail on explicit instantiation units for
+    # ActionModelCodeGenTpl (thread_local static member redefinition in cg.hpp).
+    # The implementation is header-defined, so we can safely skip this ETI file.
+    if(template_file MATCHES "/core/codegen/action\\.cpp_fptype\\.in$")
+      continue()
+    endif()
     # Extract the relative path from ${source_dir}/
     file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/${source_dir}"
          "${template_file}")
@@ -58,8 +65,18 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
       set(SCALAR_TYPE ${scalar})
       configure_file(${template_file} ${scalar_output_file} @ONLY)
       list(APPEND generated_eti_files ${scalar_output_file})
+      if(scalar_output_file MATCHES "/codegen/")
+        list(APPEND codegen_generated_eti_files ${scalar_output_file})
+      endif()
     endforeach()
   endforeach()
+  # CppADCodeGen defines thread_local static template members in headers.
+  # Some compiler/PCH combinations can trigger redefinition errors; avoid
+  # applying PCH to generated codegen ETI units.
+  if(codegen_generated_eti_files)
+    set_source_files_properties(${codegen_generated_eti_files}
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+  endif()
   # Add generated files to the target
   target_sources(${target_lib} PRIVATE ${generated_eti_files})
 endfunction()
