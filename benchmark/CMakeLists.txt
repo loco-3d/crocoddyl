@@ -11,12 +11,13 @@ set(${PROJECT_NAME}_CODEGEN_BENCHMARK)
 if(BUILD_WITH_CODEGEN_SUPPORT)
   # GCC 14+ can fail while compiling all_robots due to a CppADCodeGen
   # thread_local guard redefinition in cppad/cg/cg.hpp.
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-     AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION
+                                              VERSION_GREATER_EQUAL 14)
     message(
       WARNING
         "Skipping benchmark target all_robots with GCC ${CMAKE_CXX_COMPILER_VERSION} "
-        "because of a known CppADCodeGen TLS guard redefinition issue in cppad/cg/cg.hpp.")
+        "because of a known CppADCodeGen TLS guard redefinition issue in cppad/cg/cg.hpp."
+    )
   else()
     list(APPEND ${PROJECT_NAME}_CODEGEN_BENCHMARK all_robots)
   endif()
