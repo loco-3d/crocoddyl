@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 
 namespace crocoddyl {
 
@@ -101,8 +102,11 @@ struct ActivationBoundsTpl {
   }
 
   void print(std::ostream& os) const {
-    os << "ActivationBounds {lb=" << lb.transpose() << ", ub=" << ub.transpose()
-       << ", beta=" << beta << "}";
+    typedef typename ScalarSelector<Scalar>::type PrintableScalar;
+    os << "ActivationBounds {lb="
+       << lb.template cast<PrintableScalar>().transpose()
+       << ", ub=" << ub.template cast<PrintableScalar>().transpose()
+       << ", beta=" << scalar_cast<PrintableScalar>(beta) << "}";
   }
 
   VectorXs lb;
