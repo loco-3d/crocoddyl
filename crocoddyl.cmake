@@ -40,12 +40,6 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
   set(generated_eti_files "")
   set(codegen_generated_eti_files "")
   foreach(template_file ${ETI_TEMPLATE_FILES})
-    # GCC 11 + recent CppADCodeGen can fail on explicit instantiation units for
-    # ActionModelCodeGenTpl (thread_local static member redefinition in cg.hpp).
-    # The implementation is header-defined, so we can safely skip this ETI file.
-    if(template_file MATCHES "/core/codegen/action\\.cpp_fptype\\.in$")
-      continue()
-    endif()
     # Extract the relative path from ${source_dir}/
     file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/${source_dir}"
          "${template_file}")
@@ -58,6 +52,12 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
     file(MAKE_DIRECTORY ${output_dir})
     # Generate .cpp file from template for each scalar type
     foreach(scalar ${scalar_types})
+      # Work around GCC14/CppADCodeGen explicit instantiation failures for
+      # ActionModelCodeGenTpl<float,double>. These symbols are instantiated
+      # implicitly where needed.
+      if(template_file MATCHES "/src/core/codegen/action\\.cpp_fptype\\.in$")
+        continue()
+      endif()
       # Sanitize scalar name for filenames
       crocoddyl_sanitize_scalar_name("${scalar}" scalar_filename)
       string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
