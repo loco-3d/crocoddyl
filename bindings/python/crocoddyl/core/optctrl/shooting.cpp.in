@@ -12,6 +12,9 @@
 
 #include "python/crocoddyl/core/core.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
 namespace crocoddyl {
 namespace python {
 
@@ -158,7 +161,9 @@ struct ShootingProblemVisitor
       .def(CopyableVisitor<Problem>());
 
 void exposeShootingProblem() {
+#ifdef IS_FP_SCALAR_TRUE
   CROCODDYL_SHOOTING_PROBLEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
 }
 
 }  // namespace python
