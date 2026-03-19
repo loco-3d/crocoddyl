@@ -119,9 +119,9 @@ bool isfinite(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
 namespace Eigen {
 
 // Overload for Eigen::pow with CppAD-compatible types
-template <typename Derived>
-auto pow(const Eigen::ArrayBase<Derived>& base, double exponent) {
-  return base.unaryExpr([exponent](const typename Derived::Scalar& x) {
+template <typename Derived, typename Exp>
+auto pow(const Eigen::ArrayBase<Derived>& base, const Exp& exponent) {
+  return base.unaryExpr([&](const typename Derived::Scalar& x) {
     return CppAD::pow(x, typename Derived::Scalar(exponent));
   });
 }
