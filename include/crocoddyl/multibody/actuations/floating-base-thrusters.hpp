@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2014-2025, Heriot-Watt University
+// Copyright (C) 2014-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 
 #include "crocoddyl/core/actuation-base.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
@@ -98,11 +99,19 @@ struct ThrusterTpl {
 
   friend std::ostream& operator<<(std::ostream& os,
                                   const ThrusterTpl<Scalar>& X) {
+    typedef typename ScalarSelector<Scalar>::type PrintableScalar;
     os << "      pose:" << std::endl
-       << X.pose << "   ctorque: " << X.ctorque << std::endl
+       << "  R =\n"
+       << X.pose.rotation().template cast<PrintableScalar>() << std::endl
+       << "  p = "
+       << X.pose.translation().template cast<PrintableScalar>().transpose()
+       << std::endl
+       << "   ctorque: " << scalar_cast<PrintableScalar>(X.ctorque) << std::endl
        << "      type: " << X.type << std::endl
-       << "min_thrust: " << X.min_thrust << std::endl
-       << "max_thrust: " << X.max_thrust << std::endl;
+       << "min_thrust: " << scalar_cast<PrintableScalar>(X.min_thrust)
+       << std::endl
+       << "max_thrust: " << scalar_cast<PrintableScalar>(X.max_thrust)
+       << std::endl;
     return os;
   }
 
