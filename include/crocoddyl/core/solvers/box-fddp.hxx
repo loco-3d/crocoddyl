@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,9 +191,14 @@ SolverBoxFDDPTpl<NewScalar> SolverBoxFDDPTpl<Scalar>::cast() const {
   ReturnType ret(
       std::make_shared<ProblemType>(problem_->template cast<NewScalar>()),
       dyn_solver_, term_solver_);
+  if (dyn_solver_ == HybridShoot && this->Ts_.size() > 1) {
+    ret.set_dynamics_solver(dyn_solver_, this->Ts_[1] - this->Ts_[0]);
+  }
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
+  ret.set_th_gaptol(scalar_cast<NewScalar>(this->th_gaptol_));
+  ret.set_feasnorm(this->feasnorm_);
   ret.set_th_stop(std::sqrt(std::numeric_limits<NewScalar>::epsilon()) <
                           NewScalar(th_stop_)
                       ? scalar_cast<NewScalar>(th_stop_)
@@ -215,6 +220,8 @@ SolverBoxFDDPTpl<NewScalar> SolverBoxFDDPTpl<Scalar>::cast() const {
   ret.set_th_minfeas(scalar_cast<NewScalar>(th_minfeas_));
   ret.set_upsilon_decfactor(scalar_cast<NewScalar>(upsilon_decfactor_));
   ret.set_zero_upsilon(zero_upsilon_);
+  ret.setCandidate(vector_cast<NewScalar>(xs_), vector_cast<NewScalar>(us_),
+                   is_feasible_);
   return ret;
 }
 
