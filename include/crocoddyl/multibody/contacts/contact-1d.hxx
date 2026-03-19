@@ -227,8 +227,13 @@ ContactModel1DTpl<NewScalar> ContactModel1DTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ContactModel1DTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   os << "ContactModel1D {frame=" << state_->get_pinocchio()->frames[id_].name
-     << ", axis=" << (Raxis_ * Vector3s::UnitZ()).transpose() << "}";
+     << ", axis="
+     << (Raxis_ * Vector3s::UnitZ())
+            .template cast<PrintableScalar>()
+            .transpose()
+     << "}";
 }
 
 template <typename Scalar>

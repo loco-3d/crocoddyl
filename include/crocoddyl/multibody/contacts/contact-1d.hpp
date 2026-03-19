@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,6 +10,7 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACTS_CONTACT_1D_HPP_
 #define CROCODDYL_MULTIBODY_CONTACTS_CONTACT_1D_HPP_
 
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
