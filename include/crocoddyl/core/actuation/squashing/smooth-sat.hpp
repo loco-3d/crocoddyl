@@ -51,8 +51,8 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     // s(u) = 0.5*(lb + ub + sqrt(smooth + (u - lb)^2) - sqrt(smooth + (u -
     // ub)^2))
     data->u = Scalar(0.5) *
-              (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2) + a_.array()) -
-               Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2) + a_.array()) +
+              (Eigen::sqrt(Eigen::pow((s - u_lb_).array(), 2.) + a_.array()) -
+               Eigen::sqrt(Eigen::pow((s - u_ub_).array(), 2.) + a_.array()) +
                u_lb_.array() + u_ub_.array());
   }
 
@@ -60,11 +60,11 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& s) override {
     data->du_ds.diagonal() =
         Scalar(0.5) *
-        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2),
+        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2.),
                     Scalar(-0.5))
                  .array() *
              (s - u_lb_).array() -
-         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2),
+         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2.),
                     Scalar(-0.5))
                  .array() *
              (s - u_ub_).array());
