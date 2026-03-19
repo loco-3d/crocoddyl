@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_FRAME_TRANSLATION_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,13 +118,16 @@ ResidualModelContactWrenchConeTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ResidualModelContactWrenchConeTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   std::shared_ptr<StateMultibody> s =
       std::static_pointer_cast<StateMultibody>(state_);
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
   os << "ResidualModelContactWrenchCone {frame="
      << s->get_pinocchio()->frames[id_].name << ", mu=" << fref_.get_mu()
-     << ", box=" << fref_.get_box().transpose().format(fmt) << "}";
+     << ", box="
+     << fref_.get_box().transpose().template cast<PrintableScalar>().format(fmt)
+     << "}";
 }
 
 template <typename Scalar>
