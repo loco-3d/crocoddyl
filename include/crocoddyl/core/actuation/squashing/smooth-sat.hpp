@@ -60,12 +60,10 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
                         const Eigen::Ref<const VectorXs>& s) override {
     data->du_ds.diagonal() =
         Scalar(0.5) *
-        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2.),
-                    Scalar(-0.5))
+        (Eigen::pow(a_.array() + Eigen::pow((s - u_lb_).array(), 2.), -0.5)
                  .array() *
              (s - u_lb_).array() -
-         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2.),
-                    Scalar(-0.5))
+         Eigen::pow(a_.array() + Eigen::pow((s - u_ub_).array(), 2.), -0.5)
                  .array() *
              (s - u_ub_).array());
   }
