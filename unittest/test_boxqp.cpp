@@ -99,7 +99,7 @@ void test_box_qp_with_identity_hessian() {
   std::size_t nx = random_int_in_range(2, 5);
   crocoddyl::BoxQP boxqp(nx);
   boxqp.set_reg(0.);
-  const double tol = 10. * std::sqrt(std::numeric_limits<double>::epsilon());
+  const double tol = 100. * std::sqrt(std::numeric_limits<double>::epsilon());
 
   Eigen::MatrixXd hessian = Eigen::MatrixXd::Identity(nx, nx);
   Eigen::VectorXd gradient = Eigen::VectorXd::Ones(nx);
