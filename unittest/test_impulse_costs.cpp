@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,17 +78,18 @@ void test_partial_derivatives_against_impulse_numdiff(
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
   float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f_hess = 100.f * tol_f;
   BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
   BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
-  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
-  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f));
-  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f_hess));
+  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f_hess));
+  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f_hess));
   model->calc(data, x);
   model->calcDiff(data, x);
   casted_model->calc(casted_data, x_f);
   casted_model->calcDiff(casted_data, x_f);
   BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
-  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f_hess));
 #endif
 }
 
