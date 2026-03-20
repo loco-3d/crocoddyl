@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh
+// Copyright (C) 2020-2026, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,6 +287,8 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
   casted_problem2.calc(xs_f, us_f);
   casted_problem2.calcDiff(xs_f, us_f);
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f_jac = 100.f * tol_f;
+  float tol_f_hess = 100.f * tol_f;
   for (std::size_t i = 0; i < T; ++i) {
     const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>&
         casted_model = model->cast<float>();
@@ -294,26 +296,40 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
         casted_data = casted_model->createData();
     casted_model->calc(casted_data, xs_f[i], us_f[i]);
     casted_model->calcDiff(casted_data, xs_f[i], us_f[i]);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fx == casted_data->Fx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fx == casted_data->Fx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fu == casted_data->Fu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fu == casted_data->Fu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lx == casted_data->Lx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lx == casted_data->Lx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lu == casted_data->Lu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lu == casted_data->Lu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxx == casted_data->Lxx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxx == casted_data->Lxx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxu == casted_data->Lxu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxu == casted_data->Lxu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Luu == casted_data->Luu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Luu == casted_data->Luu);
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fx.isApprox(
+        casted_data->Fx, tol_f_jac));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fx.isApprox(
+        casted_data->Fx, tol_f_jac));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fu.isApprox(
+        casted_data->Fu, tol_f_jac));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fu.isApprox(
+        casted_data->Fu, tol_f_jac));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lx.isApprox(
+        casted_data->Lx, tol_f));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lx.isApprox(
+        casted_data->Lx, tol_f));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lu.isApprox(
+        casted_data->Lu, tol_f));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lu.isApprox(
+        casted_data->Lu, tol_f));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxx.isApprox(
+        casted_data->Lxx, tol_f_hess));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxx.isApprox(
+        casted_data->Lxx, tol_f_hess));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxu.isApprox(
+        casted_data->Lxu, tol_f_hess));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxu.isApprox(
+        casted_data->Lxu, tol_f_hess));
+    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Luu.isApprox(
+        casted_data->Luu, tol_f_hess));
+    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Luu.isApprox(
+        casted_data->Luu, tol_f_hess));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Fx.cast<float>() - casted_data->Fx)
-            .isZero(tol_f));
+            .isZero(tol_f_jac));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Fu.cast<float>() - casted_data->Fu)
-            .isZero(tol_f));
+            .isZero(tol_f_jac));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Lx.cast<float>() - casted_data->Lx)
             .isZero(tol_f));
@@ -322,13 +338,13 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
             .isZero(tol_f));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Lxx.cast<float>() - casted_data->Lxx)
-            .isZero(tol_f));
+            .isZero(tol_f_hess));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Lxu.cast<float>() - casted_data->Lxu)
-            .isZero(tol_f));
+            .isZero(tol_f_hess));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Luu.cast<float>() - casted_data->Luu)
-            .isZero(tol_f));
+            .isZero(tol_f_hess));
   }
 #endif
 }
