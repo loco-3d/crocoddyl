@@ -152,6 +152,7 @@ std::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(
   std::shared_ptr<crocoddyl::ShootingProblem> problem =
       std::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(),
                                                    running_models, modelT);
+  problem->set_nthreads(1);
 
   switch (solver_type) {
     case SolverTypes::SolverKKT:
