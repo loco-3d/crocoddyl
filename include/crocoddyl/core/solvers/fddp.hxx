@@ -37,8 +37,9 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
   switch (dyn_solver) {
     case HybridShoot: {
       const std::size_t Tshoot =
-          problem_->get_T() /
-          std::max((std::size_t)3, problem_->get_nthreads());
+          std::max(std::size_t(1),
+                   problem_->get_T() /
+                       std::max((std::size_t)3, problem_->get_nthreads()));
       set_dynamics_solver(dyn_solver, Tshoot);
       break;
     }
