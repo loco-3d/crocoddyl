@@ -69,7 +69,7 @@ message(
     "============================================================================================="
 )
 message(STATUS "${Bold}${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-message(STATUS "Copyright (C) 2018-2025, Heriot-Watt University • CNRS-LAAS.")
+message(STATUS "Copyright (C) 2018-2026, Heriot-Watt University • CNRS-LAAS.")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
 message(STATUS "")
