@@ -11,6 +11,12 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <cstdlib>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "factory/solver.hpp"
 #include "unittest_common.hpp"
@@ -600,6 +606,14 @@ void register_solvers_against_reference_unit_tests(
 //____________________________________________________________________________//
 
 bool init_function() {
+#ifdef _OPENMP
+  omp_set_dynamic(0);
+  omp_set_num_threads(1);
+#endif
+  setenv("OMP_DYNAMIC", "FALSE", 1);
+  setenv("OMP_NUM_THREADS", "1", 1);
+  setenv("KMP_ALL_THREADS", "1", 1);
+
   std::size_t T = 10;
 
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
