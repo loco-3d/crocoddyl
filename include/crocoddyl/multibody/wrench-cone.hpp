@@ -46,6 +46,9 @@ class WrenchConeTpl {
   typedef typename MathBase::MatrixX6s MatrixX6s;
   typedef typename MathBase::Quaternions Quaternions;
 
+  template <typename>
+  friend class WrenchConeTpl;
+
   /**
    * @brief Initialize the wrench cone
    *

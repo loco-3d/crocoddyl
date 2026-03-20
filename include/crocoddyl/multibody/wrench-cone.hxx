@@ -238,10 +238,17 @@ template <typename Scalar>
 template <typename NewScalar>
 WrenchConeTpl<NewScalar> WrenchConeTpl<Scalar>::cast() const {
   typedef WrenchConeTpl<NewScalar> ReturnType;
-  ReturnType ret(R_.template cast<NewScalar>(), scalar_cast<NewScalar>(mu_),
-                 box_.template cast<NewScalar>(), nf_, inner_appr_,
-                 scalar_cast<NewScalar>(min_nforce_),
-                 scalar_cast<NewScalar>(max_nforce_));
+  ReturnType ret;
+  ret.nf_ = nf_;
+  ret.A_ = A_.template cast<NewScalar>();
+  ret.ub_ = ub_.template cast<NewScalar>();
+  ret.lb_ = lb_.template cast<NewScalar>();
+  ret.R_ = R_.template cast<NewScalar>();
+  ret.box_ = box_.template cast<NewScalar>();
+  ret.mu_ = scalar_cast<NewScalar>(mu_);
+  ret.inner_appr_ = inner_appr_;
+  ret.min_nforce_ = scalar_cast<NewScalar>(min_nforce_);
+  ret.max_nforce_ = scalar_cast<NewScalar>(max_nforce_);
   return ret;
 }
 

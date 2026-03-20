@@ -39,6 +39,9 @@ class FrictionConeTpl {
   typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::Quaternions Quaternions;
 
+  template <typename>
+  friend class FrictionConeTpl;
+
   /**
    * @brief Initialize the wrench cone
    *
