@@ -73,6 +73,7 @@ class SquashingModelSmoothSatTpl : public SquashingModelAbstractTpl<_Scalar> {
     typedef SquashingModelSmoothSatTpl<NewScalar> ReturnType;
     ReturnType ret(u_lb_.template cast<NewScalar>(),
                    u_ub_.template cast<NewScalar>(), ns_);
+    ret.set_smooth(scalar_cast<NewScalar>(smooth_));
     return ret;
   }
 
