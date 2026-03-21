@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -134,7 +134,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(problem.get_runningModels()),
       running_datas_(problem.get_runningDatas()),
       nx_(problem.get_nx()),
-      ndx_(problem.get_ndx()) {}
+      ndx_(problem.get_ndx()),
+      nthreads_(problem.nthreads_),
+      is_updated_(problem.is_updated_) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
