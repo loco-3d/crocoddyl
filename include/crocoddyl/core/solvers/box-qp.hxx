@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,6 +101,9 @@ const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::solve(const MatrixXs& H,
     // Compute the Cauchy point and active set
     g_ = q;
     g_.noalias() += H * x_;
+    if (reg_ != Scalar(0.)) {
+      g_.noalias() += reg_ * x_;
+    }
     for (std::size_t j = 0; j < nx_; ++j) {
       const Scalar gj = g_(j);
       const Scalar xj = x_(j);
@@ -157,6 +160,9 @@ const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::solve(const MatrixXs& H,
     }
     // Try different step lengths
     fold_ = Scalar(0.5) * x_.dot(H * x_) + q.dot(x_);
+    if (reg_ != Scalar(0.)) {
+      fold_ += Scalar(0.5) * reg_ * x_.squaredNorm();
+    }
     for (typename std::vector<Scalar>::const_iterator it = alphas_.begin();
          it != alphas_.end(); ++it) {
       Scalar steplength = *it;
@@ -165,6 +171,9 @@ const BoxQPSolutionTpl<Scalar>& BoxQPTpl<Scalar>::solve(const MatrixXs& H,
             std::max(std::min(x_(i) + steplength * dx_(i), ub(i)), lb(i));
       }
       fnew_ = Scalar(0.5) * xnew_.dot(H * xnew_) + q.dot(xnew_);
+      if (reg_ != Scalar(0.)) {
+        fnew_ += Scalar(0.5) * reg_ * xnew_.squaredNorm();
+      }
       if (fold_ - fnew_ > th_acceptstep_ * g_.dot(x_ - xnew_)) {
         x_ = xnew_;
         break;

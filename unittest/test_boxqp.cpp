@@ -100,7 +100,6 @@ void test_box_qp_with_identity_hessian() {
   crocoddyl::BoxQP boxqp(nx);
   boxqp.set_reg(0.);
   const double tol = 100. * std::sqrt(std::numeric_limits<double>::epsilon());
-  const double tol_kkt = 1e3 * tol;
 
   Eigen::MatrixXd hessian = Eigen::MatrixXd::Identity(nx, nx);
   Eigen::VectorXd gradient = Eigen::VectorXd::Ones(nx);
@@ -138,18 +137,7 @@ void test_box_qp_with_identity_hessian() {
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg =
       boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x.array() >= lb.array() - tol_kkt).all());
-  BOOST_CHECK((sol_reg.x.array() <= ub.array() + tol_kkt).all());
-  for (std::size_t i = 0; i < nx; ++i) {
-    const double grad_i = (1. + reg) * sol_reg.x(i) + gradient(i);
-    if (std::abs(sol_reg.x(i) - lb(i)) <= tol_kkt) {
-      BOOST_CHECK_GE(grad_i, -tol_kkt);
-    } else if (std::abs(sol_reg.x(i) - ub(i)) <= tol_kkt) {
-      BOOST_CHECK_LE(grad_i, tol_kkt);
-    } else {
-      BOOST_CHECK_SMALL(grad_i, tol_kkt);
-    }
-  }
+  BOOST_CHECK((sol_reg.x - negbounded_gradient_reg).isZero(tol));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nf);
