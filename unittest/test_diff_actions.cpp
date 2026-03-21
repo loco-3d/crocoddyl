@@ -265,6 +265,8 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Fx.cast<float>() - casted_data->Fx).isZero(tol_f));
   BOOST_CHECK((data->Fu.cast<float>() - casted_data->Fu).isZero(tol_f));
   BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
+  std::cout << "Lu error: " << (data->Lu.cast<float>() - casted_data->Lu).norm()
+            << std::endl;
   BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
   BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
   BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
