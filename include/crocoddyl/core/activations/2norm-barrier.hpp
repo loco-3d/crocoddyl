@@ -109,14 +109,14 @@ class ActivationModel2NormBarrierTpl
 
     if (d->d < alpha_) {
       data->Ar = (d->d - alpha_) / d->d * r;
+      const Scalar d_sq = d->d * d->d;
       if (true_hessian_) {
         data->Arr.diagonal() =
-            alpha_ * r.array().square() / pow(d->d, Scalar(3));  // True Hessian
+            alpha_ * r.array().square() / (d_sq * d->d);  // True Hessian
         data->Arr.diagonal().array() += (d->d - alpha_) / d->d;
       } else {
-        data->Arr.diagonal() =
-            r.array().square() /
-            pow(d->d, Scalar(2));  // GN Hessian approximation
+        data->Arr.diagonal() = r.array().square() / d_sq;
+        // GN Hessian approximation
       }
     } else {
       data->Ar.setZero();
