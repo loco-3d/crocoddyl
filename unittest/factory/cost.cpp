@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "cost.hpp"
 
+#include "../random_generator.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
@@ -266,15 +267,9 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
 
 std::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(
     StateModelTypes::Type state_type, std::size_t nu) {
-  static bool once = true;
-  if (once) {
-    srand((unsigned)time(NULL));
-    once = false;
-  }
-
   CostModelFactory factory;
   CostModelTypes::Type rand_type = static_cast<CostModelTypes::Type>(
-      rand() % CostModelTypes::NbCostModelTypes);
+      random_int_in_range<int>(0, CostModelTypes::NbCostModelTypes - 1));
   return factory.create(rand_type, state_type,
                         ActivationModelTypes::ActivationModelQuad, nu);
 }

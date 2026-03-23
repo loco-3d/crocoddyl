@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "contact.hpp"
 
+#include "../random_generator.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-2d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
@@ -153,22 +154,18 @@ std::shared_ptr<crocoddyl::ContactModelAbstract> ContactModelFactory::create(
 }
 
 std::shared_ptr<crocoddyl::ContactModelAbstract> create_random_contact() {
-  static bool once = true;
-  if (once) {
-    srand((unsigned)time(NULL));
-    once = false;
-  }
   std::shared_ptr<crocoddyl::ContactModelAbstract> contact;
   ContactModelFactory factory;
-  if (rand() % 4 == 0) {
+  const int rand_type = random_int_in_range<int>(0, 3);
+  if (rand_type == 0) {
     contact = factory.create(ContactModelTypes::ContactModel1D_LOCAL,
                              PinocchioModelTypes::RandomHumanoid,
                              Eigen::Vector2d::Random());
-  } else if (rand() % 4 == 1) {
+  } else if (rand_type == 1) {
     contact = factory.create(ContactModelTypes::ContactModel2D,
                              PinocchioModelTypes::RandomHumanoid,
                              Eigen::Vector2d::Random());
-  } else if (rand() % 4 == 2) {
+  } else if (rand_type == 2) {
     contact = factory.create(ContactModelTypes::ContactModel3D_LOCAL,
                              PinocchioModelTypes::RandomHumanoid,
                              Eigen::Vector2d::Random());

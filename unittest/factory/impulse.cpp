@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2026, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "impulse.hpp"
 
+#include "../random_generator.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
 
@@ -99,14 +100,9 @@ std::shared_ptr<crocoddyl::ImpulseModelAbstract> ImpulseModelFactory::create(
 }
 
 std::shared_ptr<crocoddyl::ImpulseModelAbstract> create_random_impulse() {
-  static bool once = true;
-  if (once) {
-    srand((unsigned)time(NULL));
-    once = false;
-  }
   std::shared_ptr<crocoddyl::ImpulseModelAbstract> impulse;
   ImpulseModelFactory factory;
-  if (rand() % 2 == 0) {
+  if (random_int_in_range<int>(0, 1) == 0) {
     impulse = factory.create(ImpulseModelTypes::ImpulseModel3D_LOCAL,
                              PinocchioModelTypes::RandomHumanoid);
   } else {
