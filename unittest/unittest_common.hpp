@@ -49,6 +49,16 @@ inline void seedUnitTestRandomGenerators(
   get_random_generator().seed(seed);
 }
 
+template <typename StatePtr>
+Eigen::VectorXd sampleUnitTestState(const StatePtr& state,
+                                    const double tangent_scale = 1.) {
+  Eigen::VectorXd x0 = state->zero();
+  Eigen::VectorXd dx = tangent_scale * random_vector<double>(state->get_ndx());
+  Eigen::VectorXd x = x0;
+  state->integrate(x0, dx, x);
+  return x;
+}
+
 struct UnitTestRandomSeedFixture {
   UnitTestRandomSeedFixture() { seedUnitTestRandomGenerators(); }
 };

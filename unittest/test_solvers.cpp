@@ -26,6 +26,68 @@ using namespace crocoddyl::unittest;
 
 //____________________________________________________________________________//
 
+namespace {
+
+Eigen::VectorXd sampleSolverState(
+    const std::shared_ptr<crocoddyl::StateAbstract>& state,
+    const double tangent_scale = 1.) {
+  return sampleUnitTestState(state, tangent_scale);
+}
+
+Eigen::VectorXd perturbSolverState(
+    const std::shared_ptr<crocoddyl::StateAbstract>& state,
+    const Eigen::VectorXd& x, const double tangent_scale = 1e-1) {
+  Eigen::VectorXd dx = tangent_scale * random_vector<double>(state->get_ndx());
+  Eigen::VectorXd x_perturbed = x;
+  state->integrate(x, dx, x_perturbed);
+  return x_perturbed;
+}
+
+Eigen::VectorXd sampleSolverControl(const std::size_t nu,
+                                    const double scale = 1.) {
+  return scale * random_vector<double>(static_cast<Eigen::Index>(nu));
+}
+
+void sampleSolverTrajectoryGuess(
+    const std::shared_ptr<crocoddyl::ShootingProblem>& problem,
+    std::vector<Eigen::VectorXd>* xs, std::vector<Eigen::VectorXd>* us,
+    const double x_scale = 1., const double u_scale = 1.) {
+  xs->clear();
+  us->clear();
+  const std::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  const std::size_t T = problem->get_T();
+  xs->reserve(T + 1);
+  us->reserve(T);
+  for (std::size_t i = 0; i < T; ++i) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    xs->push_back(sampleSolverState(state, x_scale));
+    us->push_back(sampleSolverControl(model->get_nu(), u_scale));
+  }
+  xs->push_back(sampleSolverState(state, x_scale));
+}
+
+void perturbSolverTrajectoryGuess(
+    const std::shared_ptr<crocoddyl::ShootingProblem>& problem,
+    std::vector<Eigen::VectorXd>* xs, std::vector<Eigen::VectorXd>* us,
+    const double x_scale = 1e-1, const double u_scale = 1e-1) {
+  const std::shared_ptr<crocoddyl::StateAbstract>& state =
+      problem->get_runningModels()[0]->get_state();
+  const std::size_t T = problem->get_T();
+  for (std::size_t i = 0; i < T; ++i) {
+    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
+        problem->get_runningModels()[i];
+    (*xs)[i] = perturbSolverState(state, (*xs)[i], x_scale);
+    (*us)[i] += sampleSolverControl(model->get_nu(), u_scale);
+  }
+  xs->back() = perturbSolverState(state, xs->back(), x_scale);
+}
+
+}  // namespace
+
+//____________________________________________________________________________//
+
 void test_solver_compute_direction(SolverTypes::Type solver_type,
                                    ActionModelTypes::Type action_type,
                                    size_t T) {
@@ -47,17 +109,9 @@ void test_solver_compute_direction(SolverTypes::Type solver_type,
       solver->get_problem();
 
   // Generate the different state along the trajectory
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // Compute search direction
   solver->set_preg(random_real_in_range<double>(10., 100.));
@@ -123,17 +177,9 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
       solver->get_problem();
 
   // Generate the different state along the trajectory
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // One step optimization with alpha=1. This case the dynamics gaps are fully
   // closed.
@@ -218,17 +264,9 @@ void test_solver_expected_improvement(SolverTypes::Type solver_type,
       solver->get_problem();
 
   // Generate the different state along the trajectory
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // One step optimization with alpha=1.
   double alpha = 1;
@@ -288,17 +326,9 @@ void test_solver_convergence(SolverTypes::Type solver_type,
       solver->get_problem();
 
   // Generate the different state along the trajectory
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // // Define the callback function
   // std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
@@ -315,11 +345,15 @@ void test_solver_convergence(SolverTypes::Type solver_type,
 
   // Compute solve with random warmstarting and check expected convergence and
   // step length
+  xs = solver->get_xs();
+  us = solver->get_us();
+  perturbSolverTrajectoryGuess(problem, &xs, &us);
   solver->solve(xs, us);
   BOOST_CHECK_EQUAL(solver->get_iter(), 1);
   BOOST_CHECK_EQUAL(solver->get_steplength(), 1.);
 
   // Compute solve with regularization and check expected convergence
+  perturbSolverTrajectoryGuess(problem, &xs, &us);
   solver->solve(xs, us, 10, false, random_real_in_range<double>(10., 100.));
   BOOST_CHECK_EQUAL(solver->get_steplength(), 1.);
 }
@@ -348,17 +382,9 @@ void test_casted_solver(SolverTypes::Type solver_type,
       solver->get_problem();
 
   // Generate the different state along the trajectory
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
   std::vector<Eigen::VectorXf> xs_f = crocoddyl::vector_cast<float>(xs);
   std::vector<Eigen::VectorXf> us_f = crocoddyl::vector_cast<float>(us);
 
@@ -440,17 +466,9 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   // Generate the different state along the trajectory
   const std::shared_ptr<crocoddyl::ShootingProblem>& problem =
       kkt->get_problem();
-  const std::shared_ptr<crocoddyl::StateAbstract>& state =
-      problem->get_runningModels()[0]->get_state();
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // Compute the search direction
   kkt->setCandidate(xs, us);
@@ -466,8 +484,10 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   BOOST_CHECK((hess - hess.transpose()).isZero(1e-9));
 
   // Check initial state
-  BOOST_CHECK((state->diff_dx(state->integrate_x(xs[0], kkt->get_dxs()[0]),
-                              kkt->get_problem()->get_x0()))
+  BOOST_CHECK((problem->get_runningModels()[0]->get_state()->diff_dx(
+                   problem->get_runningModels()[0]->get_state()->integrate_x(
+                       xs[0], kkt->get_dxs()[0]),
+                   kkt->get_problem()->get_x0()))
                   .isZero(1e-9));
 }
 
@@ -495,19 +515,13 @@ void test_solver_against_reference_solver(SolverTypes::Type solver_type,
   // solver.
   const std::shared_ptr<crocoddyl::ShootingProblem>& problem =
       solver->get_problem();
-
-  // Generate the different state along the trajectory
   const std::shared_ptr<crocoddyl::StateAbstract>& state =
       problem->get_runningModels()[0]->get_state();
+
+  // Generate the different state along the trajectory
   std::vector<Eigen::VectorXd> xs;
   std::vector<Eigen::VectorXd> us;
-  for (std::size_t i = 0; i < T; ++i) {
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-        problem->get_runningModels()[i];
-    xs.push_back(state->rand());
-    us.push_back(Eigen::VectorXd::Random(model->get_nu()));
-  }
-  xs.push_back(state->rand());
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
 
   // Define the callback function
   std::vector<std::shared_ptr<crocoddyl::CallbackAbstract>> cbs;

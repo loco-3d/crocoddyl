@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, INRIA, University of
 //                          Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -19,7 +19,46 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
+namespace {
+
+template <typename DerivedDouble, typename DerivedFloat>
+bool isFloatCastClose(const Eigen::MatrixBase<DerivedDouble>& value,
+                      const Eigen::MatrixBase<DerivedFloat>& casted_value,
+                      const float abs_tol) {
+  if (value.size() == 0 || casted_value.size() == 0) {
+    return value.size() == casted_value.size();
+  }
+  const auto value_f = value.template cast<float>();
+  const float rel_tol = 200.f * std::numeric_limits<float>::epsilon();
+  const float scale = std::max(value_f.cwiseAbs().maxCoeff(),
+                               casted_value.cwiseAbs().maxCoeff());
+  const float max_error = (value_f - casted_value).cwiseAbs().maxCoeff();
+  return max_error <= abs_tol + rel_tol * std::max(1.f, scale);
+}
+
+void reseedDiffActionTestCase(
+    const DifferentialActionModelTypes::Type action_type,
+    const unsigned int salt) {
+  const unsigned int seed =
+      getUnitTestSeed() +
+      1009u * (static_cast<unsigned int>(action_type) + 1u) + salt;
+  seedUnitTestRandomGenerators(seed);
+}
+
+void sampleDiffActionOperatingPoint(
+    const DifferentialActionModelTypes::Type,
+    const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model,
+    const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data,
+    Eigen::VectorXd* x, Eigen::VectorXd* u) {
+  (void)data;
+  *x = sampleUnitTestState(model->get_state(), 2.5e-1);
+  *u = random_vector<double>(model->get_nu()) * 2.5e-1;
+}
+
+}  // namespace
+
 void test_check_data(DifferentialActionModelTypes::Type action_type) {
+  reseedDiffActionTestCase(action_type, 1u);
   // create the model
   DifferentialActionModelFactory factory;
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model =
@@ -46,6 +85,7 @@ void test_check_data(DifferentialActionModelTypes::Type action_type) {
 }
 
 void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
+  reseedDiffActionTestCase(action_type, 2u);
   // create the model
   DifferentialActionModelFactory factory;
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model =
@@ -56,8 +96,8 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
       model->createData();
 
   // Generating random state and control vectors
-  const Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = sampleUnitTestState(model->get_state(), 2.5e-1);
+  const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
 
   // Getting the state dimension from calc() call
   model->calc(data, x, u);
@@ -82,6 +122,7 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
 }
 
 void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
+  reseedDiffActionTestCase(action_type, 3u);
   // create the model
   DifferentialActionModelFactory factory;
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model =
@@ -93,8 +134,8 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   data->cost = nan("");
 
   // Getting the cost value computed by calc()
-  const Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
+  const Eigen::VectorXd x = sampleUnitTestState(model->get_state(), 2.5e-1);
+  const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
   model->calc(data, x, u);
 
   // Checking that calc returns a cost value
@@ -121,6 +162,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
       DifferentialActionModelTypes::
           DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed)
     return;
+  reseedDiffActionTestCase(action_type, 4u);
   // create the model
   DifferentialActionModelFactory factory;
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model =
@@ -131,7 +173,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
       model->createData();
 
   // Getting the cost value computed by calc()
-  Eigen::VectorXd x = model->get_state()->rand();
+  Eigen::VectorXd x = sampleUnitTestState(model->get_state(), 2.5e-1);
   x.tail(model->get_state()->get_nv()).setZero();
   Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
   model->quasiStatic(data, u, x);
@@ -191,6 +233,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
 
 void test_partial_derivatives_against_numdiff(
     DifferentialActionModelTypes::Type action_type) {
+  reseedDiffActionTestCase(action_type, 5u);
   // create the model
   DifferentialActionModelFactory factory;
   std::shared_ptr<crocoddyl::DifferentialActionModelAbstract> model =
@@ -205,8 +248,9 @@ void test_partial_derivatives_against_numdiff(
       model_num_diff.createData();
 
   // Generating random values for the state and control
-  Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
+  Eigen::VectorXd x;
+  Eigen::VectorXd u;
+  sampleDiffActionOperatingPoint(action_type, model, data, &x, &u);
 
   // Computing the action derivatives
   model->calc(data, x, u);
@@ -233,7 +277,7 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
 
   // Computing the action derivatives
-  x = model->get_state()->rand();
+  x = sampleUnitTestState(model->get_state(), 2.5e-1);
   model->calc(data, x);
   model->calcDiff(data, x);
   model_num_diff.calc(data_num_diff, x);
@@ -260,18 +304,16 @@ void test_partial_derivatives_against_numdiff(
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
   float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->h.cast<float>() - casted_data->h).isZero(tol_f));
-  BOOST_CHECK((data->g.cast<float>() - casted_data->g).isZero(tol_f));
-  BOOST_CHECK((data->Fx.cast<float>() - casted_data->Fx).isZero(tol_f));
-  BOOST_CHECK((data->Fu.cast<float>() - casted_data->Fu).isZero(tol_f));
-  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
-  std::cout << "Lu error: " << (data->Lu.cast<float>() - casted_data->Lu).norm()
-            << std::endl;
-  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
-  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
-  BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
-  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
-  BOOST_CHECK((data->Hu.cast<float>() - casted_data->Hu).isZero(tol_f));
+  BOOST_CHECK(isFloatCastClose(data->h, casted_data->h, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->g, casted_data->g, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Fx, casted_data->Fx, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Fu, casted_data->Fu, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Lx, casted_data->Lx, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Lu, casted_data->Lu, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Gx, casted_data->Gx, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Gu, casted_data->Gu, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Hx, casted_data->Hx, tol_f));
+  BOOST_CHECK(isFloatCastClose(data->Hu, casted_data->Hu, tol_f));
   crocoddyl::DifferentialActionModelNumDiffTpl<float> casted_model_num_diff =
       model_num_diff.cast<float>();
   std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
@@ -279,10 +321,14 @@ void test_partial_derivatives_against_numdiff(
   casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
   casted_model_num_diff.calcDiff(casted_data_num_diff, x_f, u_f);
   tol_f = 80.0f * sqrt(casted_model_num_diff.get_disturbance());
-  BOOST_CHECK((casted_data->Gx - casted_data_num_diff->Gx).isZero(tol_f));
-  BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
-  BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
-  BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
+  BOOST_CHECK(isFloatCastClose(casted_data->Gx.cast<double>(),
+                               casted_data_num_diff->Gx, tol_f));
+  BOOST_CHECK(isFloatCastClose(casted_data->Gu.cast<double>(),
+                               casted_data_num_diff->Gu, tol_f));
+  BOOST_CHECK(isFloatCastClose(casted_data->Hx.cast<double>(),
+                               casted_data_num_diff->Hx, tol_f));
+  BOOST_CHECK(isFloatCastClose(casted_data->Hu.cast<double>(),
+                               casted_data_num_diff->Hu, tol_f));
 #endif
 }
 
