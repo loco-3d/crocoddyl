@@ -10,7 +10,7 @@
 #include "state.hpp"
 
 #include <pinocchio/fwd.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/multibody/sample-models.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
 #include "crocoddyl/core/states/euclidean.hpp"
