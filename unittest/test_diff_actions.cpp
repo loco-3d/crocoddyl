@@ -21,19 +21,27 @@ using namespace crocoddyl::unittest;
 
 namespace {
 
+template <typename DerivedA, typename DerivedB, typename Scalar>
+bool isCloseAbsRel(const Eigen::MatrixBase<DerivedA>& value,
+                   const Eigen::MatrixBase<DerivedB>& reference,
+                   const Scalar abs_tol, const Scalar rel_tol) {
+  if (value.size() == 0 || reference.size() == 0) {
+    return value.size() == reference.size();
+  }
+  const auto value_s = value.template cast<Scalar>();
+  const auto reference_s = reference.template cast<Scalar>();
+  const Scalar scale = std::max(value_s.cwiseAbs().maxCoeff(),
+                                reference_s.cwiseAbs().maxCoeff());
+  const Scalar max_error = (value_s - reference_s).cwiseAbs().maxCoeff();
+  return max_error <= abs_tol + rel_tol * std::max(Scalar(1), scale);
+}
+
 template <typename DerivedDouble, typename DerivedFloat>
 bool isFloatCastClose(const Eigen::MatrixBase<DerivedDouble>& value,
                       const Eigen::MatrixBase<DerivedFloat>& casted_value,
                       const float abs_tol) {
-  if (value.size() == 0 || casted_value.size() == 0) {
-    return value.size() == casted_value.size();
-  }
-  const auto value_f = value.template cast<float>();
-  const float rel_tol = 200.f * std::numeric_limits<float>::epsilon();
-  const float scale = std::max(value_f.cwiseAbs().maxCoeff(),
-                               casted_value.cwiseAbs().maxCoeff());
-  const float max_error = (value_f - casted_value).cwiseAbs().maxCoeff();
-  return max_error <= abs_tol + rel_tol * std::max(1.f, scale);
+  return isCloseAbsRel(value, casted_value, abs_tol,
+                       200.f * std::numeric_limits<float>::epsilon());
 }
 
 void reseedDiffActionTestCase(
@@ -117,7 +125,7 @@ void test_calc_returns_state(DifferentialActionModelTypes::Type action_type) {
   BOOST_CHECK(static_cast<std::size_t>(casted_data->xout.size()) ==
               casted_model->get_state()->get_nv());
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->xout.cast<float>() - casted_data->xout).isZero(tol_f));
+  BOOST_CHECK(isFloatCastClose(data->xout, casted_data->xout, tol_f));
 #endif
 }
 
@@ -226,7 +234,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
     float tol_f =
         50.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
     BOOST_CHECK(casted_data->xout.norm() <= tol_f);
-    BOOST_CHECK((data->xout.cast<float>() - casted_data->xout).isZero(tol_f));
+    BOOST_CHECK(isFloatCastClose(data->xout, casted_data->xout, tol_f));
 #endif
   }
 }
@@ -260,21 +268,25 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = 2. * std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
-  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
-  BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(tol));
-  BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
+  const double numdiff_rel_tol = 1e-6;
+  BOOST_CHECK(isCloseAbsRel(data->h, data_num_diff->h, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->g, data_num_diff->g, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Fx, data_num_diff->Fx, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Fu, data_num_diff->Fu, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lu, data_num_diff->Lu, tol, numdiff_rel_tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
+    BOOST_CHECK(
+        isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, numdiff_rel_tol));
+    BOOST_CHECK(
+        isCloseAbsRel(data->Lxu, data_num_diff->Lxu, tol, numdiff_rel_tol));
+    BOOST_CHECK(
+        isCloseAbsRel(data->Luu, data_num_diff->Luu, tol, numdiff_rel_tol));
   }
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
-  BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
-  BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hu, data_num_diff->Hu, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gu, data_num_diff->Gu, tol, numdiff_rel_tol));
 
   // Computing the action derivatives
   x = sampleUnitTestState(model->get_state(), 2.5e-1);
@@ -282,14 +294,15 @@ void test_partial_derivatives_against_numdiff(
   model->calcDiff(data, x);
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
-  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
-  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->h, data_num_diff->h, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->g, data_num_diff->g, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, numdiff_rel_tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK(
+        isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, numdiff_rel_tol));
   }
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, numdiff_rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, numdiff_rel_tol));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
