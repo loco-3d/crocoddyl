@@ -2,7 +2,7 @@ ci:
   autoupdate_branch: devel
 repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.7
+  rev: v0.15.8
   hooks:
   - id: ruff
     args:
@@ -14,11 +14,11 @@ repos:
   hooks:
   - id: cmake-format
 - repo: https://github.com/pappasam/toml-sort
-  rev: v0.24.3
+  rev: v0.24.4
   hooks:
   - id: toml-sort-fix
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v22.1.1
+  rev: v22.1.2
   hooks:
   - id: clang-format
     args:
