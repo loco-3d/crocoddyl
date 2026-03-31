@@ -36,12 +36,31 @@ bool isCloseAbsRel(const Eigen::MatrixBase<DerivedA>& value,
   return max_error <= abs_tol + rel_tol * std::max(Scalar(1), scale);
 }
 
+template <typename ValueScalar, typename ReferenceScalar, typename Scalar>
+bool isCloseAbsRelScalar(const ValueScalar value,
+                         const ReferenceScalar reference, const Scalar abs_tol,
+                         const Scalar rel_tol) {
+  const Scalar value_s = static_cast<Scalar>(value);
+  const Scalar reference_s = static_cast<Scalar>(reference);
+  const Scalar scale = std::max(std::abs(value_s), std::abs(reference_s));
+  const Scalar abs_error = std::abs(value_s - reference_s);
+  return abs_error <= abs_tol + rel_tol * std::max(Scalar(1), scale);
+}
+
 template <typename DerivedDouble, typename DerivedFloat>
 bool isFloatCastClose(const Eigen::MatrixBase<DerivedDouble>& value,
                       const Eigen::MatrixBase<DerivedFloat>& casted_value,
                       const float abs_tol) {
   return isCloseAbsRel(value, casted_value, abs_tol,
                        200.f * std::numeric_limits<float>::epsilon());
+}
+
+template <typename DoubleScalar, typename FloatScalar>
+bool isFloatCastCloseScalar(const DoubleScalar value,
+                            const FloatScalar casted_value,
+                            const float abs_tol) {
+  return isCloseAbsRelScalar(value, casted_value, abs_tol,
+                             200.f * std::numeric_limits<float>::epsilon());
 }
 
 void reseedDiffActionTestCase(
@@ -161,7 +180,7 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
   casted_model->calc(casted_data, x_f, u_f);
   BOOST_CHECK(!std::isnan(casted_data->cost));
   float tol_f = 50.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
+  BOOST_CHECK(isFloatCastCloseScalar(data->cost, casted_data->cost, tol_f));
 #endif
 }
 
