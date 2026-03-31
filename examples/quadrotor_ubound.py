@@ -91,7 +91,7 @@ T = 33
 problem = crocoddyl.ShootingProblem(
     np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel
 )
-solver = crocoddyl.SolverBoxDDP(problem)
+solver = crocoddyl.SolverBoxFDDP(problem)
 if WITHPLOT:
     solver.setCallbacks(
         [

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2021-2026, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,6 +9,7 @@
 
 #include "residual.hpp"
 
+#include "../random_generator.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
@@ -167,15 +168,10 @@ std::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
 
 std::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
     StateModelTypes::Type state_type) {
-  static bool once = true;
-  if (once) {
-    srand((unsigned)time(NULL));
-    once = false;
-  }
-
   ResidualModelFactory factory;
-  ResidualModelTypes::Type rand_type = static_cast<ResidualModelTypes::Type>(
-      rand() % ResidualModelTypes::NbResidualModelTypes);
+  ResidualModelTypes::Type rand_type =
+      static_cast<ResidualModelTypes::Type>(random_int_in_range<int>(
+          0, ResidualModelTypes::NbResidualModelTypes - 1));
   return factory.create(rand_type, state_type);
 }
 

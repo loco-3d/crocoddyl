@@ -48,7 +48,19 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_solvers)
 
   if(BUILD_WITH_CODEGEN_SUPPORT)
-    set(${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen)
+    set(${PROJECT_NAME}_CODEGEN_CPP_TESTS)
+    # GCC 14+ can fail while compiling test_codegen due to a CppADCodeGen
+    # thread_local guard redefinition in cppad/cg/cg.hpp.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION
+                                                VERSION_GREATER_EQUAL 14)
+      message(
+        WARNING
+          "Skipping unittest target test_codegen with GCC ${CMAKE_CXX_COMPILER_VERSION} "
+          "because of a known CppADCodeGen TLS guard redefinition issue in cppad/cg/cg.hpp."
+      )
+    else()
+      list(APPEND ${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen)
+    endif()
     list(APPEND ${PROJECT_NAME}_CPP_TESTS ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
   endif()
 
@@ -90,5 +102,20 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
     foreach(TEST_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
       target_link_libraries(${TEST_NAME} ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
     endforeach()
+  endif()
+
+  if(BUILD_WITH_CODEGEN_SUPPORT
+     AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+     AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+    # Safeguard in case test_codegen is created by helper macros: keep the
+    # target available, but do not build it by default.
+    if(TARGET test_codegen)
+      set_target_properties(
+        test_codegen PROPERTIES EXCLUDE_FROM_ALL TRUE EXCLUDE_FROM_DEFAULT_BUILD
+                                                      TRUE)
+    endif()
+    if(TEST test_codegen)
+      set_tests_properties(test_codegen PROPERTIES DISABLED TRUE)
+    endif()
   endif()
 endif()

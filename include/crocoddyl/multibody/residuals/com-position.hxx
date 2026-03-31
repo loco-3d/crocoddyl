@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -62,10 +62,11 @@ ResidualModelCoMPositionTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ResidualModelCoMPositionTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
-  os << "ResidualModelCoMPosition {cref=" << cref_.transpose().format(fmt)
-     << "}";
+  os << "ResidualModelCoMPosition {cref="
+     << cref_.transpose().template cast<PrintableScalar>().format(fmt) << "}";
 }
 
 template <typename Scalar>

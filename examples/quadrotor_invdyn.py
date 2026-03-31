@@ -9,136 +9,177 @@ import pinocchio
 
 import crocoddyl
 
+if crocoddyl.WITH_ODYN:
+    from odyn.utils import plotQPsparsity
+
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+# Loading the Hector quadrotor robot
 hector = example_robot_data.load("hector")
-robot_model = hector.model
 
-target_pos = np.array([1.0, 0.0, 1.0])
-target_quat = pinocchio.Quaternion(1.0, 0.0, 0.0, 0.0)
-
-state = crocoddyl.StateMultibody(robot_model)
-
+# Creating the state and actuaction models
+state = crocoddyl.StateMultibody(hector.model)
 d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5.0, 0.1
 ps = [
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([d_cog, 0, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CCW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, d_cog, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([-d_cog, 0, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CCW,
+        0,
+        10,
     ),
     crocoddyl.Thruster(
         pinocchio.SE3(np.eye(3), np.array([0, -d_cog, 0])),
         cm / cf,
         crocoddyl.ThrusterType.CW,
+        0,
+        10,
     ),
 ]
 actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
+nv, nu, dt = state.nv, state.nv, 3e-2
 
-nu = state.nv
-runningCostModel = crocoddyl.CostModelSum(state, nu)
-terminalCostModel = crocoddyl.CostModelSum(state, nu)
-
-# Costs
-xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
-xActivation = crocoddyl.ActivationModelWeightedQuad(
-    np.array([0.1] * 3 + [1000.0] * 3 + [1000.0] * robot_model.nv)
-)
-uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
-xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
-uRegCost = crocoddyl.CostModelResidual(state, uResidual)
-goalTrackingResidual = crocoddyl.ResidualModelFramePlacement(
+# Defining the residuals, costs, and constraints
+target_pos = np.array([1.0, 0.0, 1.0])
+target_quat = pinocchio.Quaternion(1.0, 0.0, 0.0, 0.0)
+goalPoseResidual = crocoddyl.ResidualModelFramePlacement(
     state,
-    robot_model.getFrameId("base_link"),
+    state.pinocchio.getFrameId("base_link"),
     pinocchio.SE3(target_quat.matrix(), target_pos),
     nu,
 )
-goalTrackingCost = crocoddyl.CostModelResidual(state, goalTrackingResidual)
-runningCostModel.addCost("xReg", xRegCost, 1e-6)
-runningCostModel.addCost("uReg", uRegCost, 1e-6)
-runningCostModel.addCost("trackPose", goalTrackingCost, 1e-2)
-terminalCostModel.addCost("goalPose", goalTrackingCost, 3.0)
+xResidual = crocoddyl.ResidualModelState(state, state.zero(), nu)
+xActivation = crocoddyl.ActivationModelWeightedQuad(
+    np.array([0.1] * 3 + [1000.0] * 3 + [1000.0] * nv)
+)
+uResidual = crocoddyl.ResidualModelJointEffort(state, actuation, nu)
+goalTrackingCost = crocoddyl.CostModelResidual(state, goalPoseResidual)
+xRegCost = crocoddyl.CostModelResidual(state, xActivation, xResidual)
+uRegCost = crocoddyl.CostModelResidual(state, uResidual)
+eePoseConstraint = crocoddyl.ConstraintModelResidual(state, goalPoseResidual)
 
-dt = 3e-2
+# Adding the costs and constraints
+runningCosts = crocoddyl.CostModelSum(state, nu)
+terminalCosts = crocoddyl.CostModelSum(state, nu)
+terminalConstraints = crocoddyl.ConstraintModelManager(state, nu)
+runningCosts.addCost("trackPose", goalTrackingCost, 1e-2)
+runningCosts.addCost("xReg", xRegCost, 1e-6)
+runningCosts.addCost("uReg", uRegCost, 1e-6)
+terminalConstraints.addConstraint("goalPose", eePoseConstraint)
+
+# Creating the running and terminal models
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(
-        state, actuation, runningCostModel
-    ),
-    dt,
+    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCosts), dt
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
     crocoddyl.DifferentialActionModelFreeInvDynamics(
-        state, actuation, terminalCostModel
+        state, actuation, terminalCosts, terminalConstraints
     ),
     dt,
 )
 
-# Creating the shooting problem and the solver
+# Creating the shooting problem and the OC solver
 T = 33
-problem = crocoddyl.ShootingProblem(
+problem_1 = crocoddyl.ShootingProblem(
     np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel
 )
-solver = crocoddyl.SolverIntro(problem)
+problem_2 = crocoddyl.ShootingProblem(
+    np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel
+)
+solver = crocoddyl.SolverIntro(problem_1)
+if crocoddyl.WITH_ODYN:
+    solverSQP = crocoddyl.SolverOdynSQP(problem_2)
+
 if WITHPLOT:
-    solver.setCallbacks(
-        [
-            crocoddyl.CallbackVerbose(),
-            crocoddyl.CallbackLogger(),
-        ]
-    )
+    solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks(
+            [crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()]
+        )
 else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
+    if crocoddyl.WITH_ODYN:
+        solverSQP.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the solver
+print("*** SOLVE (FeasShoot) ***")
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
 solver.solve()
+print("*** SOLVE (MultiShoot) ***")
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
+solver.solve()
+Ts = int(solver.problem.T / 3)
+print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
+solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
+solver.solve()
+if crocoddyl.WITH_ODYN:
+    print("*** SOLVE (OdynSQP) ***")
+    solverSQP.solve()
+
+# Printing the terminal pose
+np.set_printoptions(precision=4, suppress=True)
+print("Target pose:")
+print("   position:", target_pos)
+print("   quaternion:", target_quat.coeffs())
+print("Terminal pose:")
+print("   position:", solver.xs[-1][:3])
+print("   quaternion:", solver.xs[-1][3:7])
 
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    crocoddyl.plotOCSolution(
+    xs, us = (
         solver.xs,
         [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
-        figIndex=1,
-        show=False,
     )
+    crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.stops, log.grads, log.steps, figIndex=2
     )
+    if crocoddyl.WITH_ODYN:
+        logSQP = solverSQP.getCallbacks()[1]
+        xs, us = (
+            solverSQP.xs,
+            [
+                d.differential.multibody.joint.tau
+                for d in solverSQP.problem.runningDatas
+            ],
+        )
+        crocoddyl.plotOCSolution(solverSQP.xs, solverSQP.us, figIndex=3, show=False)
+        crocoddyl.plotConvergence(
+            logSQP.costs,
+            logSQP.pregs,
+            logSQP.dregs,
+            logSQP.stops,
+            logSQP.grads,
+            logSQP.steps,
+            figIndex=4,
+        )
+        plotQPsparsity(solverSQP.qp_model, figIndex=5, show=True)
 
 # Display the entire motion
 if WITHDISPLAY:
-    try:
-        import gepetto
-
-        gepetto.corbaserver.Client()
-        cameraTF = [-0.03, 4.4, 2.3, -0.02, 0.56, 0.83, -0.03]
-        display = crocoddyl.GepettoDisplay(hector, 4, 4, cameraTF, floor=False)
-        hector.viewer.gui.addXYZaxis("world/wp", [1.0, 0.0, 0.0, 1.0], 0.03, 0.5)
-        hector.viewer.gui.applyConfiguration(
-            "world/wp",
-            [
-                *target_pos.tolist(),
-                target_quat[0],
-                target_quat[1],
-                target_quat[2],
-                target_quat[3],
-            ],
-        )
-    except Exception:
-        display = crocoddyl.MeshcatDisplay(hector)
+    display = crocoddyl.MeshcatDisplay(hector)
     display.rate = -1
     display.freq = 1
     while True:
         display.displayFromSolver(solver)
+        if crocoddyl.WITH_ODYN:
+            display.displayFromSolver(solverSQP)
         time.sleep(1.0)

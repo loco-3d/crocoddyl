@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,7 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_CONTACT_FORCE_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/contact-base.hpp"
 #include "crocoddyl/multibody/contacts/contact-1d.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"

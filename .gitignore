@@ -9,9 +9,9 @@
 build*/*
 _build*
 *.aux
-*.log
 *.pdf
 .clang-format
 .vscode/
 *#*#
 .cache/
+*install*

@@ -51,6 +51,12 @@ class ActuationModelDoublePendulum(crocoddyl.ActuationModelAbstract):
         crocoddyl.ActuationModelAbstract.__init__(self, state, 1)
         self.nv = state.nv
         self.actLink = actLink
+        if self.actLink == 1:
+            self.u_lb = -np.array([state.pinocchio.effortLimit[0]])
+            self.u_ub = np.array([state.pinocchio.effortLimit[0]])
+        else:
+            self.u_lb = -np.array([state.pinocchio.effortLimit[1]])
+            self.u_ub = np.array([state.pinocchio.effortLimit[1]])
 
     def calc(self, data, x, u):
         data.tau[:] = data.dtau_du * u

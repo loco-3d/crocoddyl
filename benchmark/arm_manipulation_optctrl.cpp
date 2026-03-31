@@ -55,7 +55,8 @@ int main(int argc, char* argv[]) {
   }
 
   // Formulating the optimal control problem
-  crocoddyl::SolverFDDP solver(problem);
+  crocoddyl::SolverFDDP solver(problem,
+                               crocoddyl::DynamicsSolverType::MultiShoot);
   if (CALLBACKS) {
     std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
     cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());

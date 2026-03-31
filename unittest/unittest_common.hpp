@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,7 @@
 #include <boost/function.hpp>
 #include <boost/test/execution_monitor.hpp>  // for execution_exception
 #include <boost/test/included/unit_test.hpp>
+#include <cstdlib>
 #include <iterator>
 
 #include "crocoddyl/core/utils/exception.hpp"
@@ -28,6 +29,39 @@
 
 namespace crocoddyl {
 namespace unittest {
+
+inline unsigned int getUnitTestSeed() {
+  const char* env_seed = std::getenv("CROCODDYL_UNITTEST_SEED");
+  if (env_seed == NULL || env_seed[0] == '\0') {
+    return 0u;
+  }
+  char* end = NULL;
+  const unsigned long parsed_seed = std::strtoul(env_seed, &end, 10);
+  if (end == env_seed || *end != '\0') {
+    return 0u;
+  }
+  return static_cast<unsigned int>(parsed_seed);
+}
+
+inline void seedUnitTestRandomGenerators(
+    const unsigned int seed = getUnitTestSeed()) {
+  std::srand(seed);
+  get_random_generator().seed(seed);
+}
+
+template <typename StatePtr>
+Eigen::VectorXd sampleUnitTestState(const StatePtr& state,
+                                    const double tangent_scale = 1.) {
+  Eigen::VectorXd x0 = state->zero();
+  Eigen::VectorXd dx = tangent_scale * random_vector<double>(state->get_ndx());
+  Eigen::VectorXd x = x0;
+  state->integrate(x0, dx, x);
+  return x;
+}
+
+struct UnitTestRandomSeedFixture {
+  UnitTestRandomSeedFixture() { seedUnitTestRandomGenerators(); }
+};
 
 class CaptureIOStream {
  public:
@@ -137,5 +171,9 @@ std::string GetErrorMessages(boost::function<int(void)> function_with_errors) {
 
 }  // namespace unittest
 }  // namespace crocoddyl
+
+using CrocoddylUnitTestRandomSeedFixture =
+    crocoddyl::unittest::UnitTestRandomSeedFixture;
+BOOST_TEST_GLOBAL_FIXTURE(CrocoddylUnitTestRandomSeedFixture);
 
 #endif  // CROCODDYL_UNITTEST_COMMON_HPP_

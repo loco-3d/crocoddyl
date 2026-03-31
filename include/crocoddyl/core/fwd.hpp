@@ -25,6 +25,52 @@ inline bool is_a_AssignmentOp(AssignmentOp op) {
   return (op == setto || op == addto || op == rmfrom);
 }
 
+// solver and problem
+template <typename Scalar>
+class ShootingProblemTpl;
+
+template <typename Scalar>
+class SolverAbstractTpl;
+
+template <typename Scalar>
+class SolverFDDPTpl;
+
+template <typename Scalar>
+class SolverIntroTpl;
+
+#ifdef CROCODDYL_WITH_ODYN
+template <typename Scalar>
+class SolverOdynSQPTpl;
+#endif
+
+template <typename Scalar>
+class SolverBoxFDDPTpl;
+
+template <typename Scalar>
+class SolverKKTTpl;
+
+template <typename Scalar>
+class BoxQPTpl;
+
+template <typename Scalar>
+struct BoxQPSolutionTpl;
+
+#ifdef CROCODDYL_WITH_IPOPT
+class SolverIpopt;
+
+template <typename Scalar>
+class IpoptInterfaceTpl;
+
+template <typename Scalar>
+struct IpoptInterfaceDataTpl;
+#endif
+
+template <typename Scalar>
+class CallbackAbstractTpl;
+
+template <typename Scalar>
+class CallbackVerboseTpl;
+
 // action
 template <typename Scalar>
 class ActionModelAbstractTpl;
@@ -239,10 +285,6 @@ class ConstraintModelResidualTpl;
 template <typename Scalar>
 struct ConstraintDataResidualTpl;
 
-// shooting
-template <typename Scalar>
-class ShootingProblemTpl;
-
 // Numdiff
 template <typename Scalar>
 class ActionModelNumDiffTpl;
@@ -294,6 +336,25 @@ template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
 /********************Template Instantiation*************/
+typedef ShootingProblemTpl<double> ShootingProblem;
+typedef SolverAbstractTpl<double> SolverAbstract;
+typedef SolverFDDPTpl<double> SolverFDDP;
+typedef SolverIntroTpl<double> SolverIntro;
+#ifdef CROCODDYL_WITH_ODYN
+typedef SolverOdynSQPTpl<double> SolverOdynSQP;
+#endif
+typedef SolverBoxFDDPTpl<double> SolverBoxFDDP;
+typedef SolverKKTTpl<double> SolverKKT;
+typedef BoxQPTpl<double> BoxQP;
+typedef BoxQPSolutionTpl<double> BoxQPSolution;
+typedef CallbackAbstractTpl<double> CallbackAbstract;
+typedef CallbackVerboseTpl<double> CallbackVerbose;
+
+#ifdef CROCODDYL_WITH_IPOPT
+typedef IpoptInterfaceTpl<double> IpoptInterface;
+typedef IpoptInterfaceDataTpl<double> IpoptInterfaceData;
+#endif
+
 typedef ActionModelAbstractTpl<double> ActionModelAbstract;
 typedef ActionDataAbstractTpl<double> ActionDataAbstract;
 typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
@@ -403,8 +464,6 @@ typedef ConstraintModelManagerTpl<double> ConstraintModelManager;
 typedef ConstraintDataManagerTpl<double> ConstraintDataManager;
 typedef ConstraintModelResidualTpl<double> ConstraintModelResidual;
 typedef ConstraintDataResidualTpl<double> ConstraintDataResidual;
-
-typedef ShootingProblemTpl<double> ShootingProblem;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;

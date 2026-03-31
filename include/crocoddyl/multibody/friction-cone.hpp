@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, University of Oxford,
+// Copyright (C) 2019-2026, University of Edinburgh, University of Oxford,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,6 +10,7 @@
 #ifndef CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 #define CROCODDYL_MULTIBODY_FRICTION_CONE_HPP_
 
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
@@ -37,6 +38,9 @@ class FrictionConeTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::MatrixX3s MatrixX3s;
   typedef typename MathBase::Quaternions Quaternions;
+
+  template <typename>
+  friend class FrictionConeTpl;
 
   /**
    * @brief Initialize the wrench cone

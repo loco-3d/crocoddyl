@@ -12,6 +12,9 @@
 
 #include "python/crocoddyl/core/core.hpp"
 
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
 namespace crocoddyl {
 namespace python {
 
@@ -126,6 +129,7 @@ struct ShootingProblemVisitor
         .add_property("ndx", bp::make_function(&Problem::get_ndx),
                       "dimension of the tangent space of the state manifold")
         .add_property("is_updated", bp::make_function(&Problem::is_updated),
+                      bp::make_function(&Problem::set_is_updated),
                       "Returns True if the shooting problem has been updated, "
                       "otherwise False");
   }
@@ -157,7 +161,9 @@ struct ShootingProblemVisitor
       .def(CopyableVisitor<Problem>());
 
 void exposeShootingProblem() {
+#ifdef IS_FP_SCALAR_TRUE
   CROCODDYL_SHOOTING_PROBLEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
 }
 
 }  // namespace python

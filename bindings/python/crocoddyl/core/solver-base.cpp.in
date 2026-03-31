@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,274 +9,455 @@
 
 #include "python/crocoddyl/core/solver-base.hpp"
 
-#include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 #define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
 
-void exposeSolverAbstract() {
-#ifdef SCALAR_float64
-  // Register custom converters between std::vector and Python list
-  typedef std::shared_ptr<CallbackAbstract> CallbackAbstractPtr;
-  StdVectorPythonVisitor<std::vector<CallbackAbstractPtr>, true>::expose(
-      "StdVec_Callback");
-#endif
+template <typename Model>
+struct SolverAbstractVisitor
+    : public bp::def_visitor<SolverAbstractVisitor<Model>> {
+  typedef typename Model::SolverAbstract SolverAbstract;
+  typedef typename SolverAbstract::Scalar Scalar;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_solves, Model::solve, 0,
+                                         5)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_setCandidate,
+                                         Model::setCandidate, 0, 3)
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("solve", &Model::solve,
+           SolverAbstract_solves(
+               bp::args("self", "init_xs", "init_us", "maxiter",
+                        "is_feasible", "reg_init"),
+               "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
+               "terms.\n\n"
+               "From an initial guess init_xs,init_us (feasible or not), iterate "
+               "over computeDirection and tryStep until stoppingCriteria is below "
+               "threshold. It also describes the globalization strategy used "
+               "during the numerical optimization.\n"
+               ":param init_xs: initial guess for state trajectory with T+1 "
+               "elements (default [])\n"
+               ":param init_us: initial guess for control trajectory with T "
+               "elements (default []).\n"
+               ":param maxiter: maximum allowed number of iterations (default "
+               "100).\n"
+               ":param isFeasible: true if the init_xs are obtained from "
+               "integrating the init_us (rollout) (default False).\n"
+               ":param regInit: initial guess for the regularization value. Very "
+               "low values are typical used with very good guess points (init_xs, "
+               "init_us).\n"
+               ":returns A boolean that describes if convergence was reached."))
+        .def("computeDirection", pure_virtual(&Model::computeDirection),
+             (bp::args("recalc") = true),
+             "Compute the search direction (dx, du) for the current guess (xs, "
+             "us).\n\n"
+             "You must call setCandidate first in order to define the current "
+             "guess. A current guess defines a state and control trajectory "
+             "(xs, us) of T+1 and T elements, respectively. When `recalc` is "
+             "True (the default), the method refreshes the linearization by "
+             "calling calcDir() before running the backward pass. Setting "
+             "`recalc=False` reuses the most recent derivatives, which is "
+             "useful when calcDir() has already been triggered explicitly. "
+             "The resulting state, control, and dual variations are stored in "
+             "the solver data structures (e.g., dxs_, dus_, lambdas_).\n"
+             ":param recalc: request a fresh derivative computation before "
+             "building the search direction (default True).")
+        .def(
+            "tryStep", &Model::tryStep, &Model::default_tryStep,
+            (bp::args("stepLength") = Scalar(1.)),
+            "Try a predefined step length and compute its cost and merit "
+            "improvements.\n\n"
+            "It uses the search direction found by computeDirection to try a "
+            "determined step length; so you need to first run "
+            "computeDirection. Additionally it returns the cost improvement "
+            "along the predefined step length. Internally, it updates the cost "
+            "improvement dV and merit improvement dPhi.\n"
+            ":param stepLength: step length (default 1).\n"
+            ":returns the cost improvement.")
+        .def("computeCandidate",
+             pure_virtual(&Model::computeCandidate), (bp::args("stepLength") = Scalar(1.)),
+             "Compute new candidate solution using step length.\n\n"
+             "This method updates the candidate primal and dual variables "
+             "by taking a step from the current solution along the computed "
+             "search direction, scaled by the step length `alpha`. It "
+             "prepares a candidate point that is evaluated before being "
+             "accepted by the solver.\n"
+             ":param stepLength: step length.")
+        .def("stoppingCriteria", pure_virtual(&Model::stoppingCriteria),
+             bp::args("self"),
+             "Return a positive value that quantifies the algorithm "
+             "termination.\n\n"
+             "These values typically represents the gradient norm which tell "
+             "us that it's been reached the local minima. This function is "
+             "used to evaluate the algorithm convergence. The stopping "
+             "criteria strictly speaking depends on the search direction "
+             "(calculated by computeDirection) but it could also depend on the "
+             "chosen step length, tested by tryStep.")
+        .def("expectedImprovement",
+             pure_virtual(&Model::expectedImprovement), bp::args("self"),
+             "Return the expected improvement from a given current search "
+             "direction.\n\n"
+             "For computing the expected improvement, you need to compute "
+             "first the search direction by running computeDirection. The "
+             "quadratic improvement model is described as dV = DV_0 + DV_1 + "
+             "0.5 * DV_2, where DV_0, DV_1, and DV_2 are the constant, linear, "
+             "and quadraticm terms, respectively")
+        .def("computeMeritFunctionImprovement",
+             pure_virtual(&Model::computeMeritFunctionImprovement),
+             bp::args("self"),
+             "Compute the merit function improvement for the current step.\n\n"
+             "This function computes the current merit function improvement "
+             "given the current cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
+        .def("computeExpectedMeritFunctionImprovement",
+             pure_virtual(&Model::computeExpectedMeritFunctionImprovement),
+             bp::args("self"),
+             "Compute the expected merit function improvement for the current step.\n\n"
+             "This function computes the expected merit function improvement "
+             "given the expected cost improvement and feasibility improvement. "
+             "The feasibility improvement are stored in dfeas.")
+        .def("updateMeritFunction",
+             pure_virtual(&Model::updateMeritFunction),
+             bp::args("self"), "Update the merit function value for the current guess.")
+        .def("checkAcceptance", pure_virtual(&Model::checkAcceptance),
+             bp::args("self"),
+             "Check if the current step should be accepted.\n\n"
+             ":return true if we accept the step, otherwise false")
+        .def(
+            "calcDir", &Model::calcDir, &Model::default_calcDir, bp::args("self"),
+            "Refresh the linearization of the optimal control problem around "
+            "the current candidate.\n\n"
+            "The routine evaluates the cost, dynamics, and constraint models "
+            "along the trajectories stored in xs and us, updating the "
+            "first- and second-order derivatives together with the solver's "
+            "feasibility measures. The main solve loop calls calcDir() "
+            "automatically when a new linearization is required, but the "
+            "method remains available when driving the solver manually (for "
+            "instance before computeDirection(False)).")
+        .def("allocateData", &Model::allocateData, bp::args("self"),
+             "Allocate the data used by the solver.")
+        .def(
+            "resizeRunningData", &Model::resizeRunningData,
+            &Model::default_resizeRunningData, bp::args("self"),
+            "Resize data associated with the running nodes of the shooting "
+            "problem.\n\n"
+            "This function is invoked by resizeData() whenever the horizon or "
+            "the running action models change. Derived classes can override it "
+            "to adjust their own storage before the solver resumes.")
+        .def(
+            "resizeTerminalData", &Model::resizeTerminalData,
+            &Model::default_resizeTerminalData, bp::args("self"),
+            "Resize data associated with the terminal model of the shooting "
+            "problem.\n\n"
+            "This function is invoked by resizeData() whenever the terminal "
+            "model changes. Derived classes can override it to resize custom "
+            "storage that depends on the terminal constraints or cost.")
+        .def("setCandidate", &Model::setCandidate,
+             SolverAbstract_setCandidate(
+                 bp::args("self", "xs", "us", "isFeasible"),
+                 "Set the solver candidate warm-point values (xs, us).\n\n"
+                 "The solver candidates are defined as a state and control "
+                 "trajectory (xs, us) of T+1 and T elements, respectively. "
+                 "Additionally, we need to specify whether the pair is feasible, "
+                 "i.e., whether integrating us produces xs. Updating the "
+                 "candidate invalidates the previous linearization, so the next "
+                 "search-direction computation will refresh the derivatives on "
+                 "demand.\n"
+                 ":param xs: state trajectory of T+1 elements (default []).\n"
+                 ":param us: control trajectory of T elements (default []).\n"
+                 ":param isFeasible: true if xs results from integrating us (rollout)."))
+        .def("updateCandidate", pure_virtual(&Model::updateCandidate),
+             bp::args("self"),
+             "Update the candidate solution: cost, feasibilities, and merit "
+             "value.")
+        .def("increaseRegularizationCriteria",
+             pure_virtual(&Model::increaseRegularizationCriteria), bp::args("self"),
+             "Criteria used to increase regularization")
+        .def("decreaseRegularizationCriteria",
+             pure_virtual(&Model::decreaseRegularizationCriteria), bp::args("self"),
+             "Criteria used to decrease regularization")
+        .def("increaseRegularization",
+             pure_virtual(&Model::increaseRegularization), bp::args("self"),
+             "Increase the state and control regularization values by a "
+             "regfactor_.")
+        .def("decreaseRegularization",
+             pure_virtual(&Model::decreaseRegularization), bp::args("self"),
+             "Decrease the state and control regularization values by a "
+             "regfactor_.")
+        .def(
+            "computeFeasibility", &Model::computeFeasibility,
+            bp::args("self", "fs"),
+            "Compute the feasibility from a given residual vector.\n\n"
+            "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+            "or computeEqualityFeasibility, we can compute the feasibility "
+            "using different norms (e.g, l-infty or l-1 norms). By default we "
+            "use the l-infty norm; however, we can change the type of norm "
+            "using set_feasnorm. By default we use the l-inf norm, however, we "
+            "can use the l-1 norm by defining inffeas as False.\n"
+            ":param fs: list of residual vectors which we wish to compute the "
+            "feasibility\n"
+            ":return the residuals' feasibility")
+        .def("computeDynamicFeasibility", &Model::computeDynamicFeasibility,
+             bp::args("self"),
+             "Compute the dynamic feasibility for the current guess.\n\n"
+             "The feasibility can be computed using the computed using the l-1 "
+             "and l-inf norms. By default we use the l-inf norm, however, we "
+             "can use the l-1 norm by defining inffeas as False.")
+        .def(
+            "computeStateFeasibility", &Model::computeStateFeasibility,
+            bp::args("self", "xs"),
+            "Compute the state box-constraint feasibility from a given state trajectory.\n\n"
+            "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+            "or computeEqualityFeasibility, we can compute the feasibility "
+            "using different norms (e.g, l-infty or l-1 norms). By default we "
+            "use the l-infty norm; however, we can change the type of norm "
+            "using set_feasnorm. By default we use the l-inf norm, however, we "
+            "can use the l-1 norm by defining inffeas as False.\n"
+            ":param xs: list of state vectors which we wish to compute the "
+            "feasibility\n"
+            ":return the state trajectory's feasibility")
+        .def(
+            "computeControlFeasibility", &Model::computeControlFeasibility,
+            bp::args("self", "us"),
+            "Compute the control box-constraint feasibility from a given control trajectory.\n\n"
+            "As in the computeDynamicFeasibility, computeInequalityFeasibility "
+            "or computeEqualityFeasibility, we can compute the feasibility "
+            "using different norms (e.g, l-infty or l-1 norms). By default we "
+            "use the l-infty norm; however, we can change the type of norm "
+            "using set_feasnorm. By default we use the l-inf norm, however, we "
+            "can use the l-1 norm by defining inffeas as False.\n"
+            ":param us: list of control vectors which we wish to compute the "
+            "feasibility\n"
+            ":return the control trajectory's feasibility")
+        .def("computeInequalityFeasibility",
+             &Model::computeInequalityFeasibility, bp::args("self"),
+             "Compute the feasibility of the inequality constraint for the "
+             "current guess.\n\n"
+             "The feasibility can be computed using the computed using the l-1 "
+             "and l-inf norms.\n"
+             "By default we use the l-inf norm, however, we can use the l-1 "
+             "norm by defining inffeas as False.")
+        .def("computeEqualityFeasibility", &Model::computeEqualityFeasibility,
+             bp::args("self"),
+             "Compute the feasibility of the equality constraint for the "
+             "current guess.\n\n"
+             "The feasibility can be computed using the computed using the l-1 "
+             "and l-inf norms.\n"
+             "By default we use the l-inf norm, however, we can use the l-1 "
+             "norm by defining inffeas as False.")
+        .def("setCallbacks", &Model::setCallbacks,
+             bp::args("self", "callbacks"),
+             "Set a list of callback functions using for diagnostic.\n\n"
+             "Each iteration, the solver calls these set of functions in order "
+             "to allowed user the diagnostic of the its performance.\n"
+             ":param callbacks: set of callback functions.")
+        .def("getCallbacks", &Model::getCallbacks,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             bp::args("self"),
+             "Return the list of callback functions using for diagnostic.\n\n"
+             ":return set of callback functions.")
+        .add_property("problem",
+                      bp::make_function(
+                          &Model::get_problem,
+                          bp::return_value_policy<bp::copy_const_reference>()),
+                      "shooting problem")
+        .add_property(
+            "alphas",
+            bp::make_function(
+                &Model::get_alphas,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            bp::make_function(&Model::set_alphas),
+            "list of step length (alpha) values")
+        .def_readwrite("dImpr", &Model::dImpr_,
+                      "Reduction in the iteration improvement (i.e., maximum "
+                      "between cost and merit values)")
+        .def_readwrite("xs", &Model::xs_, "state trajectory")
+        .def_readwrite("us", &Model::us_, "control sequence")
+        .def_readwrite("fs", &Model::fs_, "dynamics gaps")
+        .def_readwrite("dxs", &Model::dxs_, "linear changes in the state trajectory")
+        .def_readwrite("dus", &Model::dus_, "linear changes in the control trajectory")
+        .def_readwrite("xs_try", &Model::xs_try_,
+                       "state trajectory computed in the line-search procedure")
+        .def_readwrite("us_try", &Model::us_try_,
+                       "control sequence computed in the line-search procedure")
+        .def_readwrite("fs_try", &Model::fs_try_,
+                       "dynamics gaps computed in the line-search procedure")
+        .def_readwrite("isFeasible", &Model::is_feasible_, "feasible (xs,us)")
+        .def_readwrite("cost", &Model::cost_, "cost for the current guess")
+        .def_readwrite("cost_try", &Model::cost_try_,
+                       "cost computed in the line-search procedure")
+        .def_readwrite("merit", &Model::merit_, "merit for the current guess")
+        .def_readwrite("stop", &Model::stop_, "stopping criteria value")
+        .def_readwrite(
+            "DV", &Model::DV_,
+            "constant, linear and quadratic terms of the expected improvement")
+        .def_readwrite("dV", &Model::dV_,
+                       "reduction in the cost function computed by `tryStep()`")
+        .def_readwrite(
+            "dPhi", &Model::dPhi_,
+            "reduction in the merit function computed by `tryStep()`")
+        .def_readwrite(
+            "dVexp_full", &Model::dVexp_full_,
+            "expected reduction in the cost function for a full step length")
+        .def_readwrite("dVexp", &Model::dVexp_,
+                       "expected reduction in the cost function for a selected "
+                       "step length")
+        .def_readwrite("dPhiexp", &Model::dPhiexp_,
+                       "expected reduction in the merit function for a "
+                       "selected step length")
+        .def_readwrite("dfeas", &Model::dfeas_, "reduction in the feasibility")
+        .def_readwrite("feas", &Model::feas_,
+                       "total feasibility for the current guess")
+        .def_readwrite(
+            "ffeas", &Model::ffeas_,
+            "feasibility of the dynamic constraint for the current guess")
+        .def_readwrite(
+            "gfeas", &Model::gfeas_,
+            "feasibility of the inequality constraint for the current guess")
+        .def_readwrite(
+            "hfeas", &Model::hfeas_,
+            "feasibility of the equality constraint for the current guess")
+        .def_readwrite(
+            "ffeas_try", &Model::ffeas_try_,
+            "feasibility of the dynamic constraint for the current step length")
+        .def_readwrite(
+            "gfeas_try", &Model::gfeas_try_,
+            "feasibility of the inequality constraint for the current "
+            "step length")
+        .def_readwrite("hfeas_try", &Model::hfeas_try_,
+                       "feasibility of the equality constraint for the current "
+                       "step length")
+        .def_readwrite("g_adj", &Model::g_adj_,
+                       "adjusted inequality bound")
+        .def_readwrite("x_adj", &Model::x_adj_,
+                       "adjusted state bound")
+        .def_readwrite("u_adj", &Model::u_adj_,
+                       "adjusted control bound")
+        .add_property("preg", bp::make_function(&Model::get_preg),
+                      bp::make_function(&Model::set_preg),
+                      "primal-variable regularization")
+        .add_property("dreg", bp::make_function(&Model::get_dreg),
+                      bp::make_function(&Model::set_dreg),
+                      "dual-variable regularization")
+        .add_property("reg_min", bp::make_function(&Model::get_reg_min),
+                      bp::make_function(&Model::set_reg_min),
+                      "minimum regularization value.")
+        .add_property("reg_max", bp::make_function(&Model::get_reg_max),
+                      bp::make_function(&Model::set_reg_max),
+                      "maximum regularization value.")
+        .add_property(
+            "x_reg",
+            bp::make_function(
+                &Model::get_xreg,
+                deprecated<bp::return_value_policy<bp::return_by_value>>(
+                    "Deprecated. Use preg")),
+            bp::make_function(&Model::set_xreg,
+                              deprecated<>("Deprecated. Use preg.")),
+            "state regularization")
+        .add_property(
+            "u_reg",
+            bp::make_function(
+                &Model::get_ureg,
+                deprecated<bp::return_value_policy<bp::return_by_value>>(
+                    "Deprecated. Use preg")),
+            bp::make_function(&Model::set_ureg,
+                              deprecated<>("Deprecated. Use preg.")),
+            "control regularization")
+        .def_readwrite("stepLength", &Model::steplength_, "applied step length")
+        .add_property("th_acceptStep",
+                      bp::make_function(&Model::get_th_acceptstep),
+                      bp::make_function(&Model::set_th_acceptstep),
+                      "threshold for step acceptance")
+        .add_property("th_stop", bp::make_function(&Model::get_th_stop),
+                      bp::make_function(&Model::set_th_stop),
+                      "threshold for stopping criteria")
+        .add_property(
+            "th_gapTol",
+            bp::make_function(
+                &Model::get_th_gaptol,
+                deprecated<bp::return_value_policy<bp::return_by_value>>(
+                    "Deprecated. Dot not use this threshold as it is not "
+                    "needed "
+                    "anymore")),
+            bp::make_function(
+                &Model::set_th_gaptol,
+                deprecated<>("Deprecated. Dot not use this threshold as it is "
+                             "not needed anymore")),
+            "threshold for accepting a gap as non-zero")
+        .add_property(
+            "feasNorm", bp::make_function(&Model::get_feasnorm),
+            bp::make_function(&Model::set_feasnorm),
+            "norm used to compute the dynamic and constraints feasibility")
+        .def_readwrite("iter", &Model::iter_,
+                       "number of iterations runned in solve()")
+        .def_readwrite("acceptStep", &Model::acceptstep_,
+                       "true if the last step is accepted")
+        .def_readonly("nh_T", &Model::nh_T_,
+                        "dimension of terminal equality constraints")
+        .def_readonly("ng_T", &Model::ng_T_,
+                        "dimension of terminal inequality constraints");
+  }
+};
 
+#define CROCODDYL_SOLVER_ABSTRACT_PYTHON_BINDINGS(Scalar)                      \
+  typedef SolverAbstractTpl<Scalar> Model;                                     \
+  typedef SolverAbstractTpl_wrap<Scalar> Model_wrap;                           \
+  typedef ShootingProblemTpl<Scalar> Problem;                                  \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model_wrap, boost::noncopyable>(                                  \
+      "SolverAbstract",                                                        \
+      "Abstract class for optimal control solvers.\n\n"                        \
+      "A solver resolves an optimal control solver which is formulated in a "  \
+      "shooting problem abstraction. The main routines are computeDirection "  \
+      "and tryStep. The former finds a search direction and typically "        \
+      "computes the derivatives of each action model. The latter rollout the " \
+      "dynamics and cost (i.e. the action) to try the search direction found " \
+      "by computeDirection. Both functions used the current guess defined by " \
+      "setCandidate. Finally, solve function is used to define when the "      \
+      "search direction and length are computed in each iterate. It also "     \
+      "describes the globalization strategy (i.e. regularization) of the "     \
+      "numerical optimization.",                                               \
+      bp::init<std::shared_ptr<Problem>>(bp::args("self", "problem"),          \
+                                         "Initialize the solver model.\n\n"    \
+                                         ":param problem: shooting problem"))  \
+      .def(SolverAbstractVisitor<Model_wrap>())                                \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_CALLBACK_ABSTRACT_PYTHON_BINDINGS(Scalar)                    \
+  typedef CallbackAbstractTpl<Scalar> Callback;                                \
+  typedef CallbackAbstractTpl_wrap<Scalar> Callback_wrap;                      \
+  typedef std::shared_ptr<Callback> CallbackPtr;                               \
+  StdVectorPythonVisitor<std::vector<CallbackPtr>, true>::expose(              \
+      "StdVec_Callback");                                                      \
+  bp::register_ptr_to_python<std::shared_ptr<Callback>>();                     \
+  bp::class_<Callback_wrap, boost::noncopyable>(                               \
+      "CallbackAbstract",                                                      \
+      "Abstract class for solver callbacks.\n\n"                               \
+      "A callback is used to diagnostic the behaviour of our solver in each "  \
+      "iteration of it. For instance, it can be used to print values, record " \
+      "data or display motions")                                               \
+      .def("__call__", pure_virtual(&Callback_wrap::operator()),               \
+           bp::args("self", "solver"),                                         \
+           "Run the callback function given a solver.\n\n"                     \
+           ":param solver: solver to be diagnostic")                           \
+      .def(CopyableVisitor<Callback_wrap>());
+
+void exposeSolverAbstract() {
 #ifdef SCALAR_float64
   bp::enum_<FeasibilityNorm>("FeasibilityNorm")
       .value("LInf", LInf)
       .value("L1", L1)
+      .value("L2", L2)
       .export_values();
 #endif
 
-#ifdef SCALAR_float64
-  bp::class_<SolverAbstract_wrap, boost::noncopyable>(
-      "SolverAbstract",
-      "Abstract class for optimal control solvers.\n\n"
-      "A solver resolves an optimal control solver which is formulated in a "
-      "shooting problem\n"
-      "abstraction. The main routines are computeDirection and tryStep. The "
-      "former finds\n"
-      "a search direction and typically computes the derivatives of each "
-      "action model. The latter\n"
-      "rollout the dynamics and cost (i.e. the action) to try the search "
-      "direction found by\n"
-      "computeDirection. Both functions used the current guess defined by "
-      "setCandidate. Finally\n"
-      "solve function is used to define when the search direction and length "
-      "are computed in each\n"
-      "iterate. It also describes the globalization strategy (i.e. "
-      "regularization) of the\n"
-      "numerical optimization.",
-      bp::init<std::shared_ptr<ShootingProblem> >(
-          bp::args("self", "problem"),
-          "Initialize the solver model.\n\n"
-          ":param problem: shooting problem"))
-      .def("solve", pure_virtual(&SolverAbstract_wrap::solve),
-           bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible",
-                    "regInit"),
-           "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
-           "terms.\n\n"
-           "From an initial guess init_xs,init_us (feasible or not), iterate\n"
-           "over computeDirection and tryStep until stoppingCriteria is below\n"
-           "threshold. It also describes the globalization strategy used\n"
-           "during the numerical optimization.\n"
-           ":param init_xs: initial guess for state trajectory with T+1 "
-           "elements (default [])\n"
-           ":param init_us: initial guess for control trajectory with T "
-           "elements (default []).\n"
-           ":param maxiter: maximum allowed number of iterations (default "
-           "100).\n"
-           ":param isFeasible: true if the init_xs are obtained from "
-           "integrating the init_us (rollout) (default "
-           "False).\n"
-           ":param regInit: initial guess for the regularization value. Very "
-           "low\n"
-           "                values are typical used with very good guess "
-           "points (init_xs, init_us).\n"
-           ":returns A boolean that describes if convergence was reached.")
-      .def("computeDirection",
-           pure_virtual(&SolverAbstract_wrap::computeDirection),
-           bp::args("self", "recalc"),
-           "Compute the search direction (dx, du) for the current guess (xs, "
-           "us).\n\n"
-           "You must call setCandidate first in order to define the current\n"
-           "guess. A current guess defines a state and control trajectory\n"
-           "(xs, us) of T+1 and T elements, respectively.\n"
-           ":params recalc: true for recalculating the derivatives at current "
-           "state and control.\n"
-           ":returns the search direction dx, du and the dual lambdas as lists "
-           "of T+1, T and T+1 lengths.")
-      .def(
-          "tryStep", pure_virtual(&SolverAbstract_wrap::tryStep),
-          bp::args("self", "stepLength"),
-          "Try a predefined step length and compute its cost improvement.\n\n"
-          "It uses the search direction found by computeDirection to try a\n"
-          "determined step length; so you need to first run computeDirection.\n"
-          "Additionally it returns the cost improvement along the predefined\n"
-          "step length.\n"
-          ":param stepLength: step length\n"
-          ":returns the cost improvement.")
-      .def(
-          "stoppingCriteria",
-          pure_virtual(&SolverAbstract_wrap::stoppingCriteria),
-          bp::args("self"),
-          "Return a positive value that quantifies the algorithm "
-          "termination.\n\n"
-          "These values typically represents the gradient norm which tell us\n"
-          "that it's been reached the local minima. This function is used to\n"
-          "evaluate the algorithm convergence. The stopping criteria strictly\n"
-          "speaking depends on the search direction (calculated by\n"
-          "computeDirection) but it could also depend on the chosen step\n"
-          "length, tested by tryStep.")
-      .def("expectedImprovement",
-           pure_virtual(&SolverAbstract_wrap::expectedImprovement_wrap),
-           bp::args("self"),
-           "Return the expected improvement from a given current search "
-           "direction.\n\n"
-           "For computing the expected improvement, you need to compute first\n"
-           "the search direction by running computeDirection.")
-      .def("setCandidate", &SolverAbstract_wrap::setCandidate,
-           setCandidate_overloads(
-               bp::args("self", "xs", "us", "isFeasible"),
-               "Set the solver candidate warm-point values (xs, us).\n\n"
-               "The solver candidates are defined as a state and control "
-               "trajectory\n"
-               "(xs, us) of T+1 and T elements, respectively. Additionally, we "
-               "need\n"
-               "to define is (xs,us) pair is feasible, this means that the "
-               "dynamics\n"
-               "rollout give us produces xs.\n"
-               ":param xs: state trajectory of T+1 elements (default []).\n"
-               ":param us: control trajectory of T elements (default []).\n"
-               ":param isFeasible: true if the xs are obtained from "
-               "integrating the\n"
-               "us (rollout)."))
-      .def("computeDynamicFeasibility",
-           &SolverAbstract_wrap::computeDynamicFeasibility, bp::args("self"),
-           "Compute the dynamic feasibility for the current guess.\n\n"
-           "The feasibility can be computed using the computed using the l-1 "
-           "and l-inf norms.\n"
-           "By default we use the l-inf norm, however, we can use the l-1 norm "
-           "by defining inffeas as False.")
-      .def("computeInequalityFeasibility",
-           &SolverAbstract_wrap::computeInequalityFeasibility, bp::args("self"),
-           "Compute the feasibility of the inequality constraint for the "
-           "current guess.\n\n"
-           "The feasibility can be computed using the computed using the l-1 "
-           "and l-inf norms.\n"
-           "By default we use the l-inf norm, however, we can use the l-1 norm "
-           "by defining inffeas as False.")
-      .def("computeEqualityFeasibility",
-           &SolverAbstract_wrap::computeEqualityFeasibility, bp::args("self"),
-           "Compute the feasibility of the equality constraint for the current "
-           "guess.\n\n"
-           "The feasibility can be computed using the computed using the l-1 "
-           "and l-inf norms.\n"
-           "By default we use the l-inf norm, however, we can use the l-1 norm "
-           "by defining inffeas as False.")
-      .def("setCallbacks", &SolverAbstract_wrap::setCallbacks,
-           bp::args("self", "callbacks"),
-           "Set a list of callback functions using for diagnostic.\n\n"
-           "Each iteration, the solver calls these set of functions in order "
-           "to\n"
-           "allowed user the diagnostic of the its performance.\n"
-           ":param callbacks: set of callback functions.")
-      .def("getCallbacks", &SolverAbstract_wrap::getCallbacks,
-           bp::return_value_policy<bp::copy_const_reference>(),
-           bp::args("self"),
-           "Return the list of callback functions using for diagnostic.\n\n"
-           ":return set of callback functions.")
-      .add_property("problem",
-                    bp::make_function(
-                        &SolverAbstract_wrap::get_problem,
-                        bp::return_value_policy<bp::copy_const_reference>()),
-                    "shooting problem")
-      .def_readwrite("xs", &SolverAbstract_wrap::xs_, "state trajectory")
-      .def_readwrite("us", &SolverAbstract_wrap::us_, "control sequence")
-      .def_readwrite("fs", &SolverAbstract_wrap::fs_, "dynamics gaps")
-      .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_,
-                     "feasible (xs,us)")
-      .def_readwrite("cost", &SolverAbstract_wrap::cost_,
-                     "cost for the current guess")
-      .def_readwrite("merit", &SolverAbstract_wrap::merit_,
-                     "merit for the current guess")
-      .def_readwrite("stop", &SolverAbstract_wrap::stop_,
-                     "stopping criteria value")
-      .def_readwrite("d", &SolverAbstract_wrap::d_,
-                     "linear and quadratic terms of the expected improvement")
-      .def_readwrite("dV", &SolverAbstract_wrap::dV_,
-                     "reduction in the cost function computed by `tryStep()`")
-      .def_readwrite("dPhi", &SolverAbstract_wrap::dPhi_,
-                     "reduction in the merit function computed by `tryStep()`")
-      .def_readwrite("dVexp", &SolverAbstract_wrap::dVexp_,
-                     "expected reduction in the cost function")
-      .def_readwrite("dPhiexp", &SolverAbstract_wrap::dPhiexp_,
-                     "expected reduction in the merit function")
-      .def_readwrite("dfeas", &SolverAbstract_wrap::dfeas_,
-                     "reduction in the feasibility")
-      .def_readwrite("feas", &SolverAbstract_wrap::feas_,
-                     "total feasibility for the current guess")
-      .def_readwrite(
-          "ffeas", &SolverAbstract_wrap::ffeas_,
-          "feasibility of the dynamic constraint for the current guess")
-      .def_readwrite(
-          "gfeas", &SolverAbstract_wrap::gfeas_,
-          "feasibility of the inequality constraint for the current guess")
-      .def_readwrite(
-          "hfeas", &SolverAbstract_wrap::hfeas_,
-          "feasibility of the equality constraint for the current guess")
-      .def_readwrite(
-          "ffeas_try", &SolverAbstract_wrap::ffeas_try_,
-          "feasibility of the dynamic constraint for the current step length")
-      .def_readwrite("gfeas_try", &SolverAbstract_wrap::gfeas_try_,
-                     "feasibility of the inequality constraint for the current "
-                     "step length")
-      .def_readwrite(
-          "hfeas_try", &SolverAbstract_wrap::hfeas_try_,
-          "feasibility of the equality constraint for the current step length")
-      .add_property("preg", bp::make_function(&SolverAbstract_wrap::get_preg),
-                    bp::make_function(&SolverAbstract_wrap::set_preg),
-                    "primal-variable regularization")
-      .add_property("dreg", bp::make_function(&SolverAbstract_wrap::get_dreg),
-                    bp::make_function(&SolverAbstract_wrap::set_dreg),
-                    "dual-variable regularization")
-      .add_property(
-          "x_reg",
-          bp::make_function(
-              &SolverAbstract_wrap::get_xreg,
-              deprecated<bp::return_value_policy<bp::return_by_value> >(
-                  "Deprecated. Use preg")),
-          bp::make_function(&SolverAbstract_wrap::set_xreg,
-                            deprecated<>("Deprecated. Use preg.")),
-          "state regularization")
-      .add_property(
-          "u_reg",
-          bp::make_function(
-              &SolverAbstract_wrap::get_ureg,
-              deprecated<bp::return_value_policy<bp::return_by_value> >(
-                  "Deprecated. Use preg")),
-          bp::make_function(&SolverAbstract_wrap::set_ureg,
-                            deprecated<>("Deprecated. Use preg.")),
-          "control regularization")
-      .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_,
-                     "applied step length")
-      .add_property("th_acceptStep",
-                    bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
-                    bp::make_function(&SolverAbstract_wrap::set_th_acceptstep),
-                    "threshold for step acceptance")
-      .add_property("th_stop",
-                    bp::make_function(&SolverAbstract_wrap::get_th_stop),
-                    bp::make_function(&SolverAbstract_wrap::set_th_stop),
-                    "threshold for stopping criteria")
-      .add_property("th_gapTol",
-                    bp::make_function(&SolverAbstract_wrap::get_th_gaptol),
-                    bp::make_function(&SolverAbstract_wrap::set_th_gaptol),
-                    "threshold for accepting a gap as non-zero")
-      .add_property(
-          "feasNorm", bp::make_function(&SolverAbstract_wrap::get_feasnorm),
-          bp::make_function(&SolverAbstract_wrap::set_feasnorm),
-          "norm used to compute the dynamic and constraints feasibility")
-      .def_readwrite("iter", &SolverAbstract_wrap::iter_,
-                     "number of iterations runned in solve()")
-      .def(CopyableVisitor<SolverAbstract_wrap>());
-
-  bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
-      "CallbackAbstract",
-      "Abstract class for solver callbacks.\n\n"
-      "A callback is used to diagnostic the behaviour of our solver in each "
-      "iteration of it.\n"
-      "For instance, it can be used to print values, record data or display "
-      "motions")
-      .def("__call__", pure_virtual(&CallbackAbstract_wrap::operator()),
-           bp::args("self", "solver"),
-           "Run the callback function given a solver.\n\n"
-           ":param solver: solver to be diagnostic")
-      .def(CopyableVisitor<CallbackAbstract_wrap>());
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_SOLVER_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_CALLBACK_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
 #endif
 }
 

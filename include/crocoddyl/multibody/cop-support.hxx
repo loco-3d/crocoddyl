@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+// Copyright (C) 2021-2026, University of Edinburgh, University of Oxford,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -148,8 +148,14 @@ CoPSupportTpl<Scalar>& CoPSupportTpl<Scalar>::operator=(
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const CoPSupportTpl<Scalar>& X) {
-  os << "         R: " << X.get_R() << std::endl;
-  os << "       box: " << X.get_box().transpose() << std::endl;
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "         R: " << X.get_R().template cast<PrintableScalar>().format(fmt)
+     << std::endl;
+  os << "       box: "
+     << X.get_box().transpose().template cast<PrintableScalar>().format(fmt)
+     << std::endl;
   return os;
 }
 

@@ -43,7 +43,8 @@ int main(int argc, char* argv[]) {
   std::shared_ptr<crocoddyl::ShootingProblem> problem =
       gait.createWalkingProblem(x0, stepLength, stepHeight, timeStep, stepKnots,
                                 supportKnots);
-  crocoddyl::SolverFDDP solver(problem);
+  crocoddyl::SolverFDDP solver(problem,
+                               crocoddyl::DynamicsSolverType::MultiShoot);
   if (CALLBACKS) {
     std::vector<std::shared_ptr<crocoddyl::CallbackAbstract> > cbs;
     cbs.push_back(std::make_shared<crocoddyl::CallbackVerbose>());

@@ -146,6 +146,7 @@ problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 
 # Creating the DDP solver for this OC problem, defining a logger
 solver = crocoddyl.SolverFDDP(problem)
+solver.th_minImprove = 1.0
 if WITHPLOT:
     solver.setCallbacks(
         [
@@ -159,7 +160,7 @@ else:
 # Solving it with the FDDP algorithm
 xs = [x0] * (solver.problem.T + 1)
 us = solver.problem.quasiStatic([x0] * solver.problem.T)
-solver.solve(xs, us, 500, False, 0.1)
+solver.solve(xs, us, 500, False)
 
 # Visualizing the solution in gepetto-viewer
 display = None

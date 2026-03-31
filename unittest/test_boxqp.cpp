@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,6 +99,7 @@ void test_box_qp_with_identity_hessian() {
   std::size_t nx = random_int_in_range(2, 5);
   crocoddyl::BoxQP boxqp(nx);
   boxqp.set_reg(0.);
+  const double tol = 100. * std::sqrt(std::numeric_limits<double>::epsilon());
 
   Eigen::MatrixXd hessian = Eigen::MatrixXd::Identity(nx, nx);
   Eigen::VectorXd gradient = Eigen::VectorXd::Ones(nx);
@@ -130,13 +131,13 @@ void test_box_qp_with_identity_hessian() {
 
   // Checking the solution of the problem. Note that it the negative of the
   // gradient since Hessian is identity matrix
-  BOOST_CHECK((sol.x - negbounded_gradient).isZero(1e-9));
+  BOOST_CHECK((sol.x - negbounded_gradient).isZero(tol));
 
   // Checking the solution against a regularized case
   boxqp.set_reg(reg);
   crocoddyl::BoxQPSolution sol_reg =
       boxqp.solve(hessian, gradient, lb, ub, xinit);
-  BOOST_CHECK((sol_reg.x - negbounded_gradient_reg).isZero(1e-9));
+  BOOST_CHECK((sol_reg.x - negbounded_gradient_reg).isZero(tol));
 
   // Checking the all bounds are free and zero clamped
   BOOST_CHECK(sol.free_idx.size() == nf);

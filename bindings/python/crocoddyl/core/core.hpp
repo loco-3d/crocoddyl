@@ -68,6 +68,9 @@ void exposeActivation2NormBarrier();
 void exposeSolverDDP();
 void exposeSolverKKT();
 void exposeSolverFDDP();
+#ifdef CROCODDYL_WITH_ODYN
+void exposeSolverOdynSQP();
+#endif
 void exposeSolverBoxQP();
 void exposeSolverBoxDDP();
 void exposeSolverBoxFDDP();

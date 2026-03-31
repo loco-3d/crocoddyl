@@ -1,13 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2022, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2020-2026, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "constraint.hpp"
 
+#include "../random_generator.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
@@ -215,16 +216,10 @@ ConstraintModelFactory::create(ConstraintModelTypes::Type constraint_type,
 
 std::shared_ptr<crocoddyl::ConstraintModelAbstract> create_random_constraint(
     StateModelTypes::Type state_type) {
-  static bool once = true;
-  if (once) {
-    srand((unsigned)time(NULL));
-    once = false;
-  }
-
   ConstraintModelFactory factory;
   ConstraintModelTypes::Type rand_type =
-      static_cast<ConstraintModelTypes::Type>(
-          rand() % ConstraintModelTypes::NbConstraintModelTypes);
+      static_cast<ConstraintModelTypes::Type>(random_int_in_range<int>(
+          0, ConstraintModelTypes::NbConstraintModelTypes - 1));
   return factory.create(rand_type, state_type);
 }
 

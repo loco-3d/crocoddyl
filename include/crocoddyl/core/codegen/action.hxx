@@ -376,7 +376,7 @@ void ActionModelCodeGenTpl<Scalar>::compileLib() {
   };
   switch (compiler_type_) {
     case GCC: {
-      CppAD::cg::GccCompiler<Scalar> compiler("/usr/bin/gcc");
+      CppAD::cg::GccCompiler<Scalar> compiler(compilerExecutable(GCC));
       std::vector<std::string> compile_flags = compiler.getCompileFlags();
       compile_flags.clear();
       auto extra_flags = splitFlags(compile_options_);
@@ -387,7 +387,7 @@ void ActionModelCodeGenTpl<Scalar>::compileLib() {
       break;
     }
     case CLANG: {
-      CppAD::cg::ClangCompiler<Scalar> compiler("/usr/bin/clang");
+      CppAD::cg::ClangCompiler<Scalar> compiler(compilerExecutable(CLANG));
       std::vector<std::string> compile_flags = compiler.getCompileFlags();
       compile_flags.clear();
       auto extra_flags = splitFlags(compile_options_);
@@ -665,7 +665,7 @@ ActionModelCodeGenTpl<Scalar>::ActionModelCodeGenTpl()
     : model_(nullptr),
       np_(0),
       lib_fname_(""),
-      compiler_type_(CLANG),
+      compiler_type_(defaultCompilerType()),
       compile_options_("-O -ffast-math -march=native"),
       updateParams_(EmptyParamsEnv) {
   // Add initialization logic if necessary

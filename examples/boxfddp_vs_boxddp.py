@@ -52,7 +52,7 @@ boxfddp = crocoddyl.SolverBoxFDDP(
         jumping_gait["flyingKnots"],
     )
 )
-boxddp = crocoddyl.SolverBoxDDP(
+boxddp = crocoddyl.SolverBoxFDDP(
     gait.createJumpingProblem(
         x0,
         jumping_gait["jumpHeight"],
@@ -60,7 +60,8 @@ boxddp = crocoddyl.SolverBoxDDP(
         jumping_gait["timeStep"],
         jumping_gait["groundKnots"],
         jumping_gait["flyingKnots"],
-    )
+    ),
+    crocoddyl.DynamicsSolverType.SingleShoot,
 )
 
 # Added the callback functions
@@ -86,11 +87,9 @@ xs = [x0] * (boxfddp.problem.T + 1)
 us = boxddp.problem.quasiStatic([x0] * boxddp.problem.T)
 
 print("*** SOLVE with Box-FDDP ***")
-boxfddp.th_stop = 1e-7
 boxfddp.solve(xs, us, 50, False)
 
 print("*** SOLVE with Box-DDP ***")
-boxddp.th_stop = 1e-7
 boxddp.solve(xs, us, 30, False)
 
 # Display the entire motion

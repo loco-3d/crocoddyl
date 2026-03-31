@@ -38,6 +38,7 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
     endforeach()
   endif()
   set(generated_eti_files "")
+  set(codegen_generated_eti_files "")
   foreach(template_file ${ETI_TEMPLATE_FILES})
     # Extract the relative path from ${source_dir}/
     file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}/${source_dir}"
@@ -51,6 +52,12 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
     file(MAKE_DIRECTORY ${output_dir})
     # Generate .cpp file from template for each scalar type
     foreach(scalar ${scalar_types})
+      # Work around GCC14/CppADCodeGen explicit instantiation failures for
+      # ActionModelCodeGenTpl<float,double>. These symbols are instantiated
+      # implicitly where needed.
+      if(template_file MATCHES "/src/core/codegen/action\\.cpp_fptype\\.in$")
+        continue()
+      endif()
       # Sanitize scalar name for filenames
       crocoddyl_sanitize_scalar_name("${scalar}" scalar_filename)
       string(REPLACE ".cpp" "-${scalar_filename}.cpp" scalar_output_file
@@ -58,8 +65,18 @@ function(crocoddyl_generate_cpp_files target_lib cpp_format source_dir)
       set(SCALAR_TYPE ${scalar})
       configure_file(${template_file} ${scalar_output_file} @ONLY)
       list(APPEND generated_eti_files ${scalar_output_file})
+      if(scalar_output_file MATCHES "/codegen/")
+        list(APPEND codegen_generated_eti_files ${scalar_output_file})
+      endif()
     endforeach()
   endforeach()
+  # CppADCodeGen defines thread_local static template members in headers. Some
+  # compiler/PCH combinations can trigger redefinition errors; avoid applying
+  # PCH to generated codegen ETI units.
+  if(codegen_generated_eti_files)
+    set_source_files_properties(${codegen_generated_eti_files}
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+  endif()
   # Add generated files to the target
   target_sources(${target_lib} PRIVATE ${generated_eti_files})
 endfunction()

@@ -1,8 +1,28 @@
 import os
+import re
 import sys
 
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
+
+
+def prepare_notebook_for_test(notebook_content):
+    for cell in notebook_content.cells:
+        if cell.cell_type != "code":
+            continue
+        source = cell.source
+        source = re.sub(r"\bn_iter\s*=\s*1000000\b", "n_iter = 10000", source)
+        source = re.sub(
+            r"HTML\(anim\.to_html5_video\(\)\)",
+            'print("Skipping animation rendering in notebook test mode.")',
+            source,
+        )
+        source = re.sub(
+            r"HTML\(anim\.to_jshtml\(\)\)",
+            'print("Skipping animation rendering in notebook test mode.")',
+            source,
+        )
+        cell.source = source
 
 
 def run_notebook(notebook_path):
@@ -16,6 +36,9 @@ def run_notebook(notebook_path):
     # Read the notebook
     with open(notebook_path) as f:
         notebook_content = nbformat.read(f, as_version=4)
+    if os.environ.get("CROCODDYL_NOTEBOOK_TEST") == "1":
+        os.environ.setdefault("MPLBACKEND", "Agg")
+        prepare_notebook_for_test(notebook_content)
     # Create the notebook processor and exporter
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     try:

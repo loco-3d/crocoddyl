@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2024-2025, Heriot-Watt University
+// Copyright (C) 2024-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,53 @@ scalar_cast(const Scalar& x) {
   return static_cast<NewScalar>(x);
 }
 
+#ifdef CROCODDYL_WITH_CODEGEN
+
+// Casting to CppAD types from floating-point types
+template <typename NewScalar, typename Scalar>
+static typename std::enable_if<
+    std::is_floating_point<Scalar>::value &&
+        (std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<double>>>::value ||
+         std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<float>>>::value),
+    NewScalar>::type
+scalar_cast(const Scalar& x) {
+  return static_cast<NewScalar>(x);
+}
+
+// Casting to floating-point types from CppAD types
+template <typename NewScalar, typename Scalar>
+static inline typename std::enable_if<std::is_floating_point<Scalar>::value,
+                                      NewScalar>::type
+scalar_cast(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
+  return static_cast<NewScalar>(CppAD::Value(x).getValue());
+}
+
+#endif  // CROCODDYL_WITH_CODEGEN
+
+template <typename NewScalar, typename Scalar>
+std::vector<NewScalar> vector_cast(const std::vector<Scalar>& in) {
+  std::vector<NewScalar> out;
+  out.reserve(in.size());  // Optimize allocation
+  for (const auto& obj : in) {
+    out.push_back(scalar_cast<NewScalar>(obj));
+  }
+  return out;
+}
+
+template <typename NewScalar, typename Scalar, int Rows, int Cols, int Options,
+          int MaxRows, int MaxCols>
+std::vector<Eigen::Matrix<NewScalar, Rows, Cols, Options, MaxRows, MaxCols>>
+vector_cast(const std::vector<
+            Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>& in) {
+  std::vector<Eigen::Matrix<NewScalar, Rows, Cols, Options, MaxRows, MaxCols>>
+      out;
+  out.reserve(in.size());  // Optimize allocation
+  for (const auto& obj : in) {
+    out.push_back(obj.template cast<NewScalar>());
+  }
+  return out;
+}
+
 template <typename NewScalar, typename Scalar,
           template <typename> class ItemTpl>
 std::vector<ItemTpl<NewScalar>> vector_cast(
@@ -59,6 +106,22 @@ std::vector<std::shared_ptr<ItemTpl<NewScalar>>> vector_cast(
         obj->template cast<NewScalar>()));
   }
   return out;
+}
+
+template <typename Scalar, int Rows, int Cols, int Options, int MaxRows,
+          int MaxCols>
+Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> matrix_random_cast(
+    const Eigen::Index rows, const Eigen::Index cols) {
+  using MatrixDouble =
+      Eigen::Matrix<double, Rows, Cols, Options, MaxRows, MaxCols>;
+  return MatrixDouble::Random(rows, cols).template cast<Scalar>();
+}
+
+template <typename Scalar, int Rows, int Options, int MaxRows>
+Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, 1> vector_random_cast(
+    const Eigen::Index size) {
+  using VectorDouble = Eigen::Matrix<double, Rows, 1, Options, MaxRows, 1>;
+  return VectorDouble::Random(size).template cast<Scalar>();
 }
 
 }  // namespace crocoddyl
@@ -133,29 +196,6 @@ struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>,
 
 }  // namespace internal
 }  // namespace Eigen
-
-namespace crocoddyl {
-
-// Casting to CppAD types from floating-point types
-template <typename NewScalar, typename Scalar>
-static typename std::enable_if<
-    std::is_floating_point<Scalar>::value &&
-        (std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<double>>>::value ||
-         std::is_same<NewScalar, CppAD::AD<CppAD::cg::CG<float>>>::value),
-    NewScalar>::type
-scalar_cast(const Scalar& x) {
-  return static_cast<NewScalar>(x);
-}
-
-// Casting to floating-point types from CppAD types
-template <typename NewScalar, typename Scalar>
-static inline typename std::enable_if<std::is_floating_point<Scalar>::value,
-                                      NewScalar>::type
-scalar_cast(const CppAD::AD<CppAD::cg::CG<Scalar>>& x) {
-  return static_cast<NewScalar>(CppAD::Value(x).getValue());
-}
-
-}  // namespace crocoddyl
 
 #endif
 

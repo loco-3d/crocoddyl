@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -153,13 +153,19 @@ ResidualModelContactForceTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ResidualModelContactForceTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   std::shared_ptr<StateMultibody> s =
       std::static_pointer_cast<StateMultibody>(state_);
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
   os << "ResidualModelContactForce {frame="
-     << s->get_pinocchio()->frames[id_].name
-     << ", fref=" << fref_.toVector().head(nr_).transpose().format(fmt) << "}";
+     << s->get_pinocchio()->frames[id_].name << ", fref="
+     << fref_.toVector()
+            .head(nr_)
+            .transpose()
+            .template cast<PrintableScalar>()
+            .format(fmt)
+     << "}";
 }
 
 template <typename Scalar>

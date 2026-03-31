@@ -99,9 +99,9 @@ install(
     "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.launch"
     "${${PROJECT_NAME}_SOURCE_DIR}/bindings/python/crocoddyl/crocoddyl.rviz"
   DESTINATION ${CROCODDYL_PYTHON_INSTALL_DIR})
-# Install utility Python files
-set(${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES __init__.py pendulum.py
-                                                biped.py quadruped.py)
+
+set(${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES
+    __init__.py pendulum.py biped.py humanoid.py quadruped.py)
 
 foreach(python ${${PROJECT_NAME}_BINDINGS_UTILS_PYTHON_FILES})
   python_build(utils ${python})

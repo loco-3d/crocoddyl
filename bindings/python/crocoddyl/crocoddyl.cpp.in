@@ -18,6 +18,34 @@
 namespace crocoddyl {
 namespace python {
 
+#define CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(Scalar)                      \
+  typedef Eigen::Matrix<Scalar, 2, 1> Vector2;                           \
+  typedef Eigen::Matrix<Scalar, 3, 1> Vector3;                           \
+  typedef Eigen::Matrix<Scalar, 4, 1> Vector4;                           \
+  typedef Eigen::Matrix<Scalar, 6, 1> Vector6;                           \
+  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;                          \
+  typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic> Matrix6x;             \
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3;             \
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;              \
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX; \
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic,          \
+                        Eigen::RowMajor>                                 \
+      RowMatrixX;                                                        \
+  eigenpy::enableEigenPySpecific<Vector2>();                             \
+  eigenpy::enableEigenPySpecific<Vector3>();                             \
+  eigenpy::enableEigenPySpecific<Vector4>();                             \
+  eigenpy::enableEigenPySpecific<Vector6>();                             \
+  eigenpy::enableEigenPySpecific<Matrix46>();                            \
+  eigenpy::enableEigenPySpecific<MatrixX3>();                            \
+  eigenpy::enableEigenPySpecific<Matrix6x>();                            \
+  /* Register converters between std::vector and Python list */          \
+  StdVectorPythonVisitor<std::vector<VectorX>, true>::expose(            \
+      "StdVec_VectorX");                                                 \
+  StdVectorPythonVisitor<std::vector<MatrixX>, true>::expose(            \
+      "StdVec_MatrixX");                                                 \
+  StdVectorPythonVisitor<std::vector<RowMatrixX>, true>::expose(         \
+      "StdVec_RowMatrixX");
+
 namespace bp = boost::python;
 
 BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
@@ -34,7 +62,6 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
       ;
 #endif
 
-  eigenpy::enableEigenPy();
 #ifdef CROCODDYL_WITH_CODEGEN
   // Check if pycppad module is already importable
   PyObject* pycppad_module = PyImport_ImportModule("pycppad");
@@ -50,28 +77,20 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
   bp::scope().attr("WITH_CODEGEN") = false;
 #endif
 
-  typedef double Scalar;
-  typedef Eigen::Matrix<Scalar, 4, 1> Vector4;
-  typedef Eigen::Matrix<Scalar, 6, 1> Vector6;
-  typedef Eigen::Matrix<Scalar, 4, 6> Matrix46;
-  typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic> Matrix6x;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 3> MatrixX3;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorX;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixX;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-      RowMatrixX;
+#ifdef CROCODDYL_WITH_ODYN
+  bp::scope().attr("WITH_ODYN") = true;
+#else
+  bp::scope().attr("WITH_ODYN") = false;
+#endif
 
-  eigenpy::enableEigenPySpecific<Vector4>();
-  eigenpy::enableEigenPySpecific<Vector6>();
-  eigenpy::enableEigenPySpecific<Matrix46>();
-  eigenpy::enableEigenPySpecific<MatrixX3>();
-  eigenpy::enableEigenPySpecific<Matrix6x>();
+#ifdef CROCODDYL_WITH_IPOPT
+  bp::scope().attr("WITH_IPOPT") = true;
+#else
+  bp::scope().attr("WITH_IPOPT") = false;
+#endif
 
-  // Register converters between std::vector and Python list
-  StdVectorPythonVisitor<std::vector<VectorX>, true>::expose("StdVec_VectorX");
-  StdVectorPythonVisitor<std::vector<MatrixX>, true>::expose("StdVec_MatrixX");
-  StdVectorPythonVisitor<std::vector<RowMatrixX>, true>::expose(
-      "StdVec_RowMatrixX");
+
+  CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(@SCALAR_TYPE@)
 
 #ifdef SCALAR_float64
   // Register converters between std::set and Python set

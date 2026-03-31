@@ -247,15 +247,14 @@ struct CostDataAbstractVisitor
       .def(CopyableVisitor<Data>());
 
 void exposeCostAbstract() {
-// TODO: Remove once the deprecated update call has been removed in a future
-// release
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // TODO: Remove once the deprecated update call has been removed in a future
+  // release
+  CROCODDYL_DISABLE_WARNING_DEPRECATED
 
   CROCODDYL_COST_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_COST_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
 
-#pragma GCC diagnostic pop
+  CROCODDYL_ENABLE_WARNING_DEPRECATED
 }
 
 }  // namespace python

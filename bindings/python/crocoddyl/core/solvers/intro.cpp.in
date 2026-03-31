@@ -9,153 +9,137 @@
 #include "crocoddyl/core/solvers/intro.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
-#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/core/solver-base.hpp"
 
 #define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIntro_solves, SolverIntro::solve,
-                                       0, 5)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIntro_trySteps,
-                                       SolverIntro::tryStep, 0, 1)
+template <typename Model>
+struct SolverIntroVisitor : public bp::def_visitor<SolverIntroVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calcDir", &Model::calcDir, bp::args("self"),
+           "Refresh the Intro linearization and constraint factorizations.\n\n"
+           "The method first delegates to SolverFDDP.calcDir() to update the "
+           "first- and second-order derivatives along the current candidate. It "
+           "then processes the control-equality constraints according to the "
+           "selected equality solver, storing the factors reused during the "
+           "backward pass.")
+        .def("computePolicy", &Model::computePolicy, bp::args("self", "t"),
+             "Compute the local policy.\n\n"
+             "This function is called in the backward pass after updating the "
+             "local Hamiltonian.\n"
+             ":param t: time instance")
+        .def("computeValueFunction", &Model::computeValueFunction,
+             bp::args("self", "t", "model"),
+             "Compute the quadratic model of the value function.\n\n"
+             "This function is called in the backward pass after updating the "
+             "local Hamiltonian.\n"
+             ":param t: time instance\n"
+             ":param model: action model in the given time instance")
+        .add_property(
+            "eq_solver", bp::make_function(&Model::get_equality_solver),
+            bp::make_function(&Model::set_equality_solver),
+            "type of solver used for handling the equality constraints.")
+        .add_property(
+            "Hu_rank",
+            make_function(
+                &Model::get_Hu_rank,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "rank of Hu")
+        .add_property(
+            "YZ",
+            make_function(
+                &Model::get_YZ,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "span and kernel of Hu")
+        .add_property(
+            "Qzz",
+            make_function(
+                &Model::get_Qzz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qzz")
+        .add_property(
+            "Qxz",
+            make_function(
+                &Model::get_Qxz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qxz")
+        .add_property(
+            "Quz",
+            make_function(
+                &Model::get_Quz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Quz")
+        .add_property(
+            "Qz",
+            make_function(
+                &Model::get_Qz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qz")
+        .add_property(
+            "Hy",
+            make_function(
+                &Model::get_Hy,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Hy")
+        .add_property(
+            "Kz",
+            make_function(
+                &Model::get_Kz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Kz")
+        .add_property(
+            "kz",
+            make_function(
+                &Model::get_kz,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "kz")
+        .add_property(
+            "ks",
+            make_function(
+                &Model::get_ks,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "ks")
+        .add_property(
+            "Ks",
+            make_function(
+                &Model::get_Ks,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Ks")
+        .add_property(
+            "Qzc",
+            make_function(
+                &Model::get_Qzc,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Qzc");
+  }
+};
+
+#define CROCODDYL_SOLVER_INTRO_PYTHON_BINDINGS(Scalar)                       \
+  typedef SolverIntroTpl<Scalar> Model;                                      \
+  typedef SolverFDDPTpl<Scalar> ModelBase;                                   \
+  typedef typename ModelBase::ShootingProblem ShootingProblem;               \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "SolverIntro",                                                         \
+      bp::init<std::shared_ptr<ShootingProblem>,                             \
+               bp::optional<DynamicsSolverType, EqualitySolverType>>(        \
+          bp::args("self", "problem", "dyn_solver", "eq_solver"),            \
+          "Initialize the vector dimension.\n\n"                             \
+          ":param problem: shooting problem.\n"                              \
+          ":param dyn_solver: type of dynamic solver (default FeasShoot).\n" \
+          ":param eq_solver: type of dynamic solver (default LuNull)."))     \
+      .def(SolverIntroVisitor<Model>())                                      \
+      .def(CastVisitor<Model, true>())                                       \
+      .def(CopyableVisitor<Model>());
 
 void exposeSolverIntro() {
-#ifdef SCALAR_float64
-  bp::register_ptr_to_python<std::shared_ptr<SolverIntro> >();
-
-  bp::enum_<EqualitySolverType>("EqualitySolverType")
-      .value("LuNull", LuNull)
-      .value("QrNull", QrNull)
-      .value("Schur", Schur)
-      .export_values();
-
-  bp::class_<SolverIntro, bp::bases<SolverFDDP> >(
-      "SolverIntro", bp::init<std::shared_ptr<ShootingProblem> >(
-                         bp::args("self", "problem"),
-                         "Initialize the vector dimension.\n\n"
-                         ":param problem: shooting problem."))
-      .def("solve", &SolverIntro::solve,
-           SolverIntro_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
-                        "init_reg"),
-               "Compute the optimal trajectory xopt, uopt as lists of T+1 and "
-               "T terms.\n\n"
-               "From an initial guess init_xs,init_us (feasible or not), "
-               "iterate\n"
-               "over computeDirection and tryStep until stoppingCriteria is "
-               "below\n"
-               "threshold. It also describes the globalization strategy used\n"
-               "during the numerical optimization.\n"
-               ":param init_xs: initial guess for state trajectory with T+1 "
-               "elements (default [])\n"
-               ":param init_us: initial guess for control trajectory with T "
-               "elements (default []).\n"
-               ":param maxiter: maximum allowed number of iterations (default "
-               "100).\n"
-               ":param is_feasible: true if the init_xs are obtained from "
-               "integrating the init_us (rollout)\n"
-               "(default False).\n"
-               ":param init_reg: initial guess for the regularization value. "
-               "Very low values are typically\n"
-               "                 used with very good guess points (default "
-               "1e-9).\n"
-               ":returns the optimal trajectory xopt, uopt and a boolean that "
-               "describes if convergence was reached."))
-      .def("tryStep", &SolverIntro::tryStep,
-           SolverIntro_trySteps(
-               bp::args("self", "stepLength"),
-               "Rollout the system with a predefined step length.\n\n"
-               ":param stepLength: step length (default 1)\n"
-               ":returns the cost improvement."))
-      .add_property(
-          "eq_solver", bp::make_function(&SolverIntro::get_equality_solver),
-          bp::make_function(&SolverIntro::set_equality_solver),
-          "type of solver used for handling the equality constraints.")
-      .add_property("rho", bp::make_function(&SolverIntro::get_rho),
-                    bp::make_function(&SolverIntro::set_rho),
-                    "parameter used in the merit function to predict the "
-                    "expected reduction.")
-      .add_property("upsilon", bp::make_function(&SolverIntro::get_upsilon),
-                    "estimated penalty parameter that balances relative "
-                    "contribution of the cost function and equality "
-                    "constraints.")
-      .add_property("th_feas", bp::make_function(&SolverIntro::get_th_feas),
-                    bp::make_function(&SolverIntro::set_th_feas),
-                    "threshold to define feasibility.")
-      .add_property("zero_upsilon",
-                    bp::make_function(&SolverIntro::get_zero_upsilon),
-                    bp::make_function(&SolverIntro::set_zero_upsilon),
-                    "True if we set estimated penalty parameter (upsilon) to "
-                    "zero when solve is called.")
-      .add_property(
-          "Hu_rank",
-          make_function(
-              &SolverIntro::get_Hu_rank,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "rank of Hu")
-      .add_property(
-          "YZ",
-          make_function(
-              &SolverIntro::get_YZ,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "span and kernel of Hu")
-      .add_property(
-          "Qzz",
-          make_function(
-              &SolverIntro::get_Qzz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qzz")
-      .add_property(
-          "Qxz",
-          make_function(
-              &SolverIntro::get_Qxz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qxz")
-      .add_property(
-          "Quz",
-          make_function(
-              &SolverIntro::get_Quz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Quz")
-      .add_property(
-          "Qz",
-          make_function(
-              &SolverIntro::get_Qz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Qz")
-      .add_property(
-          "Hy",
-          make_function(
-              &SolverIntro::get_Hy,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Hy")
-      .add_property(
-          "Kz",
-          make_function(
-              &SolverIntro::get_Kz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Kz")
-      .add_property(
-          "kz",
-          make_function(
-              &SolverIntro::get_kz,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "kz")
-      .add_property(
-          "Ks",
-          make_function(
-              &SolverIntro::get_Ks,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "Ks")
-      .add_property(
-          "ks",
-          make_function(
-              &SolverIntro::get_ks,
-              bp::return_value_policy<bp::reference_existing_object>()),
-          "ks")
-      .def(CopyableVisitor<SolverIntro>());
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_SOLVER_INTRO_PYTHON_BINDINGS(@SCALAR_TYPE@)
 #endif
 }
 

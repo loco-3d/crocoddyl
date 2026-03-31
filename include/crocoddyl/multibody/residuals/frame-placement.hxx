@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,13 +90,18 @@ ResidualModelFramePlacementTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ResidualModelFramePlacementTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
   typename SE3::Quaternion qref;
   pinocchio::quaternion::assignQuaternion(qref, pref_.rotation());
   os << "ResidualModelFramePlacement {frame=" << pin_model_->frames[id_].name
-     << ", tref=" << pref_.translation().transpose().format(fmt)
-     << ", qref=" << qref.coeffs().transpose().format(fmt) << "}";
+     << ", tref="
+     << pref_.translation().transpose().template cast<PrintableScalar>().format(
+            fmt)
+     << ", qref="
+     << qref.coeffs().transpose().template cast<PrintableScalar>().format(fmt)
+     << "}";
 }
 
 template <typename Scalar>

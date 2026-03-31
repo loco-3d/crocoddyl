@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -68,7 +68,7 @@ DifferentialActionModelLQRTpl<Scalar>::DifferentialActionModelLQRTpl(
       N_(MatrixXs::Zero(2 * nq, nu)),
       G_(MatrixXs::Zero(0, 2 * nq + nu)),
       H_(MatrixXs::Zero(0, 2 * nq + nu)),
-      f_(drift_free ? VectorXs::Zero(nq) : VectorXs::Ones(nq)),
+      f_(VectorXs::Constant(nq, drift_free ? Scalar(0) : Scalar(1))),
       q_(VectorXs::Ones(2 * nq)),
       r_(VectorXs::Ones(nu)),
       g_(VectorXs::Zero(0)),
@@ -257,21 +257,35 @@ DifferentialActionModelLQRTpl<Scalar>::Random(const std::size_t nq,
                                               const std::size_t nu,
                                               const std::size_t ng,
                                               const std::size_t nh) {
-  MatrixXs Aq = MatrixXs::Random(nq, nq);
-  MatrixXs Av = MatrixXs::Random(nq, nq);
-  MatrixXs B = MatrixXs::Random(nq, nu);
-  MatrixXs L_tmp = MatrixXs::Random(2 * nq + nu, 2 * nq + nu);
+  MatrixXs Aq = matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                                   Eigen::Dynamic, Eigen::Dynamic>(nq, nq);
+  MatrixXs Av = matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                                   Eigen::Dynamic, Eigen::Dynamic>(nq, nq);
+  MatrixXs B = matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                                  Eigen::Dynamic, Eigen::Dynamic>(nq, nu);
+  MatrixXs L_tmp = matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                                      Eigen::Dynamic, Eigen::Dynamic>(
+      2 * nq + nu, 2 * nq + nu);
   MatrixXs L = L_tmp.transpose() * L_tmp;
   const Eigen::Block<MatrixXs> Q = L.topLeftCorner(2 * nq, 2 * nq);
   const Eigen::Block<MatrixXs> R = L.bottomRightCorner(nu, nu);
   const Eigen::Block<MatrixXs> N = L.topRightCorner(2 * nq, nu);
-  MatrixXs G = MatrixXs::Random(ng, 2 * nq + nu);
-  MatrixXs H = MatrixXs::Random(nh, 2 * nq + nu);
-  VectorXs f = VectorXs::Random(nq);
-  VectorXs q = VectorXs::Random(2 * nq);
-  VectorXs r = VectorXs::Random(nu);
-  VectorXs g = VectorXs::Random(ng);
-  VectorXs h = VectorXs::Random(nh);
+  MatrixXs G =
+      matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                         Eigen::Dynamic, Eigen::Dynamic>(ng, 2 * nq + nu);
+  MatrixXs H =
+      matrix_random_cast<Scalar, Eigen::Dynamic, Eigen::Dynamic, 0,
+                         Eigen::Dynamic, Eigen::Dynamic>(nh, 2 * nq + nu);
+  VectorXs f =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(nq);
+  VectorXs q =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(2 * nq);
+  VectorXs r =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(nu);
+  VectorXs g =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(ng);
+  VectorXs h =
+      vector_random_cast<Scalar, Eigen::Dynamic, 0, Eigen::Dynamic>(nh);
   return DifferentialActionModelLQRTpl<Scalar>(Aq, Av, B, Q, R, N, G, H, f, q,
                                                r, g, h);
 }

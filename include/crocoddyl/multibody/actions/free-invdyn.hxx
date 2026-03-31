@@ -16,8 +16,9 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
         std::shared_ptr<StateMultibody> state,
         std::shared_ptr<ActuationModelAbstract> actuation,
         std::shared_ptr<CostModelSum> costs)
-    : Base(state, state->get_nv(), costs->get_nr(), 0,
-           state->get_nv() - actuation->get_nu()),
+    : Base(
+          state, state->get_nv(), costs->get_nr(), 0,
+          std::max(0, static_cast<int>(state->get_nv() - actuation->get_nu()))),
       actuation_(actuation),
       costs_(costs),
       constraints_(
@@ -34,7 +35,9 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::
         std::shared_ptr<CostModelSum> costs,
         std::shared_ptr<ConstraintModelManager> constraints)
     : Base(state, state->get_nv(), costs->get_nr(), constraints->get_ng(),
-           constraints->get_nh() + state->get_nv() - actuation->get_nu(),
+           constraints->get_nh() +
+               std::max(
+                   0, static_cast<int>(state->get_nv() - actuation->get_nu())),
            constraints->get_ng_T(), constraints->get_nh_T()),
       actuation_(actuation),
       costs_(costs),
@@ -65,7 +68,7 @@ void DifferentialActionModelFreeInvDynamicsTpl<Scalar>::init(
   Base::set_u_lb(lb);
   Base::set_u_ub(ub);
 
-  if (state->get_nv() - actuation_->get_nu() > 0) {
+  if (static_cast<int>(state->get_nv() - actuation_->get_nu()) > 0) {
     constraints_->addConstraint(
         "tau",
         std::make_shared<ConstraintModelResidual>(
@@ -303,7 +306,7 @@ DifferentialActionModelFreeInvDynamicsTpl<Scalar>::get_g_ub() const {
   if (constraints_ != nullptr) {
     return constraints_->get_ub();
   } else {
-    return g_lb_;
+    return g_ub_;
   }
 }
 

@@ -15,7 +15,7 @@ x0 = np.matrix([-1.0, -1.0, 1.0]).T  # x,y,theta
 problem = crocoddyl.ShootingProblem(x0, [model] * T, model)
 
 # Creating the DDP solver for this OC problem, defining a logger
-ddp = crocoddyl.SolverDDP(problem)
+ddp = crocoddyl.SolverFDDP(problem)
 ddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
 
 # Solving it with the DDP algorithm

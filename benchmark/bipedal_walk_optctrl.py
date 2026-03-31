@@ -11,6 +11,7 @@ from crocoddyl.utils.biped import SimpleBipedGaitProblem
 T = int(sys.argv[1]) if (len(sys.argv) > 1) else int(5e3)  # number of trials
 MAXITER = 1
 GAIT = "walking"  # 55 nodes
+CALLBACKS = False
 
 
 def createProblem(gait_phase):
@@ -43,8 +44,9 @@ def createProblem(gait_phase):
 
 
 def runDDPSolveBenchmark(xs, us, problem):
-    solver = crocoddyl.SolverFDDP(problem)
-
+    solver = crocoddyl.SolverFDDP(problem, crocoddyl.DynamicsSolverType.MultiShoot)
+    if CALLBACKS:
+        solver.setCallbacks([crocoddyl.CallbackVerbose()])
     duration = []
     for _ in range(T):
         c_start = time.time()

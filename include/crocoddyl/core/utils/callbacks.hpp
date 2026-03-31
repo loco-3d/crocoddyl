@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Oxford,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Oxford,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,8 +9,6 @@
 
 #ifndef CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
 #define CROCODDYL_CORE_UTILS_CALLBACKS_HPP_
-
-#include <iomanip>
 
 #include "crocoddyl/core/solver-base.hpp"
 
@@ -28,10 +26,19 @@ enum VerboseLevel {
   _4,  //<! Fourht print level that includes expected and current improvements
        // in the merit function
 };
-class CallbackVerbose : public CallbackAbstract {
+
+template <typename _Scalar>
+class CallbackVerboseTpl : public CallbackAbstractTpl<_Scalar> {
  public:
-  explicit CallbackVerbose(VerboseLevel level = _4, int precision = 3);
-  ~CallbackVerbose() override;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_FLOATINGPOINT_CAST(CallbackBase, CallbackVerboseTpl)
+
+  typedef _Scalar Scalar;
+  typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+
+  explicit CallbackVerboseTpl(VerboseLevel level = _4, int precision = 3);
+  ~CallbackVerboseTpl() = default;
 
   void operator()(SolverAbstract& solver) override;
 
@@ -40,6 +47,18 @@ class CallbackVerbose : public CallbackAbstract {
 
   int get_precision() const;
   void set_precision(int precision);
+
+  /**
+   * @brief Cast the verbose callback
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CallbackVerboseTpl<NewScalar> A verbose callback with the new
+   * scalar type.
+   */
+  template <typename NewScalar>
+  CallbackVerboseTpl<NewScalar> cast() const;
 
  private:
   VerboseLevel level_;
@@ -52,5 +71,10 @@ class CallbackVerbose : public CallbackAbstract {
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/utils/callbacks.hxx"
 
 #endif  // CROCODDYL_CORE_UTILS_CALLBACKS_HPP_

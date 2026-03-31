@@ -69,7 +69,7 @@ message(
     "============================================================================================="
 )
 message(STATUS "${Bold}${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
-message(STATUS "Copyright (C) 2018-2025, Heriot-Watt University • CNRS-LAAS.")
+message(STATUS "Copyright (C) 2018-2026, Heriot-Watt University • CNRS-LAAS.")
 message(STATUS "All rights reserved.")
 message(STATUS "Released under the BSD 3-Clause License.")
 message(STATUS "")
@@ -78,8 +78,6 @@ message(STATUS "   - RoMI Lab @ Heriot-Watt (https://www.romilab.org)")
 message(
   STATUS
     "   - Gepetto team @ LAAS-CNRS (https://www.laas.fr/fr/equipes/gepetto/)")
-message(
-  STATUS "   - Willow team @ INRIA (https://www.di.ens.fr/willow/) ${Reset}")
 message(
   STATUS
     "============================================================================================="
@@ -101,6 +99,7 @@ option(ENABLE_VECTORIZATION
        "Enable vectorization and further processor-related optimizations" OFF)
 option(BUILD_BENCHMARK "Build the benchmark" ON)
 option(BUILD_EXAMPLES "Build the examples" ON)
+option(BUILD_WITH_ODYN "Build the ODYN wrapper." ON)
 option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
@@ -155,6 +154,10 @@ if(BUILD_EXAMPLES
       GIT_TAG v4.4.0)
     FetchContent_MakeAvailable("example-robot-data")
   endif()
+endif()
+
+if(BUILD_WITH_ODYN)
+  add_project_dependency(odyn 0.7.0 PKG_CONFIG_REQUIRES "odyn >= 0.7.0")
 endif()
 
 if(BUILD_WITH_IPOPT)
@@ -229,9 +232,19 @@ if(BUILD_WITH_MULTITHREADS)
   set(OMP_NUM_THREADS ${BUILD_WITH_NTHREADS})
 endif()
 
+# Add Odyn
+if(BUILD_WITH_ODYN AND odyn_FOUND)
+  add_definitions(-DCROCODDYL_WITH_ODYN)
+  set(PACKAGE_EXTRA_MACROS
+      "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_ODYN)")
+  link_directories(${odyn_LIBRARY_DIRS})
+endif()
+
 # Add Ipopt
 if(BUILD_WITH_IPOPT AND IPOPT_FOUND)
   add_definitions(-DCROCODDYL_WITH_IPOPT)
+  set(PACKAGE_EXTRA_MACROS
+      "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DCROCODDYL_WITH_IPOPT)")
   link_directories(${IPOPT_LIBRARY_DIRS})
 endif()
 
@@ -296,6 +309,30 @@ if(UNIX AND NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<INSTALL_INTERFACE:include>)
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CROCODDYL_CODEGEN_GCC_EXECUTABLE ${CMAKE_C_COMPILER})
+  else()
+    find_program(CROCODDYL_CODEGEN_GCC_EXECUTABLE NAMES gcc)
+  endif()
+  if(CROCODDYL_CODEGEN_GCC_EXECUTABLE)
+    target_compile_definitions(
+      ${PROJECT_NAME}
+      PUBLIC
+        CROCODDYL_CODEGEN_GCC_COMPILER_PATH="${CROCODDYL_CODEGEN_GCC_EXECUTABLE}"
+    )
+  endif()
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(CROCODDYL_CODEGEN_CLANG_EXECUTABLE ${CMAKE_C_COMPILER})
+  else()
+    find_program(CROCODDYL_CODEGEN_CLANG_EXECUTABLE NAMES clang)
+  endif()
+  if(CROCODDYL_CODEGEN_CLANG_EXECUTABLE)
+    target_compile_definitions(
+      ${PROJECT_NAME}
+      PUBLIC
+        CROCODDYL_CODEGEN_CLANG_COMPILER_PATH="${CROCODDYL_CODEGEN_CLANG_EXECUTABLE}"
+    )
+  endif()
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
   target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::serialization)
   target_compile_definitions(
@@ -310,6 +347,10 @@ if(UNIX AND NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
+  endif()
+
+  if(BUILD_WITH_ODYN AND ODYN_FOUND)
+    target_link_libraries(${PROJECT_NAME} odyn::odyn)
   endif()
 
   if(BUILD_WITH_IPOPT AND IPOPT_FOUND)

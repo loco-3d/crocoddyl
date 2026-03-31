@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, University of Oxford,
+// Copyright (C) 2020-2026, University of Edinburgh, University of Oxford,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -238,10 +238,17 @@ template <typename Scalar>
 template <typename NewScalar>
 WrenchConeTpl<NewScalar> WrenchConeTpl<Scalar>::cast() const {
   typedef WrenchConeTpl<NewScalar> ReturnType;
-  ReturnType ret(R_.template cast<NewScalar>(), scalar_cast<NewScalar>(mu_),
-                 box_.template cast<NewScalar>(), nf_, inner_appr_,
-                 scalar_cast<NewScalar>(min_nforce_),
-                 scalar_cast<NewScalar>(max_nforce_));
+  ReturnType ret;
+  ret.nf_ = nf_;
+  ret.A_ = A_.template cast<NewScalar>();
+  ret.ub_ = ub_.template cast<NewScalar>();
+  ret.lb_ = lb_.template cast<NewScalar>();
+  ret.R_ = R_.template cast<NewScalar>();
+  ret.box_ = box_.template cast<NewScalar>();
+  ret.mu_ = scalar_cast<NewScalar>(mu_);
+  ret.inner_appr_ = inner_appr_;
+  ret.min_nforce_ = scalar_cast<NewScalar>(min_nforce_);
+  ret.max_nforce_ = scalar_cast<NewScalar>(max_nforce_);
   return ret;
 }
 
@@ -376,9 +383,15 @@ WrenchConeTpl<Scalar>& WrenchConeTpl<Scalar>::operator=(
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X) {
-  os << "         R: " << X.get_R() << std::endl;
-  os << "        mu: " << X.get_mu() << std::endl;
-  os << "       box: " << X.get_box().transpose() << std::endl;
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
+  const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
+                            "]");
+  os << "         R: " << X.get_R().template cast<PrintableScalar>().format(fmt)
+     << std::endl;
+  os << "        mu: " << scalar_cast<PrintableScalar>(X.get_mu()) << std::endl;
+  os << "       box: "
+     << X.get_box().template cast<PrintableScalar>().transpose().format(fmt)
+     << std::endl;
   os << "        nf: " << X.get_nf() << std::endl;
   os << "inner_appr: ";
   if (X.get_inner_appr()) {
@@ -386,8 +399,10 @@ std::ostream& operator<<(std::ostream& os, const WrenchConeTpl<Scalar>& X) {
   } else {
     os << "false" << std::endl;
   }
-  os << " min_force: " << X.get_min_nforce() << std::endl;
-  os << " max_force: " << X.get_max_nforce() << std::endl;
+  os << " min_force: " << scalar_cast<PrintableScalar>(X.get_min_nforce())
+     << std::endl;
+  os << " max_force: " << scalar_cast<PrintableScalar>(X.get_max_nforce())
+     << std::endl;
   return os;
 }
 

@@ -50,6 +50,34 @@ cast_function(
 
 enum CompilerType { GCC = 0, CLANG };
 
+inline constexpr CompilerType defaultCompilerType() {
+#if defined(__clang__)
+  return CLANG;
+#elif defined(__GNUC__)
+  return GCC;
+#else
+  return CLANG;
+#endif
+}
+
+inline const char* compilerExecutable(CompilerType compiler) {
+  switch (compiler) {
+    case GCC:
+#ifdef CROCODDYL_CODEGEN_GCC_COMPILER_PATH
+      return CROCODDYL_CODEGEN_GCC_COMPILER_PATH;
+#else
+      return "/usr/bin/gcc";
+#endif
+    case CLANG:
+#ifdef CROCODDYL_CODEGEN_CLANG_COMPILER_PATH
+      return CROCODDYL_CODEGEN_CLANG_COMPILER_PATH;
+#else
+      return "/usr/bib/clang";
+#endif
+  }
+  return "cc";
+}
+
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
@@ -97,7 +125,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
    * parameters (default empty function)
-   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: compiler
+   * used to build Crocoddyl)
    * @param[in] compile_options  Compilation flags (default: "-O3 -ffast-math
    * -march=native")
    */
@@ -105,7 +134,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       std::shared_ptr<Base> model, const std::string& lib_fname,
       bool autodiff = false, const std::size_t np = 0,
       ParamsEnvironment updateParams = EmptyParamsEnv,
-      CompilerType compiler = CLANG,
+      CompilerType compiler = defaultCompilerType(),
       const std::string& compile_options = "-O3 -ffast-math -march=native");
 
   /**
@@ -119,7 +148,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
    * parameters (default empty function)
-   * @param[in] compiler      Type of compiler GCC or CLANG (default: CLANG)
+   * @param[in] compiler      Type of compiler GCC or CLANG (default: compiler
+   * used to build Crocoddyl)
    * @param[in] compile_options  Compilation flags (default: "-O3 -ffast-math
    * -march=native")
    */
@@ -127,7 +157,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       std::shared_ptr<ADBase> ad_model, const std::string& lib_fname,
       bool autodiff = false, const std::size_t np = 0,
       ParamsEnvironment updateParams = EmptyParamsEnv,
-      CompilerType compiler = CLANG,
+      CompilerType compiler = defaultCompilerType(),
       const std::string& compile_options = "-O3 -ffast-math -march=native");
 
   /**
@@ -693,11 +723,6 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/codegen/action.hxx"
-
-CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(
-    crocoddyl::ActionModelCodeGenTpl)
-CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_STRUCT(
-    crocoddyl::ActionDataCodeGenTpl)
 
 #endif  // CROCODDYL_WITH_CODEGEN
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, University of Oxford,
+// Copyright (C) 2021-2026, University of Edinburgh, University of Oxford,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,6 +10,7 @@
 #ifndef CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 #define CROCODDYL_MULTIBODY_COP_SUPPORT_HPP_
 
+#include "crocoddyl/core/utils/conversions.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/wrench-cone.hpp"
 

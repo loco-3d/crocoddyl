@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -67,10 +67,11 @@ ResidualModelCentroidalMomentumTpl<Scalar>::cast() const {
 
 template <typename Scalar>
 void ResidualModelCentroidalMomentumTpl<Scalar>::print(std::ostream& os) const {
+  typedef typename ScalarSelector<Scalar>::type PrintableScalar;
   const Eigen::IOFormat fmt(2, Eigen::DontAlignCols, ", ", ";\n", "", "", "[",
                             "]");
   os << "ResidualModelCentroidalMomentum {href="
-     << href_.transpose().format(fmt) << "}";
+     << href_.transpose().template cast<PrintableScalar>().format(fmt) << "}";
 }
 
 template <typename Scalar>

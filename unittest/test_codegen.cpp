@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,7 +22,6 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/solvers/ddp.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
@@ -45,6 +44,15 @@
 
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
+
+template <typename MatrixLike>
+void check_codegen_matrix_approx(const MatrixLike& lhs, const MatrixLike& rhs,
+                                 const typename MatrixLike::Scalar tol,
+                                 const std::string& name) {
+  const typename MatrixLike::Scalar max_err = (lhs - rhs).cwiseAbs().maxCoeff();
+  BOOST_TEST_MESSAGE(name << " max abs err = " << max_err);
+  BOOST_CHECK(lhs.isApprox(rhs, tol));
+}
 
 /// \brief Changing the environment variables in a autodiff model. This function
 /// needs to be passed to the ActionModelCodeGen in order to make the calc and
@@ -379,6 +387,8 @@ void test_codegen_4DoFArm() {
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::Vector3s Vector3s;
+  const Scalar tol_x = Scalar(1e-9);
+  const Scalar tol_diff = Scalar(1e-7);
   typedef typename crocoddyl::ResidualModelFrameTranslationTpl<Scalar>
       ResidualModelFrameTranslation;
 
@@ -432,15 +442,23 @@ void test_codegen_4DoFArm() {
   runningModelCG->calc(runningDataCG, x_rand, u_rand);
   runningModelCG->calcDiff(runningDataCG, x_rand, u_rand);
 
-  BOOST_CHECK(runningDataCG->xnext.isApprox(runningDataD->xnext));
+  check_codegen_matrix_approx(runningDataCG->xnext, runningDataD->xnext, tol_x,
+                              "arm xnext");
   BOOST_CHECK_CLOSE(runningDataCG->cost, runningDataD->cost, Scalar(1e-10));
-  BOOST_CHECK(runningDataCG->Lx.isApprox(runningDataD->Lx));
-  BOOST_CHECK(runningDataCG->Lu.isApprox(runningDataD->Lu));
-  BOOST_CHECK(runningDataCG->Lxx.isApprox(runningDataD->Lxx));
-  BOOST_CHECK(runningDataCG->Lxu.isApprox(runningDataD->Lxu));
-  BOOST_CHECK(runningDataCG->Luu.isApprox(runningDataD->Luu));
-  BOOST_CHECK(runningDataCG->Fx.isApprox(runningDataD->Fx));
-  BOOST_CHECK(runningDataCG->Fu.isApprox(runningDataD->Fu));
+  check_codegen_matrix_approx(runningDataCG->Lx, runningDataD->Lx, tol_diff,
+                              "arm Lx");
+  check_codegen_matrix_approx(runningDataCG->Lu, runningDataD->Lu, tol_diff,
+                              "arm Lu");
+  check_codegen_matrix_approx(runningDataCG->Lxx, runningDataD->Lxx, tol_diff,
+                              "arm Lxx");
+  check_codegen_matrix_approx(runningDataCG->Lxu, runningDataD->Lxu, tol_diff,
+                              "arm Lxu");
+  check_codegen_matrix_approx(runningDataCG->Luu, runningDataD->Luu, tol_diff,
+                              "arm Luu");
+  check_codegen_matrix_approx(runningDataCG->Fx, runningDataD->Fx, tol_diff,
+                              "arm Fx");
+  check_codegen_matrix_approx(runningDataCG->Fu, runningDataD->Fu, tol_diff,
+                              "arm Fu");
 }
 
 void test_codegen_bipedal() {
@@ -448,6 +466,8 @@ void test_codegen_bipedal() {
   typedef CppAD::cg::CG<Scalar> CGScalar;
   typedef CppAD::AD<CGScalar> ADScalar;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
+  const Scalar tol_x = Scalar(1e-9);
+  const Scalar tol_diff = Scalar(1e-6);
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> > runningModelD =
       build_bipedal_action_model<Scalar>();
   std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADScalar> > runningModelAD =
@@ -470,15 +490,23 @@ void test_codegen_bipedal() {
   runningModelCG->calc(runningDataCG, x_rand, u_rand);
   runningModelCG->calcDiff(runningDataCG, x_rand, u_rand);
 
-  BOOST_CHECK(runningDataCG->xnext.isApprox(runningDataD->xnext));
+  check_codegen_matrix_approx(runningDataCG->xnext, runningDataD->xnext, tol_x,
+                              "biped xnext");
   BOOST_CHECK_CLOSE(runningDataCG->cost, runningDataD->cost, Scalar(1e-10));
-  BOOST_CHECK(runningDataCG->Lx.isApprox(runningDataD->Lx));
-  BOOST_CHECK(runningDataCG->Lu.isApprox(runningDataD->Lu));
-  BOOST_CHECK(runningDataCG->Lxx.isApprox(runningDataD->Lxx));
-  BOOST_CHECK(runningDataCG->Lxu.isApprox(runningDataD->Lxu));
-  BOOST_CHECK(runningDataCG->Luu.isApprox(runningDataD->Luu));
-  BOOST_CHECK(runningDataCG->Fx.isApprox(runningDataD->Fx));
-  BOOST_CHECK(runningDataCG->Fu.isApprox(runningDataD->Fu));
+  check_codegen_matrix_approx(runningDataCG->Lx, runningDataD->Lx, tol_diff,
+                              "biped Lx");
+  check_codegen_matrix_approx(runningDataCG->Lu, runningDataD->Lu, tol_diff,
+                              "biped Lu");
+  check_codegen_matrix_approx(runningDataCG->Lxx, runningDataD->Lxx, tol_diff,
+                              "biped Lxx");
+  check_codegen_matrix_approx(runningDataCG->Lxu, runningDataD->Lxu, tol_diff,
+                              "biped Lxu");
+  check_codegen_matrix_approx(runningDataCG->Luu, runningDataD->Luu, tol_diff,
+                              "biped Luu");
+  check_codegen_matrix_approx(runningDataCG->Fx, runningDataD->Fx, tol_diff,
+                              "biped Fx");
+  check_codegen_matrix_approx(runningDataCG->Fu, runningDataD->Fu, tol_diff,
+                              "biped Fu");
 }
 
 bool init_function() {

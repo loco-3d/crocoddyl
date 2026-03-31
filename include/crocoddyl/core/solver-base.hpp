@@ -16,10 +16,25 @@
 
 namespace crocoddyl {
 
-class CallbackAbstract;  // forward declaration
-static std::vector<Eigen::VectorXd> DEFAULT_VECTOR;
+template <typename Scalar>
+struct DefaultVector {
+  static const std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>> value;
+};
 
-enum FeasibilityNorm { LInf = 0, L1 };
+template <typename Scalar>
+const std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>
+    DefaultVector<Scalar>::value = {};
+
+#define DEFAULT_VECTOR DefaultVector<double>::value
+
+enum FeasibilityNorm { LInf = 0, L1 = 1, L2 = 2 };
+
+class SolverBase {
+ public:
+  virtual ~SolverBase() = default;
+
+  CROCODDYL_BASE_CAST(SolverBase, SolverAbstractTpl)
+};
 
 /**
  * @brief Abstract class for optimal control solvers
@@ -57,17 +72,27 @@ enum FeasibilityNorm { LInf = 0, L1 };
  *
  * \sa `solve()`, `computeDirection()`, `tryStep()`, `stoppingCriteria()`
  */
-class SolverAbstract {
+template <typename _Scalar>
+class SolverAbstractTpl : public SolverBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
+  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::Vector3s Vector3s;
 
   /**
    * @brief Initialize the solver
    *
    * @param[in] problem  shooting problem
    */
-  explicit SolverAbstract(std::shared_ptr<ShootingProblem> problem);
-  virtual ~SolverAbstract();
+  explicit SolverAbstractTpl(std::shared_ptr<ShootingProblem> problem);
+  virtual ~SolverAbstractTpl() = default;
 
   /**
    * @brief Compute the optimal trajectory \f$\mathbf{x}^*_s,\mathbf{u}^*_s\f$
@@ -90,10 +115,10 @@ class SolverAbstract {
    * @return A boolean that describes if convergence was reached.
    */
   virtual bool solve(
-      const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
-      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR,
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
       const std::size_t maxiter = 100, const bool is_feasible = false,
-      const double reg_init = NAN) = 0;
+      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
 
   /**
    * @brief Compute the search direction
@@ -103,29 +128,47 @@ class SolverAbstract {
    * You must call `setCandidate()` first in order to define the current guess.
    * A current guess defines a state and control trajectory
    * \f$(\mathbf{x}^k_s,\mathbf{u}^k_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
-   * respectively.
+   * respectively. When \p recalc is true (the default in the provided
+   * algorithms), the method refreshes the linearization by calling
+   * `calcDir()` before running the backward pass. Setting \p recalc to false
+   * reuses the most recent derivatives, which is useful when `calcDir()` has
+   * already been triggered explicitly. The resulting state and control
+   * variations, together with the dynamics multipliers, are stored in the
+   * solver data structures (e.g., `dxs_`, `dus_`, and `lambdas_`).
    *
-   * @param[in] recalc  true for recalculating the derivatives at current state
-   * and control
-   * @return  The search direction \f$(\delta\mathbf{x},\delta\mathbf{u})\f$ and
-   * the dual lambdas as lists of \f$T+1\f$, \f$T\f$ and \f$T+1\f$ lengths,
-   * respectively
+   * @param[in] recalc  true to refresh the derivatives before computing the
+   * search direction
    */
   virtual void computeDirection(const bool recalc) = 0;
 
   /**
    * @brief Try a predefined step length \f$\alpha\f$ and compute its cost
-   * improvement \f$dV\f$.
+   * improvement \f$dV\f$ and merit improvement \f$d\Phi\f$.
    *
    * It uses the search direction found by `computeDirection()` to try a
    * determined step length \f$\alpha\f$. Therefore, it assumes that we have run
    * `computeDirection()` first. Additionally, it returns the cost improvement
-   * \f$dV\f$ along the predefined step length \f$\alpha\f$.
+   * \f$dV\f$ along the predefined step length \f$\alpha\f$. Internally, it
+   * updates the cost improvement \f$dV\f$ and merit improvement \f$d\Phi\f$.
    *
-   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$)
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$, with 1
+   * as default)
    * @return  the cost improvement
    */
-  virtual double tryStep(const double steplength = 1) = 0;
+  virtual Scalar tryStep(const Scalar steplength = Scalar(1.));
+
+  /**
+   * @brief Compute new candidate solution using step length.
+   *
+   * This method updates the candidate primal and dual variables by taking a
+   * step from the current solution along the computed search direction, scaled
+   * by the step length `alpha`. It prepares a candidate point that is
+   * evaluated before being accepted by the solver.
+   *
+   * @param[in] steplength  applied step length (\f$0\leq\alpha\leq1\f$, with 1
+   * as default)
+   */
+  virtual void computeCandidate(const Scalar steplength = Scalar(1.));
 
   /**
    * @brief Return a positive value that quantifies the algorithm termination
@@ -135,16 +178,112 @@ class SolverAbstract {
    * depends on  the search direction (calculated by `computeDirection()`) but
    * it could also depend on the chosen step length, tested by `tryStep()`.
    */
-  virtual double stoppingCriteria() = 0;
+  virtual Scalar stoppingCriteria() = 0;
 
   /**
    * @brief Return the expected improvement \f$dV_{exp}\f$ from a given current
    * search direction \f$(\delta\mathbf{x}^k,\delta\mathbf{u}^k)\f$
    *
    * For computing the expected improvement, you need to compute the search
-   * direction first via `computeDirection()`.
+   * direction first via `computeDirection()`. The quadratic improvement model
+   * is described as dV = DV_0 + DV_1 + 0.5 * DV_2, where DV_0, DV_1, and DV_2
+   * are the constant, linear, and quadratic terms, respectively.
    */
-  virtual const Eigen::Vector2d& expectedImprovement() = 0;
+  virtual Vector3s expectedImprovement() = 0;
+
+  /**
+   * @brief Compute the merit function improvement for the current step.
+   *
+   * This function computes the current merit function improvement given the
+   * current cost improvement and feasibility improvement. The feasibility
+   * improvement are stored in dfeas_.
+   */
+  virtual void computeMeritFunctionImprovement();
+
+  /**
+   * @brief Compute the expected merit function improvement for the current
+   * step.
+   *
+   * This function computes the expected merit function improvement given the
+   * expected cost improvement and feasibility improvement. The feasibility
+   * improvement are stored in dfeas_.
+   */
+  virtual void computeExpectedMeritFunctionImprovement();
+
+  /**
+   * @brief Update the merit function value for the current guess
+   */
+  virtual void updateMeritFunction();
+
+  /**
+   * @brief Check if we should accept or not the step
+   *
+   * @return True if we should accept the step. False otherwise
+   */
+  virtual bool checkAcceptance();
+
+  /**
+   * @brief Refresh the linearization of the optimal control problem around the
+   * current candidate.
+   *
+   * This routine evaluates the shooting problem along the candidate
+   * trajectories `(xs_, us_)` to update the cost, dynamics, and constraint
+   * derivatives together with the feasibility metrics used by the solver. The
+   * main `solve()` loop invokes `calcDir()` automatically whenever a new
+   * linearization is required, but the method remains available when driving
+   * the solver manually (e.g., before calling `computeDirection(false)`).
+   */
+  virtual void calcDir();
+
+  /**
+   * @brief Set the solver candidate trajectories
+   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
+   *
+   * The solver candidates are defined as a state and control trajectories
+   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
+   * respectively. Additionally, we need to define the dynamic feasibility of
+   * the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ pair. Note that the trajectories are
+   * feasible if \f$\mathbf{x}_s\f$ is the resulting trajectory from the system
+   * rollout with \f$\mathbf{u}_s\f$ inputs. Updating the candidate invalidates
+   * any previously computed linearization; the next call to
+   * `computeDirection()` will therefore refresh the derivatives on demand.
+   *
+   * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
+   * @param[in] us          control trajectory of \f$T\f$ elements (default [])
+   * @param[in] isFeasible  true if the \p xs are obtained from integrating the
+   * \p us (rollout)
+   */
+  virtual void setCandidate(
+      const std::vector<VectorXs>& xs_warm = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& us_warm = DefaultVector<Scalar>::value,
+      const bool is_feasible = false);
+
+  /**
+   * @brief Update the candidate solution: cost, feasibilities, and merit value
+   */
+  virtual void updateCandidate();
+
+  /**
+   * @brief Criteria used to decrease regularization
+   */
+  virtual bool decreaseRegularizationCriteria();
+
+  /**
+   * @brief Criteria used to increase regularization
+   */
+  virtual bool increaseRegularizationCriteria();
+
+  /**
+   * @brief Increase the state and control regularization values by a
+   * `regfactor_` factor
+   */
+  virtual void increaseRegularization();
+
+  /**
+   * @brief Decrease the state and control regularization values by a
+   * `regfactor_` factor
+   */
+  virtual void decreaseRegularization();
 
   /**
    * @brief Resizing the solver data
@@ -153,6 +292,21 @@ class SolverAbstract {
    * resizes all the data before starting resolve the problem.
    */
   virtual void resizeData();
+
+  /**
+   * @brief Compute the feasibility from a given residual vector
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] fs  Vector of residual vectors which we wish to compute the
+   * feasibility
+   * @return  the residuals' feasibility
+   */
+  Scalar computeFeasibility(const std::vector<VectorXs>& fs);
 
   /**
    * @brief Compute the dynamic feasibility
@@ -166,7 +320,39 @@ class SolverAbstract {
    * dynamics, which are computed at each node as
    * \f$\mathbf{x}^{'}-\mathbf{f}(\mathbf{x},\mathbf{u})\f$.
    */
-  double computeDynamicFeasibility();
+  Scalar computeDynamicFeasibility();
+
+  /**
+   * @brief Compute the state box-constraint feasibility from a given state
+   * trajectory
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] xs  Vector state trajectory
+   * feasibility
+   * @return  the state trajectory's feasibility
+   */
+  Scalar computeStateFeasibility(const std::vector<VectorXs>& xs);
+
+  /**
+   * @brief Compute the control box-constraint feasibility from a given control
+   * trajectory
+   *
+   * As in the `computeDynamicFeasibility`, `computeInequalityFeasibility` or
+   * `computeEqualityFeasibility`, we can compute the feasibility using
+   * different norms (e.g, \f$\ell_\infty\f$ or \f$\ell_1\f$ norms). By default
+   * we use the \f$\ell_\infty\f$ norm, however, we can change the type of norm
+   * using `set_feasnorm`.
+   *
+   * @param[in] us  Vector control trajectory
+   * feasibility
+   * @return  the control trajectory's feasibility
+   */
+  Scalar computeControlFeasibility(const std::vector<VectorXs>& us);
 
   /**
    * @brief Compute the feasibility of the inequality constraints for the
@@ -177,7 +363,7 @@ class SolverAbstract {
    * \f$\ell_\infty\f$ norm, however, we can change the type of norm using
    * `set_feasnorm`.
    */
-  double computeInequalityFeasibility();
+  Scalar computeInequalityFeasibility();
 
   /**
    * @brief Compute the feasibility of the equality constraints for the current
@@ -188,28 +374,7 @@ class SolverAbstract {
    * \f$\ell_\infty\f$ norm, however, we can change the type of norm using
    * `set_feasnorm`.
    */
-  double computeEqualityFeasibility();
-
-  /**
-   * @brief Set the solver candidate trajectories
-   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$
-   *
-   * The solver candidates are defined as a state and control trajectories
-   * \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ of \f$T+1\f$ and \f$T\f$ elements,
-   * respectively. Additionally, we need to define the dynamic feasibility of
-   * the \f$(\mathbf{x}_s,\mathbf{u}_s)\f$ pair. Note that the trajectories are
-   * feasible if \f$\mathbf{x}_s\f$ is the resulting trajectory from the system
-   * rollout with \f$\mathbf{u}_s\f$ inputs.
-   *
-   * @param[in] xs          state trajectory of \f$T+1\f$ elements (default [])
-   * @param[in] us          control trajectory of \f$T\f$ elements (default [])
-   * @param[in] isFeasible  true if the \p xs are obtained from integrating the
-   * \p us (rollout)
-   */
-  void setCandidate(
-      const std::vector<Eigen::VectorXd>& xs_warm = DEFAULT_VECTOR,
-      const std::vector<Eigen::VectorXd>& us_warm = DEFAULT_VECTOR,
-      const bool is_feasible = false);
+  Scalar computeEqualityFeasibility();
 
   /**
    * @brief Set a list of callback functions using for the solver diagnostic
@@ -220,12 +385,12 @@ class SolverAbstract {
    * @param  callbacks  set of callback functions
    */
   void setCallbacks(
-      const std::vector<std::shared_ptr<CallbackAbstract> >& callbacks);
+      const std::vector<std::shared_ptr<CallbackAbstract>>& callbacks);
 
   /**
    * @brief Return the list of callback functions using for diagnostic
    */
-  const std::vector<std::shared_ptr<CallbackAbstract> >& getCallbacks() const;
+  const std::vector<std::shared_ptr<CallbackAbstract>>& getCallbacks() const;
 
   /**
    * @brief Return the shooting problem
@@ -233,19 +398,49 @@ class SolverAbstract {
   const std::shared_ptr<ShootingProblem>& get_problem() const;
 
   /**
+   * @brief Return the set of step lengths using by the line-search procedure
+   */
+  const std::vector<Scalar>& get_alphas() const;
+
+  /**
    * @brief Return the state trajectory \f$\mathbf{x}_s\f$
    */
-  const std::vector<Eigen::VectorXd>& get_xs() const;
+  const std::vector<VectorXs>& get_xs() const;
 
   /**
    * @brief Return the control trajectory \f$\mathbf{u}_s\f$
    */
-  const std::vector<Eigen::VectorXd>& get_us() const;
+  const std::vector<VectorXs>& get_us() const;
 
   /**
    * @brief Return the dynamic infeasibility \f$\mathbf{f}_{s}\f$
    */
-  const std::vector<Eigen::VectorXd>& get_fs() const;
+  const std::vector<VectorXs>& get_fs() const;
+
+  /**
+   * @brief Return the linear update in \f$\delta\mathbf{x}_s\f$
+   */
+  const std::vector<VectorXs>& get_dxs() const;
+
+  /**
+   * @brief Return the feedforward gains \f$\delta\mathbf{u}_s\f$
+   */
+  const std::vector<VectorXs>& get_dus() const;
+
+  /**
+   * @brief Return the trial state trajectory \f$\mathbf{x}_s\f$
+   */
+  const std::vector<VectorXs>& get_xs_try() const;
+
+  /**
+   * @brief Return the trial control trajectory \f$\mathbf{u}_s\f$
+   */
+  const std::vector<VectorXs>& get_us_try() const;
+
+  /**
+   * @brief Return the trail dynamic infeasibility \f$\mathbf{f}_{s}\f$
+   */
+  const std::vector<VectorXs>& get_fs_try() const;
 
   /**
    * @brief Return the feasibility status of the
@@ -256,119 +451,134 @@ class SolverAbstract {
   /**
    * @brief Return the cost for the current guess
    */
-  double get_cost() const;
+  Scalar get_cost() const;
 
   /**
    * @brief Return the merit for the current guess
    */
-  double get_merit() const;
+  Scalar get_merit() const;
 
   /**
    * @brief Return the stopping-criteria value computed by `stoppingCriteria()`
    */
-  double get_stop() const;
+  Scalar get_stop() const;
 
   /**
-   * @brief Return the linear and quadratic terms of the expected improvement
+   * @brief Return the constant, linear, and quadratic terms of the expected
+   * improvement
    */
-  const Eigen::Vector2d& get_d() const;
+  const Vector3s& get_DV() const;
 
   /**
    * @brief Return the reduction in the cost function \f$\Delta V\f$
    */
-  double get_dV() const;
+  Scalar get_dV() const;
 
   /**
    * @brief Return the reduction in the merit function \f$\Delta\Phi\f$
    */
-  double get_dPhi() const;
+  Scalar get_dPhi() const;
 
   /**
    * @brief Return the expected reduction in the cost function \f$\Delta
    * V_{exp}\f$
    */
-  double get_dVexp() const;
+  Scalar get_dVexp() const;
 
   /**
    * @brief Return the expected reduction in the merit function
    * \f$\Delta\Phi_{exp}\f$
    */
-  double get_dPhiexp() const;
+  Scalar get_dPhiexp() const;
 
   /**
    * @brief Return the reduction in the feasibility
    */
-  double get_dfeas() const;
+  Scalar get_dfeas() const;
 
   /**
    * @brief Return the total feasibility for the current guess
    */
-  double get_feas() const;
+  Scalar get_feas() const;
 
   /**
    * @brief Return the dynamic feasibility for the current guess
    */
-  double get_ffeas() const;
+  Scalar get_ffeas() const;
 
   /**
    * @brief Return the inequality feasibility for the current guess
    */
-  double get_gfeas() const;
+  Scalar get_gfeas() const;
 
   /**
    * @brief Return the equality feasibility for the current guess
    */
-  double get_hfeas() const;
+  Scalar get_hfeas() const;
 
   /**
    * @brief Return the dynamic feasibility for the current step length
    */
-  double get_ffeas_try() const;
+  Scalar get_ffeas_try() const;
 
   /**
    * @brief Return the inequality feasibility for the current step length
    */
-  double get_gfeas_try() const;
+  Scalar get_gfeas_try() const;
 
   /**
    * @brief Return the equality feasibility for the current step length
    */
-  double get_hfeas_try() const;
+  Scalar get_hfeas_try() const;
 
   /**
    * @brief Return the primal-variable regularization
    */
-  double get_preg() const;
+  Scalar get_preg() const;
 
   /**
    * @brief Return the dual-variable regularization
    */
-  double get_dreg() const;
+  Scalar get_dreg() const;
 
-  DEPRECATED("Use get_preg for primal-variable regularization",
-             double get_xreg() const;)
-  DEPRECATED("Use get_preg for primal-variable regularization",
-             double get_ureg() const;)
+  DEPRECATED(
+      "Use get_preg for primal-variable regularization",
+      Scalar get_xreg() const { return preg_; })
+  DEPRECATED(
+      "Use get_preg for primal-variable regularization",
+      Scalar get_ureg() const { return preg_; })
+
+  /**
+   * @brief Return the minimum regularization value
+   */
+  Scalar get_reg_min() const;
+
+  /**
+   * @brief Return the maximum regularization value
+   */
+  Scalar get_reg_max() const;
 
   /**
    * @brief Return the step length \f$\alpha\f$
    */
-  double get_steplength() const;
+  Scalar get_steplength() const;
 
   /**
    * @brief Return the threshold used for accepting a step
    */
-  double get_th_acceptstep() const;
+  Scalar get_th_acceptstep() const;
 
   /**
    * @brief Return the tolerance for stopping the algorithm
    */
-  double get_th_stop() const;
+  Scalar get_th_stop() const;
 
   /**
    * @brief Return the threshold for accepting a gap as non-zero
    */
-  double get_th_gaptol() const;
+  DEPRECATED(
+      "Do not use this threshold. It is not needed by our solvers",
+      Scalar get_th_gaptol() const { return th_gaptol_; })
 
   /**
    * @brief Return the type of norm used to evaluate the dynamic and constraints
@@ -382,44 +592,76 @@ class SolverAbstract {
   std::size_t get_iter() const;
 
   /**
+   * @brief Modify the set of step lengths using by the line-search procedure
+   */
+  void set_alphas(const std::vector<Scalar>& alphas);
+
+  /**
    * @brief Modify the state trajectory \f$\mathbf{x}_s\f$
    */
-  void set_xs(const std::vector<Eigen::VectorXd>& xs);
+  void set_xs(const std::vector<VectorXs>& xs);
 
   /**
    * @brief Modify the control trajectory \f$\mathbf{u}_s\f$
    */
-  void set_us(const std::vector<Eigen::VectorXd>& us);
+  void set_us(const std::vector<VectorXs>& us);
 
   /**
    * @brief Modify the primal-variable regularization value
    */
-  void set_preg(const double preg);
+  void set_preg(const Scalar preg);
 
   /**
    * @brief Modify the dual-variable regularization value
    */
-  void set_dreg(const double dreg);
+  void set_dreg(const Scalar dreg);
 
-  DEPRECATED("Use set_preg for primal-variable regularization",
-             void set_xreg(const double xreg);)
-  DEPRECATED("Use set_preg for primal-variable regularization",
-             void set_ureg(const double ureg);)
+  /**
+   * @brief Modify the minimum regularization value
+   */
+  void set_reg_min(const Scalar regmin);
+
+  /**
+   * @brief Modify the maximum regularization value
+   */
+  void set_reg_max(const Scalar regmax);
+
+  DEPRECATED(
+      "Use set_preg for primal-variable regularization",
+      void set_xreg(const Scalar xreg) {
+        if (xreg < Scalar(0.)) {
+          throw_pretty(
+              "Invalid argument: " << "xreg value has to be positive.");
+        }
+        xreg_ = xreg;
+        preg_ = xreg;
+      })
+  DEPRECATED(
+      "Use set_preg for primal-variable regularization",
+      void set_ureg(const Scalar ureg) {
+        if (ureg < Scalar(0.)) {
+          throw_pretty(
+              "Invalid argument: " << "ureg value has to be positive.");
+        }
+        ureg_ = ureg;
+        preg_ = ureg;
+      })
 
   /**
    * @brief Modify the threshold used for accepting step
    */
-  void set_th_acceptstep(const double th_acceptstep);
+  void set_th_acceptstep(const Scalar th_acceptstep);
 
   /**
    * @brief Modify the tolerance for stopping the algorithm
    */
-  void set_th_stop(const double th_stop);
+  void set_th_stop(const Scalar th_stop);
 
   /**
    * @brief Modify the threshold for accepting a gap as non-zero
    */
-  void set_th_gaptol(const double th_gaptol);
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             void set_th_gaptol(const Scalar th_gaptol);)
 
   /**
    * @brief Modify the current norm used for computed the dynamic and constraint
@@ -428,52 +670,116 @@ class SolverAbstract {
   void set_feasnorm(const FeasibilityNorm feas_norm);
 
  protected:
+  /**
+   * @brief Allocate all the basic data needed in solvers
+   */
+  void allocateData();
+
+  /**
+   * @brief Resize data associated with the running models of the shooting
+   * problem.
+   *
+   * This function is invoked by `resizeData()` whenever the horizon or the
+   * running action models change. Derived classes can override it to adjust
+   * their own storage before the solver resumes.
+   */
+  virtual void resizeRunningData();
+
+  /**
+   * @brief Resize data associated with the terminal model of the shooting
+   * problem.
+   *
+   * This function is invoked by `resizeData()` whenever the terminal model
+   * changes. Derived classes can override it to resize custom storage that
+   * depends on the terminal constraints or cost.
+   */
+  virtual void resizeTerminalData();
+
   std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
-  std::vector<Eigen::VectorXd> xs_;           //!< State trajectory
-  std::vector<Eigen::VectorXd> us_;           //!< Control trajectory
-  std::vector<Eigen::VectorXd> fs_;  //!< Gaps/defects between shooting nodes
-  std::vector<std::shared_ptr<CallbackAbstract> >
-      callbacks_;      //!< Callback functions
+  std::vector<std::shared_ptr<CallbackAbstract>>
+      callbacks_;  //!< Callback functions
+  std::vector<Scalar>
+      alphas_;  //!< Set of step lengths using by the line-search procedure
+  Scalar th_acceptstep_;  //!< Threshold used for accepting step
+  Scalar th_stop_;        //!< Tolerance for stopping the algorithm
+  DEPRECATED("Do not use this threshold. It is not needed by our solvers",
+             Scalar th_gaptol_;)   //!< Threshold limit to check non-zero gaps
+  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
+                                   //!< dynamics and constraints feasibility
+
+  // allocate data
+  Scalar dImpr_;  //!< Reduction in the iteration improvement (i.e., maximum
+                  //!< between cost and merit values)
+  std::vector<VectorXs> xs_;  //!< State trajectory
+  std::vector<VectorXs> us_;  //!< Control trajectory
+  std::vector<VectorXs> fs_;  //!< Dynamics gaps in each node
+  std::vector<VectorXs>
+      xs_try_;  //!< State trajectory computed by line-search procedure
+  std::vector<VectorXs>
+      us_try_;  //!< Control trajectory computed by line-search procedure
+  std::vector<VectorXs> fs_try_;  //!< Dynamics gaps in each node computed by
+                                  //!< the line-search procedure
+  std::vector<VectorXs> dxs_;     //!< Linear state direction (size T + 1)
+  std::vector<VectorXs> dus_;     //!< Linear control direction (size T)
   bool is_feasible_;   //!< Label that indicates is the iteration is feasible
   bool was_feasible_;  //!< Label that indicates in the previous iterate was
                        //!< feasible
-  double cost_;        //!< Cost for the current guess
-  double merit_;       //!< Merit for the current guess
-  double stop_;        //!< Value computed by `stoppingCriteria()`
-  Eigen::Vector2d d_;  //!< LQ approximation of the expected improvement
-  double dV_;       //!< Reduction in the cost function computed by `tryStep()`
-  double dPhi_;     //!< Reduction in the merit function computed by `tryStep()`
-  double dVexp_;    //!< Expected reduction in the cost function
-  double dPhiexp_;  //!< Expected reduction in the merit function
-  double dfeas_;    //!< Reduction in the feasibility
-  double feas_;     //!< Total feasibility for the current guess
-  double
+  Scalar cost_;        //!< Cost for the current guess
+  Scalar cost_try_;    //!< Total cost computed by line-search procedure
+  Scalar merit_;       //!< Merit for the current guess
+  Scalar stop_;        //!< Value computed by `stoppingCriteria()`
+  std::size_t iter_;   //!< Number of iteration performed by the solver
+  Vector3s DV_;        //!< LQ approximation of the expected improvement
+  Scalar dV_;    //!< Reduction in the cost function computed by `tryStep()`
+  Scalar dPhi_;  //!< Reduction in the merit function computed by `tryStep()`
+  Scalar dVexp_full_;  //!< Expected reduction in the cost function for a full
+                       //!< step length
+  Scalar dVexp_;  //!< Expected reduction in the cost function for the selected
+                  //!< step length
+  Scalar dPhiexp_;  //!< Expected reduction in the merit function for the
+                    //!< selected step length
+  Scalar dfeas_;    //!< Reduction in the feasibility
+  Scalar feas_;     //!< Total feasibility for the current guess
+  Scalar
       ffeas_;  //!< Feasibility of the dynamic constraints for the current guess
-  double gfeas_;  //!< Feasibility of the inequality constraints for the current
+  Scalar gfeas_;  //!< Feasibility of the inequality constraints for the current
                   //!< guess
-  double hfeas_;  //!< Feasibility of the equality constraints for the current
+  Scalar hfeas_;  //!< Feasibility of the equality constraints for the current
                   //!< guess
-  double ffeas_try_;  //!< Feasibility of the dynamic constraints evaluated for
+  Scalar ffeas_try_;  //!< Feasibility of the dynamic constraints evaluated for
                       //!< the current step length
-  double gfeas_try_;  //!< Feasibility of the inequality constraints evaluated
+  Scalar gfeas_try_;  //!< Feasibility of the inequality constraints evaluated
                       //!< for the current step length
-  double hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
+  Scalar hfeas_try_;  //!< Feasibility of the equality constraints evaluated for
                       //!< the current step length
-  double preg_;       //!< Current primal-variable regularization value
-  double dreg_;       //!< Current dual-variable regularization value
+  Scalar tmp_feas_;   //!< Temporal variables used for computed the feasibility
+  Scalar preg_;       //!< Current primal-variable regularization value
+  Scalar dreg_;       //!< Current dual-variable regularization value
   DEPRECATED("Use preg_ for primal-variable regularization",
-             double xreg_;)  //!< Current state regularization value
+             Scalar xreg_;)  //!< Current state regularization value
   DEPRECATED("Use dreg_ for primal-variable regularization",
-             double ureg_;)        //!< Current control regularization values
-  double steplength_;              //!< Current applied step length
-  double th_acceptstep_;           //!< Threshold used for accepting step
-  double th_stop_;                 //!< Tolerance for stopping the algorithm
-  double th_gaptol_;               //!< Threshold limit to check non-zero gaps
-  enum FeasibilityNorm feasnorm_;  //!< Type of norm used to evaluate the
-                                   //!< dynamics and constraints feasibility
-  std::size_t iter_;  //!< Number of iteration performed by the solver
-  double tmp_feas_;   //!< Temporal variables used for computed the feasibility
-  std::vector<Eigen::VectorXd> g_adj_;  //!< Adjusted inequality bound
+             Scalar ureg_;)      //!< Current control regularization values
+  Scalar reg_min_;               //!< Minimum allowed regularization value
+  Scalar reg_max_;               //!< Maximum allowed regularization value
+  Scalar steplength_;            //!< Current applied step length
+  std::vector<VectorXs> g_adj_;  //!< Adjusted inequality bound
+  std::vector<VectorXs> x_adj_;  //!< Adjusted state bound
+  std::vector<VectorXs> u_adj_;  //!< Adjusted control bound
+  std::size_t nh_T_;             //!< Dimension of terminal equality constraints
+  std::size_t ng_T_;  //!< Dimension of termianl inequality constraints
+
+  bool acceptstep_;
+  bool recalcdir_;
+
+ private:
+  SolverAbstractTpl() : problem_(nullptr) {}
+};
+
+class CallbackBase {
+ public:
+  virtual ~CallbackBase() = default;
+
+  CROCODDYL_BASE_CAST(CallbackBase, CallbackAbstractTpl)
 };
 
 /**
@@ -483,13 +789,19 @@ class SolverAbstract {
  * iteration of it. For instance, it can be used to print values, record data or
  * display motions.
  */
-class CallbackAbstract {
+template <typename _Scalar>
+class CallbackAbstractTpl : public CallbackBase {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef SolverAbstractTpl<Scalar> SolverAbstract;
+
   /**
    * @brief Initialize the callback function
    */
-  CallbackAbstract() {}
-  virtual ~CallbackAbstract() {}
+  CallbackAbstractTpl() {}
+  virtual ~CallbackAbstractTpl() = default;
 
   /**
    * @brief Run the callback function given a solver
@@ -499,8 +811,20 @@ class CallbackAbstract {
   virtual void operator()(SolverAbstract& solver) = 0;
 };
 
-bool raiseIfNaN(const double value);
+template <typename Scalar>
+bool raiseIfNaN(const Scalar value);
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solver-base.hxx"
+
+CROCODDYL_DISABLE_WARNING_DEPRECATED
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::SolverAbstractTpl)
+
+CROCODDYL_ENABLE_WARNING_DEPRECATED
 
 #endif  // CROCODDYL_CORE_SOLVER_BASE_HPP_

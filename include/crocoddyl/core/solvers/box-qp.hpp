@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,13 +23,19 @@ namespace crocoddyl {
  *  - the indexes for the free space
  *  - the indexes for the clamped (constrained) space
  */
-struct BoxQPSolution {
+template <typename _Scalar>
+struct BoxQPSolutionTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the QP solution structure
    */
-  BoxQPSolution() {}
+  BoxQPSolutionTpl() {}
 
   /**
    * @brief Initialize the QP solution structure
@@ -39,13 +45,30 @@ struct BoxQPSolution {
    * @param[in] free_idx     Free space indexes
    * @param[in] clamped_idx  Clamped space indexes
    */
-  BoxQPSolution(const Eigen::MatrixXd& Hff_inv, const Eigen::VectorXd& x,
-                const std::vector<size_t>& free_idx,
-                const std::vector<size_t>& clamped_idx)
+  BoxQPSolutionTpl(const MatrixXs& Hff_inv, const VectorXs& x,
+                   const std::vector<size_t>& free_idx,
+                   const std::vector<size_t>& clamped_idx)
       : Hff_inv(Hff_inv), x(x), free_idx(free_idx), clamped_idx(clamped_idx) {}
 
-  Eigen::MatrixXd Hff_inv;          //!< Inverse of the free space Hessian
-  Eigen::VectorXd x;                //!< Decision vector
+  /**
+   * @brief Cast the BoxQP solution to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return BoxQPSolutionTpl<NewScalar> A BoxQP solution with the new scalar
+   * type.
+   */
+  template <typename NewScalar>
+  BoxQPSolutionTpl<NewScalar> cast() const {
+    typedef BoxQPSolutionTpl<NewScalar> ReturnType;
+    ReturnType ret(Hff_inv.template cast<NewScalar>(),
+                   x.template cast<NewScalar>(), free_idx, clamped_idx);
+    return ret;
+  }
+
+  MatrixXs Hff_inv;                 //!< Inverse of the free space Hessian
+  VectorXs x;                       //!< Decision vector
   std::vector<size_t> free_idx;     //!< Free space indexes
   std::vector<size_t> clamped_idx;  //!< Clamped space indexes
 };
@@ -76,9 +99,16 @@ struct BoxQPSolution {
  * article:
  * \include bertsekas-siam82.bib
  */
-class BoxQP {
+template <typename _Scalar>
+class BoxQPTpl {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef BoxQPSolutionTpl<Scalar> BoxQPSolution;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the Projected-Newton QP for bound constraints
@@ -90,13 +120,14 @@ class BoxQP {
    * @param[in] th_grad        Gradient tolerance threshold (default 1e-9)
    * @param[in] reg            Regularization value (default 1e-9)
    */
-  BoxQP(const std::size_t nx, const std::size_t maxiter = 100,
-        const double th_acceptstep = 0.1, const double th_grad = 1e-9,
-        const double reg = 1e-9);
+  BoxQPTpl(const std::size_t nx, const std::size_t maxiter = 100,
+           const Scalar th_acceptstep = Scalar(0.1),
+           const Scalar th_grad = Scalar(1e-9),
+           const Scalar reg = Scalar(1e-9));
   /**
    * @brief Destroy the Projected-Newton QP solver
    */
-  ~BoxQP();
+  ~BoxQPTpl() = default;
 
   /**
    * @brief Compute the solution of bound-constrained QP based on Newton
@@ -109,10 +140,20 @@ class BoxQP {
    * @param[in] xinit  Initial guess (dimension nx)
    * @return The solution of the problem
    */
-  const BoxQPSolution& solve(const Eigen::MatrixXd& H, const Eigen::VectorXd& q,
-                             const Eigen::VectorXd& lb,
-                             const Eigen::VectorXd& ub,
-                             const Eigen::VectorXd& xinit);
+  const BoxQPSolution& solve(const MatrixXs& H, const VectorXs& q,
+                             const VectorXs& lb, const VectorXs& ub,
+                             const VectorXs& xinit);
+
+  /**
+   * @brief Cast the BoxQP solver to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return BoxQPTpl<NewScalar> A BoxQP solver with the new scalar type.
+   */
+  template <typename NewScalar>
+  BoxQPTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the stored solution
@@ -132,22 +173,22 @@ class BoxQP {
   /**
    * @brief Return the acceptance step threshold
    */
-  double get_th_acceptstep() const;
+  Scalar get_th_acceptstep() const;
 
   /**
    * @brief Return the gradient tolerance threshold
    */
-  double get_th_grad() const;
+  Scalar get_th_grad() const;
 
   /**
    * @brief Return the regularization value
    */
-  double get_reg() const;
+  Scalar get_reg() const;
 
   /**
    * @brief Return the stack of step lengths using by the line-search procedure
    */
-  const std::vector<double>& get_alphas() const;
+  const std::vector<Scalar>& get_alphas() const;
 
   /**
    * @brief Modify the decision vector dimension
@@ -162,53 +203,59 @@ class BoxQP {
   /**
    * @brief Modify the acceptance step threshold
    */
-  void set_th_acceptstep(const double th_acceptstep);
+  void set_th_acceptstep(const Scalar th_acceptstep);
 
   /**
    * @brief Modify the gradient tolerance threshold
    */
-  void set_th_grad(const double th_grad);
+  void set_th_grad(const Scalar th_grad);
 
   /**
    * @brief Modify the regularization value
    */
-  void set_reg(const double reg);
+  void set_reg(const Scalar reg);
 
   /**
    * @brief Modify the stack of step lengths using by the line-search procedure
    */
-  void set_alphas(const std::vector<double>& alphas);
+  void set_alphas(const std::vector<Scalar>& alphas);
 
  private:
   std::size_t nx_;          //!< Decision variable dimension
   BoxQPSolution solution_;  //!< Solution of the Box QP
   std::size_t maxiter_;     //!< Allowed maximum number of iterations
-  double th_acceptstep_;    //!< Threshold used for accepting step
-  double
+  Scalar th_acceptstep_;    //!< Threshold used for accepting step
+  Scalar
       th_grad_;  //!< Tolerance for stopping the algorithm (gradient threshold)
-  double reg_;   //!< Current regularization value
+  Scalar reg_;   //!< Current regularization value
 
-  double fold_;     //!< Cost of previous iteration
-  double fnew_;     //!< Cost of current iteration
+  Scalar fold_;     //!< Cost of previous iteration
+  Scalar fnew_;     //!< Cost of current iteration
   std::size_t nf_;  //!< Free space dimension
   std::size_t nc_;  //!< Constrained space dimension
-  std::vector<double>
-      alphas_;  //!< Set of step lengths using by the line-search procedure
-  Eigen::VectorXd x_;     //!< Guess of the decision variable
-  Eigen::VectorXd xnew_;  //!< New decision vector
-  Eigen::VectorXd g_;     //!< Current gradient
-  Eigen::VectorXd dx_;    //!< Current search direction
+  std::vector<Scalar>
+      alphas_;     //!< Set of step lengths using by the line-search procedure
+  VectorXs x_;     //!< Guess of the decision variable
+  VectorXs xnew_;  //!< New decision vector
+  VectorXs g_;     //!< Current gradient
+  VectorXs dx_;    //!< Current search direction
 
-  Eigen::VectorXd xo_;  //!< Organized decision
-  Eigen::VectorXd
+  VectorXs xo_;  //!< Organized decision
+  VectorXs
       dxo_;  //!< Search direction organized by free and constrained subspaces
-  Eigen::VectorXd
-      qo_;  //!< Gradient organized by free and constrained subspaces
-  Eigen::MatrixXd Ho_;  //!< Hessian organized by free and constrained subspaces
+  VectorXs qo_;  //!< Gradient organized by free and constrained subspaces
+  MatrixXs Ho_;  //!< Hessian organized by free and constrained subspaces
 
-  Eigen::LLT<Eigen::MatrixXd> Hff_inv_llt_;  //!< Cholesky solver
+  Eigen::LLT<MatrixXs> Hff_inv_llt_;  //!< Cholesky solver
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/core/solvers/box-qp.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::BoxQPTpl)
 
 #endif  // CROCODDYL_CORE_SOLVERS_BOX_QP_HPP_

@@ -214,6 +214,7 @@ struct ActionDataCodeGeneVisitor
           ":param compile_options: Compilation flags (default: '-O3 "          \
           "-ffast-math -march=native')"))                                      \
       .def(ActionModelCodeGenVisitor<Model>())                                 \
+      .def(CastVisitor<Model, true>())                                         \
       .def(PrintableVisitor<Model>())                                          \
       .def(CopyableVisitor<Model>());
 

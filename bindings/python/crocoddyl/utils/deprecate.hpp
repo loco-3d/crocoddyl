@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020, INRIA, University of Edinburgh
+// Copyright (C) 2020-2025, INRIA, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +14,8 @@
 
 #include <boost/python.hpp>
 #include <string>
+
+#include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
