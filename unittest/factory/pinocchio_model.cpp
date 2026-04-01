@@ -9,7 +9,7 @@
 #include "pinocchio_model.hpp"
 
 #include <pinocchio/fwd.hpp>
-#include <pinocchio/parsers/sample-models.hpp>
+#include <pinocchio/multibody/sample-models.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
