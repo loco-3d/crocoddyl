@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed a bug where set_runningModels did not correctly update running_models_ in https://github.com/loco-3d/crocoddyl/pull/1489
 * Introduced single-floating point, shootings, numerics, endpoints features in solvers in https://github.com/loco-3d/crocoddyl/pull/1482
 * Fixed the compiler-flag definition used for action codegen + updated default compilation flags in https://github.com/loco-3d/crocoddyl/pull/1469
 * CMake: make example-robot-data more optional for ROS in https://github.com/loco-3d/crocoddyl/pull/1467
