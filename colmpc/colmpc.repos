@@ -1,0 +1,20 @@
+repositories:
+  vcs_repos/crocoddyl:
+    type: git
+    url: https://github.com/loco-3d/crocoddyl
+    version: v2.1.0
+
+  vcs_repos/coal:
+    type: git
+    url: https://github.com/coal-library/coal
+    version: v3.0.0
+
+  vcs_repos/pinocchio:
+    type: git
+    url: https://github.com/stack-of-tasks/pinocchio
+    version: v3.3.0
+
+  vcs_repos/mim_solvers:
+    type: git
+    url: https://github.com/machines-in-motion/mim_solvers
+    version: v0.0.5

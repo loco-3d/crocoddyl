@@ -1,0 +1,14 @@
+log/*
+build*/
+install/*
+**/__pycache__/*
+.vscode/*
+**.pyc
+.vscode
+**~
+dg*
+*anticipated-state*
+bak
+.old
+mpc/nahuel
+python3

@@ -1,0 +1,563 @@
+<robot name="demo">
+  <contact name="top">
+    <link name="support_link"/>
+    <point>
+      +0.8515 +0.4015 0.76
+      +0.8515 -0.4015 0.76
+      -0.8515 -0.4015 0.76
+      -0.8515 +0.4015 0.76
+    </point>
+    <shape>
+      4 3 2 1 0
+    </shape>
+  </contact>
+  <gripper name="panda2_gripper" clearance="0.05">
+    <position xyz="0 0 0.103" xyzw="0 -0.7071067811865476 0 0.7071067811865476"/>
+    <link name="panda2_hand"/>
+  </gripper>
+
+  <!--
+      Remove collision pairs
+  -->
+
+  <!-- Remove collision between all regular links -->
+
+  <disable_collisions link1="panda2_link0" link2="panda2_link1"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link2"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link3"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link4"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link5"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link1" link2="panda2_link2"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link3"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link4"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link5"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link2" link2="panda2_link3"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link4"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link5"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link3" link2="panda2_link4"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link5"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link4" link2="panda2_link5"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link5" link2="panda2_link6"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link6" link2="panda2_link7"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_link7" link2="panda2_hand"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_hand" link2="panda2_leftfinger"
+                      reason="self-collision handled separately"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_rightfinger"
+                      reason="self-collision handled separately"/>
+
+  <!-- remove collision between environment and self-collision geometries -->
+
+  <disable_collisions link1="support_link" link2="panda2_link1_sc"
+                      reason="handled otherwise"/>
+  <disable_collisions link1="support_link" link2="panda2_link2_sc"
+                      reason="handled otherwise"/>
+  <disable_collisions link1="support_link" link2="panda2_link3_sc"
+                      reason="handled otherwise"/>
+
+  <!-- remove self-collision pairs between adjacent links -->
+
+  <disable_collisions link1="panda2_link0_sc" link2="panda2_link1_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link0_sc" link2="panda2_link2_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link1_sc" link2="panda2_link2_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link1_sc" link2="panda2_link3_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link2_sc" link2="panda2_link3_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link3_sc" link2="panda2_link4_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link3_sc" link2="panda2_link5_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link4_sc" link2="panda2_link5_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link5_sc" link2="panda2_link6_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link5_sc" link2="panda2_link7_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link6_sc" link2="panda2_link7_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link6_sc" link2="panda2_hand_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link7_sc" link2="panda2_hand_sc"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link6_sc" link2="panda2_leftfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link7_sc" link2="panda2_leftfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_hand_sc" link2="panda2_leftfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link6_sc" link2="panda2_rightfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_link7_sc" link2="panda2_rightfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_hand_sc" link2="panda2_rightfinger"
+                      reason="adjacent"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_rightfinger"
+                      reason="adjacent"/>
+
+  <!-- remove collision between regular and self-collision geometries -->
+
+  <disable_collisions link1="panda2_link0" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link0" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link1" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link1" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link2" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link2" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link3" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link3" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link4" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link4" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link5" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link5" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link6" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link6" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_link7" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_link7" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_hand" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_hand" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_leftfinger" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link0_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link1_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link2_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link3_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link4_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link5_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link6_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_link7_sc"
+                      reason="regular and self-collision"/>
+  <disable_collisions link1="panda2_rightfinger" link2="panda2_hand_sc"
+                      reason="regular and self-collision"/>
+
+
+  <!-- ADDED BY ARTHUR HAFFEMAYER -->
+
+  <!-- panda1_box -->
+    <disable_collisions link1="panda1_box" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_link0_sc"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="camera_link"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="panda1_box" link2="panda2_rightfinger"
+                      reason="no need"/>
+
+  <!-- support_link -->
+    <disable_collisions link1="support_link" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="support_link" link2="panda2_rightfinger"
+                      reason="no need"/>
+    <disable_collisions link1="support_link" link2="camera_link"
+                      reason="no need"/>
+
+  <!-- wall_link_1 -->
+    <disable_collisions link1="wall_link_1" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_rightfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="camera_link"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_1" link2="panda2_link0_sc"
+                      reason="no need"/>
+
+
+  <!-- wall_link_2 -->
+    <disable_collisions link1="wall_link_2" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_rightfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="camera_link"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_2" link2="panda2_link0_sc"
+                      reason="no need"/>
+
+  <!-- wall_link_3 -->
+    <disable_collisions link1="wall_link_3" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_rightfinger"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="camera_link"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="wall_link_3" link2="panda2_link0_sc"
+                      reason="no need"/>
+
+  <!-- pedestal -->
+    <disable_collisions link1="pedestal" link2="panda2_leftfinger"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_rightfinger"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="camera_link"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="pedestal" link2="panda2_link0_sc"
+                      reason="no need"/>
+
+  <!-- camera_link -->
+
+    <disable_collisions link1="camera_link" link2="panda2_link7_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link6_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link5_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link4_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link3_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link2_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link1_sc"
+                      reason="no need"/>
+    <disable_collisions link1="camera_link" link2="panda2_link0_sc"
+                      reason="no need"/>
+
+
+
+
+
+</robot>

@@ -1,0 +1,31 @@
+name: update-flake-lock
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 29 * 0'
+jobs:
+  update-flake-inputs:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GEPETTO_NIX_APP_ID }}
+          private-key: ${{ secrets.GEPETTO_NIX_APP_PRIVATE_KEY }}
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Nix
+        uses: cachix/install-nix-action@v31
+      - name: Update flake inputs
+        uses: mic92/update-flake-inputs@v1
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          pr-labels: 'no-changelog'
+          git-author-name: 'hrp2-14'
+          git-author-email: '40568249+hrp2-14@users.noreply.github.com'
