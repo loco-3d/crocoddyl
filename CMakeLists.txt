@@ -104,6 +104,7 @@ option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
+option(BUILD_COLMPC "Inculde colmpc features" ON)
 
 if(ENABLE_VECTORIZATION)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -413,4 +414,8 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   foreach(boostlib ${BOOST_REQUIRED_COMPONENTS})
     pkg_config_append_libs("boost_${boostlib}")
   endforeach()
+endif()
+
+if(BUILD_COLMPC)
+  add_subdirectory(colmpc)
 endif()
