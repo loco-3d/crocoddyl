@@ -479,7 +479,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
   running_models_.clear();
   running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = models[i];
     running_models_.push_back(model);
     running_datas_.push_back(model->createData());
   }
