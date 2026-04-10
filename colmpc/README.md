@@ -13,29 +13,16 @@ An in-depth comparison is [here](https://gepettoweb.laas.fr/articles/haffemayer2
 
 ### For OCP & MPC scripts:
 
-- [Coal](https://github.com/coal-library/coal)  (tag: v3.0.0) for collision computations.
-- [Pinocchio](https://github.com/stack-of-tasks/pinocchio) (tag: v3.3.0) fast rigid body dynamics.
-- [Crocoddyl](https://github.com/loco-3d/crocoddyl) (tag: v2.1.0) framework for the solver.
+- [Coal](https://github.com/coal-library/coal) for collision computations.
+- [Pinocchio](https://github.com/stack-of-tasks/pinocchio) fast rigid body dynamics.
+- [Crocoddyl](https://github.com/loco-3d/crocoddyl) framework for the solver.
 
 ### For visualization:
 - [Meshcat](https://github.com/meshcat-dev/meshcat-python).
 
 ### For the examples:
 
-- [MiM Solvers](https://github.com/machines-in-motion/mim_solvers) (tag: v0.0.5) solver for the SQP and Constrained-SQP solver, and [Mim Robot](https://github.com/machines-in-motion/mim_robots/tree/main).
-
-## Installation
-### From source
-Coal & Pinocchio must be built from sources. Build pinocchio with the flag : WITH_COLLISION_SUPPORT=ON.
-> [!NOTE]
-> Don't forget to switch to the right commits!
-
-### Using Docker
-
-You can run examples with docker with following command:
-``` bash
-docker container run -it --rm -p 7000:7000 ghcr.io/agimus-project/colmpc:v0.2.0 python colmpc/examples/main_ocp.py --scene 1
-```
+- [MiM Solvers](https://github.com/machines-in-motion/mim_solvers) solver for the SQP and Constrained-SQP solver, and [Mim Robot](https://github.com/machines-in-motion/mim_robots/tree/main).
 
 
 ### Possible issue
@@ -47,7 +34,7 @@ docker container run -it --rm -p 7000:7000 ghcr.io/agimus-project/colmpc:v0.2.0 
 To see the different scenarios with collision avoidance simply run in the main directory ```python examples/main_ocp.py -s i```, where i is the index of the scenario, going from 1 to 3.
 
 
-As the code is still in developpement, the code is constantly moving and sometimes, examples do not work. Hence, do not hesitate to contact me at [ahaffemaye@laas.fr](mailto:ahaffemaye@laas.fr).
+As the code is still in developpement, the code is constantly moving and sometimes, examples do not work. Hence, do not hesitate to open an issue
 
 # Citation
 To cite **COLMPC** in your academic research, please use the following bibtex entry:
