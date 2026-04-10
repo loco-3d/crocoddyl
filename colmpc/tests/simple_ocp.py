@@ -1,5 +1,4 @@
 import coal
-import crocoddyl
 import matplotlib.pyplot as plt
 import mim_solvers
 import numpy as np
@@ -8,6 +7,7 @@ from numpy import r_
 from wrapper_panda import PandaWrapper
 
 import colmpc as col
+import crocoddyl
 
 np.set_printoptions(precision=4, linewidth=350, suppress=True, threshold=1e6)
 

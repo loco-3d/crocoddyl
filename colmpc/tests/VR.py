@@ -1,4 +1,3 @@
-import crocoddyl
 import numpy as np
 import pinocchio as pin
 from compute_deriv import (
@@ -7,6 +6,8 @@ from compute_deriv import (
     compute_ddot,
     compute_dist,
 )
+
+import crocoddyl
 
 
 class ResidualModelVelocityAvoidance(crocoddyl.ResidualModelAbstract):

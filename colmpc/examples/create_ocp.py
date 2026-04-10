@@ -4,13 +4,13 @@
 # Copyright note valid unless otherwise stated in individual files.
 # All rights reserved.
 
-import crocoddyl
 import mim_solvers
 import numpy as np
 import pinocchio as pin
 from param_parsers import ParamParser
 
 import colmpc as col
+import crocoddyl
 
 
 def create_ocp_velocity(

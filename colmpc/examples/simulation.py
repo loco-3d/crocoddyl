@@ -3,11 +3,12 @@ import time
 import tkinter as tk
 from tkinter import ttk
 
-import crocoddyl
 import numpy as np
 import pinocchio
 from param_parsers import ParamParser
 from visualizer import add_sphere_to_viewer
+
+import crocoddyl
 
 
 class GUI:

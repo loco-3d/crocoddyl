@@ -9,10 +9,11 @@ import time
 from pathlib import Path
 
 import create_ocp
-import crocoddyl
 import pinocchio as pin
 from param_parsers import ParamParser
 from wrapper_panda import PandaWrapper
+
+import crocoddyl
 
 
 ### Argument parser

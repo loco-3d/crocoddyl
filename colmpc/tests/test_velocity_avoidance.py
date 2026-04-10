@@ -1,6 +1,5 @@
 import unittest
 
-import crocoddyl
 import numdifftools as nd
 import numpy as np
 import pinocchio as pin
@@ -13,6 +12,7 @@ from compute_deriv import (
 from scenes import Scene
 from wrapper_panda import PandaWrapper
 
+import crocoddyl
 from colmpc import ResidualModelVelocityAvoidance
 
 np.set_printoptions(precision=7, linewidth=350, suppress=True, threshold=1e6)

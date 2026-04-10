@@ -1,9 +1,10 @@
 ## Class heavily inspired by the work of Sebastien Kleff : https://github.com/machines-in-motion/minimal_examples_crocoddyl
 
-import crocoddyl
 import mim_solvers
 import numpy as np
 import pinocchio as pin
+
+import crocoddyl
 
 # from residualDistanceCollision import ResidualCollision
 from colmpc import ResidualDistanceCollision
