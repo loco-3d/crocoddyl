@@ -21,6 +21,7 @@
                 ./benchmark
                 ./bindings
                 ./CMakeLists.txt
+                ./colmpc
                 ./crocoddyl.cmake
                 ./doc
                 ./examples
