@@ -1,0 +1,201 @@
+scene1:
+  # Number of nodes of the trajectory
+  T: 50
+
+  # Time step between each node
+  dt: 0.05
+
+  # Initial configuration
+  INITIAL_CONFIG:
+    - -0.06709294
+    - 1.35980773
+    - -0.81605989
+    - 0.74243348
+    - 0.42419277
+    - 0.45547585
+    - -0.00456262
+
+  # Initial velocity
+  INITIAL_VELOCITY:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+
+  # Target pose
+  TARGET_POSE:
+    orientation: [0.0, 0.0, 1.0, 0.0]
+    translation: [0.0, 0.5, 1.2]
+
+  # Control parameters
+  ksi: 0.0001
+  di: 0.001
+  ds: 0.000001
+
+  # Weights
+  WEIGHT_uREG: 0.0001
+  WEIGHT_xREG: 0.1
+  WEIGHT_GRIPPER_POSE: 1.0
+  WEIGHT_GRIPPER_POSE_TERM: 50
+  WEIGHT_OBSTACLE: 1.0
+  WEIGHT_LIMIT: 0.1
+
+  # Safety threshold
+  SAFETY_THRESHOLD: 0.0
+  DISTANCE_THRESHOLD: 0.01
+
+  OBSTACLES:
+    obstacle1:
+        type: "ellipsoid"
+        translation: [ 0.0, 0.1, 1.2]
+        orientation: [ 0.0, 0.707, 0.707, 0.0]
+        dim: [0.15, 0.1, 0.075]
+
+  collision_pairs:
+    - [obstacle1, panda2_rightfinger_0]
+    - [obstacle1, panda2_leftfinger_0]
+
+
+
+scene2:
+  # Number of nodes of the trajectory
+  T: 50
+
+  # Time step between each node
+  dt: 0.05
+
+  # Initial configuration and velocity
+  INITIAL_CONFIG:
+    - 6.87676046e-02
+    - 1.87133260
+    - -9.23646871e-01
+    - 6.62962572e-01
+    - 5.02801754e-01
+    - 1.696128891e-00
+    - 4.77514312e-01
+  INITIAL_VELOCITY:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+
+  # Target pose
+  TARGET_POSE:
+    orientation: [0.0, 0.0, 1.0, 0.0 ]
+    translation: [0.0, 0.2, 0.9]
+
+  # Control parameters
+  ksi: 0.01
+  di: 0.01
+  ds: 0.0001
+
+  # Weights
+  WEIGHT_uREG: 0.0001
+  WEIGHT_xREG: 0.1
+  WEIGHT_GRIPPER_POSE: 5.0
+  WEIGHT_GRIPPER_POSE_TERM: 100.0
+  WEIGHT_OBSTACLE: 1.0
+  WEIGHT_LIMIT: 0.1
+
+  # Safety threshold
+  SAFETY_THRESHOLD: 0.001
+  DISTANCE_THRESHOLD: 0.01
+
+  OBSTACLES:
+    obstacle1:
+        type: "ellipsoid"
+        translation: [0.0, 0.0, 0.9]
+        orientation: [0.707, 0.0, 0.707, 0.0]
+        dim: [0.12, 0.06, 0.2]
+    obstacle2:
+        type: "ellipsoid"
+        translation: [0.0, 0.4, 0.9]
+        orientation: [0.707, 0.0, 0.707, 0.0]
+        dim: [0.12, 0.06, 0.2]
+    obstacle3:
+        type: "ellipsoid"
+        translation: [-0.2, 0.2, 0.9]
+        orientation: [ 0.5, 0.5, -0.5, 0.5]
+        dim: [0.12, 0.06, 0.2]
+    obstacle4:
+        type: "ellipsoid"
+        translation: [0.2, 0.2, 0.9]
+        orientation: [0.5, 0.5, -0.5, 0.5]
+        dim: [0.12, 0.06, 0.2]
+
+  ROBOT_ELLIPSOIDS:
+    el1:
+      parentFrame: panda2_link7_sc
+      dim: [0.1, 0.08, 0.15]
+
+  collision_pairs:
+  - [obstacle1, el1]
+  - [obstacle2, el1]
+  - [obstacle3, el1]
+  - [obstacle4, el1]
+
+
+
+scene3:
+  # Number of nodes of the trajectory
+  T: 20
+
+  # Time step between each node
+  dt: 0.1
+
+  # Initial configuration
+  INITIAL_CONFIG: [-0.566, 0.8085, -1.0189, -0.4379, 0.7698, 1.092, -0.2002]
+
+# Initial velocity (all zeros)
+  INITIAL_VELOCITY:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+
+  # Initial state vector
+  x0: [-0.566, 0.8085, -1.0189, -0.4379, 0.7698, 1.092, -0.2002, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+  DIM_OBS:
+  - [1.0, 0.25, 0.1]
+
+  # Target pose
+  TARGET_POSE:
+    orientation: [0.0, 0.0, 1.0, 0.0]
+    translation: [0.1, -0.25, 1.34]
+
+  # Control parameters
+  ksi: 0.001
+  di: 0.01  # 1e-4
+  ds: 0.0001
+
+  # Weights
+  WEIGHT_uREG: 0.0001
+  WEIGHT_xREG: 0.1
+  WEIGHT_GRIPPER_POSE: 5.0
+  WEIGHT_GRIPPER_POSE_TERM: 100.0
+  WEIGHT_OBSTACLE: 1.0
+  WEIGHT_LIMIT: 0.1
+
+  # Safety threshold
+  SAFETY_THRESHOLD: 0.0
+  DISTANCE_THRESHOLD: 0.01
+
+  OBSTACLES:
+    obstacle1:
+        type: "ellipsoid"
+        translation: [0.1, 0.1, 1.2]
+        orientation: [0.7071, 0.7071, 0.0, 0.0]
+        dim: [0.25, 0.1, 1.0]
+
+  collision_pairs:
+  - [obstacle1, panda2_rightfinger_0]
