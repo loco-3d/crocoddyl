@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Udpate pinocchio header to fix compatibility wih v4 in https://github.com/loco-3d/crocoddyl/pull/1486
+* CMake: make example-robot-data more optional for ROS in https://github.com/loco-3d/crocoddyl/pull/1467
+
 ## [3.2.0] - 2025-12-09
 
 * Introduced the actuation limits to handle thrusters and general action models in https://github.com/loco-3d/crocoddyl/pull/1455
