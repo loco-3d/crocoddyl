@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Fixed a bug where set_runningModels did not correctly update running_models_ in https://github.com/loco-3d/crocoddyl/pull/1489
 * Introduced single-floating point, shootings, numerics, endpoints features in solvers in https://github.com/loco-3d/crocoddyl/pull/1482
 * Fixed the compiler-flag definition used for action codegen + updated default compilation flags in https://github.com/loco-3d/crocoddyl/pull/1469
+
+## [3.2.1] - 2026-04-16
+
+* Udpate pinocchio header to fix compatibility wih v4 in https://github.com/loco-3d/crocoddyl/pull/1486
 * CMake: make example-robot-data more optional for ROS in https://github.com/loco-3d/crocoddyl/pull/1467
 
 ## [3.2.0] - 2025-12-09
@@ -352,7 +356,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/loco-3d/crocoddyl/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/loco-3d/crocoddyl/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/loco-3d/crocoddyl/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...v3.0.1
