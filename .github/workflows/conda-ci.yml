@@ -70,7 +70,7 @@ jobs:
         key: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-${{ github.run_id }}
         restore-keys: ccache-conda-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.python-version }}-
 
-    - uses: conda-incubator/setup-miniconda@v3
+    - uses: conda-incubator/setup-miniconda@v4
       with:
         activate-environment: crocoddyl
         auto-update-conda: true
