@@ -52,7 +52,7 @@ jobs:
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
-      UPSTREAM_WORKSPACE: dependencies.rosinstall  # to build example-robot-data from source as it's not released via the ROS buildfarm
+      UPSTREAM_WORKSPACE: github:gepetto/example-robot-data#devel
       CTEST_OUTPUT_ON_FAILURE: 1
       BUILDER: colcon
     runs-on: ubuntu-latest
