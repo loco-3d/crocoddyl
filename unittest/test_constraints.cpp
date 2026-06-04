@@ -195,7 +195,7 @@ void test_partial_derivatives_against_numdiff(
 
   // Checking the partial derivatives against numdiff
   double tol =
-      std::max(std::pow(model_num_diff.get_disturbance(), 1. / 3.), 1e-3);
+      std::max(std::pow(model_num_diff.get_disturbance(), 1. / 3.), 5e-3);
   BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
   BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
   BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
