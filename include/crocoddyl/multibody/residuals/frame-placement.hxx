@@ -60,12 +60,15 @@ void ResidualModelFramePlacementTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
 
-  // Compute the derivatives of the frame placement
-  const std::size_t nv = state_->get_nv();
+  // Compute the frame Jacobian at the error point
   pinocchio::Jlog6(d->rMf, d->rJf);
   pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_,
                               pinocchio::LOCAL, d->fJf);
+
+  // Compute the derivatives of the frame placement
+  const std::size_t nv = state_->get_nv();
   data->Rx.leftCols(nv).noalias() = d->rJf * d->fJf;
+  data->Rx.rightCols(nv).setZero();
 }
 
 template <typename Scalar>
