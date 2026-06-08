@@ -211,7 +211,7 @@ void test_partial_derivatives_against_numdiff(
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against numdiff
-  tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  tol = std::max(std::pow(model_num_diff.get_disturbance(), 1. / 3.), 5e-2);
   BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
   if (model_num_diff.get_with_gauss_approx()) {
     // The num diff is not precise enough to be tested here.

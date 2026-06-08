@@ -69,6 +69,7 @@ void ResidualModelFrameRotationTpl<Scalar>::calcDiff(
   // Compute the derivatives of the frame rotation
   const std::size_t nv = state_->get_nv();
   data->Rx.leftCols(nv).noalias() = d->rJf * d->fJf.template bottomRows<3>();
+  data->Rx.rightCols(nv).setZero();
 }
 
 template <typename Scalar>

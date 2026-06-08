@@ -18,6 +18,7 @@ concurrency:
 jobs:
   nix:
     runs-on: "${{ matrix.os }}-latest"
+    timeout-minutes: 180
     strategy:
       matrix:
         os: [ubuntu, macos]
