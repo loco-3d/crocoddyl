@@ -86,7 +86,6 @@ message(
 # Set a default build type to 'Release' if none was specified
 set_default_cmake_build_type("Release")
 
-set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
 
 set(CXX_DISABLE_WERROR False)
@@ -104,9 +103,14 @@ option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
+option(CROCODDYL_DOXYGEN_USE_MATHJAX "Avoid latex at build time" ON)
 
 if(ENABLE_VECTORIZATION)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
+if(CROCODDYL_DOXYGEN_USE_MATHJAX)
+  set(DOXYGEN_USE_MATHJAX YES)
 endif()
 
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
