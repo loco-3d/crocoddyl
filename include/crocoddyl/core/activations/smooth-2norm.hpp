@@ -18,8 +18,8 @@ namespace crocoddyl {
  * @brief Smooth-2Norm activation
  *
  * This activation function describes a smooth representation of a 2-norm of a
- * residual vector, i.e. \f[ \begin{equation} \sqrt{\epsilon + sum^nr_{i=0}
- * \|r_i\|^2} \end{equation} \f] where \f$\epsilon\f$ defines the smoothing
+ * residual vector, i.e. \f{equation}{ \sqrt{\epsilon + sum^nr_{i=0}
+ * \|r_i\|^2} \f} where \f$\epsilon\f$ defines the smoothing
  * factor, \f$r_i\f$ is the scalar residual for the \f$i\f$ constraints,
  * \f$nr\f$ is the dimension of the residual vector.
  *

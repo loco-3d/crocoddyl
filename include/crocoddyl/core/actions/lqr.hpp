@@ -20,11 +20,11 @@ namespace crocoddyl {
  * @brief Linear-quadratic regulator (LQR) action model
  *
  * A linear-quadratic regulator (LQR) action has a transition model of the form
- * \f[ \begin{equation}
- *   \mathbf{x}^' = \mathbf{A x + B u + f}.
- * \end{equation} \f]
+ * \f{equation}{
+ *   \mathbf{x}^{'} = \mathbf{A x + B u + f}.
+ * \f}
  * Its cost function is quadratic of the form:
- * \f[ \begin{equation}
+ * \f{equation}{
  * \ell(\mathbf{x},\mathbf{u}) = \begin{bmatrix}1
  * \\ \mathbf{x} \\ \mathbf{u}\end{bmatrix}^T \begin{bmatrix}0 &
  * \mathbf{q}^T & \mathbf{r}^T \\ \mathbf{q} & \mathbf{Q}
@@ -33,7 +33,7 @@ namespace crocoddyl {
  * \mathbf{r} & \mathbf{N} & \mathbf{R}\end{bmatrix}
  * \begin{bmatrix}1 \\ \mathbf{x} \\
  * \mathbf{u}\end{bmatrix}
- * \end{equation} \f]
+ * \f}
  * and the linear equality and inequality constraints has the form:
  * \f[ \begin{aligned}
  * \mathbf{g(x,u)} =  \mathbf{G}\begin{bmatrix} \mathbf{x} \\ \mathbf{u}

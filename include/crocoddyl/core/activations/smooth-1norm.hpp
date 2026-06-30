@@ -19,8 +19,8 @@ namespace crocoddyl {
  * @brief Smooth-abs activation
  *
  * This activation function describes a smooth representation of an absolute
- * activation (1-norm) for each element of a residual vector, i.e. \f[
- * \begin{equation} sum^nr_{i=0} \sqrt{\epsilon + \|r_i\|^2} \end{equation} \f]
+ * activation (1-norm) for each element of a residual vector, i.e.
+ * \{equation}{ sum^nr_{i=0} \sqrt{\epsilon + \|r_i\|^2} \f}
  * where \f$\epsilon\f$ defines the smoothing factor, \f$r_i\f$ is the scalar
  * residual for the \f$i\f$ constraints, \f$nr\f$ is the dimension of the
  * residual vector.

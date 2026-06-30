@@ -130,7 +130,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
     }
   }
 
-  VectorXs dr;  //!< disturbance: \f$ [\hdot \;\; disturbance \;\; \hdot] \f$
+  VectorXs dr;  //!< disturbance: \f$ [\cdots \;\; disturbance \;\; \cdots] \f$
   VectorXs rp;  //!< The input + the disturbance on one DoF "\f$ r^+ = rp = \int
                 //!< r + dr \f$"
   std::shared_ptr<Base> data_0;  //!< The data that contains the final results

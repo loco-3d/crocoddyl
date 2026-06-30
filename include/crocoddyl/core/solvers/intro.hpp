@@ -104,7 +104,7 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
 
   /**
    * @brief Return the span and kernel of control-equality constraints
-   * \f$\mathbf{H_u}\f
+   * \f$\mathbf{H_u}\f$
    */
   const std::vector<MatrixXs>& get_YZ() const;
 
