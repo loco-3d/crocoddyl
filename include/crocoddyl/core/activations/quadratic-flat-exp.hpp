@@ -19,8 +19,8 @@ namespace crocoddyl {
  * @brief Quadratic-flat-exp activation
  *
  * This activation function describes a quadratic exponential activation
- * depending on the square norm of a residual vector, i.e. \f[ \begin{equation}
- * 1 - exp(\|\mathbf{r}\|^2 / \alpha) \end{equation} \f] where \f$\alpha\f$
+ * depending on the square norm of a residual vector, i.e. \f{equation}{
+ * 1 - exp(\|\mathbf{r}\|^2 / \alpha) \f} where \f$\alpha\f$
  * defines the width of the quadratic basin, \f$r\f$ is the scalar residual,
  * \f$nr\f$ is the dimension of the residual vector. Far
  * away from zero, the quadFlat activation is nearly flat.

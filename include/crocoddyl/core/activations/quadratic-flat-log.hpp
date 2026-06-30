@@ -19,8 +19,8 @@ namespace crocoddyl {
  * @brief Quadratic-flat-log activation
  *
  * This activation function describes a logarithmic quadratic activation
- * depending on the quadratic norm of a residual vector, i.e. \f[
- * \begin{equation} log(1 + \|\mathbf{r}\|^2 / \alpha) \end{equation} \f] where
+ * depending on the quadratic norm of a residual vector, i.e.
+ * \f{equation}{ log(1 + \|\mathbf{r}\|^2 / \alpha) \f} where
  * \f$\alpha\f$ defines the width of the quadratic basin, \f$r\f$ is the scalar
  * residual, \f$nr\f$ is the dimension of the residual vector.
  *

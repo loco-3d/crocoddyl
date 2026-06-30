@@ -42,11 +42,12 @@ namespace crocoddyl {
  * contact force in the frame coordinate. The CoP lies inside the convex hull of
  * the foot, see eq.(18-19) of
  * https://hal.archives-ouvertes.fr/hal-02108449/document is we have:
- * \f[
- *  \begin{align}\begin{split}\tau^x &\leq
- * Yf^z \\-\tau^x &\leq Yf^z \\\tau^y &\leq Yf^z \\-\tau^y &\leq Yf^z
- *  \end{split}\end{align}
- * \f]
+ * \f{align}{
+ *    \tau^x &\leq Yf^z \\
+ *   -\tau^x &\leq Yf^z \\
+ *    \tau^y &\leq Yf^z \\
+ *   -\tau^y &\leq Yf^z
+ * \f}
  * with \f$\boldsymbol{\lambda}= \begin{bmatrix}f^x & f^y & f^z & \tau^x &
  * \tau^y & \tau^z \end{bmatrix}^T\f$.
  *
