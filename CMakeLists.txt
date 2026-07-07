@@ -103,7 +103,7 @@ option(BUILD_WITH_IPOPT "Build the IPOPT wrapper." ON)
 option(GENERATE_PYTHON_STUBS
        "Generate the Python stubs associated to the Python library" OFF)
 option(INSTALL_DOCUMENTATION "Generate and install the documentation" OFF)
-option(CROCODDYL_DOXYGEN_USE_MATHJAX "Avoid latex at build time" ON)
+option(CROCODDYL_DOXYGEN_USE_MATHJAX "Avoid latex at build time" OFF)
 
 if(ENABLE_VECTORIZATION)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
