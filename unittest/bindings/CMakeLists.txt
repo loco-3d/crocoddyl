@@ -10,6 +10,10 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     squashing
     copy)
 
+if(BUILD_WITH_CODEGEN_SUPPORT)
+  list(APPEND ${PROJECT_NAME}_PYTHON_BINDINGS_TESTS codegen_float32)
+endif()
+
 foreach(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
   python_build(. "test_${TEST}.py")
   add_python_unit_test("test_pybinds_${TEST}"

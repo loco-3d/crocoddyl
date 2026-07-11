@@ -61,7 +61,8 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
           "because of a known CppADCodeGen TLS guard redefinition issue in cppad/cg/cg.hpp."
       )
     else()
-      list(APPEND ${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen)
+      list(APPEND ${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen
+           test_codegen_float32)
     endif()
     list(APPEND ${PROJECT_NAME}_CPP_TESTS ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
   endif()

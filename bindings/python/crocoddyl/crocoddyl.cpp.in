@@ -58,6 +58,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
       .value("Float32", DType::Float32)
 #ifdef CROCODDYL_WITH_CODEGEN
       .value("ADFloat64", DType::ADFloat64)
+      .value("ADFloat32", DType::ADFloat32)
 #endif
       ;
 #endif

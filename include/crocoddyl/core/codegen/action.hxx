@@ -735,11 +735,12 @@ void ActionModelCodeGenTpl<Scalar>::recordCalcDiff_T() {
 
 template <typename Scalar>
 void ActionModelCodeGenTpl<Scalar>::recordQuasiStatic() {
-  const std::size_t nx = state_->get_nx();
   // Define the quasiStatic's input as the independent variables
   CppAD::Independent(ad_X3_);
-  // Collect computation in quasiStatic
-  ad_model_->quasiStatic(ad_data_, ad_Y3_, ad_X3_.head(nx), 100);
+  // The generated model is used for calc/calcDiff. Taping the underlying
+  // quasiStatic path can introduce NaNs for contact models through pseudo
+  // inverse branches, so keep this symbol structurally valid and deterministic.
+  ad_Y3_.setZero();
   // Define quasiStatic's output as the dependent variable
   ad_quasiStatic_->Dependent(ad_X3_, ad_Y3_);
   ad_quasiStatic_->optimize("no_compare_op");

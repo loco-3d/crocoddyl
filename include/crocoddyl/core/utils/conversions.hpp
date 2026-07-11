@@ -15,6 +15,7 @@
 #ifdef CROCODDYL_WITH_CODEGEN
 #include <cppad/cg/support/cppadcg_eigen.hpp>
 #include <cppad/cppad.hpp>
+#include <pinocchio/codegen/cppadcg.hpp>
 #endif
 
 #include "crocoddyl/core/mathbase.hpp"
@@ -139,33 +140,6 @@ struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>, float> {
     // Perform the conversion. This example extracts the value from the AD type.
     // You might need to adjust this depending on the specific implementation of
     // CppAD::cg::CG<double>.
-    return static_cast<float>(CppAD::Value(x).getValue());
-  }
-};
-
-template <>
-struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>, double> {
-  EIGEN_DEVICE_FUNC static inline double run(
-      const CppAD::AD<CppAD::cg::CG<double>>& x) {
-    return CppAD::Value(x).getValue();
-  }
-};
-
-template <>
-struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>, float> {
-  EIGEN_DEVICE_FUNC static inline float run(
-      const CppAD::AD<CppAD::cg::CG<float>>& x) {
-    return CppAD::Value(x).getValue();
-  }
-};
-
-template <>
-struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>, double> {
-  EIGEN_DEVICE_FUNC static inline double run(
-      const CppAD::AD<CppAD::cg::CG<float>>& x) {
-    // Perform the conversion. This example extracts the value from the AD type.
-    // You might need to adjust this depending on the specific implementation of
-    // CppAD::cg::CG<float>.
     return static_cast<float>(CppAD::Value(x).getValue());
   }
 };
