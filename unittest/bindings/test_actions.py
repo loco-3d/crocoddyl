@@ -17,6 +17,99 @@ from factory import (
 import crocoddyl
 
 
+class ActionModelParameterDerived(crocoddyl.ActionModelAbstract):
+    def __init__(self, np_=3):
+        super().__init__(crocoddyl.StateVector(4), 2, 3, 2, 2, 5, 4, np_)
+        self.last_p = None
+
+    def calc(self, data, x, u=None):
+        data.xnext[:] = x
+        data.cost = 0.0
+
+    def calcDiff(self, data, x, u=None):
+        pass
+
+    def update_p(self, data, p):
+        self.last_p = np.array(p, copy=True)
+
+
+class ActionModelParameterDefault(crocoddyl.ActionModelAbstract):
+    def __init__(self, np_=3):
+        super().__init__(crocoddyl.StateVector(4), 2, 3, 2, 1, 0, 0, np_)
+
+    def calc(self, data, x, u=None):
+        data.xnext[:] = x
+        data.cost = 0.0
+
+    def calcDiff(self, data, x, u=None):
+        pass
+
+
+class ActionBaseParametersTest(unittest.TestCase):
+    def test_constructor_and_data_fields(self):
+        model = ActionModelParameterDerived()
+        data = model.createData()
+
+        self.assertEqual(model.nr, 3)
+        self.assertEqual(model.np, 3)
+        self.assertEqual(data.Fp.shape, (model.state.ndx, model.np))
+        self.assertEqual(data.Lp.shape, (model.np,))
+        self.assertEqual(data.Lpp.shape, (model.np, model.np))
+        self.assertEqual(data.Lpx.shape, (model.np, model.state.ndx))
+        self.assertEqual(data.Lpu.shape, (model.np, model.nu))
+        self.assertEqual(data.Gp.shape, (model.ng, model.np))
+        self.assertEqual(data.Hp.shape, (model.nh, model.np))
+        self.assertFalse(hasattr(data, "dissipative_E"))
+        self.assertFalse(hasattr(data, "dE_dv"))
+        self.assertFalse(hasattr(data, "dE_dp"))
+        self.assertFalse(hasattr(data, "resize"))
+        self.assertFalse(hasattr(data, "setZero"))
+
+    def test_update_p_hook_dispatch(self):
+        model = ActionModelParameterDerived()
+        data = model.createData()
+        p = np.arange(model.np, dtype=float)
+
+        crocoddyl.ActionModelAbstract.update_p(model, data, p)
+        self.assertTrue(np.array_equal(model.last_p, p))
+
+    def test_default_update_p(self):
+        model = ActionModelParameterDefault()
+        data = model.createData()
+
+        with self.assertRaises(crocoddyl.Exception):
+            crocoddyl.ActionModelAbstract.update_p(model, data, np.zeros(model.np))
+
+    def test_parameter_field_assignment(self):
+        model = ActionModelParameterDerived()
+        data = model.createData()
+        data.Fp = np.full((model.state.ndx, model.np), 1.0)
+        data.Lp = np.full(model.np, 2.0)
+        data.Lpp = np.full((model.np, model.np), 3.0)
+        data.Lpx = np.full((model.np, model.state.ndx), 4.0)
+        data.Lpu = np.full((model.np, model.nu), 5.0)
+        data.Gp = np.full((model.ng, model.np), 6.0)
+        data.Hp = np.full((model.nh, model.np), 7.0)
+
+        self.assertTrue(np.all(data.Fp == 1.0))
+        self.assertTrue(np.all(data.Lp == 2.0))
+        self.assertTrue(np.all(data.Lpp == 3.0))
+        self.assertTrue(np.all(data.Lpx == 4.0))
+        self.assertTrue(np.all(data.Lpu == 5.0))
+        self.assertTrue(np.all(data.Gp == 6.0))
+        self.assertTrue(np.all(data.Hp == 7.0))
+
+        model.np = 4
+        resized_data = model.createData()
+        self.assertEqual(resized_data.Fp.shape, (model.state.ndx, model.np))
+        self.assertEqual(resized_data.Lp.shape, (model.np,))
+        self.assertEqual(resized_data.Lpp.shape, (model.np, model.np))
+        self.assertEqual(resized_data.Lpx.shape, (model.np, model.state.ndx))
+        self.assertEqual(resized_data.Lpu.shape, (model.np, model.nu))
+        self.assertEqual(resized_data.Gp.shape, (model.ng, model.np))
+        self.assertEqual(resized_data.Hp.shape, (model.nh, model.np))
+
+
 class ActionModelAbstractTestCase(unittest.TestCase):
     MODEL = None
     MODEL_DER = None
@@ -428,6 +521,7 @@ class AnymalIntegratedRK4Test(ActionModelAbstractTestCase):
 if __name__ == "__main__":
     # test to be run
     test_classes_to_run = [
+        ActionBaseParametersTest,
         UnicycleTest,
         LQRTest,
         RandomLQRTest,

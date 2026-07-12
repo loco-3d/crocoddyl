@@ -251,6 +251,12 @@ template <typename Scalar>
 struct DataCollectorAbstractTpl;
 
 template <typename Scalar>
+class ParameterManagerTpl;
+
+template <typename Scalar>
+struct ParameterDataManagerTpl;
+
+template <typename Scalar>
 struct DataCollectorActuationTpl;
 
 template <typename Scalar>
@@ -502,6 +508,8 @@ typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 typedef JointDataAbstractTpl<double> JointDataAbstract;
 
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+typedef ParameterManagerTpl<double> ParameterManager;
+typedef ParameterDataManagerTpl<double> ParameterDataManager;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
 typedef DataCollectorJointTpl<double> DataCollectorJoint;
 typedef DataCollectorJointActuationTpl<double> DataCollectorJointActuation;
