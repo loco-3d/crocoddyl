@@ -18,6 +18,7 @@ void exposeCore() {
   exposeControlParametrizationAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
+  exposeDynamicsAbstract();
 #ifdef CROCODDYL_WITH_CODEGEN
   exposeActionCodeGen();
 #endif

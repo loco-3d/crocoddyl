@@ -20,6 +20,7 @@ void exposeStateAbstract();
 void exposeControlParametrizationAbstract();
 void exposeActuationAbstract();
 void exposeActionAbstract();
+void exposeDynamicsAbstract();
 #ifdef CROCODDYL_WITH_CODEGEN
 void exposeActionCodeGen();
 #endif
