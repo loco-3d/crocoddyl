@@ -105,6 +105,10 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
     target_compile_definitions(test_actions PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
+  if(TARGET test_residuals)
+    target_compile_definitions(test_residuals PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
   if(BUILD_WITH_CODEGEN_SUPPORT)
     foreach(TEST_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
       target_link_libraries(${TEST_NAME} ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
