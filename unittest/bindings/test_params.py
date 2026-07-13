@@ -175,6 +175,95 @@ class ParamsTest(unittest.TestCase):
                 action_data, default_data, np.zeros(4), np.zeros(2)
             )
 
+    def check_dynamics_override_data_and_regressor(self, module, dtype):
+        class DynamicsParamsOverride(module.DynamicsParamsAbstract):
+            def __init__(self, state_, np_):
+                super().__init__(state_, np_)
+                self.update_calls = 0
+                self.create_calls = 0
+                self.regressor_calls = 0
+
+            def update(self, data, p):
+                self.update_calls += 1
+                data.p = p
+
+            def createData(self):
+                self.create_calls += 1
+                data = module.DynamicsParamsDataAbstract(self)
+                data.active = False
+                return data
+
+            def computeJointTorqueRegressor(self, data, params, x, u):
+                self.regressor_calls += 1
+                columns = np.arange(1, self.np + 1, dtype=dtype)
+                rows = x[: self.state.nv] + u.sum()
+                params.dtau_dp = np.outer(rows, columns).astype(dtype)
+                data.dP_dp = params.dtau_dp.sum(axis=0, keepdims=True)
+
+        state = module.StateVector(4)
+        np_ = 3
+        nu = 2
+        model = DynamicsParamsOverride(state, np_)
+        model.lb = np.array([-3.0, -2.0, -1.0], dtype=dtype)
+        model.ub = np.array([1.0, 2.0, 3.0], dtype=dtype)
+        params = model.createData()
+        self.assertEqual(model.create_calls, 1)
+        self.assertIsInstance(params, module.DynamicsParamsDataAbstract)
+        self.assertFalse(params.active)
+        self.assertEqual(
+            (params.np, params.np_action, params.np_dynamics), (np_, 0, np_)
+        )
+        self.assertEqual(params.dx_dp.shape, (state.ndx, 0))
+        self.assertEqual(params.dtau_dp.shape, (state.nv, np_))
+
+        fallback_params = module.DynamicsParamsAbstract.createData(model)
+        self.assertIsInstance(fallback_params, module.DynamicsParamsDataAbstract)
+        self.assertTrue(fallback_params.active)
+        p = np.array([0.2, 0.4, 0.6], dtype=dtype)
+        model.update(params, p)
+        self.assertEqual(model.update_calls, 1)
+        self.assertTrue(np.array_equal(params.p, p))
+        module.DynamicsParamsAbstract.update(model, params, np.zeros(np_, dtype=dtype))
+        self.assertTrue(np.array_equal(params.p, p))
+        self.assertTrue(model.checkData(params))
+        collector = module.DataCollectorParams(params)
+        self.assertIs(collector.params, params)
+
+        dynamics = module.DynamicsModelAbstract(
+            state, crocoddyl.DynamicsType.ContinuousControl, np_, nu
+        )
+        dynamics_data = dynamics.createData()
+        x = np.array([0.1, 0.2, 0.3, 0.4], dtype=dtype)
+        u = np.array([0.5, 0.6], dtype=dtype)
+        model.computeJointTorqueRegressor(dynamics_data, params, x, u)
+        expected = np.outer(x[: state.nv] + u.sum(), np.arange(1, np_ + 1, dtype=dtype))
+        self.assertEqual(model.regressor_calls, 1)
+        self.assertTrue(np.allclose(params.dtau_dp, expected))
+        self.assertTrue(
+            np.allclose(dynamics_data.dP_dp, expected.sum(axis=0, keepdims=True))
+        )
+
+        with self.assertRaises(Exception):
+            model.lb = np.zeros(np_ + 1, dtype=dtype)
+        with self.assertRaises(Exception):
+            model.ub = np.zeros(np_ + 1, dtype=dtype)
+        with self.assertRaises(TypeError):
+            module.DynamicsParamsDataAbstract(state, np_)
+        with self.assertRaises(Exception):
+            module.DynamicsParamsDataAbstract(None)
+
+        bare_model = module.DynamicsParamsAbstract(state, np_)
+        bare_data = bare_model.createData()
+        self.assertIsInstance(bare_data, module.DynamicsParamsDataAbstract)
+        with self.assertRaises(RuntimeError):
+            bare_model.computeJointTorqueRegressor(dynamics_data, bare_data, x, u)
+
+    def test_dynamics_override_data_and_regressor_float64(self):
+        self.check_dynamics_override_data_and_regressor(crocoddyl, np.float64)
+
+    def test_dynamics_override_data_and_regressor_float32(self):
+        self.check_dynamics_override_data_and_regressor(crocoddyl_float32, np.float32)
+
     def test_float32_models_overrides_and_final_data_constructor(self):
         state = crocoddyl_float32.StateVector(4)
         model = crocoddyl_float32.ParamsAbstract(state, 2)

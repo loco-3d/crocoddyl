@@ -266,6 +266,9 @@ template <typename Scalar>
 class ActionModelParamsAbstractTpl;
 
 template <typename Scalar>
+class DynamicsParamsAbstractTpl;
+
+template <typename Scalar>
 class ParameterManagerTpl;
 
 template <typename Scalar>
@@ -276,6 +279,9 @@ struct ParamsDataAbstractTpl;
 
 template <typename Scalar>
 struct ActionModelParamsDataAbstractTpl;
+
+template <typename Scalar>
+struct DynamicsParamsDataAbstractTpl;
 
 template <typename Scalar>
 struct DataCollectorParamsTpl;
@@ -546,10 +552,12 @@ typedef JointDataAbstractTpl<double> JointDataAbstract;
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 typedef ParamsAbstractTpl<double> ParamsAbstract;
 typedef ActionModelParamsAbstractTpl<double> ActionModelParamsAbstract;
+typedef DynamicsParamsAbstractTpl<double> DynamicsParamsAbstract;
 typedef ParameterManagerTpl<double> ParameterManager;
 typedef ParameterDataManagerTpl<double> ParameterDataManager;
 typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;
 typedef ActionModelParamsDataAbstractTpl<double> ActionModelParamsDataAbstract;
+typedef DynamicsParamsDataAbstractTpl<double> DynamicsParamsDataAbstract;
 typedef DataCollectorParamsTpl<double> DataCollectorParams;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
 typedef DataCollectorActuationParamsTpl<double> DataCollectorActuationParams;

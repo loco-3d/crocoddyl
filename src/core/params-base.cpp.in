@@ -15,5 +15,7 @@ template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     ParamsAbstractTpl<@SCALAR_TYPE@>;
 template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     ActionModelParamsAbstractTpl<@SCALAR_TYPE@>;
+template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DynamicsParamsAbstractTpl<@SCALAR_TYPE@>;
 
 }  // namespace crocoddyl

@@ -125,6 +125,36 @@ struct ActionModelParamsDataAbstractTpl
 };
 
 /**
+ * @brief Dynamics-parameter data payload
+ *
+ * This caller-owned specialization places its complete parameter vector in
+ * the dynamics suffix and leaves the action prefix empty. It owns the
+ * parameter vector and the \f$nv\times np\f$ joint-torque regressor buffer.
+ * Resizing and zeroing follow the inherited payload semantics and preserve
+ * the active status. It stores no model pointer; the caller controls its
+ * lifetime.
+ */
+template <typename _Scalar>
+struct DynamicsParamsDataAbstractTpl : public ParamsDataAbstractTpl<_Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef ParamsDataAbstractTpl<Scalar> Base;
+  typedef StateAbstractTpl<Scalar> StateAbstract;
+
+  /**
+   * @brief Initialize the dynamics-parameter payload
+   *
+   * @param[in] state  Shared state description used to size \f$dtau/dp\f$
+   * @param[in] np     Dynamics-parameter dimension
+   */
+  DynamicsParamsDataAbstractTpl(std::shared_ptr<StateAbstract> state,
+                                const std::size_t np = 0)
+      : Base(state, 0, np) {}
+  virtual ~DynamicsParamsDataAbstractTpl() {}
+};
+
+/**
  * @brief Collector for shared parameter data
  *
  * The collector shares ownership of the parameter payload. Its optional

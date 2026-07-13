@@ -42,6 +42,19 @@ createActionModelParamsDataAbstract(
       model->get_np());
 }
 
+template <typename Scalar>
+std::shared_ptr<DynamicsParamsDataAbstractTpl<Scalar> >
+createDynamicsParamsDataAbstract(
+    const std::shared_ptr<DynamicsParamsAbstractTpl<Scalar> >& model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: dynamics parameter model is null");
+  }
+  typedef DynamicsParamsDataAbstractTpl<Scalar> ParamsData;
+  return std::allocate_shared<ParamsData>(
+      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
+      model->get_np());
+}
+
 template <typename ParamsData>
 struct ParamsDataAbstractVisitor
     : public bp::def_visitor<ParamsDataAbstractVisitor<ParamsData>> {
@@ -131,6 +144,22 @@ struct DataCollectorParamsVisitor
                bp::default_call_policies(), bp::args("model")))             \
       .def(CopyableVisitor<ActionParamsData>());
 
+#define CROCODDYL_DYNAMICS_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)      \
+  typedef ParamsDataAbstractTpl<Scalar> DynamicsParamsDataBase;             \
+  typedef DynamicsParamsDataAbstractTpl<Scalar> DynamicsParamsData;         \
+  bp::register_ptr_to_python<std::shared_ptr<DynamicsParamsData> >();        \
+  bp::class_<DynamicsParamsData, bp::bases<DynamicsParamsDataBase> >(        \
+      "DynamicsParamsDataAbstract",                                        \
+      "Dynamics-parameter payload. Its complete parameter vector occupies " \
+      "the dynamics suffix and its inherited buffers include the joint-"    \
+      "torque regressor. Resizing preserves active status.\n\n",            \
+      bp::no_init)                                                          \
+      .def("__init__",                                                      \
+           bp::make_constructor(&createDynamicsParamsDataAbstract<Scalar>,  \
+                                bp::default_call_policies(),                 \
+                                bp::args("model")))                          \
+      .def(CopyableVisitor<DynamicsParamsData>());
+
 #define CROCODDYL_DATA_COLLECTOR_PARAMS_PYTHON_BINDINGS(Scalar)              \
   typedef DataCollectorParamsTpl<Scalar> Data;                               \
   typedef DataCollectorAbstractTpl<Scalar> DataBase;                         \
@@ -148,6 +177,7 @@ struct DataCollectorParamsVisitor
 void exposeParamsData() {
   CROCODDYL_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_ACTION_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_DATA_COLLECTOR_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
 }
 

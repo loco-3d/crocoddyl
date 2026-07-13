@@ -98,6 +98,51 @@ class ParamsDataTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             crocoddyl.ActionModelParamsDataAbstract(self.state, 2)
 
+    def test_dynamics_model_construction_inheritance_resize_and_copy(self):
+        model = crocoddyl.DynamicsParamsAbstract(self.state, 3)
+        dynamics = crocoddyl.DynamicsParamsDataAbstract(model)
+        self.assertEqual(
+            (dynamics.np, dynamics.np_action, dynamics.np_dynamics), (3, 0, 3)
+        )
+        self.assertEqual(dynamics.p.shape, (3,))
+        self.assertEqual(dynamics.dx_dp.shape, (self.state.ndx, 0))
+        self.assertEqual(dynamics.dtau_dp.shape, (self.state.nv, 3))
+        self.assertTrue(dynamics.active)
+
+        p = np.array([0.2, 0.4, 0.6])
+        dtau_dp = np.arange(self.state.nv * 3.0).reshape(self.state.nv, 3)
+        dynamics.p = p
+        dynamics.dx_dp = np.empty((self.state.ndx, 0))
+        dynamics.dtau_dp = dtau_dp
+        dynamics.active = False
+        model.update(dynamics, np.zeros(3))
+        self.assertTrue(model.checkData(dynamics))
+        self.assertTrue(np.array_equal(dynamics.p, p))
+        self.assertIs(crocoddyl.DataCollectorParams(dynamics).params, dynamics)
+
+        shallow = copy.copy(dynamics)
+        deep = copy.deepcopy(dynamics)
+        dynamics.p = np.zeros(3)
+        dynamics.dtau_dp = np.zeros((self.state.nv, 3))
+        for copied in (shallow, deep):
+            self.assertTrue(np.array_equal(copied.p, p))
+            self.assertTrue(np.array_equal(copied.dtau_dp, dtau_dp))
+            self.assertFalse(copied.active)
+
+        dynamics.resize(0, 4)
+        self.assertEqual(
+            (dynamics.np, dynamics.np_action, dynamics.np_dynamics), (4, 0, 4)
+        )
+        self.assertEqual(dynamics.dtau_dp.shape, (self.state.nv, 4))
+        self.assertFalse(dynamics.active)
+        dynamics.setZero()
+        self.assertTrue(np.allclose(dynamics.p, 0.0))
+        self.assertTrue(np.allclose(dynamics.dtau_dp, 0.0))
+        with self.assertRaises(TypeError):
+            crocoddyl.DynamicsParamsDataAbstract(self.state, 3)
+        with self.assertRaises(Exception):
+            crocoddyl.DynamicsParamsDataAbstract(None)
+
     def test_core_collector_combinations_and_sharing(self):
         actuation = crocoddyl.ActuationModelFloatingBase(self.state)
         actuation_data = actuation.createData()
@@ -233,6 +278,29 @@ class ParamsDataTest(unittest.TestCase):
         self.assertEqual(action.dtau_dp.shape, (state.nv, 0))
         collector = crocoddyl_float32.DataCollectorParams(params)
         self.assertEqual(collector.params.np, 5)
+
+        dynamics_model = crocoddyl_float32.DynamicsParamsAbstract(state, 3)
+        dynamics = crocoddyl_float32.DynamicsParamsDataAbstract(dynamics_model)
+        self.assertEqual(
+            (dynamics.np, dynamics.np_action, dynamics.np_dynamics), (3, 0, 3)
+        )
+        dynamics.p = np.array([0.2, 0.4, 0.6], dtype=np.float32)
+        dynamics.dtau_dp = np.arange(state.nv * 3, dtype=np.float32).reshape(
+            state.nv, 3
+        )
+        copied_dynamics = copy.deepcopy(dynamics)
+        dynamics.p = np.zeros(3, dtype=np.float32)
+        self.assertTrue(
+            np.array_equal(
+                copied_dynamics.p, np.array([0.2, 0.4, 0.6], dtype=np.float32)
+            )
+        )
+        dynamics_model.update(copied_dynamics, np.zeros(3, dtype=np.float32))
+        self.assertTrue(dynamics_model.checkData(copied_dynamics))
+        self.assertIs(
+            crocoddyl_float32.DataCollectorParams(copied_dynamics).params,
+            copied_dynamics,
+        )
 
 
 if __name__ == "__main__":

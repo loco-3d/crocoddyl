@@ -80,6 +80,31 @@ struct ActionModelParamsAbstractVisitor
   }
 };
 
+template <typename Model>
+struct DynamicsParamsAbstractVisitor
+    : public bp::def_visitor<DynamicsParamsAbstractVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("update", &Model::update, &Model::default_update,
+           bp::args("self", "data", "p"),
+           "Update the dynamics-parameter model.\n\n"
+           ":param data: parameter data\n"
+           ":param p: parameter vector")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the dynamics-parameter data.\n\n"
+             ":return parameter data")
+        .def("computeJointTorqueRegressor",
+             pure_virtual(&Model::computeJointTorqueRegressor),
+             bp::args("self", "data", "params", "x", "u"),
+             "Compute the joint-torque regressor with respect to parameters.\n\n"
+             ":param data: dynamics data\n"
+             ":param params: parameter data\n"
+             ":param x: state point\n"
+             ":param u: control point");
+  }
+};
+
 #define CROCODDYL_PARAMS_ABSTRACT_PYTHON_BINDINGS(Scalar)                     \
   {                                                                           \
     typedef ParamsAbstractTpl<Scalar> Model;                                  \
@@ -123,9 +148,31 @@ struct ActionModelParamsAbstractVisitor
         .def(CopyableVisitor<Model_wrap>());                                  \
   }
 
+#define CROCODDYL_DYNAMICS_PARAMS_ABSTRACT_PYTHON_BINDINGS(Scalar)            \
+  {                                                                           \
+    typedef DynamicsParamsAbstractTpl<Scalar> Model;                          \
+    typedef DynamicsParamsAbstractTpl_wrap<Scalar> Model_wrap;                \
+    typedef typename Model_wrap::State State;                                 \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model_wrap, bp::bases<ParamsAbstractTpl<Scalar> >,             \
+               boost::noncopyable>(                                           \
+        "DynamicsParamsAbstract",                                            \
+        "Abstract class for dynamics-parameter models.\n\n"                  \
+        "These models update the dynamics-suffix partition and compute "     \
+        "joint-torque regressors with respect to it.",                       \
+        bp::init<std::shared_ptr<State>, bp::optional<std::size_t> >(         \
+            bp::args("self", "state", "np"),                                \
+            "Initialize the dynamics-parameter model.\n\n"                  \
+            ":param state: state description\n"                              \
+            ":param np: dimension of the parameter vector"))                 \
+        .def(DynamicsParamsAbstractVisitor<Model_wrap>())                     \
+        .def(PrintableVisitor<Model_wrap>());                                 \
+  }
+
 void exposeParamsAbstract() {
   CROCODDYL_PARAMS_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_ACTION_MODEL_PARAMS_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_PARAMS_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
 }
 
 }  // namespace python

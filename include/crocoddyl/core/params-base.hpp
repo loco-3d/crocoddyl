@@ -187,6 +187,59 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
   virtual std::shared_ptr<ParamsDataAbstract> createData() override;
 };
 
+/**
+ * @brief Abstract dynamics-parameter model
+ *
+ * This interface extends ParamsAbstractTpl with the computation of the joint
+ * torque sensitivity to its dynamics-parameter vector. It creates
+ * caller-owned data whose parameter vector occupies the dynamics suffix of
+ * the shared payload.
+ */
+template <typename _Scalar>
+class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef ParamsAbstractTpl<Scalar> Base;
+  typedef DynamicsDataAbstractTpl<Scalar> DynamicsDataAbstract;
+  typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  /**
+   * @brief Initialize the dynamics-parameter model
+   *
+   * @param[in] state  Shared state description
+   * @param[in] np     Dimension of the dynamics-parameter vector
+   */
+  DynamicsParamsAbstractTpl(std::shared_ptr<StateAbstract> state,
+                            const std::size_t np = 0);
+  virtual ~DynamicsParamsAbstractTpl() = default;
+
+  /**
+   * @brief Compute the joint-torque regressor with respect to parameters
+   *
+   * @param[in] data    Dynamics data owned by the caller
+   * @param[in] params  Shared dynamics-parameter payload
+   * @param[in] x       State point
+   * @param[in] u       Control point
+   */
+  virtual void computeJointTorqueRegressor(
+      const std::shared_ptr<DynamicsDataAbstract>& data,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) = 0;
+
+  /**
+   * @brief Create the dynamics-partitioned parameter data
+   *
+   * The return type remains the generic parameter-data pointer while the
+   * allocated object is DynamicsParamsDataAbstractTpl.
+   */
+  virtual std::shared_ptr<ParamsDataAbstract> createData() override;
+};
+
 }  // namespace crocoddyl
 
 /* --- Details -------------------------------------------------------------- */
@@ -194,5 +247,6 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
 
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ParamsAbstractTpl)
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActionModelParamsAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::DynamicsParamsAbstractTpl)
 
 #endif  // CROCODDYL_CORE_PARAMS_BASE_HPP_

@@ -152,4 +152,17 @@ ActionModelParamsAbstractTpl<Scalar>::createData() {
       this->state_, this->np_);
 }
 
+template <typename Scalar>
+DynamicsParamsAbstractTpl<Scalar>::DynamicsParamsAbstractTpl(
+    std::shared_ptr<StateAbstract> state, const std::size_t np)
+    : Base(state, np) {}
+
+template <typename Scalar>
+std::shared_ptr<typename DynamicsParamsAbstractTpl<Scalar>::ParamsDataAbstract>
+DynamicsParamsAbstractTpl<Scalar>::createData() {
+  return std::allocate_shared<DynamicsParamsDataAbstractTpl<Scalar> >(
+      Eigen::aligned_allocator<DynamicsParamsDataAbstractTpl<Scalar> >(),
+      this->state_, this->np_);
+}
+
 }  // namespace crocoddyl

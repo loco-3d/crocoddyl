@@ -90,6 +90,16 @@ void test_params_data_layout_resize_and_active() {
   BOOST_CHECK_EQUAL(action_params.np_dynamics, 0);
   BOOST_CHECK_EQUAL(action_params.dx_dp.cols(), 4);
   BOOST_CHECK_EQUAL(action_params.dtau_dp.cols(), 0);
+
+  crocoddyl::DynamicsParamsDataAbstractTpl<Scalar> dynamics_params(state, 3);
+  BOOST_CHECK_EQUAL(dynamics_params.np, 3);
+  BOOST_CHECK_EQUAL(dynamics_params.np_action, 0);
+  BOOST_CHECK_EQUAL(dynamics_params.np_dynamics, 3);
+  BOOST_CHECK_EQUAL(dynamics_params.dx_dp.cols(), 0);
+  BOOST_CHECK_EQUAL(dynamics_params.dtau_dp.rows(), state->get_nv());
+  BOOST_CHECK_EQUAL(dynamics_params.dtau_dp.cols(), 3);
+  BOOST_CHECK(dynamics_params.p.isZero());
+  BOOST_CHECK(dynamics_params.dtau_dp.isZero());
 }
 
 void test_params_data_copy_and_scalar_values() {
@@ -318,12 +328,16 @@ void test_multibody_parameter_collectors() {
 template <typename Scalar>
 void test_params_data_same_size_no_allocation() {
   typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
+  typedef crocoddyl::DynamicsParamsDataAbstractTpl<Scalar> DynamicsParamsData;
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       create_state<Scalar>();
   ParamsData params(state, 2, 3);
+  DynamicsParamsData dynamics_params(state, 3);
   const Scalar* const p_ptr = params.p.data();
   const Scalar* const dx_dp_ptr = params.dx_dp.data();
   const Scalar* const dtau_dp_ptr = params.dtau_dp.data();
+  const Scalar* const dynamics_p_ptr = dynamics_params.p.data();
+  const Scalar* const dynamics_dtau_dp_ptr = dynamics_params.dtau_dp.data();
 
   const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
   Eigen::internal::set_is_malloc_allowed(false);
@@ -331,6 +345,8 @@ void test_params_data_same_size_no_allocation() {
     for (std::size_t i = 0; i < 100; ++i) {
       params.resize(2, 3);
       params.setZero();
+      dynamics_params.resize(0, 3);
+      dynamics_params.setZero();
     }
     Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
   } catch (...) {
@@ -341,6 +357,8 @@ void test_params_data_same_size_no_allocation() {
   BOOST_CHECK_EQUAL(params.p.data(), p_ptr);
   BOOST_CHECK_EQUAL(params.dx_dp.data(), dx_dp_ptr);
   BOOST_CHECK_EQUAL(params.dtau_dp.data(), dtau_dp_ptr);
+  BOOST_CHECK_EQUAL(dynamics_params.p.data(), dynamics_p_ptr);
+  BOOST_CHECK_EQUAL(dynamics_params.dtau_dp.data(), dynamics_dtau_dp_ptr);
 }
 
 }  // namespace
