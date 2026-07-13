@@ -5,6 +5,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     shooting
     solvers
     costs
+    cost_sum
     contacts
     impulses
     squashing

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,13 +9,267 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
 
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
+
+//----------------------------------------------------------------------------//
+
+template <typename _Scalar>
+class CostSumParameterResidualTpl
+    : public crocoddyl::ResidualModelAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ResidualModelBase,
+                         CostSumParameterResidualTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ResidualModelAbstractTpl<Scalar> Base;
+  typedef typename Base::ResidualDataAbstract ResidualDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  CostSumParameterResidualTpl(std::shared_ptr<StateAbstract> state,
+                              const std::size_t nu, const std::size_t np)
+      : Base(state, 2, nu, true, true, true, np) {}
+
+  void calc(const std::shared_ptr<ResidualDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>&,
+            const Eigen::Ref<const VectorXs>&) override {
+    data->r << Scalar(1), Scalar(-2);
+  }
+
+  void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&) override {
+    data->Rx.setConstant(Scalar(0.25));
+    data->Ru.setConstant(Scalar(-0.5));
+    if (this->get_np() != 0) {
+      data->Rp << Scalar(1), Scalar(2), Scalar(-1), Scalar(3);
+    }
+  }
+
+  template <typename NewScalar>
+  CostSumParameterResidualTpl<NewScalar> cast() const {
+    typedef CostSumParameterResidualTpl<NewScalar> ReturnType;
+    return ReturnType(this->get_state()->template cast<NewScalar>(),
+                      this->get_nu(), this->get_np());
+  }
+};
+
+template <typename _Scalar>
+struct CostSumActionShapeTpl {
+  typedef _Scalar Scalar;
+  typedef crocoddyl::StateVectorTpl<Scalar> State;
+
+  CostSumActionShapeTpl(const std::size_t nx, const std::size_t nu,
+                        const std::size_t np)
+      : state(std::make_shared<State>(nx)), nu(nu), np(np) {}
+
+  const std::shared_ptr<State>& get_state() const { return state; }
+  std::size_t get_nu() const { return nu; }
+  std::size_t get_np() const { return np; }
+  std::size_t get_nr() const { return 0; }
+  std::size_t get_ng() const { return 0; }
+  std::size_t get_nh() const { return 0; }
+  std::size_t get_ng_T() const { return 0; }
+  std::size_t get_nh_T() const { return 0; }
+
+  std::shared_ptr<State> state;
+  std::size_t nu;
+  std::size_t np;
+};
+
+typedef CostSumParameterResidualTpl<double> CostSumParameterResidual;
+typedef CostSumActionShapeTpl<double> CostSumActionShape;
+
+void test_parameter_aggregation_and_terminal_lifecycle() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::size_t nu = 2;
+  const std::size_t np = 2;
+  const std::shared_ptr<CostSumParameterResidual> residual =
+      std::make_shared<CostSumParameterResidual>(state, nu, np);
+  const std::shared_ptr<crocoddyl::CostModelResidual> cost =
+      std::make_shared<crocoddyl::CostModelResidual>(state, residual);
+  crocoddyl::CostModelSum model(state, nu, np);
+  model.addCost("active", cost, 2.);
+  model.addCost("inactive", cost, 3., false);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataSum> data =
+      model.createData(&shared);
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(nu);
+
+  BOOST_CHECK_EQUAL(model.get_np(), np);
+  BOOST_CHECK_EQUAL(data->Lp.size(), np);
+  BOOST_CHECK_EQUAL(data->Lpp.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpp.cols(), np);
+  BOOST_CHECK_EQUAL(data->Lpx.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpx.cols(), state->get_ndx());
+  BOOST_CHECK_EQUAL(data->Lpu.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpu.cols(), nu);
+  BOOST_CHECK(data->Lp.isZero(0.));
+  BOOST_CHECK(data->Lpp.isZero(0.));
+  BOOST_CHECK(data->Lpx.isZero(0.));
+  BOOST_CHECK(data->Lpu.isZero(0.));
+
+  model.calc(data, x, u);
+  model.calcDiff(data, x, u);
+  const std::shared_ptr<crocoddyl::CostDataAbstract>& active_data =
+      data->costs.find("active")->second;
+  BOOST_CHECK(data->Lp.isApprox(2. * active_data->Lp, 1e-12));
+  BOOST_CHECK(data->Lpp.isApprox(2. * active_data->Lpp, 1e-12));
+  BOOST_CHECK(data->Lpx.isApprox(2. * active_data->Lpx, 1e-12));
+  BOOST_CHECK(data->Lpu.isApprox(2. * active_data->Lpu, 1e-12));
+
+  model.changeCostStatus("inactive", true);
+  data->Lu.setConstant(41.);
+  data->Luu.setConstant(42.);
+  data->Lxu.setConstant(43.);
+  data->Lpu.setConstant(44.);
+  model.calc(data, x);
+  model.calcDiff(data, x);
+  BOOST_CHECK(data->Lp.isApprox(5. * active_data->Lp, 1e-12));
+  BOOST_CHECK(data->Lpp.isApprox(5. * active_data->Lpp, 1e-12));
+  BOOST_CHECK(data->Lpx.isApprox(5. * active_data->Lpx, 1e-12));
+  BOOST_CHECK(data->Lu.isConstant(41., 0.));
+  BOOST_CHECK(data->Luu.isConstant(42., 0.));
+  BOOST_CHECK(data->Lxu.isConstant(43., 0.));
+  BOOST_CHECK(data->Lpu.isConstant(44., 0.));
+
+#ifdef NDEBUG  // Run only in release mode
+  crocoddyl::CostModelSumTpl<float> casted_model = model.cast<float>();
+  BOOST_CHECK_EQUAL(casted_model.get_np(), np);
+  BOOST_CHECK_EQUAL(casted_model.get_costs().size(), model.get_costs().size());
+  crocoddyl::DataCollectorAbstractTpl<float> casted_shared;
+  const std::shared_ptr<crocoddyl::CostDataSumTpl<float>> casted_data =
+      casted_model.createData(&casted_shared);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_model.calc(casted_data, x_f, u_f);
+  casted_model.calcDiff(casted_data, x_f, u_f);
+  BOOST_CHECK(casted_data->Lp.isApprox(data->Lp.cast<float>(), 1e-5f));
+  BOOST_CHECK(casted_data->Lpp.isApprox(data->Lpp.cast<float>(), 1e-5f));
+  BOOST_CHECK(casted_data->Lpx.isApprox(data->Lpx.cast<float>(), 1e-5f));
+#endif
+}
+
+void test_parameter_dimension_validation() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::shared_ptr<CostSumParameterResidual> residual =
+      std::make_shared<CostSumParameterResidual>(state, 2, 2);
+  const std::shared_ptr<crocoddyl::CostModelResidual> cost =
+      std::make_shared<crocoddyl::CostModelResidual>(state, residual);
+  crocoddyl::CostModelSum model(state, 2, 3);
+  BOOST_CHECK_THROW(model.addCost("invalid", cost, 1.), std::exception);
+  const std::shared_ptr<crocoddyl::CostItem> item =
+      std::make_shared<crocoddyl::CostItem>("invalid", cost, 1.);
+  BOOST_CHECK_THROW(model.addCost(item), std::exception);
+
+  const std::shared_ptr<CostSumParameterResidual> parameter_free_residual =
+      std::make_shared<CostSumParameterResidual>(state, 2, 0);
+  const std::shared_ptr<crocoddyl::CostModelResidual> parameter_free_cost =
+      std::make_shared<crocoddyl::CostModelResidual>(state,
+                                                     parameter_free_residual);
+  BOOST_CHECK_NO_THROW(
+      model.addCost("parameter_free", parameter_free_cost, 1.));
+}
+
+void test_parameter_share_memory() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  crocoddyl::CostModelSum model(state, 2, 2);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataSum> data =
+      model.createData(&shared);
+  CostSumActionShape action_model(4, 2, 2);
+  crocoddyl::ActionDataAbstract action_data(&action_model);
+  data->shareMemory(&action_data);
+  data->Lp.setConstant(1.);
+  data->Lpp.setConstant(2.);
+  data->Lpx.setConstant(3.);
+  data->Lpu.setConstant(4.);
+  BOOST_CHECK(action_data.Lp.isApprox(data->Lp, 0.));
+  BOOST_CHECK(action_data.Lpp.isApprox(data->Lpp, 0.));
+  BOOST_CHECK(action_data.Lpx.isApprox(data->Lpx, 0.));
+  BOOST_CHECK(action_data.Lpu.isApprox(data->Lpu, 0.));
+
+  CostSumActionShape invalid_action_model(4, 2, 3);
+  crocoddyl::ActionDataAbstract invalid_action_data(&invalid_action_model);
+  BOOST_CHECK_THROW(data->shareMemory(&invalid_action_data), std::exception);
+
+  const std::shared_ptr<crocoddyl::CostDataSum> differential_cost_data =
+      model.createData(&shared);
+  crocoddyl::DifferentialActionModelLQR differential_model(4, 2);
+  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
+      differential_data = differential_model.createData();
+  const double* const Lp_ptr = differential_cost_data->Lp.data();
+  differential_cost_data->shareMemory(differential_data.get());
+  BOOST_CHECK_EQUAL(differential_cost_data->Lp.data(), Lp_ptr);
+  BOOST_CHECK_EQUAL(differential_cost_data->Lp.size(), 2);
+  differential_cost_data->Lx.setConstant(5.);
+  BOOST_CHECK(differential_data->Lx.isApprox(differential_cost_data->Lx, 0.));
+
+  crocoddyl::CostModelSum parameter_free_model(state, 2);
+  const std::shared_ptr<crocoddyl::CostDataSum> parameter_free_data =
+      parameter_free_model.createData(&shared);
+  CostSumActionShape terminal_action_model(4, 0, 0);
+  crocoddyl::ActionDataAbstract terminal_action_data(&terminal_action_model);
+  BOOST_CHECK_NO_THROW(parameter_free_data->shareMemory(&terminal_action_data));
+  BOOST_CHECK_EQUAL(parameter_free_data->Lpu.rows(), 0);
+  BOOST_CHECK_EQUAL(parameter_free_data->Lpu.cols(), 2);
+}
+
+void test_parameter_setters_and_no_allocation() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::shared_ptr<CostSumParameterResidual> residual =
+      std::make_shared<CostSumParameterResidual>(state, 2, 2);
+  const std::shared_ptr<crocoddyl::CostModelResidual> cost =
+      std::make_shared<crocoddyl::CostModelResidual>(state, residual);
+  crocoddyl::CostModelSum model(state, 2, 2);
+  model.addCost("cost", cost, 1.);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataSum> data =
+      model.createData(&shared);
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::Vector2d u = Eigen::Vector2d::Random();
+
+  BOOST_CHECK_NO_THROW(data->set_Lp(Eigen::Vector2d::Ones()));
+  BOOST_CHECK_NO_THROW(data->set_Lpp(Eigen::Matrix2d::Ones()));
+  BOOST_CHECK_NO_THROW(data->set_Lpx(Eigen::MatrixXd::Ones(2, 4)));
+  BOOST_CHECK_NO_THROW(data->set_Lpu(Eigen::Matrix2d::Ones()));
+  BOOST_CHECK_THROW(data->set_Lp(Eigen::Vector3d::Zero()), std::exception);
+  BOOST_CHECK_THROW(data->set_Lpp(Eigen::Matrix3d::Zero()), std::exception);
+  BOOST_CHECK_THROW(data->set_Lpx(Eigen::MatrixXd::Zero(3, 4)), std::exception);
+  BOOST_CHECK_THROW(data->set_Lpu(Eigen::MatrixXd::Zero(2, 3)), std::exception);
+
+  model.calc(data, x, u);
+  model.calcDiff(data, x, u);
+  const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
+  Eigen::internal::set_is_malloc_allowed(false);
+  try {
+    for (std::size_t i = 0; i < 100; ++i) {
+      model.calc(data, x, u);
+      model.calcDiff(data, x, u);
+      model.calc(data, x);
+      model.calcDiff(data, x);
+    }
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+  } catch (...) {
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+    throw;
+  }
+}
 
 //----------------------------------------------------------------------------//
 
@@ -611,6 +865,14 @@ void register_unit_tests(StateModelTypes::Type state_type) {
 }
 
 bool init_function() {
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_parameter_aggregation_and_terminal_lifecycle));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_parameter_dimension_validation));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_parameter_share_memory));
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_parameter_setters_and_no_allocation));
   register_unit_tests(StateModelTypes::StateMultibody_TalosArm);
   register_unit_tests(StateModelTypes::StateMultibody_HyQ);
   register_unit_tests(StateModelTypes::StateMultibody_Talos);
