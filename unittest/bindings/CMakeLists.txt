@@ -6,6 +6,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     solvers
     costs
     cost_sum
+    constraint_manager
     contacts
     impulses
     squashing
