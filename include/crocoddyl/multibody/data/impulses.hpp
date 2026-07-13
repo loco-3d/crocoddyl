@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2020, University of Edinburgh
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,10 +40,27 @@ struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>,
   virtual ~DataCollectorMultibodyInImpulseTpl() {}
 };
 
+template <typename Scalar>
+struct DataCollectorMultibodyInImpulseParamsTpl
+    : DataCollectorMultibodyInImpulseTpl<Scalar>,
+      DataCollectorParamsTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  DataCollectorMultibodyInImpulseParamsTpl(
+      pinocchio::DataTpl<Scalar>* const pinocchio,
+      std::shared_ptr<ImpulseDataMultipleTpl<Scalar> > impulses,
+      std::shared_ptr<ParamsDataAbstractTpl<Scalar> > params)
+      : DataCollectorMultibodyInImpulseTpl<Scalar>(pinocchio, impulses),
+        DataCollectorParamsTpl<Scalar>(params) {}
+  virtual ~DataCollectorMultibodyInImpulseParamsTpl() {}
+};
+
 }  // namespace crocoddyl
 
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorImpulseTpl)
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
     crocoddyl::DataCollectorMultibodyInImpulseTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorMultibodyInImpulseParamsTpl)
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_

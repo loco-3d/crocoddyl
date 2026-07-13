@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +59,34 @@ struct DataCollectorImpulseVisitor
                                                                         2>()]) \
       .def(CopyableVisitor<MData>());
 
+#define CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPULSE_PARAMS_PYTHON_BINDINGS(    \
+    Scalar)                                                                    \
+  typedef DataCollectorMultibodyInImpulseParamsTpl<Scalar> PMData;             \
+  typedef DataCollectorMultibodyInImpulseTpl<Scalar> PMDataBase1;              \
+  typedef DataCollectorParamsTpl<Scalar> PMDataBase2;                          \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ImpulseDataMultipleTpl<Scalar> ImpulseData;                          \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PMData>>();                       \
+  bp::class_<PMData, bp::bases<PMDataBase1, PMDataBase2>>(                     \
+      "DataCollectorMultibodyInImpulseParams",                                 \
+      "Data collector for multibody systems in impulse with parameter "        \
+      "payload.\n\n",                                                          \
+      bp::init<PinocchioData*, std::shared_ptr<ImpulseData>,                   \
+               std::shared_ptr<ParamsData>>(                                   \
+          bp::args("self", "pinocchio", "impulses", "params"),                 \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param impulses: impulses data\n"                                   \
+          ":param params: parameter payload")[bp::with_custodian_and_ward<1,   \
+                                                                             2>()]) \
+      .def(CopyableVisitor<PMData>());
+
 void exposeDataCollectorImpulses() {
   CROCODDYL_DATA_COLLECTOR_IMPULSE_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPULSE_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPULSE_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
 }
 
 }  // namespace python

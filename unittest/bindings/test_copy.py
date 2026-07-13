@@ -1,3 +1,11 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
 import copy
 import sys
 import unittest
@@ -259,10 +267,20 @@ class DataCollectorsTest(CopyModelTestCase):
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
     jdata = crocoddyl.JointDataAbstract(state, actuation, actuation.nu)
+    params = crocoddyl.ParamsDataAbstract(state, 2, 3)
+    MODEL.append(params)
     MODEL.append(crocoddyl.DataCollectorAbstract())
+    MODEL.append(crocoddyl.DataCollectorParams(params))
     MODEL.append(crocoddyl.DataCollectorActuation(actuation.createData()))
+    MODEL.append(crocoddyl.DataCollectorActuationParams(actuation.createData(), params))
     MODEL.append(jdata)
     MODEL.append(crocoddyl.DataCollectorJoint(jdata))
+    MODEL.append(crocoddyl.DataCollectorJointParams(jdata, params))
+    MODEL.append(
+        crocoddyl.DataCollectorJointActuationParams(
+            actuation.createData(), jdata, params
+        )
+    )
     # multibody collectors
     impulse = crocoddyl.ImpulseModelMultiple(state)
     contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
@@ -271,15 +289,30 @@ class DataCollectorsTest(CopyModelTestCase):
     cdata = contact.createData(pdata)
     idata = impulse.createData(pdata)
     MODEL.append(crocoddyl.DataCollectorMultibody(pdata))
+    MODEL.append(crocoddyl.DataCollectorMultibodyParams(pdata, params))
     MODEL.append(crocoddyl.DataCollectorActMultibody(pdata, adata))
+    MODEL.append(crocoddyl.DataCollectorActMultibodyParams(pdata, adata, params))
     MODEL.append(crocoddyl.DataCollectorJointActMultibody(pdata, adata, jdata))
+    MODEL.append(
+        crocoddyl.DataCollectorJointActMultibodyParams(pdata, adata, jdata, params)
+    )
     MODEL.append(crocoddyl.DataCollectorImpulse(idata))
     MODEL.append(crocoddyl.DataCollectorContact(cdata))
     MODEL.append(crocoddyl.DataCollectorMultibodyInImpulse(pdata, idata))
+    MODEL.append(crocoddyl.DataCollectorMultibodyInImpulseParams(pdata, idata, params))
     MODEL.append(crocoddyl.DataCollectorMultibodyInContact(pdata, cdata))
+    MODEL.append(crocoddyl.DataCollectorMultibodyInContactParams(pdata, cdata, params))
     MODEL.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
     MODEL.append(
+        crocoddyl.DataCollectorActMultibodyInContactParams(pdata, adata, cdata, params)
+    )
+    MODEL.append(
         crocoddyl.DataCollectorJointActMultibodyInContact(pdata, adata, jdata, cdata)
+    )
+    MODEL.append(
+        crocoddyl.DataCollectorJointActMultibodyInContactParams(
+            pdata, adata, jdata, cdata, params
+        )
     )
     cmodel = crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu)
     MODEL.append(crocoddyl.ForceDataAbstract(cmodel, pdata))

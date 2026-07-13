@@ -33,6 +33,8 @@ void exposeCore() {
   exposeSquashingAbstract();
   exposeSquashingSmoothSat();
   exposeActuationSquashing();
+  exposeParamsAbstract();
+  exposeParamsData();
   exposeDataCollectorActuation();
   exposeDataCollectorJoint();
   exposeIntegratedActionEuler();

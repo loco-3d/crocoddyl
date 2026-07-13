@@ -1,0 +1,155 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/data/params.hpp"
+#include "crocoddyl/core/params-base.hpp"
+
+#include <boost/python/make_constructor.hpp>
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Scalar>
+std::shared_ptr<ParamsDataAbstractTpl<Scalar> > createParamsDataAbstract(
+    const std::shared_ptr<ParamsAbstractTpl<Scalar> >& model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: parameter model is null");
+  }
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;
+  return std::allocate_shared<ParamsData>(
+      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
+      model->get_np(), 0);
+}
+
+template <typename Scalar>
+std::shared_ptr<ActionModelParamsDataAbstractTpl<Scalar> >
+createActionModelParamsDataAbstract(
+    const std::shared_ptr<ActionModelParamsAbstractTpl<Scalar> >& model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: action parameter model is null");
+  }
+  typedef ActionModelParamsDataAbstractTpl<Scalar> ParamsData;
+  return std::allocate_shared<ParamsData>(
+      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
+      model->get_np());
+}
+
+template <typename ParamsData>
+struct ParamsDataAbstractVisitor
+    : public bp::def_visitor<ParamsDataAbstractVisitor<ParamsData>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "np", bp::make_getter(&ParamsData::np), "total parameter dimension")
+        .add_property("np_action", bp::make_getter(&ParamsData::np_action),
+                      "action-parameter dimension")
+        .add_property("np_dynamics", bp::make_getter(&ParamsData::np_dynamics),
+                      "dynamics-parameter dimension")
+        .add_property(
+            "p", bp::make_getter(&ParamsData::p, bp::return_internal_reference<>()),
+            bp::make_setter(&ParamsData::p), "active parameter vector")
+        .add_property(
+            "dx_dp",
+            bp::make_getter(&ParamsData::dx_dp,
+                            bp::return_internal_reference<>()),
+            bp::make_setter(&ParamsData::dx_dp),
+            "action sensitivity Jacobian")
+        .add_property(
+            "dtau_dp",
+            bp::make_getter(&ParamsData::dtau_dp,
+                            bp::return_internal_reference<>()),
+            bp::make_setter(&ParamsData::dtau_dp),
+            "dynamics torque-regressor Jacobian")
+        .def_readwrite("active", &ParamsData::active, "active status")
+        .def("resize", &ParamsData::resize,
+             bp::args("self", "np_action", "np_dynamics"),
+             "Resize the parameter payload.\n\n"
+             ":param np_action: action-parameter dimension\n"
+             ":param np_dynamics: dynamics-parameter dimension")
+        .def("setZero", &ParamsData::setZero, bp::args("self"),
+             "Set the parameter payload to zero.");
+  }
+};
+
+template <typename Data>
+struct DataCollectorParamsVisitor
+    : public bp::def_visitor<DataCollectorParamsVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "params",
+        bp::make_getter(&Data::params,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "parameter payload");
+  }
+};
+
+#define CROCODDYL_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)                  \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                             \
+  typedef typename ParamsData::StateAbstract State;                             \
+  bp::register_ptr_to_python<std::shared_ptr<ParamsData>>();                    \
+  bp::class_<ParamsData>(                                                       \
+      "ParamsDataAbstract",                                                     \
+      "Abstract class for parameter payloads.\n\n"                              \
+      "The payload owns a contiguous active parameter vector whose action "     \
+      "parameters form the prefix and dynamics parameters form the suffix, "    \
+      "together with the shared action and torque sensitivity buffers. "        \
+      "Resizing preserves active status and zeros the buffers.\n\n",              \
+      bp::init<std::shared_ptr<State>, std::size_t, std::size_t>(              \
+          bp::args("self", "state", "np_action", "np_dynamics"),               \
+          "Create the parameter payload.\n\n"                                   \
+          ":param state: state description\n"                                   \
+          ":param np_action: action-parameter dimension\n"                      \
+          ":param np_dynamics: dynamics-parameter dimension"))                  \
+      .def("__init__",                                                          \
+           bp::make_constructor(&createParamsDataAbstract<Scalar>,              \
+                                bp::default_call_policies(),                    \
+                                bp::args("model")))                             \
+      .def(ParamsDataAbstractVisitor<ParamsData>())                             \
+      .def(CopyableVisitor<ParamsData>());
+
+#define CROCODDYL_ACTION_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)         \
+  typedef ParamsDataAbstractTpl<Scalar> ActionParamsDataBase;                \
+  typedef ActionModelParamsDataAbstractTpl<Scalar> ActionParamsData;         \
+  bp::register_ptr_to_python<std::shared_ptr<ActionParamsData> >();          \
+  bp::class_<ActionParamsData, bp::bases<ActionParamsDataBase> >(            \
+      "ActionModelParamsDataAbstract",                                      \
+      "Action-model parameter payload. Its complete parameter vector "      \
+      "occupies the action prefix and it owns its sensitivity buffers.\n\n", \
+      bp::no_init)                                                           \
+      .def("__init__",                                                       \
+           bp::make_constructor(                                             \
+               &createActionModelParamsDataAbstract<Scalar>,                 \
+               bp::default_call_policies(), bp::args("model")))             \
+      .def(CopyableVisitor<ActionParamsData>());
+
+#define CROCODDYL_DATA_COLLECTOR_PARAMS_PYTHON_BINDINGS(Scalar)              \
+  typedef DataCollectorParamsTpl<Scalar> Data;                               \
+  typedef DataCollectorAbstractTpl<Scalar> DataBase;                         \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
+  bp::class_<Data, bp::bases<DataBase>>(                                     \
+      "DataCollectorParams", "Parameter-payload data collector.\n\n",        \
+      bp::init<std::shared_ptr<ParamsData>>(                                 \
+          bp::args("self", "params"),                                        \
+          "Create parameter data collection.\n\n"                            \
+          ":param params: parameter payload"))                               \
+      .def(DataCollectorParamsVisitor<Data>())                               \
+      .def(CopyableVisitor<Data>());
+
+void exposeParamsData() {
+  CROCODDYL_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTION_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

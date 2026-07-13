@@ -250,6 +250,15 @@ struct JointDataAbstractTpl;
 template <typename Scalar>
 struct DataCollectorAbstractTpl;
 
+// parameters
+class ParamsModelBase;
+
+template <typename Scalar>
+class ParamsAbstractTpl;
+
+template <typename Scalar>
+class ActionModelParamsAbstractTpl;
+
 template <typename Scalar>
 class ParameterManagerTpl;
 
@@ -257,13 +266,31 @@ template <typename Scalar>
 struct ParameterDataManagerTpl;
 
 template <typename Scalar>
+struct ParamsDataAbstractTpl;
+
+template <typename Scalar>
+struct ActionModelParamsDataAbstractTpl;
+
+template <typename Scalar>
+struct DataCollectorParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActuationTpl;
+
+template <typename Scalar>
+struct DataCollectorActuationParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorJointTpl;
 
 template <typename Scalar>
+struct DataCollectorJointParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActuationTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActuationParamsTpl;
 
 // residual
 template <typename Scalar>
@@ -508,11 +535,20 @@ typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 typedef JointDataAbstractTpl<double> JointDataAbstract;
 
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+typedef ParamsAbstractTpl<double> ParamsAbstract;
+typedef ActionModelParamsAbstractTpl<double> ActionModelParamsAbstract;
 typedef ParameterManagerTpl<double> ParameterManager;
 typedef ParameterDataManagerTpl<double> ParameterDataManager;
+typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;
+typedef ActionModelParamsDataAbstractTpl<double> ActionModelParamsDataAbstract;
+typedef DataCollectorParamsTpl<double> DataCollectorParams;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
+typedef DataCollectorActuationParamsTpl<double> DataCollectorActuationParams;
 typedef DataCollectorJointTpl<double> DataCollectorJoint;
+typedef DataCollectorJointParamsTpl<double> DataCollectorJointParams;
 typedef DataCollectorJointActuationTpl<double> DataCollectorJointActuation;
+typedef DataCollectorJointActuationParamsTpl<double>
+    DataCollectorJointActuationParams;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;

@@ -7,6 +7,8 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     costs
     cost_sum
     constraint_manager
+    params
+    params_data
     contacts
     impulses
     squashing

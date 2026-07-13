@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +59,29 @@ struct DataCollectorContactVisitor
                                                                         2>()]) \
       .def(CopyableVisitor<MData>());
 
+#define CROCODDYL_DATA_COLLECTOR_MULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(     \
+    Scalar)                                                                    \
+  typedef DataCollectorMultibodyInContactParamsTpl<Scalar> PMData;             \
+  typedef DataCollectorMultibodyInContactTpl<Scalar> PMDataBase1;              \
+  typedef DataCollectorParamsTpl<Scalar> PMDataBase2;                          \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ContactDataMultipleTpl<Scalar> ContactData;                          \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PMData>>();                       \
+  bp::class_<PMData, bp::bases<PMDataBase1, PMDataBase2>>(                     \
+      "DataCollectorMultibodyInContactParams",                                 \
+      "Data collector for multibody systems in contact with parameter "        \
+      "payload.\n\n",                                                          \
+      bp::init<PinocchioData*, std::shared_ptr<ContactData>,                   \
+               std::shared_ptr<ParamsData>>(                                   \
+          bp::args("self", "pinocchio", "contacts", "params"),                 \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param contacts: contacts data\n"                                   \
+          ":param params: parameter payload")[bp::with_custodian_and_ward<1,   \
+                                                                             2>()]) \
+      .def(CopyableVisitor<PMData>());
+
 #define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_CONTACT_PYTHON_BINDINGS(Scalar)  \
   typedef DataCollectorActMultibodyInContactTpl<Scalar> AMData;                  \
   typedef DataCollectorMultibodyInContactTpl<Scalar> AMDataBase1;                \
@@ -79,6 +102,31 @@ struct DataCollectorContactVisitor
           ":param contacts: contacts data")[bp::with_custodian_and_ward<1,     \
                                                                         2>()]) \
       .def(CopyableVisitor<AMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(  \
+    Scalar)                                                                    \
+  typedef DataCollectorActMultibodyInContactParamsTpl<Scalar> PAMData;         \
+  typedef DataCollectorActMultibodyInContactTpl<Scalar> PAMDataBase1;          \
+  typedef DataCollectorParamsTpl<Scalar> PAMDataBase2;                         \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef ContactDataMultipleTpl<Scalar> ContactData;                          \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PAMData>>();                      \
+  bp::class_<PAMData, bp::bases<PAMDataBase1, PAMDataBase2>>(                  \
+      "DataCollectorActMultibodyInContactParams",                              \
+      "Data collector for actuated multibody systems in contact with "         \
+      "parameter payload.\n\n",                                                \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<ContactData>, std::shared_ptr<ParamsData>>(     \
+          bp::args("self", "pinocchio", "actuation", "contacts", "params"),    \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param contacts: contacts data\n"                                   \
+          ":param params: parameter payload")[bp::with_custodian_and_ward<1,   \
+                                                                             2>()]) \
+      .def(CopyableVisitor<PAMData>());
 
 #define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PYTHON_BINDINGS(   \
     Scalar)                                                                    \
@@ -104,11 +152,46 @@ struct DataCollectorContactVisitor
                                                                         2>()]) \
       .def(CopyableVisitor<JAMData>());
 
+#define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorJointActMultibodyInContactParamsTpl<Scalar> PJAMData;   \
+  typedef DataCollectorJointActMultibodyInContactTpl<Scalar> PJAMDataBase1;    \
+  typedef DataCollectorParamsTpl<Scalar> PJAMDataBase2;                        \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  typedef ContactDataMultipleTpl<Scalar> ContactData;                          \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PJAMData>>();                     \
+  bp::class_<PJAMData, bp::bases<PJAMDataBase1, PJAMDataBase2>>(               \
+      "DataCollectorJointActMultibodyInContactParams",                         \
+      "Data collector for actuated-joint multibody systems in contact with "   \
+      "parameter payload.\n\n",                                                \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<JointData>, std::shared_ptr<ContactData>,       \
+               std::shared_ptr<ParamsData>>(                                   \
+          bp::args("self", "pinocchio", "actuation", "joint", "contacts",      \
+                   "params"),                                                  \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param joint: joint data\n"                                         \
+          ":param contacts: contacts data\n"                                   \
+          ":param params: parameter payload")[bp::with_custodian_and_ward<1,   \
+                                                                             2>()]) \
+      .def(CopyableVisitor<PJAMData>());
+
 void exposeDataCollectorContacts() {
   CROCODDYL_DATA_COLLECTOR_CONTACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_DATA_COLLECTOR_MULTIBODY_CONTACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_MULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
   CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_CONTACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
   CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
 }
 
 }  // namespace python

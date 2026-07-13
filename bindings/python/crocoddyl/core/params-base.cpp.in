@@ -1,0 +1,132 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/params-base.hpp"
+
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ParamsAbstractVisitor
+    : public bp::def_visitor<ParamsAbstractVisitor<Model> > {
+  typedef typename Model::ParamsModel ParamsModel;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("update", &ParamsModel::update, &Model::default_update,
+             bp::args("self", "data", "p"),
+             "Update the parameter model.\n\n"
+             ":param data: parameter data\n"
+             ":param p: parameter vector")
+        .def("createData", &ParamsModel::createData,
+             &Model::default_createData,
+             bp::args("self"),
+             "Create the parameter data.\n\n"
+             ":return parameter data")
+        .def("checkData", &ParamsModel::checkData, bp::args("self", "data"),
+             "Check that a given parameter data belongs to this model.")
+        .def("zero", &ParamsModel::zero, bp::args("self"),
+             "Return the zero parameter vector.")
+        .def("rand", &ParamsModel::rand, bp::args("self"),
+             "Return a random parameter vector.")
+        .add_property(
+            "state",
+            bp::make_function(&ParamsModel::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state description")
+        .add_property("np", bp::make_function(&ParamsModel::get_np),
+                      "dimension of the parameter vector")
+        .add_property("lb",
+                      bp::make_function(&ParamsModel::get_lb,
+                                        bp::return_internal_reference<>()),
+                      &ParamsModel::set_lb, "parameter lower bounds")
+        .add_property("ub",
+                      bp::make_function(&ParamsModel::get_ub,
+                                        bp::return_internal_reference<>()),
+                      &ParamsModel::set_ub, "parameter upper bounds");
+  }
+};
+
+template <typename Model>
+struct ActionModelParamsAbstractVisitor
+    : public bp::def_visitor<ActionModelParamsAbstractVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("update", &Model::update, &Model::default_update,
+           bp::args("self", "data", "p"),
+           "Update the action-parameter model.\n\n"
+           ":param data: parameter data\n"
+           ":param p: parameter vector")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the action-parameter data.\n\n"
+             ":return parameter data")
+        .def("computeParamSensitivity",
+             pure_virtual(&Model::computeParamSensitivity),
+             bp::args("self", "data", "params", "x", "u"),
+             "Compute action sensitivity with respect to parameters.\n\n"
+             ":param data: action data\n"
+             ":param params: parameter data\n"
+             ":param x: state point\n"
+             ":param u: control point");
+  }
+};
+
+#define CROCODDYL_PARAMS_ABSTRACT_PYTHON_BINDINGS(Scalar)                     \
+  {                                                                           \
+    typedef ParamsAbstractTpl<Scalar> Model;                                  \
+    typedef ParamsAbstractTpl_wrap<Scalar> Model_wrap;                        \
+    typedef typename Model_wrap::State State;                                 \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model_wrap, boost::noncopyable>(                               \
+        "ParamsAbstract",                                                     \
+        "Abstract class for parameter models.\n\n"                            \
+        "A parameter model owns its dimension and bounds, and updates a "     \
+        "caller-owned shared parameter payload.",                            \
+        bp::init<std::shared_ptr<State>, bp::optional<std::size_t> >(         \
+            bp::args("self", "state", "np"),                                  \
+            "Initialize the parameter model.\n\n"                             \
+            ":param state: state description\n"                               \
+            ":param np: dimension of the parameter vector"))                 \
+        .def(ParamsAbstractVisitor<Model_wrap>())                             \
+        .def(PrintableVisitor<Model_wrap>())                                  \
+        .def(CopyableVisitor<Model_wrap>());                                  \
+  }
+
+#define CROCODDYL_ACTION_MODEL_PARAMS_ABSTRACT_PYTHON_BINDINGS(Scalar)        \
+  {                                                                           \
+    typedef ActionModelParamsAbstractTpl<Scalar> Model;                       \
+    typedef ActionModelParamsAbstractTpl_wrap<Scalar> Model_wrap;             \
+    typedef typename Model_wrap::State State;                                 \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model_wrap, bp::bases<ParamsAbstractTpl<Scalar> >,             \
+               boost::noncopyable>(                                           \
+        "ActionModelParamsAbstract",                                          \
+        "Abstract class for action-parameter models.\n\n"                     \
+        "These models update the action-prefix partition and compute state "  \
+        "sensitivities with respect to it.",                                 \
+        bp::init<std::shared_ptr<State>, bp::optional<std::size_t> >(         \
+            bp::args("self", "state", "np"),                                  \
+            "Initialize the action-parameter model.\n\n"                      \
+            ":param state: state description\n"                               \
+            ":param np: dimension of the parameter vector"))                 \
+        .def(ActionModelParamsAbstractVisitor<Model_wrap>())                  \
+        .def(PrintableVisitor<Model_wrap>())                                  \
+        .def(CopyableVisitor<Model_wrap>());                                  \
+  }
+
+void exposeParamsAbstract() {
+  CROCODDYL_PARAMS_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTION_MODEL_PARAMS_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

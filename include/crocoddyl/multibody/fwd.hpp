@@ -238,10 +238,19 @@ template <typename Scalar>
 struct DataCollectorMultibodyTpl;
 
 template <typename Scalar>
+struct DataCollectorMultibodyParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActMultibodyTpl;
 
 template <typename Scalar>
+struct DataCollectorActMultibodyParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActMultibodyTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorContactTpl;
@@ -250,16 +259,28 @@ template <typename Scalar>
 struct DataCollectorMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorMultibodyInContactParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorActMultibodyInContactParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActMultibodyInContactTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInContactParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
 template <typename Scalar>
 struct DataCollectorMultibodyInImpulseTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImpulseParamsTpl;
 
 // impulse
 template <typename Scalar>
@@ -404,19 +425,32 @@ typedef ContactData6DTpl<double> ContactData6D;
 typedef StateMultibodyTpl<double> StateMultibody;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
+typedef DataCollectorMultibodyParamsTpl<double> DataCollectorMultibodyParams;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
+typedef DataCollectorActMultibodyParamsTpl<double>
+    DataCollectorActMultibodyParams;
 typedef DataCollectorJointActMultibodyTpl<double>
     DataCollectorJointActMultibody;
+typedef DataCollectorJointActMultibodyParamsTpl<double>
+    DataCollectorJointActMultibodyParams;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double>
     DataCollectorMultibodyInContact;
+typedef DataCollectorMultibodyInContactParamsTpl<double>
+    DataCollectorMultibodyInContactParams;
 typedef DataCollectorActMultibodyInContactTpl<double>
     DataCollectorActMultibodyInContact;
+typedef DataCollectorActMultibodyInContactParamsTpl<double>
+    DataCollectorActMultibodyInContactParams;
 typedef DataCollectorJointActMultibodyInContactTpl<double>
     DataCollectorJointActMultibodyInContact;
+typedef DataCollectorJointActMultibodyInContactParamsTpl<double>
+    DataCollectorJointActMultibodyInContactParams;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double>
     DataCollectorMultibodyInImpulse;
+typedef DataCollectorMultibodyInImpulseParamsTpl<double>
+    DataCollectorMultibodyInImpulseParams;
 
 typedef ImpulseModel6DTpl<double> ImpulseModel6D;
 typedef ImpulseData6DTpl<double> ImpulseData6D;
