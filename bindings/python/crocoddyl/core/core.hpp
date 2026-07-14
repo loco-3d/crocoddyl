@@ -58,6 +58,7 @@ void exposeActionNumDiff();
 void exposeDifferentialActionNumDiff();
 void exposeActivationNumDiff();
 void exposeStateNumDiff();
+void exposeProblemAbstract();
 void exposeShootingProblem();
 void exposeSolverAbstract();
 void exposeStateEuclidean();

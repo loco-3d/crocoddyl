@@ -3,6 +3,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     actuations
     actions
     shooting
+    problem_abstract
     solvers
     costs
     cost_sum

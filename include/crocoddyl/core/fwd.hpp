@@ -27,6 +27,9 @@ inline bool is_a_AssignmentOp(AssignmentOp op) {
 
 // solver and problem
 template <typename Scalar>
+class ProblemAbstractTpl;
+
+template <typename Scalar>
 class ShootingProblemTpl;
 
 template <typename Scalar>
@@ -420,6 +423,7 @@ template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
 /********************Template Instantiation*************/
+typedef ProblemAbstractTpl<double> ProblemAbstract;
 typedef ShootingProblemTpl<double> ShootingProblem;
 typedef SolverAbstractTpl<double> SolverAbstract;
 typedef SolverFDDPTpl<double> SolverFDDP;

@@ -1,0 +1,127 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
+#include "crocoddyl/core/optctrl/problem-abstract.hpp"
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_PROBLEM_ABSTRACT_PYTHON_BINDINGS(Scalar)                     \
+  typedef ProblemAbstractTpl<Scalar> Problem;                                  \
+  typedef std::shared_ptr<typename Problem::ConstraintModelManager>            \
+      ConstraintModelManagerPtr;                                               \
+  typedef std::shared_ptr<typename Problem::ConstraintDataManager>             \
+      ConstraintDataManagerPtr;                                                \
+  StdVectorPythonVisitor<std::vector<ConstraintModelManagerPtr>,               \
+                         true>::expose("StdVec_ConstraintModelManager");       \
+  StdVectorPythonVisitor<std::vector<ConstraintDataManagerPtr>, true>::expose( \
+      "StdVec_ConstraintDataManager");                                         \
+  bp::register_ptr_to_python<std::shared_ptr<Problem> >();                     \
+  bp::class_<Problem, boost::noncopyable>(                                     \
+      "ProblemAbstract",                                                       \
+      "Abstract base class for optimal control problems.\n\n"                  \
+      "It defines trajectory evaluation, structural and model/data queries, "  \
+      "update tracking, and phase/parameter hooks.",                           \
+      bp::no_init)                                                             \
+      .def("calc", bp::pure_virtual(&Problem::calc),                           \
+           bp::args("self", "xs", "us"),                                       \
+           "Compute the cost and next states along a trajectory.\n\n"          \
+           ":param xs: state trajectory (size T+1)\n"                          \
+           ":param us: control trajectory (size T)\n"                          \
+           ":returns: total cost")                                             \
+      .def("calcDiff", bp::pure_virtual(&Problem::calcDiff),                   \
+           bp::args("self", "xs", "us"),                                       \
+           "Compute cost and dynamics derivatives along a trajectory.\n\n"     \
+           ":param xs: state trajectory (size T+1)\n"                          \
+           ":param us: control trajectory (size T)\n"                          \
+           ":returns: total cost")                                             \
+      .def("rollout", &Problem::rollout_us, bp::args("self", "us"),            \
+           "Integrate the dynamics for a control sequence.\n\n"                \
+           ":param us: control trajectory (size T)\n"                          \
+           ":returns: state trajectory (size T+1)")                            \
+      .def("update_p", &Problem::update_p,                                     \
+           (bp::arg("self"), bp::arg("p"), bp::arg("phase_idx") = 0),          \
+           "Update the parameter vector of a phase.")                          \
+      .add_property("T", bp::make_function(&Problem::get_T),                   \
+                    "number of running nodes")                                 \
+      .add_property("x0",                                                      \
+                    bp::make_function(                                         \
+                        &Problem::get_x0,                                      \
+                        bp::return_value_policy<bp::copy_const_reference>()),  \
+                    "initial state")                                           \
+      .add_property("nx", bp::make_function(&Problem::get_nx),                 \
+                    "dimension of the state tuple")                            \
+      .add_property("ndx", bp::make_function(&Problem::get_ndx),               \
+                    "dimension of the state tangent space")                    \
+      .add_property("nthreads", bp::make_function(&Problem::get_nthreads),     \
+                    "number of evaluation threads")                            \
+      .add_property(                                                           \
+          "runningModels",                                                     \
+          bp::make_function(&Problem::get_runningModels,                       \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "running action models")                                             \
+      .add_property(                                                           \
+          "terminalModel",                                                     \
+          bp::make_function(&Problem::get_terminalModel,                       \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "terminal action model")                                             \
+      .add_property(                                                           \
+          "runningDatas",                                                      \
+          bp::make_function(&Problem::get_runningDatas,                        \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "running action data")                                               \
+      .add_property(                                                           \
+          "terminalData",                                                      \
+          bp::make_function(&Problem::get_terminalData,                        \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "terminal action data")                                              \
+      .add_property("is_updated", bp::make_function(&Problem::is_updated),     \
+                    bp::make_function(&Problem::set_is_updated),               \
+                    "whether the problem was structurally modified")           \
+      .add_property("n_phases", bp::make_function(&Problem::get_n_phases),     \
+                    "number of phases")                                        \
+      .add_property("phase_idxs",                                              \
+                    bp::make_function(                                         \
+                        &Problem::get_phase_idxs,                              \
+                        bp::return_value_policy<bp::copy_const_reference>()),  \
+                    "inclusive phase start indices")                           \
+      .add_property("phase_edxs",                                              \
+                    bp::make_function(                                         \
+                        &Problem::get_phase_edxs,                              \
+                        bp::return_value_policy<bp::copy_const_reference>()),  \
+                    "exclusive phase end indices")                             \
+      .add_property(                                                           \
+          "parameter_constraints",                                             \
+          bp::make_function(&Problem::get_parameter_constraints_models,        \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "phase-level parameter-constraint models")                           \
+      .add_property(                                                           \
+          "parameter_constraints_data",                                        \
+          bp::make_function(&Problem::get_parameter_constraints_datas,         \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+          "phase-level parameter-constraint data")                             \
+      .add_property("has_parameter_constraints",                               \
+                    bp::make_function(&Problem::has_parameter_constraints),    \
+                    "whether parameter constraints are active");
+
+void exposeProblemAbstract() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_PROBLEM_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

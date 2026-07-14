@@ -292,6 +292,9 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(
     std::shared_ptr<ActionModelAbstract> model,
     std::shared_ptr<ActionDataAbstract> data) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   if (!model->checkData(data)) {
     throw_pretty("Invalid argument: "
                  << "action data is not consistent with the action model")
@@ -316,6 +319,9 @@ void ShootingProblemTpl<Scalar>::circularAppend(
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::circularAppend(
     std::shared_ptr<ActionModelAbstract> model) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   if (model->get_state()->get_nx() != nx_) {
     throw_pretty(
         "Invalid argument: " << "nx is not consistent with the other nodes")
@@ -337,6 +343,9 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateNode(
     const std::size_t i, std::shared_ptr<ActionModelAbstract> model,
     std::shared_ptr<ActionDataAbstract> data) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   if (i >= T_ + 1) {
     throw_pretty("Invalid argument: "
                  << "i is bigger than the allocated horizon (it should be less "
@@ -368,6 +377,9 @@ void ShootingProblemTpl<Scalar>::updateNode(
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::updateModel(
     const std::size_t i, std::shared_ptr<ActionModelAbstract> model) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   if (i >= T_ + 1) {
     throw_pretty(
         "Invalid argument: "
@@ -461,6 +473,9 @@ void ShootingProblemTpl<Scalar>::set_x0(const VectorXs& x0_in) {
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<std::shared_ptr<ActionModelAbstract> >& models) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   for (std::size_t i = 0; i < T_; ++i) {
     const std::shared_ptr<ActionModelAbstract>& model = models[i];
     if (model->get_state()->get_nx() != nx_) {
@@ -488,6 +503,9 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_terminalModel(
     std::shared_ptr<ActionModelAbstract> model) {
+  if (this->get_n_phases() != 0) {
+    throw_pretty("Invalid call: problem must be reconstructed");
+  }
   if (model->get_state()->get_nx() != nx_) {
     throw_pretty(
         "Invalid argument: " << "nx is not consistent with the other nodes")

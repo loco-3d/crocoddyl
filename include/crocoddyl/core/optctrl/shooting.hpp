@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/optctrl/problem-abstract.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -26,10 +27,11 @@ namespace crocoddyl {
  * set of next states and cost values per each node \f$k\f$. Instead, `calcDiff`
  * updates the derivatives of all action models. Finally, `rollout` integrates
  * the system dynamics. This class is used to decouple problem formulation and
- * resolution.
+ * resolution. Structural mutation is supported only for standard problems
+ * without phase-owned data; phased problems must be reconstructed.
  */
 template <typename _Scalar>
-class ShootingProblemTpl {
+class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -85,7 +87,8 @@ class ShootingProblemTpl {
    * \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  virtual Scalar calc(const std::vector<VectorXs>& xs,
+                      const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Compute the derivatives of the cost and dynamics
@@ -103,8 +106,8 @@ class ShootingProblemTpl {
    * \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calcDiff(const std::vector<VectorXs>& xs,
-                  const std::vector<VectorXs>& us);
+  virtual Scalar calcDiff(const std::vector<VectorXs>& xs,
+                          const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Integrate the dynamics given a control sequence
@@ -114,7 +117,8 @@ class ShootingProblemTpl {
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size
    * \f$T\f$)
    */
-  void rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs);
+  virtual void rollout(const std::vector<VectorXs>& us,
+                       std::vector<VectorXs>& xs) override;
 
   /**
    * @copybrief rollout
@@ -124,7 +128,8 @@ class ShootingProblemTpl {
    * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size
    * \f$T+1\f$)
    */
-  std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+  virtual std::vector<VectorXs> rollout_us(
+      const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Compute the quasic static commands given a state trajectory
@@ -204,34 +209,36 @@ class ShootingProblemTpl {
   /**
    * @brief Return the number of running nodes
    */
-  std::size_t get_T() const;
+  virtual std::size_t get_T() const override;
 
   /**
    * @brief Return the initial state
    */
-  const VectorXs& get_x0() const;
+  virtual const VectorXs& get_x0() const override;
 
   /**
    * @brief Return the running models
    */
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& get_runningModels()
-      const;
+  virtual const std::vector<std::shared_ptr<ActionModelAbstract> >&
+  get_runningModels() const override;
 
   /**
    * @brief Return the terminal model
    */
-  const std::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
+  virtual const std::shared_ptr<ActionModelAbstract>& get_terminalModel()
+      const override;
 
   /**
    * @brief Return the running datas
    */
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& get_runningDatas()
-      const;
+  virtual const std::vector<std::shared_ptr<ActionDataAbstract> >&
+  get_runningDatas() const override;
 
   /**
    * @brief Return the terminal data
    */
-  const std::shared_ptr<ActionDataAbstract>& get_terminalData() const;
+  virtual const std::shared_ptr<ActionDataAbstract>& get_terminalData()
+      const override;
 
   /**
    * @brief Modify the initial state
@@ -260,28 +267,28 @@ class ShootingProblemTpl {
   /**
    * @brief Modify the is_updated flag
    */
-  void set_is_updated(const bool is_updated);
+  virtual void set_is_updated(const bool is_updated) override;
 
   /**
    * @brief Return the dimension of the state tuple
    */
-  std::size_t get_nx() const;
+  virtual std::size_t get_nx() const override;
 
   /**
    * @brief Return the dimension of the tangent space of the state manifold
    */
-  std::size_t get_ndx() const;
+  virtual std::size_t get_ndx() const override;
 
   /**
    * @brief Return the number of threads
    */
-  std::size_t get_nthreads() const;
+  virtual std::size_t get_nthreads() const override;
 
   /**
    * @brief Return only once true is the shooting problem has been changed,
    * otherwise false
    */
-  bool is_updated();
+  virtual bool is_updated() override;
 
   /**
    * @brief Print information on the 'ShootingProblem'
@@ -313,8 +320,6 @@ class ShootingProblemTpl {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/optctrl/shooting.hxx"
 

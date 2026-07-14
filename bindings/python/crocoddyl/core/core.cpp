@@ -56,6 +56,7 @@ void exposeCore() {
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
   exposeStateNumDiff();
+  exposeProblemAbstract();
   exposeShootingProblem();
   exposeSolverAbstract();
   exposeStateEuclidean();
