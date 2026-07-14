@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -22,6 +22,8 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
            model->get_ng(), model->get_nh()),
       differential_(model),
       control_(control),
+      integrator_time_(std::make_shared<IntegratorTime>(
+          time_step < Scalar(0.) ? Scalar(1e-3) : time_step, false)),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
   if (control->get_nw() != model->get_nu()) {
@@ -42,6 +44,8 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
       differential_(model),
       control_(
           new ControlParametrizationModelPolyZeroTpl<Scalar>(model->get_nu())),
+      integrator_time_(std::make_shared<IntegratorTime>(
+          time_step < Scalar(0.) ? Scalar(1e-3) : time_step, false)),
       time_step_(time_step),
       with_cost_residual_(with_cost_residual) {
   init();
@@ -49,26 +53,25 @@ IntegratedActionModelAbstractTpl<Scalar>::IntegratedActionModelAbstractTpl(
 
 template <typename Scalar>
 void IntegratedActionModelAbstractTpl<Scalar>::init() {
-  time_step2_ = time_step_ * time_step_;
+  if (time_step_ < Scalar(0.)) {
+    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
+  }
+  refresh_integrator_time();
   VectorXs u_lb(nu_), u_ub(nu_);
   control_->convertBounds(differential_->get_u_lb(), differential_->get_u_ub(),
                           u_lb, u_ub);
   Base::set_u_lb(u_lb);
   Base::set_u_ub(u_ub);
-  if (time_step_ < Scalar(0.)) {
-    time_step_ = Scalar(1e-3);
-    time_step2_ = time_step_ * time_step_;
-    std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-  }
 }
 
 template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 IntegratedActionModelAbstractTpl<Scalar>::createData() {
-  if (control_->get_nu() > differential_->get_nu())
+  if (control_->get_nu() > differential_->get_nu()) {
     std::cerr << "Warning: It is useless to use an Euler integrator with a "
                  "control parametrization larger than PolyZero"
               << std::endl;
+  }
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
 }
 
@@ -117,8 +120,14 @@ IntegratedActionModelAbstractTpl<Scalar>::get_control() const {
 }
 
 template <typename Scalar>
+const std::shared_ptr<IntegratorTimeTpl<Scalar> >&
+IntegratedActionModelAbstractTpl<Scalar>::get_integrator_time() const {
+  return integrator_time_;
+}
+
+template <typename Scalar>
 const Scalar IntegratedActionModelAbstractTpl<Scalar>::get_dt() const {
-  return time_step_;
+  return integrator_time_->get_time_step();
 }
 
 template <typename Scalar>
@@ -126,8 +135,14 @@ void IntegratedActionModelAbstractTpl<Scalar>::set_dt(const Scalar dt) {
   if (dt < 0.) {
     throw_pretty("Invalid argument: " << "dt has positive value");
   }
-  time_step_ = dt;
-  time_step2_ = dt * dt;
+  integrator_time_->set_time_step(dt);
+  refresh_integrator_time();
+}
+
+template <typename Scalar>
+void IntegratedActionModelAbstractTpl<Scalar>::refresh_integrator_time() {
+  time_step_ = integrator_time_->get_time_step();
+  time_step2_ = integrator_time_->get_time_step2();
 }
 
 template <typename Scalar>

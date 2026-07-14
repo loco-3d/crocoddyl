@@ -1,0 +1,90 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/params/integrator-timeopt.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct IntegratorTimeoptParamsVisitor
+    : public bp::def_visitor<IntegratorTimeoptParamsVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("update", &Model::update, bp::args("self", "data", "p"),
+           "Update the shared time using dt = exp(p[0]).")
+        .def("computeParamSensitivity", &Model::computeParamSensitivity,
+             bp::args("self", "data", "params", "x", "u"),
+             "Compute the Euler state sensitivity to log(dt).")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create specialized integration-time parameter data.")
+        .add_property(
+            "integrator_time",
+            bp::make_function(&Model::get_integrator_time,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "shared integration-time metadata");
+  }
+};
+
+template <typename Data>
+struct IntegratorTimeoptParamsDataVisitor
+    : public bp::def_visitor<IntegratorTimeoptParamsDataVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property("dt", bp::make_getter(&Data::dt),
+                    bp::make_setter(&Data::dt), "integration time step")
+        .add_property("dt_dp", bp::make_getter(&Data::dt_dp),
+                      bp::make_setter(&Data::dt_dp),
+                      "time-step derivative with respect to log(dt)");
+  }
+};
+
+#define CROCODDYL_INTEGRATOR_TIMEOPT_PARAMS_PYTHON_BINDINGS(Scalar)        \
+  {                                                                         \
+    typedef IntegratorTimeoptParamsTpl<Scalar> Model;                       \
+    typedef ActionModelParamsAbstractTpl<Scalar> ModelBase;                 \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                  \
+    bp::class_<Model, bp::bases<ModelBase> >(                               \
+        "IntegratorTimeoptParams",                                         \
+        "Action parameter that optimizes a shared integration time using " \
+        "dt = exp(p[0]).",                                                 \
+        bp::init<std::shared_ptr<StateAbstractTpl<Scalar> >,                 \
+                 std::shared_ptr<IntegratorTimeTpl<Scalar> > >(             \
+            bp::args("self", "state", "integratorTime"),                  \
+            "Initialize from a state and shared integration time."))        \
+        .def(IntegratorTimeoptParamsVisitor<Model>())                       \
+        .def(CastVisitor<Model>())                                          \
+        .def(PrintableVisitor<Model>())                                     \
+        .def(CopyableVisitor<Model>());                                     \
+  }
+
+#define CROCODDYL_INTEGRATOR_TIMEOPT_PARAMS_DATA_PYTHON_BINDINGS(Scalar) \
+  {                                                                      \
+    typedef IntegratorTimeoptParamsDataTpl<Scalar> Data;                 \
+    typedef ActionModelParamsDataAbstractTpl<Scalar> DataBase;            \
+    typedef IntegratorTimeoptParamsTpl<Scalar> Model;                    \
+    bp::register_ptr_to_python<std::shared_ptr<Data> >();                \
+    bp::class_<Data, bp::bases<DataBase> >(                              \
+        "IntegratorTimeoptParamsData",                                  \
+        "Data for logarithmic integration-time parameters.",            \
+        bp::init<Model*>(bp::args("self", "model"),                     \
+                         "Create data from its parameter model."))        \
+        .def(IntegratorTimeoptParamsDataVisitor<Data>())                 \
+        .def(CopyableVisitor<Data>());                                   \
+  }
+
+void exposeIntegratorTimeoptParams() {
+  CROCODDYL_INTEGRATOR_TIMEOPT_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_INTEGRATOR_TIMEOPT_PARAMS_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

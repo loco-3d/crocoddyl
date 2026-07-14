@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -15,6 +15,7 @@
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/integrator/time.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -52,6 +53,7 @@ class IntegratedActionModelAbstractTpl
       DifferentialActionModelAbstract;
   typedef ControlParametrizationModelAbstractTpl<Scalar>
       ControlParametrizationModelAbstract;
+  typedef IntegratorTimeTpl<Scalar> IntegratorTime;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -137,6 +139,11 @@ class IntegratedActionModelAbstractTpl
       const;
 
   /**
+   * @brief Return the shared integration-time handle
+   */
+  const std::shared_ptr<IntegratorTime>& get_integrator_time() const;
+
+  /**
    * @brief Return the time step used for the integration
    */
   const Scalar get_dt() const;
@@ -162,18 +169,21 @@ class IntegratedActionModelAbstractTpl
   IntegratedActionModelAbstractTpl()
       : differential_(nullptr),
         control_(nullptr),
+        integrator_time_(std::make_shared<IntegratorTime>(Scalar(0.), false)),
         time_step_(0),
         time_step2_(0),
         with_cost_residual_(false) {}
   void init();
-
+  void refresh_integrator_time();
   std::shared_ptr<DifferentialActionModelAbstract>
       differential_;  //!< Differential action model that is integrated
   std::shared_ptr<ControlParametrizationModelAbstract>
       control_;  //!< Model of the control parametrization
 
-  Scalar time_step_;   //!< Time step used for integration
-  Scalar time_step2_;  //!< Square of the time step used for integration
+  std::shared_ptr<IntegratorTime>
+      integrator_time_;  //!< Shared integration-time metadata
+  Scalar time_step_;     //!< Time step used for integration
+  Scalar time_step2_;    //!< Square of the time step used for integration
   bool
       with_cost_residual_;  //!< Flag indicating whether a cost residual is used
 };
@@ -207,8 +217,6 @@ struct IntegratedActionDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integ-action-base.hxx"
 

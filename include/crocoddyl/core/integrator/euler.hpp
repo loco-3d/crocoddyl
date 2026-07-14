@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -190,9 +190,10 @@ class IntegratedActionModelEulerTpl
   using Base::ng_;            //!< Number of inequality constraints
   using Base::nh_;            //!< Number of equality constraints
   using Base::nu_;            //!< Dimension of the control
-  using Base::state_;         //!< Model of the state
-  using Base::time_step2_;    //!< Square of the time step used for integration
-  using Base::time_step_;     //!< Time step used for integration
+  using Base::refresh_integrator_time;
+  using Base::state_;       //!< Model of the state
+  using Base::time_step2_;  //!< Square of the time step used for integration
+  using Base::time_step_;   //!< Time step used for integration
   using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual
                                     //!< is used
 };
@@ -207,6 +208,7 @@ struct IntegratedActionDataEulerTpl
   typedef IntegratedActionDataAbstractTpl<Scalar> Base;
   typedef DifferentialActionDataAbstractTpl<Scalar>
       DifferentialActionDataAbstract;
+  typedef DynamicsDataAbstractTpl<Scalar> DynamicsDataAbstract;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
       ControlParametrizationDataAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -226,7 +228,8 @@ struct IntegratedActionDataEulerTpl
   virtual ~IntegratedActionDataEulerTpl() = default;
 
   std::shared_ptr<DifferentialActionDataAbstract>
-      differential;  //!< Differential model data
+      differential;                                //!< Differential model data
+  std::shared_ptr<DynamicsDataAbstract> dynamics;  //!< Dynamics model data
   std::shared_ptr<ControlParametrizationDataAbstract>
       control;  //!< Control parametrization data
   VectorXs dx;
@@ -248,8 +251,6 @@ struct IntegratedActionDataEulerTpl
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integrator/euler.hxx"
 

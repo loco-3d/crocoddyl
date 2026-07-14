@@ -12,6 +12,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     params
     params_data
     parameter_manager
+    time_parameterization
     lqr
     contacts
     impulses

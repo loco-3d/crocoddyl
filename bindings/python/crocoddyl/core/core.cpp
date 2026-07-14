@@ -22,6 +22,7 @@ void exposeCore() {
 #ifdef CROCODDYL_WITH_CODEGEN
   exposeActionCodeGen();
 #endif
+  exposeIntegratorTime();
   exposeIntegratedActionAbstract();
   exposeDifferentialActionAbstract();
   exposeResidualAbstract();
@@ -37,6 +38,7 @@ void exposeCore() {
   exposeParamsAbstract();
   exposeParamsData();
   exposeParameterManager();
+  exposeIntegratorTimeoptParams();
   exposeDataCollectorActuation();
   exposeDataCollectorJoint();
   exposeIntegratedActionEuler();

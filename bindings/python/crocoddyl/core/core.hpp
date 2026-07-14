@@ -25,6 +25,7 @@ void exposeDynamicsAbstract();
 void exposeActionCodeGen();
 #endif
 void exposeDifferentialActionAbstract();
+void exposeIntegratorTime();
 void exposeIntegratedActionAbstract();
 void exposeResidualAbstract();
 void exposeTaskAbstract();
@@ -39,6 +40,7 @@ void exposeActuationSquashing();
 void exposeParamsAbstract();
 void exposeParamsData();
 void exposeParameterManager();
+void exposeIntegratorTimeoptParams();
 void exposeDataCollectorActuation();
 void exposeDataCollectorJoint();
 void exposeIntegratedActionEuler();

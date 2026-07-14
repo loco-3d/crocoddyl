@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2026, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -200,9 +200,10 @@ class IntegratedActionModelRKTpl
   using Base::ng_;            //!< Number of inequality constraints
   using Base::nh_;            //!< Number of equality constraints
   using Base::nu_;            //!< Dimension of the control
-  using Base::state_;         //!< Model of the state
-  using Base::time_step2_;    //!< Square of the time step used for integration
-  using Base::time_step_;     //!< Time step used for integration
+  using Base::refresh_integrator_time;
+  using Base::state_;       //!< Model of the state
+  using Base::time_step2_;  //!< Square of the time step used for integration
+  using Base::time_step_;   //!< Time step used for integration
   using Base::with_cost_residual_;  //!< Flag indicating whether a cost residual
                                     //!< is used
 
@@ -367,8 +368,6 @@ struct IntegratedActionDataRKTpl
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/integrator/rk.hxx"
 

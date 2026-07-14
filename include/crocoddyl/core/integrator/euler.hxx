@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Pisa,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -37,6 +37,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
         "Invalid argument: " << "u has wrong dimension (it should be " +
                                     std::to_string(nu_) + ")");
   }
+  refresh_integrator_time();
   const std::size_t nv = differential_->get_state()->get_nv();
   Data* d = static_cast<Data*>(data.get());
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
@@ -65,6 +66,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calc(
         "Invalid argument: " << "x has wrong dimension (it should be " +
                                     std::to_string(state_->get_nx()) + ")");
   }
+  refresh_integrator_time();
   Data* d = static_cast<Data*>(data.get());
 
   differential_->calc(d->differential, x);
@@ -92,6 +94,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
         "Invalid argument: " << "u has wrong dimension (it should be " +
                                     std::to_string(nu_) + ")");
   }
+  refresh_integrator_time();
 
   const std::size_t nv = state_->get_nv();
   Data* d = static_cast<Data*>(data.get());
@@ -136,6 +139,7 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
         "Invalid argument: " << "x has wrong dimension (it should be " +
                                     std::to_string(state_->get_nx()) + ")");
   }
+  refresh_integrator_time();
   Data* d = static_cast<Data*>(data.get());
 
   differential_->calcDiff(d->differential, x);
@@ -162,13 +166,17 @@ IntegratedActionModelEulerTpl<NewScalar>
 IntegratedActionModelEulerTpl<Scalar>::cast() const {
   typedef IntegratedActionModelEulerTpl<NewScalar> ReturnType;
   if (control_) {
-    ReturnType ret(differential_->template cast<NewScalar>(),
-                   control_->template cast<NewScalar>(),
-                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    ReturnType ret(
+        differential_->template cast<NewScalar>(),
+        control_->template cast<NewScalar>(),
+        scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+        with_cost_residual_);
     return ret;
   } else {
-    ReturnType ret(differential_->template cast<NewScalar>(),
-                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    ReturnType ret(
+        differential_->template cast<NewScalar>(),
+        scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+        with_cost_residual_);
     return ret;
   }
 }
@@ -210,8 +218,9 @@ void IntegratedActionModelEulerTpl<Scalar>::quasiStatic(
 
 template <typename Scalar>
 void IntegratedActionModelEulerTpl<Scalar>::print(std::ostream& os) const {
-  os << "IntegratedActionModelEuler {dt=" << time_step_ << ", "
-     << *differential_ << "}";
+  os << "IntegratedActionModelEuler {dt="
+     << this->get_integrator_time()->get_time_step() << ", " << *differential_
+     << "}";
 }
 
 }  // namespace crocoddyl

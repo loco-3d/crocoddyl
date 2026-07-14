@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
@@ -107,13 +107,17 @@ class IntegratedActionModelAbstractTpl_wrap
   IntegratedActionModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef IntegratedActionModelAbstractTpl_wrap<NewScalar> ReturnType;
     if (control_) {
-      ReturnType ret(differential_->template cast<NewScalar>(),
-                     control_->template cast<NewScalar>(),
-                     scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+      ReturnType ret(
+          differential_->template cast<NewScalar>(),
+          control_->template cast<NewScalar>(),
+          scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+          with_cost_residual_);
       return ret;
     } else {
-      ReturnType ret(differential_->template cast<NewScalar>(),
-                     scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+      ReturnType ret(
+          differential_->template cast<NewScalar>(),
+          scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+          with_cost_residual_);
       return ret;
     }
   }

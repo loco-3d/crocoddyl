@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2026, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -40,6 +40,7 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
         "Invalid argument: " << "u has wrong dimension (it should be " +
                                     std::to_string(nu_) + ")");
   }
+  refresh_integrator_time();
   const std::size_t nv = state_->get_nv();
   Data* d = static_cast<Data*>(data.get());
 
@@ -101,6 +102,7 @@ void IntegratedActionModelRKTpl<Scalar>::calc(
         "Invalid argument: " << "x has wrong dimension (it should be " +
                                     std::to_string(state_->get_nx()) + ")");
   }
+  refresh_integrator_time();
   Data* d = static_cast<Data*>(data.get());
 
   const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
@@ -130,6 +132,7 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
         "Invalid argument: " << "u has wrong dimension (it should be " +
                                     std::to_string(nu_) + ")");
   }
+  refresh_integrator_time();
   const std::size_t nv = state_->get_nv();
   const std::size_t nu = control_->get_nu();
   Data* d = static_cast<Data*>(data.get());
@@ -319,6 +322,7 @@ void IntegratedActionModelRKTpl<Scalar>::calcDiff(
         "Invalid argument: " << "x has wrong dimension (it should be " +
                                     std::to_string(state_->get_nx()) + ")");
   }
+  refresh_integrator_time();
   Data* d = static_cast<Data*>(data.get());
 
   const std::shared_ptr<DifferentialActionDataAbstract>& k0_data =
@@ -342,13 +346,17 @@ IntegratedActionModelRKTpl<NewScalar> IntegratedActionModelRKTpl<Scalar>::cast()
     const {
   typedef IntegratedActionModelRKTpl<NewScalar> ReturnType;
   if (control_) {
-    ReturnType ret(differential_->template cast<NewScalar>(),
-                   control_->template cast<NewScalar>(), rk_type_,
-                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    ReturnType ret(
+        differential_->template cast<NewScalar>(),
+        control_->template cast<NewScalar>(), rk_type_,
+        scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+        with_cost_residual_);
     return ret;
   } else {
-    ReturnType ret(differential_->template cast<NewScalar>(), rk_type_,
-                   scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    ReturnType ret(
+        differential_->template cast<NewScalar>(), rk_type_,
+        scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+        with_cost_residual_);
     return ret;
   }
 }
@@ -401,7 +409,8 @@ std::size_t IntegratedActionModelRKTpl<Scalar>::get_ni() const {
 
 template <typename Scalar>
 void IntegratedActionModelRKTpl<Scalar>::print(std::ostream& os) const {
-  os << "IntegratedActionModelRK {dt=" << time_step_ << ", " << *differential_
+  os << "IntegratedActionModelRK {dt="
+     << this->get_integrator_time()->get_time_step() << ", " << *differential_
      << "}";
 }
 

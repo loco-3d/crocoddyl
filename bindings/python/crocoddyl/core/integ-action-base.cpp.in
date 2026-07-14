@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -87,10 +87,16 @@ struct IntegratedActionModelAbstractVisitor
                               bp::return_value_policy<bp::return_by_value>()),
             "control parametrization model")
         .add_property(
+            "integrator_time",
+            bp::make_function(
+                &IntegratedActionModel::get_integrator_time,
+                bp::return_value_policy<bp::return_by_value>()),
+            "shared integration-time metadata")
+        .add_property(
             "dt",
-            bp::make_function(&IntegratedActionModelAbstract::get_dt,
+            bp::make_function(&IntegratedActionModel::get_dt,
                               bp::return_value_policy<bp::return_by_value>()),
-            &IntegratedActionModelAbstract::set_dt, "step time");
+            &IntegratedActionModel::set_dt, "step time");
   }
 };
 

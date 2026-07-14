@@ -112,6 +112,9 @@ struct DifferentialActionDataLQRTpl;
 
 // integrated action
 template <typename Scalar>
+class IntegratorTimeTpl;
+
+template <typename Scalar>
 class IntegratedActionModelAbstractTpl;
 template <typename Scalar>
 struct IntegratedActionDataAbstractTpl;
@@ -292,6 +295,12 @@ template <typename Scalar>
 struct DynamicsParamsDataAbstractTpl;
 
 template <typename Scalar>
+class IntegratorTimeoptParamsTpl;
+
+template <typename Scalar>
+struct IntegratorTimeoptParamsDataTpl;
+
+template <typename Scalar>
 struct DataCollectorParamsTpl;
 
 template <typename Scalar>
@@ -463,6 +472,7 @@ typedef DifferentialActionDataAbstractTpl<double>
 typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
 typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
 
+typedef IntegratorTimeTpl<double> IntegratorTime;
 typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
 typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
@@ -569,6 +579,8 @@ typedef ParameterDataManagerTpl<double> ParameterDataManager;
 typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;
 typedef ActionModelParamsDataAbstractTpl<double> ActionModelParamsDataAbstract;
 typedef DynamicsParamsDataAbstractTpl<double> DynamicsParamsDataAbstract;
+typedef IntegratorTimeoptParamsTpl<double> IntegratorTimeoptParams;
+typedef IntegratorTimeoptParamsDataTpl<double> IntegratorTimeoptParamsData;
 typedef DataCollectorParamsTpl<double> DataCollectorParams;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
 typedef DataCollectorActuationParamsTpl<double> DataCollectorActuationParams;
