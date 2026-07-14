@@ -90,6 +90,8 @@ template <typename Scalar>
 class ActionModelLQRTpl;
 template <typename Scalar>
 struct ActionDataLQRTpl;
+template <typename Scalar>
+class LQRParamsTpl;
 
 // dynamics
 template <typename Scalar>
@@ -449,6 +451,7 @@ typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
 typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
 typedef ActionModelLQRTpl<double> ActionModelLQR;
 typedef ActionDataLQRTpl<double> ActionDataLQR;
+typedef LQRParamsTpl<double> LQRParams;
 
 typedef DynamicsModelAbstractTpl<double> DynamicsModelAbstract;
 typedef DynamicsDataAbstractTpl<double> DynamicsDataAbstract;

@@ -40,6 +40,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_params
       test_params_data
       test_parameter_manager
+      test_lqr
       test_contact_costs
       test_impulse_costs
       test_contact_constraints
@@ -130,6 +131,10 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   if(TARGET test_parameter_manager)
     target_compile_definitions(test_parameter_manager
                                PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_lqr)
+    target_compile_definitions(test_lqr PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
   if(TARGET test_dynamics)
