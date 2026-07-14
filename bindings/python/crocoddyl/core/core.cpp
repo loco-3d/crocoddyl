@@ -36,6 +36,7 @@ void exposeCore() {
   exposeActuationSquashing();
   exposeParamsAbstract();
   exposeParamsData();
+  exposeParameterManager();
   exposeDataCollectorActuation();
   exposeDataCollectorJoint();
   exposeIntegratedActionEuler();

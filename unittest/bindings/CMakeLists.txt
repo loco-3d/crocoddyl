@@ -10,6 +10,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     dynamics
     params
     params_data
+    parameter_manager
     contacts
     impulses
     squashing

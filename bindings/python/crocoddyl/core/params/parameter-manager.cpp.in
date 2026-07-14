@@ -1,0 +1,213 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/params/parameter-manager.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/map-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Item>
+struct ParameterItemVisitor
+    : public bp::def_visitor<ParameterItemVisitor<Item> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "name",
+          bp::make_function(
+              &Item::get_name,
+              bp::return_value_policy<bp::copy_const_reference>()),
+          "parameter name")
+        .add_property(
+            "param",
+            bp::make_function(
+                &Item::get_param,
+                bp::return_value_policy<bp::return_by_value>()),
+            "parameter model")
+        .add_property("active", &Item::get_active, "parameter status");
+  }
+};
+
+template <typename Model>
+struct ParameterManagerVisitor
+    : public bp::def_visitor<ParameterManagerVisitor<Model> > {
+  typedef typename Model::ActionModelParamsAbstract ActionParams;
+  typedef typename Model::DynamicsParamsAbstract DynamicsParams;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("addParam",
+           static_cast<void (Model::*)(const std::string&,
+                                       std::shared_ptr<ActionParams>,
+                                       const bool)>(&Model::addParam),
+           (bp::arg("self"), bp::arg("name"), bp::arg("param"),
+            bp::arg("active") = true),
+           "Add an action-parameter item.")
+        .def("addParam",
+             static_cast<void (Model::*)(const std::string&,
+                                         std::shared_ptr<DynamicsParams>,
+                                         const bool)>(&Model::addParam),
+             (bp::arg("self"), bp::arg("name"), bp::arg("param"),
+              bp::arg("active") = true),
+             "Add a dynamics-parameter item.")
+        .def("removeParam", &Model::removeParam, bp::args("self", "name"),
+             "Remove a parameter item.")
+        .def("changeParamStatus", &Model::changeParamStatus,
+             bp::args("self", "name", "active"),
+             "Change a parameter item's status.")
+        .def("getParamStatus", &Model::getParamStatus,
+             bp::args("self", "name"),
+             "Return a parameter item's status.")
+        .def("update", &Model::update, bp::args("self", "data", "p"),
+             "Update the aggregate and active per-item parameter vectors.")
+        .def("calcDiff_action", &Model::calcDiff_action,
+             bp::args("self", "data", "action_data", "x", "u"),
+             "Stack active action-parameter sensitivities.")
+        .def("calcDiff_dynamics", &Model::calcDiff_dynamics,
+             bp::args("self", "data", "dynamics_data", "x", "u"),
+             "Stack active dynamics-parameter torque regressors.")
+        .def("zero", &Model::zero, bp::args("self"),
+             "Return the zero active-parameter vector.")
+        .def("rand", &Model::rand, bp::args("self"),
+             "Return a random active-parameter vector.")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create complete data for the current model set.")
+        .add_property(
+            "state",
+            bp::make_function(&Model::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state description")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "active parameter dimension")
+        .add_property("np_action", bp::make_function(&Model::get_np_action),
+                      "active action-parameter dimension")
+        .add_property("np_dynamics",
+                      bp::make_function(&Model::get_np_dynamics),
+                      "active dynamics-parameter dimension")
+        .add_property(
+            "action_params",
+            bp::make_function(&Model::get_action_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "lexicographically ordered action-parameter items")
+        .add_property(
+            "dynamics_params",
+            bp::make_function(&Model::get_dynamics_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "lexicographically ordered dynamics-parameter items")
+        .add_property(
+            "active_set",
+            bp::make_function(&Model::get_active_set,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "active parameter names")
+        .add_property(
+            "inactive_set",
+            bp::make_function(&Model::get_inactive_set,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "inactive parameter names");
+  }
+};
+
+template <typename Data>
+struct ParameterDataManagerVisitor
+    : public bp::def_visitor<ParameterDataManagerVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("resize", &Data::resize, bp::args("self", "model"),
+           "Resize after status-only changes; recreate after add/remove.")
+        .def("setZero", &Data::setZero, bp::args("self"),
+             "Zero the aggregate and every per-item payload.")
+        .add_property(
+            "action_params",
+            bp::make_getter(&Data::action_params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "all action-parameter data")
+        .add_property(
+            "dynamics_params",
+            bp::make_getter(&Data::dynamics_params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "all dynamics-parameter data");
+  }
+};
+
+#define CROCODDYL_PARAMETER_ITEM_PYTHON_BINDINGS(Scalar)                   \
+  typedef ParameterItemTpl<Scalar> Item;                                  \
+  typedef std::shared_ptr<Item> ItemPtr;                                  \
+  StdMapPythonVisitor<                                                    \
+      std::string, ItemPtr, std::less<std::string>,                       \
+      std::allocator<std::pair<const std::string, ItemPtr> >,             \
+      true>::expose("StdMap_ParameterItem");                             \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                       \
+  typedef std::shared_ptr<ParamsData> ParamsDataPtr;                      \
+  StdMapPythonVisitor<                                                    \
+      std::string, ParamsDataPtr, std::less<std::string>,                 \
+      std::allocator<std::pair<const std::string, ParamsDataPtr> >,       \
+      true>::expose("StdMap_ParamsData");                                \
+  bp::register_ptr_to_python<std::shared_ptr<Item> >();                   \
+  bp::class_<Item>(                                                       \
+      "ParameterItem", "Named parameter model and activation state.\n\n", \
+      bp::init<std::string, std::shared_ptr<ParamsAbstractTpl<Scalar> >,  \
+               bp::optional<bool> >(                                     \
+          bp::args("self", "name", "param", "active"),                 \
+          "Initialize a parameter item.\n\n"                              \
+          ":param name: parameter name\n"                               \
+          ":param param: non-null parameter model\n"                     \
+          ":param active: activation status"))                          \
+      .def(ParameterItemVisitor<Item>())                                 \
+      .def(PrintableVisitor<Item>())                                     \
+      .def(CopyableVisitor<Item>());
+
+#define CROCODDYL_PARAMETER_MANAGER_PYTHON_BINDINGS(Scalar)              \
+  typedef ParameterManagerTpl<Scalar> Model;                             \
+  typedef typename Model::StateAbstract State;                           \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                 \
+  bp::class_<Model>(                                                     \
+      "ParameterManager",                                               \
+      "Manage sorted action and dynamics parameter models.\n\n"         \
+      "Active action parameters form the first partition and active "    \
+      "dynamics parameters the second; names are lexicographically "      \
+      "ordered inside each partition. Inactive items consume no offset. " \
+      "Data must be resized after status changes and recreated after "    \
+      "adding or removing models.\n\n",                                  \
+      bp::init<std::shared_ptr<State> >(                                 \
+          bp::args("self", "state"),                                    \
+          "Initialize an empty parameter manager.\n\n"                  \
+          ":param state: non-null state description"))                  \
+      .def(ParameterManagerVisitor<Model>())                             \
+      .def(CastVisitor<Model>())                                         \
+      .def(PrintableVisitor<Model>())                                    \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_PARAMETER_DATA_MANAGER_PYTHON_BINDINGS(Scalar)          \
+  typedef ParameterDataManagerTpl<Scalar> Data;                           \
+  typedef ParameterManagerTpl<Scalar> Model;                              \
+  typedef DataCollectorParamsTpl<Scalar> DataCollectorParams;             \
+  bp::register_ptr_to_python<std::shared_ptr<Data> >();                   \
+  bp::class_<Data, bp::bases<DataCollectorParams> >(                     \
+      "ParameterDataManager",                                           \
+      "Complete parameter-manager data. It owns an aggregate payload and " \
+      "one specialized payload per item, including inactive items. The "  \
+      "inherited manager link is non-owning and valid for this object's "  \
+      "lifetime.\n\n",                                                   \
+      bp::init<const Model*>(                                             \
+          bp::args("self", "model"),                                    \
+          "Initialize complete data from a manager.\n\n"                 \
+          ":param model: non-null parameter manager"))                   \
+      .def(ParameterDataManagerVisitor<Data>())                           \
+      .def(CopyableVisitor<Data>());
+
+void exposeParameterManager() {
+  CROCODDYL_PARAMETER_ITEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_PARAMETER_MANAGER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_PARAMETER_DATA_MANAGER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

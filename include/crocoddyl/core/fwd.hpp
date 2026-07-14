@@ -269,6 +269,9 @@ template <typename Scalar>
 class DynamicsParamsAbstractTpl;
 
 template <typename Scalar>
+struct ParameterItemTpl;
+
+template <typename Scalar>
 class ParameterManagerTpl;
 
 template <typename Scalar>
@@ -553,6 +556,7 @@ typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
 typedef ParamsAbstractTpl<double> ParamsAbstract;
 typedef ActionModelParamsAbstractTpl<double> ActionModelParamsAbstract;
 typedef DynamicsParamsAbstractTpl<double> DynamicsParamsAbstract;
+typedef ParameterItemTpl<double> ParameterItem;
 typedef ParameterManagerTpl<double> ParameterManager;
 typedef ParameterDataManagerTpl<double> ParameterDataManager;
 typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;

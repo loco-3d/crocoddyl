@@ -38,6 +38,7 @@ void exposeSquashingSmoothSat();
 void exposeActuationSquashing();
 void exposeParamsAbstract();
 void exposeParamsData();
+void exposeParameterManager();
 void exposeDataCollectorActuation();
 void exposeDataCollectorJoint();
 void exposeIntegratedActionEuler();
