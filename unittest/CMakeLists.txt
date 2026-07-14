@@ -32,6 +32,11 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_constraints
       test_constraint_manager
       test_contacts
+      test_implicit_constraints
+      test_multiple_implicit_constraints
+      test_kinematic_loop
+      test_generic_contact
+      test_implicit_constraint_residuals
       test_controls
       test_impulses
       test_multiple_contacts
@@ -150,6 +155,21 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_problem_abstract)
     target_compile_definitions(test_problem_abstract
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multiple_implicit_constraints)
+    target_compile_definitions(test_multiple_implicit_constraints
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_generic_contact)
+    target_compile_definitions(test_generic_contact
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_kinematic_loop)
+    target_compile_definitions(test_kinematic_loop
                                PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 

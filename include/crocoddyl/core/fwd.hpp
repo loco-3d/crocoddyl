@@ -264,6 +264,9 @@ struct JointDataAbstractTpl;
 template <typename Scalar>
 struct DataCollectorAbstractTpl;
 
+template <typename Scalar>
+struct DataCollectorObserverTpl;
+
 // parameters
 class ParamsModelBase;
 
@@ -570,6 +573,7 @@ typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 typedef JointDataAbstractTpl<double> JointDataAbstract;
 
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+typedef DataCollectorObserverTpl<double> DataCollectorObserver;
 typedef ParamsAbstractTpl<double> ParamsAbstract;
 typedef ActionModelParamsAbstractTpl<double> ActionModelParamsAbstract;
 typedef DynamicsParamsAbstractTpl<double> DynamicsParamsAbstract;

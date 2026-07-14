@@ -22,10 +22,15 @@ void exposeMultibody() {
   exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
+  exposeImplicitConstraintAbstract();
+  exposeContact();
+  exposeKinematicLoop();
+  exposeImplicitConstraintMultiple();
   exposeContactMultiple();
   exposeImpulseMultiple();
   exposeDataCollectorMultibody();
   exposeDataCollectorContacts();
+  exposeDataCollectorImplicitConstraints();
   exposeDataCollectorImpulses();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionFreeInvDynamics();

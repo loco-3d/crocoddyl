@@ -15,6 +15,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     time_parameterization
     lqr
     contacts
+    implicit_constraints
     impulses
     squashing
     copy)

@@ -219,6 +219,26 @@ class ContactModel6DTpl;
 template <typename Scalar>
 struct ContactData6DTpl;
 
+// implicit constraint
+template <typename Scalar>
+class ImplicitConstraintModelAbstractTpl;
+template <typename Scalar>
+struct ImplicitConstraintDataAbstractTpl;
+template <typename Scalar>
+struct ImplicitConstraintItemTpl;
+template <typename Scalar>
+class ImplicitConstraintModelMultipleTpl;
+template <typename Scalar>
+struct ImplicitConstraintDataMultipleTpl;
+template <typename Scalar>
+class KinematicLoopModelTpl;
+template <typename Scalar>
+struct KinematicLoopDataTpl;
+template <typename Scalar>
+class ContactModelTpl;
+template <typename Scalar>
+struct ContactDataTpl;
+
 // friction
 template <typename Scalar>
 class FrictionConeTpl;
@@ -272,6 +292,33 @@ struct DataCollectorJointActMultibodyInContactTpl;
 
 template <typename Scalar>
 struct DataCollectorJointActMultibodyInContactParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorJointMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorJointMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInImplicitConstraintParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
@@ -421,6 +468,19 @@ typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
 typedef ContactData6DTpl<double> ContactData6D;
+typedef ImplicitConstraintModelAbstractTpl<double>
+    ImplicitConstraintModelAbstract;
+typedef ImplicitConstraintDataAbstractTpl<double>
+    ImplicitConstraintDataAbstract;
+typedef ImplicitConstraintItemTpl<double> ImplicitConstraintItem;
+typedef ImplicitConstraintModelMultipleTpl<double>
+    ImplicitConstraintModelMultiple;
+typedef ImplicitConstraintDataMultipleTpl<double>
+    ImplicitConstraintDataMultiple;
+typedef KinematicLoopModelTpl<double> KinematicLoopModel;
+typedef KinematicLoopDataTpl<double> KinematicLoopData;
+typedef ContactModelTpl<double> ContactModel;
+typedef ContactDataTpl<double> ContactData;
 
 typedef StateMultibodyTpl<double> StateMultibody;
 
@@ -446,6 +506,24 @@ typedef DataCollectorJointActMultibodyInContactTpl<double>
     DataCollectorJointActMultibodyInContact;
 typedef DataCollectorJointActMultibodyInContactParamsTpl<double>
     DataCollectorJointActMultibodyInContactParams;
+typedef DataCollectorImplicitConstraintTpl<double>
+    DataCollectorImplicitConstraint;
+typedef DataCollectorMultibodyInImplicitConstraintTpl<double>
+    DataCollectorMultibodyInImplicitConstraint;
+typedef DataCollectorMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorMultibodyInImplicitConstraintParams;
+typedef DataCollectorActMultibodyInImplicitConstraintTpl<double>
+    DataCollectorActMultibodyInImplicitConstraint;
+typedef DataCollectorActMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorActMultibodyInImplicitConstraintParams;
+typedef DataCollectorJointMultibodyInImplicitConstraintTpl<double>
+    DataCollectorJointMultibodyInImplicitConstraint;
+typedef DataCollectorJointMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorJointMultibodyInImplicitConstraintParams;
+typedef DataCollectorJointActMultibodyInImplicitConstraintTpl<double>
+    DataCollectorJointActMultibodyInImplicitConstraint;
+typedef DataCollectorJointActMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorJointActMultibodyInImplicitConstraintParams;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double>
     DataCollectorMultibodyInImpulse;
