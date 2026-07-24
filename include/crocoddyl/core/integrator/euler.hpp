@@ -10,16 +10,22 @@
 #ifndef CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 #define CROCODDYL_CORE_INTEGRATOR_EULER_HPP_
 
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/integ-action-base.hpp"
+#include "crocoddyl/core/params/integrator-timeopt.hpp"
+#include "crocoddyl/core/params/parameter-manager.hpp"
 
 namespace crocoddyl {
 
 /**
  * @brief Symplectic Euler integrator
  *
- * It applies a symplectic Euler integration scheme to a differential (i.e.,
- * continuous time) action model.
+ * It applies a symplectic Euler integration scheme to either a differential
+ * action model or the compositional continuous dynamics, cost and constraint
+ * backend. The latter propagates action and dynamics parameters, including a
+ * shared time parameter, through every first- and second-order action block.
  *
  * This symplectic Euler scheme introduces also the possibility to parametrize
  * the control trajectory inside an integration step, for instance using
@@ -47,10 +53,19 @@ class IntegratedActionModelEulerTpl
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModelAbstract;
+  typedef DynamicsModelAbstractTpl<Scalar> DynamicsModelAbstract;
+  typedef DynamicsDataAbstractTpl<Scalar> DynamicsDataAbstract;
+  typedef CostModelSumTpl<Scalar> CostModelSum;
+  typedef CostDataSumTpl<Scalar> CostDataSum;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef ControlParametrizationModelAbstractTpl<Scalar>
       ControlParametrizationModelAbstract;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
       ControlParametrizationDataAbstract;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
+  typedef typename Base::ParameterManager ParameterManager;
+  typedef IntegratorTimeTpl<Scalar> IntegratorTime;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -82,7 +97,22 @@ class IntegratedActionModelEulerTpl
       std::shared_ptr<DifferentialActionModelAbstract> model,
       const Scalar time_step = Scalar(1e-3),
       const bool with_cost_residual = true);
+
+  /**
+   * @brief Initialize from continuous dynamics, costs and constraints
+   *
+   * Null control and time arguments select a zero-order control
+   * parametrization and a private default integration time, respectively.
+   */
+  IntegratedActionModelEulerTpl(
+      std::shared_ptr<DynamicsModelAbstract> dynamics,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr,
+      std::shared_ptr<ControlParametrizationModelAbstract> control = nullptr,
+      std::shared_ptr<IntegratorTime> integrator_time = nullptr);
   virtual ~IntegratedActionModelEulerTpl() = default;
+
+  using Base::createData;
 
   /**
    * @brief Integrate the differential action model using symplectic Euler
@@ -139,6 +169,8 @@ class IntegratedActionModelEulerTpl
    * @return the symplectic Euler data
    */
   virtual std::shared_ptr<ActionDataAbstract> createData() override;
+  virtual std::shared_ptr<ActionDataAbstract> createData(
+      const std::shared_ptr<ParameterDataManager>& params_data) override;
 
   /**
    * @brief Cast the Euler integrated-action model to a different scalar type.
@@ -177,6 +209,14 @@ class IntegratedActionModelEulerTpl
                            const std::size_t maxiter = 100,
                            const Scalar tol = Scalar(1e-9)) override;
 
+  /** @brief Attach a parameter manager and rebuild shared backend data */
+  void set_params(const std::shared_ptr<ActionDataAbstract>& data,
+                  std::shared_ptr<ParameterManager> params) override;
+
+  /** @brief Update active action and dynamics parameters */
+  virtual void update_p(const std::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& p) override;
+
   /**
    * @brief Print relevant information of the Euler integrator model
    *
@@ -185,11 +225,16 @@ class IntegratedActionModelEulerTpl
   virtual void print(std::ostream& os) const override;
 
  protected:
-  using Base::control_;       //!< Control parametrization
-  using Base::differential_;  //!< Differential action model
-  using Base::ng_;            //!< Number of inequality constraints
-  using Base::nh_;            //!< Number of equality constraints
-  using Base::nu_;            //!< Dimension of the control
+  using Base::constraints_;      //!< Constraint manager
+  using Base::control_;          //!< Control parametrization
+  using Base::costs_;            //!< Cost model stack
+  using Base::differential_;     //!< Differential action model
+  using Base::dynamics_;         //!< Dynamics model
+  using Base::integrator_time_;  //!< Integrator time description
+  using Base::ng_;               //!< Number of inequality constraints
+  using Base::nh_;               //!< Number of equality constraints
+  using Base::nu_;               //!< Dimension of the control
+  using Base::params_;
   using Base::refresh_integrator_time;
   using Base::state_;       //!< Model of the state
   using Base::time_step2_;  //!< Square of the time step used for integration
@@ -198,6 +243,14 @@ class IntegratedActionModelEulerTpl
                                     //!< is used
 };
 
+/**
+ * @brief Data for the symplectic Euler integrated action
+ *
+ * Backend data, control data, and the optional parameter payload are shared;
+ * the Euler rate, control-chain-rule matrices and parameter-gradient scratch
+ * are owned by each data object. Repeated same-layout calculations reuse all
+ * workspaces.
+ */
 template <typename _Scalar>
 struct IntegratedActionDataEulerTpl
     : public IntegratedActionDataAbstractTpl<_Scalar> {
@@ -209,16 +262,37 @@ struct IntegratedActionDataEulerTpl
   typedef DifferentialActionDataAbstractTpl<Scalar>
       DifferentialActionDataAbstract;
   typedef DynamicsDataAbstractTpl<Scalar> DynamicsDataAbstract;
+  typedef CostDataSumTpl<Scalar> CostDataSum;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef ControlParametrizationDataAbstractTpl<Scalar>
       ControlParametrizationDataAbstract;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataEulerTpl(Model<Scalar>* const model)
+  explicit IntegratedActionDataEulerTpl(
+      Model<Scalar>* const model,
+      const std::shared_ptr<ParameterDataManager>& params_data =
+          std::shared_ptr<ParameterDataManager>())
       : Base(model) {
-    differential = model->get_differential()->createData();
     control = model->get_control()->createData();
+    differential.reset();
+    dynamics.reset();
+    costs.reset();
+    constraints.reset();
+    if (model->get_dynamics() != nullptr) {
+      params = params_data;
+      dynamics = params_data != nullptr
+                     ? model->get_dynamics()->createData(params_data)
+                     : model->get_dynamics()->createData();
+      costs = model->get_costs()->createData(dynamics->shared);
+      if (model->get_constraints() != nullptr) {
+        constraints = model->get_constraints()->createData(dynamics->shared);
+      }
+    } else if (model->get_differential() != nullptr) {
+      differential = model->get_differential()->createData();
+    }
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nv = model->get_state()->get_nv();
     dx = VectorXs::Zero(ndx);
@@ -227,19 +301,41 @@ struct IntegratedActionDataEulerTpl
   }
   virtual ~IntegratedActionDataEulerTpl() = default;
 
+  template <class Model>
+  void resize(Model* const model, const bool running_node = true) {
+    ActionDataAbstractTpl<Scalar>::resize(model, running_node);
+    dx.resize(model->get_state()->get_ndx());
+    da_du.resize(model->get_state()->get_nv(), model->get_nu());
+    Lwu.resize(model->get_control()->get_nw(), model->get_nu());
+    dx.setZero();
+    da_du.setZero();
+    Lwu.setZero();
+  }
+
   std::shared_ptr<DifferentialActionDataAbstract>
       differential;                                //!< Differential model data
   std::shared_ptr<DynamicsDataAbstract> dynamics;  //!< Dynamics model data
+  std::shared_ptr<CostDataSum> costs;              //!< Cost model data
+  std::shared_ptr<ConstraintDataManager>
+      constraints;  //!< Constraint-manager data
   std::shared_ptr<ControlParametrizationDataAbstract>
       control;  //!< Control parametrization data
-  VectorXs dx;
-  MatrixXs da_du;
-  MatrixXs Lwu;  //!< Hessian of the cost function with respect to the control
-                 //!< input (w) and control parameters (u)
+  std::shared_ptr<ParameterDataManager> params;  //!< Shared parameter payload
+  VectorXs dx;                                   //!< Integrated state increment
+  MatrixXs da_du;  //!< Acceleration derivative through control parametrization
+  MatrixXs Lwu;    //!< Hessian of the cost function with respect to the control
+                   //!< input (w) and control parameters (u)
 
   using Base::cost;
+  using Base::Fp;
   using Base::Fu;
   using Base::Fx;
+  using Base::Gp;
+  using Base::Hp;
+  using Base::Lp;
+  using Base::Lpp;
+  using Base::Lpu;
+  using Base::Lpx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, University of Trento,
+// Copyright (C) 2019-2026, University of Edinburgh, University of Trento,
 //                          LAAS-CNRS, IRI: CSIC-UPC, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -25,8 +25,12 @@ struct IntegratedActionModelRKVisitor
   typedef typename Model::ActionDataAbstract Data;
   typedef
       typename Model::DifferentialActionModelAbstract DifferentialActionModel;
+  typedef typename Model::DynamicsModelAbstract DynamicsModelAbstract;
+  typedef typename Model::CostModelSum CostModelSum;
+  typedef typename Model::ConstraintModelManager ConstraintModelManager;
   typedef typename Model::ControlParametrizationModelAbstract
       ControlParametrizationModel;
+  typedef typename Model::IntegratorTime IntegratorTime;
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -43,6 +47,21 @@ struct IntegratedActionModelRKVisitor
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
                "derivatives (default True)."))
+        .def(bp::init<std::shared_ptr<DynamicsModelAbstract>,
+                      std::shared_ptr<CostModelSum>,
+                      bp::optional<std::shared_ptr<ConstraintModelManager>,
+                                   std::shared_ptr<ControlParametrizationModel>,
+                                   std::shared_ptr<IntegratorTime>, RKType> >(
+                 bp::args("self", "dynModel", "costModel", "constraints",
+                          "control", "integratorTime", "rktype"),
+                 "Initialize the RK integrator from dynamics and costs.\n\n"
+                 ":param dynModel: dynamics model\n"
+                 ":param costModel: cost model stack\n"
+                 ":param constraints: constraint manager (default None)\n"
+                 ":param control: control parametrization (default None)\n"
+                 ":param integratorTime: shared integrator time (default None)\n"
+                 ":param rktype: type of RK integrator (options are two, "
+                 "three, and four)"))
         .def(
             "calc",
             static_cast<void (Model::*)(
@@ -79,21 +98,28 @@ struct IntegratedActionModelRKVisitor
                                          const Eigen::Ref<const VectorXs>&)>(
                  &Model::calcDiff),
              bp::args("self", "data", "x"))
-        .def("createData", &Model::createData, bp::args("self"),
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
              "Create the RK integrator data.")
+        .def(
+            "createData",
+            static_cast<std::shared_ptr<Data> (Model::*)(
+                const std::shared_ptr<typename Model::ParameterDataManager>&)>(
+                &Model::createData),
+            bp::args("self", "params_data"),
+            "Create the RK integrator data with parameter-manager data.")
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Wire a ParameterManager into this node.")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Propagate a new parameter vector into this node.")
         .add_property(
             "ni",
             bp::make_function(&Model::get_ni,
                               bp::return_value_policy<bp::return_by_value>()),
-            "number of nodes to be integrated")
-        .add_property(
-            "ng", bp::make_function(&Model::get_ng), "number of equality constraints")
-        .add_property(
-            "nh", bp::make_function(&Model::get_nh), "number of inequality constraints")
-        .add_property(
-            "ng_T", bp::make_function(&Model::get_ng_T), "number of equality terminal constraints")
-        .add_property(
-            "nh_T", bp::make_function(&Model::get_nh_T), "number of inequality terminal constraints");
+            "number of nodes to be integrated");
   }
 };
 
@@ -107,6 +133,26 @@ struct IntegratedActionDataRKVisitor
           bp::make_getter(&Data::differential,
                           bp::return_value_policy<bp::return_by_value>()),
           "list of differential action data")
+        .add_property(
+            "dynamics",
+            bp::make_getter(&Data::dynamics,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "list of dynamics data")
+        .add_property(
+            "costs",
+            bp::make_getter(&Data::costs,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "list of cost data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint-manager data")
+        .add_property(
+            "params",
+            bp::make_getter(&Data::params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "parameter-manager data")
         .add_property(
             "control",
             bp::make_getter(&Data::control,
@@ -140,6 +186,11 @@ struct IntegratedActionDataRKVisitor
             "list of partial derivatives of RK nodes with respect to the "
             "control parameters of the RK integration. dki/du")
         .add_property(
+            "dki_dp",
+            bp::make_getter(&Data::dki_dp, bp::return_internal_reference<>()),
+            "list of partial derivatives of RK nodes with respect to the "
+            "parameters. dki/dp")
+        .add_property(
             "dyi_dx",
             bp::make_getter(&Data::dyi_dx, bp::return_internal_reference<>()),
             "list of partial derivatives of RK dynamics with respect to the "
@@ -150,6 +201,11 @@ struct IntegratedActionDataRKVisitor
             "list of partial derivatives of RK dynamics with respect to the "
             "control parameters of the RK integrator. dyi/du")
         .add_property(
+            "dyi_dp",
+            bp::make_getter(&Data::dyi_dp, bp::return_internal_reference<>()),
+            "list of partial derivatives of RK dynamics with respect to the "
+            "parameters. dyi/dp")
+        .add_property(
             "dli_dx",
             bp::make_getter(&Data::dli_dx, bp::return_internal_reference<>()),
             "list of partial derivatives of the cost with respect to the state "
@@ -159,6 +215,11 @@ struct IntegratedActionDataRKVisitor
             bp::make_getter(&Data::dli_du, bp::return_internal_reference<>()),
             "list of partial derivatives of the cost with respect to the "
             "control input of the RK integration. dli_du")
+        .add_property(
+            "dli_dp",
+            bp::make_getter(&Data::dli_dp, bp::return_internal_reference<>()),
+            "list of partial derivatives of the cost with respect to the "
+            "parameters. dli_dp")
         .add_property(
             "ddli_ddx",
             bp::make_getter(&Data::ddli_ddx, bp::return_internal_reference<>()),
@@ -175,6 +236,11 @@ struct IntegratedActionDataRKVisitor
             "list of second partial derivatives of the cost with respect to "
             "the control input of the RK integration. ddli_ddu")
         .add_property(
+            "ddli_ddp",
+            bp::make_getter(&Data::ddli_ddp, bp::return_internal_reference<>()),
+            "list of second partial derivatives of the cost with respect to "
+            "parameters. ddli_ddp")
+        .add_property(
             "ddli_dxdw",
             bp::make_getter(&Data::ddli_dxdw,
                             bp::return_internal_reference<>()),
@@ -186,6 +252,18 @@ struct IntegratedActionDataRKVisitor
                             bp::return_internal_reference<>()),
             "list of second partial derivatives of the cost with respect to "
             "the state and control input of the RK integration. ddli_dxdu")
+        .add_property(
+            "ddli_dpdx",
+            bp::make_getter(&Data::ddli_dpdx,
+                            bp::return_internal_reference<>()),
+            "list of second partial derivatives of the cost with respect to "
+            "parameters and state. ddli_dpdx")
+        .add_property(
+            "ddli_dpdu",
+            bp::make_getter(&Data::ddli_dpdu,
+                            bp::return_internal_reference<>()),
+            "list of second partial derivatives of the cost with respect to "
+            "parameters and control input. ddli_dpdu")
         .add_property(
             "ddli_dwdu",
             bp::make_getter(&Data::ddli_dwdu,
@@ -199,12 +277,11 @@ struct IntegratedActionDataRKVisitor
 #define CROCODDYL_INTACTION_MODEL_RK_PYTHON_BINDINGS(Scalar)                   \
   typedef IntegratedActionModelRKTpl<Scalar> Model;                            \
   typedef IntegratedActionModelAbstractTpl<Scalar> ModelBase;                  \
-  typedef ActionModelAbstractTpl<Scalar> ActionBase;                           \
   typedef DifferentialActionModelAbstractTpl<Scalar> DiffActionBase;           \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
-  bp::class_<Model, bp::bases<ModelBase, ActionBase>>(                         \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
       "IntegratedActionModelRK",                                               \
-      "RK integrator for differential action models.\n\n"                      \
+      "RK integrator for differential or dynamics backends.\n\n"               \
       "This class implements different RK integrator schemes. The available "  \
       "integrators are: RK2, RK3, and RK4.",                                   \
       bp::init<std::shared_ptr<DiffActionBase>, RKType,                        \

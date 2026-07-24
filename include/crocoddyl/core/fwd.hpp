@@ -129,6 +129,12 @@ class IntegratedActionModelRKTpl;
 template <typename Scalar>
 struct IntegratedActionDataRKTpl;
 
+template <typename Scalar>
+class DiscretizedActionModelTpl;
+
+template <typename Scalar>
+struct DiscretizedActionDataTpl;
+
 // residual
 template <typename Scalar>
 class ResidualModelAbstractTpl;
@@ -482,6 +488,8 @@ typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRKTpl<double> IntegratedActionModelRK;
 typedef IntegratedActionDataRKTpl<double> IntegratedActionDataRK;
+typedef DiscretizedActionModelTpl<double> DiscretizedActionModel;
+typedef DiscretizedActionDataTpl<double> DiscretizedActionData;
 
 typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;

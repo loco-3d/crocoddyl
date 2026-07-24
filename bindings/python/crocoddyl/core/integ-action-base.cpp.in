@@ -38,7 +38,11 @@ struct IntegratedActionModelAbstractVisitor
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
                "derivatives (default True)."))
-        .def("calc", pure_virtual(&Model::calc),
+        .def("calc",
+             bp::pure_virtual(static_cast<void (Model::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc)),
              bp::args("self", "data", "x", "u"),
              "Compute the next state and cost value.\n\n"
              "It describes the time-discrete evolution of our dynamical system "
@@ -53,7 +57,11 @@ struct IntegratedActionModelAbstractVisitor
                  const Eigen::Ref<const VectorXs>&)>(
                  &IntegratedActionModel::calc),
              bp::args("self", "data", "x"))
-        .def("calcDiff", pure_virtual(&Model::calcDiff),
+        .def("calcDiff",
+             bp::pure_virtual(static_cast<void (Model::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff)),
              bp::args("self", "data", "x", "u"),
              "Compute the derivatives of the dynamics and cost functions.\n\n"
              "It computes the partial derivatives of the dynamical system and "
@@ -69,7 +77,10 @@ struct IntegratedActionModelAbstractVisitor
                  const Eigen::Ref<const VectorXs>&)>(
                  &IntegratedActionModel::calcDiff),
              bp::args("self", "data", "x"))
-        .def("createData", &Model::createData, &Model::default_createData,
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (Model::*)()>(
+                 &Model::createData),
+             &Model::default_createData,
              bp::args("self"),
              "Create the integrated-action data.\n\n"
              "Each integrated-action model (IAM) has its own data that needs "
@@ -82,15 +93,29 @@ struct IntegratedActionModelAbstractVisitor
                               bp::return_value_policy<bp::return_by_value>()),
             "differential action model")
         .add_property(
+            "dynamics",
+            bp::make_function(&Model::get_dynamics,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "dynamics model")
+        .add_property(
+            "costs",
+            bp::make_function(&Model::get_costs,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "cost model stack")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "constraint manager")
+        .add_property(
             "control",
             bp::make_function(&Model::get_control,
                               bp::return_value_policy<bp::return_by_value>()),
             "control parametrization model")
         .add_property(
             "integrator_time",
-            bp::make_function(
-                &IntegratedActionModel::get_integrator_time,
-                bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&IntegratedActionModel::get_integrator_time,
+                              bp::return_value_policy<bp::return_by_value>()),
             "shared integration-time metadata")
         .add_property(
             "dt",
@@ -121,8 +146,7 @@ struct IntegratedActionModelAbstractVisitor
           ":param withCostResidual: includes the cost residuals and "       \
           "derivatives (default True)."))                                   \
       .def(IntegratedActionModelAbstractVisitor<Model_wrap>())              \
-      .def(PrintableVisitor<Model_wrap>())                                  \
-      .def(CopyableVisitor<Model_wrap>());
+      .def(PrintableVisitor<Model_wrap>());
 
 #define CROCODDYL_INTACTION_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)              \
   typedef IntegratedActionDataAbstractTpl<Scalar> Data;                        \

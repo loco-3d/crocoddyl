@@ -74,6 +74,16 @@ class IntegratedActionModelAbstractTpl_wrap
                           (VectorXs)u);
   }
 
+  void calc(const std::shared_ptr<ActionData>& data,
+            const Eigen::Ref<const VectorXs>& x) override {
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty(
+          "Invalid argument: " << "x has wrong dimension (it should be " +
+                                      std::to_string(state_->get_nx()) + ")");
+    }
+    return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x);
+  }
+
   void calcDiff(const std::shared_ptr<ActionData>& data,
                 const Eigen::Ref<const VectorXs>& x,
                 const Eigen::Ref<const VectorXs>& u) override {
@@ -89,6 +99,17 @@ class IntegratedActionModelAbstractTpl_wrap
     }
     return bp::call<void>(this->get_override("calcDiff").ptr(), data,
                           (VectorXs)x, (VectorXs)u);
+  }
+
+  void calcDiff(const std::shared_ptr<ActionData>& data,
+                const Eigen::Ref<const VectorXs>& x) override {
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty(
+          "Invalid argument: " << "x has wrong dimension (it should be " +
+                                      std::to_string(state_->get_nx()) + ")");
+    }
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                          (VectorXs)x);
   }
 
   std::shared_ptr<ActionData> createData() override {

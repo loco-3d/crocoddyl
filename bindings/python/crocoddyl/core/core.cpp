@@ -43,6 +43,7 @@ void exposeCore() {
   exposeDataCollectorJoint();
   exposeIntegratedActionEuler();
   exposeIntegratedActionRK();
+  exposeDiscretizedAction();
   exposeCostAbstract();
   exposeResidualControl();
   exposeResidualJointEffort();

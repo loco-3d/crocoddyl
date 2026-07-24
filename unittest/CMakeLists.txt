@@ -44,6 +44,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_impulse_dynamics
       test_integrator_time
       test_integrator_timeopt_params
+      test_action_integration
       test_params
       test_params_data
       test_parameter_manager
@@ -142,6 +143,11 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_integrator_timeopt_params)
     target_compile_definitions(test_integrator_timeopt_params
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_action_integration)
+    target_compile_definitions(test_action_integration
                                PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 

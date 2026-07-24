@@ -45,6 +45,7 @@ void exposeDataCollectorActuation();
 void exposeDataCollectorJoint();
 void exposeIntegratedActionEuler();
 void exposeIntegratedActionRK();
+void exposeDiscretizedAction();
 void exposeCostAbstract();
 void exposeResidualControl();
 void exposeResidualJointEffort();

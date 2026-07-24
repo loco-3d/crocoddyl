@@ -13,6 +13,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     params_data
     parameter_manager
     time_parameterization
+    action_integration
     lqr
     implicit_constraints
     multibody_actuation
