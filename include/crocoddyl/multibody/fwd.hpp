@@ -86,6 +86,22 @@ class DifferentialActionModelContactInvDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl;
 
+// dynamics
+template <typename Scalar>
+class DynamicsModelConstrainedForwardTpl;
+template <typename Scalar>
+struct DynamicsDataConstrainedForwardTpl;
+
+template <typename Scalar>
+class DynamicsModelConstrainedInverseTpl;
+template <typename Scalar>
+struct DynamicsDataConstrainedInverseTpl;
+
+template <typename Scalar>
+class DynamicsModelImpulseForwardTpl;
+template <typename Scalar>
+struct DynamicsDataImpulseForwardTpl;
+
 // numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
@@ -410,6 +426,17 @@ typedef DifferentialActionModelContactInvDynamicsTpl<double>
     DifferentialActionModelContactInvDynamics;
 typedef DifferentialActionDataContactInvDynamicsTpl<double>
     DifferentialActionDataContactInvDynamics;
+
+typedef DynamicsModelConstrainedForwardTpl<double>
+    DynamicsModelConstrainedForward;
+typedef DynamicsDataConstrainedForwardTpl<double>
+    DynamicsDataConstrainedForward;
+typedef DynamicsModelConstrainedInverseTpl<double>
+    DynamicsModelConstrainedInverse;
+typedef DynamicsDataConstrainedInverseTpl<double>
+    DynamicsDataConstrainedInverse;
+typedef DynamicsModelImpulseForwardTpl<double> DynamicsModelImpulseForward;
+typedef DynamicsDataImpulseForwardTpl<double> DynamicsDataImpulseForward;
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;

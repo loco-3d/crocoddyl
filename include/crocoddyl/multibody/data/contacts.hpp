@@ -16,7 +16,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
+struct [[deprecated("Use DataCollectorImplicitConstraint.")]]
+DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorContactTpl(
@@ -28,8 +29,9 @@ struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
 };
 
 template <typename Scalar>
-struct DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>,
-                                            DataCollectorContactTpl<Scalar> {
+struct [[deprecated("Use DataCollectorMultibodyInImplicitConstraint.")]]
+DataCollectorMultibodyInContactTpl : DataCollectorMultibodyTpl<Scalar>,
+                                     DataCollectorContactTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorMultibodyInContactTpl(
@@ -56,7 +58,8 @@ struct DataCollectorMultibodyInContactParamsTpl
 };
 
 template <typename Scalar>
-struct DataCollectorActMultibodyInContactTpl
+struct [[deprecated("Use DataCollectorActMultibodyInImplicitConstraint.")]]
+DataCollectorActMultibodyInContactTpl
     : DataCollectorMultibodyInContactTpl<Scalar>,
       DataCollectorActuationTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -88,7 +91,8 @@ struct DataCollectorActMultibodyInContactParamsTpl
 };
 
 template <typename Scalar>
-struct DataCollectorJointActMultibodyInContactTpl
+struct [[deprecated("Use DataCollectorJointActMultibodyInImplicitConstraint.")]]
+DataCollectorJointActMultibodyInContactTpl
     : DataCollectorActMultibodyInContactTpl<Scalar>,
       DataCollectorJointTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

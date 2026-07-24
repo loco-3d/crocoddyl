@@ -29,6 +29,29 @@ struct JointDataAbstractTpl {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
+   * @brief Initialize joint data from its effort and control dimensions
+   *
+   * @param state  State description
+   * @param ntau   Dimension of joint efforts
+   * @param nu     Dimension of control input
+   */
+  JointDataAbstractTpl(std::shared_ptr<StateAbstract> state,
+                       const std::size_t ntau, const std::size_t nu)
+      : tau(ntau),
+        a(state->get_nv()),
+        dtau_dx(ntau, state->get_ndx()),
+        dtau_du(ntau, nu),
+        da_dx(state->get_nv(), state->get_ndx()),
+        da_du(state->get_nv(), nu) {
+    tau.setZero();
+    a.setZero();
+    dtau_dx.setZero();
+    dtau_du.setZero();
+    da_dx.setZero();
+    da_du.setZero();
+  }
+
+  /**
    * @brief Initialize a joint data structure containing generalized
    * accelerations and joint efforts, and their derivatives.
    *
@@ -39,19 +62,7 @@ struct JointDataAbstractTpl {
   JointDataAbstractTpl(std::shared_ptr<StateAbstract> state,
                        std::shared_ptr<ActuationModelAbstract> actuation,
                        const std::size_t nu)
-      : tau(actuation->get_nu()),
-        a(state->get_nv()),
-        dtau_dx(actuation->get_nu(), state->get_ndx()),
-        dtau_du(actuation->get_nu(), nu),
-        da_dx(state->get_nv(), state->get_ndx()),
-        da_du(state->get_nv(), nu) {
-    tau.setZero();
-    a.setZero();
-    dtau_dx.setZero();
-    dtau_du.setZero();
-    da_dx.setZero();
-    da_du.setZero();
-  }
+      : JointDataAbstractTpl(state, actuation->get_nu(), nu) {}
   virtual ~JointDataAbstractTpl() {}
 
   VectorXs tau;      //!< Joint efforts

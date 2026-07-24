@@ -10,10 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include <cmath>
-#include <limits>
 
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/implicit-constraints/contact.hpp"
 #include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
 #include "factory/state.hpp"
@@ -26,8 +23,6 @@ namespace {
 
 typedef crocoddyl::ContactModel Model;
 typedef crocoddyl::ContactData Data;
-typedef crocoddyl::ContactModel6D LegacyModel;
-typedef crocoddyl::ContactData6D LegacyData;
 typedef Model::MaskArray MaskArray;
 
 std::shared_ptr<crocoddyl::StateMultibody> create_state() {
@@ -98,45 +93,6 @@ void test_construct_data_and_accessors() {
   BOOST_CHECK_EQUAL(model->get_mask()[1], false);
   BOOST_CHECK(model->get_reference().isApprox(create_reference()));
   BOOST_CHECK(contact_data->mask == mask);
-}
-
-void test_full_mask_matches_legacy_contact_6d() {
-  const MaskArray mask = {{true, true, true, true, true, true}};
-  const Eigen::Vector2d gains(0.2, 0.3);
-  const std::shared_ptr<Model> model =
-      create_model(mask, pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED, gains);
-  const std::shared_ptr<LegacyModel> legacy_model =
-      std::make_shared<LegacyModel>(model->get_state(), model->get_id(),
-                                    model->get_reference(), model->get_type(),
-                                    model->get_nu(), gains);
-
-  pinocchio::Data pinocchio_data(*model->get_state()->get_pinocchio());
-  const std::shared_ptr<Data> data =
-      std::static_pointer_cast<Data>(model->createData(&pinocchio_data));
-  const std::shared_ptr<LegacyData> legacy_data =
-      std::static_pointer_cast<LegacyData>(
-          legacy_model->createData(&pinocchio_data));
-  const Eigen::VectorXd x = model->get_state()->rand();
-
-  crocoddyl::unittest::updateAllPinocchio(
-      model->get_state()->get_pinocchio().get(), &pinocchio_data, x);
-  model->calc(data, x);
-  legacy_model->calc(legacy_data, x);
-  model->calcDiff(data, x);
-  legacy_model->calcDiff(legacy_data, x);
-
-  BOOST_CHECK((data->a0 - legacy_data->a0).isZero(1e-12));
-  BOOST_CHECK((data->Jc - legacy_data->Jc).isZero(1e-12));
-  BOOST_CHECK((data->da0_dx - legacy_data->da0_dx).isZero(1e-12));
-
-  const Eigen::VectorXd force =
-      Eigen::VectorXd::LinSpaced(model->get_nc(), 1., 6.);
-  model->updateForce(data, force);
-  legacy_model->updateForce(legacy_data, force);
-  BOOST_CHECK((data->f.toVector() - legacy_data->f.toVector()).isZero(1e-12));
-  BOOST_CHECK(
-      (data->fext.toVector() - legacy_data->fext.toVector()).isZero(1e-12));
-  BOOST_CHECK((data->dtau_dq - legacy_data->dtau_dq).isZero(1e-12));
 }
 
 void test_calc_and_mask_projection() {
@@ -403,14 +359,12 @@ void test_copy_cast_and_validation() {
 }
 
 template <typename Scalar>
-void check_contact_3d_parity() {
+void check_contact_3d_analytical() {
   typedef crocoddyl::ContactModelTpl<Scalar> GenericModel;
   typedef crocoddyl::ContactDataTpl<Scalar> GenericData;
-  typedef crocoddyl::ContactModel3DTpl<Scalar> LegacyModelTpl;
-  typedef crocoddyl::ContactData3DTpl<Scalar> LegacyDataTpl;
   typedef crocoddyl::StateMultibodyTpl<Scalar> State;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
-  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
+  typedef Eigen::Matrix<Scalar, 6, Eigen::Dynamic> Matrix6xs;
 
   const std::shared_ptr<crocoddyl::StateMultibody> state64 = create_state();
   const std::shared_ptr<State> state =
@@ -422,137 +376,82 @@ void check_contact_3d_parity() {
   const typename GenericModel::Vector2s gains[] = {
       GenericModel::Vector2s::Zero(),
       (typename GenericModel::Vector2s() << Scalar(0.4), Scalar(0.25))
-          .finished(),
-      (typename GenericModel::Vector2s()
-           << std::numeric_limits<Scalar>::epsilon() / Scalar(4),
-       std::numeric_limits<Scalar>::epsilon() / Scalar(4))
           .finished()};
   const typename GenericModel::SE3 reference =
       create_reference().template cast<Scalar>();
-  typename GenericModel::SE3 tiny_reference = reference;
-  tiny_reference.translation()[0] =
-      Scalar(20) / std::sqrt(std::numeric_limits<Scalar>::epsilon());
-  const typename GenericModel::SE3 references[] = {reference, reference,
-                                                   tiny_reference};
   const Scalar tolerance =
-      std::is_same<Scalar, double>::value ? Scalar(1e-10) : Scalar(2e-4);
+      std::is_same<Scalar, double>::value ? Scalar(2e-10) : Scalar(3e-4);
 
   for (const pinocchio::ReferenceFrame frame : frames) {
-    for (std::size_t gain_index = 0; gain_index < 3; ++gain_index) {
-      const typename GenericModel::Vector2s& gain = gains[gain_index];
-      const typename GenericModel::SE3& gain_reference = references[gain_index];
+    for (const typename GenericModel::Vector2s& gain : gains) {
       const std::shared_ptr<GenericModel> model =
-          std::make_shared<GenericModel>(state, 2, gain_reference, frame,
+          std::make_shared<GenericModel>(state, 2, reference, frame,
                                          state->get_nv(), gain, mask);
-      const std::shared_ptr<LegacyModelTpl> legacy =
-          std::make_shared<LegacyModelTpl>(state, 2,
-                                           gain_reference.translation(), frame,
-                                           state->get_nv(), gain);
       pinocchio::DataTpl<Scalar> pin_data(*state->get_pinocchio());
-      pinocchio::DataTpl<Scalar> legacy_pin_data(*state->get_pinocchio());
       const std::shared_ptr<GenericData> data =
           std::static_pointer_cast<GenericData>(model->createData(&pin_data));
-      const std::shared_ptr<LegacyDataTpl> legacy_data =
-          std::static_pointer_cast<LegacyDataTpl>(
-              legacy->createData(&legacy_pin_data));
       const VectorXs x = state->rand();
       const VectorXs q = x.head(state->get_nq());
       const VectorXs v = x.tail(state->get_nv());
-      const VectorXs a =
-          VectorXs::LinSpaced(state->get_nv(), Scalar(-0.3), Scalar(0.45));
-
-      pinocchio::forwardKinematics(*state->get_pinocchio(), pin_data, q, v,
-                                   VectorXs::Zero(state->get_nv()));
-      pinocchio::computeForwardKinematicsDerivatives(
-          *state->get_pinocchio(), pin_data, q, v,
-          VectorXs::Zero(state->get_nv()));
-      pinocchio::computeJointJacobians(*state->get_pinocchio(), pin_data, q);
-      pinocchio::updateFramePlacements(*state->get_pinocchio(), pin_data);
-      pinocchio::forwardKinematics(*state->get_pinocchio(), legacy_pin_data, q,
-                                   v, VectorXs::Zero(state->get_nv()));
-      pinocchio::computeForwardKinematicsDerivatives(
-          *state->get_pinocchio(), legacy_pin_data, q, v,
-          VectorXs::Zero(state->get_nv()));
-      pinocchio::computeJointJacobians(*state->get_pinocchio(), legacy_pin_data,
-                                       q);
-      pinocchio::updateFramePlacements(*state->get_pinocchio(),
-                                       legacy_pin_data);
-      model->calc(data, x);
-      legacy->calc(legacy_data, x);
-      BOOST_CHECK(data->Jc.isApprox(legacy_data->Jc, tolerance));
-      BOOST_CHECK(data->a0.isApprox(legacy_data->a0, tolerance));
+      const VectorXs a = VectorXs::Zero(state->get_nv());
 
       pinocchio::forwardKinematics(*state->get_pinocchio(), pin_data, q, v, a);
       pinocchio::computeForwardKinematicsDerivatives(*state->get_pinocchio(),
                                                      pin_data, q, v, a);
-      pinocchio::forwardKinematics(*state->get_pinocchio(), legacy_pin_data, q,
-                                   v, a);
-      pinocchio::computeForwardKinematicsDerivatives(*state->get_pinocchio(),
-                                                     legacy_pin_data, q, v, a);
-      model->calcDiff(data, x);
-      legacy->calcDiff(legacy_data, x);
-      BOOST_CHECK(data->a0.isApprox(legacy_data->a0, tolerance));
-      BOOST_TEST_CONTEXT("frame=" << frame << ", gains=" << gain.transpose()
-                                  << ", error="
-                                  << (data->da0_dx - legacy_data->da0_dx)
-                                         .template lpNorm<Eigen::Infinity>()) {
-        BOOST_CHECK_SMALL((data->da0_dx - legacy_data->da0_dx)
-                              .template lpNorm<Eigen::Infinity>(),
-                          Scalar(20) * tolerance);
+      pinocchio::computeJointJacobians(*state->get_pinocchio(), pin_data, q);
+      pinocchio::updateFramePlacements(*state->get_pinocchio(), pin_data);
+      model->calc(data, x);
+
+      Matrix6xs Jlocal(6, state->get_nv());
+      pinocchio::getFrameJacobian(*state->get_pinocchio(), pin_data,
+                                  model->get_id(), pinocchio::LOCAL, Jlocal);
+      pinocchio::MotionTpl<Scalar> a_local =
+          pinocchio::MotionTpl<Scalar>::Zero();
+      const pinocchio::MotionTpl<Scalar> v_local = pinocchio::getFrameVelocity(
+          *state->get_pinocchio(), pin_data, model->get_id(), pinocchio::LOCAL);
+      a_local.linear() = pinocchio::getFrameClassicalAcceleration(
+                             *state->get_pinocchio(), pin_data, model->get_id(),
+                             pinocchio::LOCAL)
+                             .linear();
+      if (gain[0] != Scalar(0)) {
+        a_local.linear().noalias() +=
+            gain[0] * pin_data.oMf[model->get_id()].rotation().transpose() *
+            (pin_data.oMf[model->get_id()].translation() -
+             reference.translation());
       }
+      if (gain[1] != Scalar(0)) {
+        a_local.linear().noalias() += gain[1] * v_local.linear();
+      }
+      Matrix6xs Jexpected = Jlocal;
+      pinocchio::MotionTpl<Scalar> a_expected = a_local;
+      if (frame != pinocchio::LOCAL) {
+        typename GenericModel::SE3 rotation = GenericModel::SE3::Identity();
+        rotation.rotation(pin_data.oMf[model->get_id()].rotation());
+        Jexpected.noalias() = rotation.toActionMatrix() * Jlocal;
+        a_expected = rotation.act(a_local);
+      }
+      BOOST_CHECK(data->Jc.isApprox(Jexpected.topRows(3), tolerance));
+      BOOST_CHECK(data->a0.isApprox(a_expected.linear(), tolerance));
 
       const VectorXs force = VectorXs::LinSpaced(3, Scalar(-1.2), Scalar(2.1));
       model->updateForce(data, force);
-      legacy->updateForce(legacy_data, force);
-      BOOST_CHECK(
-          data->f.toVector().isApprox(legacy_data->f.toVector(), tolerance));
-      BOOST_CHECK(data->fext.toVector().isApprox(legacy_data->fext.toVector(),
-                                                 tolerance));
-      BOOST_CHECK(
-          data->dtau_dq.isApprox(legacy_data->dtau_dq, Scalar(20) * tolerance));
-
-      pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >
-          generic_fext(state->get_pinocchio()->njoints,
-                       pinocchio::ForceTpl<Scalar>::Zero());
-      pinocchio::container::aligned_vector<pinocchio::ForceTpl<Scalar> >
-          legacy_fext(state->get_pinocchio()->njoints,
-                      pinocchio::ForceTpl<Scalar>::Zero());
+      pinocchio::ForceTpl<Scalar> expected_force =
+          pinocchio::ForceTpl<Scalar>::Zero();
+      expected_force.linear() = force;
       const pinocchio::JointIndex joint =
           state->get_pinocchio()->frames[model->get_id()].parentJoint;
-      generic_fext[joint] = data->fext;
-      legacy_fext[joint] = legacy_data->fext;
-      pinocchio::DataTpl<Scalar> torque_data(*state->get_pinocchio());
-      pinocchio::DataTpl<Scalar> legacy_torque_data(*state->get_pinocchio());
-      const VectorXs tau = pinocchio::rnea(*state->get_pinocchio(), torque_data,
-                                           q, v, a, generic_fext);
-      const VectorXs legacy_tau = pinocchio::rnea(
-          *state->get_pinocchio(), legacy_torque_data, q, v, a, legacy_fext);
-      BOOST_CHECK(tau.isApprox(legacy_tau, Scalar(20) * tolerance));
-
-      MatrixXs kkt = MatrixXs::Zero(state->get_nv() + 3, state->get_nv() + 3);
-      pinocchio::DataTpl<Scalar> dynamics_data(*state->get_pinocchio());
-      pinocchio::crba(*state->get_pinocchio(), dynamics_data, q);
-      dynamics_data.M.template triangularView<Eigen::StrictlyLower>() =
-          dynamics_data.M.transpose()
-              .template triangularView<Eigen::StrictlyLower>();
-      kkt.topLeftCorner(state->get_nv(), state->get_nv()) = dynamics_data.M;
-      kkt.topRightCorner(state->get_nv(), 3) = data->Jc.transpose();
-      kkt.bottomLeftCorner(3, state->get_nv()) = data->Jc;
-      VectorXs rhs = VectorXs::Zero(state->get_nv() + 3);
-      rhs.head(state->get_nv()) =
-          VectorXs::LinSpaced(state->get_nv(), Scalar(-2), Scalar(3)) -
-          pinocchio::nonLinearEffects(*state->get_pinocchio(), dynamics_data, q,
-                                      v);
-      rhs.tail(3) = -data->a0;
-      const VectorXs solution = kkt.fullPivLu().solve(rhs);
-      MatrixXs legacy_kkt = kkt;
-      legacy_kkt.topRightCorner(state->get_nv(), 3) =
-          legacy_data->Jc.transpose();
-      legacy_kkt.bottomLeftCorner(3, state->get_nv()) = legacy_data->Jc;
-      VectorXs legacy_rhs = rhs;
-      legacy_rhs.tail(3) = -legacy_data->a0;
-      const VectorXs legacy_solution = legacy_kkt.fullPivLu().solve(legacy_rhs);
-      BOOST_CHECK(solution.isApprox(legacy_solution, Scalar(50) * tolerance));
+      const typename GenericModel::SE3 jMf =
+          pin_data.oMi[joint].inverse() * pin_data.oMf[model->get_id()];
+      pinocchio::ForceTpl<Scalar> expected_local = expected_force;
+      if (frame != pinocchio::LOCAL) {
+        typename GenericModel::SE3 rotation = GenericModel::SE3::Identity();
+        rotation.rotation(pin_data.oMf[model->get_id()].rotation());
+        expected_local = rotation.actInv(expected_force);
+      }
+      BOOST_CHECK(
+          data->f.toVector().isApprox(expected_force.toVector(), tolerance));
+      BOOST_CHECK(data->fext.toVector().isApprox(
+          jMf.act(expected_local).toVector(), Scalar(10) * tolerance));
     }
   }
 }
@@ -613,9 +512,13 @@ void test_contact_hot_path_no_allocation_float() {
   check_contact_hot_path_no_allocation<float>();
 }
 
-void test_contact_3d_parity_double() { check_contact_3d_parity<double>(); }
+void test_contact_3d_analytical_double() {
+  check_contact_3d_analytical<double>();
+}
 
-void test_contact_3d_parity_float() { check_contact_3d_parity<float>(); }
+void test_contact_3d_analytical_float() {
+  check_contact_3d_analytical<float>();
+}
 
 }  // namespace
 
@@ -623,15 +526,14 @@ bool init_function() {
   test_suite* ts = BOOST_TEST_SUITE("test_generic_contact");
 
   ts->add(BOOST_TEST_CASE(&test_construct_data_and_accessors));
-  ts->add(BOOST_TEST_CASE(&test_full_mask_matches_legacy_contact_6d));
   ts->add(BOOST_TEST_CASE(&test_calc_and_mask_projection));
   ts->add(BOOST_TEST_CASE(&test_calc_diff_against_finite_differences));
   ts->add(BOOST_TEST_CASE(&test_update_force_and_multiple_scatter));
   ts->add(BOOST_TEST_CASE(&test_contact_dimensions_and_masks_double));
   ts->add(BOOST_TEST_CASE(&test_contact_dimensions_and_masks_float));
   ts->add(BOOST_TEST_CASE(&test_copy_cast_and_validation));
-  ts->add(BOOST_TEST_CASE(&test_contact_3d_parity_double));
-  ts->add(BOOST_TEST_CASE(&test_contact_3d_parity_float));
+  ts->add(BOOST_TEST_CASE(&test_contact_3d_analytical_double));
+  ts->add(BOOST_TEST_CASE(&test_contact_3d_analytical_float));
   ts->add(BOOST_TEST_CASE(&test_contact_hot_path_no_allocation_double));
   ts->add(BOOST_TEST_CASE(&test_contact_hot_path_no_allocation_float));
 

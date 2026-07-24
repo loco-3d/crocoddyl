@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,11 +9,31 @@
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/multibody/actions/free-invdyn.hpp"
 
+#include <boost/python/make_constructor.hpp>
+
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
+
+template <typename Model>
+std::shared_ptr<Model> createDeprecatedDifferentialActionModelFreeInvDynamics(
+    const std::shared_ptr<typename Model::StateMultibody>& state,
+    const std::shared_ptr<typename Model::ActuationModelAbstract>& actuation,
+    const std::shared_ptr<typename Model::CostModelSum>& costs) {
+  return std::make_shared<Model>(state, actuation, costs);
+}
+
+template <typename Model>
+std::shared_ptr<Model> createDeprecatedDifferentialActionModelFreeInvDynamics(
+    const std::shared_ptr<typename Model::StateMultibody>& state,
+    const std::shared_ptr<typename Model::ActuationModelAbstract>& actuation,
+    const std::shared_ptr<typename Model::CostModelSum>& costs,
+    const std::shared_ptr<typename Model::ConstraintModelManager>& constraints) {
+  return std::make_shared<Model>(state, actuation, costs, constraints);
+}
 
 template <typename Model>
 struct DifferentialActionModelFreeInvDynamicsVisitor
@@ -172,17 +192,36 @@ struct DifferentialActionDataFreeInvDynamicsVisitor
           "Algorithm (RNEA) as an equality constraint. The stack of cost and " \
           "constraint functions are implemented in ConstraintModelManager() "  \
           "and CostModelSum(), respectively.",                                 \
-          bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,         \
-                   std::shared_ptr<Costs>,                                     \
-                   bp::optional<std::shared_ptr<Constraints>>>(                \
-              bp::args("self", "state", "actuation", "costs", "constraints"),  \
-              "Initialize the free inverse-dynamics action model.\n\n"         \
-              "It describes the kinematic evolution of the multibody system "  \
-              "and computes the needed torques using inverse dynamics.\n"      \
-              ":param state: multibody state\n"                                \
-              ":param actuation: abstract actuation model\n"                   \
-              ":param costs: stack of cost functions\n"                        \
-              ":param constraints: stack of constraint functions"))            \
+          bp::no_init)                                                         \
+          .def("__init__",                                                     \
+               bp::make_constructor(                                           \
+                   static_cast<std::shared_ptr<Model> (*)(                      \
+                       const std::shared_ptr<State>&,                           \
+                       const std::shared_ptr<Actuation>&,                       \
+                       const std::shared_ptr<Costs>&)>(                         \
+                       &createDeprecatedDifferentialActionModelFreeInvDynamics< \
+                           Model>),                                             \
+                   deprecated<>(                                                \
+                       "Deprecated. Use DynamicsModelConstrainedInverse for "   \
+                       "the dynamics backend. For action-model integration, "   \
+                       "migrate to the dynamics-based "                         \
+                       "IntegratedActionModelEuler constructor."),              \
+                   bp::args("state", "actuation", "costs")))                   \
+          .def("__init__",                                                     \
+               bp::make_constructor(                                           \
+                   static_cast<std::shared_ptr<Model> (*)(                      \
+                       const std::shared_ptr<State>&,                           \
+                       const std::shared_ptr<Actuation>&,                       \
+                       const std::shared_ptr<Costs>&,                           \
+                       const std::shared_ptr<Constraints>&)>(                   \
+                       &createDeprecatedDifferentialActionModelFreeInvDynamics< \
+                           Model>),                                             \
+                   deprecated<>(                                                \
+                       "Deprecated. Use DynamicsModelConstrainedInverse for "   \
+                       "the dynamics backend. For action-model integration, "   \
+                       "migrate to the dynamics-based "                         \
+                       "IntegratedActionModelEuler constructor."),              \
+                   bp::args("state", "actuation", "costs", "constraints")))    \
           .def(DifferentialActionModelFreeInvDynamicsVisitor<Model>())         \
           .def(CastVisitor<Model>())                                           \
           .def(PrintableVisitor<Model>())                                      \
@@ -218,7 +257,8 @@ struct DifferentialActionDataFreeInvDynamicsVisitor
           bp::init<Model*>(                                                 \
               bp::args("self", "model"),                                    \
               "Create free inverse-dynamics action data.\n\n"               \
-              ":param model: free inverse-dynamics action model"))          \
+              ":param model: free inverse-dynamics action model")[          \
+              deprecated<>("Deprecated. Use DynamicsDataConstrainedInverse.")]) \
           .def(DifferentialActionDataFreeInvDynamicsVisitor<Data>())        \
           .def(CopyableVisitor<Data>());                                    \
   typedef typename Model::ResidualModelActuation ResidualModelActuation;    \

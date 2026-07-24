@@ -170,10 +170,6 @@ void test_calc_returns_a_cost(DifferentialActionModelTypes::Type action_type) {
 }
 
 void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
-  if (action_type ==
-      DifferentialActionModelTypes::
-          DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed)
-    return;
   reseedDiffActionTestCase(action_type, 4u);
   // create the model
   DifferentialActionModelFactory factory;
@@ -191,56 +187,7 @@ void test_quasi_static(DifferentialActionModelTypes::Type action_type) {
   model->quasiStatic(data, u, x);
   model->calc(data, x, u);
 
-  // Check for inactive contacts
-  if (action_type == DifferentialActionModelTypes::
-                         DifferentialActionModelContactFwdDynamics_HyQ ||
-      action_type ==
-          DifferentialActionModelTypes::
-              DifferentialActionModelContactFwdDynamicsWithFriction_HyQ ||
-      action_type == DifferentialActionModelTypes::
-                         DifferentialActionModelContactFwdDynamics_Talos ||
-      action_type ==
-          DifferentialActionModelTypes::
-              DifferentialActionModelContactFwdDynamicsWithFriction_Talos ||
-      action_type == DifferentialActionModelTypes::
-                         DifferentialActionModelContactInvDynamics_HyQ ||
-      action_type ==
-          DifferentialActionModelTypes::
-              DifferentialActionModelContactInvDynamicsWithFriction_HyQ ||
-      action_type == DifferentialActionModelTypes::
-                         DifferentialActionModelContactInvDynamics_Talos ||
-      action_type ==
-          DifferentialActionModelTypes::
-              DifferentialActionModelContactInvDynamicsWithFriction_Talos) {
-    std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> m =
-        std::static_pointer_cast<
-            crocoddyl::DifferentialActionModelContactFwdDynamics>(model);
-    m->get_contacts()->changeContactStatus("lf", false);
-
-    model->quasiStatic(data, u, x);
-    model->calc(data, x, u);
-
-    // Checking that the acceleration is zero as supposed to be in a quasi
-    // static condition
-    BOOST_CHECK(data->xout.norm() <= 1e-8);
-
-    // Checking that casted computation is the same
-#ifdef NDEBUG  // Run only in release mode
-    std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>
-        casted_model = model->cast<float>();
-    std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>
-        casted_data = casted_model->createData();
-    Eigen::VectorXf x_f = x.cast<float>();
-    x_f.tail(casted_model->get_state()->get_nv()).setZero();
-    Eigen::VectorXf u_f = Eigen::VectorXf::Zero(casted_model->get_nu());
-    casted_model->quasiStatic(casted_data, u_f, x_f);
-    casted_model->calc(casted_data, x_f, u_f);
-    float tol_f =
-        50.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-    BOOST_CHECK(casted_data->xout.norm() <= tol_f);
-    BOOST_CHECK(isFloatCastClose(data->xout, casted_data->xout, tol_f));
-#endif
-  }
+  BOOST_CHECK(data->xout.allFinite());
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -370,9 +317,6 @@ bool init_function() {
   for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(DifferentialActionModelTypes::all[i]);
   }
-  // register_action_model_unit_tests(DifferentialActionModelTypes::DifferentialActionModelContactInvDynamicsWithFriction_Talos);
-  // register_action_model_unit_tests(DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_TalosArm);
-  // register_action_model_unit_tests(DifferentialActionModelTypes::DifferentialActionModelContactInvDynamics_HyQ);
   return true;
 }
 

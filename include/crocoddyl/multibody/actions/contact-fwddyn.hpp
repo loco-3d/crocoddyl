@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -69,7 +69,8 @@ namespace crocoddyl {
  * `createData()`
  */
 template <typename _Scalar>
-class DifferentialActionModelContactFwdDynamicsTpl
+class [[deprecated("Use DynamicsModelConstrainedForward.")]]
+DifferentialActionModelContactFwdDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -335,7 +336,8 @@ class DifferentialActionModelContactFwdDynamicsTpl
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataContactFwdDynamicsTpl
+struct [[deprecated("Use DynamicsDataConstrainedForward.")]]
+DifferentialActionDataContactFwdDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;

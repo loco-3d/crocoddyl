@@ -10,6 +10,7 @@
 #include "crocoddyl/multibody/data/impulses.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -37,7 +38,8 @@ struct DataCollectorImpulseVisitor
       bp::init<std::shared_ptr<ImpulseData>>(                    \
           bp::args("self", "impulses"),                          \
           "Create impulse data collection.\n\n"                  \
-          ":param impulses: impulses data"))                     \
+          ":param impulses: impulses data")[                     \
+          deprecated<>("Deprecated. Use DataCollectorImplicitConstraint.")]) \
       .def(DataCollectorImpulseVisitor<Data>())                  \
       .def(CopyableVisitor<Data>());
 
@@ -55,8 +57,10 @@ struct DataCollectorImpulseVisitor
           bp::args("self", "pinocchio", "impulses"),                           \
           "Create multibody data collection.\n\n"                              \
           ":param pinocchio: Pinocchio data\n"                                 \
-          ":param impulses: impulses data")[bp::with_custodian_and_ward<1,     \
-                                                                        2>()]) \
+          ":param impulses: impulses data")[                                  \
+          deprecated<bp::with_custodian_and_ward<1, 2>>(                       \
+              "Deprecated. Use "                                               \
+              "DataCollectorMultibodyInImplicitConstraint.")])                \
       .def(CopyableVisitor<MData>());
 
 #define CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPULSE_PARAMS_PYTHON_BINDINGS(    \

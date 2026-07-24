@@ -38,6 +38,9 @@ void exposeMultibody() {
   exposeDataCollectorContacts();
   exposeDataCollectorImplicitConstraints();
   exposeDataCollectorImpulses();
+  exposeDynamicsConstrainedForward();
+  exposeDynamicsConstrainedInverse();
+  exposeDynamicsImpulseForward();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionFreeInvDynamics();
   exposeDifferentialActionContactFwdDynamics();

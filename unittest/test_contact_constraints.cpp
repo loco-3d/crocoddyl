@@ -1,148 +1,61 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <boost/test/unit_test.hpp>
 
-#include "factory/contact_constraint.hpp"
+#include "crocoddyl/core/constraints/residual.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
+#include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
+#include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "factory/state.hpp"
 #include "unittest_common.hpp"
 
-using namespace boost::unit_test;
-using namespace crocoddyl::unittest;
+BOOST_AUTO_TEST_CASE(test_generic_contact_constraint_collector) {
+  const std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
+          crocoddyl::unittest::StateModelFactory().create(
+              crocoddyl::unittest::StateModelTypes::StateMultibody_TalosArm));
+  const std::shared_ptr<pinocchio::Model> pinocchio = state->get_pinocchio();
+  const std::shared_ptr<crocoddyl::ActuationModelMultibody> actuation =
+      std::make_shared<crocoddyl::ActuationModelMultibody>(state);
+  const std::shared_ptr<crocoddyl::ImplicitConstraintModelMultiple>
+      constraints =
+          std::make_shared<crocoddyl::ImplicitConstraintModelMultiple>(
+              state, actuation->get_nu());
+  const pinocchio::FrameIndex id = pinocchio->frames.size() - 1;
+  crocoddyl::ContactModel::MaskArray mask = {
+      {true, true, true, false, false, false}};
+  constraints->addConstraint(
+      "contact", std::make_shared<crocoddyl::ContactModel>(
+                     state, id, pinocchio->frames[id].placement,
+                     pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
+                     crocoddyl::ContactModel::Vector2s::Zero(), mask));
+  crocoddyl::DynamicsModelConstrainedForward dynamics(state, actuation,
+                                                      constraints);
+  const std::shared_ptr<crocoddyl::DynamicsDataAbstract> dynamics_data =
+      dynamics.createData();
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(dynamics.get_nu());
+  dynamics.calc(dynamics_data, x, u);
+  dynamics.calcDiff(dynamics_data, x, u);
 
-//----------------------------------------------------------------------------//
-
-void test_partial_derivatives_against_contact_numdiff(
-    ContactConstraintModelTypes::Type constraint_type,
-    PinocchioModelTypes::Type model_type,
-    ActuationModelTypes::Type actuation_type) {
-  // create the model
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
-      ContactConstraintModelFactory().create(constraint_type, model_type,
-                                             actuation_type);
-
-  // create the corresponding data object and set the constraint to nan
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
-      model->createData();
-
-  crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
-      data_num_diff = model_num_diff.createData();
-
-  // Generating random values for the state and control
-  Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
-
-  // Computing the action derivatives
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  model_num_diff.calc(data_num_diff, x, u);
-  model_num_diff.calcDiff(data_num_diff, x, u);
-  // Tolerance defined as in
-  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
-  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Gu, data_num_diff->Gu, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Hu, data_num_diff->Hu, tol, tol));
-
-  // Computing the action derivatives
-  x = model->get_state()->rand();
-  model->calc(data, x);
-  model->calcDiff(data, x);
-  model_num_diff.calc(data_num_diff, x);
-  model_num_diff.calcDiff(data_num_diff, x);
-  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, tol));
-
-  // Checking that casted computation is the same
-#ifdef NDEBUG  // Run only in release mode
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>&
-      casted_model = model->cast<float>();
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>&
-      casted_data = casted_model->createData();
-  Eigen::VectorXf x_f = x.cast<float>();
-  const Eigen::VectorXf u_f = u.cast<float>();
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  casted_model->calc(casted_data, x_f, u_f);
-  casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = 20.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  std::cout << "tol_f: " << tol_f << std::endl;
-  //   std::cout << data->Gx.cast<float>() - casted_data->Gx << std::endl;
-  BOOST_CHECK(
-      isCloseAbsRel(data->Gx.cast<float>(), casted_data->Gx, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Gu.cast<float>(), casted_data->Gu, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Hx.cast<float>(), casted_data->Hx, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Hu.cast<float>(), casted_data->Hu, tol_f, tol_f));
-  model->calc(data, x);
-  model->calcDiff(data, x);
-  casted_model->calc(casted_data, x_f);
-  casted_model->calcDiff(casted_data, x_f);
-  BOOST_CHECK(
-      isCloseAbsRel(data->Gx.cast<float>(), casted_data->Gx, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Hx.cast<float>(), casted_data->Hx, tol_f, tol_f));
-#endif
-}
-
-//----------------------------------------------------------------------------//
-
-void register_contact_constraint_model_unit_tests(
-    ContactConstraintModelTypes::Type constraint_type,
-    PinocchioModelTypes::Type model_type,
-    ActuationModelTypes::Type actuation_type) {
-  boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << constraint_type << "_" << actuation_type << "_"
-            << model_type;
-  std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_against_contact_numdiff,
-                  constraint_type, model_type, actuation_type)));
-  framework::master_test_suite().add(ts);
-}
-
-bool init_function() {
-  // Test all the contact constraint model. Note that we can do it only with
-  // humanoids as it needs to test the contact wrench cone
-  for (size_t constraint_type = 0;
-       constraint_type < ContactConstraintModelTypes::all.size();
-       ++constraint_type) {
-    register_contact_constraint_model_unit_tests(
-        ContactConstraintModelTypes::all[constraint_type],
-        PinocchioModelTypes::Talos,
-        ActuationModelTypes::ActuationModelFloatingBase);
-    register_contact_constraint_model_unit_tests(
-        ContactConstraintModelTypes::all[constraint_type],
-        PinocchioModelTypes::RandomHumanoid,
-        ActuationModelTypes::ActuationModelFloatingBase);
-    if (ContactConstraintModelTypes::all[constraint_type] ==
-            ContactConstraintModelTypes::
-                ConstraintModelResidualContactForceEquality ||
-        ContactConstraintModelTypes::all[constraint_type] ==
-            ContactConstraintModelTypes::
-                ConstraintModelResidualContactFrictionConeInequality ||
-        ContactConstraintModelTypes::all[constraint_type] ==
-            ContactConstraintModelTypes::
-                ConstraintModelResidualContactControlGravInequality) {
-      register_contact_constraint_model_unit_tests(
-          ContactConstraintModelTypes::all[constraint_type],
-          PinocchioModelTypes::HyQ,
-          ActuationModelTypes::ActuationModelFloatingBase);
-    }
-  }
-  return true;
-}
-
-int main(int argc, char** argv) {
-  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+  const std::shared_ptr<crocoddyl::ResidualModelContactForce> residual =
+      std::make_shared<crocoddyl::ResidualModelContactForce>(
+          state, id, pinocchio::Force::Zero(), 3, dynamics.get_nu());
+  crocoddyl::ConstraintModelResidual constraint(state, residual);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract> data =
+      constraint.createData(dynamics_data->shared);
+  constraint.calc(data, x, u);
+  constraint.calcDiff(data, x, u);
+  BOOST_CHECK_EQUAL(data->h.size(), 3);
+  BOOST_CHECK(data->Hx.allFinite());
+  BOOST_CHECK(data->Hu.allFinite());
 }

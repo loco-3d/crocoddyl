@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,8 @@ namespace crocoddyl {
  * `createData()`
  */
 template <typename _Scalar>
-class DifferentialActionModelFreeInvDynamicsTpl
+class [[deprecated("Use DynamicsModelConstrainedInverse.")]]
+DifferentialActionModelFreeInvDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -419,7 +420,8 @@ class DifferentialActionModelFreeInvDynamicsTpl
 };
 
 template <typename _Scalar>
-struct DifferentialActionDataFreeInvDynamicsTpl
+struct [[deprecated("Use DynamicsDataConstrainedInverse.")]]
+DifferentialActionDataFreeInvDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;

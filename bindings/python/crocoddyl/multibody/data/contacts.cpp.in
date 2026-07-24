@@ -10,6 +10,7 @@
 #include "crocoddyl/multibody/data/contacts.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -37,7 +38,8 @@ struct DataCollectorContactVisitor
       bp::init<std::shared_ptr<ContactData>>(                    \
           bp::args("self", "contacts"),                          \
           "Create contact data collection.\n\n"                  \
-          ":param contacts: contacts data"))                     \
+          ":param contacts: contacts data")[                     \
+          deprecated<>("Deprecated. Use DataCollectorImplicitConstraint.")]) \
       .def(DataCollectorContactVisitor<Data>())                  \
       .def(CopyableVisitor<Data>());
 
@@ -55,8 +57,10 @@ struct DataCollectorContactVisitor
           bp::args("self", "pinocchio", "contacts"),                           \
           "Create multibody data collection.\n\n"                              \
           ":param pinocchio: Pinocchio data\n"                                 \
-          ":param contacts: contacts data")[bp::with_custodian_and_ward<1,     \
-                                                                        2>()]) \
+          ":param contacts: contacts data")[                                  \
+          deprecated<bp::with_custodian_and_ward<1, 2>>(                       \
+              "Deprecated. Use "                                               \
+              "DataCollectorMultibodyInImplicitConstraint.")])                \
       .def(CopyableVisitor<MData>());
 
 #define CROCODDYL_DATA_COLLECTOR_MULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(     \
@@ -99,8 +103,10 @@ struct DataCollectorContactVisitor
           "Create multibody data collection.\n\n"                              \
           ":param pinocchio: Pinocchio data\n"                                 \
           ":param actuation: actuation data\n"                                 \
-          ":param contacts: contacts data")[bp::with_custodian_and_ward<1,     \
-                                                                        2>()]) \
+          ":param contacts: contacts data")[                                  \
+          deprecated<bp::with_custodian_and_ward<1, 2>>(                       \
+              "Deprecated. Use "                                               \
+              "DataCollectorActMultibodyInImplicitConstraint.")])             \
       .def(CopyableVisitor<AMData>());
 
 #define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS(  \
@@ -148,8 +154,10 @@ struct DataCollectorContactVisitor
           ":param pinocchio: Pinocchio data\n"                                 \
           ":param actuation: actuation data\n"                                 \
           ":param joint: joint data\n"                                         \
-          ":param contacts: contacts data")[bp::with_custodian_and_ward<1,     \
-                                                                        2>()]) \
+          ":param contacts: contacts data")[                                  \
+          deprecated<bp::with_custodian_and_ward<1, 2>>(                       \
+              "Deprecated. Use "                                               \
+              "DataCollectorJointActMultibodyInImplicitConstraint.")])        \
       .def(CopyableVisitor<JAMData>());
 
 #define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_CONTACT_PARAMS_PYTHON_BINDINGS( \

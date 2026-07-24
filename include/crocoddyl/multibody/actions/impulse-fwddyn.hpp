@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -56,8 +56,8 @@ namespace crocoddyl {
  * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ActionModelImpulseFwdDynamicsTpl
-    : public ActionModelAbstractTpl<_Scalar> {
+class [[deprecated("Use DynamicsModelImpulseForward.")]]
+ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelImpulseFwdDynamicsTpl)
@@ -327,7 +327,8 @@ class ActionModelImpulseFwdDynamicsTpl
 };
 
 template <typename _Scalar>
-struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
+struct [[deprecated("Use DynamicsDataImpulseForward.")]]
+ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;

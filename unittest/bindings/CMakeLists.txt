@@ -8,15 +8,14 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     cost_sum
     constraint_manager
     dynamics
+    multibody_dynamics
     params
     params_data
     parameter_manager
     time_parameterization
     lqr
-    contacts
     implicit_constraints
     multibody_actuation
-    impulses
     squashing
     copy)
 

@@ -31,7 +31,6 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_cost_sum
       test_constraints
       test_constraint_manager
-      test_contacts
       test_implicit_constraints
       test_multiple_implicit_constraints
       test_kinematic_loop
@@ -39,10 +38,9 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_multibody_actuation
       test_implicit_constraint_residuals
       test_controls
-      test_impulses
-      test_multiple_contacts
-      test_multiple_impulses
       test_dynamics
+      test_multibody_dynamics
+      test_impulse_dynamics
       test_integrator_time
       test_integrator_timeopt_params
       test_params
@@ -152,6 +150,16 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_dynamics)
     target_compile_definitions(test_dynamics PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multibody_dynamics)
+    target_compile_definitions(test_multibody_dynamics
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_impulse_dynamics)
+    target_compile_definitions(test_impulse_dynamics
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
   if(TARGET test_problem_abstract)

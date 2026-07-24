@@ -16,7 +16,8 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
+struct [[deprecated("Use DataCollectorImplicitConstraint.")]]
+DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorImpulseTpl(
@@ -28,8 +29,9 @@ struct DataCollectorImpulseTpl : virtual DataCollectorAbstractTpl<Scalar> {
 };
 
 template <typename Scalar>
-struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>,
-                                            DataCollectorImpulseTpl<Scalar> {
+struct [[deprecated("Use DataCollectorMultibodyInImplicitConstraint.")]]
+DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>,
+                                     DataCollectorImpulseTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   DataCollectorMultibodyInImpulseTpl(

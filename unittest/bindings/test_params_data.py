@@ -144,7 +144,7 @@ class ParamsDataTest(unittest.TestCase):
             crocoddyl.DynamicsParamsDataAbstract(None)
 
     def test_core_collector_combinations_and_sharing(self):
-        actuation = crocoddyl.ActuationModelFloatingBase(self.state)
+        actuation = crocoddyl.ActuationModelMultibody(self.state)
         actuation_data = actuation.createData()
         joint_data = crocoddyl.JointDataAbstract(self.state, actuation, actuation.nu)
         params = crocoddyl.ParamsDataAbstract(self.state, 2, 3)
@@ -186,16 +186,12 @@ class ParamsDataTest(unittest.TestCase):
             self.assertEqual(copied.params.np_action, 2)
             self.assertEqual(copied.params.np_dynamics, 3)
 
-    def test_multibody_contact_and_impulse_collector_combinations(self):
-        actuation = crocoddyl.ActuationModelFloatingBase(self.state)
+    def test_multibody_collector_combinations(self):
+        actuation = crocoddyl.ActuationModelMultibody(self.state)
         actuation_data = actuation.createData()
         joint_data = crocoddyl.JointDataAbstract(self.state, actuation, actuation.nu)
         params = crocoddyl.ParamsDataAbstract(self.state, 2, 3)
         pinocchio_data = self.state.pinocchio.createData()
-        contacts = crocoddyl.ContactModelMultiple(self.state, actuation.nu)
-        impulses = crocoddyl.ImpulseModelMultiple(self.state)
-        contact_data = contacts.createData(pinocchio_data)
-        impulse_data = impulses.createData(pinocchio_data)
         collectors = [
             (
                 crocoddyl.DataCollectorMultibodyParams(pinocchio_data, params),
@@ -213,34 +209,6 @@ class ParamsDataTest(unittest.TestCase):
                 ),
                 ("pinocchio", "actuation", "joint", "params"),
             ),
-            (
-                crocoddyl.DataCollectorMultibodyInContactParams(
-                    pinocchio_data, contact_data, params
-                ),
-                ("pinocchio", "contacts", "params"),
-            ),
-            (
-                crocoddyl.DataCollectorActMultibodyInContactParams(
-                    pinocchio_data, actuation_data, contact_data, params
-                ),
-                ("pinocchio", "actuation", "contacts", "params"),
-            ),
-            (
-                crocoddyl.DataCollectorJointActMultibodyInContactParams(
-                    pinocchio_data,
-                    actuation_data,
-                    joint_data,
-                    contact_data,
-                    params,
-                ),
-                ("pinocchio", "actuation", "joint", "contacts", "params"),
-            ),
-            (
-                crocoddyl.DataCollectorMultibodyInImpulseParams(
-                    pinocchio_data, impulse_data, params
-                ),
-                ("pinocchio", "impulses", "params"),
-            ),
         ]
 
         for collector, inherited in collectors:
@@ -256,7 +224,8 @@ class ParamsDataTest(unittest.TestCase):
                     self.assertEqual(copied.pinocchio.M[0, 0], 42.0)
                 else:
                     self.assertIs(getattr(copied, field), getattr(collector, field))
-            self.assertEqual(copied.params.np, params.np)
+            self.assertEqual(copied.params.np_action, 2)
+            self.assertEqual(copied.params.np_dynamics, 3)
 
     def test_float32_layout_assignment_and_copy(self):
         state = crocoddyl_float32.StateVector(4)

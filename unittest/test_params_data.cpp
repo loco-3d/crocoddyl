@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright (C) 2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,12 +12,8 @@
 #include "crocoddyl/core/data/actuation.hpp"
 #include "crocoddyl/core/data/joint.hpp"
 #include "crocoddyl/core/data/params.hpp"
-#include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
-#include "crocoddyl/multibody/data/contacts.hpp"
-#include "crocoddyl/multibody/data/impulses.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
-#include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
 #include "factory/state.hpp"
 #include "unittest_common.hpp"
 
@@ -136,13 +132,13 @@ void test_params_data_copy_and_scalar_values() {
 template <typename Scalar>
 void test_core_parameter_collectors() {
   typedef crocoddyl::ActuationModelAbstractTpl<Scalar> ActuationModel;
-  typedef crocoddyl::ActuationModelFloatingBaseTpl<Scalar> FloatingBase;
+  typedef crocoddyl::ActuationModelMultibodyTpl<Scalar> MultibodyActuation;
   typedef crocoddyl::JointDataAbstractTpl<Scalar> JointData;
   typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       create_state<Scalar>();
   const std::shared_ptr<ActuationModel> actuation =
-      std::make_shared<FloatingBase>(state);
+      std::make_shared<MultibodyActuation>(state);
   const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<Scalar> >
       actuation_data = actuation->createData();
   const std::shared_ptr<JointData> joint_data =
@@ -196,17 +192,13 @@ void test_core_parameter_collectors() {
 template <typename Scalar>
 void test_multibody_parameter_collectors() {
   typedef crocoddyl::ActuationModelAbstractTpl<Scalar> ActuationModel;
-  typedef crocoddyl::ActuationModelFloatingBaseTpl<Scalar> FloatingBase;
-  typedef crocoddyl::ContactDataMultipleTpl<Scalar> ContactData;
-  typedef crocoddyl::ContactModelMultipleTpl<Scalar> ContactModel;
-  typedef crocoddyl::ImpulseDataMultipleTpl<Scalar> ImpulseData;
-  typedef crocoddyl::ImpulseModelMultipleTpl<Scalar> ImpulseModel;
+  typedef crocoddyl::ActuationModelMultibodyTpl<Scalar> MultibodyActuation;
   typedef crocoddyl::JointDataAbstractTpl<Scalar> JointData;
   typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
   const std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       create_state<Scalar>();
   const std::shared_ptr<ActuationModel> actuation =
-      std::make_shared<FloatingBase>(state);
+      std::make_shared<MultibodyActuation>(state);
   const std::shared_ptr<crocoddyl::ActuationDataAbstractTpl<Scalar> >
       actuation_data = actuation->createData();
   const std::shared_ptr<JointData> joint_data =
@@ -215,12 +207,6 @@ void test_multibody_parameter_collectors() {
       std::make_shared<ParamsData>(state, 2, 3);
 
   pinocchio::DataTpl<Scalar> pinocchio_data(*state->get_pinocchio());
-  ContactModel contacts(state, actuation->get_nu());
-  ImpulseModel impulses(state);
-  const std::shared_ptr<ContactData> contact_data =
-      contacts.createData(&pinocchio_data);
-  const std::shared_ptr<ImpulseData> impulse_data =
-      impulses.createData(&pinocchio_data);
 
   crocoddyl::DataCollectorMultibodyParamsTpl<Scalar> multibody_collector(
       &pinocchio_data, params);
@@ -261,68 +247,6 @@ void test_multibody_parameter_collectors() {
   BOOST_CHECK(joint_act_multibody_copy.joint == joint_data);
   BOOST_CHECK(joint_act_multibody_copy.params == params);
   BOOST_CHECK(joint_act_multibody_copy.parameter_data == nullptr);
-
-  crocoddyl::DataCollectorMultibodyInContactParamsTpl<Scalar>
-      multibody_contact_collector(&pinocchio_data, contact_data, params);
-  BOOST_CHECK(multibody_contact_collector.pinocchio == &pinocchio_data);
-  BOOST_CHECK(multibody_contact_collector.contacts == contact_data);
-  BOOST_CHECK(multibody_contact_collector.params == params);
-  BOOST_CHECK(multibody_contact_collector.parameter_data == nullptr);
-  const crocoddyl::DataCollectorMultibodyInContactParamsTpl<Scalar>
-      multibody_contact_copy(multibody_contact_collector);
-  BOOST_CHECK(multibody_contact_copy.pinocchio == &pinocchio_data);
-  BOOST_CHECK(multibody_contact_copy.contacts == contact_data);
-  BOOST_CHECK(multibody_contact_copy.params == params);
-  BOOST_CHECK(multibody_contact_copy.parameter_data == nullptr);
-
-  crocoddyl::DataCollectorActMultibodyInContactParamsTpl<Scalar>
-      act_multibody_contact_collector(&pinocchio_data, actuation_data,
-                                      contact_data, params);
-  BOOST_CHECK(act_multibody_contact_collector.pinocchio == &pinocchio_data);
-  BOOST_CHECK(act_multibody_contact_collector.actuation == actuation_data);
-  BOOST_CHECK(act_multibody_contact_collector.contacts == contact_data);
-  BOOST_CHECK(act_multibody_contact_collector.params == params);
-  BOOST_CHECK(act_multibody_contact_collector.parameter_data == nullptr);
-  const crocoddyl::DataCollectorActMultibodyInContactParamsTpl<Scalar>
-      act_multibody_contact_copy(act_multibody_contact_collector);
-  BOOST_CHECK(act_multibody_contact_copy.pinocchio == &pinocchio_data);
-  BOOST_CHECK(act_multibody_contact_copy.actuation == actuation_data);
-  BOOST_CHECK(act_multibody_contact_copy.contacts == contact_data);
-  BOOST_CHECK(act_multibody_contact_copy.params == params);
-  BOOST_CHECK(act_multibody_contact_copy.parameter_data == nullptr);
-
-  crocoddyl::DataCollectorJointActMultibodyInContactParamsTpl<Scalar>
-      joint_act_multibody_contact_collector(&pinocchio_data, actuation_data,
-                                            joint_data, contact_data, params);
-  BOOST_CHECK(joint_act_multibody_contact_collector.pinocchio ==
-              &pinocchio_data);
-  BOOST_CHECK(joint_act_multibody_contact_collector.actuation ==
-              actuation_data);
-  BOOST_CHECK(joint_act_multibody_contact_collector.joint == joint_data);
-  BOOST_CHECK(joint_act_multibody_contact_collector.contacts == contact_data);
-  BOOST_CHECK(joint_act_multibody_contact_collector.params == params);
-  BOOST_CHECK(joint_act_multibody_contact_collector.parameter_data == nullptr);
-  const crocoddyl::DataCollectorJointActMultibodyInContactParamsTpl<Scalar>
-      joint_act_multibody_contact_copy(joint_act_multibody_contact_collector);
-  BOOST_CHECK(joint_act_multibody_contact_copy.pinocchio == &pinocchio_data);
-  BOOST_CHECK(joint_act_multibody_contact_copy.actuation == actuation_data);
-  BOOST_CHECK(joint_act_multibody_contact_copy.joint == joint_data);
-  BOOST_CHECK(joint_act_multibody_contact_copy.contacts == contact_data);
-  BOOST_CHECK(joint_act_multibody_contact_copy.params == params);
-  BOOST_CHECK(joint_act_multibody_contact_copy.parameter_data == nullptr);
-
-  crocoddyl::DataCollectorMultibodyInImpulseParamsTpl<Scalar>
-      multibody_impulse_collector(&pinocchio_data, impulse_data, params);
-  BOOST_CHECK(multibody_impulse_collector.pinocchio == &pinocchio_data);
-  BOOST_CHECK(multibody_impulse_collector.impulses == impulse_data);
-  BOOST_CHECK(multibody_impulse_collector.params == params);
-  BOOST_CHECK(multibody_impulse_collector.parameter_data == nullptr);
-  const crocoddyl::DataCollectorMultibodyInImpulseParamsTpl<Scalar>
-      multibody_impulse_copy(multibody_impulse_collector);
-  BOOST_CHECK(multibody_impulse_copy.pinocchio == &pinocchio_data);
-  BOOST_CHECK(multibody_impulse_copy.impulses == impulse_data);
-  BOOST_CHECK(multibody_impulse_copy.params == params);
-  BOOST_CHECK(multibody_impulse_copy.parameter_data == nullptr);
 }
 
 template <typename Scalar>

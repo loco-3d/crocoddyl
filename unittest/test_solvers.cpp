@@ -632,7 +632,7 @@ bool init_function() {
 
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
-         i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
+         i < ActionModelTypes::NbActionModelTypes; ++i) {
       if (SolverTypes::all[s] != SolverTypes::SolverIpopt) {
 #ifdef CROCODDYL_WITH_ODYN
         if (SolverTypes::all[s] != SolverTypes::SolverOdynSQP) {
@@ -654,7 +654,7 @@ bool init_function() {
   // We start from 1 as 0 is the kkt solver
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
-         i < ActionModelTypes::ActionModelImpulseFwdDynamics_HyQ; ++i) {
+         i < ActionModelTypes::NbActionModelTypes; ++i) {
       if (SolverTypes::all[s] != SolverTypes::getReferenceSolverType() &&
           !ActionModelTypes::hasTerminalConstraints(ActionModelTypes::all[i])) {
         register_solvers_against_reference_unit_tests(
