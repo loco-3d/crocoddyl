@@ -36,6 +36,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_multiple_implicit_constraints
       test_kinematic_loop
       test_generic_contact
+      test_multibody_actuation
       test_implicit_constraint_residuals
       test_controls
       test_impulses
@@ -165,6 +166,11 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_generic_contact)
     target_compile_definitions(test_generic_contact
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multibody_actuation)
+    target_compile_definitions(test_multibody_actuation
                                PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 

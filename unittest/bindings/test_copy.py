@@ -260,6 +260,34 @@ class ControlsTest(CopyModelTestCase):
     )
 
 
+class JointDynamicsTest(CopyModelTestCase):
+    MODEL = list()
+    DATA = True
+    if hasattr(crocoddyl, "JointDynamicsModelIdentity"):
+        MODEL.append(crocoddyl.JointDynamicsModelIdentity(2, 1, 1))
+    if hasattr(crocoddyl, "JointDynamicsModelFriction"):
+        MODEL.append(
+            crocoddyl.JointDynamicsModelFriction(
+                3,
+                1,
+                np.array([np.log(0.2), np.log(4.0), np.log(0.1)]),
+                crocoddyl.JointFrictionType.COULOMB_VISCOUS,
+            )
+        )
+    if hasattr(crocoddyl, "JointDynamicsModelThruster"):
+        MODEL.append(
+            crocoddyl.JointDynamicsModelThruster(
+                [
+                    crocoddyl.Thruster(
+                        pinocchio.SE3.Identity(),
+                        0.1,
+                        crocoddyl.ThrusterType.CW,
+                    )
+                ]
+            )
+        )
+
+
 class DataCollectorsTest(CopyModelTestCase):
     MODEL = []
     DATA = False
@@ -333,8 +361,8 @@ class ActuationsTest(CopyModelTestCase):
         )
     )
     # multibody actuations
-    MODEL.append(crocoddyl.ActuationModelFloatingBase(state))
-    MODEL.append(crocoddyl.ActuationModelFull(state))
+    if hasattr(crocoddyl, "ActuationModelMultibody"):
+        MODEL.append(crocoddyl.ActuationModelMultibody(state))
     d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5.0, 0.1
     ps = [
         crocoddyl.Thruster(
@@ -358,7 +386,14 @@ class ActuationsTest(CopyModelTestCase):
             crocoddyl.ThrusterType.CW,
         ),
     ]
-    MODEL.append(crocoddyl.ActuationModelFloatingBaseThrusters(state, ps))
+    if hasattr(crocoddyl, "ActuationModelMultibody") and hasattr(
+        crocoddyl, "JointDynamicsModelThruster"
+    ):
+        MODEL.append(
+            crocoddyl.ActuationModelMultibody(
+                state, [crocoddyl.JointDynamicsModelThruster(ps)]
+            )
+        )
 
 
 class ContactsTest(CopyModelTestCase):
@@ -439,6 +474,7 @@ if __name__ == "__main__":
         CostsTest,
         ConstraintsTest,
         ControlsTest,
+        JointDynamicsTest,
         DataCollectorsTest,
         ActuationsTest,
         ContactsTest,

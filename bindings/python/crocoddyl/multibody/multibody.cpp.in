@@ -16,9 +16,15 @@ void exposeMultibody() {
   exposeWrenchCone();
   exposeCoPSupport();
   exposeStateMultibody();
+  exposeActuationFloatingBaseThruster();
+  exposeJointDynamicsAbstract();
+  exposeJointDynamicsIdentity();
+  exposeJointDynamicsFriction();
+  exposeJointDynamicsThruster();
+  exposeActuationMultibody();
+  exposeActuationMultibodyParams();
   exposeActuationFloatingBase();
   exposeActuationFull();
-  exposeActuationFloatingBaseThruster();
   exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();

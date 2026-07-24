@@ -314,7 +314,7 @@ class RandomDifferentialLQRTest(ActionModelAbstractTestCase):
 class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -345,7 +345,7 @@ class TalosArmFreeFwdDynamicsTest(ActionModelAbstractTestCase):
 class TalosArmFreeFwdDynamicsWithArmatureTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -401,7 +401,7 @@ class AnymalFreeFwdDynamicsTest(ActionModelAbstractTestCase):
 class TalosArmIntegratedEulerTest(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -435,7 +435,7 @@ class TalosArmIntegratedEulerTest(ActionModelAbstractTestCase):
 class TalosArmIntegratedRK4Test(ActionModelAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",

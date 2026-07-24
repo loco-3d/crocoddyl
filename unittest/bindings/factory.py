@@ -1,3 +1,12 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
+
 import copy
 import warnings
 
@@ -166,28 +175,50 @@ class SquashingSmoothSatDerived(crocoddyl.SquashingModelAbstract):
         np.fill_diagonal(data.du_ds, du_ds)
 
 
-class FreeFloatingActuationDerived(crocoddyl.ActuationModelAbstract):
-    def __init__(self, state):
-        assert state.pinocchio.joints[1].shortname() == "JointModelFreeFlyer"
-        crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv - 6)
+class JointDynamicsDerived(crocoddyl.JointDynamicsModelAbstract):
+    def __init__(self, id, nq, nv, nu=None, p=None):
+        if nu is None:
+            nu = nv
+        super().__init__(id, nq, nv, nu)
+        self._p = np.array([] if p is None else p, dtype=float)
 
-    def calc(self, data, x, u):
-        data.tau[:] = np.hstack([np.zeros(6), u])
+    def calc(self, data, q, v, u):
+        data.friction = np.zeros(self.nv)
+        data.tau = np.pad(u, (0, self.nv - self.nu))
 
-    def calcDiff(self, data, x, u):
-        data.dtau_du[:, :] = np.vstack([np.zeros((6, self.nu)), np.eye(self.nu)])
+    def calcDiff(self, data, q, v, u):
+        data.dtau_dq = np.zeros((self.nv, self.nv))
+        data.dtau_dv = np.zeros((self.nv, self.nv))
+        data.dtau_du = np.eye(self.nv, self.nu)
+        data.Mtau = np.eye(self.nu, self.nv)
 
+    def commands(self, data, q, v, tau):
+        data.friction = np.zeros(self.nv)
+        data.u = tau[: self.nu]
 
-class FullActuationDerived(crocoddyl.ActuationModelAbstract):
-    def __init__(self, state):
-        assert state.pinocchio.joints[1].shortname() != "JointModelFreeFlyer"
-        crocoddyl.ActuationModelAbstract.__init__(self, state, state.nv)
+    def get_np(self):
+        return self._p.size
 
-    def calc(self, data, x, u):
-        data.tau[:] = u
+    def set_parameters(self, p):
+        self._p = np.array(p, dtype=float)
 
-    def calcDiff(self, data, x, u):
-        data.dtau_du[:, :] = pinocchio.utils.eye(self.nu)
+    def get_parameters(self):
+        return self._p.copy()
+
+    def get_parametrization(self):
+        return self._p.copy()
+
+    def updateParametrizationDerivative(self, dgamma_dp):
+        return np.eye(self.np)
+
+    def computeJointTorqueRegressor(self, joint_dtau_dp, q, v, u):
+        result = np.zeros((self.nv, self.np))
+        n = min(self.nv, self.np)
+        result[:n, :n] = np.eye(n)
+        return result
+
+    def createData(self):
+        return crocoddyl.JointDynamicsDataAbstract(self)
 
 
 class UnicycleModelDerived(crocoddyl.ActionModelAbstract):

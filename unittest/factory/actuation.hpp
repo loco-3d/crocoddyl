@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ namespace unittest {
 
 struct ActuationModelTypes {
   enum Type {
-    ActuationModelFull,
+    ActuationModelMultibody,
     ActuationModelFloatingBase,
     ActuationModelFloatingBaseThrusters,
     ActuationModelSquashingFull,

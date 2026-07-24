@@ -190,8 +190,9 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_TalosArm:
-      action = create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
-                                      ActuationModelTypes::ActuationModelFull);
+      action =
+          create_freeFwdDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                 ActuationModelTypes::ActuationModelMultibody);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeFwdDynamics_TalosArm_Squashed:
@@ -207,8 +208,9 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeInvDynamics_TalosArm:
-      action = create_freeInvDynamics(StateModelTypes::StateMultibody_TalosArm,
-                                      ActuationModelTypes::ActuationModelFull);
+      action =
+          create_freeInvDynamics(StateModelTypes::StateMultibody_TalosArm,
+                                 ActuationModelTypes::ActuationModelMultibody);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelFreeInvDynamics_TalosArm_Squashed:
@@ -220,13 +222,13 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelContactFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(
           StateModelTypes::StateMultibody_TalosArm,
-          ActuationModelTypes::ActuationModelFull, false, with_baumgarte);
+          ActuationModelTypes::ActuationModelMultibody, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelContact2DFwdDynamics_TalosArm:
       action = create_contactFwdDynamics(
           StateModelTypes::StateMultibodyContact2D_TalosArm,
-          ActuationModelTypes::ActuationModelFull, false, with_baumgarte);
+          ActuationModelTypes::ActuationModelMultibody, false, with_baumgarte);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelContactFwdDynamics_HyQ:
@@ -246,13 +248,13 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelContactFwdDynamicsWithFriction_TalosArm:
       action = create_contactFwdDynamics(
           StateModelTypes::StateMultibody_TalosArm,
-          ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
+          ActuationModelTypes::ActuationModelMultibody, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelContact2DFwdDynamicsWithFriction_TalosArm:
       action = create_contactFwdDynamics(
           StateModelTypes::StateMultibodyContact2D_TalosArm,
-          ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
+          ActuationModelTypes::ActuationModelMultibody, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelContactFwdDynamicsWithFriction_HyQ:
@@ -293,7 +295,7 @@ DifferentialActionModelFactory::create(DifferentialActionModelTypes::Type type,
         DifferentialActionModelContactInvDynamicsWithFriction_TalosArm:
       action = create_contactInvDynamics(
           StateModelTypes::StateMultibody_TalosArm,
-          ActuationModelTypes::ActuationModelFull, true, with_baumgarte);
+          ActuationModelTypes::ActuationModelMultibody, true, with_baumgarte);
       break;
     case DifferentialActionModelTypes::
         DifferentialActionModelContactInvDynamicsWithFriction_HyQ:

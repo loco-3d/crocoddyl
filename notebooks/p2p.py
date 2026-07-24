@@ -1,3 +1,11 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
 import example_robot_data
 import numpy as np
 import pinocchio
@@ -51,7 +59,7 @@ for p in ps:
         ),
     )
 
-    actuation = crocoddyl.ActuationModelFull(state)
+    actuation = crocoddyl.ActuationModelMultibody(state)
 
     # Create the running action model
     runningCostModel = crocoddyl.CostModelSum(state)

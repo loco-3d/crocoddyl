@@ -1,0 +1,159 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/multibody/actuations/joint-dynamics-base.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct JointDynamicsModelAbstractVisitor
+    : public bp::def_visitor<JointDynamicsModelAbstractVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "data", "q", "v", "u"),
+           "Compute the joint actuation dynamics.\n\n"
+           ":param data: joint dynamics data\n"
+           ":param q: joint configuration\n"
+           ":param v: joint velocity\n"
+           ":param u: joint control input")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "q", "v", "u"),
+             "Compute the derivatives of the joint actuation dynamics.\n\n"
+             "calc must be called first with the same data and inputs.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: joint control input")
+        .def("commands", pure_virtual(&Model::commands),
+             bp::args("self", "data", "q", "v", "tau"),
+             "Compute the joint commands from the joint torque.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param tau: joint torque")
+        .def("set_parameters", &Model::set_parameters,
+             &Model::default_set_parameters, bp::args("self", "p"),
+             "Set the joint dynamics parameters.")
+        .def("get_parameters", &Model::get_parameters,
+             &Model::default_get_parameters, bp::args("self"),
+             "Get the joint dynamics parameters in gamma form.")
+        .def("get_parametrization", &Model::get_parametrization,
+             &Model::default_get_parametrization, bp::args("self"),
+             "Get the joint dynamics parameters in external coordinates.")
+        .def("updateParametrizationDerivative",
+             &Model::updateParametrizationDerivative,
+             &Model::default_updateParametrizationDerivative,
+             bp::args("self", "dgamma_dp"),
+             "Update the Jacobian of the internal joint parameters.\n\n"
+             ":param dgamma_dp: internal-parameter Jacobian")
+        .def("computeJointTorqueRegressor", &Model::computeJointTorqueRegressor,
+             &Model::default_computeJointTorqueRegressor,
+             bp::args("self", "joint_dtau_dp", "q", "v", "u"),
+             "Compute the joint torque regressor with respect to the joint "
+             "parameters.\n\n"
+             ":param joint_dtau_dp: joint torque regressor\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: joint control input")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the joint dynamics data.\n\n"
+             ":return joint dynamics data.")
+        .add_property("id", bp::make_function(&Model::get_id), "joint id")
+        .add_property("nq", bp::make_function(&Model::get_nq),
+                      "joint configuration dimension")
+        .add_property("nv", bp::make_function(&Model::get_nv),
+                      "joint velocity dimension")
+        .add_property("nu", bp::make_function(&Model::get_nu),
+                      "joint control dimension")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "joint parameter dimension");
+  }
+};
+
+template <typename Data>
+struct JointDynamicsDataAbstractVisitor
+    : public bp::def_visitor<JointDynamicsDataAbstractVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "friction",
+          bp::make_getter(&Data::friction, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::friction), "joint friction")
+        .add_property(
+            "tau", bp::make_getter(&Data::tau, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::tau), "joint torque")
+        .add_property(
+            "u", bp::make_getter(&Data::u, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::u), "joint control")
+        .add_property(
+            "dtau_dq",
+            bp::make_getter(&Data::dtau_dq, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dtau_dq),
+            "derivative of the joint torque with respect to the configuration tangent")
+        .add_property(
+            "dtau_dv",
+            bp::make_getter(&Data::dtau_dv, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dtau_dv),
+            "derivative of the joint torque with respect to the velocity")
+        .add_property(
+            "dtau_du",
+            bp::make_getter(&Data::dtau_du, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dtau_du),
+            "derivative of the joint torque with respect to the control")
+        .add_property(
+            "Mtau",
+            bp::make_getter(&Data::Mtau, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Mtau),
+            "torque transform from joint torque to control");
+  }
+};
+
+#define CROCODDYL_JOINT_DYNAMICS_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)      \
+  typedef JointDynamicsModelAbstractTpl<Scalar> Model;                        \
+  typedef JointDynamicsModelAbstractTpl_wrap<Scalar> Model_wrap;              \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                     \
+  bp::class_<Model_wrap, boost::noncopyable>(                                 \
+      "JointDynamicsModelAbstract",                                           \
+      "Abstract class for joint actuation dynamics.",                         \
+      bp::init<pinocchio::JointIndex, std::size_t, std::size_t,               \
+               bp::optional<std::size_t> >(                                   \
+          bp::args("self", "id", "nq", "nv", "nu"),                         \
+          "Initialize the joint dynamics model.\n\n"                          \
+          ":param id: joint id\n"                                             \
+          ":param nq: joint configuration dimension\n"                        \
+          ":param nv: joint velocity dimension\n"                             \
+          ":param nu: joint control dimension (default 0)"))                  \
+      .def(JointDynamicsModelAbstractVisitor<Model_wrap>())                   \
+      .def(PrintableVisitor<Model_wrap>());
+
+#define CROCODDYL_JOINT_DYNAMICS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)      \
+  typedef JointDynamicsDataAbstractTpl<Scalar> Data;                         \
+  typedef JointDynamicsModelAbstractTpl<Scalar> Model;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Data> >();                      \
+  bp::class_<Data>(                                                          \
+      "JointDynamicsDataAbstract",                                           \
+      "Abstract class for joint dynamics data.",                             \
+      bp::init<Model*>(                                                      \
+          bp::args("self", "model"),                                         \
+          "Create common data shared between joint dynamics models.\n\n"     \
+          ":param model: joint dynamics model"))                             \
+      .def(JointDynamicsDataAbstractVisitor<Data>())                         \
+      .def(CopyableVisitor<Data>());
+
+void exposeJointDynamicsAbstract() {
+  CROCODDYL_JOINT_DYNAMICS_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_JOINT_DYNAMICS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

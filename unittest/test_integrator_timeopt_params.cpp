@@ -22,7 +22,7 @@
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "unittest_common.hpp"
@@ -86,7 +86,7 @@ class TimeDynamicsProbeTpl
 
 template <typename Scalar>
 struct TimeFixtureTpl {
-  typedef crocoddyl::ActuationModelFullTpl<Scalar> Actuation;
+  typedef crocoddyl::ActuationModelMultibodyTpl<Scalar> Actuation;
   typedef crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
   typedef crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>
       DifferentialAction;

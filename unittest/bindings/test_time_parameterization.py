@@ -159,7 +159,7 @@ class TimeParameterizationTest(unittest.TestCase):
     def test_existing_integrators_refresh_shared_time_and_keep_terminal_route(self):
         for module, dtype, state in self.scalar_cases():
             with self.subTest(module=module.__name__):
-                actuation = module.ActuationModelFull(state)
+                actuation = module.ActuationModelMultibody(state)
                 costs = module.CostModelSum(state, actuation.nu)
                 differential = module.DifferentialActionModelFreeFwdDynamics(
                     state, actuation, costs

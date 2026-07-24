@@ -1,6 +1,5 @@
 set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     states
-    actuations
     actions
     shooting
     problem_abstract
@@ -16,6 +15,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     lqr
     contacts
     implicit_constraints
+    multibody_actuation
     impulses
     squashing
     copy)

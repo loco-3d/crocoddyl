@@ -433,10 +433,11 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
                 [True, False],
             )
 
-        actuation_model = module.ActuationModelFull(state)
+        actuation_model = module.ActuationModelMultibody(state)
         actuation = actuation_model.createData()
-        actuation_model.calc(actuation, x, u)
-        actuation_model.calcDiff(actuation, x, u)
+        actuation_u = np.zeros(actuation_model.nu, dtype=dtype)
+        actuation_model.calc(actuation, x, actuation_u)
+        actuation_model.calcDiff(actuation, x, actuation_u)
         joint = module.JointDataAbstract(state, actuation_model, actuation_model.nu)
         params = module.ParamsDataAbstract(state, 1, 1)
         collectors = [

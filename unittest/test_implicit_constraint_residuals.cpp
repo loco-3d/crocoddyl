@@ -9,7 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/implicit-constraints/contact.hpp"
 #include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
@@ -34,7 +34,7 @@ void test_generic_residual_collectors() {
   typedef crocoddyl::ContactModelTpl<Scalar> Contact;
   typedef crocoddyl::ImplicitConstraintModelMultipleTpl<Scalar> Multiple;
   typedef crocoddyl::ImplicitConstraintDataMultipleTpl<Scalar> MultipleData;
-  typedef crocoddyl::ActuationModelFullTpl<Scalar> Actuation;
+  typedef crocoddyl::ActuationModelMultibodyTpl<Scalar> Actuation;
   typedef crocoddyl::ActuationDataAbstractTpl<Scalar> ActuationData;
   typedef crocoddyl::ResidualDataAbstractTpl<Scalar> ResidualData;
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;

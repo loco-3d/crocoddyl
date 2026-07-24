@@ -1,0 +1,106 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/params/actuation.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ActuationMultibodyParamsVisitor
+    : public bp::def_visitor<ActuationMultibodyParamsVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("update", &Model::update, bp::args("self", "data", "p"),
+           "Update the multibody actuation parameters.")
+        .def("computeJointTorqueRegressor",
+             &Model::computeJointTorqueRegressor,
+             bp::args("self", "data", "params", "x", "u"),
+             "Compute the multibody actuation torque regressor.")
+        .add_property(
+        "actuation",
+        bp::make_function(&Model::get_actuation,
+                          bp::return_value_policy<bp::return_by_value>()),
+        "multibody actuation model");
+  }
+};
+
+template <typename Data>
+struct ActuationMultibodyParamsDataVisitor
+    : public bp::def_visitor<ActuationMultibodyParamsDataVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "gamma",
+          bp::make_getter(&Data::gamma, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::gamma), "internal actuation parameters")
+        .add_property(
+            "dgamma_dp",
+            bp::make_getter(&Data::dgamma_dp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dgamma_dp),
+            "Jacobian of the internal actuation parameters");
+  }
+};
+
+template <typename Data, typename Model>
+std::shared_ptr<Data> createActuationMultibodyParamsData(Model* model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: model is null");
+  }
+  return std::dynamic_pointer_cast<Data>(model->createData());
+}
+
+#define CROCODDYL_ACTUATION_MULTIBODY_PARAMS_PYTHON_BINDINGS(Scalar)         \
+  {                                                                          \
+    typedef ActuationMultibodyParamsTpl<Scalar> Model;                       \
+    typedef DynamicsParamsAbstractTpl<Scalar> ModelBase;                     \
+    typedef ActuationModelMultibodyTpl<Scalar> ActuationModel;               \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                   \
+    bp::class_<Model, bp::bases<ModelBase> >(                                \
+        "ActuationMultibodyParams",                                          \
+        "Actuation-parameter model for multibody actuation stacks.",         \
+        bp::init<std::shared_ptr<ActuationModel> >(                          \
+            bp::args("self", "actuation"),                                   \
+            "Initialize the multibody actuation-parameter model.\n\n"        \
+            ":param actuation: multibody actuation model"))                  \
+        .def("createData", &Model::createData, bp::args("self"),             \
+             "Create the parameter data.\n\n"                                \
+             ":return parameter data")                                       \
+        .def(ActuationMultibodyParamsVisitor<Model>())                       \
+        .def(PrintableVisitor<Model>())                                      \
+        .def(CopyableVisitor<Model>());                                      \
+  }
+
+#define CROCODDYL_ACTUATION_MULTIBODY_PARAMS_DATA_PYTHON_BINDINGS(Scalar)    \
+  {                                                                          \
+    typedef ActuationMultibodyParamsDataTpl<Scalar> Data;                    \
+    typedef DynamicsParamsDataAbstractTpl<Scalar> DataBase;                 \
+    typedef ActuationMultibodyParamsTpl<Scalar> Model;                       \
+    bp::register_ptr_to_python<std::shared_ptr<Data> >();                    \
+    bp::class_<Data, bp::bases<DataBase> >(                                  \
+        "ActuationMultibodyParamsData",                                      \
+        "Data for multibody actuation-parameter models.",                    \
+        bp::no_init)                                                         \
+        .def("__init__",                                                     \
+             bp::make_constructor(                                           \
+                 &createActuationMultibodyParamsData<Data, Model>,           \
+                 bp::default_call_policies(), bp::args("model")))            \
+        .def(ActuationMultibodyParamsDataVisitor<Data>())                    \
+        .def(CopyableVisitor<Data>());                                       \
+  }
+
+void exposeActuationMultibodyParams() {
+  CROCODDYL_ACTUATION_MULTIBODY_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTUATION_MULTIBODY_PARAMS_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

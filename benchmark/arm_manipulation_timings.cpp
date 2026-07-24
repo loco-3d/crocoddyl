@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,7 +18,7 @@
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -70,8 +70,8 @@ int main(int argc, char* argv[]) {
   std::shared_ptr<crocoddyl::StateMultibody> state =
       std::make_shared<crocoddyl::StateMultibody>(
           std::make_shared<pinocchio::Model>(model));
-  std::shared_ptr<crocoddyl::ActuationModelFull> actuation =
-      std::make_shared<crocoddyl::ActuationModelFull>(state);
+  std::shared_ptr<crocoddyl::ActuationModelMultibody> actuation =
+      std::make_shared<crocoddyl::ActuationModelMultibody>(state);
 
   Eigen::VectorXd q0 = Eigen::VectorXd::Random(state->get_nq());
   Eigen::VectorXd x0(state->get_nx());
@@ -356,7 +356,7 @@ int main(int argc, char* argv[]) {
     actuation->calc(actuation_data, x1s[_smooth], us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
-  std::cout << "ActuationModelFull" << std::endl;
+  std::cout << "ActuationModelMultibody" << std::endl;
   printStatistics("calc", duration);
 
   duration.setZero();

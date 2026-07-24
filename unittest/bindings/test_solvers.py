@@ -143,7 +143,7 @@ class UnicycleSingleShootFDDPTest(SolverAbstractTestCase):
 class TalosArmFeasDriveFDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -179,7 +179,7 @@ class TalosArmFeasDriveFDDPTest(SolverAbstractTestCase):
 class TalosArmMultiShootFDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -215,7 +215,7 @@ class TalosArmMultiShootFDDPTest(SolverAbstractTestCase):
 class TalosArmHybridShootFDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",
@@ -251,7 +251,7 @@ class TalosArmHybridShootFDDPTest(SolverAbstractTestCase):
 class TalosArmSingleShootFDDPTest(SolverAbstractTestCase):
     ROBOT_MODEL = example_robot_data.load("talos_arm").model
     STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
+    ACTUATION = crocoddyl.ActuationModelMultibody(STATE)
     COST_SUM = crocoddyl.CostModelSum(STATE)
     COST_SUM.addCost(
         "gripperPose",

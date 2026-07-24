@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2026, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,7 +18,7 @@
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -35,7 +35,8 @@ void build_arm_action_models(
       DifferentialActionModelFreeFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar>
       IntegratedActionModelEuler;
-  typedef typename crocoddyl::ActuationModelFullTpl<Scalar> ActuationModelFull;
+  typedef typename crocoddyl::ActuationModelMultibodyTpl<Scalar>
+      ActuationModelMultibody;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
   typedef typename crocoddyl::CostModelAbstractTpl<Scalar> CostModelAbstract;
   typedef typename crocoddyl::CostModelResidualTpl<Scalar> CostModelResidual;
@@ -89,8 +90,8 @@ void build_arm_action_models(
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1e3));
 
   // We define an actuation model
-  std::shared_ptr<ActuationModelFull> actuation =
-      std::make_shared<ActuationModelFull>(state);
+  std::shared_ptr<ActuationModelMultibody> actuation =
+      std::make_shared<ActuationModelMultibody>(state);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented

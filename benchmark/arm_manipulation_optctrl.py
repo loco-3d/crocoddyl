@@ -1,3 +1,11 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
 import sys
 import time
 
@@ -50,7 +58,7 @@ def createProblem(model):
     # Next, we need to create an action model for running and terminal knots. The
     # forward dynamics (computed using ABA) are implemented
     # inside DifferentialActionModelFullyActuated.
-    actuation = crocoddyl.ActuationModelFull(state)
+    actuation = crocoddyl.ActuationModelMultibody(state)
     runningModel = crocoddyl.IntegratedActionModelEuler(
         model(state, actuation, runningCostModel), 1e-2
     )

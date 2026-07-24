@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 #include "crocoddyl/core/actuation/squashing/smooth-sat.hpp"
 #include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -23,8 +23,8 @@ const std::vector<ActuationModelTypes::Type> ActuationModelTypes::all(
 
 std::ostream& operator<<(std::ostream& os, ActuationModelTypes::Type type) {
   switch (type) {
-    case ActuationModelTypes::ActuationModelFull:
-      os << "ActuationModelFull";
+    case ActuationModelTypes::ActuationModelMultibody:
+      os << "ActuationModelMultibody";
       break;
     case ActuationModelTypes::ActuationModelFloatingBase:
       os << "ActuationModelFloatingBase";
@@ -73,12 +73,38 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
   Eigen::VectorXd lb;
   Eigen::VectorXd ub;
   switch (actuation_type) {
-    case ActuationModelTypes::ActuationModelFull:
+    case ActuationModelTypes::ActuationModelMultibody:
+    case ActuationModelTypes::ActuationModelSquashingFull: {
       state_multibody =
           std::static_pointer_cast<crocoddyl::StateMultibody>(state);
-      actuation =
-          std::make_shared<crocoddyl::ActuationModelFull>(state_multibody);
+      std::vector<std::shared_ptr<crocoddyl::JointDynamicsModelAbstract> >
+          joints;
+      for (pinocchio::JointIndex id = 1;
+           id < state_multibody->get_pinocchio()->joints.size(); ++id) {
+        const pinocchio::JointModel& joint =
+            state_multibody->get_pinocchio()->joints[id];
+        if (joint.nv() != 0) {
+          joints.push_back(
+              std::make_shared<crocoddyl::JointDynamicsModelIdentity>(
+                  id, static_cast<std::size_t>(joint.nq()),
+                  static_cast<std::size_t>(joint.nv())));
+        }
+      }
+      act = std::make_shared<crocoddyl::ActuationModelMultibody>(
+          state_multibody, joints);
+      if (actuation_type == ActuationModelTypes::ActuationModelMultibody) {
+        actuation = act;
+        break;
+      }
+
+      lb = Eigen::VectorXd::Constant(act->get_nu(), -100.0);
+      ub = Eigen::VectorXd::Constant(act->get_nu(), 100.0);
+      squash = std::make_shared<crocoddyl::SquashingModelSmoothSat>(
+          lb, ub, act->get_nu());
+      actuation = std::make_shared<crocoddyl::ActuationSquashingModel>(
+          act, squash, act->get_nu());
       break;
+    }
     case ActuationModelTypes::ActuationModelFloatingBase:
       state_multibody =
           std::static_pointer_cast<crocoddyl::StateMultibody>(state);
@@ -91,22 +117,6 @@ ActuationModelFactory::create(ActuationModelTypes::Type actuation_type,
       actuation =
           std::make_shared<crocoddyl::ActuationModelFloatingBaseThrusters>(
               state_multibody, ps);
-      break;
-    case ActuationModelTypes::ActuationModelSquashingFull:
-      state_multibody =
-          std::static_pointer_cast<crocoddyl::StateMultibody>(state);
-
-      act = std::make_shared<crocoddyl::ActuationModelFull>(state_multibody);
-
-      lb = Eigen::VectorXd::Zero(state->get_nv());
-      ub = Eigen::VectorXd::Zero(state->get_nv());
-      lb.fill(-100.0);
-      ub.fill(100.0);
-      squash = std::make_shared<crocoddyl::SquashingModelSmoothSat>(
-          lb, ub, state->get_nv());
-
-      actuation = std::make_shared<crocoddyl::ActuationSquashingModel>(
-          act, squash, state->get_nv());
       break;
     default:
       throw_pretty(__FILE__ ":\n Construct wrong ActuationModelTypes::Type");

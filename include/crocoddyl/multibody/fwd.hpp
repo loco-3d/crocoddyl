@@ -28,6 +28,27 @@ struct ThrusterTpl;
 template <typename Scalar>
 class ActuationModelFloatingBaseThrustersTpl;
 
+template <typename Scalar>
+class JointDynamicsModelAbstractTpl;
+template <typename Scalar>
+struct JointDynamicsDataAbstractTpl;
+template <typename Scalar>
+class JointDynamicsModelIdentityTpl;
+template <typename Scalar>
+struct JointDynamicsDataFrictionTpl;
+template <typename Scalar>
+class JointDynamicsModelFrictionTpl;
+template <typename Scalar>
+class JointDynamicsModelThrusterTpl;
+template <typename Scalar>
+class ActuationModelMultibodyTpl;
+template <typename Scalar>
+struct ActuationDataMultibodyTpl;
+template <typename Scalar>
+class ActuationMultibodyParamsTpl;
+template <typename Scalar>
+struct ActuationMultibodyParamsDataTpl;
+
 // force
 template <typename Scala>
 struct ForceDataAbstractTpl;
@@ -354,6 +375,16 @@ typedef ActuationModelFullTpl<double> ActuationModelFull;
 typedef ThrusterTpl<double> Thruster;
 typedef ActuationModelFloatingBaseThrustersTpl<double>
     ActuationModelFloatingBaseThrusters;
+typedef JointDynamicsModelAbstractTpl<double> JointDynamicsModelAbstract;
+typedef JointDynamicsDataAbstractTpl<double> JointDynamicsDataAbstract;
+typedef JointDynamicsModelIdentityTpl<double> JointDynamicsModelIdentity;
+typedef JointDynamicsDataFrictionTpl<double> JointDynamicsDataFriction;
+typedef JointDynamicsModelFrictionTpl<double> JointDynamicsModelFriction;
+typedef JointDynamicsModelThrusterTpl<double> JointDynamicsModelThruster;
+typedef ActuationModelMultibodyTpl<double> ActuationModelMultibody;
+typedef ActuationDataMultibodyTpl<double> ActuationDataMultibody;
+typedef ActuationMultibodyParamsTpl<double> ActuationMultibodyParams;
+typedef ActuationMultibodyParamsDataTpl<double> ActuationMultibodyParamsData;
 
 typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 
