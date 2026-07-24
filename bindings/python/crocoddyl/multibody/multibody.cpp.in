@@ -70,6 +70,13 @@ void exposeMultibody() {
   exposeTaskFramePlacement();
   exposeTaskCoMPosition();
   exposeTaskJointPosition();
+  exposeResidualActuationParameters();
+  exposeResidualInertialParameters();
+  exposeResidualSymmetryParameters();
+  exposeResidualTotalMass();
+  exposeResidualPotentialEnergy();
+  exposeResidualKineticEnergy();
+  exposeResidualPower();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION

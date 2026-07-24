@@ -50,6 +50,7 @@ void exposeCore() {
   exposeResidualJointAcceleration();
   exposeResidualTaskFirstOrder();
   exposeResidualTaskSecondOrder();
+  exposeResidualParameters();
   exposeCostSum();
   exposeCostResidual();
   exposeConstraintAbstract();

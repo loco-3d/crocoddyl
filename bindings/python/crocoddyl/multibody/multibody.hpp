@@ -79,6 +79,13 @@ void exposeTaskFrameTranslation();
 void exposeTaskFramePlacement();
 void exposeTaskCoMPosition();
 void exposeTaskJointPosition();
+void exposeResidualActuationParameters();
+void exposeResidualInertialParameters();
+void exposeResidualSymmetryParameters();
+void exposeResidualTotalMass();
+void exposeResidualPotentialEnergy();
+void exposeResidualKineticEnergy();
+void exposeResidualPower();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION

@@ -203,6 +203,35 @@ class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
 
+template <typename Scalar>
+class ResidualModelActuationParametersTpl;
+template <typename Scalar>
+struct ResidualDataActuationParametersTpl;
+template <typename Scalar>
+class ResidualModelInertialParametersTpl;
+template <typename Scalar>
+struct ResidualDataInertialParametersTpl;
+template <typename Scalar>
+class ResidualModelSymmetryParametersTpl;
+template <typename Scalar>
+struct ResidualDataSymmetryParametersTpl;
+template <typename Scalar>
+class ResidualModelTotalMassTpl;
+template <typename Scalar>
+struct ResidualDataTotalMassTpl;
+template <typename Scalar>
+class ResidualModelPotentialEnergyTpl;
+template <typename Scalar>
+struct ResidualDataPotentialEnergyTpl;
+template <typename Scalar>
+class ResidualModelKineticEnergyTpl;
+template <typename Scalar>
+struct ResidualDataKineticEnergyTpl;
+template <typename Scalar>
+class ResidualModelPowerTpl;
+template <typename Scalar>
+struct ResidualDataPowerTpl;
+
 #ifdef PINOCCHIO_WITH_HPP_FCL
 template <typename Scalar>
 class ResidualModelPairCollisionTpl;
@@ -515,6 +544,26 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
+typedef ResidualModelActuationParametersTpl<double>
+    ResidualModelActuationParameters;
+typedef ResidualDataActuationParametersTpl<double>
+    ResidualDataActuationParameters;
+typedef ResidualModelInertialParametersTpl<double>
+    ResidualModelInertialParameters;
+typedef ResidualDataInertialParametersTpl<double>
+    ResidualDataInertialParameters;
+typedef ResidualModelSymmetryParametersTpl<double>
+    ResidualModelSymmetryParameters;
+typedef ResidualDataSymmetryParametersTpl<double>
+    ResidualDataSymmetryParameters;
+typedef ResidualModelTotalMassTpl<double> ResidualModelTotalMass;
+typedef ResidualDataTotalMassTpl<double> ResidualDataTotalMass;
+typedef ResidualModelPotentialEnergyTpl<double> ResidualModelPotentialEnergy;
+typedef ResidualDataPotentialEnergyTpl<double> ResidualDataPotentialEnergy;
+typedef ResidualModelKineticEnergyTpl<double> ResidualModelKineticEnergy;
+typedef ResidualDataKineticEnergyTpl<double> ResidualDataKineticEnergy;
+typedef ResidualModelPowerTpl<double> ResidualModelPower;
+typedef ResidualDataPowerTpl<double> ResidualDataPower;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 typedef ResidualModelPairCollisionTpl<double> ResidualModelPairCollision;
