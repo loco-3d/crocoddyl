@@ -1,0 +1,133 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/optctrl/observation.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(Scalar)                 \
+  typedef ObservationProblemTpl<Scalar> Problem;                              \
+  typedef ObserverModelAbstractTpl<Scalar> ObserverModel;                     \
+  typedef ParameterManagerTpl<Scalar> ParameterManager;                       \
+  typedef typename Problem::ConstraintModelManager ConstraintManager;         \
+  typedef typename Problem::VectorXs VectorXs;                                \
+  typedef std::shared_ptr<ObserverModel> ObserverModelPtr;                    \
+  typedef std::shared_ptr<ParameterManager> ParameterManagerPtr;              \
+  StdVectorPythonVisitor<std::vector<std::vector<ObserverModelPtr> >,         \
+                         true>::expose("StdVec_StdVec_ObserverModel");        \
+  bp::register_ptr_to_python<std::shared_ptr<Problem> >();                    \
+  bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
+      "ObservationProblem",                                                  \
+      "Multi-phase optimal-estimation problem with measured torques, "       \
+      "process noise and shared parameters.",                                \
+      bp::init<VectorXs, std::vector<VectorXs>,                              \
+               std::vector<ObserverModelPtr>, ObserverModelPtr,              \
+               ParameterManagerPtr>(                                         \
+          bp::args("self", "x0", "tau_meas", "runningModels",               \
+                   "terminalModel", "params"),                               \
+          "Initialize a single-phase observation problem."))                 \
+      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
+                    std::vector<ObserverModelPtr>, ObserverModelPtr,          \
+                    ParameterManagerPtr,                                     \
+                    std::shared_ptr<ConstraintManager> >(                    \
+          bp::args("self", "x0", "tau_meas", "runningModels",               \
+                   "terminalModel", "params", "parameter_constraints"),     \
+          "Initialize a constrained single-phase observation problem."))     \
+      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
+                    std::vector<std::vector<ObserverModelPtr> >,              \
+                    ObserverModelPtr, std::vector<ParameterManagerPtr> >(     \
+          bp::args("self", "x0", "tau_meas", "modelPhases",                \
+                   "terminalModel", "params"),                               \
+          "Initialize a multi-phase observation problem."))                  \
+      .def(bp::init<                                                         \
+           VectorXs, std::vector<VectorXs>,                                  \
+           std::vector<std::vector<ObserverModelPtr> >, ObserverModelPtr,     \
+           std::vector<ParameterManagerPtr>,                                 \
+           std::vector<std::shared_ptr<ConstraintManager> > >(               \
+          bp::args("self", "x0", "tau_meas", "modelPhases",                \
+                   "terminalModel", "params", "parameter_constraints"),     \
+          "Initialize a constrained multi-phase observation problem."))      \
+      .def("calc", &Problem::calc, bp::args("self", "xs", "us"),            \
+           "Compute the total observation cost along a trajectory.")         \
+      .def("calcDiff", &Problem::calcDiff, bp::args("self", "xs", "us"),    \
+           "Compute observation derivatives along a trajectory.")            \
+      .def("rollout", &Problem::rollout_us, bp::args("self", "us"),          \
+           "Roll out the observer models from the initial state.")            \
+      .def("update_p", &Problem::update_p,                                   \
+           (bp::arg("self"), bp::arg("p"), bp::arg("phase_idx") = 0),        \
+           "Update one phase parameter vector.")                             \
+      .def("update_tau", &Problem::update_tau,                               \
+           bp::args("self", "t", "tau_meas"),                               \
+           "Update measured torque at one running node.")                    \
+      .def("update_us", &Problem::update_us,                                 \
+           bp::args("self", "tau_meas"),                                     \
+           "Update measured torques at all running nodes.")                  \
+      .def("get_running_phase_models", &Problem::get_running_phase_models,   \
+           bp::args("self", "phase_idx"),                                    \
+           "Return the running observer models in a phase.")                 \
+      .def("get_running_phase_datas", &Problem::get_running_phase_datas,     \
+           bp::args("self", "phase_idx"),                                    \
+           "Return the running observer data in a phase.")                   \
+      .add_property("n_phases", bp::make_function(&Problem::get_n_phases),   \
+                    "number of phases")                                      \
+      .add_property(                                                          \
+          "params",                                                           \
+          bp::make_function(&Problem::get_params,                             \
+                            bp::return_value_policy<bp::return_by_value>()),  \
+          "parameter managers, one per phase")                               \
+      .add_property(                                                          \
+          "params_data",                                                      \
+          bp::make_function(&Problem::get_params_data,                        \
+                            bp::return_value_policy<bp::return_by_value>()),  \
+          "parameter data, one per phase")                                   \
+      .add_property(                                                          \
+          "parameter_constraints",                                            \
+          bp::make_function(                                                  \
+              &Problem::get_parameter_constraints_models,                     \
+              bp::return_value_policy<bp::return_by_value>()),                \
+          "parameter constraints, one per phase")                            \
+      .add_property(                                                          \
+          "parameter_constraints_data",                                       \
+          bp::make_function(                                                  \
+              &Problem::get_parameter_constraints_datas,                      \
+              bp::return_value_policy<bp::return_by_value>()),                \
+          "parameter constraint data, one per phase")                        \
+      .add_property("has_parameter_constraints",                              \
+                    bp::make_function(&Problem::has_parameter_constraints),   \
+                    "whether any parameter constraint is active")            \
+      .add_property(                                                          \
+          "phase_idxs",                                                       \
+          bp::make_function(                                                  \
+              &Problem::get_phase_idxs,                                       \
+              bp::return_value_policy<bp::copy_const_reference>()),           \
+          "inclusive phase start indices")                                   \
+      .add_property(                                                          \
+          "phase_edxs",                                                       \
+          bp::make_function(                                                  \
+              &Problem::get_phase_edxs,                                       \
+              bp::return_value_policy<bp::copy_const_reference>()),           \
+          "exclusive phase end indices")                                     \
+      .def(CopyableVisitor<Problem>());
+
+void exposeObservationProblem() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

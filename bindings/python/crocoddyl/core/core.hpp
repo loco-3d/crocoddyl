@@ -72,6 +72,8 @@ void exposeActivationNumDiff();
 void exposeStateNumDiff();
 void exposeProblemAbstract();
 void exposeShootingProblem();
+void exposeParametrizedShootingProblem();
+void exposeObservationProblem();
 void exposeSolverAbstract();
 void exposeStateEuclidean();
 void exposeControlParametrizationPolyZero();

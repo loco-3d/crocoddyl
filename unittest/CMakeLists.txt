@@ -64,6 +64,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_diff_actions
       test_problem
       test_problem_abstract
+      test_parameterized_problems
       test_cop_support
       test_friction_cone
       test_wrench_cone
@@ -195,6 +196,11 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_problem_abstract)
     target_compile_definitions(test_problem_abstract
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_parameterized_problems)
+    target_compile_definitions(test_parameterized_problems
                                PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
