@@ -25,6 +25,10 @@ class SimpleQuadrupedalGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
+        termConstraint=False,
+        timeopt=False,
+        n_phases=1,
+        time_reg_weight=3e-1,
     ):
         """Construct quadrupedal-gait problem.
 
@@ -39,6 +43,12 @@ class SimpleQuadrupedalGaitProblem:
             ``"rk4"``); see Crocoddyl control parametrizations for details.
         :param fwddyn: True for forward-dynamics, False for inverse-dynamics
             formulations.
+        :param termConstraint: if True, soften running tracking costs and move
+            foot tracking to terminal equality constraints where supported.
+        :param timeopt: if True, build a ``ParametrizedShootingProblem`` with
+            one log-time parameter per phase.
+        :param n_phases: number of shared time-optimization phases.
+        :param time_reg_weight: running weight for the log-time regularization.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
@@ -56,6 +66,10 @@ class SimpleQuadrupedalGaitProblem:
         self._integrator = integrator
         self._control = control
         self._fwddyn = fwddyn
+        self._termConstraint = termConstraint
+        self._timeopt = timeopt
+        self._nphases = n_phases
+        self._time_reg_weight = time_reg_weight
 
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["standing"]
@@ -64,6 +78,67 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the friction coefficient and normal
         self.mu = 0.7
         self.Rsurf = np.eye(3)
+
+    def _createProblem(self, x0, models, phase_idx=None, phase_times=None):
+        if not self._timeopt:
+            return crocoddyl.ShootingProblem(x0, models[:-1], models[-1])
+
+        if phase_idx is None:
+            phase_idx = [(i * self._nphases) // len(models) for i in range(len(models))]
+        phases = [[] for _ in range(self._nphases)]
+        for i, model in enumerate(models[:-1]):
+            phases[phase_idx[i]].append(model)
+        if phase_times is None:
+            phase_times = []
+            for i, phase in enumerate(phases):
+                if not phase:
+                    raise ValueError(f"time-opt phase {i} has no running models")
+                if any(model is not phase[0] for model in phase):
+                    raise ValueError(
+                        "phase_times is required when a time-opt phase "
+                        "contains multiple model instances"
+                    )
+                phase_times.append(phase[0].integrator_time)
+        if len(phase_times) != self._nphases:
+            raise ValueError("phase_times should contain one IntegratorTime per phase")
+        params = []
+        for i, phase in enumerate(phases):
+            if not phase:
+                raise ValueError(f"time-opt phase {i} has no running models")
+            params_i = crocoddyl.ParameterManager(self.state)
+            params_i.addParam(
+                "timeopt",
+                crocoddyl.IntegratorTimeoptParams(self.state, phase_times[i]),
+            )
+            params.append(params_i)
+        return crocoddyl.ParametrizedShootingProblem(x0, phases, models[-1], params)
+
+    def _createTerminalFootConstraints(self, models):
+        terminal_model = models[-1]
+        terminalConstraints = crocoddyl.ConstraintModelManager(
+            self.state, terminal_model.nu
+        )
+        foot_residuals = {}
+        for model in models:
+            if hasattr(model, "dynamics"):
+                for name, item in model.costs.costs.todict().items():
+                    if "_footTrack" in name:
+                        foot_residuals[name] = item.cost.residual
+        for name, residual in foot_residuals.items():
+            frameTranslationResidual = crocoddyl.ResidualModelFrameTranslation(
+                self.state, residual.id, residual.reference, terminal_model.nu
+            )
+            terminalConstraints.addConstraint(
+                name,
+                crocoddyl.ConstraintModelResidual(self.state, frameTranslationResidual),
+            )
+        return crocoddyl.IntegratedActionModelEuler(
+            terminal_model.dynamics,
+            terminal_model.costs,
+            terminalConstraints,
+            None,
+            terminal_model.integrator_time,
+        )
 
     def createCoMProblem(self, x0, comGoTo, timeStep, numKnots, constraint=False):
         """Create a shooting problem for a CoM forward/backward task.
@@ -188,14 +263,36 @@ class SimpleQuadrupedalGaitProblem:
         comRef = (rfFootPos0 + rhFootPos0 + lfFootPos0 + lhFootPos0) / 4
         comRef[2] = pinocchio.centerOfMass(self.rmodel, self.rdata, q0)[2].item()
         # Defining the action models along the time instances
+        stepKnots_ = stepKnots + 1
+        total_knots = (2 * supportKnots) + (4 * stepKnots_) + 1
+        phase_idx = [(i * self._nphases) // total_knots for i in range(total_knots)]
+        phase_times = (
+            [crocoddyl.IntegratorTime(timeStep, True) for _ in range(self._nphases)]
+            if self._timeopt
+            else None
+        )
+
+        def phase_time(knot):
+            return phase_times[phase_idx[knot]] if phase_times is not None else None
+
         loco3dModel = []
-        doubleSupport = [
+        doubleSupportA = [
             self.createModel(
                 timeStep=timeStep,
                 footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
                 constraint=constraint,
+                integratorTime=phase_time(k),
             )
-            for _ in range(supportKnots)
+            for k in range(supportKnots)
+        ]
+        doubleSupportB = [
+            self.createModel(
+                timeStep=timeStep,
+                footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
+                constraint=constraint,
+                integratorTime=phase_time(supportKnots + 2 * stepKnots_ + k),
+            )
+            for k in range(supportKnots)
         ]
         if self.firstStep is True:
             rhStep = self.createFootstepModels(
@@ -208,6 +305,12 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFoot, self.rfFoot, self.lhFoot],
                 [self.rhFoot],
                 constraint=constraint,
+                integratorTimes=[
+                    phase_times[p]
+                    for p in phase_idx[supportKnots : supportKnots + stepKnots_]
+                ]
+                if phase_times is not None
+                else None,
             )
             rfStep = self.createFootstepModels(
                 comRef,
@@ -219,6 +322,14 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFoot, self.lhFoot, self.rhFoot],
                 [self.rfFoot],
                 constraint=constraint,
+                integratorTimes=[
+                    phase_times[p]
+                    for p in phase_idx[
+                        supportKnots + stepKnots_ : supportKnots + 2 * stepKnots_
+                    ]
+                ]
+                if phase_times is not None
+                else None,
             )
             self.firstStep = False
         else:
@@ -232,6 +343,12 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFoot, self.rfFoot, self.lhFoot],
                 [self.rhFoot],
                 constraint=constraint,
+                integratorTimes=[
+                    phase_times[p]
+                    for p in phase_idx[supportKnots : supportKnots + stepKnots_]
+                ]
+                if phase_times is not None
+                else None,
             )
             rfStep = self.createFootstepModels(
                 comRef,
@@ -243,6 +360,14 @@ class SimpleQuadrupedalGaitProblem:
                 [self.lfFoot, self.lhFoot, self.rhFoot],
                 [self.rfFoot],
                 constraint=constraint,
+                integratorTimes=[
+                    phase_times[p]
+                    for p in phase_idx[
+                        supportKnots + stepKnots_ : supportKnots + 2 * stepKnots_
+                    ]
+                ]
+                if phase_times is not None
+                else None,
             )
         lhStep = self.createFootstepModels(
             comRef,
@@ -254,6 +379,15 @@ class SimpleQuadrupedalGaitProblem:
             [self.lfFoot, self.rfFoot, self.rhFoot],
             [self.lhFoot],
             constraint=constraint,
+            integratorTimes=[
+                phase_times[p]
+                for p in phase_idx[
+                    2 * supportKnots + 2 * stepKnots_ : 2 * supportKnots
+                    + 3 * stepKnots_
+                ]
+            ]
+            if phase_times is not None
+            else None,
         )
         lfStep = self.createFootstepModels(
             comRef,
@@ -265,10 +399,27 @@ class SimpleQuadrupedalGaitProblem:
             [self.rfFoot, self.lhFoot, self.rhFoot],
             [self.lfFoot],
             constraint=constraint,
+            integratorTimes=[
+                phase_times[p]
+                for p in phase_idx[
+                    2 * supportKnots + 3 * stepKnots_ : 2 * supportKnots
+                    + 4 * stepKnots_
+                ]
+            ]
+            if phase_times is not None
+            else None,
         )
-        loco3dModel += doubleSupport + rhStep + rfStep
-        loco3dModel += doubleSupport + lhStep + lfStep + [doubleSupport[0]]
-        return crocoddyl.ShootingProblem(x0, loco3dModel[:-1], loco3dModel[-1])
+        finalDoubleSupport = self.createModel(
+            timeStep=timeStep,
+            footContacts=[self.lfFoot, self.rfFoot, self.lhFoot, self.rhFoot],
+            constraint=constraint,
+            integratorTime=phase_time(total_knots - 1),
+        )
+        loco3dModel += doubleSupportA + rhStep + rfStep
+        loco3dModel += doubleSupportB + lhStep + lfStep + [finalDoubleSupport]
+        if self._termConstraint:
+            loco3dModel[-1] = self._createTerminalFootConstraints(loco3dModel)
+        return self._createProblem(x0, loco3dModel, phase_idx, phase_times)
 
     def createTrottingProblem(
         self,
@@ -620,6 +771,7 @@ class SimpleQuadrupedalGaitProblem:
         footContacts,
         swingFootNames,
         constraint=False,
+        integratorTimes=None,
     ):
         """Action models for a footstep phase.
 
@@ -633,8 +785,12 @@ class SimpleQuadrupedalGaitProblem:
         :param swingFootNames: names of the swinging feet.
         :param constraint: if True, enforce friction cones and swing tracks as
             constraints.
+        :param integratorTimes: optional list of shared integrator times, one
+            per swing knot plus one for the switch.
         :return: list of action models for the swing phase and the switch.
         """
+        if integratorTimes is not None and len(integratorTimes) != numKnots + 1:
+            raise ValueError("integratorTimes should contain numKnots + 1 entries")
         numLegs = len(footContacts) + len(swingFootNames)
         comPercentage = float(len(swingFootNames)) / numLegs
         # Action models for the foot swing
@@ -672,11 +828,18 @@ class SimpleQuadrupedalGaitProblem:
                     comTask=comTask,
                     swingFootTask=swingFootTask,
                     constraint=constraint,
+                    integratorTime=integratorTimes[k]
+                    if integratorTimes is not None
+                    else None,
                 )
             ]
         # Action model for the foot switch
         footSwitchModel = self.createSwitch(
-            swingFootNames, swingFootTask, constraint=constraint
+            swingFootNames,
+            swingFootTask,
+            constraint=constraint,
+            timeStep=timeStep,
+            integratorTime=integratorTimes[-1] if integratorTimes is not None else None,
         )
         # Updating the current foot position for next step
         comPos0 += [stepLength * comPercentage, 0.0, 0.0]
@@ -691,6 +854,7 @@ class SimpleQuadrupedalGaitProblem:
         comTask=None,
         swingFootTask=None,
         constraint=False,
+        integratorTime=None,
     ):
         """Action model for a swing foot phase.
 
@@ -701,8 +865,11 @@ class SimpleQuadrupedalGaitProblem:
             each swing foot.
         :param constraint: if True, treat friction cones and swing tasks as
             constraints instead of costs.
+        :param integratorTime: optional shared integrator time description.
         :return: integrated action model for the swing phase.
         """
+        if integratorTime is None:
+            integratorTime = crocoddyl.IntegratorTime(timeStep, self._timeopt)
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
         if self._fwddyn:
@@ -723,12 +890,15 @@ class SimpleQuadrupedalGaitProblem:
             )
             contactConstraints.addConstraint(name + "_contact", supportContactModel)
         # Creating the cost model for a contact phase
-        costModel = crocoddyl.CostModelSum(self.state, nu)
+        np_total = 1 if self._timeopt else 0
+        costModel = crocoddyl.CostModelSum(self.state, nu, np_total)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
         if isinstance(comTask, np.ndarray):
             comResidual = crocoddyl.ResidualModelCoMPosition(self.state, comTask, nu)
             comTrack = crocoddyl.CostModelResidual(self.state, comResidual)
-            costModel.addCost("comTrack", comTrack, 1e6)
+            costModel.addCost(
+                "comTrack", comTrack, 1e-2 if self._termConstraint else 1e6
+            )
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
             cone = crocoddyl.FrictionCone(self.Rsurf, self.mu, 4, False)
@@ -742,7 +912,11 @@ class SimpleQuadrupedalGaitProblem:
                 frictionCone = crocoddyl.CostModelResidual(
                     self.state, coneActivation, coneResidual
                 )
-                costModel.addCost(name + "_frictionCone", frictionCone, 1e1)
+                costModel.addCost(
+                    name + "_frictionCone",
+                    frictionCone,
+                    1e-2 if self._termConstraint else 1e1,
+                )
             else:
                 frictionCone = crocoddyl.ConstraintModelResidual(
                     self.state, coneResidual, cone.lb, cone.ub
@@ -759,7 +933,11 @@ class SimpleQuadrupedalGaitProblem:
                     footTrack = crocoddyl.CostModelResidual(
                         self.state, frameTranslationResidual
                     )
-                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e6)
+                    costModel.addCost(
+                        frame_name + "_footTrack",
+                        footTrack,
+                        1e-1 if self._termConstraint else 1e6,
+                    )
                 else:
                     footTrack = crocoddyl.ConstraintModelResidual(
                         self.state, frameTranslationResidual
@@ -787,8 +965,14 @@ class SimpleQuadrupedalGaitProblem:
                 self.state, self.actuation, nu
             )
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
-        costModel.addCost("stateReg", stateReg, 1e1)
-        costModel.addCost("ctrlReg", ctrlReg, 1e-1)
+        if self._timeopt:
+            pResidual = crocoddyl.ResidualModelParameters(
+                self.state, np.array([np.log(integratorTime.timeStep)]), nu
+            )
+            pRegCost = crocoddyl.CostModelResidual(self.state, pResidual)
+            costModel.addCost("pReg", pRegCost, self._time_reg_weight)
+        costModel.addCost("stateReg", stateReg, 1e-4 if self._termConstraint else 1e1)
+        costModel.addCost("ctrlReg", ctrlReg, 1e-4 if self._termConstraint else 1e-1)
         lb = np.concatenate(
             [self.state.lb[1 : self.state.nv + 1], self.state.lb[-self.state.nv :]]
         )
@@ -803,16 +987,18 @@ class SimpleQuadrupedalGaitProblem:
             stateBounds = crocoddyl.CostModelResidual(
                 self.state, stateBoundsActivation, stateBoundsResidual
             )
-            costModel.addCost("stateBounds", stateBounds, 1e3)
+            costModel.addCost(
+                "stateBounds", stateBounds, 1e-3 if self._termConstraint else 1e3
+            )
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
             dynamics = crocoddyl.DynamicsModelConstrainedForward(
-                self.state, self.actuation, contactConstraints
+                self.state, self.actuation, contactConstraints, np_total
             )
         else:
             dynamics = crocoddyl.DynamicsModelConstrainedInverse(
-                self.state, self.actuation, contactConstraints
+                self.state, self.actuation, contactConstraints, np_total
             )
         if self._control == "one":
             control = crocoddyl.ControlParametrizationModelPolyOne(nu)
@@ -832,7 +1018,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 control,
-                crocoddyl.IntegratorTime(timeStep, False),
+                integratorTime,
             )
         elif self._integrator == "rk4":
             model = crocoddyl.IntegratedActionModelRK(
@@ -840,7 +1026,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 control,
-                crocoddyl.IntegratorTime(timeStep, False),
+                integratorTime,
                 crocoddyl.RKType.four,
             )
         elif self._integrator == "rk3":
@@ -849,7 +1035,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 control,
-                crocoddyl.IntegratorTime(timeStep, False),
+                integratorTime,
                 crocoddyl.RKType.three,
             )
         elif self._integrator == "rk2":
@@ -858,7 +1044,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 control,
-                crocoddyl.IntegratorTime(timeStep, False),
+                integratorTime,
                 crocoddyl.RKType.two,
             )
         else:
@@ -867,7 +1053,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 control,
-                crocoddyl.IntegratorTime(timeStep, False),
+                integratorTime,
             )
         if self._fwddyn:
             u_lb = np.empty(model.nu)
@@ -878,7 +1064,13 @@ class SimpleQuadrupedalGaitProblem:
         return model
 
     def createSwitch(
-        self, footContacts, swingFootTask, pseudoImpulse=False, constraint=False
+        self,
+        footContacts,
+        swingFootTask,
+        pseudoImpulse=False,
+        constraint=False,
+        timeStep=0.0,
+        integratorTime=None,
     ):
         """Action model for a foot switch phase.
 
@@ -888,16 +1080,29 @@ class SimpleQuadrupedalGaitProblem:
             False to use impulse dynamics.
         :param constraint: if True, treat swing tasks/friction cones as
             constraints where applicable.
+        :param timeStep: duration of a pseudo-impulse node.
+        :param integratorTime: optional shared integrator time description.
         :return: action model for the foot switch phase.
         """
-        if pseudoImpulse:
+        if pseudoImpulse or self._timeopt:
             return self.createPseudoImpulseModel(
-                footContacts, swingFootTask, constraint
+                footContacts,
+                swingFootTask,
+                constraint,
+                timeStep=timeStep,
+                integratorTime=integratorTime,
             )
         else:
             return self.createImpulseModel(footContacts, swingFootTask, constraint)
 
-    def createPseudoImpulseModel(self, footContacts, swingFootTask, constraint):
+    def createPseudoImpulseModel(
+        self,
+        footContacts,
+        swingFootTask,
+        constraint,
+        timeStep=0.0,
+        integratorTime=None,
+    ):
         """Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact
@@ -906,8 +1111,14 @@ class SimpleQuadrupedalGaitProblem:
         :param swingFootTask: swing foot frame names and landing poses.
         :param constraint: if True, treat swing tasks/friction cones as
             constraints.
+        :param timeStep: duration of the pseudo-impulse node.
+        :param integratorTime: optional shared integrator time description.
         :return: pseudo-impulse differential action model.
         """
+        if integratorTime is None:
+            integratorTime = crocoddyl.IntegratorTime(
+                timeStep if self._timeopt else 0.0, self._timeopt
+            )
         # Creating a 3D multi-contact model, and then including the supporting
         # foot
         if self._fwddyn:
@@ -928,7 +1139,8 @@ class SimpleQuadrupedalGaitProblem:
             )
             contactConstraints.addConstraint(name + "_contact", supportContactModel)
         # Creating the cost model for a contact phase
-        costModel = crocoddyl.CostModelSum(self.state, nu)
+        np_total = 1 if self._timeopt else 0
+        costModel = crocoddyl.CostModelSum(self.state, nu, np_total)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
@@ -943,7 +1155,11 @@ class SimpleQuadrupedalGaitProblem:
                 frictionCone = crocoddyl.CostModelResidual(
                     self.state, coneActivation, coneResidual
                 )
-                costModel.addCost(name + "_frictionCone", frictionCone, 1e1)
+                costModel.addCost(
+                    name + "_frictionCone",
+                    frictionCone,
+                    1e-2 if self._termConstraint else 1e1,
+                )
             else:
                 frictionCone = crocoddyl.ConstraintModelResidual(
                     self.state, coneResidual, cone.lb, cone.ub
@@ -970,9 +1186,15 @@ class SimpleQuadrupedalGaitProblem:
                     impulseFootVelCost = crocoddyl.CostModelResidual(
                         self.state, frameVelocityResidual
                     )
-                    costModel.addCost(frame_name + "_footTrack", footTrack, 1e7)
                     costModel.addCost(
-                        frame_name + "_impulseVel", impulseFootVelCost, 1e6
+                        frame_name + "_footTrack",
+                        footTrack,
+                        1.0 if self._termConstraint else 1e7,
+                    )
+                    costModel.addCost(
+                        frame_name + "_impulseVel",
+                        impulseFootVelCost,
+                        1e-1 if self._termConstraint else 1e6,
                     )
                 else:
                     footTrack = crocoddyl.ConstraintModelResidual(
@@ -1006,17 +1228,23 @@ class SimpleQuadrupedalGaitProblem:
                 self.state, self.actuation, nu
             )
             ctrlReg = crocoddyl.CostModelResidual(self.state, ctrlResidual)
-        costModel.addCost("stateReg", stateReg, 1e1)
-        costModel.addCost("ctrlReg", ctrlReg, 1e-3)
+        if self._timeopt:
+            pResidual = crocoddyl.ResidualModelParameters(
+                self.state, np.array([np.log(integratorTime.timeStep)]), nu
+            )
+            pRegCost = crocoddyl.CostModelResidual(self.state, pResidual)
+            costModel.addCost("pReg", pRegCost, self._time_reg_weight)
+        costModel.addCost("stateReg", stateReg, 1e-4 if self._termConstraint else 1e1)
+        costModel.addCost("ctrlReg", ctrlReg, 1e-4 if self._termConstraint else 1e-3)
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
             dynamics = crocoddyl.DynamicsModelConstrainedForward(
-                self.state, self.actuation, contactConstraints
+                self.state, self.actuation, contactConstraints, np_total
             )
         else:
             dynamics = crocoddyl.DynamicsModelConstrainedInverse(
-                self.state, self.actuation, contactConstraints
+                self.state, self.actuation, contactConstraints, np_total
             )
         if self._integrator == "euler":
             model = crocoddyl.IntegratedActionModelEuler(
@@ -1024,7 +1252,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 None,
-                crocoddyl.IntegratorTime(0.0, False),
+                integratorTime,
             )
         elif self._integrator == "rk4":
             model = crocoddyl.IntegratedActionModelRK(
@@ -1032,7 +1260,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 None,
-                crocoddyl.IntegratorTime(0.0, False),
+                integratorTime,
                 crocoddyl.RKType.four,
             )
         elif self._integrator == "rk3":
@@ -1041,7 +1269,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 None,
-                crocoddyl.IntegratorTime(0.0, False),
+                integratorTime,
                 crocoddyl.RKType.three,
             )
         elif self._integrator == "rk2":
@@ -1050,7 +1278,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 None,
-                crocoddyl.IntegratorTime(0.0, False),
+                integratorTime,
                 crocoddyl.RKType.two,
             )
         else:
@@ -1059,7 +1287,7 @@ class SimpleQuadrupedalGaitProblem:
                 costModel,
                 constraintModel,
                 None,
-                crocoddyl.IntegratorTime(0.0, False),
+                integratorTime,
             )
         if self._fwddyn:
             model.u_lb = self.actuation.u_lb
@@ -1146,7 +1374,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         xs_lb, xs_ub = [], []
 
     def updateTrajectories(solver):
-        xs.extend(solver.xs[:-1])
+        xs.extend(solver.xs.tolist()[:-1])
         for m, d in zip(solver.problem.runningModels, solver.problem.runningDatas):
             if hasattr(m, "dynamics"):
                 cs.append(d.dynamics.multibody.pinocchio.com[0])
