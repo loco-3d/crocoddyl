@@ -23,6 +23,10 @@ void exposeMultibody() {
   exposeJointDynamicsThruster();
   exposeActuationMultibody();
   exposeActuationMultibodyParams();
+  exposeInertialParametrizationAbstract();
+  exposeLogCholeskyParametrization();
+  exposeExpEigenValueParametrization();
+  exposeMultibodyInertialParams();
   exposeActuationFloatingBase();
   exposeActuationFull();
   exposeForceAbstract();

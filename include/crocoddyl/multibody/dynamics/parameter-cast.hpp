@@ -11,6 +11,7 @@
 
 #include "crocoddyl/core/params/parameter-manager.hpp"
 #include "crocoddyl/multibody/params/actuation.hpp"
+#include "crocoddyl/multibody/params/inertial.hpp"
 
 namespace crocoddyl {
 namespace internal {
@@ -26,6 +27,8 @@ std::shared_ptr<ParameterManagerTpl<NewScalar> > castDynamicsParameters(
   typedef ActuationMultibodyParamsTpl<Scalar> ActuationParams;
   typedef ActuationMultibodyParamsTpl<NewScalar> ActuationParamsNew;
   typedef ActuationModelMultibodyTpl<NewScalar> ActuationModelNew;
+  typedef MultibodyInertialParamsTpl<Scalar> InertialParams;
+  typedef MultibodyInertialParamsTpl<NewScalar> InertialParamsNew;
 
   const std::shared_ptr<ParameterManagerNew> ret =
       std::make_shared<ParameterManagerNew>(state);
@@ -50,6 +53,8 @@ std::shared_ptr<ParameterManagerTpl<NewScalar> > castDynamicsParameters(
     std::shared_ptr<DynamicsParamsNew> casted_param;
     const std::shared_ptr<ActuationParams> actuation_param =
         std::dynamic_pointer_cast<ActuationParams>(it->second->get_param());
+    const std::shared_ptr<InertialParams> inertial_param =
+        std::dynamic_pointer_cast<InertialParams>(it->second->get_param());
     if (actuation_param != nullptr && actuation != nullptr) {
       const std::shared_ptr<ActuationModelNew> multibody_actuation =
           std::dynamic_pointer_cast<ActuationModelNew>(actuation);
@@ -62,6 +67,16 @@ std::shared_ptr<ParameterManagerTpl<NewScalar> > castDynamicsParameters(
           actuation_param->template cast<NewScalar>();
       const std::shared_ptr<ActuationParamsNew> coherent =
           std::make_shared<ActuationParamsNew>(multibody_actuation);
+      coherent->set_lb(standalone.get_lb());
+      coherent->set_ub(standalone.get_ub());
+      casted_param = coherent;
+    } else if (inertial_param != nullptr) {
+      const InertialParamsNew standalone =
+          inertial_param->template cast<NewScalar>();
+      const std::shared_ptr<InertialParamsNew> coherent =
+          std::make_shared<InertialParamsNew>(state,
+                                              standalone.get_parametrization(),
+                                              standalone.get_body_names());
       coherent->set_lb(standalone.get_lb());
       coherent->set_ub(standalone.get_ub());
       casted_param = coherent;

@@ -49,6 +49,25 @@ class ActuationMultibodyParamsTpl;
 template <typename Scalar>
 struct ActuationMultibodyParamsDataTpl;
 
+class InertialParametrizationBase;
+
+template <typename Scalar>
+class InertialParametrizationAbstractTpl;
+template <typename Scalar>
+struct InertialParametrizationDataAbstractTpl;
+template <typename Scalar>
+class LogCholeskyParametrizationTpl;
+template <typename Scalar>
+struct LogCholeskyParametrizationDataTpl;
+template <typename Scalar>
+class ExpEigenValueParametrizationTpl;
+template <typename Scalar>
+struct ExpEigenValueParametrizationDataTpl;
+template <typename Scalar>
+class MultibodyInertialParamsTpl;
+template <typename Scalar>
+struct MultibodyInertialParamsDataTpl;
+
 // force
 template <typename Scala>
 struct ForceDataAbstractTpl;
@@ -401,6 +420,18 @@ typedef ActuationModelMultibodyTpl<double> ActuationModelMultibody;
 typedef ActuationDataMultibodyTpl<double> ActuationDataMultibody;
 typedef ActuationMultibodyParamsTpl<double> ActuationMultibodyParams;
 typedef ActuationMultibodyParamsDataTpl<double> ActuationMultibodyParamsData;
+typedef InertialParametrizationAbstractTpl<double>
+    InertialParametrizationAbstract;
+typedef InertialParametrizationDataAbstractTpl<double>
+    InertialParametrizationDataAbstract;
+typedef LogCholeskyParametrizationTpl<double> LogCholeskyParametrization;
+typedef LogCholeskyParametrizationDataTpl<double>
+    LogCholeskyParametrizationData;
+typedef ExpEigenValueParametrizationTpl<double> ExpEigenValueParametrization;
+typedef ExpEigenValueParametrizationDataTpl<double>
+    ExpEigenValueParametrizationData;
+typedef MultibodyInertialParamsTpl<double> MultibodyInertialParams;
+typedef MultibodyInertialParamsDataTpl<double> MultibodyInertialParamsData;
 
 typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 

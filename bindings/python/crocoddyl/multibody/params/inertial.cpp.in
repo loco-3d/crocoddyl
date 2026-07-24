@@ -1,0 +1,146 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+#include <boost/python/stl_iterator.hpp>
+#include <eigenpy/std-vector.hpp>
+
+#include "crocoddyl/multibody/params/inertial.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+bp::list multibodyInertialParamsBodyNames(const Model& model) {
+  bp::list body_names;
+  const std::vector<std::string> names = model.get_body_names();
+  for (std::vector<std::string>::const_iterator it = names.begin();
+       it != names.end(); ++it) {
+    body_names.append(*it);
+  }
+  return body_names;
+}
+
+inline std::vector<std::string> multibodyInertialParamsBodyNamesFromPython(
+    const bp::object& iterable) {
+  std::vector<std::string> body_names;
+  const boost::python::stl_input_iterator<std::string> begin(iterable), end;
+  for (boost::python::stl_input_iterator<std::string> it = begin; it != end;
+       ++it) {
+    body_names.push_back(*it);
+  }
+  return body_names;
+}
+
+template <typename Model, typename State, typename Parametrization>
+std::shared_ptr<Model> createMultibodyInertialParamsWithBodyNames(
+    const std::shared_ptr<State>& state,
+    const std::shared_ptr<Parametrization>& parametrization,
+    const bp::object& body_names) {
+  return std::make_shared<Model>(
+      state, parametrization,
+      multibodyInertialParamsBodyNamesFromPython(body_names));
+}
+
+template <typename Data, typename Model>
+std::shared_ptr<Data> createMultibodyInertialParamsData(Model* model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: model is null");
+  }
+  return std::dynamic_pointer_cast<Data>(model->createData());
+}
+
+template <typename Model>
+struct MultibodyInertialParamsVisitor
+    : public bp::def_visitor<MultibodyInertialParamsVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "parametrization",
+          bp::make_function(&Model::get_parametrization,
+                            bp::return_value_policy<bp::return_by_value>()),
+          "inertial parametrization")
+        .add_property("body_names", &multibodyInertialParamsBodyNames<Model>,
+                      "identified body names");
+  }
+};
+
+#define CROCODDYL_MULTIBODY_INERTIAL_PARAMS_PYTHON_BINDINGS(Scalar)           \
+  {                                                                           \
+    typedef MultibodyInertialParamsTpl<Scalar> Model;                         \
+    typedef DynamicsParamsAbstractTpl<Scalar> ModelBase;                      \
+    typedef StateMultibodyTpl<Scalar> State;                                  \
+    typedef InertialParametrizationAbstractTpl<Scalar> Parametrization;       \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model, bp::bases<ModelBase> >(                                 \
+        "MultibodyInertialParams",                                            \
+        "Dynamics-parameter model for multibody inertial identification.",    \
+        bp::init<std::shared_ptr<State>, std::shared_ptr<Parametrization> >(  \
+            bp::args("self", "state", "parametrization")))                  \
+        .def("__init__",                                                      \
+             bp::make_constructor(                                            \
+                 &createMultibodyInertialParamsWithBodyNames<                 \
+                     Model, State, Parametrization>,                          \
+                 bp::default_call_policies(),                                 \
+                 bp::args("state", "parametrization", "body_names")))         \
+        .def("createData", &Model::createData, bp::args("self"),              \
+             "Create the inertial-parameter data.\n\n"                        \
+             ":return parameter data")                                        \
+        .def("update", &Model::update, bp::args("self", "data", "p"),          \
+             "Update the selected inertial parameters.")                     \
+        .def("computeJointTorqueRegressor",                                  \
+             &Model::computeJointTorqueRegressor,                            \
+             bp::args("self", "data", "params", "x", "u"),                  \
+             "Compute the inertial joint-torque regressor.")                 \
+        .def("changeBodyStatus", &Model::changeBodyStatus,                   \
+             bp::args("self", "body_name", "active"),                       \
+             "Activate or deactivate a body parameter block. Existing data " \
+             "must be recreated after a real layout change.")               \
+        .def(MultibodyInertialParamsVisitor<Model>())                         \
+        .def(CastVisitor<Model>())                                             \
+        .def(PrintableVisitor<Model>())                                       \
+        .def(CopyableVisitor<Model>());                                       \
+  }
+
+#define CROCODDYL_MULTIBODY_INERTIAL_PARAMS_DATA_PYTHON_BINDINGS(Scalar)      \
+  {                                                                           \
+    typedef MultibodyInertialParamsDataTpl<Scalar> Data;                      \
+    typedef DynamicsParamsDataAbstractTpl<Scalar> DataBase;                  \
+    typedef MultibodyInertialParamsTpl<Scalar> Model;                         \
+    typedef Data::Vector10s Vector10s;                                        \
+    typedef Data::Matrix10s Matrix10s;                                        \
+    eigenpy::enableEigenPySpecific<Vector10s>();                             \
+    eigenpy::enableEigenPySpecific<Matrix10s>();                             \
+    eigenpy::exposeStdVectorEigenSpecificType<Vector10s>("Vector10");        \
+    eigenpy::exposeStdVectorEigenSpecificType<Matrix10s>("Matrix10");        \
+    bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
+    bp::class_<Data, bp::bases<DataBase> >(                                   \
+        "MultibodyInertialParamsData",                                        \
+        "Data for multibody inertial-parameter models.", bp::no_init)         \
+        .def("__init__",                                                      \
+             bp::make_constructor(                                            \
+                 &createMultibodyInertialParamsData<Data, Model>,             \
+                 bp::default_call_policies(), bp::args("model")))             \
+        .def_readwrite("psi", &Data::psi,                                    \
+                       "physical inertial vectors by selected body")         \
+        .def_readwrite("dpsi_dp", &Data::dpsi_dp,                            \
+                       "parametrization Jacobians by selected body")         \
+        .def_readonly("parametrization", &Data::parametrization,             \
+                      "reusable inertial-parametrization workspace")         \
+        .def(CopyableVisitor<Data>());                                        \
+  }
+
+void exposeMultibodyInertialParams() {
+  CROCODDYL_MULTIBODY_INERTIAL_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_MULTIBODY_INERTIAL_PARAMS_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

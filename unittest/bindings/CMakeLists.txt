@@ -16,6 +16,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     lqr
     implicit_constraints
     multibody_actuation
+    inertial_parameterization
     squashing
     copy)
 
