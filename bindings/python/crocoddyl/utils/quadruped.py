@@ -29,6 +29,8 @@ class SimpleQuadrupedalGaitProblem:
         timeopt=False,
         n_phases=1,
         time_reg_weight=3e-1,
+        friction_type=crocoddyl.JointFrictionType.COULOMB_VISCOUS,
+        friction_parameters=None,
     ):
         """Construct quadrupedal-gait problem.
 
@@ -49,11 +51,21 @@ class SimpleQuadrupedalGaitProblem:
             one log-time parameter per phase.
         :param n_phases: number of shared time-optimization phases.
         :param time_reg_weight: running weight for the log-time regularization.
+        :param friction_type: per-joint friction model used in the actuation
+            model. Set to None to recover identity joint actuation.
+        :param friction_parameters: log-parameters for the selected friction
+            model. By default, use static/Coulomb plus viscous friction.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
-        self.actuation = crocoddyl.ActuationModelMultibody(self.state)
+        self.friction_type = friction_type
+        self.friction_parameters = (
+            np.array([np.log(0.15), np.log(30.0), np.log(0.2)])
+            if friction_parameters is None
+            else np.asarray(friction_parameters, dtype=float)
+        )
+        self.actuation = self._createActuationModel()
         self.lfFoot = lfFoot
         self.rfFoot = rfFoot
         self.lhFoot = lhFoot
@@ -78,6 +90,33 @@ class SimpleQuadrupedalGaitProblem:
         # Defining the friction coefficient and normal
         self.mu = 0.7
         self.Rsurf = np.eye(3)
+
+    def _createActuationModel(self):
+        if self.friction_type is None:
+            return crocoddyl.ActuationModelMultibody(self.state)
+
+        first_actuated_joint = (
+            self.rmodel.getJointId("root_joint") + 1
+            if self.rmodel.existJointName("root_joint")
+            else 1
+        )
+        joint_dynamics = []
+        for jid in range(first_actuated_joint, self.rmodel.njoints):
+            joint = self.rmodel.joints[jid]
+            if joint.nv == 1:
+                joint_dynamics.append(
+                    crocoddyl.JointDynamicsModelFriction(
+                        jid,
+                        joint.nq,
+                        self.friction_parameters,
+                        self.friction_type,
+                    )
+                )
+            else:
+                joint_dynamics.append(
+                    crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv)
+                )
+        return crocoddyl.ActuationModelMultibody(self.state, joint_dynamics)
 
     def _createProblem(self, x0, models, phase_idx=None, phase_times=None):
         if not self._timeopt:

@@ -13,6 +13,12 @@ fi
 
 LOGPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 EXAMPLEPATH=${LOGPATH}/..
+TIMEOPTEXAMPLEPATH=${EXAMPLEPATH}/timeopt
+TIMEOPTLOGPATH=${TIMEOPTEXAMPLEPATH}/log
+ESTIMATIONEXAMPLEPATH=${EXAMPLEPATH}/estimation
+ESTIMATIONLOGPATH=${ESTIMATIONEXAMPLEPATH}/log
+
+mkdir -p ${TIMEOPTLOGPATH} ${ESTIMATIONLOGPATH}
 
 # If PYTHON_EXECUTABLE has not been set, then try to determine using `which`
 if [ -z $PYTHON_EXECUTABLE ] ; then
@@ -38,6 +44,18 @@ update_logfile() {
   FILENAME=$1
   echo "    ${FILENAME}"
   ${PYTHON_EXECUTABLE} -u ${EXAMPLEPATH}/${FILENAME}.py > ${LOGPATH}/${FILENAME}.log
+}
+
+update_timeopt_logfile() {
+  FILENAME=$1
+  echo "    timeopt/${FILENAME}"
+  ${PYTHON_EXECUTABLE} -u ${TIMEOPTEXAMPLEPATH}/${FILENAME}.py > ${TIMEOPTLOGPATH}/${FILENAME}.log
+}
+
+update_estimation_logfile() {
+  FILENAME=$1
+  echo "    estimation/${FILENAME}"
+  ${PYTHON_EXECUTABLE} -u ${ESTIMATIONEXAMPLEPATH}/${FILENAME}.py > ${ESTIMATIONLOGPATH}/${FILENAME}.log
 }
 
 update_logfile "aerial_manipulator_fwddyn"
@@ -79,3 +97,25 @@ update_logfile "quadruped_gaits_invdyn"
 update_logfile "quadruped_pose_fwddyn"
 update_logfile "quadruped_pose_invdyn"
 update_logfile "quadruped_walk_ubound"
+
+update_timeopt_logfile "double_pendulum_timeopt_fwddyn"
+update_timeopt_logfile "double_pendulum_timeopt_invdyn"
+update_timeopt_logfile "manipulator_timeopt_fwddyn"
+update_timeopt_logfile "manipulator_timeopt_invdyn"
+update_timeopt_logfile "quadrotor_timeopt_fwddyn"
+update_timeopt_logfile "quadrotor_timeopt_invdyn"
+update_timeopt_logfile "quadruped_gait_timeopt_fwddyn"
+update_timeopt_logfile "quadruped_gait_timeopt_invdyn"
+update_timeopt_logfile "quadruped_pose_timeopt_fwddyn"
+update_timeopt_logfile "quadruped_pose_timeopt_invdyn"
+
+update_estimation_logfile "double_pendulum_inertialparam_fwddyn"
+update_estimation_logfile "double_pendulum_inertialparam_invdyn"
+update_estimation_logfile "manipulator_inertialparam_fwddyn"
+update_estimation_logfile "manipulator_inertialparam_invdyn"
+update_estimation_logfile "quadrotor_inertialparam_fwddyn"
+update_estimation_logfile "quadrotor_inertialparam_invdyn"
+update_estimation_logfile "biped_gaits_friction_inertialparam_fwddyn"
+update_estimation_logfile "biped_gaits_friction_inertialparam_invdyn"
+update_estimation_logfile "quadruped_gaits_friction_inertialparam_fwddyn"
+update_estimation_logfile "quadruped_gaits_friction_inertialparam_invdyn"
