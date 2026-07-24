@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,7 +10,9 @@
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/optctrl/problem-abstract.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
@@ -78,9 +80,10 @@ class SolverAbstractTpl : public SolverBase {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef ProblemAbstractTpl<Scalar> ProblemAbstract;
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
-  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
-  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
@@ -92,6 +95,13 @@ class SolverAbstractTpl : public SolverBase {
    * @param[in] problem  shooting problem
    */
   explicit SolverAbstractTpl(std::shared_ptr<ShootingProblem> problem);
+
+  /**
+   * @brief Initialize the solver for an abstract optimal-control problem
+   *
+   * @param[in] problem  optimal control / estimation problem
+   */
+  explicit SolverAbstractTpl(std::shared_ptr<ProblemAbstract> problem);
   virtual ~SolverAbstractTpl() = default;
 
   /**
@@ -393,9 +403,9 @@ class SolverAbstractTpl : public SolverBase {
   const std::vector<std::shared_ptr<CallbackAbstract>>& getCallbacks() const;
 
   /**
-   * @brief Return the shooting problem
+   * @brief Return the optimal control / estimation problem
    */
-  const std::shared_ptr<ShootingProblem>& get_problem() const;
+  const std::shared_ptr<ProblemAbstract>& get_problem() const;
 
   /**
    * @brief Return the set of step lengths using by the line-search procedure
@@ -695,7 +705,8 @@ class SolverAbstractTpl : public SolverBase {
    */
   virtual void resizeTerminalData();
 
-  std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
+  std::shared_ptr<ProblemAbstract>
+      problem_;  //!< optimal control / estimation problem
   std::vector<std::shared_ptr<CallbackAbstract>>
       callbacks_;  //!< Callback functions
   std::vector<Scalar>
@@ -816,8 +827,6 @@ bool raiseIfNaN(const Scalar value);
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solver-base.hxx"
 

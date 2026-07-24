@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -97,7 +97,7 @@ void SolverKKTTpl<Scalar>::computeDirection(const bool recalc) {
 
   std::size_t ix = 0;
   std::size_t iu = 0;
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::size_t ndxi = models[t]->get_state()->get_ndx();
@@ -117,7 +117,7 @@ void SolverKKTTpl<Scalar>::computeDirection(const bool recalc) {
 template <typename Scalar>
 Scalar SolverKKTTpl<Scalar>::tryStep(const Scalar steplength) {
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
@@ -138,9 +138,9 @@ Scalar SolverKKTTpl<Scalar>::stoppingCriteria() {
   const std::size_t T = problem_->get_T();
   std::size_t ix = 0;
   std::size_t iu = 0;
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -177,8 +177,15 @@ template <typename NewScalar>
 SolverKKTTpl<NewScalar> SolverKKTTpl<Scalar>::cast() const {
   typedef SolverKKTTpl<NewScalar> ReturnType;
   typedef ShootingProblemTpl<NewScalar> ProblemType;
+  const std::shared_ptr<ShootingProblemTpl<Scalar>> problem =
+      std::dynamic_pointer_cast<ShootingProblemTpl<Scalar>>(problem_);
+  if (problem == nullptr) {
+    throw_pretty(
+        "Invalid operation: parameterized problems cannot be cast by "
+        "SolverKKT.");
+  }
   ReturnType ret(
-      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
+      std::make_shared<ProblemType>(problem->template cast<NewScalar>()));
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));
@@ -312,7 +319,7 @@ void SolverKKTTpl<Scalar>::allocateData() {
   nu_ = 0;
   const std::size_t nx = problem_->get_nx();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];

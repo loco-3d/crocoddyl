@@ -44,8 +44,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_solve(self):
         # Run maximum 10 iterations in order to boost test analysis
-        self.solver.solve([], [], 10)
-        self.solver_der.solve([], [], 10)
+        self.solver.solve([], [], maxiter=10)
+        self.solver_der.solve([], [], maxiter=10)
         for x1, x2 in zip(self.solver.xs, self.solver_der.xs):
             self.assertTrue(np.allclose(x1, x2, atol=1e-9), "xs doesn't match.")
         for u1, u2 in zip(self.solver.us, self.solver_der.us):
@@ -91,8 +91,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_stopping_criteria(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([], [], 2)
-        self.solver_der.solve([], [], 2)
+        self.solver.solve([], [], maxiter=2)
+        self.solver_der.solve([], [], maxiter=2)
         # Compute and check the stopping criteria
         stop = self.solver.stoppingCriteria()
         stopDer = self.solver_der.stoppingCriteria()
@@ -100,8 +100,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_expected_improvement(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([], [], 2)
-        self.solver_der.solve([], [], 2)
+        self.solver.solve([], [], maxiter=2)
+        self.solver_der.solve([], [], maxiter=2)
         expImp = self.solver.expectedImprovement()
         expImpDer = self.solver_der.expectedImprovement()
         self.assertTrue(

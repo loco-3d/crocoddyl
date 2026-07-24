@@ -87,10 +87,10 @@ xs = [x0] * (boxfddp.problem.T + 1)
 us = boxddp.problem.quasiStatic([x0] * boxddp.problem.T)
 
 print("*** SOLVE with Box-FDDP ***")
-boxfddp.solve(xs, us, 50, False)
+boxfddp.solve(xs, us, maxiter=50, is_feasible=False)
 
 print("*** SOLVE with Box-DDP ***")
-boxddp.solve(xs, us, 30, False)
+boxddp.solve(xs, us, maxiter=30, is_feasible=False)
 
 # Display the entire motion
 if WITHDISPLAY:

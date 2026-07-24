@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,8 +10,16 @@
 #ifndef CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 #define CROCODDYL_CORE_SOLVERS_FDDP_HPP_
 
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
+#ifdef CROCODDYL_WITH_ODYN
+#include <odyn/data.hpp>
+#include <odyn/model.hpp>
+#include <odyn/params.hpp>
+#include <odyn/solver.hpp>
+#include <odyn/status.hpp>
+#endif
 
 namespace crocoddyl {
 
@@ -26,6 +34,20 @@ enum EqualitySolverType {
   LuNull = 0,  //!< Nullspace factorization using LU decomposition
   QrNull,      //!< Nullspace factorization using QR decomposition
   Schur,       //!< Schur-complement factorization
+};
+
+/**
+ * @brief Solver type for the arrival-state (initial-state) estimation
+ *
+ * This determines how the parameter solve marginalises over the initial state.
+ * Use `AStateNone` when the initial state is not part of the estimation.
+ */
+enum ArrivalStateSolverType {
+  AStateLuNull = 0,  //!< Nullspace factorization using LU decomposition
+  AStateQrNull,      //!< Nullspace factorization using QR decomposition
+  AStateSchur,       //!< Schur-complement factorization
+  AStateQP,          //!< QP solve for constrained parameter updates
+  AStateNone,        //!< Initial state is not estimated
 };
 
 /**
@@ -74,9 +96,10 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
+  typedef ProblemAbstractTpl<Scalar> ProblemAbstract;
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
-  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
-  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef typename ProblemAbstract::ActionModelAbstract ActionModelAbstract;
+  typedef typename ProblemAbstract::ActionDataAbstract ActionDataAbstract;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
@@ -99,7 +122,49 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   explicit SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
                          const DynamicsSolverType dyn_solver = FeasShoot,
                          const EqualitySolverType term_solver = LuNull);
+
+  /**
+   * @brief Initialize the FDDP solver for an abstract optimal-control problem
+   *
+   * @param[in] problem        Optimal control / estimation problem
+   * @param[in] dyn_solver     Type of dynamic solver
+   * @param[in] term_solver    Type of terminal solver
+   * @param[in] astate_solver  Type of arrival-state solver
+   */
+  explicit SolverFDDPTpl(
+      std::shared_ptr<ProblemAbstract> problem,
+      const DynamicsSolverType dyn_solver = FeasShoot,
+      const EqualitySolverType term_solver = LuNull,
+      const ArrivalStateSolverType astate_solver = AStateNone);
   virtual ~SolverFDDPTpl() = default;
+
+  /**
+   * @brief Solve the optimal estimation/control problem with an initial
+   * parameter guess
+   *
+   * @param[in] init_xs      Initial state trajectory (size T+1)
+   * @param[in] init_us      Initial control trajectory (size T)
+   * @param[in] init_p       Initial parameter vectors, one per phase (size
+   * n_phases)
+   * @param[in] maxiter      Maximum number of iterations
+   * @param[in] is_feasible  True if the initial guess is dynamically feasible
+   * @param[in] reg_init     Initial regularization value
+   */
+  virtual bool solve(
+      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::vector<VectorXs>& init_p = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
+
+  /**
+   * @copybrief SolverAbstract::calcDir
+   *
+   * For parameter-estimation problems, restores the accepted parameters p_
+   * into the problem models when a step was rejected, so that calcDiff sees
+   * the correct parameter values.
+   */
+  virtual void calcDir() override;
 
   /**
    * @copybrief SolverAbstract::computeDirection
@@ -108,6 +173,9 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 
   /**
    * @copybrief SolverAbstract::computeCandidate
+   *
+   * For parameter-estimation problems this also updates p_try and calls
+   * problem->update_p() before running the forward pass.
    */
   virtual void computeCandidate(const Scalar step_length = Scalar(1.)) override;
 
@@ -300,6 +368,121 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * The results of this linear rollout are stored in dxs and dus.
    */
   void linearRollout();
+
+  // Parameter estimation
+
+  /**
+   * @brief Run the parametrized backward pass
+   *
+   * Computes Vp, Vpx and Vpp (value-function parameter derivatives) backward
+   * within each phase. Direct parameter derivatives are restarted at phase
+   * boundaries, while the state value function carries the effect of later
+   * phases. The phase-start results are stored in `Vp_phase_`, `Vpx_phase_`,
+   * `Vpp_phase_` and `Vpx_f_phase_`.
+   *
+   * Must be called after `backwardPass()` (it reuses K_, k_, Vx_, Vxx_).
+   */
+  virtual void parametrizedBackwardPass();
+
+  /**
+   * @brief Compute the parameter action-value terms Qp, Qpx, Qpp, Qpu
+   *
+   * @param[in] t      Time index
+   * @param[in] model  Running action model at t
+   * @param[in] data   Running action data at t
+   */
+  virtual void parametrizedActionValueFunction(
+      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model,
+      const std::shared_ptr<ActionDataAbstract>& data);
+
+  /**
+   * @brief Compute the parameter feedback gain P = Quu^{-1} Qpu^T
+   *
+   * @param[in] t  Time index
+   */
+  virtual void parametrizedPolicy(const std::size_t t);
+
+  /**
+   * @brief Propagate the parameter value function (Vp, Vpx, Vpp)
+   *
+   * @param[in] t      Time index
+   * @param[in] model  Running action model at t
+   */
+  virtual void parametrizedValueFunction(
+      const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
+
+  /**
+   * @brief Solve for the optimal parameter direction dp
+   *
+   * Factorises `Vpp_phase_` (Cholesky for Schur/None, LU or QR nullspace
+   * for LuNull/QrNull) and computes `kp_`, `Kp_`, `dp_`.  Updates `k_` with
+   * the P*dp contribution.
+   */
+  virtual void paramsPass();
+
+  /**
+   * @brief Compute the parameter-constraint coupling direction dPc, Kpc
+   *
+   * Called inside `batchPass` when the problem has both parameters and
+   * terminal constraints.
+   */
+  virtual void paramsBatchPass();
+
+  // Getters for parameter solver data
+
+  /** Return the arrival-state solver type */
+  ArrivalStateSolverType get_astate_solver() const;
+
+  /** Return the current parameter vectors (one per phase) */
+  const std::vector<VectorXs>& get_p() const;
+
+  /** Return the candidate parameter vectors (one per phase) */
+  const std::vector<VectorXs>& get_p_try() const;
+
+  /** Return the parameter search directions (one per phase) */
+  const std::vector<VectorXs>& get_dp() const;
+
+  /** Return the parameter feedforward gains (one per phase) */
+  const std::vector<VectorXs>& get_kp() const;
+
+  /** Return the parameter feedback gains (one per phase) */
+  const std::vector<MatrixXs>& get_Kp() const;
+
+  /** Return Vp trajectory (size T+1) */
+  const std::vector<VectorXs>& get_Vp() const;
+
+  /** Return Vpp trajectory (size T+1) */
+  const std::vector<MatrixXs>& get_Vpp() const;
+
+  /** Return Vpx trajectory (size T+1) */
+  const std::vector<MatrixXs>& get_Vpx() const;
+
+  /** Return Vp_phase (one per phase) */
+  const std::vector<VectorXs>& get_Vp_phase() const;
+
+  /** Return Vpp_phase (one per phase) */
+  const std::vector<MatrixXs>& get_Vpp_phase() const;
+
+  /** Return Vpx_phase (one per phase) */
+  const std::vector<MatrixXs>& get_Vpx_phase() const;
+
+  /** Return the parameter action-value gradients */
+  const std::vector<VectorXs>& get_Qp() const;
+
+  /** Return the parameter action-value Hessians */
+  const std::vector<MatrixXs>& get_Qpp() const;
+
+  /** Return the parameter-state action-value Hessians */
+  const std::vector<MatrixXs>& get_Qpx() const;
+
+  /** Return the parameter-control action-value Hessians */
+  const std::vector<MatrixXs>& get_Qpu() const;
+
+  /** Return the control response to parameter variations */
+  const std::vector<MatrixXs>& get_P() const;
+
+  /** Modify the arrival-state solver type */
+  void set_astate_solver(const ArrivalStateSolverType type);
 
   /**
    * @brief Run the feasibility-driven nonlinear rollout
@@ -755,7 +938,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
                       //!< per each running node
   VectorXs fTVxx_p_;  //!< Store the value of
                       //!< \f$\mathbf{\bar{f}}^T\mathbf{V_{xx}}^{'}\f$
-  std::vector<Eigen::LLT<MatrixXs> > Quu_llt_;  //!< Cholesky LLT solver
+  std::vector<Eigen::LLT<MatrixXs>> Quu_llt_;  //!< Cholesky LLT solver
   std::vector<VectorXs>
       Quuk_;  //!< Store the values of \f$\mathbf{Q_{uu}\mathbf{k}} per each
               //!< running node
@@ -801,6 +984,91 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   DEPRECATED(
       "Do not use this member",
       Scalar dv_;)  //!< Internal data for computing the expected improvement
+
+  // Parameter estimation data
+  ArrivalStateSolverType astate_solver_;  //!< Arrival-state solver type
+
+  // Per-phase quantities (size n_phases_)
+  std::size_t n_phases_;         //!< Number of parameter phases (0 = no params)
+  std::vector<VectorXs> p_;      //!< Current parameter vector per phase
+  std::vector<VectorXs> p_try_;  //!< Candidate parameter vector per phase
+  std::vector<VectorXs> dp_;     //!< Parameter search direction per phase
+  std::vector<VectorXs> kp_;     //!< Parameter feedforward gain per phase
+  std::vector<MatrixXs> Kp_;  //!< Parameter feedback gain (np x ndx) per phase
+  std::vector<VectorXs> Vp_phase_;     //!< Phase-start Vp per phase
+  std::vector<MatrixXs> Vpp_phase_;    //!< Phase-start Vpp (np x np) per phase
+  std::vector<MatrixXs> Vpx_phase_;    //!< Phase-start Vpx (np x ndx) per phase
+  std::vector<VectorXs> Vpx_f_phase_;  //!< Vpx * f at phase start, per phase
+  std::vector<Eigen::LLT<MatrixXs>>
+      Vpp_llt_;  //!< Cholesky of Vpp_phase per phase
+
+  // LuNull / QrNull arrival-state variants (per phase)
+  std::vector<std::size_t> Vpp_rank_;  //!< Rank of Vpp_phase per phase
+  std::vector<MatrixXs> YZp_;  //!< Orth + nullspace of Vpp_phase (np x np)
+  std::vector<MatrixXs> Vpy_;  //!< Vpp_phase * Y  (np x rank)
+  std::vector<MatrixXs> Vyy_;  //!< Y^T Vpy         (rank x rank)
+  std::vector<VectorXs> Vy_;   //!< Y^T Vp_phase    (rank)
+  std::vector<MatrixXs> Vxy_;  //!< Vpx_phase^T Y   (ndx x rank)
+  std::vector<Eigen::LLT<MatrixXs>> Vyy_llt_;  //!< Cholesky of Vyy per phase
+  std::vector<VectorXs> kp_y_;  //!< kp in Y subspace (rank) per phase
+  std::vector<MatrixXs> Kp_y_;  //!< Kp in Y subspace (rank x ndx) per phase
+  std::vector<Eigen::JacobiSVD<MatrixXs>>
+      Vpp_svd_;  //!< SVD workspaces for nullspace parameter branches
+
+  MatrixXs FxTVxx_param_;        //!< Scratch for Fx^T * Vxx in parameter pass
+  MatrixXs FpTVxx_param_;        //!< Scratch for Fp^T * Vxx in parameter pass
+  MatrixXs FuTVxx_param_;        //!< Scratch for Fu^T * Vxx in parameter pass
+  MatrixXs Vpp_sym_;             //!< Scratch for symmetrizing Vpp
+  VectorXs Vp_next_;             //!< Next-node parameter gradient scratch
+  MatrixXs Vpp_next_;            //!< Next-node parameter Hessian scratch
+  MatrixXs Vpx_next_;            //!< Next-node parameter-state Hessian scratch
+  VectorXs Vpx_f_next_;          //!< Next-node parameter-state gap product
+  MatrixXs Vpc_next_;            //!< Next-node parameter-constraint scratch
+  std::vector<VectorXs> qp_c_;   //!< QP linear terms, per phase
+  std::vector<VectorXs> qp_x0_;  //!< Zero state used by parameter constraints
+  std::vector<VectorXs> qp_u0_;  //!< Zero control used by parameter constraints
+#ifdef CROCODDYL_WITH_ODYN
+  std::vector<std::shared_ptr<odyn::DenseModelTpl<Scalar>>>
+      qp_models_;  //!< Preallocated ODYN QP models, per phase
+  std::vector<std::shared_ptr<odyn::DenseDataTpl<Scalar>>>
+      qp_datas_;  //!< Preallocated ODYN QP data, per phase
+  std::vector<std::shared_ptr<odyn::DenseQPTpl<Scalar>>>
+      qp_solvers_;  //!< Preallocated ODYN QP solvers, per phase
+  std::vector<std::shared_ptr<odyn::ParamsTpl<Scalar>>>
+      qp_params_;  //!< Preallocated ODYN QP parameters, per phase
+#endif
+
+  // Per-node value / action-value param derivatives (size T+1 and T)
+  std::vector<VectorXs> Vp_;     //!< Value-function gradient w.r.t. p  (np)
+  std::vector<MatrixXs> Vpp_;    //!< Value-function Hessian w.r.t. p  (np x np)
+  std::vector<MatrixXs> Vpx_;    //!< Value-function mixed Hessian (np x ndx)
+  std::vector<VectorXs> Vpx_f_;  //!< Vpx * dynamics_gap (np)
+  std::vector<VectorXs> Qp_;     //!< Hamiltonian gradient w.r.t. p  (np)
+  std::vector<MatrixXs> Qpp_;    //!< Hamiltonian Hessian w.r.t. p   (np x np)
+  std::vector<MatrixXs> Qpx_;    //!< Hamiltonian mixed Hessian (np x ndx)
+  std::vector<MatrixXs> Qpu_;    //!< Hamiltonian mixed Hessian (np x nu)
+  std::vector<MatrixXs> P_;      //!< Parameter feedback gain (nu x np)
+  std::vector<VectorXs> P_dp_;   //!< P * dp used to update k (nu)
+
+  // For expectedImprovement parameter contribution (size T+1 and T)
+  std::vector<VectorXs> Lpp_dp_;  //!< Lpp * dp  (np)
+  std::vector<VectorXs> Lpx_dp_;  //!< dp^T Lpx  (ndx)
+  std::vector<VectorXs> Lpu_dp_;  //!< dp^T Lpu  (nu)
+
+  // Arrival-state initial-state correction (Schur/LuNull/QrNull only)
+  MatrixXs Vxx0_;  //!< Modified Vxx[0] after marginalising params
+  VectorXs Vx0_;   //!< Modified Vx[0]
+  Eigen::LLT<MatrixXs> Vxx0_llt_;  //!< Cholesky of Vxx0
+
+  // Terminal-constraint / parameter coupling (size T+1, T, n_phases)
+  std::vector<MatrixXs> Qpc_;  //!< Hamiltonian (np x nh_T) per running node
+  std::vector<MatrixXs> Vpc_;  //!< Value (np x nh_T) per node (size T+1)
+  std::vector<MatrixXs>
+      Vpc_phase_;  //!< Vpc at phase start (np x nh_T) per phase
+  std::vector<MatrixXs>
+      dPc_;  //!< Parameter constraint direction (np x nh_T) per phase
+  std::vector<MatrixXs>
+      Kpc_;  //!< Parameter constraint feedback (np x nh_T) per phase
 
   using SolverAbstract::acceptstep_;
   using SolverAbstract::alphas_;
@@ -849,8 +1117,6 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/fddp.hxx"
 

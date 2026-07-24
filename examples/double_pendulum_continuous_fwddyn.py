@@ -69,14 +69,14 @@ else:
 # Solving the problem with the FDDP solver
 print("*** SOLVE (FeasShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
-solver.solve([], [], 300)
+solver.solve([], [], maxiter=300)
 print("*** SOLVE (MultiShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
-solver.solve([], [], 300)
+solver.solve([], [], maxiter=300)
 Ts = int(solver.problem.T / 3)
 print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
-solver.solve([], [], 300)
+solver.solve([], [], maxiter=300)
 
 # Printing the terminal state
 np.set_printoptions(precision=4, suppress=True)

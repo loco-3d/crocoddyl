@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,7 @@
 #ifndef BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define BINDINGS_PYTHON_CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/solver-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
 
@@ -26,7 +27,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
 
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
-  typedef ShootingProblemTpl<Scalar> ShootingProblem;
+  typedef ProblemAbstractTpl<Scalar> ProblemAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::Vector3s Vector3s;
@@ -69,7 +70,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::xs_;
   using SolverAbstract::xs_try_;
 
-  explicit SolverAbstractTpl_wrap(std::shared_ptr<ShootingProblem> problem)
+  explicit SolverAbstractTpl_wrap(std::shared_ptr<ProblemAbstract> problem)
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstractTpl_wrap() = default;
 
@@ -328,9 +329,15 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   SolverAbstractTpl_wrap<NewScalar> cast() const {
     typedef SolverAbstractTpl_wrap<NewScalar> ReturnType;
     typedef ShootingProblemTpl<NewScalar> ProblemType;
-    ReturnType ret(
-        std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
-    return ret;
+    auto cast_problem =
+        std::dynamic_pointer_cast<ShootingProblemTpl<Scalar>>(problem_);
+    if (cast_problem) {
+      return ReturnType(std::make_shared<ProblemType>(
+          cast_problem->template cast<NewScalar>()));
+    }
+    throw_pretty(
+        "cast() of SolverAbstractTpl_wrap is only supported for "
+        "ShootingProblem-based solvers");
   }
 };
 

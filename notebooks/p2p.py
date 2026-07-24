@@ -107,7 +107,7 @@ ddp.solve()
 for i in range(4, 6):
     for m in terminalModels:
         m.costs.costs["gripperPose"].weight = 10**i
-    ddp.solve(ddp.xs, ddp.us, 10)
+    ddp.solve(ddp.xs, ddp.us, maxiter=10)
 
 # Visualizing the solution in gepetto-viewer
 display.displayFromSolver(ddp)

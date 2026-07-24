@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    solver.solve(xs, us, MAXITER);
+    solver.solve(xs, us, std::vector<Eigen::VectorXd>(), MAXITER);
     duration[i] = timer.get_duration();
   }
 

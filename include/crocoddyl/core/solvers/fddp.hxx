@@ -13,6 +13,14 @@ template <typename Scalar>
 SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
                                      const DynamicsSolverType dyn_solver,
                                      const EqualitySolverType term_solver)
+    : SolverFDDPTpl(std::static_pointer_cast<ProblemAbstract>(problem),
+                    dyn_solver, term_solver, AStateNone) {}
+
+template <typename Scalar>
+SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ProblemAbstract> problem,
+                                     const DynamicsSolverType dyn_solver,
+                                     const EqualitySolverType term_solver,
+                                     const ArrivalStateSolverType astate_solver)
     : SolverAbstract(problem),
       term_solver_(term_solver),
       reg_incfactor_(Scalar(10.)),
@@ -30,7 +38,9 @@ SolverFDDPTpl<Scalar>::SolverFDDPTpl(std::shared_ptr<ShootingProblem> problem,
                             (Scalar(1.) - rho_))),
       upsilon_(Scalar(0.)),
       upsilon_decfactor_(Scalar(0.5)),
-      zero_upsilon_(false) {
+      zero_upsilon_(false),
+      astate_solver_(astate_solver),
+      n_phases_(0) {
   // Allocating the solver's data
   allocateData();
   // Setting the dynamics solver
@@ -54,11 +64,21 @@ void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
   START_PROFILER("SolverFDDP::computeDirection");
   // Update the batch's derivatives
   if (recalc) {
-    SolverAbstract::calcDir();
+    // Keep virtual dispatch for parameter restoration and INTRO preprocessing.
+    calcDir();
   }
   // Update the search direction associated with the batch's internal
   // constraints
   backwardPass();
+  // Parameter backward pass (only when problem has phases)
+  if (n_phases_ > 0) {
+    parametrizedBackwardPass();
+    // Multi-phase needs dxs at phase boundaries before paramsPass
+    if (n_phases_ > 1) {
+      linearRollout();
+    }
+    paramsPass();
+  }
   // Update search direction associated with the batch's constraint-to-go
   // conditions
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
@@ -75,6 +95,30 @@ void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
   START_PROFILER("SolverFDDP::computeCandidate");
+  // For parameter-estimation problems: update p_try and push into models
+  if (n_phases_ > 0) {
+    acceptstep_ = false;
+    const std::vector<
+        std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
+        constraints_models = problem_->get_parameter_constraints_models();
+    const std::vector<
+        std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
+        constraints_datas = problem_->get_parameter_constraints_datas();
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      p_try_[i] = p_[i] + steplength * dp_[i];
+      problem_->update_p(p_try_[i], i);
+      const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
+          constraints =
+              (i < constraints_models.size()) ? constraints_models[i] : nullptr;
+      if (constraints != nullptr) {
+        if (i >= constraints_datas.size() || constraints_datas[i] == nullptr ||
+            i >= qp_x0_.size() || i >= qp_u0_.size()) {
+          throw_pretty("Invalid data: parameter-constraint data is missing");
+        }
+        constraints->calc(constraints_datas[i], qp_x0_[i], qp_u0_[i]);
+      }
+    }
+  }
   // Update primal, dual and slack variables
   forwardPass(steplength);
   updateDualsAndSlacks(steplength);
@@ -139,7 +183,7 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
     case FeasShoot:
     case MultiShoot:
     case HybridShoot:
-      const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+      const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
           problem_->get_runningDatas();
       for (std::size_t t = 0; t < T; ++t) {
         const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -158,6 +202,57 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
       DV_[1] -= dxs_.back().dot(d->Lx);
       DV_[2] -= dxs_.back().dot(Lxx_dx_.back());
       break;
+  }
+  if (n_phases_ > 0) {
+    if (dyn_solver_ == DynamicsSolverType::SingleShoot) {
+      const std::vector<std::size_t>& phase_starts = problem_->get_phase_idxs();
+      for (std::size_t t = 0; t < T; ++t) {
+        if (P_dp_[t].size() != 0) {
+          DV_[1] -= P_dp_[t].dot(Qu_[t]);
+          DV_[2] += P_dp_[t].dot(Quuk_[t]);
+        }
+      }
+      for (std::size_t nph = 0; nph < n_phases_; ++nph) {
+        const std::size_t t = phase_starts[nph];
+        const VectorXs& dx = dxs_[t];
+        if (nph == 0) {
+          DV_[1] -= dx.dot(Vx_[0]);
+          DV_[2] -= dx.dot(Vxx_[0] * dx);
+        }
+        DV_[1] -= dp_[nph].dot(Vp_phase_[nph]);
+        DV_[2] -= Scalar(2.) * dp_[nph].dot(Vpx_phase_[nph] * dx);
+        DV_[2] -= dp_[nph].dot(Vpp_phase_[nph] * dp_[nph]);
+      }
+    } else {
+      const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+      const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
+          problem_->get_runningDatas();
+      std::size_t tstart = 0;
+      for (std::size_t nph = 0; nph < n_phases_; ++nph) {
+        const std::size_t tend = phase_ends[nph];
+        for (std::size_t t = tstart; t < tend; ++t) {
+          const std::shared_ptr<ActionDataAbstract>& dt = datas[t];
+          Lpp_dp_[t].noalias() = dt->Lpp * dp_[nph];
+          Lpx_dp_[t].noalias() = dt->Lpx.transpose() * dp_[nph];
+          DV_[1] -= dp_[nph].dot(dt->Lp);
+          DV_[2] -= dp_[nph].dot(Lpp_dp_[t]);
+          DV_[2] -= Scalar(2.) * Lpx_dp_[t].dot(dxs_[t]);
+          if (dt->Lu.size() > 0) {
+            Lpu_dp_[t].noalias() = dt->Lpu.transpose() * dp_[nph];
+            DV_[2] -= Scalar(2.) * Lpu_dp_[t].dot(dus_[t]);
+          }
+        }
+        tstart = tend;
+      }
+      const std::shared_ptr<ActionDataAbstract>& d_T =
+          problem_->get_terminalData();
+      const std::size_t last = n_phases_ - 1;
+      Lpp_dp_.back().noalias() = d_T->Lpp * dp_[last];
+      Lpx_dp_.back().noalias() = d_T->Lpx.transpose() * dp_[last];
+      DV_[1] -= dp_[last].dot(d_T->Lp);
+      DV_[2] -= dp_[last].dot(Lpp_dp_.back());
+      DV_[2] -= Scalar(2.) * Lpx_dp_.back().dot(dxs_.back());
+    }
   }
   return DV_;
 }
@@ -200,8 +295,10 @@ bool SolverFDDPTpl<Scalar>::checkAcceptance() {
   // lengths smaller than th_acceptMinStep. This ensures any possible
   // progress in the iteration.
   acceptstep_ = false;
-  if ((std::abs(dPhi_) <= th_noimprovement_) &&
-      (std::abs(dPhiexp_) <= th_noimprovement_)) {
+  if (n_phases_ == 0 && std::abs(dPhi_) <= th_noimprovement_ &&
+      std::abs(dPhiexp_) <= th_noimprovement_) {
+    // Preserve the legacy no-improvement acceptance for ordinary problems.
+    // Parameterized problems follow PDDP's Armijo logic below.
     acceptstep_ = true;  // we can't make further improvement
   } else if (dPhiexp_ >= Scalar(0.)) {
     if (dPhi_ > Scalar(0.)) {
@@ -251,7 +348,7 @@ void SolverFDDPTpl<Scalar>::resizeRunningData() {
   SolverAbstract::resizeRunningData();
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -277,7 +374,7 @@ void SolverFDDPTpl<Scalar>::resizeTerminalData() {
   const std::size_t T = problem_->get_T();
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -288,9 +385,23 @@ void SolverFDDPTpl<Scalar>::resizeTerminalData() {
     dXc_[t].conservativeResize(ndx, nh_T);
     dUc_[t].conservativeResize(nu, nh_T);
     Kc_[t].conservativeResize(nu, nh_T);
+    if (n_phases_ > 0) {
+      Qpc_[t].conservativeResize(models[t]->get_np(), nh_T);
+      Vpc_[t].conservativeResize(models[t]->get_np(), nh_T);
+    }
   }
   Vxc_.back().conservativeResize(ndx, nh_T);
   dXc_.back().conservativeResize(ndx, nh_T);
+  if (n_phases_ > 0) {
+    Vpc_.back().conservativeResize(problem_->get_terminalModel()->get_np(),
+                                   nh_T);
+    Vpc_next_.conservativeResize(Vpc_next_.rows(), nh_T);
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      Vpc_phase_[i].conservativeResize(p_[i].size(), nh_T);
+      dPc_[i].conservativeResize(p_[i].size(), nh_T);
+      Kpc_[i].conservativeResize(p_[i].size(), nh_T);
+    }
+  }
   dHc_.conservativeResize(nh_T, nh_T);
   hc_.conservativeResize(nh_T);
   YZc_.conservativeResize(nh_T, nh_T);
@@ -312,9 +423,9 @@ void SolverFDDPTpl<Scalar>::backwardPass() {
   }
   // Compute and store the Vxx_f gradient
   Vxx_f_.back().noalias() = Vxx_.back() * fs_.back();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
@@ -339,28 +450,73 @@ template <typename Scalar>
 void SolverFDDPTpl<Scalar>::batchPass() {
   START_PROFILER("SolverFDDP::batchPass");
   const std::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
-  Vxc_.back() = -d_T->Hx.transpose();
-  for (int t = static_cast<int>(problem_->get_T()) - 1; t >= 0; --t) {
-    const std::shared_ptr<ActionDataAbstract>& d = datas[t];
-    // Update action-value function associated with the batch's constraint-to-go
-    // conditions
-    computeBatchActionValueFunction(t, d);
-    // Update feed-forward policy associated with the batch's constraint-to-go
-    // conditions
-    computeBatchPolicy(t);
-    // Update value function associated with the batch's constraint-to-go
-    // conditions
-    computeBatchValueFunction(t);
+  // ActionData can store the maximum running/terminal constraint layout. Only
+  // the first nh_T rows belong to the terminal node.
+  Vxc_.back() = -d_T->Hx.topRows(nh_T).transpose();
+  if (n_phases_ > 0) {
+    Vpc_.back().setZero();  // terminal node has no param-constraint coupling
+  }
+  if (n_phases_ > 0) {
+    const std::vector<std::size_t>& phase_starts = problem_->get_phase_idxs();
+    const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+    for (std::size_t phase = n_phases_; phase-- > 0;) {
+      const std::size_t np =
+          problem_->get_runningModels()[phase_starts[phase]]->get_np();
+      Vpc_next_.setZero();
+      for (std::size_t t = phase_ends[phase]; t-- > phase_starts[phase];) {
+        // Update action-value function associated with the batch's
+        // constraint-to-go conditions
+        computeBatchActionValueFunction(t, datas[t]);
+        // Update feed-forward policy associated with the batch's
+        // constraint-to-go conditions
+        computeBatchPolicy(t);
+        // Update value function associated with the batch's constraint-to-go
+        // conditions
+        computeBatchValueFunction(t);
+        Vpc_next_.topRows(np) = Vpc_[t];
+      }
+      Vpc_phase_[phase] = Vpc_[phase_starts[phase]];
+    }
+  } else {
+    for (std::size_t t = problem_->get_T(); t-- > 0;) {
+      // Update action-value function associated with the batch's
+      // constraint-to-go conditions
+      computeBatchActionValueFunction(t, datas[t]);
+      // Update feed-forward policy associated with the batch's
+      // constraint-to-go conditions
+      computeBatchPolicy(t);
+      // Update value function associated with the batch's constraint-to-go
+      // conditions
+      computeBatchValueFunction(t);
+    }
   }
   dXc_[0].setZero();
+  if (n_phases_ > 0) {
+    paramsBatchPass();
+  }
+  // Phase index for forward pass (parameter coupling to dXc)
+  const std::vector<std::size_t>* phase_starts_fwd =
+      (n_phases_ > 0) ? &problem_->get_phase_idxs() : nullptr;
+  std::size_t nph_fwd = 0;
   for (std::size_t t = 0; t < problem_->get_T(); ++t) {  // sequence
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     dUc_[t] = -Kc_[t];
     dUc_[t].noalias() -= K_[t] * dXc_[t];
+    if (n_phases_ > 0) {
+      dUc_[t].noalias() -= P_[t] * dPc_[nph_fwd];
+    }
     dXc_[t + 1].noalias() = d->Fx * dXc_[t];
     dXc_[t + 1].noalias() += d->Fu * dUc_[t];
+    if (n_phases_ > 0) {
+      dXc_[t + 1].noalias() += d->Fp * dPc_[nph_fwd];
+      if (nph_fwd + 1 < n_phases_ &&
+          (t + 1) == (*phase_starts_fwd)[nph_fwd + 1]) {
+        ++nph_fwd;
+      }
+    }
   }
   STOP_PROFILER("SolverFDDP::batchPass");
 }
@@ -369,9 +525,13 @@ template <typename Scalar>
 void SolverFDDPTpl<Scalar>::updateDir() {
   START_PROFILER("SolverFDDP::updateDir");
   const std::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
-  dHc_.noalias() = d_T->Hx * dXc_.back();
-  hc_ = d_T->h;
-  hc_.noalias() += d_T->Hx * dxs_.back();
+  const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
+  // ActionData can store the maximum running/terminal constraint layout. Only
+  // the first nh_T rows belong to the terminal node.
+  const auto Hx_T = d_T->Hx.topRows(nh_T);
+  dHc_.noalias() = Hx_T * dXc_.back();
+  hc_ = d_T->h.head(nh_T);
+  hc_.noalias() += Hx_T * dxs_.back();
   switch (term_solver_) {
     // For the LuNull and QrNull solvers, we compute terminal multiplier using
     // nullspace parametrization. Instead of parametrizing Hx, we opt to
@@ -380,7 +540,6 @@ void SolverFDDPTpl<Scalar>::updateDir() {
       dHc_lu_.compute(dHc_);
       dHc_rank_ = dHc_lu_.rank();
       YZc_.leftCols(dHc_rank_) << dHc_lu_.matrixLU().transpose();
-      const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
       if (dHc_rank_ < nh_T) {
         YZc_.rightCols(nh_T - dHc_rank_) << dHc_lu_.kernel();
       }
@@ -403,6 +562,24 @@ void SolverFDDPTpl<Scalar>::updateDir() {
       beta_plus_ = hc_;
       YdHcY_llt_.solveInPlace(beta_plus_);
       break;
+    }
+  }
+  // Update parameter directions and k_ with terminal constraint multiplier
+  if (n_phases_ > 0) {
+    const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      kp_[i].noalias() -= Kpc_[i] * beta_plus_;
+      dp_[i].noalias() -= dPc_[i] * beta_plus_;
+    }
+    // Rebuild P_dp contribution and update k_
+    std::size_t tstart = 0;
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      for (std::size_t t = tstart; t < phase_ends[i]; ++t) {
+        k_[t] -= P_dp_[t];
+        P_dp_[t].noalias() = P_[t] * dp_[i];
+        k_[t] += P_dp_[t];
+      }
+      tstart = phase_ends[i];
     }
   }
   // Finally, we update the feed-forward term and search direction.
@@ -469,6 +646,10 @@ void SolverFDDPTpl<Scalar>::computeBatchActionValueFunction(
   START_PROFILER("SolverFDDP::computeBatchActionValueFunction");
   Quc_[t].noalias() = data->Fu.transpose() * Vxc_[t + 1];
   Qxc_[t].noalias() = data->Fx.transpose() * Vxc_[t + 1];
+  if (n_phases_ > 0) {
+    Qpc_[t].noalias() = data->Fp.transpose() * Vxc_[t + 1];
+    Qpc_[t] += Vpc_next_.topRows(data->Fp.cols());
+  }
   STOP_PROFILER("SolverFDDP::computeBatchActionValueFunction");
 }
 
@@ -541,17 +722,26 @@ void SolverFDDPTpl<Scalar>::computeBatchValueFunction(const std::size_t t) {
   START_PROFILER("SolverFDDP::computeBatchValueFunction");
   Vxc_[t] = Qxc_[t];
   Vxc_[t].noalias() -= Qxu_[t] * Kc_[t];
+  if (n_phases_ > 0) {
+    Vpc_[t] = Qpc_[t];
+    Vpc_[t].noalias() -= Qpu_[t] * Kc_[t];
+  }
   STOP_PROFILER("SolverFDDP::computeBatchValueFunction");
 }
 
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::linearRollout() {
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   dxs_[0] = fs_[0];
+  // Phase tracking for parameter contribution
+  const bool has_params = (n_phases_ > 0);
+  const std::vector<std::size_t>* phase_starts =
+      has_params ? &problem_->get_phase_idxs() : nullptr;
+  std::size_t nph = 0;
   for (std::size_t t = 0; t < T; ++t) {  // in sequence
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -561,6 +751,13 @@ void SolverFDDPTpl<Scalar>::linearRollout() {
       dus_[t] = -k_[t];
       dus_[t].noalias() -= K_[t] * dxs_[t];
       dxs_[t + 1].noalias() += d->Fu * dus_[t];
+    }
+    // Parameter contribution: Fp * dp
+    if (has_params) {
+      dxs_[t + 1].noalias() += d->Fp * dp_[nph];
+      if (nph + 1 < n_phases_ && (t + 1) == (*phase_starts)[nph + 1]) {
+        ++nph;
+      }
     }
   }
 }
@@ -573,9 +770,9 @@ void SolverFDDPTpl<Scalar>::feasShootForwardPass(const Scalar steplength) {
                  << "invalid step length, value is between 0. to 1.");
   }
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   cost_try_ = Scalar(0.);
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -588,10 +785,8 @@ void SolverFDDPTpl<Scalar>::feasShootForwardPass(const Scalar steplength) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t] = us_[t] - steplength * k_[t];
       us_try_[t].noalias() -= K_[t] * dx_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
-    } else {
-      m->calc(d, xs_try_[t]);
     }
+    m->calc(d, xs_try_[t], us_try_[t]);
     fs_try_[t + 1] = fs_[t + 1] * (Scalar(1.) - steplength);
     m->get_state()->integrate(d->xnext, -fs_try_[t + 1], xs_try_[t + 1]);
     cost_try_ += d->cost;
@@ -619,9 +814,9 @@ void SolverFDDPTpl<Scalar>::multiShootForwardPass(const Scalar steplength) {
                  << "invalid step length, value is between 0. to 1.");
   }
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   // Update the dynamics gap for each node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -639,10 +834,8 @@ void SolverFDDPTpl<Scalar>::multiShootForwardPass(const Scalar steplength) {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     if (m->get_nu() != 0) {
       us_try_[t] = us_[t] + steplength * dus_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
-    } else {
-      m->calc(d, xs_try_[t]);
     }
+    m->calc(d, xs_try_[t], us_try_[t]);
     m->get_state()->diff(xs_try_[t + 1], d->xnext, fs_try_[t + 1]);
   }
   cost_try_ = Scalar(0.);
@@ -672,9 +865,9 @@ void SolverFDDPTpl<Scalar>::hybridShootForwardPass(const Scalar steplength) {
     throw_pretty("Invalid argument: "
                  << "invalid step length, value is between 0. to 1.");
   }
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   // Update the initial state of each shooting node
   models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
@@ -696,10 +889,8 @@ void SolverFDDPTpl<Scalar>::hybridShootForwardPass(const Scalar steplength) {
         m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
         us_try_[t] = us_[t] - steplength * k_[t];
         us_try_[t].noalias() -= K_[t] * dx_[t];
-        m->calc(d, xs_try_[t], us_try_[t]);
-      } else {
-        m->calc(d, xs_try_[t]);
       }
+      m->calc(d, xs_try_[t], us_try_[t]);
       if (t + 1 != Ts_[i]) {
         fs_try_[t + 1] = fs_[t + 1] * (Scalar(1.) - steplength);
         m->get_state()->integrate(d->xnext, -fs_try_[t + 1], xs_try_[t + 1]);
@@ -745,12 +936,17 @@ void SolverFDDPTpl<Scalar>::singleShootForwardPass(const Scalar steplength) {
   }
   START_PROFILER("SolverFDDP::singleShootForwardPass");
   cost_try_ = Scalar(0.);
-  xs_try_[0] = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
+  if (n_phases_ > 0 && astate_solver_ != AStateNone &&
+      astate_solver_ != AStateQP) {
+    models[0]->get_state()->integrate(xs_[0], steplength * dxs_[0], xs_try_[0]);
+  } else {
+    xs_try_[0] = problem_->get_x0();
+  }
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& m = models[t];
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
@@ -758,10 +954,8 @@ void SolverFDDPTpl<Scalar>::singleShootForwardPass(const Scalar steplength) {
       m->get_state()->diff(xs_[t], xs_try_[t], dx_[t]);
       us_try_[t] = us_[t] - steplength * k_[t];
       us_try_[t].noalias() -= K_[t] * dx_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
-    } else {
-      m->calc(d, xs_try_[t]);
     }
+    m->calc(d, xs_try_[t], us_try_[t]);
     xs_try_[t + 1] = d->xnext;
     cost_try_ += d->cost;
     if (raiseIfNaN(cost_try_)) {
@@ -813,6 +1007,12 @@ void SolverFDDPTpl<Scalar>::updateCandidate() {
   gfeas_ = gfeas_try_;
   hfeas_ = hfeas_try_;
   merit_ = cost_ + upsilon_ * (ffeas_ + gfeas_ + hfeas_);
+  // Accept the parameter candidate on step acceptance
+  if (n_phases_ > 0) {
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      p_[i] = p_try_[i];
+    }
+  }
 }
 
 template <typename Scalar>
@@ -849,9 +1049,21 @@ template <typename NewScalar>
 SolverFDDPTpl<NewScalar> SolverFDDPTpl<Scalar>::cast() const {
   typedef SolverFDDPTpl<NewScalar> ReturnType;
   typedef ShootingProblemTpl<NewScalar> ProblemType;
+  if (problem_->get_n_phases() != 0) {
+    throw_pretty(
+        "Invalid operation: parameterized problems cannot be cast by "
+        "SolverFDDP.");
+  }
+  auto sp = std::dynamic_pointer_cast<ShootingProblemTpl<Scalar>>(problem_);
+  if (sp == nullptr) {
+    throw_pretty(
+        "Invalid operation: parameterized problems cannot be cast by "
+        "SolverFDDP.");
+  }
   ReturnType ret(
-      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()),
-      dyn_solver_, term_solver_);
+      std::static_pointer_cast<ProblemAbstractTpl<NewScalar>>(
+          std::make_shared<ProblemType>(sp->template cast<NewScalar>())),
+      dyn_solver_, term_solver_, astate_solver_);
   if (dyn_solver_ == HybridShoot && Ts_.size() > 1) {
     ret.set_dynamics_solver(dyn_solver_, Ts_[1] - Ts_[0]);
   }
@@ -903,6 +1115,12 @@ template <typename Scalar>
 void SolverFDDPTpl<Scalar>::allocateData() {
   const std::size_t ndx = problem_->get_ndx();
   const std::size_t T = problem_->get_T();
+  std::size_t max_nu = 0;
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
+      problem_->get_runningModels();
+  for (std::size_t t = 0; t < T; ++t) {
+    max_nu = std::max(max_nu, models[t]->get_nu());
+  }
   Vxx_tmp_ = MatrixXs::Zero(ndx, ndx);
   Vxx_.resize(T + 1);
   Vxx_f_.resize(T + 1);
@@ -922,8 +1140,6 @@ void SolverFDDPTpl<Scalar>::allocateData() {
   FuTVxx_p_.resize(T);
   Quu_llt_.resize(T);
   Quuk_.resize(T);
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
-      problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
     const std::size_t nu = model->get_nu();
@@ -980,6 +1196,182 @@ void SolverFDDPTpl<Scalar>::allocateData() {
   YdHcY_llt_ = Eigen::LLT<MatrixXs>(nh_T);
   dHc_lu_ = Eigen::FullPivLU<MatrixXs>(nh_T, nh_T);
   dHc_qr_ = Eigen::ColPivHouseholderQR<MatrixXs>(nh_T, nh_T);
+  // Parameter data -- only allocated when the problem has phases
+  n_phases_ = problem_->get_n_phases();
+  if (n_phases_ > 0) {
+    const std::vector<std::size_t>& phase_starts = problem_->get_phase_idxs();
+    const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+    if (phase_starts.size() != n_phases_ || phase_ends.size() != n_phases_) {
+      throw_pretty(
+          "Invalid argument: phase boundary count does not match n_phases.");
+    }
+    std::size_t max_np = 0;
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      if (phase_starts[i] >= phase_ends[i] || phase_ends[i] > T ||
+          (i > 0 && phase_starts[i] != phase_ends[i - 1])) {
+        throw_pretty("Invalid argument: inconsistent phase boundaries.");
+      }
+      const std::size_t np = models[phase_starts[i]]->get_np();
+      for (std::size_t t = phase_starts[i]; t < phase_ends[i]; ++t) {
+        if (models[t]->get_np() != np) {
+          throw_pretty(
+              "Invalid argument: all models in a phase must have the same "
+              "parameter dimension.");
+        }
+      }
+      max_np = std::max(max_np, np);
+    }
+    if (phase_starts.front() != 0 || phase_ends.back() != T ||
+        problem_->get_terminalModel()->get_np() !=
+            models[phase_starts.back()]->get_np()) {
+      throw_pretty(
+          "Invalid argument: phases must cover the horizon and the terminal "
+          "parameter dimension must match the final phase.");
+    }
+    // Per-node arrays (T+1 and T)
+    Vp_.resize(T + 1);
+    Vpp_.resize(T + 1);
+    Vpx_.resize(T + 1);
+    Vpx_f_.resize(T + 1);
+    Qp_.resize(T);
+    Qpp_.resize(T);
+    Qpx_.resize(T);
+    Qpu_.resize(T);
+    P_.resize(T);
+    P_dp_.resize(T);
+    Lpp_dp_.resize(T + 1);
+    Lpx_dp_.resize(T + 1);
+    Lpu_dp_.resize(T);
+    Qpc_.resize(T);
+    Vpc_.resize(T + 1);
+    for (std::size_t t = 0; t < T; ++t) {
+      const std::size_t nu = models[t]->get_nu();
+      const std::size_t np = models[t]->get_np();
+      Vp_[t] = VectorXs::Zero(np);
+      Vpp_[t] = MatrixXs::Zero(np, np);
+      Vpx_[t] = MatrixXs::Zero(np, ndx);
+      Vpx_f_[t] = VectorXs::Zero(np);
+      Qp_[t] = VectorXs::Zero(np);
+      Qpp_[t] = MatrixXs::Zero(np, np);
+      Qpx_[t] = MatrixXs::Zero(np, ndx);
+      Qpu_[t] = MatrixXs::Zero(np, nu);
+      P_[t] = MatrixXs::Zero(nu, np);
+      P_dp_[t] = VectorXs::Zero(nu);
+      Lpp_dp_[t] = VectorXs::Zero(np);
+      Lpx_dp_[t] = VectorXs::Zero(ndx);
+      Lpu_dp_[t] = VectorXs::Zero(nu);
+      Qpc_[t] = MatrixXs::Zero(np, nh_T);
+      Vpc_[t] = MatrixXs::Zero(np, nh_T);
+    }
+    const std::size_t terminal_np = problem_->get_terminalModel()->get_np();
+    Vp_.back() = VectorXs::Zero(terminal_np);
+    Vpp_.back() = MatrixXs::Zero(terminal_np, terminal_np);
+    Vpx_.back() = MatrixXs::Zero(terminal_np, ndx);
+    Vpx_f_.back() = VectorXs::Zero(terminal_np);
+    Lpp_dp_.back() = VectorXs::Zero(terminal_np);
+    Lpx_dp_.back() = VectorXs::Zero(ndx);
+    Vpc_.back() = MatrixXs::Zero(terminal_np, nh_T);
+    // Per-phase arrays
+    p_.resize(n_phases_);
+    p_try_.resize(n_phases_);
+    dp_.resize(n_phases_);
+    kp_.resize(n_phases_);
+    Kp_.resize(n_phases_);
+    Vp_phase_.resize(n_phases_);
+    Vpp_phase_.resize(n_phases_);
+    Vpx_phase_.resize(n_phases_);
+    Vpx_f_phase_.resize(n_phases_);
+    Vpp_llt_.resize(n_phases_);
+    Vpc_phase_.resize(n_phases_);
+    dPc_.resize(n_phases_);
+    Kpc_.resize(n_phases_);
+    // LuNull/QrNull data
+    Vpp_rank_.resize(n_phases_);
+    YZp_.resize(n_phases_);
+    Vpy_.resize(n_phases_);
+    Vyy_.resize(n_phases_);
+    Vy_.resize(n_phases_);
+    Vxy_.resize(n_phases_);
+    Vyy_llt_.resize(n_phases_);
+    kp_y_.resize(n_phases_);
+    Kp_y_.resize(n_phases_);
+    Vpp_svd_.resize(n_phases_);
+    FxTVxx_param_ = MatrixXs::Zero(ndx, ndx);
+    FpTVxx_param_ = MatrixXs::Zero(max_np, ndx);
+    FuTVxx_param_ = MatrixXs::Zero(max_nu, ndx);
+    Vpp_sym_ = MatrixXs::Zero(max_np, max_np);
+    Vp_next_ = VectorXs::Zero(max_np);
+    Vpp_next_ = MatrixXs::Zero(max_np, max_np);
+    Vpx_next_ = MatrixXs::Zero(max_np, ndx);
+    Vpx_f_next_ = VectorXs::Zero(max_np);
+    Vpc_next_ = MatrixXs::Zero(max_np, nh_T);
+    qp_c_.resize(n_phases_);
+    qp_x0_.resize(n_phases_);
+    qp_u0_.resize(n_phases_);
+#ifdef CROCODDYL_WITH_ODYN
+    qp_models_.resize(n_phases_);
+    qp_datas_.resize(n_phases_);
+    qp_solvers_.resize(n_phases_);
+    qp_params_.resize(n_phases_);
+#endif
+    const std::vector<
+        std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
+        constraints_models = problem_->get_parameter_constraints_models();
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      const std::size_t np = models[phase_starts[i]]->get_np();
+      p_[i] = VectorXs::Zero(np);
+      p_try_[i] = VectorXs::Zero(np);
+      dp_[i] = VectorXs::Zero(np);
+      kp_[i] = VectorXs::Zero(np);
+      Kp_[i] = MatrixXs::Zero(np, ndx);
+      Vp_phase_[i] = VectorXs::Zero(np);
+      Vpp_phase_[i] = MatrixXs::Zero(np, np);
+      Vpx_phase_[i] = MatrixXs::Zero(np, ndx);
+      Vpx_f_phase_[i] = VectorXs::Zero(np);
+      Vpp_llt_[i] = Eigen::LLT<MatrixXs>(np);
+      Vpc_phase_[i] = MatrixXs::Zero(np, nh_T);
+      dPc_[i] = MatrixXs::Zero(np, nh_T);
+      Kpc_[i] = MatrixXs::Zero(np, nh_T);
+      Vpp_rank_[i] = np;
+      YZp_[i] = MatrixXs::Zero(np, np);
+      Vpy_[i] = MatrixXs::Zero(np, np);
+      Vyy_[i] = MatrixXs::Zero(np, np);
+      Vy_[i] = VectorXs::Zero(np);
+      Vxy_[i] = MatrixXs::Zero(ndx, np);
+      Vyy_llt_[i] = Eigen::LLT<MatrixXs>(np);
+      kp_y_[i] = VectorXs::Zero(np);
+      Kp_y_[i] = MatrixXs::Zero(np, ndx);
+      Vpp_svd_[i] = Eigen::JacobiSVD<MatrixXs>(
+          np, np, Eigen::ComputeFullU | Eigen::ComputeFullV);
+      qp_c_[i] = VectorXs::Zero(np);
+      const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
+          constraints =
+              (i < constraints_models.size()) ? constraints_models[i] : nullptr;
+      if (constraints != nullptr) {
+        qp_x0_[i] = constraints->get_state()->zero();
+        qp_u0_[i] = VectorXs::Zero(constraints->get_nu());
+#ifdef CROCODDYL_WITH_ODYN
+        const std::size_t nh = constraints->get_nh();
+        const std::size_t ng = constraints->get_ng();
+        if (np != 0 && (nh != 0 || ng != 0)) {
+          qp_models_[i] =
+              std::make_shared<odyn::DenseModelTpl<Scalar>>(np, nh, 2 * ng);
+          qp_datas_[i] =
+              std::make_shared<odyn::DenseDataTpl<Scalar>>(*qp_models_[i]);
+          qp_solvers_[i] = std::make_shared<odyn::DenseQPTpl<Scalar>>();
+          qp_params_[i] = std::make_shared<odyn::ParamsTpl<Scalar>>();
+        }
+#endif
+      } else {
+        qp_x0_[i] = VectorXs::Zero(0);
+        qp_u0_[i] = VectorXs::Zero(0);
+      }
+    }
+    // Arrival-state correction matrices
+    Vxx0_ = MatrixXs::Zero(ndx, ndx);
+    Vx0_ = VectorXs::Zero(ndx);
+    Vxx0_llt_ = Eigen::LLT<MatrixXs>(ndx);
+  }
 }
 
 template <typename Scalar>
@@ -1316,6 +1708,580 @@ void SolverFDDPTpl<Scalar>::set_upsilon_decfactor(
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::set_zero_upsilon(const bool zero_upsilon) {
   zero_upsilon_ = zero_upsilon;
+}
+
+template <typename Scalar>
+bool SolverFDDPTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
+                                  const std::vector<VectorXs>& init_us,
+                                  const std::vector<VectorXs>& init_p,
+                                  const std::size_t maxiter,
+                                  const bool is_feasible,
+                                  const Scalar reg_init) {
+  // Initialise parameter vectors from init_p (one per phase)
+  if (!init_p.empty()) {
+    if (init_p.size() != n_phases_) {
+      throw_pretty(
+          "Invalid argument: init_p must contain one vector per phase.");
+    }
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      if (init_p[i].size() != p_[i].size()) {
+        throw_pretty("Invalid argument: init_p[" << i
+                                                 << "] has wrong dimension.");
+      }
+      p_[i] = init_p[i];
+    }
+  }
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    p_try_[i] = p_[i];
+    problem_->update_p(p_[i], i);
+  }
+  // Delegate to the base solve (xs/us initialisation, main loop)
+  return SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
+                               reg_init);
+}
+
+// Parametrized backward pass
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::parametrizedBackwardPass() {
+  const std::shared_ptr<ActionDataAbstract>& d_T = problem_->get_terminalData();
+  const std::size_t terminal_np = d_T->Lp.size();
+  Vp_.back() = d_T->Lp;
+  Vpx_.back() = d_T->Lpx;
+  Vpp_.back() = d_T->Lpp;
+  if (preg_ != Scalar(0.)) {
+    for (std::size_t i = 0; i < terminal_np; ++i) {
+      Vpp_.back()(i, i) += preg_;
+    }
+  }
+  Vpx_f_.back().noalias() = Vpx_.back() * fs_.back();
+
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
+      problem_->get_runningModels();
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
+      problem_->get_runningDatas();
+  const std::vector<std::size_t>& phase_starts = problem_->get_phase_idxs();
+  const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+
+  for (std::size_t phase = n_phases_; phase-- > 0;) {
+    const std::size_t np = models[phase_starts[phase]]->get_np();
+    Vp_next_.setZero();
+    Vpp_next_.setZero();
+    Vpx_next_.setZero();
+    Vpx_f_next_.setZero();
+    if (phase + 1 == n_phases_) {
+      Vp_next_.head(np) = Vp_.back();
+      Vpp_next_.topLeftCorner(np, np) = Vpp_.back();
+      Vpx_next_.topRows(np) = Vpx_.back();
+      Vpx_f_next_.head(np) = Vpx_f_.back();
+    }
+    for (std::size_t t = phase_ends[phase]; t-- > phase_starts[phase];) {
+      const std::shared_ptr<ActionModelAbstract>& model = models[t];
+      parametrizedActionValueFunction(t, model, datas[t]);
+      parametrizedPolicy(t);
+      parametrizedValueFunction(t, model);
+      Vp_next_.head(np) = Vp_[t];
+      Vpp_next_.topLeftCorner(np, np) = Vpp_[t];
+      Vpx_next_.topRows(np) = Vpx_[t];
+      Vpx_f_next_.head(np) = Vpx_f_[t];
+    }
+    const std::size_t start = phase_starts[phase];
+    Vp_phase_[phase] = Vp_[start];
+    Vpp_phase_[phase] = Vpp_[start];
+    Vpx_phase_[phase] = Vpx_[start];
+    Vpx_f_phase_[phase] = Vpx_f_[start];
+  }
+}
+
+// Parametrized action-value function
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::parametrizedActionValueFunction(
+    const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model,
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  const std::size_t nu = model->get_nu();
+  const std::size_t np = model->get_np();
+
+  // Vx_{t+1} + Vxx_{t+1} * f_{t+1}
+  VectorXs& Vx_p = Vx_[t + 1];
+  MatrixXs& Vxx_p = Vxx_[t + 1];
+
+  Vx_p += Vxx_f_[t + 1];  // temporarily add gap term
+
+  FxTVxx_param_.noalias() = data->Fx.transpose() * Vxx_p;
+  FpTVxx_param_.topRows(np).noalias() = data->Fp.transpose() * Vxx_p;
+
+  Qp_[t].noalias() = data->Lp + Vp_next_.head(np) + Vpx_f_next_.head(np) +
+                     data->Fp.transpose() * Vx_p;
+
+  Qpx_[t].noalias() = data->Lpx + Vpx_next_.topRows(np) * data->Fx;
+  Qpx_[t].noalias() += data->Fp.transpose() * FxTVxx_param_.transpose();
+
+  Qpp_[t].noalias() = data->Lpp + Vpp_next_.topLeftCorner(np, np);
+  Qpp_[t].noalias() +=
+      Scalar(2.) * data->Fp.transpose() * Vpx_next_.topRows(np).transpose();
+  Qpp_[t].noalias() += FpTVxx_param_.topRows(np) * data->Fp;
+
+  if (nu != 0) {
+    FuTVxx_param_.topRows(static_cast<Eigen::Index>(nu)).noalias() =
+        data->Fu.transpose() * Vxx_p;
+    Qpu_[t].noalias() = data->Lpu + Vpx_next_.topRows(np) * data->Fu;
+    Qpu_[t].noalias() +=
+        data->Fp.transpose() *
+        FuTVxx_param_.topRows(static_cast<Eigen::Index>(nu)).transpose();
+  }
+
+  // Restore
+  Vx_p -= Vxx_f_[t + 1];
+}
+
+// Parametrized policy
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::parametrizedPolicy(const std::size_t t) {
+  const std::size_t nu = problem_->get_runningModels()[t]->get_nu();
+  if (nu != 0) {
+    // P = Quu^{-1} Qpu^T   (already have Quu_llt_ from backwardPass)
+    P_[t] = Qpu_[t].transpose();
+    Quu_llt_[t].solveInPlace(P_[t]);
+  }
+}
+
+// Parametrized value function
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::parametrizedValueFunction(
+    const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model) {
+  const std::size_t nu = model->get_nu();
+  Vp_[t] = Qp_[t];
+  Vpx_[t] = Qpx_[t];
+  Vpp_[t] = Qpp_[t];
+  if (nu != 0) {
+    Vp_[t].noalias() -= P_[t].transpose() * Qu_[t];
+    Vpp_[t].noalias() -= Qpu_[t] * P_[t];
+    Vpx_[t].noalias() -= Qpu_[t] * K_[t];
+  }
+  const std::size_t np = model->get_np();
+  Vpp_sym_.topLeftCorner(np, np).noalias() =
+      Scalar(0.5) * (Vpp_[t] + Vpp_[t].transpose());
+  Vpp_[t] = Vpp_sym_.topLeftCorner(np, np);
+  Vpx_f_[t].noalias() = Vpx_[t] * fs_[t];
+}
+
+// Parameter solve pass
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::paramsPass() {
+  if (n_phases_ == 0) return;
+
+  const std::vector<std::size_t>& phase_starts = problem_->get_phase_idxs();
+
+  switch (astate_solver_) {
+    case AStateSchur:
+    case AStateNone: {
+      for (std::size_t i = 0; i < n_phases_; ++i) {
+        if (p_[i].size() == 0) {
+          continue;
+        }
+        Vpp_llt_[i].compute(Vpp_phase_[i]);
+        if (Vpp_llt_[i].info() != Eigen::Success) {
+          throw_pretty("parameter backward error: Vpp_phase is not PD");
+        }
+        kp_[i] = Vp_phase_[i] + Vpx_f_phase_[i];
+        Vpp_llt_[i].solveInPlace(kp_[i]);
+        Kp_[i] = Vpx_phase_[i];
+        Vpp_llt_[i].solveInPlace(Kp_[i]);
+      }
+      break;
+    }
+    case AStateLuNull:
+    case AStateQrNull: {
+      for (std::size_t i = 0; i < n_phases_; ++i) {
+        const std::size_t np = static_cast<std::size_t>(p_[i].size());
+        if (np == 0) {
+          continue;
+        }
+        Eigen::JacobiSVD<MatrixXs>& svd = Vpp_svd_[i];
+        svd.compute(Vpp_phase_[i], Eigen::ComputeFullU | Eigen::ComputeFullV);
+        const Eigen::Index sv_count = svd.singularValues().size();
+        const typename Eigen::NumTraits<Scalar>::Real tol =
+            static_cast<typename Eigen::NumTraits<Scalar>::Real>(
+                std::max(Vpp_phase_[i].rows(), Vpp_phase_[i].cols())) *
+            Eigen::NumTraits<Scalar>::epsilon() *
+            (sv_count > 0 ? svd.singularValues()(0)
+                          : typename Eigen::NumTraits<Scalar>::Real(0.));
+        Eigen::Index rank_idx = 0;
+        while (rank_idx < sv_count && svd.singularValues()(rank_idx) > tol) {
+          ++rank_idx;
+        }
+        const Eigen::Index np_i = static_cast<Eigen::Index>(np);
+        const Eigen::Index nullity = np_i - rank_idx;
+        YZp_[i].setZero();
+        if (rank_idx > 0) {
+          YZp_[i].leftCols(rank_idx) = svd.matrixU().leftCols(rank_idx);
+        }
+        if (nullity > 0) {
+          YZp_[i].middleCols(rank_idx, nullity) =
+              svd.matrixV().rightCols(nullity);
+        }
+        Vpp_rank_[i] = static_cast<std::size_t>(rank_idx);
+        const std::size_t rank = Vpp_rank_[i];
+        const Eigen::Index rank_eig = static_cast<Eigen::Index>(rank);
+        // Build reduced system
+        Vpy_[i].setZero();
+        Vyy_[i].setZero();
+        if (rank_eig > 0) {
+          Vpy_[i].leftCols(rank_eig).noalias() =
+              Vpp_phase_[i] * YZp_[i].leftCols(rank_eig);
+          Vyy_[i].topLeftCorner(rank_eig, rank_eig).noalias() =
+              YZp_[i].leftCols(rank_eig).transpose() *
+              Vpy_[i].leftCols(rank_eig);
+        }
+        if (rank_eig < np_i) {
+          Vyy_[i]
+              .bottomRightCorner(np_i - rank_eig, np_i - rank_eig)
+              .setIdentity();
+        }
+        Vyy_llt_[i].compute(Vyy_[i]);
+        if (Vyy_llt_[i].info() != Eigen::Success) {
+          throw_pretty("parameter backward error: Vyy is not PD");
+        }
+        Vy_[i].setZero();
+        Vxy_[i].setZero();
+        if (rank_eig > 0) {
+          Vy_[i].head(rank_eig).noalias() =
+              YZp_[i].leftCols(rank_eig).transpose() * Vp_phase_[i];
+          Vxy_[i].leftCols(rank_eig).noalias() =
+              Vpx_phase_[i].transpose() * YZp_[i].leftCols(rank_eig);
+        }
+        kp_y_[i] = Vy_[i];
+        Vyy_llt_[i].solveInPlace(kp_y_[i]);
+        kp_[i].noalias() = YZp_[i] * kp_y_[i];
+        Kp_y_[i].setZero();
+        if (rank_eig > 0) {
+          Kp_y_[i].topRows(rank_eig) = Vxy_[i].leftCols(rank_eig).transpose();
+        }
+        Vyy_llt_[i].solveInPlace(Kp_y_[i]);
+        Kp_[i].noalias() = YZp_[i] * Kp_y_[i];
+      }
+      break;
+    }
+    case AStateQP: {
+#ifdef CROCODDYL_WITH_ODYN
+      START_PROFILER("SolverFDDP::paramsPassQP");
+      const std::vector<
+          std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
+          constraints_models = problem_->get_parameter_constraints_models();
+      const std::vector<
+          std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
+          constraints_datas = problem_->get_parameter_constraints_datas();
+      for (std::size_t i = 0; i < n_phases_; ++i) {
+        const std::size_t np = static_cast<std::size_t>(p_[i].size());
+        if (np == 0) {
+          continue;
+        }
+        Vpp_llt_[i].compute(Vpp_phase_[i]);
+        if (Vpp_llt_[i].info() != Eigen::Success) {
+          STOP_PROFILER("SolverFDDP::paramsPassQP");
+          throw_pretty("parameter backward error: Vpp_phase is not PD");
+        }
+        Kp_[i] = Vpx_phase_[i];
+        Vpp_llt_[i].solveInPlace(Kp_[i]);
+
+        qp_c_[i].noalias() = Vp_phase_[i] + Vpx_f_phase_[i];
+        const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
+            constraints =
+                (i < constraints_models.size()) ? constraints_models[i]
+                                                : nullptr;
+        const std::shared_ptr<typename ShootingProblem::ConstraintDataManager>
+            constraints_data =
+                (i < constraints_datas.size()) ? constraints_datas[i] : nullptr;
+        const bool has_constraints =
+            constraints != nullptr && constraints_data != nullptr &&
+            (constraints->get_nh() != 0 || constraints->get_ng() != 0);
+
+        if (!has_constraints) {
+          kp_[i] = qp_c_[i];
+          Vpp_llt_[i].solveInPlace(kp_[i]);
+          continue;
+        }
+
+        const std::size_t nh = constraints->get_nh();
+        const std::size_t ng = constraints->get_ng();
+        if (qp_x0_[i].size() !=
+                static_cast<Eigen::Index>(constraints->get_state()->get_nx()) ||
+            qp_u0_[i].size() !=
+                static_cast<Eigen::Index>(constraints->get_nu())) {
+          STOP_PROFILER("SolverFDDP::paramsPassQP");
+          throw_pretty(
+              "parameter backward error: parameter constraint dimensions "
+              "changed; recreate the solver");
+        }
+        constraints->calc(constraints_data, qp_x0_[i], qp_u0_[i]);
+        constraints->calcDiff(constraints_data, qp_x0_[i], qp_u0_[i]);
+        if (!qp_models_[i] || !qp_datas_[i] || !qp_solvers_[i] ||
+            !qp_params_[i]) {
+          STOP_PROFILER("SolverFDDP::paramsPassQP");
+          throw_pretty(
+              "parameter backward error: missing preallocated QP data");
+        }
+        odyn::DenseModelTpl<Scalar>& qp_model = *qp_models_[i];
+        odyn::DenseDataTpl<Scalar>& qp_data = *qp_datas_[i];
+        odyn::DenseQPTpl<Scalar>& qp_solver = *qp_solvers_[i];
+        odyn::ParamsTpl<Scalar>& qp_params = *qp_params_[i];
+        if (qp_model.n != np || qp_model.m != nh || qp_model.p != 2 * ng) {
+          STOP_PROFILER("SolverFDDP::paramsPassQP");
+          throw_pretty(
+              "parameter backward error: parameter constraint dimensions "
+              "changed; recreate the solver");
+        }
+
+        qp_model.Q = Vpp_phase_[i];
+        qp_model.c = qp_c_[i];
+        qp_model.l.setConstant(-std::numeric_limits<Scalar>::infinity());
+        qp_model.u.setConstant(std::numeric_limits<Scalar>::infinity());
+        if (nh != 0) {
+          qp_model.A = constraints_data->Hp;
+          qp_model.b = -constraints_data->h;
+        }
+        if (ng != 0) {
+          qp_model.G.topRows(ng) = constraints_data->Gp;
+          qp_model.G.bottomRows(ng) = -constraints_data->Gp;
+          qp_model.h.head(ng) =
+              constraints->get_ub().head(ng) - constraints_data->g;
+          qp_model.h.tail(ng) =
+              constraints_data->g - constraints->get_lb().head(ng);
+        }
+
+        const odyn::Status status = qp_solver.solve(
+            qp_model, qp_data, qp_params, odyn::VerboseLevel::Silent);
+        if (status == odyn::Status::PrimalInfeasible ||
+            status == odyn::Status::DualInfeasible ||
+            status == odyn::Status::Unsolved) {
+          STOP_PROFILER("SolverFDDP::paramsPassQP");
+          throw_pretty("parameter backward error: arrival-node QP failed");
+        }
+        kp_[i].noalias() = -qp_data.x;
+      }
+      STOP_PROFILER("SolverFDDP::paramsPassQP");
+      break;
+#else
+      throw_pretty(
+          "parameter backward error: AStateQP requires CROCODDYL_WITH_ODYN");
+#endif
+    }
+  }
+
+  // Compute dp = -kp (feedforward) - Kp * dx_phase_start (feedback)
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    dp_[i] = -kp_[i];
+  }
+  // For phases > 0, couple the parameter direction to the state direction
+  // at the phase start (dxs_[phase_starts[nph]])
+  for (std::size_t i = 1; i < n_phases_; ++i) {
+    const std::size_t t = phase_starts[i];
+    dp_[i].noalias() -= Kp_[i] * dxs_[t];
+  }
+
+  // Arrival-state solver: marginalise the initial state
+  if (astate_solver_ != AStateNone && astate_solver_ != AStateQP) {
+    Vxx0_ = Vxx_[0];
+    Vxx0_.noalias() -= Vpx_phase_[0].transpose() * Kp_[0];
+    Vx0_ = Vx_[0];
+    Vx0_.noalias() -= Vpx_phase_[0].transpose() * kp_[0];
+    Vxx0_llt_.compute(Vxx0_);
+    if (Vxx0_llt_.info() != Eigen::Success) {
+      throw_pretty("parameter backward error: Vxx0 is not PD");
+    }
+    dxs_[0] = -Vx0_;
+    Vxx0_llt_.solveInPlace(dxs_[0]);
+    dp_[0].noalias() -= Kp_[0] * dxs_[0];
+  }
+
+  // Update k_ with P * dp  contribution so control policy uses params
+  const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
+  std::size_t t0 = 0;
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    for (std::size_t t = t0; t < phase_ends[i]; ++t) {
+      P_dp_[t].noalias() = P_[t] * dp_[i];
+      k_[t] += P_dp_[t];
+    }
+    t0 = phase_ends[i];
+  }
+}
+
+// paramsBatchPass
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::paramsBatchPass() {
+  if (n_phases_ == 0) return;
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    if (p_[i].size() == 0) {
+      continue;
+    }
+    Kpc_[i] = Vpc_phase_[i];
+    Vpp_llt_[i].solveInPlace(Kpc_[i]);
+    dPc_[i] = -Kpc_[i];
+  }
+}
+
+// calcDir override (restore p on non-acceptance)
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::calcDir() {
+  START_PROFILER("SolverFDDP::calcDir");
+  if (!acceptstep_ && n_phases_ > 0) {
+    // Restore the last accepted parameters so calcDiff sees correct values
+    for (std::size_t i = 0; i < n_phases_; ++i) {
+      problem_->update_p(p_[i], i);
+    }
+    if (problem_->has_parameter_constraints()) {
+      const std::vector<
+          std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
+          constraints_models = problem_->get_parameter_constraints_models();
+      const std::vector<
+          std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
+          constraints_datas = problem_->get_parameter_constraints_datas();
+      for (std::size_t i = 0; i < constraints_models.size(); ++i) {
+        const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>&
+            constraints = constraints_models[i];
+        if (constraints == nullptr) {
+          continue;
+        }
+        if (i >= constraints_datas.size() || constraints_datas[i] == nullptr) {
+          throw_pretty("Invalid data: parameter-constraint data is missing");
+        }
+        if (i >= qp_x0_.size() || i >= qp_u0_.size() ||
+            constraints->get_state() == nullptr ||
+            qp_x0_[i].size() !=
+                static_cast<Eigen::Index>(constraints->get_state()->get_nx()) ||
+            qp_u0_[i].size() !=
+                static_cast<Eigen::Index>(constraints->get_nu())) {
+          throw_pretty(
+              "Invalid data: parameter-constraint workspace is invalid");
+        }
+        constraints->calc(constraints_datas[i], qp_x0_[i], qp_u0_[i]);
+      }
+    }
+  }
+  SolverAbstract::calcDir();
+  if (n_phases_ > 0 && astate_solver_ != AStateNone) {
+    // PDDP treats the arrival state as a decision variable, not as an initial
+    // dynamics defect.
+    fs_[0].setZero();
+    ffeas_ = computeFeasibility(fs_);
+    feas_ = ffeas_ + gfeas_ + hfeas_;
+  }
+  STOP_PROFILER("SolverFDDP::calcDir");
+}
+
+// Getters
+
+template <typename Scalar>
+ArrivalStateSolverType SolverFDDPTpl<Scalar>::get_astate_solver() const {
+  return astate_solver_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_p() const {
+  return p_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_p_try() const {
+  return p_try_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_dp() const {
+  return dp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_kp() const {
+  return kp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Kp() const {
+  return Kp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_Vp() const {
+  return Vp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Vpp() const {
+  return Vpp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Vpx() const {
+  return Vpx_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_Vp_phase() const {
+  return Vp_phase_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Vpp_phase() const {
+  return Vpp_phase_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Vpx_phase() const {
+  return Vpx_phase_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
+SolverFDDPTpl<Scalar>::get_Qp() const {
+  return Qp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Qpp() const {
+  return Qpp_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Qpx() const {
+  return Qpx_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_Qpu() const {
+  return Qpu_;
+}
+
+template <typename Scalar>
+const std::vector<typename MathBaseTpl<Scalar>::MatrixXs>&
+SolverFDDPTpl<Scalar>::get_P() const {
+  return P_;
+}
+
+template <typename Scalar>
+void SolverFDDPTpl<Scalar>::set_astate_solver(
+    const ArrivalStateSolverType type) {
+  astate_solver_ = type;
 }
 
 }  // namespace crocoddyl

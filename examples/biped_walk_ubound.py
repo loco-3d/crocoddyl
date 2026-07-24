@@ -102,14 +102,14 @@ for i, phase in enumerate(GAITPHASES):
     us = solver[i].problem.quasiStatic([x0] * solver[i].problem.T)
     print("*** SOLVE {key} (FeasShoot) ***".format_map(locals()))
     solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
-    solver[i].solve(xs, us, 100, False)
+    solver[i].solve(xs, us, maxiter=100, is_feasible=False)
     print("*** SOLVE {key} (MultiShoot) ***".format_map(locals()))
     solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
-    solver[i].solve(xs, us, 100, False)
+    solver[i].solve(xs, us, maxiter=100, is_feasible=False)
     Ts = int(solver[i].problem.T / 3)
     print("*** SOLVE {key} (HybridShoot: {Ts}) ***".format_map(locals()))
     solver[i].setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
-    solver[i].solve(xs, us, 100, False)
+    solver[i].solve(xs, us, maxiter=100, is_feasible=False)
     if i != len(GAITPHASES) - 1:
         print()
 

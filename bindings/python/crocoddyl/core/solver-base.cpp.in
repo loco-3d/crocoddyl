@@ -406,7 +406,7 @@ struct SolverAbstractVisitor
 #define CROCODDYL_SOLVER_ABSTRACT_PYTHON_BINDINGS(Scalar)                      \
   typedef SolverAbstractTpl<Scalar> Model;                                     \
   typedef SolverAbstractTpl_wrap<Scalar> Model_wrap;                           \
-  typedef ShootingProblemTpl<Scalar> Problem;                                  \
+  typedef ProblemAbstractTpl<Scalar> Problem;                                  \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model_wrap, boost::noncopyable>(                                  \
       "SolverAbstract",                                                        \

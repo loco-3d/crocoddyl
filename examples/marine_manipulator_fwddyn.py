@@ -158,7 +158,7 @@ solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.FeasShoot)
 solver.solve()
 print("*** SOLVE (MultiShoot) ***")
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.MultiShoot)
-solver.solve([], [], 200)
+solver.solve([], [], maxiter=200)
 if crocoddyl.WITH_ODYN:
     print("*** SOLVE (OdynSQP) ***")
     solverSQP.solve([], [], 200)

@@ -103,7 +103,7 @@ else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving the problem with the BoxDDP solver
-solver.solve([], [], 200)
+solver.solve([], [], maxiter=200)
 
 # Plotting the entire motion
 if WITHPLOT:

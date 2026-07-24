@@ -66,7 +66,7 @@ else:
 # Solve the DDP problem
 xs = [x0] * (solver.problem.T + 1)
 us = solver.problem.quasiStatic([x0] * solver.problem.T)
-solver.solve(xs, us, 100, False)
+solver.solve(xs, us, maxiter=100, is_feasible=False)
 
 # Plotting the entire motion
 if WITHPLOT:

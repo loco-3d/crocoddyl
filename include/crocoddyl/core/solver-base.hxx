@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University, University of Oxford
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,11 @@ namespace crocoddyl {
 template <typename Scalar>
 SolverAbstractTpl<Scalar>::SolverAbstractTpl(
     std::shared_ptr<ShootingProblem> problem)
+    : SolverAbstractTpl(std::static_pointer_cast<ProblemAbstract>(problem)) {}
+
+template <typename Scalar>
+SolverAbstractTpl<Scalar>::SolverAbstractTpl(
+    std::shared_ptr<ProblemAbstract> problem)
     : problem_(problem),
       th_acceptstep_(Scalar(0.1)),
       th_stop_(sqrt(std::numeric_limits<Scalar>::epsilon())),
@@ -21,10 +26,15 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
       tmp_feas_(Scalar(0.)),
       reg_min_(ScaleNumerics<Scalar>(1e-9)),
       reg_max_(ScaleNumerics<Scalar>(1e9, 1e-4)),
-      nh_T_(problem->get_terminalModel()->get_nh_T()),
-      ng_T_(problem->get_terminalModel()->get_ng_T()),
+      nh_T_(0),
+      ng_T_(0),
       acceptstep_(false),
       recalcdir_(true) {
+  if (problem_ == nullptr) {
+    throw_pretty("Invalid argument: problem is null");
+  }
+  nh_T_ = problem_->get_terminalModel()->get_nh_T();
+  ng_T_ = problem_->get_terminalModel()->get_ng_T();
   allocateData();
   // Defining the list of step lengths used in the linear search routine
   const std::size_t n_alphas = 10;
@@ -541,10 +551,21 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
   START_PROFILER("SolverAbstract::computeInequalityFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
+  const std::shared_ptr<ActionModelAbstract>& terminal_model =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& terminal_data =
+      problem_->get_terminalData();
+  const std::size_t ng_T = terminal_model->get_ng_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
+  const bool has_parameter_constraints = problem_->has_parameter_constraints();
+  const std::vector<std::shared_ptr<ConstraintModelManagerTpl<Scalar>>>&
+      parameter_constraints_models =
+          problem_->get_parameter_constraints_models();
+  const std::vector<std::shared_ptr<ConstraintDataManagerTpl<Scalar>>>&
+      parameter_constraints_datas = problem_->get_parameter_constraints_datas();
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_ng() > 0) {
       g_adj_[t] = datas[t]
@@ -552,10 +573,10 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
                       .cwiseMin(models[t]->get_g_ub());
     }
   }
-  if (problem_->get_terminalModel()->get_ng_T() > 0) {
-    g_adj_.back() = problem_->get_terminalData()
-                        ->g.cwiseMax(problem_->get_terminalModel()->get_g_lb())
-                        .cwiseMin(problem_->get_terminalModel()->get_g_ub());
+  if (ng_T > 0) {
+    g_adj_.back() = terminal_data->g.head(ng_T)
+                        .cwiseMax(terminal_model->get_g_lb().head(ng_T))
+                        .cwiseMin(terminal_model->get_g_ub().head(ng_T));
   }
   switch (feasnorm_) {
     case LInf:
@@ -566,10 +587,31 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
               (datas[t]->g - g_adj_[t]).template lpNorm<Eigen::Infinity>());
         }
       }
-      if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ = std::max(tmp_feas_,
-                             (problem_->get_terminalData()->g - g_adj_.back())
-                                 .template lpNorm<Eigen::Infinity>());
+      if (ng_T > 0) {
+        tmp_feas_ =
+            std::max(tmp_feas_, (terminal_data->g.head(ng_T) - g_adj_.back())
+                                    .template lpNorm<Eigen::Infinity>());
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_ng() > 0) {
+            const Eigen::Index ng =
+                static_cast<Eigen::Index>(constraints->get_ng());
+            tmp_feas_ = std::max(
+                tmp_feas_, (constraints_data->g.head(ng)
+                                .cwiseMax(constraints->get_lb().head(ng))
+                                .cwiseMin(constraints->get_ub().head(ng)) -
+                            constraints_data->g.head(ng))
+                               .template lpNorm<Eigen::Infinity>());
+          }
+        }
       }
       break;
     case L1:
@@ -578,9 +620,29 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
           tmp_feas_ += (datas[t]->g - g_adj_[t]).template lpNorm<1>();
         }
       }
-      if (problem_->get_terminalModel()->get_ng_T() > 0) {
-        tmp_feas_ += (problem_->get_terminalData()->g - g_adj_.back())
-                         .template lpNorm<1>();
+      if (ng_T > 0) {
+        tmp_feas_ +=
+            (terminal_data->g.head(ng_T) - g_adj_.back()).template lpNorm<1>();
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_ng() > 0) {
+            const Eigen::Index ng =
+                static_cast<Eigen::Index>(constraints->get_ng());
+            tmp_feas_ += (constraints_data->g.head(ng)
+                              .cwiseMax(constraints->get_lb().head(ng))
+                              .cwiseMin(constraints->get_ub().head(ng)) -
+                          constraints_data->g.head(ng))
+                             .template lpNorm<1>();
+          }
+        }
       }
       break;
     case L2:
@@ -589,9 +651,29 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
           tmp_feas_ += (datas[t]->g - g_adj_[t]).squaredNorm();
         }
       }
-      if (problem_->get_terminalModel()->get_ng_T() > 0) {
+      if (ng_T > 0) {
         tmp_feas_ +=
-            (problem_->get_terminalData()->g - g_adj_.back()).squaredNorm();
+            (terminal_data->g.head(ng_T) - g_adj_.back()).squaredNorm();
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_ng() > 0) {
+            const Eigen::Index ng =
+                static_cast<Eigen::Index>(constraints->get_ng());
+            tmp_feas_ += (constraints_data->g.head(ng)
+                              .cwiseMax(constraints->get_lb().head(ng))
+                              .cwiseMin(constraints->get_ub().head(ng)) -
+                          constraints_data->g.head(ng))
+                             .squaredNorm();
+          }
+        }
       }
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
@@ -605,10 +687,21 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
   START_PROFILER("SolverAbstract::computeEqualityFeasibility");
   tmp_feas_ = Scalar(0.);
   const std::size_t T = problem_->get_T();
+  const std::shared_ptr<ActionModelAbstract>& terminal_model =
+      problem_->get_terminalModel();
+  const std::shared_ptr<ActionDataAbstract>& terminal_data =
+      problem_->get_terminalData();
+  const std::size_t nh_T = terminal_model->get_nh_T();
   const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
+  const bool has_parameter_constraints = problem_->has_parameter_constraints();
+  const std::vector<std::shared_ptr<ConstraintModelManagerTpl<Scalar>>>&
+      parameter_constraints_models =
+          problem_->get_parameter_constraints_models();
+  const std::vector<std::shared_ptr<ConstraintDataManagerTpl<Scalar>>>&
+      parameter_constraints_datas = problem_->get_parameter_constraints_datas();
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {
@@ -617,10 +710,28 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
                                datas[t]->h.template lpNorm<Eigen::Infinity>());
         }
       }
-      if (problem_->get_terminalModel()->get_nh_T() > 0) {
+      if (nh_T > 0) {
         tmp_feas_ = std::max(
             tmp_feas_,
-            problem_->get_terminalData()->h.template lpNorm<Eigen::Infinity>());
+            terminal_data->h.head(nh_T).template lpNorm<Eigen::Infinity>());
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_nh() > 0) {
+            const Eigen::Index nh =
+                static_cast<Eigen::Index>(constraints->get_nh());
+            tmp_feas_ =
+                std::max(tmp_feas_, constraints_data->h.head(nh)
+                                        .template lpNorm<Eigen::Infinity>());
+          }
+        }
       }
       break;
     case L1:
@@ -629,8 +740,24 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
           tmp_feas_ += datas[t]->h.template lpNorm<1>();
         }
       }
-      if (problem_->get_terminalModel()->get_nh_T() > 0) {
-        tmp_feas_ += problem_->get_terminalData()->h.template lpNorm<1>();
+      if (nh_T > 0) {
+        tmp_feas_ += terminal_data->h.head(nh_T).template lpNorm<1>();
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_nh() > 0) {
+            const Eigen::Index nh =
+                static_cast<Eigen::Index>(constraints->get_nh());
+            tmp_feas_ += constraints_data->h.head(nh).template lpNorm<1>();
+          }
+        }
       }
       break;
     case L2:
@@ -639,8 +766,24 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
           tmp_feas_ += datas[t]->h.squaredNorm();
         }
       }
-      if (problem_->get_terminalModel()->get_nh_T() > 0) {
-        tmp_feas_ += problem_->get_terminalData()->h.squaredNorm();
+      if (nh_T > 0) {
+        tmp_feas_ += terminal_data->h.head(nh_T).squaredNorm();
+      }
+      if (has_parameter_constraints) {
+        for (std::size_t i = 0; i < parameter_constraints_models.size(); ++i) {
+          const std::shared_ptr<ConstraintModelManagerTpl<Scalar>>&
+              constraints = parameter_constraints_models[i];
+          const std::shared_ptr<ConstraintDataManagerTpl<Scalar>>&
+              constraints_data = (i < parameter_constraints_datas.size())
+                                     ? parameter_constraints_datas[i]
+                                     : nullptr;
+          if (constraints != nullptr && constraints_data != nullptr &&
+              constraints->get_nh() > 0) {
+            const Eigen::Index nh =
+                static_cast<Eigen::Index>(constraints->get_nh());
+            tmp_feas_ += constraints_data->h.head(nh).squaredNorm();
+          }
+        }
       }
       tmp_feas_ = std::sqrt(tmp_feas_);
       break;
@@ -735,7 +878,7 @@ SolverAbstractTpl<Scalar>::getCallbacks() const {
 }
 
 template <typename Scalar>
-const std::shared_ptr<ShootingProblemTpl<Scalar>>&
+const std::shared_ptr<ProblemAbstractTpl<Scalar>>&
 SolverAbstractTpl<Scalar>::get_problem() const {
   return problem_;
 }

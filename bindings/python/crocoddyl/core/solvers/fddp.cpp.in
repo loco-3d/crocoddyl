@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -22,7 +22,6 @@ template <typename Model>
 struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
   using Scalar = typename Model::Scalar;
   using VectorXs = typename Model::VectorXs;
-  BOOST_PYTHON_FUNCTION_OVERLOADS(SolverFDDP_solves, solve, 1, 6)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverFDDP_computeDirections,
                                          Model::computeDirection, 0, 1)
   BOOST_PYTHON_FUNCTION_OVERLOADS(SolverFDDP_trySteps, tryStep, 1, 2)
@@ -38,29 +37,32 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def(
-          "solve", &solve,
-          SolverFDDP_solves(
-              bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
-                       "init_reg"),
-              "Compute the optimal trajectory xopt, uopt as lists of T+1 and T "
-              "terms.\n\n"
-              "From an initial guess init_xs,init_us (feasible or not), "
-              "iterate over computeDirection and tryStep until "
-              "stoppingCriteria is below threshold. It also describes the "
-              "globalization strategy used during the numerical optimization.\n"
+          "solve",
+          static_cast<bool (Model::*)(
+              const std::vector<VectorXs>&, const std::vector<VectorXs>&,
+              const std::vector<VectorXs>&, const std::size_t, const bool,
+              const Scalar)>(&Model::solve),
+          (bp::arg("init_xs") = DefaultVector<Scalar>::value,
+           bp::arg("init_us") = DefaultVector<Scalar>::value,
+           bp::arg("init_p") = DefaultVector<Scalar>::value,
+           bp::arg("maxiter") = 100, bp::arg("is_feasible") = false,
+           bp::arg("init_reg") = std::numeric_limits<Scalar>::quiet_NaN()),
+              "Solve the optimal estimation/control problem.\n\n"
+              "An optional initial parameter vector can be provided for each "
+              "phase.\n"
               ":param init_xs: initial guess for state trajectory with T+1 "
               "elements (default [])\n"
               ":param init_us: initial guess for control trajectory with T "
               "elements (default []).\n"
+              ":param init_p: initial parameter vectors, one per phase "
+              "(default []).\n"
               ":param maxiter: maximum allowed number of iterations (default "
               "100).\n"
               ":param is_feasible: true if the init_xs are obtained from "
               "integrating the init_us (rollout) (default False).\n"
-              ":param init_reg: initial guess for the regularization value. "
-              "Very low values are typical used with very good guess points "
+              ":param init_reg: initial guess for the regularization value "
               "(default 1e-9).\n"
-              ":returns the optimal trajectory xopt, uopt and a boolean that "
-              "describes if convergence was reached."))
+              ":returns True if convergence was reached.")
         .def("computeDirection", &Model::computeDirection,
              SolverFDDP_computeDirections(
                  bp::args("self", "recalc"),
@@ -445,15 +447,109 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             make_function(
                 &Model::get_beta_plus,
                 bp::return_value_policy<bp::reference_existing_object>()),
-            "beta_plus");
-  }
-  static bool solve(
-      Model& self,
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar init_reg = std::numeric_limits<Scalar>::quiet_NaN()) {
-    return self.solve(init_xs, init_us, maxiter, is_feasible, init_reg);
+            "beta_plus")
+        // Parameter-estimation properties
+        .add_property(
+            "astate_solver",
+            bp::make_function(&Model::get_astate_solver),
+            bp::make_function(&Model::set_astate_solver),
+            "Type of arrival-state solver used for parameter estimation.")
+        .add_property(
+            "p",
+            make_function(
+                &Model::get_p,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Accepted parameter vectors, one per phase.")
+        .add_property(
+            "p_try",
+            make_function(
+                &Model::get_p_try,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Candidate parameter vectors, one per phase.")
+        .add_property(
+            "dp",
+            make_function(
+                &Model::get_dp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Parameter increments (step direction), one per phase.")
+        .add_property(
+            "kp",
+            make_function(
+                &Model::get_kp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Parameter feed-forward gains, one per phase.")
+        .add_property(
+            "Kp",
+            make_function(
+                &Model::get_Kp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Parameter feedback gains (dp / dx0), one per phase.")
+        .add_property(
+            "Vp",
+            make_function(
+                &Model::get_Vp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Value-function gradient w.r.t. parameters (per node).")
+        .add_property(
+            "Vpp",
+            make_function(
+                &Model::get_Vpp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Value-function Hessian w.r.t. parameters (per node).")
+        .add_property(
+            "Vpx",
+            make_function(
+                &Model::get_Vpx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Value-function cross Hessian d2V / dp dx (per node).")
+        .add_property(
+            "Vp_phase",
+            make_function(
+                &Model::get_Vp_phase,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Phase-level value-function gradient w.r.t. parameters.")
+        .add_property(
+            "Vpp_phase",
+            make_function(
+                &Model::get_Vpp_phase,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Phase-level value-function Hessian w.r.t. parameters.")
+        .add_property(
+            "Vpx_phase",
+            make_function(
+                &Model::get_Vpx_phase,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Phase-level value-function cross Hessian d2V / dp dx.")
+        .add_property(
+            "Qp",
+            make_function(
+                &Model::get_Qp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Action-value gradients with respect to parameters.")
+        .add_property(
+            "Qpp",
+            make_function(
+                &Model::get_Qpp,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Action-value parameter Hessians.")
+        .add_property(
+            "Qpx",
+            make_function(
+                &Model::get_Qpx,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Action-value parameter-state Hessians.")
+        .add_property(
+            "Qpu",
+            make_function(
+                &Model::get_Qpu,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Action-value parameter-control Hessians.")
+        .add_property(
+            "P",
+            make_function(
+                &Model::get_P,
+                bp::return_value_policy<bp::reference_existing_object>()),
+            "Control response to parameter variations.");
   }
   static Scalar tryStep(Model& self, const Scalar step_length = Scalar(1.)) {
     return self.tryStep(step_length);
@@ -470,7 +566,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
 #define CROCODDYL_SOLVER_FDDP_PYTHON_BINDINGS(Scalar)                          \
   typedef SolverFDDPTpl<Scalar> Model;                                         \
   typedef SolverAbstractTpl<Scalar> ModelBase;                                 \
-  typedef typename ModelBase::ShootingProblem ShootingProblem;                 \
+  typedef typename ModelBase::ProblemAbstract ProblemAbstract;                 \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model, bp::bases<ModelBase>>(                                     \
       "SolverFDDP",                                                            \
@@ -483,13 +579,17 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
       "control commands U*.\n"                                                 \
       ":param shootingProblem: shooting problem (list of action models along " \
       "trajectory.)",                                                          \
-      bp::init<std::shared_ptr<ShootingProblem>,                               \
-               bp::optional<DynamicsSolverType, EqualitySolverType>>(          \
-          bp::args("self", "problem", "dyn_solver", "term_solver"),            \
-          "Initialize the vector dimension.\n\n"                               \
+      bp::init<std::shared_ptr<ProblemAbstract>,                               \
+               bp::optional<DynamicsSolverType, EqualitySolverType,           \
+                            ArrivalStateSolverType>>(                          \
+          bp::args("self", "problem", "dyn_solver", "term_solver",            \
+                   "astate_solver"),                                           \
+          "Initialize the FDDP solver.\n\n"                                   \
           ":param problem: shooting problem.\n"                                \
-          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"    \
-          ":param term_solver: type of terminal solver (defaul LuNull)"))      \
+          ":param dyn_solver: type of dynamic solver (default FeasShoot)\n"   \
+          ":param term_solver: type of terminal solver (default LuNull)\n"    \
+          ":param astate_solver: type of arrival-state solver for parameter " \
+          "estimation (default AStateNone)"))                                  \
       .def(SolverFDDPVisitor<Model>())                                         \
       .def(CastVisitor<Model, true>())                                         \
       .def(CopyableVisitor<Model>());
@@ -507,6 +607,14 @@ void exposeSolverFDDP() {
       .value("LuNull", LuNull)
       .value("QrNull", QrNull)
       .value("Schur", Schur)
+      .export_values();
+
+  bp::enum_<ArrivalStateSolverType>("ArrivalStateSolverType")
+      .value("AStateLuNull", AStateLuNull)
+      .value("AStateQrNull", AStateQrNull)
+      .value("AStateSchur", AStateSchur)
+      .value("AStateQP", AStateQP)
+      .value("AStateNone", AStateNone)
       .export_values();
 #endif
 

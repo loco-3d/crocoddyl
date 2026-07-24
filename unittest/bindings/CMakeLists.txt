@@ -4,6 +4,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     shooting
     problem_abstract
     parameterized_problems
+    parameterized_solvers
     solvers
     costs
     cost_sum
