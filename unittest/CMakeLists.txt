@@ -38,6 +38,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_multibody_actuation
       test_multibody_inertial_params
       test_parameter_energy_residuals
+      test_numdiff
       test_implicit_constraint_residuals
       test_controls
       test_dynamics
@@ -154,6 +155,10 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_lqr)
     target_compile_definitions(test_lqr PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_numdiff)
+    target_compile_definitions(test_numdiff PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
   if(TARGET test_dynamics)

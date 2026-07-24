@@ -56,7 +56,10 @@ void exposeCore() {
   exposeConstraintAbstract();
   exposeConstraintManager();
   exposeConstraintResidual();
+  exposeResidualNumDiff();
+  exposeActuationNumDiff();
   exposeActionNumDiff();
+  exposeDynamicsNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
   exposeStateNumDiff();

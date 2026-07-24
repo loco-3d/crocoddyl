@@ -402,6 +402,11 @@ template <typename Scalar>
 struct ActionDataNumDiffTpl;
 
 template <typename Scalar>
+class DynamicsModelNumDiffTpl;
+template <typename Scalar>
+struct DynamicsDataNumDiffTpl;
+
+template <typename Scalar>
 class DifferentialActionModelNumDiffTpl;
 template <typename Scalar>
 struct DifferentialActionDataNumDiffTpl;
@@ -433,11 +438,6 @@ template <typename Scalar>
 class ControlParametrizationModelNumDiffTpl;
 template <typename Scalar>
 struct ControlParametrizationDataNumDiffTpl;
-
-template <typename Scalar>
-class ActuationModelNumDiffTpl;
-template <typename Scalar>
-struct ActuationDataNumDiffTpl;
 
 template <typename Scalar>
 class ActionModelCodeGenTpl;
@@ -624,6 +624,8 @@ typedef ConstraintDataResidualTpl<double> ConstraintDataResidual;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
+typedef DynamicsModelNumDiffTpl<double> DynamicsModelNumDiff;
+typedef DynamicsDataNumDiffTpl<double> DynamicsDataNumDiff;
 typedef ControlParametrizationModelNumDiffTpl<double>
     ControlParametrizationModelNumDiff;
 typedef ControlParametrizationDataNumDiffTpl<double>
@@ -640,9 +642,6 @@ typedef ResidualDataNumDiffTpl<double> ResidualDataNumDiff;
 typedef ConstraintModelNumDiffTpl<double> ConstraintModelNumDiff;
 typedef ConstraintDataNumDiffTpl<double> ConstraintDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
-typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
-typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;
-
 typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
 typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
 

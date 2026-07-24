@@ -19,6 +19,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     multibody_actuation
     inertial_parameterization
     parameter_energy_residuals
+    numdiff
     squashing
     copy)
 
