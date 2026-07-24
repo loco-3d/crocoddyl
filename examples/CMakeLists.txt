@@ -74,16 +74,10 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   if(UNIX)
     add_test(
       "test_logfiles"
-      ${CMAKE_COMMAND}
-      -E
-      env
-      PYTHONPATH=${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH}
-      PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
       /bin/bash
-      ${CMAKE_CURRENT_SOURCE_DIR}/log/update_logfiles.sh
-      &&
-      /bin/bash
-      ${CMAKE_CURRENT_SOURCE_DIR}/log/check_logfiles.sh)
+      -c
+      "export PYTHONPATH='${PROJECT_BINARY_DIR}/bindings/python:$ENV{PYTHONPATH}'; export PYTHON_EXECUTABLE='${PYTHON_EXECUTABLE}'; export LD_LIBRARY_PATH='${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/unittest:$ENV{LD_LIBRARY_PATH}'; export DYLD_LIBRARY_PATH='${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/unittest:$ENV{DYLD_LIBRARY_PATH}'; source \"$0\""
+      ${CMAKE_CURRENT_SOURCE_DIR}/log/update_logfiles.sh)
     set_tests_properties("test_logfiles" PROPERTIES TIMEOUT 7200)
 
     add_custom_target(

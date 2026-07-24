@@ -247,6 +247,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   if(BUILD_WITH_CODEGEN_SUPPORT)
     foreach(TEST_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
       target_link_libraries(${TEST_NAME} ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
+      target_compile_definitions(${TEST_NAME} PRIVATE EIGEN_RUNTIME_NO_MALLOC)
     endforeach()
   endif()
 

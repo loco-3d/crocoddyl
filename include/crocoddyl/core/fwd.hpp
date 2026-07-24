@@ -480,6 +480,12 @@ class ActionModelCodeGenTpl;
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
+template <typename Scalar>
+class ObserverModelCodeGenTpl;
+
+template <typename Scalar>
+struct ObserverDataCodeGenTpl;
+
 /********************Template Instantiation*************/
 typedef ProblemAbstractTpl<double> ProblemAbstract;
 typedef ShootingProblemTpl<double> ShootingProblem;
@@ -695,6 +701,8 @@ typedef ConstraintDataNumDiffTpl<double> ConstraintDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
 typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
 typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
+typedef ObserverModelCodeGenTpl<double> ObserverModelCodeGen;
+typedef ObserverDataCodeGenTpl<double> ObserverDataCodeGen;
 
 }  // namespace crocoddyl
 

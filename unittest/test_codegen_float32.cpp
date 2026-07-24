@@ -26,7 +26,7 @@
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
-#include "crocoddyl/multibody/actuations/full.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/contacts/contact-3d.hpp"
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
@@ -110,7 +110,8 @@ build_arm_action_model() {
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar>
       ActionModelAbstract;
-  typedef typename crocoddyl::ActuationModelFullTpl<Scalar> ActuationModelFull;
+  typedef typename crocoddyl::ActuationModelMultibodyTpl<Scalar>
+      ActuationModelMultibody;
   typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>
       DifferentialActionModelFreeFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar>
@@ -218,8 +219,8 @@ build_arm_action_model() {
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
 
   // We define an actuation model
-  std::shared_ptr<ActuationModelFull> actuation =
-      std::make_shared<ActuationModelFull>(state);
+  std::shared_ptr<ActuationModelMultibody> actuation =
+      std::make_shared<ActuationModelMultibody>(state);
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented

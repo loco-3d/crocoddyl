@@ -39,8 +39,8 @@ struct ActionModelCodeGenVisitor
             "Initialize the action codegen action model.\n\n"
             ":param ad_model: action model used to code generate\n"
             ":param lib_fname: name of the code generated library\n"
-            ":param autodiff: Generate autodiff Jacobians and Hessians "
-            "(default False)\n"
+            ":param autodiff: Generate autodiff Jacobians and use calcDiff "
+            "Gauss-Newton Hessian blocks (default False)\n"
             ":param np: Dimension of the parameter variables in the calc and "
             "calcDiff functions\n"
             ":param updateParams: function used to update the calc and "
@@ -53,7 +53,7 @@ struct ActionModelCodeGenVisitor
             "Initialize the code generated action model from an pre-compiled "
             "library.\n\n"
             ":param lib_fname: name of the code generated library\n"
-            ":param model: action model model which we want to code generate"))
+            ":param model: action model which we want to code generate"))
         .def(bp::init<std::string, std::shared_ptr<ADModel>>(
             bp::args("self", "lib_fname", "ad_model"),
             "Initialize the code generated action model from an pre-compiled "
@@ -98,7 +98,13 @@ struct ActionModelCodeGenVisitor
              bp::args("self", "data", "x"))
         .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
              "Update the action parameters")
-        .def("createData", &Model::createData, bp::args("self"),
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Set the action parameter manager")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
              "Create the action codegen data.")
         .def("initLib", &Model::initLib, bp::args("self"),
              "initialize the code-generated library")
@@ -121,21 +127,92 @@ struct ActionModelCodeGenVisitor
         .add_property(
             "nY1", bp::make_function(&Model::get_nY1),
             "dimension of the independent vector used by the calc function")
-        .add_property("nY1_T", bp::make_function(&Model::get_nY1),
+        .add_property("nY1_T", bp::make_function(&Model::get_nY1_T),
                       "dimension of the independent vector used by the calc "
                       "function in terminal nodes")
         .add_property(
             "nY2", bp::make_function(&Model::get_nY2),
             "dimension of the independent vector used by the calcDiff function")
-        .add_property("nY2_T", bp::make_function(&Model::get_nY2),
+        .add_property("nY2_T", bp::make_function(&Model::get_nY2_T),
                       "dimension of the independent vector used by the "
                       "calcDiff function in terminal nodes")
-        .add_property("nY3", bp::make_function(&Model::get_nY2),
+        .add_property("nY3", bp::make_function(&Model::get_nY3),
                       "dimension of the independent vector used by the "
-                      "quasiStati function")
-        .add_property("nY3_T", bp::make_function(&Model::get_nY2),
+                      "quasiStatic function")
+        .add_property("nY3_T", bp::make_function(&Model::get_nY3),
                       "dimension of the independent vector used by the "
-                      "quasiStati function in terminal nodes");
+                      "quasiStatic function in terminal nodes");
+  }
+};
+
+template <typename Model>
+struct ObserverModelCodeGenVisitor
+    : public bp::def_visitor<ObserverModelCodeGenVisitor<Model>> {
+  typedef typename Model::ActionDataAbstract Data;
+  typedef typename Model::ADBase ADModel;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<ADModel>, std::string,
+                    bp::optional<bool, std::size_t, bp::object, CompilerType,
+                                 std::string>>(
+               bp::args("self", "ad_model", "lib_fname", "autodiff", "np",
+                        "updateParams", "compiler", "compile_options")))
+        .def(bp::init<std::shared_ptr<ADModel>, std::string, bool,
+                      std::size_t, std::size_t, std::string,
+                      bp::optional<std::string, CompilerType, std::string>>(
+            bp::args("self", "ad_model", "lib_fname", "autodiff", "np",
+                     "nenv", "state_observation_cost", "weight_cost",
+                     "compiler", "compile_options")))
+        .def(bp::init<std::string, std::shared_ptr<ModelBase>>(
+            bp::args("self", "lib_fname", "model")))
+        .def(bp::init<std::string, std::shared_ptr<ADModel>>(
+            bp::args("self", "lib_fname", "ad_model")))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"))
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"))
+        .def("update_env", &Model::update_env,
+             bp::args("self", "data", "env"))
+        .def("update_tau", &Model::update_tau, bp::args("self", "tau_meas"))
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"))
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"))
+        .def("initLib", &Model::initLib, bp::args("self"))
+        .def("compileLib", &Model::compileLib, bp::args("self"))
+        .def("existLib", &Model::existLib, bp::args("self", "lib_fname"))
+        .def("loadLib", &Model::loadLib, bp::args("self", "lib_fname"))
+        .add_property("np", bp::make_function(&Model::get_np))
+        .add_property("nenv", bp::make_function(&Model::get_nenv))
+        .add_property("nX", bp::make_function(&Model::get_nX))
+        .add_property("nX_T", bp::make_function(&Model::get_nX_T))
+        .add_property("nY1", bp::make_function(&Model::get_nY1))
+        .add_property("nY1_T", bp::make_function(&Model::get_nY1_T))
+        .add_property("nY2", bp::make_function(&Model::get_nY2))
+        .add_property("nY2_T", bp::make_function(&Model::get_nY2_T));
   }
 };
 
@@ -158,7 +235,7 @@ struct ActionDataCodeGeneVisitor
             "autodiff Jacobian of the the calc function")
         .add_property(
             "H1", bp::make_getter(&Data::H1, bp::return_internal_reference<>()),
-            "autodiff Hessian of the the calc function")
+            "legacy autodiff Hessian buffer of the calc function")
         .add_property(
             "Y1_T",
             bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()),
@@ -170,7 +247,8 @@ struct ActionDataCodeGeneVisitor
         .add_property(
             "H1_T",
             bp::make_getter(&Data::H1_T, bp::return_internal_reference<>()),
-            "autodiff Hessian of the the calc function in terminal nodes")
+            "legacy autodiff Hessian buffer of the calc function in terminal "
+            "nodes")
         .add_property(
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
             "dependent variables used by the calcDiff function")
@@ -182,6 +260,48 @@ struct ActionDataCodeGeneVisitor
         .add_property(
             "Y3", bp::make_getter(&Data::Y3, bp::return_internal_reference<>()),
             "dependent variables used by the quasiStatic function");
+  }
+};
+
+template <typename Data>
+struct ObserverDataCodeGenVisitor
+    : public bp::def_visitor<ObserverDataCodeGenVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "X", bp::make_getter(&Data::X, bp::return_internal_reference<>()))
+        .add_property(
+            "X_T",
+            bp::make_getter(&Data::X_T, bp::return_internal_reference<>()))
+        .add_property(
+            "Y1", bp::make_getter(&Data::Y1, bp::return_internal_reference<>()))
+        .add_property(
+            "J1", bp::make_getter(&Data::J1, bp::return_internal_reference<>()))
+        .add_property(
+            "H1", bp::make_getter(&Data::H1, bp::return_internal_reference<>()))
+        .add_property(
+            "Y1_T",
+            bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()))
+        .add_property(
+            "J1_T",
+            bp::make_getter(&Data::J1_T, bp::return_internal_reference<>()))
+        .add_property(
+            "H1_T",
+            bp::make_getter(&Data::H1_T, bp::return_internal_reference<>()))
+        .add_property(
+            "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()))
+        .add_property(
+            "Y2_T",
+            bp::make_getter(&Data::Y2_T, bp::return_internal_reference<>()))
+        .add_property("dissipative_E",
+                      bp::make_getter(&Data::dissipative_E,
+                                      bp::return_internal_reference<>()))
+        .add_property("dE_dv",
+                      bp::make_getter(&Data::dE_dv,
+                                      bp::return_internal_reference<>()))
+        .add_property("dE_dp",
+                      bp::make_getter(&Data::dE_dp,
+                                      bp::return_internal_reference<>()));
   }
 };
 
@@ -202,10 +322,10 @@ struct ActionDataCodeGeneVisitor
           bp::args("self", "model", "lib_fname", "autodiff", "np",             \
                    "updateParams", "compiler", "compile_options"),             \
           "Initialize the action codegen action model.\n\n"                    \
-          ":param model: action model model which we want to code generate\n"  \
+          ":param model: action model which we want to code generate\n"        \
           ":param lib_fname: name of the code generated library\n"             \
-          ":param autodiff: Generate autodiff Jacobians and Hessians "         \
-          "(default False)\n"                                                  \
+          ":param autodiff: Generate autodiff Jacobians and use calcDiff "     \
+          "Gauss-Newton Hessian blocks (default False)\n"                     \
           ":param np: Dimension of the parameter variables in the calc and "   \
           "calcDiff functions\n"                                               \
           ":param updateParams: function used to update the calc and "         \
@@ -231,6 +351,39 @@ struct ActionDataCodeGeneVisitor
       .def(ActionDataCodeGeneVisitor<Data>())                           \
       .def(CopyableVisitor<Data>());
 
+#define CROCODDYL_OBSERVER_MODEL_CODEGEN_PYTHON_BINDINGS(Scalar)              \
+  typedef ObserverModelCodeGenTpl<Scalar> ObserverCodeGenModel;               \
+  typedef ObserverModelAbstractTpl<Scalar> ObserverCodeGenModelBase;          \
+  bp::register_ptr_to_python<std::shared_ptr<ObserverCodeGenModel>>();        \
+  bp::class_<ObserverCodeGenModel, bp::bases<ObserverCodeGenModelBase>>(      \
+      "ObserverModelCodeGen",                                                \
+      "Observer model used to code generate an observer model.",             \
+      bp::init<std::shared_ptr<ObserverCodeGenModelBase>, std::string,        \
+               bp::optional<bool, std::size_t, bp::object, CompilerType,      \
+                            std::string>>(                                    \
+          bp::args("self", "model", "lib_fname", "autodiff", "np",          \
+                   "updateParams", "compiler", "compile_options")))          \
+      .def(bp::init<std::shared_ptr<ObserverCodeGenModelBase>, std::string,   \
+                    bool, std::size_t, std::size_t, std::string,              \
+                    bp::optional<std::string, CompilerType, std::string>>(    \
+          bp::args("self", "model", "lib_fname", "autodiff", "np",          \
+                   "nenv", "state_observation_cost", "weight_cost",          \
+                   "compiler", "compile_options")))                          \
+      .def(ObserverModelCodeGenVisitor<ObserverCodeGenModel>())               \
+      .def(PrintableVisitor<ObserverCodeGenModel>())                          \
+      .def(CopyableVisitor<ObserverCodeGenModel>());
+
+#define CROCODDYL_OBSERVER_DATA_CODEGEN_PYTHON_BINDINGS(Scalar)               \
+  typedef ObserverDataCodeGenTpl<Scalar> ObserverCodeGenData;                 \
+  typedef ObserverDataAbstractTpl<Scalar> ObserverCodeGenDataBase;            \
+  typedef ObserverModelCodeGenTpl<Scalar> ObserverCodeGenModelForData;        \
+  bp::register_ptr_to_python<std::shared_ptr<ObserverCodeGenData>>();         \
+  bp::class_<ObserverCodeGenData, bp::bases<ObserverCodeGenDataBase>>(        \
+      "ObserverDataCodeGen", "Observer data for the codegen observer model.", \
+      bp::init<ObserverCodeGenModelForData*>(bp::args("self", "model")))      \
+      .def(ObserverDataCodeGenVisitor<ObserverCodeGenData>())                 \
+      .def(CopyableVisitor<ObserverCodeGenData>());
+
 void exposeActionCodeGen() {
 #ifdef SCALAR_float64
   bp::enum_<CompilerType>("CompilerType")
@@ -241,6 +394,8 @@ void exposeActionCodeGen() {
 #ifdef IS_FP_SCALAR_TRUE
   CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_ACTION_DATA_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_OBSERVER_MODEL_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_OBSERVER_DATA_CODEGEN_PYTHON_BINDINGS(@SCALAR_TYPE@)
 #endif
 }
 
