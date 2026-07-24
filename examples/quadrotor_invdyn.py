@@ -52,7 +52,14 @@ ps = [
         10,
     ),
 ]
-actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
+joint_dynamics = [crocoddyl.JointDynamicsModelThruster(ps)]
+root_joint_id = state.pinocchio.getJointId("root_joint")
+for jid in range(1, state.pinocchio.njoints):
+    if jid == root_joint_id:
+        continue
+    joint = state.pinocchio.joints[jid]
+    joint_dynamics.append(crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv))
+actuation = crocoddyl.ActuationModelMultibody(state, joint_dynamics)
 nv, nu, dt = state.nv, state.nv, 3e-2
 
 # Defining the residuals, costs, and constraints
@@ -84,14 +91,29 @@ runningCosts.addCost("uReg", uRegCost, 1e-6)
 terminalConstraints.addConstraint("goalPose", eePoseConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -144,23 +166,14 @@ print("   quaternion:", solver.xs[-1][3:7])
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    xs, us = (
-        solver.xs,
-        [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
-    )
+    xs, us = solver.xs, solver.us
     crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.stops, log.grads, log.steps, figIndex=2
     )
     if crocoddyl.WITH_ODYN:
         logSQP = solverSQP.getCallbacks()[1]
-        xs, us = (
-            solverSQP.xs,
-            [
-                d.differential.multibody.joint.tau
-                for d in solverSQP.problem.runningDatas
-            ],
-        )
+        xs, us = solverSQP.xs, solverSQP.us
         crocoddyl.plotOCSolution(solverSQP.xs, solverSQP.us, figIndex=3, show=False)
         crocoddyl.plotConvergence(
             logSQP.costs,

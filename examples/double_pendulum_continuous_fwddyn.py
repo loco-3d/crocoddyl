@@ -7,7 +7,6 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils.pendulum import ActuationModelDoublePendulum
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
@@ -18,7 +17,16 @@ pendulum = example_robot_data.load("double_pendulum_continuous")
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(pendulum.model)
-actuation = ActuationModelDoublePendulum(state, actLink=1)
+actLink = 1
+actuated_joint = state.pinocchio.joints[actLink]
+actuation = crocoddyl.ActuationModelMultibody(
+    state,
+    [
+        crocoddyl.JointDynamicsModelIdentity(
+            actLink, actuated_joint.nq, actuated_joint.nv
+        )
+    ],
+)
 nu, dt = actuation.nu, 1e-2
 
 # Defining the residuals, costs, and constraints
@@ -41,14 +49,29 @@ terminalCosts.addCost("xGoal", xRegCost, 1e4)
 terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver

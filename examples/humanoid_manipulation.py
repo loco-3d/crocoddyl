@@ -21,7 +21,7 @@ rmodel = robot.model
 # Create data structures
 rdata = rmodel.createData()
 state = crocoddyl.StateMultibody(rmodel)
-actuation = crocoddyl.ActuationModelFloatingBase(state)
+actuation = crocoddyl.ActuationModelMultibody(state)
 
 # Set integration time
 DT = 5e-2
@@ -46,8 +46,8 @@ comRef = (rfPos0 + lfPos0) / 2
 comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
 # Add contact to the model
-contactModel = crocoddyl.ContactModelMultiple(state, actuation.nu)
-supportContactModelLeft = crocoddyl.ContactModel6D(
+contactConstraints = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+supportContactModelLeft = crocoddyl.ContactModel(
     state,
     leftFootId,
     pinocchio.SE3.Identity(),
@@ -55,8 +55,8 @@ supportContactModelLeft = crocoddyl.ContactModel6D(
     actuation.nu,
     np.array([0, 0]),
 )
-contactModel.addContact(leftFoot + "_contact", supportContactModelLeft)
-supportContactModelRight = crocoddyl.ContactModel6D(
+contactConstraints.addConstraint(leftFoot + "_contact", supportContactModelLeft)
+supportContactModelRight = crocoddyl.ContactModel(
     state,
     rightFootId,
     pinocchio.SE3.Identity(),
@@ -64,8 +64,7 @@ supportContactModelRight = crocoddyl.ContactModel6D(
     actuation.nu,
     np.array([0, 0]),
 )
-contactModel.addContact(rightFoot + "_contact", supportContactModelRight)
-contactData = contactModel.createData(rdata)
+contactConstraints.addConstraint(rightFoot + "_contact", supportContactModelRight)
 
 # Cost for self-collision
 maxfloat = sys.float_info.max
@@ -131,14 +130,26 @@ terminalCostModel.addCost("stateReg", xRegTermCost, 1e-3)
 terminalCostModel.addCost("limitCost", limitCost, 1e3)
 
 # Create the action model
-dmodelRunning = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel, runningCostModel
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints
 )
-dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel, terminalCostModel
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints
 )
-runningModel = crocoddyl.IntegratedActionModelEuler(dmodelRunning, DT)
-terminalModel = crocoddyl.IntegratedActionModelEuler(dmodelTerminal, 0)
+runningModel = crocoddyl.IntegratedActionModelEuler(
+    runningDynamics,
+    runningCostModel,
+    None,
+    None,
+    crocoddyl.IntegratorTime(DT, False),
+)
+terminalModel = crocoddyl.IntegratedActionModelEuler(
+    terminalDynamics,
+    terminalCostModel,
+    None,
+    None,
+    crocoddyl.IntegratorTime(0.0, False),
+)
 
 # Problem definition
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])
@@ -158,9 +169,9 @@ else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 # Solving it with the FDDP algorithm
-xs = [x0] * (solver.problem.T + 1)
 us = solver.problem.quasiStatic([x0] * solver.problem.T)
-solver.solve(xs, us, maxiter=500, is_feasible=False)
+xs = problem.rollout(us)
+solver.solve(xs, us, maxiter=500, is_feasible=True, init_reg=1e-3)
 
 # Visualizing the solution in gepetto-viewer
 display = None

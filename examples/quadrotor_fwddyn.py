@@ -52,7 +52,14 @@ ps = [
         10,
     ),
 ]
-actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
+joint_dynamics = [crocoddyl.JointDynamicsModelThruster(ps)]
+root_joint_id = state.pinocchio.getJointId("root_joint")
+for jid in range(1, state.pinocchio.njoints):
+    if jid == root_joint_id:
+        continue
+    joint = state.pinocchio.joints[jid]
+    joint_dynamics.append(crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv))
+actuation = crocoddyl.ActuationModelMultibody(state, joint_dynamics)
 nv, nu, dt = state.nv, actuation.nu, 3e-2
 
 # Defining the residuals, costs, and constraints
@@ -84,14 +91,29 @@ runningCosts.addCost("uReg", uRegCost, 1e-6)
 terminalConstraints.addConstraint("goalPose", eePoseConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver

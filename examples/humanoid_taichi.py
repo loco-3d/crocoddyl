@@ -24,7 +24,7 @@ rmodel.effortLimit = lims
 # Create data structures
 rdata = rmodel.createData()
 state = crocoddyl.StateMultibody(rmodel)
-actuation = crocoddyl.ActuationModelFloatingBase(state)
+actuation = crocoddyl.ActuationModelMultibody(state)
 
 # Set integration time
 DT = 5e-2
@@ -49,9 +49,9 @@ comRef = (rfPos0 + lfPos0) / 2
 comRef[2] = pinocchio.centerOfMass(rmodel, rdata, q0)[2].item()
 
 # Create two contact models used along the motion
-contactModel1Foot = crocoddyl.ContactModelMultiple(state, actuation.nu)
-contactModel2Feet = crocoddyl.ContactModelMultiple(state, actuation.nu)
-supportContactModelLeft = crocoddyl.ContactModel6D(
+contactConstraints1Foot = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+contactConstraints2Feet = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+supportContactModelLeft = crocoddyl.ContactModel(
     state,
     leftFootId,
     pinocchio.SE3.Identity(),
@@ -59,7 +59,7 @@ supportContactModelLeft = crocoddyl.ContactModel6D(
     actuation.nu,
     np.array([0, 40]),
 )
-supportContactModelRight = crocoddyl.ContactModel6D(
+supportContactModelRight = crocoddyl.ContactModel(
     state,
     rightFootId,
     pinocchio.SE3.Identity(),
@@ -67,9 +67,9 @@ supportContactModelRight = crocoddyl.ContactModel6D(
     actuation.nu,
     np.array([0, 40]),
 )
-contactModel1Foot.addContact(rightFoot + "_contact", supportContactModelRight)
-contactModel2Feet.addContact(leftFoot + "_contact", supportContactModelLeft)
-contactModel2Feet.addContact(rightFoot + "_contact", supportContactModelRight)
+contactConstraints1Foot.addConstraint(rightFoot + "_contact", supportContactModelRight)
+contactConstraints2Feet.addConstraint(leftFoot + "_contact", supportContactModelLeft)
+contactConstraints2Feet.addConstraint(rightFoot + "_contact", supportContactModelRight)
 
 # Cost for self-collision
 maxfloat = sys.float_info.max
@@ -169,23 +169,47 @@ terminalCostModel.addCost("stateReg", xRegTermCost, 1e-3)
 terminalCostModel.addCost("limitCost", limitCost, 1e3)
 
 # Create the action model
-dmodelRunning1 = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel2Feet, runningCostModel1
+runningDynamics1 = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints2Feet
 )
-dmodelRunning2 = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel1Foot, runningCostModel2
+runningDynamics2 = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints1Foot
 )
-dmodelRunning3 = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel1Foot, runningCostModel3
+runningDynamics3 = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints1Foot
 )
-dmodelTerminal = crocoddyl.DifferentialActionModelContactFwdDynamics(
-    state, actuation, contactModel1Foot, terminalCostModel
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state, actuation, contactConstraints1Foot
 )
 
-runningModel1 = crocoddyl.IntegratedActionModelEuler(dmodelRunning1, DT)
-runningModel2 = crocoddyl.IntegratedActionModelEuler(dmodelRunning2, DT)
-runningModel3 = crocoddyl.IntegratedActionModelEuler(dmodelRunning3, DT)
-terminalModel = crocoddyl.IntegratedActionModelEuler(dmodelTerminal, 0)
+runningModel1 = crocoddyl.IntegratedActionModelEuler(
+    runningDynamics1,
+    runningCostModel1,
+    None,
+    None,
+    crocoddyl.IntegratorTime(DT, False),
+)
+runningModel2 = crocoddyl.IntegratedActionModelEuler(
+    runningDynamics2,
+    runningCostModel2,
+    None,
+    None,
+    crocoddyl.IntegratorTime(DT, False),
+)
+runningModel3 = crocoddyl.IntegratedActionModelEuler(
+    runningDynamics3,
+    runningCostModel3,
+    None,
+    None,
+    crocoddyl.IntegratorTime(DT, False),
+)
+terminalModel = crocoddyl.IntegratedActionModelEuler(
+    terminalDynamics,
+    terminalCostModel,
+    None,
+    None,
+    crocoddyl.IntegratorTime(0.0, False),
+)
 
 # Problem definition
 x0 = np.concatenate([q0, pinocchio.utils.zero(state.nv)])

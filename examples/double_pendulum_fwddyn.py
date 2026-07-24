@@ -10,7 +10,6 @@ import crocoddyl
 
 if crocoddyl.WITH_ODYN:
     from odyn.utils import plotQPsparsity
-from crocoddyl.utils.pendulum import ActuationModelDoublePendulum
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
@@ -25,7 +24,16 @@ pendulum.model.effortLimit[:] = 5.0
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(pendulum.model)
-actuation = ActuationModelDoublePendulum(state, actLink=1)
+actLink = 1
+actuated_joint = state.pinocchio.joints[actLink]
+actuation = crocoddyl.ActuationModelMultibody(
+    state,
+    [
+        crocoddyl.JointDynamicsModelIdentity(
+            actLink, actuated_joint.nq, actuated_joint.nv
+        )
+    ],
+)
 nu, dt = actuation.nu, 1e-2
 
 # Defining the residuals, costs, and constraints
@@ -47,14 +55,29 @@ runningCosts.addCost("xGoal", xRegCost, 1e-5 / dt)
 terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -111,13 +134,7 @@ if WITHPLOT:
     )
     if crocoddyl.WITH_ODYN:
         logSQP = solverSQP.getCallbacks()[1]
-        xs, us = (
-            solverSQP.xs,
-            [
-                d.differential.multibody.joint.tau
-                for d in solverSQP.problem.runningDatas
-            ],
-        )
+        xs, us = solverSQP.xs, solverSQP.us
         crocoddyl.plotOCSolution(xs, us, figIndex=3, show=False)
         crocoddyl.plotConvergence(
             logSQP.costs,

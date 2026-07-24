@@ -39,7 +39,14 @@ for name in thrusterNames:
         pinocchio.utils.rpyToMatrix(0.0, np.pi / 2, 0.0), np.zeros(3)
     )
     ps.append(crocoddyl.Thruster(bMt, cm / cf, crocoddyl.ThrusterType.CCW, 0, 150))
-actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
+joint_dynamics = [crocoddyl.JointDynamicsModelThruster(ps)]
+root_joint_id = state.pinocchio.getJointId("root_joint")
+for jid in range(1, state.pinocchio.njoints):
+    if jid == root_joint_id:
+        continue
+    joint = state.pinocchio.joints[jid]
+    joint_dynamics.append(crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv))
+actuation = crocoddyl.ActuationModelMultibody(state, joint_dynamics)
 nv, nu, dt = state.nv, actuation.nu, 3e-2
 
 # Defining the residuals, costs, and constraints
@@ -70,14 +77,29 @@ runningCosts.addCost("accReg", accRegCost, 5e-1)
 terminalConstraints.addConstraint("goalPose", eePoseConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -165,9 +187,10 @@ if crocoddyl.WITH_ODYN:
 
 # Printing the terminal pose
 np.set_printoptions(precision=4, suppress=True)
-Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[target_id]
-)
+pinocchio_data = state.pinocchio.createData()
+pinocchio.forwardKinematics(state.pinocchio, pinocchio_data, solver.xs[-1][: state.nq])
+pinocchio.updateFramePlacements(state.pinocchio, pinocchio_data)
+Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[target_id])
 print("Target end-effector pose:")
 print("   position:", target_pos)
 print("   quaternion:", target_quat.coeffs())

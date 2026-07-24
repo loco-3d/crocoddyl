@@ -10,7 +10,6 @@ import crocoddyl
 
 if crocoddyl.WITH_ODYN:
     from odyn.utils import plotQPsparsity
-from crocoddyl.utils.pendulum import ActuationModelDoublePendulum
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
@@ -25,7 +24,16 @@ pendulum.model.effortLimit[:] = 5.0
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(pendulum.model)
-actuation = ActuationModelDoublePendulum(state, actLink=1)
+actuated_joint_id = state.pinocchio.getJointId("joint1")
+actuated_joint = state.pinocchio.joints[actuated_joint_id]
+actuation = crocoddyl.ActuationModelMultibody(
+    state,
+    [
+        crocoddyl.JointDynamicsModelIdentity(
+            actuated_joint_id, actuated_joint.nq, actuated_joint.nv
+        )
+    ],
+)
 nu, dt = state.nv, 1e-2
 
 # Defining the residuals, costs, and constraints
@@ -49,14 +57,29 @@ runningCosts.addCost("xGoal", xRegCost, 1e-5 / dt)
 terminalCosts.addCost("xGoal", xRegCost, 1e4)
 terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
+runningDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -107,23 +130,14 @@ print("Terminal state:", solver.xs[-1])
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    xs, us = (
-        solver.xs,
-        [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
-    )
+    xs, us = solver.xs, solver.us
     crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2
     )
     if crocoddyl.WITH_ODYN:
         logSQP = solverSQP.getCallbacks()[1]
-        xs, us = (
-            solverSQP.xs,
-            [
-                d.differential.multibody.joint.tau
-                for d in solverSQP.problem.runningDatas
-            ],
-        )
+        xs, us = solverSQP.xs, solverSQP.us
         crocoddyl.plotOCSolution(xs, us, figIndex=3, show=False)
         crocoddyl.plotConvergence(
             logSQP.costs,

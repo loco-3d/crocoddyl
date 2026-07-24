@@ -44,7 +44,14 @@ ps = [
         crocoddyl.ThrusterType.CW,
     ),
 ]
-actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
+joint_dynamics = [crocoddyl.JointDynamicsModelThruster(ps)]
+root_joint_id = state.pinocchio.getJointId("root_joint")
+for jid in range(1, state.pinocchio.njoints):
+    if jid == root_joint_id:
+        continue
+    joint = state.pinocchio.joints[jid]
+    joint_dynamics.append(crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv))
+actuation = crocoddyl.ActuationModelMultibody(state, joint_dynamics)
 
 nu = actuation.nu
 runningCostModel = crocoddyl.CostModelSum(state, nu)
@@ -71,17 +78,29 @@ runningCostModel.addCost("trackPose", goalTrackingCost, 1e-2)
 terminalCostModel.addCost("goalPose", goalTrackingCost, 3.0)
 
 dt = 3e-2
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, runningCostModel
-    ),
-    dt,
+    runningDynamics,
+    runningCostModel,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCostModel
-    ),
-    dt,
+    terminalDynamics,
+    terminalCostModel,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 runningModel.u_lb = np.array([l_lim, l_lim, l_lim, l_lim])
 runningModel.u_ub = np.array([u_lim, u_lim, u_lim, u_lim])

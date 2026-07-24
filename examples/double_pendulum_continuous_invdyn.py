@@ -7,7 +7,6 @@ import example_robot_data
 import numpy as np
 
 import crocoddyl
-from crocoddyl.utils.pendulum import ActuationModelDoublePendulum
 
 WITHDISPLAY = "display" in sys.argv or "CROCODDYL_DISPLAY" in os.environ
 WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
@@ -18,8 +17,16 @@ pendulum = example_robot_data.load("double_pendulum_continuous")
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(pendulum.model)
-actuation = ActuationModelDoublePendulum(state, actLink=1)
-# actuation = crocoddyl.ActuationModelFull(state)
+actuated_joint_id = state.pinocchio.getJointId("joint1")
+actuated_joint = state.pinocchio.joints[actuated_joint_id]
+actuation = crocoddyl.ActuationModelMultibody(
+    state,
+    [
+        crocoddyl.JointDynamicsModelIdentity(
+            actuated_joint_id, actuated_joint.nq, actuated_joint.nv
+        )
+    ],
+)
 nu, dt = state.nv, 1e-2
 
 # Defining the residuals, costs, and constraints
@@ -44,14 +51,29 @@ terminalCosts.addCost("xGoal", xRegCost, 1e4)
 terminalConstraints.addConstraint("xGoal", xGoalConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedInverse(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeInvDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    dt,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -89,10 +111,7 @@ print("Terminal state:", solver.xs[-1])
 # Plotting the entire motion
 if WITHPLOT:
     log = solver.getCallbacks()[1]
-    xs, us = (
-        solver.xs,
-        [d.differential.multibody.joint.tau for d in solver.problem.runningDatas],
-    )
+    xs, us = solver.xs, solver.us
     crocoddyl.plotOCSolution(xs, us, figIndex=1, show=False)
     crocoddyl.plotConvergence(
         log.costs, log.pregs, log.dregs, log.grads, log.stops, log.steps, figIndex=2

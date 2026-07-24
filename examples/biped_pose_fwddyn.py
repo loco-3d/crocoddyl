@@ -35,16 +35,18 @@ def createCoMGoalProblem(model, rf, lf, comGoTo, timeStep, numKnots):
     )
     eePoseConstraint = crocoddyl.ConstraintModelResidual(gait.state, comPosResidual)
     terminalConstraints.addConstraint("goalCOM", eePoseConstraint)
-    dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
+    dmodel = crocoddyl.DynamicsModelConstrainedForward(
         gait.state,
         gait.actuation,
-        amodel.differential.contacts,
-        amodel.differential.costs,
-        terminalConstraints,
-        0.0,
-        True,
+        amodel.dynamics.constraints,
     )
-    comForwardTermModel = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
+    comForwardTermModel = crocoddyl.IntegratedActionModelEuler(
+        dmodel,
+        amodel.costs,
+        terminalConstraints,
+        None,
+        crocoddyl.IntegratorTime(timeStep, False),
+    )
     # Defining the shooting problem
     return crocoddyl.ShootingProblem(x0, comForwardModels, comForwardTermModel)
 
@@ -108,13 +110,13 @@ if crocoddyl.WITH_ODYN:
 np.set_printoptions(precision=4, suppress=True)
 print(
     "Target CoM position = ",
-    solver.problem.terminalModel.differential.constraints.constraints[
+    solver.problem.terminalModel.constraints.constraints[
         "goalCOM"
     ].constraint.residual.reference,
 )
 print(
     "Reached CoM position = ",
-    solver.problem.terminalData.differential.multibody.pinocchio.com[0],
+    solver.problem.terminalData.dynamics.multibody.pinocchio.com[0],
 )
 
 # Display the entire motion

@@ -67,22 +67,19 @@ solver.solve(xs, us, maxiter=200, is_feasible=False)
 
 # Printing the terminal pose
 np.set_printoptions(precision=4, suppress=True)
-RF_target = solver.problem.terminalModel.differential.constraints.constraints[
+RF_target = solver.problem.terminalModel.constraints.constraints[
     RF_name + "_pose"
 ].constraint.residual.reference
-LF_target = solver.problem.terminalModel.differential.constraints.constraints[
+LF_target = solver.problem.terminalModel.constraints.constraints[
     LF_name + "_pose"
 ].constraint.residual.reference
-RF_Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[
-        robot_model.getFrameId(RF_name)
-    ]
+pinocchio_data = robot_model.createData()
+pinocchio.forwardKinematics(
+    robot_model, pinocchio_data, solver.xs[-1][: robot_model.nq]
 )
-LF_Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[
-        robot_model.getFrameId(LF_name)
-    ]
-)
+pinocchio.updateFramePlacements(robot_model, pinocchio_data)
+RF_Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[robot_model.getFrameId(RF_name)])
+LF_Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[robot_model.getFrameId(LF_name)])
 print("Target end-effector pose:")
 print("   RF position:", RF_target.translation)
 print("   RF quaternion:", pinocchio.Quaternion(RF_target.rotation).coeffs())

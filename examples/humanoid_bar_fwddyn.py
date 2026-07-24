@@ -66,16 +66,13 @@ solver.solve(xs, us, maxiter=200, is_feasible=False)
 
 # Printing the terminal pose
 np.set_printoptions(precision=4, suppress=True)
-RH_Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[
-        robot_model.getFrameId(RH_name)
-    ]
+pinocchio_data = robot_model.createData()
+pinocchio.forwardKinematics(
+    robot_model, pinocchio_data, solver.xs[-1][: robot_model.nq]
 )
-LH_Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[
-        robot_model.getFrameId(LH_name)
-    ]
-)
+pinocchio.updateFramePlacements(robot_model, pinocchio_data)
+RH_Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[robot_model.getFrameId(RH_name)])
+LH_Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[robot_model.getFrameId(LH_name)])
 print("Target end-effector pose:")
 print("   RH position:", RH_grasp_list[-1].translation)
 print("   RH quaternion:", pinocchio.Quaternion(RH_grasp_list[-1].rotation).coeffs())

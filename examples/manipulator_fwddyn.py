@@ -18,7 +18,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # In this example test, we will solve the reaching-goal task with the Kinova arm.
 # For that, we use the forward dynamics (with its analytical derivatives) developed
-# inside crocoddyl; it is described inside DifferentialActionModelFreeFwdDynamics class.
+# inside crocoddyl; it is described inside DynamicsModelConstrainedForward class.
 # Finally, we use an Euler sympletic integration scheme.
 
 # Loading the Kinova manipulator robot
@@ -28,7 +28,7 @@ kinova.model.upperPositionLimit[3] = np.pi
 
 # Creating the state and actuaction models
 state = crocoddyl.StateMultibody(kinova.model)
-actuation = crocoddyl.ActuationModelFull(state)
+actuation = crocoddyl.ActuationModelMultibody(state)
 nv, nu, dt = state.nv, state.nv, 1e-2
 
 q0 = state.pinocchio.referenceConfigurations["arm_up"]
@@ -65,14 +65,29 @@ runningCosts.addCost("accReg", accRegCost, 5e-1)
 terminalConstraints.addConstraint("goalPose", eePoseConstraint)
 
 # Creating the running and terminal models
+runningDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
+terminalDynamics = crocoddyl.DynamicsModelConstrainedForward(
+    state,
+    actuation,
+    crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu),
+)
 runningModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, runningCosts), dt
+    runningDynamics,
+    runningCosts,
+    None,
+    None,
+    crocoddyl.IntegratorTime(dt, False),
 )
 terminalModel = crocoddyl.IntegratedActionModelEuler(
-    crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        state, actuation, terminalCosts, terminalConstraints
-    ),
-    0.0,
+    terminalDynamics,
+    terminalCosts,
+    terminalConstraints,
+    None,
+    crocoddyl.IntegratorTime(0.0, False),
 )
 
 # Creating the shooting problem and the OC solver
@@ -111,9 +126,10 @@ if crocoddyl.WITH_ODYN:
     solverSQP.solve(xs, [], 300)
 
 # Printing the terminal end-effector pose
-Mterm = pinocchio.SE3ToXYZQUAT(
-    solver.problem.terminalData.differential.multibody.pinocchio.oMf[target_id]
-)
+pinocchio_data = state.pinocchio.createData()
+pinocchio.forwardKinematics(state.pinocchio, pinocchio_data, solver.xs[-1][: state.nq])
+pinocchio.updateFramePlacements(state.pinocchio, pinocchio_data)
+Mterm = pinocchio.SE3ToXYZQUAT(pinocchio_data.oMf[target_id])
 print("Target end-effector pose:")
 print("   position:", target_pos)
 print("   quaternion:", pinocchio.Quaternion(target_rot).coeffs())
