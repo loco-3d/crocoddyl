@@ -18,6 +18,7 @@ void exposeCore() {
   exposeControlParametrizationAbstract();
   exposeActuationAbstract();
   exposeActionAbstract();
+  exposeObserverAbstract();
   exposeDynamicsAbstract();
 #ifdef CROCODDYL_WITH_CODEGEN
   exposeActionCodeGen();
@@ -56,10 +57,14 @@ void exposeCore() {
   exposeConstraintAbstract();
   exposeConstraintManager();
   exposeConstraintResidual();
+  exposeIntegratedObserverEuler();
+  exposeIntegratedObserverRK();
+  exposeDiscretizedObserver();
   exposeResidualNumDiff();
   exposeActuationNumDiff();
   exposeActionNumDiff();
   exposeDynamicsNumDiff();
+  exposeObserverNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
   exposeStateNumDiff();

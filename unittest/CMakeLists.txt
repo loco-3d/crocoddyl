@@ -50,6 +50,11 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_params
       test_params_data
       test_parameter_manager
+      test_observer_base
+      test_integrated_observer_base
+      test_observer_euler
+      test_observer_rk
+      test_observer_discretized
       test_lqr
       test_contact_costs
       test_impulse_costs
@@ -159,6 +164,19 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
 
   if(TARGET test_numdiff)
     target_compile_definitions(test_numdiff PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_observer_euler)
+    target_compile_definitions(test_observer_euler
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_observer_rk)
+    target_compile_definitions(test_observer_rk PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+  if(TARGET test_observer_discretized)
+    target_compile_definitions(test_observer_discretized
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
   endif()
 
   if(TARGET test_dynamics)

@@ -20,6 +20,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     inertial_parameterization
     parameter_energy_residuals
     numdiff
+    observers
     squashing
     copy)
 

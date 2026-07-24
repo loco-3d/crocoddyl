@@ -81,6 +81,12 @@ class ActionModelAbstractTpl;
 template <typename Scalar>
 struct ActionDataAbstractTpl;
 
+// observer
+template <typename Scalar>
+class ObserverModelAbstractTpl;
+template <typename Scalar>
+struct ObserverDataAbstractTpl;
+
 template <typename Scalar>
 class ActionModelUnicycleTpl;
 template <typename Scalar>
@@ -118,6 +124,24 @@ template <typename Scalar>
 class IntegratedActionModelAbstractTpl;
 template <typename Scalar>
 struct IntegratedActionDataAbstractTpl;
+
+// integrated observer
+template <typename Scalar>
+class IntegratedObserverModelAbstractTpl;
+template <typename Scalar>
+struct IntegratedObserverDataAbstractTpl;
+template <typename Scalar>
+class IntegratedObserverModelEulerTpl;
+template <typename Scalar>
+struct IntegratedObserverDataEulerTpl;
+template <typename Scalar>
+class IntegratedObserverModelRKTpl;
+template <typename Scalar>
+struct IntegratedObserverDataRKTpl;
+template <typename Scalar>
+class DiscretizedObserverModelTpl;
+template <typename Scalar>
+struct DiscretizedObserverDataTpl;
 
 template <typename Scalar>
 class IntegratedActionModelEulerTpl;
@@ -417,6 +441,11 @@ template <typename Scalar>
 struct ActuationDataNumDiffTpl;
 
 template <typename Scalar>
+class ObserverModelNumDiffTpl;
+template <typename Scalar>
+struct ObserverDataNumDiffTpl;
+
+template <typename Scalar>
 class ActivationModelNumDiffTpl;
 template <typename Scalar>
 struct ActivationDataNumDiffTpl;
@@ -468,6 +497,8 @@ typedef IpoptInterfaceDataTpl<double> IpoptInterfaceData;
 
 typedef ActionModelAbstractTpl<double> ActionModelAbstract;
 typedef ActionDataAbstractTpl<double> ActionDataAbstract;
+typedef ObserverModelAbstractTpl<double> ObserverModelAbstract;
+typedef ObserverDataAbstractTpl<double> ObserverDataAbstract;
 typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
 typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
 typedef ActionModelLQRTpl<double> ActionModelLQR;
@@ -487,6 +518,16 @@ typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
 typedef IntegratorTimeTpl<double> IntegratorTime;
 typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
 typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
+typedef IntegratedObserverModelAbstractTpl<double>
+    IntegratedObserverModelAbstract;
+typedef IntegratedObserverDataAbstractTpl<double>
+    IntegratedObserverDataAbstract;
+typedef IntegratedObserverModelEulerTpl<double> IntegratedObserverModelEuler;
+typedef IntegratedObserverDataEulerTpl<double> IntegratedObserverDataEuler;
+typedef IntegratedObserverModelRKTpl<double> IntegratedObserverModelRK;
+typedef IntegratedObserverDataRKTpl<double> IntegratedObserverDataRK;
+typedef DiscretizedObserverModelTpl<double> DiscretizedObserverModel;
+typedef DiscretizedObserverDataTpl<double> DiscretizedObserverData;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRKTpl<double> IntegratedActionModelRK;
@@ -634,6 +675,8 @@ typedef DifferentialActionModelNumDiffTpl<double>
     DifferentialActionModelNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;
+typedef ObserverModelNumDiffTpl<double> ObserverModelNumDiff;
+typedef ObserverDataNumDiffTpl<double> ObserverDataNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
