@@ -778,10 +778,10 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
     plt.legend()
     plt.subplot(2, 3, 3)
     plt.title("joint torque [Nm]")
-    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(0, 6))]
+    [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(6))]
     if bounds:
-        [plt.plot(U_LB[k], "--r") for i, k in enumerate(range(0, 6))]
-        [plt.plot(U_UB[k], "--r") for i, k in enumerate(range(0, 6))]
+        [plt.plot(U_LB[k], "--r") for i, k in enumerate(range(6))]
+        [plt.plot(U_UB[k], "--r") for i, k in enumerate(range(6))]
     plt.ylabel("LF")
     plt.legend()
 

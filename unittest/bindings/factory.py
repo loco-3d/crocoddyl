@@ -2205,14 +2205,12 @@ class SolverFDDP(crocoddyl.SolverAbstract):
 
     def decreaseRegularization(self):
         self.preg /= self.reg_decFactor
-        if self.preg < self.reg_min:
-            self.preg = self.reg_min
+        self.preg = max(self.preg, self.reg_min)
         self.dreg = self.preg
 
     def increaseRegularization(self):
         self.preg *= self.reg_incFactor
-        if self.preg > self.reg_max:
-            self.preg = self.reg_max
+        self.preg = min(self.preg, self.reg_max)
         self.dreg = self.preg
 
     # This is virtual function

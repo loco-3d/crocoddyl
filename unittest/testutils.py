@@ -11,8 +11,6 @@ NUMDIFF_MODIFIER = 1e4
 class NumDiffException(Exception):
     """Raised when the NumDiff values are too high"""
 
-    pass
-
 
 def assertNumDiff(A, B, threshold):
     """Assert analytical derivatives against NumDiff using the error norm.
