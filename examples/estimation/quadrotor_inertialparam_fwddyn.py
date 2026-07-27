@@ -3,11 +3,7 @@ import sys
 
 import numpy as np
 import pinocchio
-from utils import (
-    compute_inertial_covariances,
-    import_control_example,
-    plot_inertial_estimation,
-)
+from utils import import_control_example
 
 import crocoddyl
 
@@ -130,7 +126,7 @@ for i in range(nbodies):
 print("total-mass error:", abs(original_total_mass - estimated_total_mass))
 
 if WITHPLOT:
-    plot_inertial_estimation(
+    crocoddyl.plotInertialEstimationWithCovariance(
         solver,
         oc.solver,
         state,
@@ -138,7 +134,7 @@ if WITHPLOT:
         param_scratch,
         groundtruth_p,
         nbodies,
-        compute_inertial_covariances(
+        crocoddyl.computeInertialCovariances(
             solver, param, param_scratch, nbodies, initial_p=initial_p
         ),
     )

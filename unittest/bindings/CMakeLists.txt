@@ -5,6 +5,7 @@ set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     problem_abstract
     parameterized_problems
     parameterized_solvers
+    callbacks
     solvers
     costs
     cost_sum

@@ -3,11 +3,7 @@ import sys
 
 import numpy as np
 import pinocchio
-from utils import (
-    compute_inertial_covariances,
-    import_control_example,
-    plot_inertial_estimation,
-)
+from utils import import_control_example
 
 import crocoddyl
 
@@ -201,7 +197,7 @@ for i, jid in enumerate(friction_joint_ids):
     )
 
 if WITHPLOT:
-    plot_inertial_estimation(
+    crocoddyl.plotInertialEstimationWithCovariance(
         solver,
         oc.solver,
         state,
@@ -209,7 +205,7 @@ if WITHPLOT:
         param_scratch,
         groundtruth_inertial_p,
         nbodies,
-        compute_inertial_covariances(
+        crocoddyl.computeInertialCovariances(
             solver,
             param,
             param_scratch,

@@ -2,11 +2,8 @@ import os
 import sys
 
 from utils import (
-    compute_inertial_covariances,
     create_gait_estimation_problem,
     import_control_example,
-    plot_friction_parameters,
-    plot_inertial_estimation,
     print_friction_estimation,
     print_inertial_estimation,
 )
@@ -63,7 +60,7 @@ print_friction_estimation(
 )
 
 if WITHPLOT:
-    plot_inertial_estimation(
+    crocoddyl.plotInertialEstimationWithCovariance(
         solver,
         control_solver,
         estimation["state"],
@@ -71,7 +68,7 @@ if WITHPLOT:
         estimation["param_scratch"],
         estimation["groundtruth_inertial_p"],
         estimation["nbodies"],
-        compute_inertial_covariances(
+        crocoddyl.computeInertialCovariances(
             solver,
             estimation["parametrization"],
             estimation["param_scratch"],
@@ -86,11 +83,12 @@ if WITHPLOT:
     joint_names = [
         estimation["state"].pinocchio.names[jid] for jid in estimation["joint_ids"]
     ]
-    plot_friction_parameters(
+    crocoddyl.plotFrictionParam(
         p_est[estimation["actuation_slice"]].reshape(-1, nfriction),
         estimation["friction_type"],
         nominal=estimation["groundtruth_actuation_p"].reshape(-1, nfriction),
-        figure_index=6 + estimation["nbodies"],
-        title="Friction model",
-        joint_names=joint_names,
+        figIndex=6 + estimation["nbodies"],
+        figTitle="Friction model",
+        joint_name=joint_names,
+        parametrized=True,
     )
