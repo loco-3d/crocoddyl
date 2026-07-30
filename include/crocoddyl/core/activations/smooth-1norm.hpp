@@ -63,13 +63,8 @@ class ActivationModelSmooth1NormTpl
   explicit ActivationModelSmooth1NormTpl(const std::size_t nr,
                                          const Scalar eps = Scalar(1.))
       : Base(nr), eps_(eps) {
-    if (eps < Scalar(0.)) {
+    if (eps <= Scalar(0.)) {
       throw_pretty("Invalid argument: " << "eps should be a positive value");
-    }
-    if (eps == Scalar(0.)) {
-      std::cerr << "Warning: eps=0 leads to derivatives discontinuities in the "
-                   "origin, it becomes the absolute function"
-                << std::endl;
     }
   };
   virtual ~ActivationModelSmooth1NormTpl() = default;
@@ -89,7 +84,7 @@ class ActivationModelSmooth1NormTpl
     }
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
-    d->a = (r.array().cwiseAbs2().array() + eps_).array().cwiseSqrt();
+    d->a = (r.array().square() + eps_).sqrt().matrix();
     data->a_value = d->a.sum();
   };
 
@@ -108,9 +103,10 @@ class ActivationModelSmooth1NormTpl
     }
 
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
-    data->Ar = r.cwiseProduct(d->a.cwiseInverse());
-    data->Arr.diagonal() =
-        d->a.cwiseProduct(d->a).cwiseProduct(d->a).cwiseInverse();
+    const VectorXs a_inv = d->a.cwiseInverse();
+
+    data->Ar = r.cwiseProduct(a_inv);
+    data->Arr.diagonal() = eps_ * a_inv.cwiseProduct(a_inv).cwiseProduct(a_inv);
   };
 
   /**
