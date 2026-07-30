@@ -84,9 +84,11 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
 
  private:
   std::shared_ptr<Base>
-      model_;     //!< model to compute the finite differentiation from
-  Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
-                  //!< calculation
+      model_;      //!< model to compute the finite differentiation from
+  Scalar e_jac_;   //!< Constant used for computing disturbances in Jacobian
+                   //!< calculation
+  Scalar e_hess_;  //!< Constant used for computing disturbances in Hessian
+                   //!< calculation
 
  protected:
   using Base::nr_;
@@ -112,11 +114,9 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   explicit ActivationDataNumDiffTpl(Model<Scalar>* const model)
       : Base(model),
         dr(model->get_model()->get_nr()),
-        rp(model->get_model()->get_nr()),
-        Arr_(Arr.rows(), Arr.cols()) {
+        rp(model->get_model()->get_nr()) {
     dr.setZero();
     rp.setZero();
-    Arr_.setZero();
     data_0 = model->get_model()->createData();
     const std::size_t nr = model->get_model()->get_nr();
     data_rp.clear();
@@ -125,7 +125,7 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
     }
 
     data_r2p.clear();
-    for (std::size_t i = 0; i < 4; ++i) {
+    for (std::size_t i = 0; i < 2; ++i) {
       data_r2p.push_back(model->get_model()->createData());
     }
   }
@@ -137,9 +137,9 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
   std::vector<std::shared_ptr<Base> >
       data_rp;  //!< The temporary data associated with the input variation
   std::vector<std::shared_ptr<Base> >
-      data_r2p;  //!< The temporary data associated with the input variation
+      data_r2p;  //!< Temporary data for positive and negative Hessian
+                 //!< disturbances
 
-  MatrixXs Arr_;
   using Base::a_value;
   using Base::Ar;
   using Base::Arr;

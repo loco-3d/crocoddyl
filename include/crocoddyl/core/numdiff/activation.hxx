@@ -14,7 +14,9 @@ ActivationModelNumDiffTpl<Scalar>::ActivationModelNumDiffTpl(
     std::shared_ptr<Base> model)
     : Base(model->get_nr()),
       model_(model),
-      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {}
+      e_jac_(sqrt(Scalar(2.0) * std::numeric_limits<Scalar>::epsilon())) {
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
+}
 
 template <typename Scalar>
 ActivationModelNumDiffTpl<Scalar>::~ActivationModelNumDiffTpl() {}
@@ -58,9 +60,24 @@ void ActivationModelNumDiffTpl<Scalar>::calcDiff(
     data->Ar(i_r) = (data_nd->data_rp[i_r]->a_value - a_value0) / rh_jac;
   }
 
-  // Computing the d^2 action(r) / dr^2
-  data_nd->Arr_.noalias() = data->Ar * data->Ar.transpose();
-  data->Arr.diagonal() = data_nd->Arr_.diagonal();
+  // Computing the diagonal of d^2 activation(r) / dr^2
+  const Scalar rh_hess = e_hess_ * std::max(Scalar(1.), r.norm());
+  const Scalar rh_hess_squared = rh_hess * rh_hess;
+  data_nd->rp = r;
+  for (unsigned int i_r = 0; i_r < nr; ++i_r) {
+    data_nd->rp(i_r) += rh_hess;
+    model_->calc(data_nd->data_r2p[0], data_nd->rp);
+    const Scalar a_value_plus = data_nd->data_r2p[0]->a_value;
+
+    data_nd->rp(i_r) -= Scalar(2.) * rh_hess;
+    model_->calc(data_nd->data_r2p[1], data_nd->rp);
+    const Scalar a_value_minus = data_nd->data_r2p[1]->a_value;
+
+    data_nd->rp(i_r) += rh_hess;
+    data->Arr.diagonal()(i_r) =
+        (a_value_plus - Scalar(2.) * a_value0 + a_value_minus) /
+        rh_hess_squared;
+  }
 }
 
 template <typename Scalar>
@@ -96,6 +113,7 @@ void ActivationModelNumDiffTpl<Scalar>::set_disturbance(
     throw_pretty("Invalid argument: " << "Disturbance constant is positive");
   }
   e_jac_ = disturbance;
+  e_hess_ = sqrt(Scalar(2.0) * e_jac_);
 }
 
 }  // namespace crocoddyl

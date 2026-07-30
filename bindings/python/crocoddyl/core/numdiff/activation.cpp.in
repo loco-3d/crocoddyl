@@ -47,6 +47,7 @@ struct ActivationModelNumDiffVisitor
             "action model")
         .add_property(
             "disturbance", bp::make_function(&Model::get_disturbance),
+            &Model::set_disturbance,
             "disturbance constant used in the numerical differentiation");
   }
 };
