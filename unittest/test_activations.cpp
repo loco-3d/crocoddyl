@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -12,6 +12,10 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
+#include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/activations/smooth-1norm.hpp"
+#include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/activations/weighted-smooth-1norm.hpp"
 #include "factory/activation.hpp"
 #include "unittest_common.hpp"
 
@@ -115,6 +119,68 @@ void test_partial_derivatives_against_numdiff(
   BOOST_CHECK((data->Ar.cast<float>() - casted_data->Ar).isZero(tol_f));
 }
 
+void test_activation_is_zero_at_zero(
+    ActivationModelTypes::Type activation_type) {
+  ActivationModelFactory factory;
+  const std::shared_ptr<crocoddyl::ActivationModelAbstract>& model =
+      factory.create(activation_type);
+  const Eigen::VectorXd r =
+      Eigen::VectorXd::Zero(static_cast<Eigen::Index>(model->get_nr()));
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
+      model->createData();
+  if (activation_type != ActivationModelTypes::ActivationModelSmooth2Norm &
+      activation_type !=
+          ActivationModelTypes::ActivationModelWeightedQuadraticBarrier &
+      activation_type != ActivationModelTypes::ActivationModelQuadraticBarrier &
+      activation_type != ActivationModelTypes::ActivationModel2NormBarrier) {
+    model->calc(data, r);
+    BOOST_CHECK_SMALL(data->a_value, std::numeric_limits<double>::epsilon());
+  }
+}
+
+void check_activation_local_quadratic_response(
+    crocoddyl::ActivationModelAbstract& model,
+    crocoddyl::ActivationModelAbstract& quadratic_model) {
+  const Eigen::VectorXd r =
+      Eigen::VectorXd::Zero(static_cast<Eigen::Index>(model.get_nr()));
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& data =
+      model.createData();
+  const std::shared_ptr<crocoddyl::ActivationDataAbstract>& quadratic_data =
+      quadratic_model.createData();
+  model.calc(data, r);
+  model.calcDiff(data, r);
+  quadratic_model.calc(quadratic_data, r);
+  quadratic_model.calcDiff(quadratic_data, r);
+  const Eigen::MatrixXd hessian =
+      crocoddyl::ActivationDataAbstract::getHessianMatrix(*data);
+  const Eigen::MatrixXd quadratic_hessian =
+      crocoddyl::ActivationDataAbstract::getHessianMatrix(*quadratic_data);
+  BOOST_CHECK(hessian.isApprox(quadratic_hessian));
+}
+
+void test_smooth_1norm_properties() {
+  const double delta = 0.25;
+  crocoddyl::ActivationModelSmooth1Norm model(3, delta);
+  crocoddyl::ActivationModelSmooth1Norm large_delta_model(3, 100.);
+  crocoddyl::ActivationModelQuad quadratic_model(3);
+  BOOST_CHECK_EQUAL(model.get_delta(), delta);
+  check_activation_local_quadratic_response(model, quadratic_model);
+  check_activation_local_quadratic_response(large_delta_model, quadratic_model);
+}
+
+void test_weighted_smooth_1norm_properties() {
+  Eigen::VectorXd weights(3);
+  weights << 0.5, 2., 4.;
+  const double delta = 0.25;
+  crocoddyl::ActivationModelWeightedSmooth1Norm model(weights, delta);
+  crocoddyl::ActivationModelWeightedSmooth1Norm large_delta_model(weights,
+                                                                  100.);
+  crocoddyl::ActivationModelWeightedQuad quadratic_model(weights);
+  BOOST_CHECK_EQUAL(model.get_delta(), delta);
+  check_activation_local_quadratic_response(model, quadratic_model);
+  check_activation_local_quadratic_response(large_delta_model, quadratic_model);
+}
+
 void test_activation_bounds_with_infinity() {
   Eigen::VectorXd lb(1);
   Eigen::VectorXd ub(1);
@@ -150,6 +216,8 @@ void register_unit_tests(ActivationModelTypes::Type activation_type) {
       boost::bind(&test_calc_returns_a_value, activation_type)));
   ts->add(BOOST_TEST_CASE(
       boost::bind(&test_partial_derivatives_against_numdiff, activation_type)));
+  ts->add(BOOST_TEST_CASE(
+      boost::bind(&test_activation_is_zero_at_zero, activation_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -164,11 +232,25 @@ bool register_bounds_unit_test() {
   return true;
 }
 
+bool register_smooth_1norm_unit_tests() {
+  test_suite* smooth_ts =
+      BOOST_TEST_SUITE("test_ActivationModelSmooth1NormProperties");
+  smooth_ts->add(BOOST_TEST_CASE(&test_smooth_1norm_properties));
+  framework::master_test_suite().add(smooth_ts);
+
+  test_suite* ts =
+      BOOST_TEST_SUITE("test_ActivationModelWeightedSmooth1NormProperties");
+  ts->add(BOOST_TEST_CASE(&test_weighted_smooth_1norm_properties));
+  framework::master_test_suite().add(ts);
+  return true;
+}
+
 bool init_function() {
   for (size_t i = 0; i < ActivationModelTypes::all.size(); ++i) {
     register_unit_tests(ActivationModelTypes::all[i]);
   }
   register_bounds_unit_test();
+  register_smooth_1norm_unit_tests();
   return true;
 }
 
