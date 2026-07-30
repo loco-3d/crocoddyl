@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2019-2026, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -50,10 +50,9 @@ class ActivationModelWeightedQuadraticBarrierTpl
 
     d->rlb_min = (r - bounds_.lb).array().min(Scalar(0.));
     d->rub_max = (r - bounds_.ub).array().max(Scalar(0.));
-    d->rlb_min.array() *= weights_.array();
-    d->rub_max.array() *= weights_.array();
-    data->a_value = Scalar(0.5) * d->rlb_min.matrix().squaredNorm() +
-                    Scalar(0.5) * d->rub_max.matrix().squaredNorm();
+    data->a_value =
+        Scalar(0.5) * (weights_.array() * d->rlb_min.array().square()).sum() +
+        Scalar(0.5) * (weights_.array() * d->rub_max.array().square()).sum();
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
@@ -64,18 +63,17 @@ class ActivationModelWeightedQuadraticBarrierTpl
                                       std::to_string(nr_) + ")");
     }
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
-    data->Ar = (d->rlb_min + d->rub_max).matrix();
-    data->Ar.array() *= weights_.array();
+    data->Ar =
+        (weights_.array() * (d->rlb_min.array() + d->rub_max.array())).matrix();
 
     using pinocchio::internal::if_then_else;
-    for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
-      data->Arr.diagonal()[i] = if_then_else(
-          pinocchio::internal::LE, r[i] - bounds_.lb[i], Scalar(0.), Scalar(1.),
-          if_then_else(pinocchio::internal::GE, r[i] - bounds_.ub[i],
-                       Scalar(0.), Scalar(1.), Scalar(0.)));
+    for (Eigen::Index i = 0; i < data->Arr.rows(); ++i) {
+      const Scalar active =
+          if_then_else(pinocchio::internal::LT, r[i], bounds_.lb[i], Scalar(1.),
+                       if_then_else(pinocchio::internal::GT, r[i],
+                                    bounds_.ub[i], Scalar(1.), Scalar(0.)));
+      data->Arr.diagonal()[i] = active * weights_[i];
     }
-
-    data->Arr.diagonal().array() *= weights_.array();
   };
 
   virtual std::shared_ptr<ActivationDataAbstract> createData() override {

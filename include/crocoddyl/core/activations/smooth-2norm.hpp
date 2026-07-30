@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, LAAS-CNRS, Heriot-Watt University
+// Copyright (C) 2020-2026, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,9 @@ class ActivationModelSmooth2NormTpl
     }
 
     data->Ar = r / data->a_value;
-    data->Arr.diagonal().array() = Scalar(1) / pow(data->a_value, Scalar(3));
+    data->Arr.diagonal().array() =
+        Scalar(1.) / data->a_value -
+        r.array().square() / pow(data->a_value, Scalar(3.));
   };
 
   /**
