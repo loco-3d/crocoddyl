@@ -26,7 +26,7 @@ class ActivationModelSmoothAbsTpl
   DEPRECATED("Use ActivationModelSmooth1Norm",
              explicit ActivationModelSmoothAbsTpl(
                  const std::size_t nr,
-                 const Scalar eps = Scalar(1.)) : Base(nr, eps){};)
+                 const Scalar delta = Scalar(1.)) : Base(nr, delta){};)
 };
 
 template <typename Scalar>

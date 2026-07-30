@@ -20,15 +20,19 @@ namespace crocoddyl {
  * This activation function describes a weighted smooth representation of the
  * 1-norm of a residual vector:
  * \f[
- *   a(\mathbf{r}) = \sum_{i=0}^{nr-1} w_i\sqrt{\epsilon + r_i^2},
+ *   a(\mathbf{r}) =
+ *     \sum_{i=0}^{nr-1}
+ *       w_i\delta^2\left(\sqrt{1 + (r_i/\delta)^2} - 1\right),
  * \f]
- * where \f$\epsilon > 0\f$ is the smoothing factor, \f$w_i \geq 0\f$ is the
+ * where \f$\delta > 0\f$ is the smoothing scale, \f$w_i \geq 0\f$ is the
  * weight associated with the scalar residual \f$r_i\f$, and \f$nr\f$ is the
- * residual dimension. This activation represents a shifted and weighted
- * Charbonnier function.
+ * residual dimension. This is the weighted classical pseudo-Huber form,
+ * equivalently \f$w_i(\delta\sqrt{\delta^2 + r_i^2} - \delta^2)\f$.
  *
  * The weights scale the activation without changing the smoothing transition,
- * which occurs around \f$|r_i| = \sqrt{\epsilon}\f$.
+ * which occurs around \f$|r_i| = \delta\f$. The local quadratic approximation
+ * is \f$w_i r_i^2/2\f$ for every \f$\delta\f$, while the asymptotic slope of
+ * each term is \f$w_i\delta\f$.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -51,14 +55,15 @@ class ActivationModelWeightedSmooth1NormTpl
    * @brief Initialize the weighted smooth-1norm activation model
    *
    * @param[in] weights  Nonnegative residual weights
-   * @param[in] eps      Strictly positive smoothing factor (default: 1)
+   * @param[in] delta    Strictly positive smoothing scale (default: 1)
    */
-  explicit ActivationModelWeightedSmooth1NormTpl(const VectorXs& weights,
-                                                 const Scalar eps = Scalar(1.))
-      : Base(weights.size()), weights_(weights), eps_(eps) {
+  explicit ActivationModelWeightedSmooth1NormTpl(
+      const VectorXs& weights, const Scalar delta = Scalar(1.))
+      : Base(weights.size()), weights_(weights), delta_(delta) {
     check_weights(weights_);
-    if (eps_ <= Scalar(0.)) {
-      throw_pretty("Invalid argument: eps should be a strictly positive value");
+    if (delta_ <= Scalar(0.)) {
+      throw_pretty(
+          "Invalid argument: delta should be a strictly positive value");
     }
   }
   virtual ~ActivationModelWeightedSmooth1NormTpl() = default;
@@ -78,8 +83,10 @@ class ActivationModelWeightedSmooth1NormTpl
     }
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
-    d->a = (r.array().square() + eps_).sqrt().matrix();
-    data->a_value = weights_.dot(d->a);
+    d->a = (r.array().square() + delta_ * delta_).sqrt().matrix();
+    data->a_value =
+        delta_ *
+        (weights_.array() * r.array().square() / (d->a.array() + delta_)).sum();
   }
 
   /**
@@ -97,9 +104,9 @@ class ActivationModelWeightedSmooth1NormTpl
     }
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
     const VectorXs a_inv = d->a.cwiseInverse();
-    data->Ar = weights_.cwiseProduct(r).cwiseProduct(a_inv);
+    data->Ar = delta_ * weights_.cwiseProduct(r).cwiseProduct(a_inv);
     data->Arr.diagonal() =
-        eps_ *
+        delta_ * delta_ * delta_ *
         weights_.cwiseProduct(a_inv.cwiseProduct(a_inv).cwiseProduct(a_inv));
   }
 
@@ -116,11 +123,11 @@ class ActivationModelWeightedSmooth1NormTpl
   ActivationModelWeightedSmooth1NormTpl<NewScalar> cast() const {
     typedef ActivationModelWeightedSmooth1NormTpl<NewScalar> ReturnType;
     return ReturnType(weights_.template cast<NewScalar>(),
-                      scalar_cast<NewScalar>(eps_));
+                      scalar_cast<NewScalar>(delta_));
   }
 
   const VectorXs& get_weights() const { return weights_; }
-  Scalar get_eps() const { return eps_; }
+  Scalar get_delta() const { return delta_; }
 
   void set_weights(const VectorXs& weights) {
     if (weights.size() != weights_.size()) {
@@ -138,8 +145,8 @@ class ActivationModelWeightedSmooth1NormTpl
    * @param[out] os  Output stream object
    */
   virtual void print(std::ostream& os) const override {
-    os << "ActivationModelWeightedSmooth1Norm {nr=" << nr_ << ", eps=" << eps_
-       << "}";
+    os << "ActivationModelWeightedSmooth1Norm {nr=" << nr_
+       << ", delta=" << delta_ << "}";
   }
 
  protected:
@@ -156,7 +163,7 @@ class ActivationModelWeightedSmooth1NormTpl
   }
 
   VectorXs weights_;  //!< Residual weights
-  Scalar eps_;        //!< Smoothing factor
+  Scalar delta_;      //!< Smoothing scale
 };
 
 template <typename _Scalar>
@@ -174,7 +181,7 @@ struct ActivationDataWeightedSmooth1NormTpl
       : Base(activation), a(VectorXs::Zero(activation->get_nr())) {}
   virtual ~ActivationDataWeightedSmooth1NormTpl() = default;
 
-  VectorXs a;  //!< Element-wise values \f$\sqrt{\epsilon + r_i^2}\f$
+  VectorXs a;  //!< Element-wise values \f$\sqrt{\delta^2 + r_i^2}\f$
 
   using Base::a_value;
   using Base::Ar;
