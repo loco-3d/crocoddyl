@@ -36,7 +36,7 @@ struct ActivationModelWeightedSmooth1NormVisitor
                       bp::make_function(&Model::get_weights,
                                         bp::return_internal_reference<>()),
                       &Model::set_weights, "nonnegative residual weights")
-        .add_property("eps", &Model::get_eps, "smoothing factor");
+        .add_property("delta", &Model::get_delta, "smoothing scale");
   }
 };
 
@@ -48,7 +48,7 @@ struct ActivationDataWeightedSmooth1NormVisitor
   void visit(PyClass& cl) const {
     cl.add_property(
         "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
-        "element-wise sqrt(eps + r_i^2) values");
+        "element-wise sqrt(delta^2 + r_i^2) values");
   }
 };
 
@@ -61,14 +61,14 @@ struct ActivationDataWeightedSmooth1NormVisitor
   bp::class_<Model, bp::bases<ModelBase>>(                             \
       "ActivationModelWeightedSmooth1Norm",                            \
       "Weighted smooth-1norm activation model.\n\n"                    \
-      "It computes sum_i w_i * sqrt(eps + r_i^2), where w contains "   \
-      "nonnegative weights and eps is a strictly positive smoothing "  \
-      "factor.",                                                       \
+      "It computes sum_i w_i * delta^2 * "                             \
+      "(sqrt(1 + (r_i / delta)^2) - 1), where w contains nonnegative " \
+      "weights and delta is a strictly positive smoothing scale.",     \
       bp::init<VectorXs, bp::optional<Scalar>>(                        \
-          bp::args("self", "weights", "eps"),                          \
+          bp::args("self", "weights", "delta"),                        \
           "Initialize the activation model.\n\n"                       \
           ":param weights: nonnegative residual weights\n"             \
-          ":param eps: smoothing factor (default: 1)"))                \
+          ":param delta: smoothing scale (default: 1)"))               \
       .def(ActivationModelWeightedSmooth1NormVisitor<Model>())         \
       .def(CastVisitor<Model>())                                       \
       .def(PrintableVisitor<Model>())                                  \

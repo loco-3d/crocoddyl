@@ -81,7 +81,7 @@ ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
   Eigen::VectorXd nonnegative_weights = weights.cwiseAbs();
   double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double eps = fabs(Eigen::VectorXd::Random(1)[0]);
-  double positive_eps = eps + 1e-3;
+  double delta = fabs(Eigen::VectorXd::Random(1)[0]) + 1e-3;
   bool hessian = random_boolean();
 
   switch (activation_type) {
@@ -98,12 +98,12 @@ ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation =
-          std::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
+          std::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, delta);
       break;
     case ActivationModelTypes::ActivationModelWeightedSmooth1Norm:
       activation =
           std::make_shared<crocoddyl::ActivationModelWeightedSmooth1Norm>(
-              nonnegative_weights, positive_eps);
+              nonnegative_weights, delta);
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       activation =
