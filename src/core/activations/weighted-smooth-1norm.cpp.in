@@ -1,0 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/activations/weighted-smooth-1norm.hpp"
+
+namespace crocoddyl {
+
+template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ActivationModelWeightedSmooth1NormTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    ActivationDataWeightedSmooth1NormTpl<@SCALAR_TYPE@>;
+
+}  // namespace crocoddyl
