@@ -98,9 +98,8 @@ void test_partial_derivatives_against_numdiff(
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
   BOOST_CHECK((data->Ar - data_num_diff->Ar).isZero(tol));
-
-  // numerical differentiation of the Hessian is not good enough to be tested.
-  // BOOST_CHECK((data->Arr - data_num_diff->Arr).isMuchSmallerThan(1.0, tol));
+  BOOST_CHECK(
+      (data->Arr.diagonal() - data_num_diff->Arr.diagonal()).isZero(tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<crocoddyl::ActivationModelAbstractTpl<float>>&
