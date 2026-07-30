@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -23,7 +23,14 @@ namespace crocoddyl {
  * \{equation}{ sum^nr_{i=0} \sqrt{\epsilon + \|r_i\|^2} \f}
  * where \f$\epsilon\f$ defines the smoothing factor, \f$r_i\f$ is the scalar
  * residual for the \f$i\f$ constraints, \f$nr\f$ is the dimension of the
- * residual vector.
+ * residual vector. It represents a shifted Charbonnier activation function,
+ * which is a type of pseudo-Huber function that provides a smooth
+ * approximation of the absolute value function. The smooth-abs activation is
+ * differentiable everywhere, including at the origin, which makes it suitable
+ * for optimization problems where smoothness is desired. The parameter
+ * \f$\epsilon\f$ controls the degree of smoothing; smaller values lead to a
+ * closer approximation to the absolute value function, while larger values
+ * result in a smoother curve.
  *
  * The computation of the function and it derivatives are carried out in
  * `calc()` and `caldDiff()`, respectively.

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -154,6 +154,11 @@ template <typename Scalar>
 class ActivationModelSmooth1NormTpl;
 template <typename Scalar>
 struct ActivationDataSmooth1NormTpl;
+
+template <typename Scalar>
+class ActivationModelWeightedSmooth1NormTpl;
+template <typename Scalar>
+struct ActivationDataWeightedSmooth1NormTpl;
 
 template <typename Scalar>
 class ActivationModelSmooth2NormTpl;
@@ -408,6 +413,10 @@ DEPRECATED(
     typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmoothAbs;)
 typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmooth1Norm;
 typedef ActivationDataSmooth1NormTpl<double> ActivationDataSmooth1Norm;
+typedef ActivationModelWeightedSmooth1NormTpl<double>
+    ActivationModelWeightedSmooth1Norm;
+typedef ActivationDataWeightedSmooth1NormTpl<double>
+    ActivationDataWeightedSmooth1Norm;
 typedef ActivationModelSmooth2NormTpl<double> ActivationModelSmooth2Norm;
 typedef ActivationDataSmooth2NormTpl<double> ActivationDataSmooth2Norm;
 typedef ActivationModel2NormBarrierTpl<double> ActivationModel2NormBarrier;

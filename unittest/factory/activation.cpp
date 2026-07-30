@@ -18,6 +18,7 @@
 #include "crocoddyl/core/activations/smooth-2norm.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic.hpp"
+#include "crocoddyl/core/activations/weighted-smooth-1norm.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -38,6 +39,9 @@ std::ostream& operator<<(std::ostream& os, ActivationModelTypes::Type type) {
       break;
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       os << "ActivationModelSmooth1Norm";
+      break;
+    case ActivationModelTypes::ActivationModelWeightedSmooth1Norm:
+      os << "ActivationModelWeightedSmooth1Norm";
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       os << "ActivationModelSmooth2Norm";
@@ -74,8 +78,10 @@ ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
   Eigen::VectorXd ub =
       lb + Eigen::VectorXd::Ones(nr) + Eigen::VectorXd::Random(nr);
   Eigen::VectorXd weights = 1. * Eigen::VectorXd::Random(nr);
+  Eigen::VectorXd nonnegative_weights = weights.cwiseAbs();
   double alpha = fabs(Eigen::VectorXd::Random(1)[0]);
   double eps = fabs(Eigen::VectorXd::Random(1)[0]);
+  double positive_eps = eps + 1e-3;
   bool hessian = random_boolean();
 
   switch (activation_type) {
@@ -93,6 +99,11 @@ ActivationModelFactory::create(ActivationModelTypes::Type activation_type,
     case ActivationModelTypes::ActivationModelSmooth1Norm:
       activation =
           std::make_shared<crocoddyl::ActivationModelSmooth1Norm>(nr, eps);
+      break;
+    case ActivationModelTypes::ActivationModelWeightedSmooth1Norm:
+      activation =
+          std::make_shared<crocoddyl::ActivationModelWeightedSmooth1Norm>(
+              nonnegative_weights, positive_eps);
       break;
     case ActivationModelTypes::ActivationModelSmooth2Norm:
       activation =

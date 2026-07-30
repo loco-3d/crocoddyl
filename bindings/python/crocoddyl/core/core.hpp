@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University, University of Trento
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -63,6 +63,7 @@ void exposeActivationWeightedQuad();
 void exposeActivationQuadraticBarrier();
 void exposeActivationWeightedQuadraticBarrier();
 void exposeActivationSmooth1Norm();
+void exposeActivationWeightedSmooth1Norm();
 void exposeActivationSmooth2Norm();
 void exposeActivation2NormBarrier();
 void exposeSolverDDP();

@@ -21,6 +21,7 @@ struct ActivationModelTypes {
     ActivationModelQuadFlatExp,
     ActivationModelQuadFlatLog,
     ActivationModelSmooth1Norm,
+    ActivationModelWeightedSmooth1Norm,
     ActivationModelSmooth2Norm,
     ActivationModelWeightedQuad,
     ActivationModelQuadraticBarrier,

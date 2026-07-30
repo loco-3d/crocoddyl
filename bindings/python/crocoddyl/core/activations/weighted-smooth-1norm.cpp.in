@@ -1,0 +1,100 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/activations/weighted-smooth-1norm.hpp"
+
+#include "python/crocoddyl/core/activation-base.hpp"
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ActivationModelWeightedSmooth1NormVisitor
+    : public bp::def_visitor<
+          ActivationModelWeightedSmooth1NormVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "r"),
+           "Compute the weighted smooth-1norm activation.\n\n"
+           ":param data: activation data\n"
+           ":param r: residual vector")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "r"),
+             "Compute the activation derivatives.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: activation data\n"
+             ":param r: residual vector")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the weighted smooth-1norm activation data.")
+        .add_property("weights",
+                      bp::make_function(&Model::get_weights,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_weights, "nonnegative residual weights")
+        .add_property("eps", &Model::get_eps, "smoothing factor");
+  }
+};
+
+template <typename Data>
+struct ActivationDataWeightedSmooth1NormVisitor
+    : public bp::def_visitor<
+          ActivationDataWeightedSmooth1NormVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
+        "element-wise sqrt(eps + r_i^2) values");
+  }
+};
+
+#define CROCODDYL_ACTIVATION_MODEL_WEIGHTEDSMOOTH1NORM_PYTHON_BINDINGS( \
+    Scalar)                                                            \
+  typedef ActivationModelWeightedSmooth1NormTpl<Scalar> Model;         \
+  typedef ActivationModelAbstractTpl<Scalar> ModelBase;                \
+  typedef typename Model::VectorXs VectorXs;                           \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                \
+  bp::class_<Model, bp::bases<ModelBase>>(                             \
+      "ActivationModelWeightedSmooth1Norm",                            \
+      "Weighted smooth-1norm activation model.\n\n"                    \
+      "It computes sum_i w_i * sqrt(eps + r_i^2), where w contains "   \
+      "nonnegative weights and eps is a strictly positive smoothing "  \
+      "factor.",                                                       \
+      bp::init<VectorXs, bp::optional<Scalar>>(                        \
+          bp::args("self", "weights", "eps"),                          \
+          "Initialize the activation model.\n\n"                       \
+          ":param weights: nonnegative residual weights\n"             \
+          ":param eps: smoothing factor (default: 1)"))                \
+      .def(ActivationModelWeightedSmooth1NormVisitor<Model>())         \
+      .def(CastVisitor<Model>())                                       \
+      .def(PrintableVisitor<Model>())                                  \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTIVATION_DATA_WEIGHTEDSMOOTH1NORM_PYTHON_BINDINGS( \
+    Scalar)                                                            \
+  typedef ActivationDataWeightedSmooth1NormTpl<Scalar> Data;           \
+  typedef ActivationDataAbstractTpl<Scalar> DataBase;                  \
+  typedef ActivationModelWeightedSmooth1NormTpl<Scalar> Model;         \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                 \
+  bp::class_<Data, bp::bases<DataBase>>(                               \
+      "ActivationDataWeightedSmooth1Norm",                             \
+      "Data for weighted smooth-1norm activation.\n\n",                \
+      bp::init<Model*>(bp::args("self", "model"),                      \
+                       "Create weighted smooth-1norm activation data." \
+                       "\n\n:param model: activation model"))          \
+      .def(ActivationDataWeightedSmooth1NormVisitor<Data>())           \
+      .def(CopyableVisitor<Data>());
+
+void exposeActivationWeightedSmooth1Norm() {
+  CROCODDYL_ACTIVATION_MODEL_WEIGHTEDSMOOTH1NORM_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_ACTIVATION_DATA_WEIGHTEDSMOOTH1NORM_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
