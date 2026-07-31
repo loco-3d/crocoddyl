@@ -61,6 +61,16 @@ class HumanoidLocoManipulation:
         switch=False,
         constraint=False,
     ):
+        if footContacts is None:
+            footContacts = []
+        if handContacts is None:
+            handContacts = []
+        if bodiesTarget is None:
+            bodiesTarget = {}
+        if handsTarget is None:
+            handsTarget = {}
+        if feetTarget is None:
+            feetTarget = {}
         if self._fwddyn:
             nu = self.actuation.nu if switch is False else 0
         else:
@@ -76,22 +86,21 @@ class HumanoidLocoManipulation:
         else:
             impulses = crocoddyl.ImpulseModelMultiple(self.state)
         # Cost for body target
-        if bodiesTarget is not None:
-            for name, Mref in bodiesTarget.items():
-                frame_id = self.robot_model.getFrameId(name)
-                # Cost for target reaching: bodies
-                if isinstance(Mref, (np.ndarray, np.generic)):
-                    costs.addCost(
-                        name + "_pose",
-                        self._createFrameRotationCost(name, Mref, np.ones(3), nu),
-                        1e3,
-                    )
-                elif isinstance(Mref, pinocchio.SE3):
-                    costs.addCost(
-                        name + "_pose",
-                        self._createFramePlacementCost(name, Mref, np.ones(6), nu),
-                        1e3,
-                    )
+        for name, Mref in bodiesTarget.items():
+            frame_id = self.robot_model.getFrameId(name)
+            # Cost for target reaching: bodies
+            if isinstance(Mref, (np.ndarray, np.generic)):
+                costs.addCost(
+                    name + "_pose",
+                    self._createFrameRotationCost(name, Mref, np.ones(3), nu),
+                    1e3,
+                )
+            elif isinstance(Mref, pinocchio.SE3):
+                costs.addCost(
+                    name + "_pose",
+                    self._createFramePlacementCost(name, Mref, np.ones(6), nu),
+                    1e3,
+                )
         # Cost for self-collision, and for state and control regularization
         costs.addCost("stateLimitsCost", self._createStateLimsCost(nu), 1e3)
         costs.addCost(
