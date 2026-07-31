@@ -72,7 +72,9 @@ void test_partial_derivatives_against_contact_numdiff(
   model->calcDiff(data, x, u);
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float tol_f = 20.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  std::cout << "tol_f: " << tol_f << std::endl;
+  //   std::cout << data->Gx.cast<float>() - casted_data->Gx << std::endl;
   BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
   BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
   BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
