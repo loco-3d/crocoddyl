@@ -6,6 +6,7 @@ from pinocchio.utils import zero
 
 EPS = np.finfo(float).eps
 NUMDIFF_MODIFIER = 1e4
+DEFAULT_NUMDIFF_STEP = np.sqrt(2 * EPS)
 
 
 class NumDiffException(Exception):
@@ -27,7 +28,7 @@ def assertNumDiff(A, B, threshold):
         )
 
 
-def df_dx(func, x, h=np.sqrt(2 * EPS)):
+def df_dx(func, x, h=DEFAULT_NUMDIFF_STEP):
     """Perform df/dx by num_diff.
     :params func: function to differentiate f : np.matrix -> np.matrix
     :params x: value at which f is differentiated. type np.matrix
@@ -45,7 +46,7 @@ def df_dx(func, x, h=np.sqrt(2 * EPS)):
     return res
 
 
-def df_dq(model, func, q, h=np.sqrt(2 * EPS)):
+def df_dq(model, func, q, h=DEFAULT_NUMDIFF_STEP):
     """Perform df/dq by num_diff. q is in the lie manifold.
     :params func: function to differentiate f : np.matrix -> np.matrix
     :params q: configuration value at which f is differentiated. type np.matrix

@@ -293,5 +293,5 @@ if WITHPLOT:
                 log.steps,
                 figTitle=title,
                 figIndex=i + fig_idx + 3,
-                show=True if i == len(GAITPHASES) - 1 else False,
+                show=i == len(GAITPHASES) - 1,
             )

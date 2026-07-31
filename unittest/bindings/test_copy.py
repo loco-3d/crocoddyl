@@ -9,9 +9,9 @@ import crocoddyl
 
 
 class CopyModelTestCase(unittest.TestCase):
-    MODEL = list()
+    MODEL = []
     DATA = False
-    COLLECTOR = list()
+    COLLECTOR = []
 
     def test_copy(self):
         Mcopy = copy.copy(self.MODEL)
@@ -49,7 +49,7 @@ class CopyModelTestCase(unittest.TestCase):
 
 
 class ActionsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     # core actions
     MODEL.append(crocoddyl.ActionModelUnicycle())
@@ -58,27 +58,27 @@ class ActionsTest(CopyModelTestCase):
     # multibody actions
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
-    cost = crocoddyl.CostModelSum(state, actuation.nu)
+    cost_fwd = crocoddyl.CostModelSum(state, actuation.nu)
     impulse = crocoddyl.ImpulseModelMultiple(state)
-    contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
-    MODEL.append(crocoddyl.ActionModelImpulseFwdDynamics(state, impulse, cost))
+    contact_fwd = crocoddyl.ContactModelMultiple(state, actuation.nu)
+    MODEL.append(crocoddyl.ActionModelImpulseFwdDynamics(state, impulse, cost_fwd))
     MODEL.append(
         crocoddyl.DifferentialActionModelContactFwdDynamics(
-            state, actuation, contact, cost
+            state, actuation, contact_fwd, cost_fwd
         )
     )
     MODEL.append(
-        crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, cost)
+        crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, cost_fwd)
     )
-    cost = crocoddyl.CostModelSum(state, state.nv)
-    contact = crocoddyl.ContactModelMultiple(state, state.nv)
+    cost_inv = crocoddyl.CostModelSum(state, state.nv)
+    contact_inv = crocoddyl.ContactModelMultiple(state, state.nv)
     MODEL.append(
         crocoddyl.DifferentialActionModelContactInvDynamics(
-            state, actuation, contact, cost
+            state, actuation, contact_inv, cost_inv
         )
     )
     MODEL.append(
-        crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, cost)
+        crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, cost_inv)
     )
     # integrated actions
     MODEL.append(
@@ -101,7 +101,7 @@ class ActionsTest(CopyModelTestCase):
 
 
 class StatesTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     # core states
     MODEL.append(crocoddyl.StateVector(2))
     MODEL.append(crocoddyl.StateNumDiff(crocoddyl.StateVector(2)))
@@ -110,9 +110,9 @@ class StatesTest(CopyModelTestCase):
 
 
 class ResidualsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
-    COLLECTOR = list()
+    COLLECTOR = []
     # core residuals
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
@@ -200,7 +200,7 @@ class ResidualsTest(CopyModelTestCase):
 
 
 class ActivationsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     bounds = crocoddyl.ActivationBounds(np.zeros(2), np.ones(2), 0.1)
     MODEL.append(crocoddyl.ActivationModel2NormBarrier(2))
@@ -218,9 +218,9 @@ class ActivationsTest(CopyModelTestCase):
 
 
 class CostsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
-    COLLECTOR = list()
+    COLLECTOR = []
     state = crocoddyl.StateVector(2)
     residual = crocoddyl.ResidualModelControl(crocoddyl.StateVector(2))
     activation = crocoddyl.ActivationModelWeightedQuad(np.ones(1))
@@ -231,9 +231,9 @@ class CostsTest(CopyModelTestCase):
 
 
 class ConstraintsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
-    COLLECTOR = list()
+    COLLECTOR = []
     state = crocoddyl.StateVector(2)
     residual = crocoddyl.ResidualModelControl(crocoddyl.StateVector(2))
     MODEL.append(crocoddyl.ConstraintModelResidual(state, residual))
@@ -243,7 +243,7 @@ class ConstraintsTest(CopyModelTestCase):
 
 
 class ControlsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     MODEL.append(crocoddyl.ControlParametrizationModelPolyZero(2))
     MODEL.append(crocoddyl.ControlParametrizationModelPolyOne(2))
@@ -253,7 +253,7 @@ class ControlsTest(CopyModelTestCase):
 
 
 class DataCollectorsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = False
     # core collectors
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
@@ -286,7 +286,7 @@ class DataCollectorsTest(CopyModelTestCase):
 
 
 class ActuationsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     # core actuations
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
@@ -325,14 +325,13 @@ class ActuationsTest(CopyModelTestCase):
             crocoddyl.ThrusterType.CW,
         ),
     ]
-    actuation = crocoddyl.ActuationModelFloatingBaseThrusters(state, ps)
     MODEL.append(crocoddyl.ActuationModelFloatingBaseThrusters(state, ps))
 
 
 class ContactsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
-    COLLECTOR = list()
+    COLLECTOR = []
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
     frame_id = state.pinocchio.getFrameId("rleg6_joint")
@@ -377,14 +376,14 @@ class ContactsTest(CopyModelTestCase):
 
 
 class ConesTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     MODEL.append(crocoddyl.FrictionCone())
     MODEL.append(crocoddyl.WrenchCone())
     MODEL.append(crocoddyl.CoPSupport())
 
 
 class ProblemAndSolversTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     m = crocoddyl.ActionModelLQR(2, 2)
     problem = crocoddyl.ShootingProblem(m.state.zero(), [m] * 10, m)
     MODEL.append(problem)

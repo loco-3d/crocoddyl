@@ -1110,7 +1110,7 @@ class FrameVelocityCostDataDerived(crocoddyl.CostDataAbstract):
 
 class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
     def __init__(
-        self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=[0.0, 0.0]
+        self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=(0.0, 0.0)
     ):
         crocoddyl.ContactModelAbstract.__init__(self, state, type, 1)
         self.id = id
@@ -1236,7 +1236,7 @@ class Contact1DModelDerived(crocoddyl.ContactModelAbstract):
 
 class Contact3DModelDerived(crocoddyl.ContactModelAbstract):
     def __init__(
-        self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=[0.0, 0.0]
+        self, state, id, xref, type=pinocchio.ReferenceFrame.LOCAL, gains=(0.0, 0.0)
     ):
         crocoddyl.ContactModelAbstract.__init__(self, state, type, 3)
         self.id = id
@@ -1398,7 +1398,7 @@ class Contact3DDataDerived(crocoddyl.ContactDataAbstract):
 
 class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
     def __init__(
-        self, state, id, Mref, type=pinocchio.ReferenceFrame.LOCAL, gains=[0.0, 0.0]
+        self, state, id, Mref, type=pinocchio.ReferenceFrame.LOCAL, gains=(0.0, 0.0)
     ):
         crocoddyl.ContactModelAbstract.__init__(self, state, type, 6)
         self.id = id

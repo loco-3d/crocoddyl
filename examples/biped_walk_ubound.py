@@ -124,7 +124,7 @@ if WITHDISPLAY:
         gepetto.corbaserver.Client()
         cameraTF = [3.0, 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
         display = crocoddyl.GepettoDisplay(talos_legs, 4, 4, cameraTF)
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(talos_legs)
     display.rate = -1
     display.freq = 1
@@ -149,5 +149,5 @@ if WITHPLOT:
             log.steps,
             figTitle=title,
             figIndex=i + 3,
-            show=True if i == len(GAITPHASES) - 1 else False,
+            show=i == len(GAITPHASES) - 1,
         )

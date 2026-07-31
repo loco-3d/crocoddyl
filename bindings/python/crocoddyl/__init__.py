@@ -15,6 +15,16 @@ except ImportError:
 from .libcrocoddyl_pywrap_float64 import *
 from .libcrocoddyl_pywrap_float64 import __raw_version__, __version__  # noqa: F401
 
+_CONTACT_DIFFERENTIAL_DATA_TYPES = (
+    DifferentialActionDataContactFwdDynamics,
+    DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
+)
+
+_INV_DIFFERENTIAL_DATA_TYPES = (
+    DifferentialActionModelFreeInvDynamics,
+    DifferentialActionModelContactInvDynamics,
+)
+
 
 def rotationMatrixFromTwoVectors(a, b):
     a_norm = np.linalg.norm(a)
@@ -73,7 +83,16 @@ class DisplayAbstract(ABC):
         self.display(solver.xs, dts, rs, ps, [], fs, [], dts, factor)
 
     def display(
-        self, xs, us=[], rs=[], ps=[], pds=[], fs=[], ss=[], dts=[], factor=1.0
+        self,
+        xs,
+        us=None,
+        rs=None,
+        ps=None,
+        pds=None,
+        fs=None,
+        ss=None,
+        dts=None,
+        factor=1.0,
     ):
         if ps:
             self.displayFramePoses(ps)
@@ -88,7 +107,7 @@ class DisplayAbstract(ABC):
                             # Display the thrust forces
                             self.displayThrustForce(r)
                     else:
-                        for key, _ in self.activeThrust.items():
+                        for key in self.activeThrust:
                             thrustName = self.thrustGroup + "/" + key
                             self.setVisibility(thrustName, False)
                 if fs:
@@ -127,11 +146,11 @@ class DisplayAbstract(ABC):
                         name = self.robot.model.frames[c.impact.id].name
                     if name not in frameNames:
                         frameNames.append(name)
-            if hasattr(model, "differential"):
-                if isinstance(
-                    model.differential.actuation, ActuationModelFloatingBaseThrusters
-                ):
-                    thrusters.append(model.differential.actuation.thrusters)
+            if hasattr(model, "differential") and isinstance(
+                model.differential.actuation,
+                ActuationModelFloatingBaseThrusters,
+            ):
+                thrusters.append(model.differential.actuation.thrusters)
         for n in frameNames:
             frameId = self.robot.model.getFrameId(n)
             parentId = self.robot.model.frames[frameId].parentJoint
@@ -222,39 +241,35 @@ class DisplayAbstract(ABC):
         fs = []
         for i, model in enumerate(solver.problem.runningModels.tolist()):
             data = solver.problem.runningDatas[i]
-            if hasattr(model, "differential"):
-                if isinstance(
-                    model.differential.actuation, ActuationModelFloatingBaseThrusters
-                ):
-                    fc = []
-                    if isinstance(
-                        model.differential, DifferentialActionModelFreeInvDynamics
-                    ) or isinstance(
-                        model.differential, DifferentialActionModelContactInvDynamics
-                    ):
-                        ui = data.differential.multibody.actuation.u
-                    else:
-                        ui = solver.us[i]
-                    for t, thrust in enumerate(model.differential.actuation.thrusters):
-                        frameName = self.robot.model.frames[2].name
-                        frameId = self.robot.model.getFrameId(frameName)
-                        pinocchio.updateFramePlacement(
-                            model.differential.state.pinocchio,
-                            data.differential.pinocchio,
-                            frameId,
-                        )
-                        oMb = data.differential.pinocchio.oMf[frameId]
-                        oMf = oMb.act(thrust.pose)
-                        force = ui[t]
-                        fc.append(
-                            {
-                                "key": str(t),
-                                "oMf": oMf,
-                                "f": force,
-                                "type": thrust.type,
-                            }
-                        )
-                    fs.append(fc)
+            if hasattr(model, "differential") and isinstance(
+                model.differential.actuation,
+                ActuationModelFloatingBaseThrusters,
+            ):
+                fc = []
+                if isinstance(data.differential, _INV_DIFFERENTIAL_DATA_TYPES):
+                    ui = data.differential.multibody.actuation.u
+                else:
+                    ui = solver.us[i]
+                for t, thrust in enumerate(model.differential.actuation.thrusters):
+                    frameName = self.robot.model.frames[2].name
+                    frameId = self.robot.model.getFrameId(frameName)
+                    pinocchio.updateFramePlacement(
+                        model.differential.state.pinocchio,
+                        data.differential.pinocchio,
+                        frameId,
+                    )
+                    oMb = data.differential.pinocchio.oMf[frameId]
+                    oMf = oMb.act(thrust.pose)
+                    force = ui[t]
+                    fc.append(
+                        {
+                            "key": str(t),
+                            "oMf": oMf,
+                            "f": force,
+                            "type": thrust.type,
+                        }
+                    )
+                fs.append(fc)
         return fs
 
     def getFrameTrajectoryFromSolver(self, solver):
@@ -300,39 +315,21 @@ class DisplayAbstract(ABC):
 
     def _hasContacts(self, data):
         if hasattr(data, "differential"):
-            if isinstance(
-                data.differential,
-                DifferentialActionDataContactFwdDynamics,
-            ) or isinstance(
-                data.differential,
-                DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
-            ):
+            if isinstance(data.differential, _CONTACT_DIFFERENTIAL_DATA_TYPES):
                 return True
         elif isinstance(data, ActionDataImpulseFwdDynamics):
             return True
 
     def _getContactModelAndData(self, model, data):
         if hasattr(data, "differential"):
-            if isinstance(
-                data.differential,
-                DifferentialActionDataContactFwdDynamics,
-            ) or isinstance(
-                data.differential,
-                DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
-            ):
+            if isinstance(data.differential, _CONTACT_DIFFERENTIAL_DATA_TYPES):
                 return (
                     model.differential.contacts.contacts,
                     data.differential.multibody.contacts.contacts,
                 )
-            elif isinstance(data.differential, StdVec_DiffActionData) and (
-                isinstance(
-                    data.differential,
-                    DifferentialActionDataContactFwdDynamics,
-                )
-                or isinstance(
-                    data.differential,
-                    DifferentialActionModelContactInvDynamics.DifferentialActionDataContactInvDynamics,
-                )
+            elif isinstance(data.differential, StdVec_DiffActionData) and isinstance(
+                data.differential[0],
+                _CONTACT_DIFFERENTIAL_DATA_TYPES,
             ):
                 return (
                     model.differential[0].contacts.contacts,
@@ -361,14 +358,16 @@ class DisplayAbstract(ABC):
                 R = np.eye(3)
                 mu = 0.7
                 for c in cost_model.todict().values():
-                    if isinstance(
-                        c.cost.residual,
-                        ResidualModelContactFrictionCone,
+                    if (
+                        isinstance(
+                            c.cost.residual,
+                            ResidualModelContactFrictionCone,
+                        )
+                        and contact.frame == c.cost.residual.id
                     ):
-                        if contact.frame == c.cost.residual.id:
-                            R = c.cost.residual.reference.R
-                            mu = c.cost.residual.reference.mu
-                            continue
+                        R = c.cost.residual.reference.R
+                        mu = c.cost.residual.reference.mu
+                        continue
                 fc.append(
                     {
                         "key": str(joint),
@@ -590,8 +589,8 @@ class MeshcatDisplay(DisplayAbstract):
         self.robot.viewer[name].set_property("visible", status)
 
     def displayFramePoses(self, ps):
-        for key in ps.keys():
-            vertices = np.array(ps[key]).T
+        for key, value in ps.items():
+            vertices = np.array(value).T
             self._addFrameCurves(key, vertices)
 
     def displayContactForce(self, f):
@@ -803,7 +802,16 @@ class RvizDisplay(DisplayAbstract):
         self.display(xs, us, dts, ps, pds, fs, ss, dts, factor)
 
     def display(
-        self, xs, us=[], rs=[], ps=[], pds=[], fs=[], ss=[], dts=[], factor=1.0
+        self,
+        xs,
+        us=None,
+        rs=None,
+        ps=None,
+        pds=None,
+        fs=None,
+        ss=None,
+        dts=None,
+        factor=1.0,
     ):
         nq = self.robot.model.nq
         if not dts:
@@ -876,16 +884,17 @@ class RvizDisplay(DisplayAbstract):
         if hasattr(data, "differential"):
             if hasattr(data.differential, "multibody"):
                 return data.differential.multibody.pinocchio
-            elif isinstance(data.differential, StdVec_DiffActionData):
-                if hasattr(data.differential[0], "multibody"):
-                    return data.differential[0].multibody.pinocchio
+            elif isinstance(data.differential, StdVec_DiffActionData) and hasattr(
+                data.differential[0], "multibody"
+            ):
+                return data.differential[0].multibody.pinocchio
         elif isinstance(data, ActionDataImpulseFwdDynamics):
             return data.multibody.pinocchio
 
     def _get_pc(self, pinocchio_data):
         if len(self.frameTrajNames) == 0:
             return None
-        popt = dict()
+        popt = {}
         for frame in self.frameTrajNames:
             frame_id = int(frame)
             name = self.robot.model.frames[frame_id].name
@@ -896,7 +905,7 @@ class RvizDisplay(DisplayAbstract):
     def _get_pdc(self, pinocchio_data):
         if len(self.frameTrajNames) == 0:
             return None
-        pdopt = dict()
+        pdopt = {}
         for frame in self.frameTrajNames:
             frame_id = int(frame)
             name = self.robot.model.frames[frame_id].name
@@ -914,7 +923,7 @@ class RvizDisplay(DisplayAbstract):
 
         if len(self.frameTrajNames) == 0:
             return None
-        fc = dict()
+        fc = {}
         for frame in self.frameTrajNames:
             frame_id = int(frame)
             name = self.robot.model.frames[frame_id].name
@@ -935,7 +944,7 @@ class RvizDisplay(DisplayAbstract):
         return fc
 
     def _get_sc(self, contact_data):
-        sc = dict()
+        sc = {}
         self.mu = 0.7
         for frame in self.frameTrajNames:
             frame_id = int(frame)
