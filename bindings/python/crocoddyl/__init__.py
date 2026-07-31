@@ -94,6 +94,20 @@ class DisplayAbstract(ABC):
         dts=None,
         factor=1.0,
     ):
+        if us is None:
+            us = []
+        if rs is None:
+            rs = []
+        if ps is None:
+            ps = []
+        if pds is None:
+            pds = []
+        if fs is None:
+            fs = []
+        if ss is None:
+            ss = []
+        if dts is None:
+            dts = []
         if ps:
             self.displayFramePoses(ps)
         if not dts:
@@ -813,6 +827,20 @@ class RvizDisplay(DisplayAbstract):
         dts=None,
         factor=1.0,
     ):
+        if us is None:
+            us = []
+        if rs is None:
+            rs = []
+        if ps is None:
+            ps = []
+        if pds is None:
+            pds = []
+        if fs is None:
+            fs = []
+        if ss is None:
+            ss = []
+        if dts is None:
+            dts = []
         nq = self.robot.model.nq
         if not dts:
             dts = [0.01] * len(xs)
