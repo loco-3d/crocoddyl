@@ -76,7 +76,7 @@ if WITHDISPLAY:
         gepetto.corbaserver.Client()
         cameraTF = [3.0, 3.68, 0.84, 0.2, 0.62, 0.72, 0.22]
         display = crocoddyl.GepettoDisplay(robot, 4, 4, cameraTF)
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(robot)
     # Display the optimized motion
     display.rate = -1

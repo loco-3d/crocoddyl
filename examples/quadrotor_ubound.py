@@ -132,7 +132,7 @@ if WITHDISPLAY:
                 target_quat[3],
             ],
         )
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(hector)
     display.rate = -1
     display.freq = 1

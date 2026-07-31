@@ -99,7 +99,7 @@ if WITHDISPLAY:
         gepetto.corbaserver.Client()
         cameraTF = [1.4, 0.0, 0.2, 0.5, 0.5, 0.5, 0.5]
         display = crocoddyl.GepettoDisplay(pendulum, 4, 4, cameraTF, floor=False)
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(pendulum)
     display.rate = -1
     display.freq = 1

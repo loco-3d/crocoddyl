@@ -138,7 +138,7 @@ if WITHDISPLAY:
                 solverSQP.setCallbacks(
                     [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
                 )
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(bluevolta)
         # display.forceLength = 3
 if WITHPLOT:

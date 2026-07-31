@@ -149,7 +149,7 @@ if WITHDISPLAY:
                 solverSQP.setCallbacks(
                     [crocoddyl.CallbackVerbose(), crocoddyl.CallbackDisplay(display)]
                 )
-    except Exception:
+    except (RuntimeError, ImportError):
         display = crocoddyl.MeshcatDisplay(borinot)
 if WITHPLOT:
     solver.setCallbacks([crocoddyl.CallbackVerbose(), crocoddyl.CallbackLogger()])

@@ -53,11 +53,11 @@ class HumanoidLocoManipulation:
     def createModel(
         self,
         qref=None,
-        footContacts=list(),
-        handContacts=list(),
+        footContacts=None,
+        handContacts=None,
         bodiesTarget=None,
-        handsTarget=dict(),
-        feetTarget=dict(),
+        handsTarget=None,
+        feetTarget=None,
         switch=False,
         constraint=False,
     ):
@@ -250,7 +250,7 @@ class HumanoidLocoManipulation:
             dsSwitch2 = self.createModel(handsTarget=handsTarget3, switch=True)
             models += [dsModel] * Tds + [dsSwitch2]
         # Model for leaving the bars
-        handsTermTarget = dict()
+        handsTermTarget = {}
         q0 = copy.deepcopy(self.q0)
         q0[:2] = (LF_pose.translation + RF_pose.translation)[:2] / 2
         pinocchio.forwardKinematics(self.robot_model, self.robot_data, q0)
@@ -401,7 +401,7 @@ class HumanoidLocoManipulation:
                 )
             models += [dsModel] * Tds + [dsSwitch2]
         # Model for leaving the bars
-        handsTermTarget = dict()
+        handsTermTarget = {}
         q0 = copy.deepcopy(self.q0)
         q0[:2] = (LF_pose.translation + RF_pose.translation)[:2] / 2
         pinocchio.forwardKinematics(self.robot_model, self.robot_data, q0)
@@ -540,7 +540,7 @@ class HumanoidLocoManipulation:
                 )
             models += [backflipModel] * Tflipseg + [backflipAngleModel]
         # Model for resting posture
-        handsTermTarget = dict()
+        handsTermTarget = {}
         qref = copy.deepcopy(self.qref)
         qref[:2] = (LF_pose.translation + RF_pose.translation)[:2] / 2
         pinocchio.forwardKinematics(self.robot_model, self.robot_data, qref)
@@ -548,7 +548,7 @@ class HumanoidLocoManipulation:
             frame_id = self.robot_model.getFrameId(name)
             pinocchio.updateFramePlacement(self.robot_model, self.robot_data, frame_id)
             handsTermTarget[name] = self.robot_data.oMf[frame_id]
-        bodiesTarget = dict()
+        bodiesTarget = {}
         bodiesTarget["torso_1_joint"] = np.eye(3)
         bodiesTarget["torso_2_joint"] = pinocchio.SE3(np.eye(3), qref[:3])
         models += [standModel] * Tend

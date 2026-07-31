@@ -41,17 +41,17 @@ def parseCsvFile(filename, sep=",", delimiter=None):
     input: (string) filename
     output: (numpy array) seq
     """
-    col_types = dict(
-        fn_name=str,
-        nthreads=int,
-        with_cg=bool,
-        mean=float,
-        stddev=float,
-        max=float,
-        min=float,
-        mean_per_nodes=float,
-        stddev_per_nodes=float,
-    )
+    col_types = {
+        "fn_name": str,
+        "nthreads": int,
+        "with_cg": bool,
+        "mean": float,
+        "stddev": float,
+        "max": float,
+        "min": float,
+        "mean_per_nodes": float,
+        "stddev_per_nodes": float,
+    }
 
     seq = pd.read_csv(
         filename,

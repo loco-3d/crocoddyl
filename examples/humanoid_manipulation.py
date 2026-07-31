@@ -177,7 +177,7 @@ if WITHDISPLAY:
             display.robot.viewer.gui.applyConfiguration(
                 "world/point", [*target.tolist(), 0.0, 0.0, 0.0, 1.0]
             )  # xyz+quaternion
-        except Exception:
+        except (RuntimeError, ImportError):
             display = crocoddyl.MeshcatDisplay(robot)
     display.rate = -1
     display.freq = 1

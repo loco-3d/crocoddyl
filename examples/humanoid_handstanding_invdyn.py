@@ -23,11 +23,11 @@ LH_name, RH_name = "gripper_left_inner_double_link", "gripper_right_inner_double
 q0 = robot_model.referenceConfigurations["half_sitting"]
 
 # Define the location of the bars
-bars = list()
+bars = []
 bars.append(np.array([0.4, 0.0, 0.3]))
 
 # Define the monkey-bar tasks
-RH_grasp_list, LH_grasp_list = list(), list()
+RH_grasp_list, LH_grasp_list = [], []
 for bar_pos in bars:
     Rhand = pinocchio.utils.rpyToMatrix(0.0, 0.0, np.pi / 2)
     t_rh = bar_pos - np.array([0.0, 0.45, 0.0])

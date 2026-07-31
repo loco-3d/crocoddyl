@@ -3,6 +3,7 @@ import re
 import sys
 
 import nbformat
+from nbclient.exceptions import CellExecutionError
 from nbconvert.preprocessors import ExecutePreprocessor
 
 
@@ -46,8 +47,8 @@ def run_notebook(notebook_path):
         ep.preprocess(notebook_content, {"metadata": {"path": "./"}})
         # Optionally: You can extract results and verify them here
         print(f"Notebook {notebook_path} executed successfully.")
-    except Exception as e:
-        print(f"Error executing notebook {notebook_path}: {e!s}")
+    except CellExecutionError as err:
+        print(f"Error executing notebook {notebook_path}: {err}")
         sys.exit(1)
 
 
