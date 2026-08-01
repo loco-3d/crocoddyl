@@ -19,9 +19,10 @@ struct ObserverModelAbstractVisitor
     : public bp::def_visitor<ObserverModelAbstractVisitor<Model>> {
   typedef typename Model::ObserverModel ObserverModel;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::Scalar Scalar;
   typedef typename Model::VectorXs VectorXs;
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ObserverModel_quasiStatic_wraps,
-                                         ObserverModel::quasiStatic_x, 2, 4)
+  BOOST_PYTHON_FUNCTION_OVERLOADS(ObserverModel_quasiStatic_wraps,
+                                  quasiStatic, 3, 5)
 
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -46,7 +47,7 @@ struct ObserverModelAbstractVisitor
              "allocated. This function returns the allocated data for a "
              "predefined observer model.\n"
              ":return observer data")
-        .def("quasiStatic", &ObserverModel::quasiStatic_x,
+        .def("quasiStatic", &quasiStatic,
              ObserverModel_quasiStatic_wraps(
                  bp::args("self", "data", "x", "maxiter", "tol"),
                  "Compute the quasi-static observer process noise.\n\n"
@@ -77,6 +78,13 @@ struct ObserverModelAbstractVisitor
             bp::make_function(&ObserverModel::get_tau_meas,
                               bp::return_internal_reference<>()),
             "measured torques");
+  }
+
+  static VectorXs quasiStatic(
+      ObserverModel& self, const std::shared_ptr<ActionData>& data,
+      const VectorXs& x, const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) {
+    return self.quasiStatic_x(data, x, maxiter, tol);
   }
 };
 

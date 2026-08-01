@@ -403,6 +403,7 @@ void check_contact_3d_analytical() {
       model->calc(data, x);
 
       Matrix6xs Jlocal(6, state->get_nv());
+      Jlocal.setZero();
       pinocchio::getFrameJacobian(*state->get_pinocchio(), pin_data,
                                   model->get_id(), pinocchio::LOCAL, Jlocal);
       pinocchio::MotionTpl<Scalar> a_local =

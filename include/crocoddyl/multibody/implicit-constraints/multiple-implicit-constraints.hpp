@@ -399,7 +399,8 @@ struct ImplicitConstraintDataMultipleTpl {
   template <template <typename Scalar> class Model>
   ImplicitConstraintDataMultipleTpl(Model<Scalar>* const model,
                                     pinocchio::DataTpl<Scalar>* const data)
-      : Jc(checkModel(model)->get_nc_total(), model->get_state()->get_nv()),
+      : Jc(checkModel(model)->get_nc_total(),
+           checkModel(model)->get_state()->get_nv()),
         a0(model->get_nc_total()),
         da0_dx(model->get_nc_total(), model->get_state()->get_ndx()),
         dv0_dq(model->get_nc_total(), model->get_state()->get_nv()),
