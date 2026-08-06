@@ -1,0 +1,95 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/guidance-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct GuidanceModelAbstractVisitor
+    : public bp::def_visitor<GuidanceModelAbstractVisitor<Model>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "data",
+                                                        "error"),
+           "Compute the desired task rate.\n\n"
+           "Specifically, the guidance law is:\n"
+           "  g = phi(e)\n\n"
+           ":param data: guidance data\n"
+           ":param error: task error")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "error"),
+             "Compute the derivatives of the guidance law.\n\n"
+             "The guidance Jacobian is:\n"
+             "  G_e = dg/de\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: guidance data\n"
+             ":param error: task error")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"), "Create the guidance data.\n\n")
+        .add_property("nr", bp::make_function(&Model::get_nr),
+                      "dimension of the guidance task");
+  }
+};
+
+template <typename Data>
+struct GuidanceDataAbstractVisitor
+    : public bp::def_visitor<GuidanceDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "g", bp::make_getter(&Data::g, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::g), "Desired task rate g.")
+        .add_property(
+            "Ge",
+            bp::make_getter(&Data::Ge, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Ge),
+            "Jacobian of the desired task rate G_e.");
+  }
+};
+
+#define CROCODDYL_GUIDANCE_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)             \
+  typedef GuidanceModelAbstractTpl<Scalar> Model;                             \
+  typedef GuidanceModelAbstractTpl_wrap<Scalar> Model_wrap;                   \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+  bp::class_<Model_wrap, boost::noncopyable>(                                 \
+      "GuidanceModelAbstract",                                                \
+      "Abstract class for guidance models.\n\n"                               \
+      "A guidance model maps task error e to a desired task rate g.\n\n"    \
+      "Specifically, the guidance equations are:\n"                                \
+      "  g = phi(e),   G_e = dg/de",                                          \
+      bp::init<std::size_t>(bp::args("self", "nr"),                          \
+                           "Initialize the guidance model.\n\n"               \
+                           ":param nr: task dimension"))                      \
+      .def(GuidanceModelAbstractVisitor<Model_wrap>())                        \
+      .def(PrintableVisitor<Model_wrap>())                                    \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_GUIDANCE_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)             \
+  typedef GuidanceDataAbstractTpl<Scalar> Data;                               \
+  typedef GuidanceModelAbstractTpl<Scalar> Model;                             \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+  bp::class_<Data>(                                                           \
+      "GuidanceDataAbstract",                                                \
+      "Abstract class for guidance data.\n\n"                                \
+      "It stores the desired task rate g and its Jacobian G_e.\n\n",        \
+      bp::init<Model*>(bp::args("self", "model"),                           \
+                       "Create guidance data.\n\n"                           \
+                       ":param model: guidance model"))                      \
+      .def(GuidanceDataAbstractVisitor<Data>())                               \
+      .def(CopyableVisitor<Data>());
+
+void exposeGuidanceAbstract() {
+  CROCODDYL_GUIDANCE_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_GUIDANCE_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

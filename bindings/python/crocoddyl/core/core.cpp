@@ -24,6 +24,10 @@ void exposeCore() {
   exposeIntegratedActionAbstract();
   exposeDifferentialActionAbstract();
   exposeResidualAbstract();
+  exposeGuidanceAbstract();
+  exposeGuidanceLinear();
+  exposeGuidanceSmoothSaturation();
+  exposeGuidanceComponentwiseSaturation();
   exposeActivationAbstract();
   exposeSquashingAbstract();
   exposeSquashingSmoothSat();

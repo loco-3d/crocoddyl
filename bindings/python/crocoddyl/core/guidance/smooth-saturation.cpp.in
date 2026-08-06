@@ -1,0 +1,123 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/guidance/smooth-saturation.hpp"
+
+#include "python/crocoddyl/core/guidance-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct GuidanceModelSmoothSaturationVisitor
+    : public bp::def_visitor<GuidanceModelSmoothSaturationVisitor<Model>> {
+  typedef typename Model::GuidanceDataAbstract Data;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "error"),
+           "Compute the smooth-saturation guidance output.\n\n"
+           "The guidance equations are:\n"
+           "  r_eps = sqrt(e^T e + eps^2)\n"
+           "  g(e) = -v_max * tanh(k * r_eps / v_max) * e / r_eps\n\n"
+           ":param data: guidance data\n"
+           ":param error: task error")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "error"),
+             "Compute the Jacobian of the smooth-saturation guidance law.\n\n"
+             "It assumes that calc has been run first so the cached radius,\n"
+             "scale, z, and tanh_z values are available.\n"
+             ":param data: guidance data\n"
+             ":param error: task error")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the guidance data.")
+        .add_property("gain",
+                      bp::make_function(&Model::get_gain,
+                                        bp::return_value_policy<
+                                            bp::return_by_value>()),
+                      &Model::set_gain, "guidance gain")
+        .add_property("max_rate",
+                      bp::make_function(&Model::get_max_rate,
+                                        bp::return_value_policy<
+                                            bp::return_by_value>()),
+                      &Model::set_max_rate, "maximum desired rate")
+        .add_property("epsilon",
+                      bp::make_function(&Model::get_epsilon,
+                                        bp::return_value_policy<
+                                            bp::return_by_value>()),
+                      &Model::set_epsilon, "smoothing epsilon");
+  }
+};
+
+template <typename Data>
+struct GuidanceDataSmoothSaturationVisitor
+    : public bp::def_visitor<GuidanceDataSmoothSaturationVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "radius",
+          bp::make_getter(&Data::radius,
+                          bp::return_value_policy<bp::return_by_value>()),
+          bp::make_setter(&Data::radius), "cached task error norm")
+        .add_property(
+            "scale",
+            bp::make_getter(&Data::scale,
+                            bp::return_value_policy<bp::return_by_value>()),
+            bp::make_setter(&Data::scale), "cached output scale")
+        .add_property(
+            "z",
+            bp::make_getter(&Data::z,
+                            bp::return_value_policy<bp::return_by_value>()),
+            bp::make_setter(&Data::z), "cached saturation argument")
+        .add_property(
+            "tanh_z",
+            bp::make_getter(&Data::tanh_z,
+                            bp::return_value_policy<bp::return_by_value>()),
+            bp::make_setter(&Data::tanh_z), "cached tanh argument");
+  }
+};
+
+#define CROCODDYL_GUIDANCE_MODEL_SMOOTH_SATURATION_PYTHON_BINDINGS(Scalar)   \
+  typedef GuidanceModelSmoothSaturationTpl<Scalar> Model;                    \
+  typedef GuidanceModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef GuidanceDataSmoothSaturationTpl<Scalar> Data;                      \
+  typedef typename Model::GuidanceDataAbstract DataBase;                     \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "GuidanceModelSmoothSaturation",                                       \
+      "Direction-preserving, smoothly bounded guidance model.\n\n"         \
+      "The guidance equations are:\n"                                        \
+      "  r_eps = sqrt(e^T e + eps^2)\n"                                     \
+      "  g(e) = -v_max * tanh(k * r_eps / v_max) * e / r_eps\n\n"          \
+      "It preserves direction and bounds the desired-rate norm.",            \
+      bp::init<std::size_t, Scalar, Scalar, bp::optional<Scalar>>(           \
+          bp::args("self", "nr", "gain", "max_rate", "epsilon"),         \
+          "Initialize the guidance model.\n\n"                               \
+          ":param nr: task dimension\n"                                      \
+          ":param gain: guidance gain\n"                                     \
+          ":param max_rate: maximum desired rate\n"                          \
+          ":param epsilon: smoothing epsilon (default: 1e-6)"))              \
+      .def(GuidanceModelSmoothSaturationVisitor<Model>())                    \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());                                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
+  bp::class_<Data, bp::bases<DataBase>>(                                     \
+      "GuidanceDataSmoothSaturation",                                       \
+      "Cached values for smooth saturation guidance.\n\n"                  \
+      "This stores radius, scale, z, and tanh_z for reuse in calcDiff().\n", \
+      bp::init<Model*>(bp::args("self", "model"),                           \
+                       "Create the guidance data.\n\n"                      \
+                       ":param model: guidance model"))                    \
+      .def(GuidanceDataSmoothSaturationVisitor<Data>())                      \
+      .def(CopyableVisitor<Data>());
+
+void exposeGuidanceSmoothSaturation() {
+  CROCODDYL_GUIDANCE_MODEL_SMOOTH_SATURATION_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

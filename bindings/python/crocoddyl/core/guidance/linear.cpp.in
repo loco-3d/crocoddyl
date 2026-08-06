@@ -1,0 +1,79 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/guidance/linear.hpp"
+
+#include "python/crocoddyl/core/guidance-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct GuidanceModelLinearVisitor
+    : public bp::def_visitor<GuidanceModelLinearVisitor<Model>> {
+  typedef typename Model::GuidanceDataAbstract Data;
+  typedef typename Model::MatrixXs MatrixXs;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "error"),
+           "Compute the linear guidance output.\n\n"
+           "The guidance equations are:\n"
+           "  g(e) = -K e\n\n"
+           ":param data: guidance data\n"
+           ":param error: task error")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "error"),
+             "Compute the Jacobian of the linear guidance law.\n\n"
+             "The guidance Jacobian is:\n"
+             "  G_e = -K\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: guidance data\n"
+             ":param error: task error")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the guidance data.")
+        .add_property("gain",
+                      bp::make_function(&Model::get_gain,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_gain, "feedback gain matrix");
+  }
+};
+
+#define CROCODDYL_GUIDANCE_MODEL_LINEAR_PYTHON_BINDINGS(Scalar)              \
+  typedef GuidanceModelLinearTpl<Scalar> Model;                              \
+  typedef GuidanceModelAbstractTpl<Scalar> ModelBase;                        \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "GuidanceModelLinear",                                                 \
+      "Linear guidance model.\n\n"                                           \
+      "The guidance equations are:\n"                                        \
+      "  g(e) = -K e\n"                                                      \
+      "  G_e = -K\n\n"                                                       \
+      "K is the constant feedback-gain matrix.",                              \
+      bp::init<typename Model::MatrixXs>(                                     \
+          bp::args("self", "gain"),                                         \
+          "Initialize the guidance model.\n\n"                               \
+          ":param gain: square feedback gain matrix"))                       \
+      .def(bp::init<typename Model::VectorXs>(                                \
+          bp::args("self", "diagonal_gain"),                                \
+          "Initialize the guidance model.\n\n"                               \
+          ":param diagonal_gain: diagonal feedback gain"))                   \
+      .def(bp::init<std::size_t, Scalar>(bp::args("self", "nr", "gain"),   \
+                                         "Initialize the guidance model.\n\n" \
+                                         ":param nr: task dimension\n"       \
+                                         ":param gain: scalar gain"))        \
+      .def(GuidanceModelLinearVisitor<Model>())                               \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+void exposeGuidanceLinear() {
+  CROCODDYL_GUIDANCE_MODEL_LINEAR_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
