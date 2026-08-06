@@ -121,6 +121,21 @@ class ResidualModelAbstractTpl;
 template <typename Scalar>
 struct ResidualDataAbstractTpl;
 
+template <typename Scalar>
+class GuidanceModelAbstractTpl;
+template <typename Scalar>
+struct GuidanceDataAbstractTpl;
+template <typename Scalar>
+class GuidanceModelLinearTpl;
+template <typename Scalar>
+class GuidanceModelSmoothSaturationTpl;
+template <typename Scalar>
+struct GuidanceDataSmoothSaturationTpl;
+template <typename Scalar>
+class GuidanceModelComponentwiseSaturationTpl;
+template <typename Scalar>
+struct GuidanceDataComponentwiseSaturationTpl;
+
 // activation
 template <typename Scalar>
 struct ActivationBoundsTpl;
@@ -390,6 +405,16 @@ typedef ResidualDataJointEffortTpl<double> ResidualDataJointEffort;
 typedef ResidualModelJointAccelerationTpl<double>
     ResidualModelJointAcceleration;
 typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
+
+typedef GuidanceModelAbstractTpl<double> GuidanceModelAbstract;
+typedef GuidanceDataAbstractTpl<double> GuidanceDataAbstract;
+typedef GuidanceModelLinearTpl<double> GuidanceModelLinear;
+typedef GuidanceModelSmoothSaturationTpl<double> GuidanceModelSmoothSaturation;
+typedef GuidanceDataSmoothSaturationTpl<double> GuidanceDataSmoothSaturation;
+typedef GuidanceModelComponentwiseSaturationTpl<double>
+    GuidanceModelComponentwiseSaturation;
+typedef GuidanceDataComponentwiseSaturationTpl<double>
+    GuidanceDataComponentwiseSaturation;
 
 typedef ActivationDataQuadraticBarrierTpl<double>
     ActivationDataQuadraticBarrier;

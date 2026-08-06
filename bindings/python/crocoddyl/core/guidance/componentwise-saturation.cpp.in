@@ -1,0 +1,112 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/guidance/componentwise-saturation.hpp"
+
+#include "python/crocoddyl/core/guidance-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct GuidanceModelComponentwiseSaturationVisitor
+    : public bp::def_visitor<
+          GuidanceModelComponentwiseSaturationVisitor<Model>> {
+  typedef typename Model::GuidanceDataAbstract Data;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "error"),
+           "Compute the componentwise saturated guidance output.\n\n"
+           "The guidance equations are:\n"
+           "  z_i = k_i * e_i / v_max_i\n"
+           "  g_i(e_i) = -v_max_i * tanh(z_i)\n\n"
+           ":param data: guidance data\n"
+           ":param error: task error")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "error"),
+             "Compute the Jacobian of the componentwise guidance law.\n\n"
+             "The guidance equations are:\n"
+             "  G_e(i,i) = -k_i * (1 - tanh(z_i)^2)\n"
+             "  z_i = k_i * e_i / v_max_i\n\n"
+             "It assumes that calc has been run first so the cached z and\n"
+             "tanh_z values are available.\n"
+             ":param data: guidance data\n"
+             ":param error: task error")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the guidance data.")
+        .add_property("gain",
+                      bp::make_function(&Model::get_gain,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_gain, "componentwise guidance gains")
+        .add_property("max_rate",
+                      bp::make_function(&Model::get_max_rate,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_max_rate,
+                      "componentwise maximum desired rates");
+  }
+};
+
+template <typename Data>
+struct GuidanceDataComponentwiseSaturationVisitor
+    : public bp::def_visitor<
+          GuidanceDataComponentwiseSaturationVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "z",
+          bp::make_getter(&Data::z, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::z), "cached saturation arguments")
+        .add_property(
+            "tanh_z",
+            bp::make_getter(&Data::tanh_z, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::tanh_z), "cached tanh values");
+  }
+};
+
+#define CROCODDYL_GUIDANCE_MODEL_COMPONENTWISE_SATURATION_PYTHON_BINDINGS(  \
+    Scalar)                                                                  \
+  typedef GuidanceModelComponentwiseSaturationTpl<Scalar> Model;             \
+  typedef GuidanceModelAbstractTpl<Scalar> ModelBase;                        \
+  typedef GuidanceDataComponentwiseSaturationTpl<Scalar> Data;               \
+  typedef typename Model::GuidanceDataAbstract DataBase;                     \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
+      "GuidanceModelComponentwiseSaturation",                                \
+      "Componentwise bounded guidance model.\n\n"                            \
+      "The guidance equations are:\n"                                       \
+      "  z_i = k_i * e_i / v_max_i\n"                                       \
+      "  g_i(e_i) = -v_max_i * tanh(z_i)\n"                                  \
+      "  G_e(i,i) = -k_i * (1 - tanh(z_i)^2)\n\n"                           \
+      "Each task channel is saturated independently.",                        \
+      bp::init<typename Model::VectorXs, typename Model::VectorXs>(          \
+          bp::args("self", "gain", "max_rate"),                            \
+          "Initialize the guidance model.\n\n"                               \
+          ":param gain: componentwise guidance gains\n"                     \
+          ":param max_rate: componentwise maximum desired rates"))          \
+      .def(GuidanceModelComponentwiseSaturationVisitor<Model>())             \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());                                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
+  bp::class_<Data, bp::bases<DataBase>>(                                     \
+      "GuidanceDataComponentwiseSaturation",                                \
+      "Cached values for componentwise saturation guidance.\n\n"           \
+      "This stores the per-component z and tanh_z values for reuse in\n"   \
+      "calcDiff().\n",                                                      \
+      bp::init<Model*>(bp::args("self", "model"),                           \
+                       "Create the guidance data.\n\n"                      \
+                       ":param model: guidance model"))                    \
+      .def(GuidanceDataComponentwiseSaturationVisitor<Data>())               \
+      .def(CopyableVisitor<Data>());
+
+void exposeGuidanceComponentwiseSaturation() {
+  CROCODDYL_GUIDANCE_MODEL_COMPONENTWISE_SATURATION_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
