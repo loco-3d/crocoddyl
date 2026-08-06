@@ -42,10 +42,10 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
               const std::vector<VectorXs>&, const std::vector<VectorXs>&,
               const std::vector<VectorXs>&, const std::size_t, const bool,
               const Scalar)>(&Model::solve),
-          (bp::arg("init_xs") = DefaultVector<Scalar>::value,
-           bp::arg("init_us") = DefaultVector<Scalar>::value,
-           bp::arg("init_p") = DefaultVector<Scalar>::value,
-           bp::arg("maxiter") = 100, bp::arg("is_feasible") = false,
+          (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+           bp::arg("init_us") = bp::list(),
+           bp::arg("init_p") = bp::list(), bp::arg("maxiter") = 100,
+           bp::arg("is_feasible") = false,
            bp::arg("init_reg") = std::numeric_limits<Scalar>::quiet_NaN()),
               "Solve the optimal estimation/control problem.\n\n"
               "An optional initial parameter vector can be provided for each "
