@@ -114,6 +114,11 @@ class DynamicsParamsProbeTpl
     data->p = p;
   }
 
+  void updateBase(const std::shared_ptr<ParamsDataAbstract>& data,
+                  const Eigen::Ref<const VectorXs>& p) {
+    Base::update(data, p);
+  }
+
   void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
@@ -304,7 +309,7 @@ void test_dynamics_params_model_data_regressor_copy_and_cast() {
   const VectorXs p = VectorXs::LinSpaced(np, Scalar(0.2), Scalar(0.6));
   model.update(params, p);
   BOOST_CHECK(params->p.isApprox(p));
-  model.Base::update(params, VectorXs::Zero(np));
+  model.updateBase(params, VectorXs::Zero(np));
   BOOST_CHECK(params->p.isApprox(p));
   BOOST_CHECK_THROW(model.update(params, VectorXs::Zero(np + 1)),
                     std::exception);
