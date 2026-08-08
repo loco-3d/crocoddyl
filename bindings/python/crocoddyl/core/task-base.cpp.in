@@ -1,0 +1,174 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/task-base.hpp"
+
+#include "python/crocoddyl/core/task-base.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct TaskModelAbstractVisitor
+    : public bp::def_visitor<TaskModelAbstractVisitor<Model>> {
+  typedef typename Model::TaskDataAbstract TaskData;
+  typedef typename Model::State State;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(
+         bp::init<std::shared_ptr<State>, std::size_t, std::size_t,
+                  bp::optional<bool, bool, bool>>(
+             bp::args("self", "state", "nr", "nu", "q_dependent",
+                      "v_dependent", "u_dependent"),
+             "Initialize the task model.\n\n"
+             ":param state: state description\n"
+             ":param nr: dimension of the task vector\n"
+             ":param nu: dimension of control vector\n"
+             ":param q_dependent: define if the task depends on q "
+             "(default true)\n"
+             ":param v_dependent: define if the task depends on v "
+             "(default true)\n"
+             ":param u_dependent: define if the task depends on u "
+             "(default true)"))
+        .def("calc", pure_virtual(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the task quantity, rate, and acceleration.\n\n"
+             ":param data: task data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("calcDiff", pure_virtual(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobians of the task.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: task data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("createData", &Model::createData, &Model::default_createData,
+             bp::args("self"),
+             "Create the task data.\n\n"
+             "Each task model has its own data that needs to be allocated.")
+        .add_property("state",
+                      bp::make_function(&Model::get_state,
+                                        bp::return_value_policy<bp::return_by_value>()),
+                      "state")
+        .add_property("nr", bp::make_function(&Model::get_nr),
+                      "dimension of the task vector")
+        .add_property("nu", bp::make_function(&Model::get_nu),
+                      "dimension of control vector")
+        .add_property("q_dependent", bp::make_function(&Model::get_q_dependent),
+                      "flag that indicates if the task depends on q")
+        .add_property("v_dependent", bp::make_function(&Model::get_v_dependent),
+                      "flag that indicates if the task depends on v")
+        .add_property("u_dependent", bp::make_function(&Model::get_u_dependent),
+                      "flag that indicates if the task depends on u");
+  }
+};
+
+template <typename Data>
+struct TaskDataAbstractVisitor
+    : public bp::def_visitor<TaskDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "shared",
+          bp::make_getter(&Data::shared, bp::return_internal_reference<>()),
+          "shared data")
+        .add_property(
+            "y", bp::make_getter(&Data::y, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::y), "task quantity")
+        .add_property(
+            "v", bp::make_getter(&Data::v, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::v), "task rate")
+        .add_property(
+            "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::a), "task acceleration")
+        .add_property(
+            "Yx", bp::make_getter(&Data::Yx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Yx), "Jacobian of the task quantity")
+        .add_property(
+            "Yu", bp::make_getter(&Data::Yu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Yu), "Jacobian of the task quantity")
+        .add_property(
+            "Vx", bp::make_getter(&Data::Vx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Vx), "Jacobian of the task rate")
+        .add_property(
+            "Vu", bp::make_getter(&Data::Vu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Vu), "Jacobian of the task rate")
+        .add_property(
+            "Ax", bp::make_getter(&Data::Ax, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Ax), "Jacobian of the task acceleration")
+        .add_property(
+            "Au", bp::make_getter(&Data::Au, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Au), "Jacobian of the task acceleration");
+  }
+};
+
+#define CROCODDYL_TASK_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)               \
+  typedef TaskModelAbstractTpl<Scalar> Model;                               \
+  typedef TaskModelAbstractTpl_wrap<Scalar> Model_wrap;                     \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model_wrap, boost::noncopyable>(                               \
+      "TaskModelAbstract",                                                 \
+      "Abstract class for task models.\n\n"                                \
+      "A task model defines three outputs:\n"                               \
+      "  y = y(x, u)\n"                                                    \
+      "  v = v(x, u) = dy/dt\n"                                             \
+      "  a = a(x, u) = d2y/dt2\n\n"                                         \
+      "The Jacobians are:\n"                                                \
+      "  Yx = dy/dx, Yu = dy/du\n"                                          \
+      "  Vx = dv/dx, Vu = dv/du\n"                                          \
+      "  Ax = da/dx, Au = da/du.",                                         \
+      bp::init<std::shared_ptr<typename Model::StateAbstract>, std::size_t, \
+               std::size_t, bp::optional<bool, bool, bool>>(                \
+          bp::args("self", "state", "nr", "nu", "q_dependent",           \
+                   "v_dependent", "u_dependent"),                         \
+          "Initialize the task model.\n\n"                                 \
+          ":param state: state description\n"                              \
+          ":param nr: dimension of the task vector\n"                     \
+          ":param nu: dimension of control vector\n"                      \
+          ":param q_dependent: define if the task depends on q (default "  \
+          "true)\n"                                                        \
+          ":param v_dependent: define if the task depends on v (default " \
+          "true)\n"                                                        \
+          ":param u_dependent: define if the task depends on u (default " \
+          "true)"))                                                        \
+      .def(TaskModelAbstractVisitor<Model_wrap>())                         \
+      .def(CastVisitor<Model_wrap>())                                      \
+      .def(PrintableVisitor<Model_wrap>())                                 \
+      .def(CopyableVisitor<Model_wrap>());
+
+#define CROCODDYL_TASK_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)                \
+  typedef TaskDataAbstractTpl<Scalar> Data;                                 \
+  typedef TaskModelAbstractTpl<Scalar> Model;                               \
+  typedef Model::DataCollectorAbstract DataCollector;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                      \
+  bp::class_<Data>(                                                         \
+      "TaskDataAbstract",                                                   \
+      "Abstract class for task data.\n\n"                                   \
+      "It stores the task quantity y, task rate v, task acceleration a, "  \
+      "and their Jacobians.\n\n",                                           \
+      bp::init<Model*, DataCollector*>(                                     \
+          bp::args("self", "model", "data"),                              \
+          "Create common data shared between task models.\n\n"             \
+          ":param model: task model\n"                                     \
+          ":param data: shared data")[bp::with_custodian_and_ward<          \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                      \
+      .def(TaskDataAbstractVisitor<Data>())                                 \
+      .def(CopyableVisitor<Data>());
+
+void exposeTaskAbstract() {
+  CROCODDYL_TASK_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_TASK_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

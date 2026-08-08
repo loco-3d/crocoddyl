@@ -23,6 +23,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_actuation
       test_activations
       test_guidance
+      test_tasks
       test_residuals
       test_costs
       test_costs_noFF

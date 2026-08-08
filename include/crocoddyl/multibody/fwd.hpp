@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, INRIA
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh, INRIA
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -153,6 +153,27 @@ class ResidualModelPairCollisionTpl;
 template <typename Scalar>
 struct ResidualDataPairCollisionTpl;
 #endif
+
+// task
+template <typename Scalar>
+class TaskModelFrameRotationTpl;
+template <typename Scalar>
+struct TaskDataFrameRotationTpl;
+
+template <typename Scalar>
+class TaskModelFrameTranslationTpl;
+template <typename Scalar>
+struct TaskDataFrameTranslationTpl;
+
+template <typename Scalar>
+class TaskModelFramePlacementTpl;
+template <typename Scalar>
+struct TaskDataFramePlacementTpl;
+
+template <typename Scalar>
+class TaskModelCoMPositionTpl;
+template <typename Scalar>
+struct TaskDataCoMPositionTpl;
 
 // impulse
 template <typename Scalar>
@@ -332,6 +353,15 @@ typedef ResidualDataStateTpl<double> ResidualDataState;
 typedef ResidualModelPairCollisionTpl<double> ResidualModelPairCollision;
 typedef ResidualDataPairCollisionTpl<double> ResidualDataPairCollision;
 #endif
+
+typedef TaskModelFrameRotationTpl<double> TaskModelFrameRotation;
+typedef TaskDataFrameRotationTpl<double> TaskDataFrameRotation;
+typedef TaskModelFrameTranslationTpl<double> TaskModelFrameTranslation;
+typedef TaskDataFrameTranslationTpl<double> TaskDataFrameTranslation;
+typedef TaskModelFramePlacementTpl<double> TaskModelFramePlacement;
+typedef TaskDataFramePlacementTpl<double> TaskDataFramePlacement;
+typedef TaskModelCoMPositionTpl<double> TaskModelCoMPosition;
+typedef TaskDataCoMPositionTpl<double> TaskDataCoMPosition;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;

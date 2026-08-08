@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <boost/function.hpp>
 #include <boost/test/execution_monitor.hpp>  // for execution_exception
 #include <boost/test/included/unit_test.hpp>
@@ -57,6 +58,21 @@ Eigen::VectorXd sampleUnitTestState(const StatePtr& state,
   Eigen::VectorXd x = x0;
   state->integrate(x0, dx, x);
   return x;
+}
+
+template <typename DerivedA, typename DerivedB, typename Scalar>
+bool isCloseAbsRel(const Eigen::MatrixBase<DerivedA>& value,
+                   const Eigen::MatrixBase<DerivedB>& reference,
+                   const Scalar abs_tol, const Scalar rel_tol) {
+  if (value.size() == 0 || reference.size() == 0) {
+    return value.size() == reference.size();
+  }
+  const auto value_s = value.template cast<Scalar>();
+  const auto reference_s = reference.template cast<Scalar>();
+  const Scalar scale = std::max(value_s.cwiseAbs().maxCoeff(),
+                                reference_s.cwiseAbs().maxCoeff());
+  const Scalar max_error = (value_s - reference_s).cwiseAbs().maxCoeff();
+  return max_error <= abs_tol + rel_tol * std::max(Scalar(1), scale);
 }
 
 struct UnitTestRandomSeedFixture {
