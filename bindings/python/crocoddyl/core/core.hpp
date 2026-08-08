@@ -26,6 +26,7 @@ void exposeActionCodeGen();
 void exposeDifferentialActionAbstract();
 void exposeIntegratedActionAbstract();
 void exposeResidualAbstract();
+void exposeTaskAbstract();
 void exposeGuidanceAbstract();
 void exposeGuidanceLinear();
 void exposeGuidanceSmoothSaturation();

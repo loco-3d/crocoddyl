@@ -1,0 +1,263 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/tasks/frame-placement.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct TaskModelFramePlacementVisitor
+    : public bp::def_visitor<TaskModelFramePlacementVisitor<Model>> {
+  typedef typename Model::TaskDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::SE3 SE3;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,
+                    std::size_t>(
+               bp::args("self", "state", "id", "pref", "nu"),
+               "Initialize the frame placement task.\n\n"
+               "The task quantity is\n"
+               "  y = log6(pref^{-1} M)\n\n"
+               "where M is the current frame placement and pref is the "
+               "absolute reference placement.\n\n"
+               "The task rate is the 6D spatial velocity expressed in the "
+               "selected reference frame:\n"
+               "  LOCAL: v = {}^f V_f\n"
+               "  WORLD: v = {}^o V_f\n"
+               "  LOCAL_WORLD_ALIGNED: v = {}^lwa V_f\n\n"
+               "The task acceleration is the 6D spatial acceleration in the "
+               "selected reference frame:\n"
+               "  LOCAL: a = {}^f A_f\n"
+               "  WORLD: a = {}^o A_f\n"
+               "  LOCAL_WORLD_ALIGNED: a = {}^lwa A_f\n"
+               ":param state: state of the multibody system\n"
+               ":param id: reference frame id\n"
+               ":param pref: reference frame placement\n"
+               ":param nu: dimension of control vector"))
+        .def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3>(
+            bp::args("self", "state", "id", "pref"),
+            "Initialize the frame placement task.\n\n"
+            "The default control dimension is state.nv.\n"
+            "The task quantity is y = log6(pref^{-1} M), the task rate is "
+            "the selected reference-frame spatial velocity, and the task "
+            "acceleration is the selected reference-frame spatial "
+            "acceleration.\n"
+            ":param state: state of the multibody system\n"
+            ":param id: reference frame id\n"
+            ":param pref: reference frame placement"))
+        .def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,
+                      pinocchio::ReferenceFrame, std::size_t>(
+            bp::args("self", "state", "id", "pref", "type", "nu"),
+            "Initialize the frame placement task.\n\n"
+            "The task quantity is\n"
+            "  y = log6(pref^{-1} M)\n\n"
+            "where M is the current frame placement and pref is the "
+            "absolute reference placement.\n\n"
+            "The task rate is the 6D spatial velocity expressed in the "
+            "selected reference frame:\n"
+            "  LOCAL: v = {}^f V_f\n"
+            "  WORLD: v = {}^o V_f\n"
+            "  LOCAL_WORLD_ALIGNED: v = {}^lwa V_f\n\n"
+            "The task acceleration is the 6D spatial acceleration in the "
+            "selected reference frame:\n"
+            "  LOCAL: a = {}^f A_f\n"
+            "  WORLD: a = {}^o A_f\n"
+            "  LOCAL_WORLD_ALIGNED: a = {}^lwa A_f\n"
+            ":param state: state of the multibody system\n"
+            ":param id: reference frame id\n"
+            ":param pref: reference frame placement\n"
+            ":param type: reference frame convention\n"
+            ":param nu: dimension of control vector"))
+        .def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,
+                      pinocchio::ReferenceFrame>(
+            bp::args("self", "state", "id", "pref", "type"),
+            "Initialize the frame placement task.\n\n"
+            "The default control dimension is state.nv.\n"
+            "The task quantity is y = log6(pref^{-1} M), the task rate is "
+            "the selected reference-frame spatial velocity, and the task "
+            "acceleration is the selected reference-frame spatial "
+            "acceleration.\n"
+            ":param state: state of the multibody system\n"
+            ":param id: reference frame id\n"
+            ":param pref: reference frame placement\n"
+            ":param type: reference frame convention"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the frame placement task.\n\n"
+             ":param data: task data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobians of the frame placement task.\n\n"
+             "It assumes that calc has been run first.\n"
+             ":param data: task data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the frame placement task data.\n\n"
+             ":param data: shared data")
+        .add_property("id", &Model::get_id, &Model::set_id,
+                      "reference frame id")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_reference, "reference frame placement")
+        .add_property("type", &Model::get_type, &Model::set_type,
+                      "reference frame convention");
+  }
+};
+
+template <typename Data>
+struct TaskDataFramePlacementVisitor
+    : public bp::def_visitor<TaskDataFramePlacementVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "pinocchio",
+          bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+        .add_property(
+            "rMf",
+            bp::make_getter(&Data::rMf, bp::return_value_policy<bp::return_by_value>()),
+            "pose error composition")
+        .add_property(
+            "rJf",
+            bp::make_getter(&Data::rJf, bp::return_internal_reference<>()),
+            "log-map Jacobian")
+        .add_property(
+            "vf", bp::make_getter(&Data::vf, bp::return_internal_reference<>()),
+            "frame velocity")
+        .add_property(
+            "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
+            "frame Jacobian")
+        .add_property(
+            "fVdq",
+            bp::make_getter(&Data::fVdq, bp::return_internal_reference<>()),
+            "frame velocity derivative w.r.t q")
+        .add_property(
+            "fVdv",
+            bp::make_getter(&Data::fVdv, bp::return_internal_reference<>()),
+            "frame velocity derivative w.r.t v");
+  }
+};
+
+#define CROCODDYL_TASK_MODEL_FRAME_PLACEMENT_PYTHON_BINDINGS(Scalar)       \
+  typedef TaskModelFramePlacementTpl<Scalar> Model;                         \
+  typedef TaskModelAbstractTpl<Scalar> ModelBase;                           \
+  typedef typename Model::StateMultibody State;                             \
+  typedef typename Model::SE3 SE3;                                          \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model, bp::bases<ModelBase>>(                                  \
+      "TaskModelFramePlacement",                                           \
+      "This task defines a 6D frame placement error.\n\n"                  \
+      "The task quantity is\n"                                              \
+      "  y = log6(pref^{-1} M)\n\n"                                         \
+      "where M is the current frame placement and pref is the absolute "    \
+      "reference placement.\n\n"                                            \
+      "The task rate is the 6D spatial velocity expressed in the selected " \
+      "reference frame:\n"                                                  \
+      "  LOCAL: v = {}^f V_f\n"                                             \
+      "  WORLD: v = {}^o V_f\n"                                            \
+      "  LOCAL_WORLD_ALIGNED: v = {}^lwa V_f\n\n"                           \
+      "The task acceleration is the 6D spatial acceleration in the "       \
+      "selected reference frame:\n"                                         \
+      "  LOCAL: a = {}^f A_f\n"                                             \
+      "  WORLD: a = {}^o A_f\n"                                            \
+      "  LOCAL_WORLD_ALIGNED: a = {}^lwa A_f.",                             \
+      bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,          \
+               std::size_t>(                                                \
+          bp::args("self", "state", "id", "pref", "nu"),                \
+          "Initialize the frame placement task.\n\n"                       \
+          "The task quantity is y = log6(pref^{-1} M), the task rate is "   \
+          "the selected reference-frame spatial velocity, and the task "    \
+          "acceleration is the selected reference-frame spatial "           \
+          "acceleration.\n"                                                 \
+          ":param state: state of the multibody system\n"                  \
+          ":param id: reference frame id\n"                                \
+          ":param pref: reference frame placement\n"                       \
+          ":param nu: dimension of control vector"))                       \
+      .def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,     \
+                    pinocchio::ReferenceFrame, std::size_t>(                \
+          bp::args("self", "state", "id", "pref", "type", "nu"),      \
+          "Initialize the frame placement task.\n\n"                       \
+          "The task quantity is\n"                                          \
+          "  y = log6(pref^{-1} M)\n\n"                                     \
+          "where M is the current frame placement and pref is the absolute "\
+          "reference placement.\n\n"                                        \
+          "The task rate is the 6D spatial velocity expressed in the "      \
+          "selected reference frame:\n"                                     \
+          "  LOCAL: v = {}^f V_f\n"                                         \
+          "  WORLD: v = {}^o V_f\n"                                         \
+          "  LOCAL_WORLD_ALIGNED: v = {}^lwa V_f\n\n"                      \
+          "The task acceleration is the 6D spatial acceleration in the "   \
+          "selected reference frame:\n"                                     \
+          "  LOCAL: a = {}^f A_f\n"                                         \
+          "  WORLD: a = {}^o A_f\n"                                         \
+          "  LOCAL_WORLD_ALIGNED: a = {}^lwa A_f\n"                        \
+          ":param state: state of the multibody system\n"                  \
+          ":param id: reference frame id\n"                                \
+          ":param pref: reference frame placement\n"                       \
+          ":param type: reference frame convention\n"                      \
+          ":param nu: dimension of control vector"))                       \
+      .def(bp::init<std::shared_ptr<State>, pinocchio::FrameIndex, SE3,     \
+                    pinocchio::ReferenceFrame>(                             \
+          bp::args("self", "state", "id", "pref", "type"),            \
+          "Initialize the frame placement task.\n\n"                       \
+          "The task quantity is y = log6(pref^{-1} M), the task rate is "   \
+          "the selected reference-frame spatial velocity, and the task "    \
+          "acceleration is the selected reference-frame spatial "           \
+          "acceleration.\n"                                                 \
+          ":param state: state of the multibody system\n"                  \
+          ":param id: reference frame id\n"                                \
+          ":param pref: reference frame placement\n"                       \
+          ":param type: reference frame convention"))                      \
+      .def(TaskModelFramePlacementVisitor<Model>())                         \
+      .def(CastVisitor<Model>())                                            \
+      .def(PrintableVisitor<Model>())                                       \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_TASK_DATA_FRAME_PLACEMENT_PYTHON_BINDINGS(Scalar)        \
+  typedef TaskDataFramePlacementTpl<Scalar> Data;                          \
+  typedef TaskDataAbstractTpl<Scalar> DataBase;                             \
+  typedef TaskModelFramePlacementTpl<Scalar> Model;                         \
+  typedef Model::DataCollectorAbstract DataCollector;                       \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                     \
+  bp::class_<Data, bp::bases<DataBase>>(                                    \
+      "TaskDataFramePlacement", "Data for frame placement task.\n\n",     \
+      bp::init<Model*, DataCollector*>(                                    \
+          bp::args("self", "model", "data"),                             \
+          "Create frame placement task data.\n\n"                         \
+          ":param model: frame placement task model\n"                    \
+          ":param data: shared data")[bp::with_custodian_and_ward<        \
+          1, 2, bp::with_custodian_and_ward<1, 3>>()])                     \
+      .def(TaskDataFramePlacementVisitor<Data>())                          \
+      .def(CopyableVisitor<Data>());
+
+void exposeTaskFramePlacement() {
+  CROCODDYL_TASK_MODEL_FRAME_PLACEMENT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_TASK_DATA_FRAME_PLACEMENT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

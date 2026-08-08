@@ -24,6 +24,7 @@ void exposeCore() {
   exposeIntegratedActionAbstract();
   exposeDifferentialActionAbstract();
   exposeResidualAbstract();
+  exposeTaskAbstract();
   exposeGuidanceAbstract();
   exposeGuidanceLinear();
   exposeGuidanceSmoothSaturation();

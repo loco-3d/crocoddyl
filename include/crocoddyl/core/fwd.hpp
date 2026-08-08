@@ -121,6 +121,12 @@ class ResidualModelAbstractTpl;
 template <typename Scalar>
 struct ResidualDataAbstractTpl;
 
+// task
+template <typename Scalar>
+class TaskModelAbstractTpl;
+template <typename Scalar>
+struct TaskDataAbstractTpl;
+
 template <typename Scalar>
 class GuidanceModelAbstractTpl;
 template <typename Scalar>
@@ -405,6 +411,9 @@ typedef ResidualDataJointEffortTpl<double> ResidualDataJointEffort;
 typedef ResidualModelJointAccelerationTpl<double>
     ResidualModelJointAcceleration;
 typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
+
+typedef TaskModelAbstractTpl<double> TaskModelAbstract;
+typedef TaskDataAbstractTpl<double> TaskDataAbstract;
 
 typedef GuidanceModelAbstractTpl<double> GuidanceModelAbstract;
 typedef GuidanceDataAbstractTpl<double> GuidanceDataAbstract;

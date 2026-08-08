@@ -57,6 +57,11 @@ void updateAllPinocchio(
   pinocchio::computeCentroidalDynamicsDerivatives(*model, *data, q, v, a, tmp,
                                                   tmp, tmp, tmp);
   pinocchio::computeRNEADerivatives(*model, *data, q, v, a);
+  // Centroidal routines reuse data.com for mass moments and overwrite the
+  // subtree CoM cache needed by getCenterOfMassVelocityDerivatives().
+  // Restore the CoM quantities at the end so task numdiff and CoM task
+  // derivatives see consistent Pinocchio data.
+  pinocchio::centerOfMass(*model, *data, q, v, a);
 }
 
 }  // namespace unittest
