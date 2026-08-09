@@ -275,6 +275,16 @@ class ResidualModelJointAccelerationTpl;
 template <typename Scalar>
 struct ResidualDataJointAccelerationTpl;
 
+template <typename Scalar>
+class ResidualModelTaskFirstOrderTpl;
+template <typename Scalar>
+struct ResidualDataTaskFirstOrderTpl;
+
+template <typename Scalar>
+class ResidualModelTaskSecondOrderTpl;
+template <typename Scalar>
+struct ResidualDataTaskSecondOrderTpl;
+
 // cost
 template <typename Scalar>
 class CostModelAbstractTpl;
@@ -411,6 +421,10 @@ typedef ResidualDataJointEffortTpl<double> ResidualDataJointEffort;
 typedef ResidualModelJointAccelerationTpl<double>
     ResidualModelJointAcceleration;
 typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
+typedef ResidualModelTaskFirstOrderTpl<double> ResidualModelTaskFirstOrder;
+typedef ResidualDataTaskFirstOrderTpl<double> ResidualDataTaskFirstOrder;
+typedef ResidualModelTaskSecondOrderTpl<double> ResidualModelTaskSecondOrder;
+typedef ResidualDataTaskSecondOrderTpl<double> ResidualDataTaskSecondOrder;
 
 typedef TaskModelAbstractTpl<double> TaskModelAbstract;
 typedef TaskDataAbstractTpl<double> TaskDataAbstract;

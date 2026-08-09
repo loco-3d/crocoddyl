@@ -16,6 +16,13 @@
 
 namespace crocoddyl {
 
+class TaskModelBase {
+ public:
+  virtual ~TaskModelBase() = default;
+
+  CROCODDYL_BASE_CAST(TaskModelBase, TaskModelAbstractTpl)
+};
+
 /**
  * @brief Abstract task model for convergence residuals.
  *
@@ -37,7 +44,7 @@ namespace crocoddyl {
  * should remain zero.
  */
 template <typename _Scalar>
-class TaskModelAbstractTpl {
+class TaskModelAbstractTpl : public TaskModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

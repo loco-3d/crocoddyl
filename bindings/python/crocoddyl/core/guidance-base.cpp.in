@@ -69,6 +69,7 @@ struct GuidanceDataAbstractVisitor
                            "Initialize the guidance model.\n\n"               \
                            ":param nr: task dimension"))                      \
       .def(GuidanceModelAbstractVisitor<Model_wrap>())                        \
+      .def(CastVisitor<Model_wrap>())                                        \
       .def(PrintableVisitor<Model_wrap>())                                    \
       .def(CopyableVisitor<Model_wrap>());
 

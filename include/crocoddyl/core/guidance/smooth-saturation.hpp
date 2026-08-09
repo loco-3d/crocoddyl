@@ -10,6 +10,7 @@
 #define CROCODDYL_CORE_GUIDANCE_SMOOTH_SATURATION_HPP_
 
 #include "crocoddyl/core/guidance-base.hpp"
+#include "crocoddyl/core/utils/conversions.hpp"
 
 namespace crocoddyl {
 
@@ -34,6 +35,7 @@ class GuidanceModelSmoothSaturationTpl
     : public GuidanceModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(GuidanceModelBase, GuidanceModelSmoothSaturationTpl)
 
   typedef _Scalar Scalar;
   typedef GuidanceModelAbstractTpl<Scalar> Base;
@@ -88,6 +90,12 @@ class GuidanceModelSmoothSaturationTpl
    * @return The gain \f$k\f$.
    */
   const Scalar& get_gain() const;
+
+  /**
+   * @brief Cast the guidance model to a different scalar type.
+   */
+  template <typename NewScalar>
+  GuidanceModelSmoothSaturationTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the maximum desired-rate norm.

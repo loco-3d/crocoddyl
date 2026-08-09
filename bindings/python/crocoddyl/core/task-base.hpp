@@ -21,6 +21,7 @@ class TaskModelAbstractTpl_wrap
       public bp::wrapper<TaskModelAbstractTpl<_Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(TaskModelBase, TaskModelAbstractTpl_wrap)
 
   typedef _Scalar Scalar;
   typedef crocoddyl::TaskModelAbstractTpl<Scalar> TaskModel;

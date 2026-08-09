@@ -46,6 +46,15 @@ void GuidanceModelLinearTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+GuidanceModelLinearTpl<NewScalar> GuidanceModelLinearTpl<Scalar>::cast() const {
+  typedef GuidanceModelLinearTpl<NewScalar> ReturnType;
+  typename ReturnType::MatrixXs gain = gain_.template cast<NewScalar>();
+  ReturnType ret(gain);
+  return ret;
+}
+
+template <typename Scalar>
 const typename GuidanceModelLinearTpl<Scalar>::MatrixXs&
 GuidanceModelLinearTpl<Scalar>::get_gain() const {
   return gain_;

@@ -36,6 +36,8 @@ class GuidanceModelComponentwiseSaturationTpl
     : public GuidanceModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(GuidanceModelBase,
+                         GuidanceModelComponentwiseSaturationTpl)
 
   typedef _Scalar Scalar;
   typedef GuidanceModelAbstractTpl<Scalar> Base;
@@ -87,6 +89,12 @@ class GuidanceModelComponentwiseSaturationTpl
    * @return The vector of nonnegative gains \f$k_i\f$.
    */
   const VectorXs& get_gain() const;
+
+  /**
+   * @brief Cast the guidance model to a different scalar type.
+   */
+  template <typename NewScalar>
+  GuidanceModelComponentwiseSaturationTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the componentwise saturation bounds.

@@ -26,6 +26,7 @@ template <typename _Scalar>
 class GuidanceModelLinearTpl : public GuidanceModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(GuidanceModelBase, GuidanceModelLinearTpl)
 
   typedef _Scalar Scalar;
   typedef GuidanceModelAbstractTpl<Scalar> Base;
@@ -81,6 +82,12 @@ class GuidanceModelLinearTpl : public GuidanceModelAbstractTpl<_Scalar> {
    * @return The constant gain matrix \f$K\f$.
    */
   const MatrixXs& get_gain() const;
+
+  /**
+   * @brief Cast the guidance model to a different scalar type.
+   */
+  template <typename NewScalar>
+  GuidanceModelLinearTpl<NewScalar> cast() const;
 
   /**
    * @brief Set the feedback-gain matrix.
