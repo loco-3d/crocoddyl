@@ -156,6 +156,7 @@ void test_construct_data(const TaskModelTypes::Type task_type,
                     state->get_ndx());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Au.rows()), model->get_nr());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Au.cols()), model->get_nu());
+  BOOST_CHECK(data->compute_acceleration);
   BOOST_CHECK(data->y.isZero());
   BOOST_CHECK(data->v.isZero());
   BOOST_CHECK(data->a.isZero());
@@ -201,6 +202,40 @@ void test_calc_returns_a_value(const TaskModelTypes::Type task_type,
   BOOST_CHECK(data->Au.allFinite());
 }
 
+void test_calc_without_acceleration(const TaskModelTypes::Type task_type,
+                                    const StateModelTypes::Type state_type) {
+  seedUnitTestRandomGenerators(
+      getUnitTestSeed() + 1009u * (static_cast<unsigned int>(task_type) + 1u) +
+      2003u * (static_cast<unsigned int>(state_type) + 1u) + 4u);
+  TaskModelFactory factory;
+  const std::shared_ptr<crocoddyl::TaskModelAbstract> model =
+      factory.create(task_type, state_type);
+  const std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(pinocchio_model);
+  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::TaskDataAbstract>& data =
+      model->createData(&shared_data);
+
+  data->compute_acceleration = false;
+
+  const Eigen::VectorXd x = sampleUnitTestState(state, 2.5e-1);
+  const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x,
+                                          u);
+  model->calc(data, x, u);
+  model->calcDiff(data, x, u);
+
+  BOOST_CHECK(!data->compute_acceleration);
+  BOOST_CHECK(data->a.isZero());
+  BOOST_CHECK(data->Ax.isZero());
+  BOOST_CHECK(data->Au.isZero());
+
+  check_task_partial_derivatives_against_numdiff(
+      model, data, state, pinocchio_model, pinocchio_data, x, u);
+}
+
 void test_partial_derivatives_against_numdiff(
     const TaskModelTypes::Type task_type,
     const StateModelTypes::Type state_type) {
@@ -234,6 +269,8 @@ void register_unit_tests(const TaskModelTypes::Type task_type) {
         make_task_test_case_name("construct_data", task_type, state_type);
     const std::string calc_name =
         make_task_test_case_name("calc_returns_a_value", task_type, state_type);
+    const std::string noaccel_name = make_task_test_case_name(
+        "calc_without_acceleration", task_type, state_type);
     const std::string numdiff_name = make_task_test_case_name(
         "partial_derivatives_against_numdiff", task_type, state_type);
     ts->add(BOOST_TEST_CASE_NAME(
@@ -242,6 +279,9 @@ void register_unit_tests(const TaskModelTypes::Type task_type) {
     ts->add(BOOST_TEST_CASE_NAME(
         boost::bind(&test_calc_returns_a_value, task_type, state_type),
         calc_name));
+    ts->add(BOOST_TEST_CASE_NAME(
+        boost::bind(&test_calc_without_acceleration, task_type, state_type),
+        noaccel_name));
     ts->add(BOOST_TEST_CASE_NAME(
         boost::bind(&test_partial_derivatives_against_numdiff, task_type,
                     state_type),

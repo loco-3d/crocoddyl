@@ -57,8 +57,6 @@ void TaskModelFrameRotationTpl<Scalar>::calc(
       data->y = pinocchio::log3(d->rRf);
       d->vf = pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_,
                                           pinocchio::LOCAL);
-      d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
-                                              id_, pinocchio::LOCAL);
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
@@ -68,13 +66,18 @@ void TaskModelFrameRotationTpl<Scalar>::calc(
       data->y = pinocchio::log3(d->rRf);
       d->vf = pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_,
                                           type_);
-      d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
-                                              id_, type_);
       break;
   }
 
   data->v.noalias() = d->rJf * d->vf.angular();
-  data->a.noalias() = d->rJf * d->af.angular();
+  if (data->compute_acceleration) {
+    d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
+                                            id_, type_);
+    data->a.noalias() = d->rJf * d->af.angular();
+  } else {
+    d->af = Motion::Zero();
+    data->a.setZero();
+  }
 }
 
 template <typename Scalar>
@@ -95,21 +98,47 @@ void TaskModelFrameRotationTpl<Scalar>::calcDiff(
                               d->fJf);
   data->Yx.leftCols(nv).noalias() = d->rJf * d->fJf.template bottomRows<3>();
 
-  pinocchio::getFrameAccelerationDerivatives(*pin_model_.get(), *d->pinocchio,
-                                             id_, type_, d->fVdq, d->fAdq,
-                                             d->fAdv, d->fVdv);
+  const pinocchio::ReferenceFrame deriv_type =
+      (type_ == pinocchio::ReferenceFrame::LOCAL) ? pinocchio::LOCAL
+                                                  : pinocchio::WORLD;
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
       pinocchio::Hlog3(d->rRf, d->vf.angular(), d->Hlogf);
       d->dJ_v.noalias() = d->Hlogf.transpose() * d->rRf;
-      pinocchio::Hlog3(d->rRf, d->af.angular(), d->Hlogf);
-      d->dJ_a.noalias() = d->Hlogf.transpose() * d->rRf;
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       const Matrix3s rRf_inv = d->rRf.transpose().eval();
       pinocchio::Hlog3(rRf_inv, -d->vf.angular(), d->Hlogf);
       d->dJ_v.noalias() = d->Hlogf.transpose() * rRf_inv;
+      break;
+  }
+
+  if (!data->compute_acceleration) {
+    pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio,
+                                           id_, deriv_type, d->fVdq, d->fVdv);
+    auto Vx_q = data->Vx.leftCols(nv);
+    Vx_q.noalias() = d->dJ_v * d->fJf.template bottomRows<3>();
+    Vx_q.noalias() += d->rJf * d->fVdq.template bottomRows<3>();
+    data->Vx.rightCols(nv).noalias() =
+        d->rJf * d->fVdv.template bottomRows<3>();
+    d->dJ_a.setZero();
+    d->fAdq.setZero();
+    d->fAdv.setZero();
+    return;
+  }
+
+  pinocchio::getFrameAccelerationDerivatives(*pin_model_.get(), *d->pinocchio,
+                                             id_, deriv_type, d->fVdq, d->fAdq,
+                                             d->fAdv, d->fVdv);
+  switch (type_) {
+    case pinocchio::ReferenceFrame::LOCAL:
+      pinocchio::Hlog3(d->rRf, d->af.angular(), d->Hlogf);
+      d->dJ_a.noalias() = d->Hlogf.transpose() * d->rRf;
+      break;
+    case pinocchio::ReferenceFrame::WORLD:
+    case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
+      const Matrix3s rRf_inv = d->rRf.transpose().eval();
       pinocchio::Hlog3(rRf_inv, -d->af.angular(), d->Hlogf);
       d->dJ_a.noalias() = d->Hlogf.transpose() * rRf_inv;
       break;

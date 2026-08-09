@@ -33,9 +33,14 @@ void TaskModelCoMPositionTpl<Scalar>::calc(
   data->y = d->com - cref_;
 
   d->vcom = d->pinocchio->vcom[0];
-  d->acom = d->pinocchio->acom[0];
   data->v = d->vcom;
-  data->a = d->acom;
+  if (data->compute_acceleration) {
+    d->acom = d->pinocchio->acom[0];
+    data->a = d->acom;
+  } else {
+    d->acom.setZero();
+    data->a.setZero();
+  }
 }
 
 template <typename Scalar>
@@ -50,6 +55,11 @@ void TaskModelCoMPositionTpl<Scalar>::calcDiff(
                                                 *d->pinocchio, d->dvc_dq);
   data->Vx.leftCols(nv).noalias() = d->dvc_dq;
   data->Vx.rightCols(nv).noalias() = d->pinocchio->Jcom;
+  if (!data->compute_acceleration) {
+    d->dacom_dq.setZero();
+    d->dacom_dv.setZero();
+    return;
+  }
   const Scalar inv_mass = Scalar(1) / d->pinocchio->mass[0];
   d->dacom_dq.noalias() = d->pinocchio->dFdq.template topRows<3>() * inv_mass;
   d->dacom_dv.noalias() = d->pinocchio->dFdv.template topRows<3>() * inv_mass;
