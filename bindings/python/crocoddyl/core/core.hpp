@@ -43,6 +43,8 @@ void exposeCostAbstract();
 void exposeResidualControl();
 void exposeResidualJointEffort();
 void exposeResidualJointAcceleration();
+void exposeResidualTaskFirstOrder();
+void exposeResidualTaskSecondOrder();
 void exposeCostSum();
 void exposeCostResidual();
 void exposeConstraintAbstract();

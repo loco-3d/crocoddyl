@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2021-2026, University of Edinburgh, LAAS-CNRS,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,8 @@ struct ResidualModelTypes {
     ResidualModelFrameTranslation,
     ResidualModelFrameVelocity,
     ResidualModelControlGrav,
+    ResidualModelTaskFirstOrder,
+    ResidualModelTaskSecondOrder,
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION
     ResidualModelPairCollision,

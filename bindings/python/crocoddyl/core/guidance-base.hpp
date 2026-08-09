@@ -21,6 +21,7 @@ class GuidanceModelAbstractTpl_wrap
       public bp::wrapper<GuidanceModelAbstractTpl<Scalar>> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(GuidanceModelBase, GuidanceModelAbstractTpl_wrap)
 
   typedef crocoddyl::GuidanceModelAbstractTpl<Scalar> GuidanceModel;
   typedef crocoddyl::GuidanceDataAbstractTpl<Scalar> GuidanceData;
@@ -61,6 +62,13 @@ class GuidanceModelAbstractTpl_wrap
 
   std::shared_ptr<GuidanceData> default_createData() const {
     return this->GuidanceModel::createData();
+  }
+
+  template <typename NewScalar>
+  GuidanceModelAbstractTpl_wrap<NewScalar> cast() const {
+    typedef GuidanceModelAbstractTpl_wrap<NewScalar> ReturnType;
+    ReturnType ret(nr_);
+    return ret;
   }
 };
 

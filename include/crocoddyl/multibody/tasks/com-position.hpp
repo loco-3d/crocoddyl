@@ -44,6 +44,7 @@ template <typename _Scalar>
 class TaskModelCoMPositionTpl : public TaskModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(TaskModelBase, TaskModelCoMPositionTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;

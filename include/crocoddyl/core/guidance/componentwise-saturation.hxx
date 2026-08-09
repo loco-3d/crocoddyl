@@ -53,6 +53,16 @@ void GuidanceModelComponentwiseSaturationTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+GuidanceModelComponentwiseSaturationTpl<NewScalar>
+GuidanceModelComponentwiseSaturationTpl<Scalar>::cast() const {
+  typedef GuidanceModelComponentwiseSaturationTpl<NewScalar> ReturnType;
+  ReturnType ret(gain_.template cast<NewScalar>(),
+                 max_rate_.template cast<NewScalar>());
+  return ret;
+}
+
+template <typename Scalar>
 std::shared_ptr<typename GuidanceModelComponentwiseSaturationTpl<
     Scalar>::GuidanceDataAbstract>
 GuidanceModelComponentwiseSaturationTpl<Scalar>::createData() const {

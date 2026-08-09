@@ -14,6 +14,13 @@
 
 namespace crocoddyl {
 
+class GuidanceModelBase {
+ public:
+  virtual ~GuidanceModelBase() = default;
+
+  CROCODDYL_BASE_CAST(GuidanceModelBase, GuidanceModelAbstractTpl)
+};
+
 /**
  * @brief Differentiable mapping from a task error to a desired task rate.
  *
@@ -36,7 +43,7 @@ namespace crocoddyl {
  * \f]
  */
 template <typename _Scalar>
-class GuidanceModelAbstractTpl {
+class GuidanceModelAbstractTpl : public GuidanceModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

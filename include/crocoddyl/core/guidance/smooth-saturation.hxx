@@ -58,6 +58,17 @@ void GuidanceModelSmoothSaturationTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+GuidanceModelSmoothSaturationTpl<NewScalar>
+GuidanceModelSmoothSaturationTpl<Scalar>::cast() const {
+  typedef GuidanceModelSmoothSaturationTpl<NewScalar> ReturnType;
+  ReturnType ret(nr_, scalar_cast<NewScalar>(gain_),
+                 scalar_cast<NewScalar>(max_rate_),
+                 scalar_cast<NewScalar>(epsilon_));
+  return ret;
+}
+
+template <typename Scalar>
 std::shared_ptr<
     typename GuidanceModelSmoothSaturationTpl<Scalar>::GuidanceDataAbstract>
 GuidanceModelSmoothSaturationTpl<Scalar>::createData() const {

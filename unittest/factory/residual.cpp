@@ -11,6 +11,8 @@
 
 #include "../random_generator.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
+#include "crocoddyl/core/residuals/task-first-order.hpp"
+#include "crocoddyl/core/residuals/task-second-order.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/residuals/control-gravity.hpp"
@@ -18,6 +20,8 @@
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#include "factory/guidance.hpp"
+#include "factory/task.hpp"
 #ifdef CROCODDYL_WITH_PAIR_COLLISION
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
 #endif  // CROCODDYL_WITH_PAIR_COLLISION
@@ -57,6 +61,12 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
       break;
     case ResidualModelTypes::ResidualModelControlGrav:
       os << "ResidualModelControlGrav";
+      break;
+    case ResidualModelTypes::ResidualModelTaskFirstOrder:
+      os << "ResidualModelTaskFirstOrder";
+      break;
+    case ResidualModelTypes::ResidualModelTaskSecondOrder:
+      os << "ResidualModelTaskSecondOrder";
       break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION
@@ -150,6 +160,30 @@ std::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
       residual =
           std::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
       break;
+    case ResidualModelTypes::ResidualModelTaskFirstOrder: {
+      TaskModelFactory task_factory;
+      GuidanceModelFactory guidance_factory;
+      const auto task_type = TaskModelTypes::TaskModelCoMPosition;
+      const auto guidance_type = GuidanceModelTypes::GuidanceModelLinear;
+      std::shared_ptr<crocoddyl::TaskModelAbstract> task =
+          task_factory.create(task_type, state_type, nu);
+      std::shared_ptr<crocoddyl::GuidanceModelAbstract> guidance =
+          guidance_factory.create(guidance_type, task->get_nr());
+      residual = std::make_shared<crocoddyl::ResidualModelTaskFirstOrder>(
+          task, guidance);
+    } break;
+    case ResidualModelTypes::ResidualModelTaskSecondOrder: {
+      TaskModelFactory task_factory;
+      GuidanceModelFactory guidance_factory;
+      const auto task_type = TaskModelTypes::TaskModelCoMPosition;
+      const auto guidance_type = GuidanceModelTypes::GuidanceModelLinear;
+      std::shared_ptr<crocoddyl::TaskModelAbstract> task =
+          task_factory.create(task_type, state_type, nu);
+      std::shared_ptr<crocoddyl::GuidanceModelAbstract> guidance =
+          guidance_factory.create(guidance_type, task->get_nr());
+      residual = std::make_shared<crocoddyl::ResidualModelTaskSecondOrder>(
+          task, guidance, random_real_in_range<double>(0.1, 2.0));
+    } break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION
     case ResidualModelTypes::ResidualModelPairCollision:
