@@ -21,21 +21,6 @@ using namespace crocoddyl::unittest;
 
 namespace {
 
-template <typename DerivedA, typename DerivedB, typename Scalar>
-bool isCloseAbsRel(const Eigen::MatrixBase<DerivedA>& value,
-                   const Eigen::MatrixBase<DerivedB>& reference,
-                   const Scalar abs_tol, const Scalar rel_tol) {
-  if (value.size() == 0 || reference.size() == 0) {
-    return value.size() == reference.size();
-  }
-  const auto value_s = value.template cast<Scalar>();
-  const auto reference_s = reference.template cast<Scalar>();
-  const Scalar scale = std::max(value_s.cwiseAbs().maxCoeff(),
-                                reference_s.cwiseAbs().maxCoeff());
-  const Scalar max_error = (value_s - reference_s).cwiseAbs().maxCoeff();
-  return max_error <= abs_tol + rel_tol * std::max(Scalar(1), scale);
-}
-
 template <typename ValueScalar, typename ReferenceScalar, typename Scalar>
 bool isCloseAbsRelScalar(const ValueScalar value,
                          const ReferenceScalar reference, const Scalar abs_tol,
