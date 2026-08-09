@@ -10,6 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <sstream>
 
@@ -38,6 +39,48 @@ std::string make_task_test_case_name(const char* test_kind,
   return oss.str();
 }
 
+void check_casted_task_results(
+    const std::shared_ptr<crocoddyl::TaskModelAbstract>& model,
+    const std::shared_ptr<crocoddyl::TaskDataAbstract>& data,
+    const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+#ifdef NDEBUG
+  const auto casted_model = model->cast<float>();
+  const auto casted_state =
+      std::static_pointer_cast<crocoddyl::StateMultibodyTpl<float>>(
+          casted_model->get_state());
+  pinocchio::ModelTpl<float>& pinocchio_model_f =
+      *casted_state->get_pinocchio().get();
+  pinocchio::DataTpl<float> pinocchio_data_f(pinocchio_model_f);
+  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
+      &pinocchio_data_f);
+  const auto casted_data = casted_model->createData(&casted_shared_data);
+  casted_data->compute_acceleration = data->compute_acceleration;
+
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model_f, &pinocchio_data_f,
+                                          x_f, u_f);
+  casted_model->calc(casted_data, x_f, u_f);
+  casted_model->calcDiff(casted_data, x_f, u_f);
+
+  const float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(isCloseAbsRel(data->y, casted_data->y, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->v, casted_data->v, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->a, casted_data->a, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Yx, casted_data->Yx, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Yu, casted_data->Yu, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Vx, casted_data->Vx, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Vu, casted_data->Vu, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Ax, casted_data->Ax, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Au, casted_data->Au, tol_f, tol_f));
+#else
+  (void)model;
+  (void)data;
+  (void)x;
+  (void)u;
+#endif
+}
+
 void check_task_partial_derivatives_against_numdiff(
     const std::shared_ptr<crocoddyl::TaskModelAbstract>& model,
     const std::shared_ptr<crocoddyl::TaskDataAbstract>& data,
@@ -48,6 +91,7 @@ void check_task_partial_derivatives_against_numdiff(
                                           u);
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
+  check_casted_task_results(model, data, x, u);
 
   Eigen::MatrixXd Yx_fd =
       Eigen::MatrixXd::Zero(model->get_nr(), state->get_ndx());
@@ -200,6 +244,7 @@ void test_calc_returns_a_value(const TaskModelTypes::Type task_type,
   BOOST_CHECK(data->Vu.allFinite());
   BOOST_CHECK(data->Ax.allFinite());
   BOOST_CHECK(data->Au.allFinite());
+  check_casted_task_results(model, data, x, u);
 }
 
 void test_calc_without_acceleration(const TaskModelTypes::Type task_type,

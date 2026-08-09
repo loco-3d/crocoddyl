@@ -10,6 +10,7 @@
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <sstream>
 
@@ -27,6 +28,27 @@ Eigen::VectorXd evaluate_rate(const crocoddyl::GuidanceModelAbstract& model,
       model.createData();
   model.calc(data, error);
   return data->g;
+}
+
+void check_casted_guidance_results(
+    const std::shared_ptr<crocoddyl::GuidanceModelAbstract>& model,
+    const std::shared_ptr<crocoddyl::GuidanceDataAbstract>& data,
+    const Eigen::VectorXd& error) {
+#ifdef NDEBUG
+  const auto casted_model = model->cast<float>();
+  const auto casted_data = casted_model->createData();
+  const Eigen::VectorXf error_f = error.cast<float>();
+  casted_model->calc(casted_data, error_f);
+  casted_model->calcDiff(casted_data, error_f);
+
+  const float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(isCloseAbsRel(data->g, casted_data->g, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->Ge, casted_data->Ge, tol_f, tol_f));
+#else
+  (void)model;
+  (void)data;
+  (void)error;
+#endif
 }
 
 void test_construct_data(const GuidanceModelTypes::Type guidance_type) {
@@ -57,6 +79,7 @@ void test_calc_returns_a_value(const GuidanceModelTypes::Type guidance_type) {
 
   BOOST_CHECK(data->g.allFinite());
   BOOST_CHECK(data->Ge.allFinite());
+  check_casted_guidance_results(model, data, error);
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -88,6 +111,7 @@ void test_partial_derivatives_against_numdiff(
 
   const double max_error = (data->Ge - jacobian_fd).cwiseAbs().maxCoeff();
   BOOST_CHECK_LT(max_error, 5e-6);
+  check_casted_guidance_results(model, data, error);
 }
 
 void register_unit_tests(const GuidanceModelTypes::Type guidance_type) {
