@@ -61,8 +61,6 @@ void TaskModelFrameTranslationTpl<Scalar>::calc(
       data->y.noalias() = oRf.transpose() * dt;
       d->vf = pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_,
                                           pinocchio::LOCAL);
-      d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
-                                              id_, pinocchio::LOCAL);
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
@@ -71,13 +69,19 @@ void TaskModelFrameTranslationTpl<Scalar>::calc(
       data->y = dt;
       d->vf = pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_,
                                           pinocchio::WORLD);
-      d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
-                                              id_, pinocchio::WORLD);
       break;
   }
 
   data->v = d->vf.linear();
-  data->a = d->af.linear();
+  if (data->compute_acceleration) {
+    d->af = pinocchio::getFrameAcceleration(
+        *pin_model_.get(), *d->pinocchio, id_,
+        type_ == pinocchio::LOCAL ? pinocchio::LOCAL : pinocchio::WORLD);
+    data->a = d->af.linear();
+  } else {
+    d->af = Motion::Zero();
+    data->a.setZero();
+  }
 }
 
 template <typename Scalar>
@@ -105,26 +109,31 @@ void TaskModelFrameTranslationTpl<Scalar>::calcDiff(
       const Vector3s y = data->y.template head<3>();
       data->Yx.leftCols(nv).noalias() +=
           pinocchio::skew(y) * d->fJf.template bottomRows<3>();
-      pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio,
-                                             id_, pinocchio::LOCAL, d->fVdq,
-                                             d->fVdv);
-      pinocchio::getFrameAccelerationDerivatives(
-          *pin_model_.get(), *d->pinocchio, id_, pinocchio::LOCAL, d->fVdq,
-          d->fAdq, d->fAdv, d->fVdv);
       break;
     }
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       data->Yx.leftCols(nv).noalias() =
           d->pinocchio->oMf[id_].rotation() * d->fJf.template topRows<3>();
-      pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio,
-                                             id_, pinocchio::WORLD, d->fVdq,
-                                             d->fVdv);
-      pinocchio::getFrameAccelerationDerivatives(
-          *pin_model_.get(), *d->pinocchio, id_, pinocchio::WORLD, d->fVdq,
-          d->fAdq, d->fAdv, d->fVdv);
       break;
   }
+
+  const pinocchio::ReferenceFrame deriv_type =
+      (type_ == pinocchio::ReferenceFrame::LOCAL) ? pinocchio::LOCAL
+                                                  : pinocchio::WORLD;
+  if (!data->compute_acceleration) {
+    pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio,
+                                           id_, deriv_type, d->fVdq, d->fVdv);
+    data->Vx.leftCols(nv).noalias() = d->fVdq.template topRows<3>();
+    data->Vx.rightCols(nv).noalias() = d->fVdv.template topRows<3>();
+    d->fAdq.setZero();
+    d->fAdv.setZero();
+    return;
+  }
+
+  pinocchio::getFrameAccelerationDerivatives(*pin_model_.get(), *d->pinocchio,
+                                             id_, deriv_type, d->fVdq, d->fAdq,
+                                             d->fAdv, d->fVdv);
   data->Vx.leftCols(nv).noalias() = d->fVdq.template topRows<3>();
   data->Vx.rightCols(nv).noalias() = d->fVdv.template topRows<3>();
   data->Ax.leftCols(nv).noalias() = d->fAdq.template topRows<3>();

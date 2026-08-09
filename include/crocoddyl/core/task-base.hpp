@@ -29,6 +29,8 @@ namespace crocoddyl {
  * Concrete implementations own the task geometry and obtain cached robot
  * quantities from the shared DataCollectorAbstract passed to createData().
  * They must not launch a second dynamics pipeline inside calc() or calcDiff().
+ * The task data includes a per-evaluation flag that can disable acceleration
+ * computations when only first-order convergence is requested.
  *
  * A first-order model needs to populate y, v, Yx, Yu, Vx, and Vu. A
  * second-order model additionally populates a, Ax, and Au. Unused quantities
@@ -112,6 +114,7 @@ struct TaskDataAbstractTpl {
   TaskDataAbstractTpl(TaskModelAbstract* const model,
                       DataCollectorAbstract* const data)
       : shared(data),
+        compute_acceleration(true),
         y(model->get_nr()),
         v(model->get_nr()),
         a(model->get_nr()),
@@ -134,6 +137,7 @@ struct TaskDataAbstractTpl {
   virtual ~TaskDataAbstractTpl() = default;
 
   DataCollectorAbstract* shared;
+  bool compute_acceleration;  //!< Request computation of task acceleration
 
   VectorXs y;
   VectorXs v;

@@ -58,10 +58,15 @@ void TaskModelFramePlacementTpl<Scalar>::calc(
 
   d->vf =
       pinocchio::getFrameVelocity(*pin_model_.get(), *d->pinocchio, id_, type_);
-  d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio, id_,
-                                          type_);
   data->v = d->vf.toVector();
-  data->a = d->af.toVector();
+  if (data->compute_acceleration) {
+    d->af = pinocchio::getFrameAcceleration(*pin_model_.get(), *d->pinocchio,
+                                            id_, type_);
+    data->a = d->af.toVector();
+  } else {
+    d->af = Motion::Zero();
+    data->a.setZero();
+  }
 }
 
 template <typename Scalar>
@@ -82,6 +87,16 @@ void TaskModelFramePlacementTpl<Scalar>::calcDiff(
   pinocchio::getFrameJacobian(*pin_model_.get(), *d->pinocchio, id_,
                               pinocchio::LOCAL, d->fJf);
   data->Yx.leftCols(nv).noalias() = d->rJf * d->fJf;
+
+  if (!data->compute_acceleration) {
+    pinocchio::getFrameVelocityDerivatives(*pin_model_.get(), *d->pinocchio,
+                                           id_, type_, d->fVdq, d->fVdv);
+    data->Vx.leftCols(nv).noalias() = d->fVdq;
+    data->Vx.rightCols(nv).noalias() = d->fVdv;
+    d->fAdq.setZero();
+    d->fAdv.setZero();
+    return;
+  }
 
   pinocchio::getFrameAccelerationDerivatives(*pin_model_.get(), *d->pinocchio,
                                              id_, type_, d->fVdq, d->fAdq,

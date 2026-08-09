@@ -78,7 +78,9 @@ struct TaskDataAbstractVisitor
     : public bp::def_visitor<TaskDataAbstractVisitor<Data>> {
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.add_property(
+    cl.def_readwrite("compute_acceleration", &Data::compute_acceleration,
+                     "flag that requests acceleration computation")
+      .add_property(
           "shared",
           bp::make_getter(&Data::shared, bp::return_internal_reference<>()),
           "shared data")
@@ -155,7 +157,9 @@ struct TaskDataAbstractVisitor
       "TaskDataAbstract",                                                   \
       "Abstract class for task data.\n\n"                                   \
       "It stores the task quantity y, task rate v, task acceleration a, "  \
-      "and their Jacobians.\n\n",                                           \
+      "and their Jacobians.\n\n"                                           \
+      "The compute_acceleration flag disables acceleration-specific work "  \
+      "when false.\n\n",                                                   \
       bp::init<Model*, DataCollector*>(                                     \
           bp::args("self", "model", "data"),                              \
           "Create common data shared between task models.\n\n"             \
