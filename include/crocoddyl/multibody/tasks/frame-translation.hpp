@@ -189,11 +189,18 @@ struct TaskDataFrameTranslationTpl : public TaskDataAbstractTpl<_Scalar> {
     }
 
     pinocchio = d->pinocchio;
+    DataCollectorJointTpl<Scalar>* j =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    if (j != nullptr) {
+      joint = j->joint;
+    }
   }
 
   virtual ~TaskDataFrameTranslationTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
+  std::shared_ptr<JointDataAbstractTpl<Scalar>>
+      joint;  //!< Shared generalized-acceleration data, when available
   Motion vf;  //!< Frame velocity in the task's reference-frame convention
   Motion af;  //!< Frame acceleration in the task's reference-frame convention
   Matrix6xs fJf;   //!< Local Jacobian of the frame

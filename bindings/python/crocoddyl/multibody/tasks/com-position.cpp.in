@@ -87,6 +87,12 @@ struct TaskDataCoMPositionVisitor
           bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
         .add_property(
+            "joint",
+            bp::make_getter(
+                &Data::joint,
+                bp::return_value_policy<bp::return_by_value>()),
+            "shared generalized-acceleration data, when available")
+        .add_property(
             "com",
             bp::make_getter(&Data::com, bp::return_internal_reference<>()),
             "current CoM position")

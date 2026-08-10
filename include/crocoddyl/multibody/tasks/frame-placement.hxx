@@ -25,7 +25,7 @@ template <typename Scalar>
 TaskModelFramePlacementTpl<Scalar>::TaskModelFramePlacementTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const SE3& pref, const pinocchio::ReferenceFrame type, const std::size_t nu)
-    : Base(state, 6, nu, true, true, false),
+    : Base(state, 6, nu, true, true, true),
       id_(id),
       pref_(pref),
       oMf_inv_(pref.inverse()),
@@ -167,10 +167,14 @@ void TaskModelFramePlacementTpl<Scalar>::calcDiff(
   data->Vx.rightCols(nv).noalias() = d->fVdv;
   data->Ax.leftCols(nv).noalias() = d->fAdq;
   data->Ax.rightCols(nv).noalias() = d->fAdv;
+  if (d->joint != nullptr) {
+    data->Ax.noalias() += d->fVdv * d->joint->da_dx;
+    data->Au.noalias() = d->fVdv * d->joint->da_du;
+  }
 }
 
 template <typename Scalar>
-std::shared_ptr<TaskDataAbstractTpl<Scalar> >
+std::shared_ptr<TaskDataAbstractTpl<Scalar>>
 TaskModelFramePlacementTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,

@@ -150,6 +150,7 @@ struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
   typedef TaskDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Matrix3s Matrix3s;
+  typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef pinocchio::MotionTpl<Scalar> Motion;
 
@@ -164,11 +165,13 @@ struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
         Hlogf(Matrix3s::Zero()),
         dJ_v(Matrix3s::Zero()),
         dJ_a(Matrix3s::Zero()),
+        a_partial_da(3, model->get_state()->get_nv()),
         fJf(6, model->get_state()->get_nv()),
         fVdq(6, model->get_state()->get_nv()),
         fVdv(6, model->get_state()->get_nv()),
         fAdq(6, model->get_state()->get_nv()),
         fAdv(6, model->get_state()->get_nv()) {
+    a_partial_da.setZero();
     fJf.setZero();
     fVdq.setZero();
     fVdv.setZero();
@@ -184,11 +187,18 @@ struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
     }
 
     pinocchio = d->pinocchio;
+    DataCollectorJointTpl<Scalar>* j =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    if (j != nullptr) {
+      joint = j->joint;
+    }
   }
 
   virtual ~TaskDataFrameRotationTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
+  std::shared_ptr<JointDataAbstractTpl<Scalar>>
+      joint;       //!< Shared generalized-acceleration data, when available
   Matrix3s rRf;    //!< Rotation-error composition in the selected convention
   Matrix3s rJf;    //!< Jacobian of the SO(3) logarithm
   Motion vf;       //!< Frame velocity in the selected reference frame
@@ -196,7 +206,8 @@ struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
   Matrix3s Hlogf;  //!< Hessian of the SO(3) logarithm
   Matrix3s dJ_v;   //!< Derivative of rJf contracted with frame velocity
   Matrix3s dJ_a;   //!< Derivative of rJf contracted with frame acceleration
-  Matrix6xs fJf;   //!< Frame Jacobian in the selected reference frame
+  Matrix3xs a_partial_da;  //!< Derivative of task acceleration w.r.t. ddq
+  Matrix6xs fJf;           //!< Frame Jacobian in the selected reference frame
   Matrix6xs fVdq;  //!< Partial derivative of frame velocity with respect to q
   Matrix6xs fVdv;  //!< Partial derivative of frame velocity with respect to v
   Matrix6xs fAdq;  //!< Partial derivative of frame acceleration w.r.t. q

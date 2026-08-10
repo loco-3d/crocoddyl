@@ -30,6 +30,7 @@ class TaskModelAbstractTpl_wrap
   typedef typename TaskModel::StateAbstract State;
   typedef typename TaskModel::VectorXs VectorXs;
   typedef typename TaskModel::DataCollectorAbstract DataCollectorAbstract;
+  using TaskModel::has_acceleration_;
   using TaskModel::nr_;
   using TaskModel::nu_;
   using TaskModel::q_dependent_;
@@ -40,8 +41,10 @@ class TaskModelAbstractTpl_wrap
   TaskModelAbstractTpl_wrap(std::shared_ptr<State> state, const std::size_t nr,
                             const std::size_t nu, const bool q_dependent = true,
                             const bool v_dependent = true,
-                            const bool u_dependent = true)
-      : TaskModel(state, nr, nu, q_dependent, v_dependent, u_dependent),
+                            const bool u_dependent = true,
+                            const bool has_acceleration = true)
+      : TaskModel(state, nr, nu, q_dependent, v_dependent, u_dependent,
+                  has_acceleration),
         bp::wrapper<TaskModel>() {}
 
   void calc(const std::shared_ptr<TaskData>& data,
@@ -99,7 +102,7 @@ class TaskModelAbstractTpl_wrap
     typedef StateAbstractTpl<NewScalar> StateType;
     ReturnType ret(
         std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
-        nr_, nu_, q_dependent_, v_dependent_, u_dependent_);
+        nr_, nu_, q_dependent_, v_dependent_, u_dependent_, has_acceleration_);
     return ret;
   }
 };

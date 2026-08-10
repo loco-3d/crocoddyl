@@ -12,20 +12,21 @@ template <typename Scalar>
 TaskModelAbstractTpl<Scalar>::TaskModelAbstractTpl(
     std::shared_ptr<StateAbstract> state, const std::size_t nr,
     const std::size_t nu, const bool q_dependent, const bool v_dependent,
-    const bool u_dependent)
+    const bool u_dependent, const bool has_acceleration)
     : state_(state),
       nr_(nr),
       nu_(nu),
       q_dependent_(q_dependent),
       v_dependent_(v_dependent),
-      u_dependent_(u_dependent) {
+      u_dependent_(u_dependent),
+      has_acceleration_(has_acceleration) {
   if (nr_ == 0) {
     throw_pretty("Invalid argument: task dimension must be positive");
   }
 }
 
 template <typename Scalar>
-std::shared_ptr<TaskDataAbstractTpl<Scalar> >
+std::shared_ptr<TaskDataAbstractTpl<Scalar>>
 TaskModelAbstractTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return std::allocate_shared<TaskDataAbstract>(
       Eigen::aligned_allocator<TaskDataAbstract>(), this, data);
@@ -60,6 +61,11 @@ bool TaskModelAbstractTpl<Scalar>::get_v_dependent() const {
 template <typename Scalar>
 bool TaskModelAbstractTpl<Scalar>::get_u_dependent() const {
   return u_dependent_;
+}
+
+template <typename Scalar>
+bool TaskModelAbstractTpl<Scalar>::get_has_acceleration() const {
+  return has_acceleration_;
 }
 
 template <typename Scalar>

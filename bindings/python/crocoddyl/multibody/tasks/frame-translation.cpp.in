@@ -129,11 +129,22 @@ struct TaskDataFrameTranslationVisitor
           bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
         .add_property(
+            "joint",
+            bp::make_getter(
+                &Data::joint,
+                bp::return_value_policy<bp::return_by_value>()),
+            "shared generalized-acceleration data, when available")
+        .add_property(
             "vf", bp::make_getter(&Data::vf, bp::return_internal_reference<>()),
             "frame velocity in the task reference-frame convention")
         .add_property(
             "af", bp::make_getter(&Data::af, bp::return_internal_reference<>()),
             "frame acceleration in the task reference-frame convention")
+        .add_property(
+            "a_partial_da",
+            bp::make_getter(&Data::a_partial_da,
+                            bp::return_internal_reference<>()),
+            "derivative of task acceleration w.r.t. generalized acceleration")
         .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "local frame Jacobian")

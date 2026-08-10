@@ -56,11 +56,23 @@ class TaskModelAbstractTpl : public TaskModelBase {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Initialize the task model.
+   *
+   * @param[in] state             State of the dynamical system
+   * @param[in] nr                Dimension of the task vectors
+   * @param[in] nu                Dimension of the control vector
+   * @param[in] q_dependent       Whether the task depends on configuration
+   * @param[in] v_dependent       Whether the task depends on velocity
+   * @param[in] u_dependent       Whether the task depends on control
+   * @param[in] has_acceleration  Whether the task defines \f$a, A_x, A_u\f$
+   */
   TaskModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                        const std::size_t nr, const std::size_t nu,
                        const bool q_dependent = true,
                        const bool v_dependent = true,
-                       const bool u_dependent = true);
+                       const bool u_dependent = true,
+                       const bool has_acceleration = true);
   virtual ~TaskModelAbstractTpl() = default;
 
   /**
@@ -89,6 +101,8 @@ class TaskModelAbstractTpl : public TaskModelBase {
   bool get_q_dependent() const;
   bool get_v_dependent() const;
   bool get_u_dependent() const;
+  /** @brief Return whether the task defines an acceleration component. */
+  bool get_has_acceleration() const;
 
   /**
    * @brief Print relevant information about the task model.
@@ -102,6 +116,7 @@ class TaskModelAbstractTpl : public TaskModelBase {
   bool q_dependent_;
   bool v_dependent_;
   bool u_dependent_;
+  bool has_acceleration_;
 };
 
 /**
@@ -118,10 +133,19 @@ struct TaskDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
+  /**
+   * @brief Allocate and initialize the common task data.
+   *
+   * The acceleration-computation request is initialized from the model's
+   * acceleration capability.
+   *
+   * @param[in] model  Task model
+   * @param[in] data   Shared action-model data collector
+   */
   TaskDataAbstractTpl(TaskModelAbstract* const model,
                       DataCollectorAbstract* const data)
       : shared(data),
-        compute_acceleration(true),
+        compute_acceleration(model->get_has_acceleration()),
         y(model->get_nr()),
         v(model->get_nr()),
         a(model->get_nr()),

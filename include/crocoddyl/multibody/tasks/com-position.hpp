@@ -156,14 +156,21 @@ struct TaskDataCoMPositionTpl : public TaskDataAbstractTpl<_Scalar> {
     }
 
     pinocchio = d->pinocchio;
+    DataCollectorJointTpl<Scalar>* j =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    if (j != nullptr) {
+      joint = j->joint;
+    }
   }
 
   virtual ~TaskDataCoMPositionTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
-  Vector3s com;                           //!< Center-of-mass position
-  Vector3s vcom;                          //!< Center-of-mass velocity
-  Vector3s acom;                          //!< Center-of-mass acceleration
+  std::shared_ptr<JointDataAbstractTpl<Scalar>>
+      joint;           //!< Shared generalized-acceleration data, when available
+  Vector3s com;        //!< Center-of-mass position
+  Vector3s vcom;       //!< Center-of-mass velocity
+  Vector3s acom;       //!< Center-of-mass acceleration
   Matrix3xs dvc_dq;    //!< Partial derivative of CoM velocity w.r.t. q
   Matrix3xs dacom_dq;  //!< Partial derivative of CoM acceleration w.r.t. q
   Matrix3xs dacom_dv;  //!< Partial derivative of CoM acceleration w.r.t. v

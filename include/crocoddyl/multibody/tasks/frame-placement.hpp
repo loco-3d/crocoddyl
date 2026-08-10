@@ -201,11 +201,18 @@ struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
     }
 
     pinocchio = d->pinocchio;
+    DataCollectorJointTpl<Scalar>* j =
+        dynamic_cast<DataCollectorJointTpl<Scalar>*>(shared);
+    if (j != nullptr) {
+      joint = j->joint;
+    }
   }
 
   virtual ~TaskDataFramePlacementTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
+  std::shared_ptr<JointDataAbstractTpl<Scalar>>
+      joint;           //!< Shared generalized-acceleration data, when available
   SE3 rMf;             //!< Pose-error composition for the selected convention
   Matrix6s rJf;        //!< Jacobian of the SE(3) logarithm
   Motion y_local;      //!< Local pose error used by LOCAL_WORLD_ALIGNED

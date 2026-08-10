@@ -27,7 +27,7 @@ TaskModelFrameRotationTpl<Scalar>::TaskModelFrameRotationTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Matrix3s& Rref, const pinocchio::ReferenceFrame type,
     const std::size_t nu)
-    : Base(state, 3, nu, true, true, false),
+    : Base(state, 3, nu, true, true, true),
       id_(id),
       Rref_(Rref),
       oRf_inv_(Rref.transpose()),
@@ -152,10 +152,15 @@ void TaskModelFrameRotationTpl<Scalar>::calcDiff(
   Ax_q.noalias() = d->dJ_a * d->fJf.template bottomRows<3>();
   Ax_q.noalias() += d->rJf * d->fAdq.template bottomRows<3>();
   data->Ax.rightCols(nv).noalias() = d->rJf * d->fAdv.template bottomRows<3>();
+  d->a_partial_da.noalias() = d->rJf * d->fVdv.template bottomRows<3>();
+  if (d->joint != nullptr) {
+    data->Ax.noalias() += d->a_partial_da * d->joint->da_dx;
+    data->Au.noalias() = d->a_partial_da * d->joint->da_du;
+  }
 }
 
 template <typename Scalar>
-std::shared_ptr<TaskDataAbstractTpl<Scalar> >
+std::shared_ptr<TaskDataAbstractTpl<Scalar>>
 TaskModelFrameRotationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,

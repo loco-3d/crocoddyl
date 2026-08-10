@@ -12,14 +12,14 @@ template <typename Scalar>
 TaskModelCoMPositionTpl<Scalar>::TaskModelCoMPositionTpl(
     std::shared_ptr<StateMultibody> state, const Vector3s& cref,
     const std::size_t nu)
-    : Base(state, 3, nu, true, true, false),
+    : Base(state, 3, nu, true, true, true),
       cref_(cref),
       pin_model_(state->get_pinocchio()) {}
 
 template <typename Scalar>
 TaskModelCoMPositionTpl<Scalar>::TaskModelCoMPositionTpl(
     std::shared_ptr<StateMultibody> state, const Vector3s& cref)
-    : Base(state, 3, state->get_nv(), true, true, false),
+    : Base(state, 3, state->get_nv(), true, true, true),
       cref_(cref),
       pin_model_(state->get_pinocchio()) {}
 
@@ -65,10 +65,14 @@ void TaskModelCoMPositionTpl<Scalar>::calcDiff(
   d->dacom_dv.noalias() = d->pinocchio->dFdv.template topRows<3>() * inv_mass;
   data->Ax.leftCols(nv).noalias() = d->dacom_dq;
   data->Ax.rightCols(nv).noalias() = d->dacom_dv;
+  if (d->joint != nullptr) {
+    data->Ax.noalias() += d->pinocchio->Jcom * d->joint->da_dx;
+    data->Au.noalias() = d->pinocchio->Jcom * d->joint->da_du;
+  }
 }
 
 template <typename Scalar>
-std::shared_ptr<TaskDataAbstractTpl<Scalar> >
+std::shared_ptr<TaskDataAbstractTpl<Scalar>>
 TaskModelCoMPositionTpl<Scalar>::createData(DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);

@@ -136,6 +136,12 @@ struct TaskDataFramePlacementVisitor
           bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
         .add_property(
+            "joint",
+            bp::make_getter(
+                &Data::joint,
+                bp::return_value_policy<bp::return_by_value>()),
+            "shared generalized-acceleration data, when available")
+        .add_property(
             "rMf",
             bp::make_getter(&Data::rMf, bp::return_value_policy<bp::return_by_value>()),
             "pose error composition")
@@ -157,6 +163,11 @@ struct TaskDataFramePlacementVisitor
         .add_property(
             "af", bp::make_getter(&Data::af, bp::return_internal_reference<>()),
             "frame acceleration in the selected reference frame")
+        .add_property(
+            "a_partial_da",
+            bp::make_getter(&Data::a_partial_da,
+                            bp::return_internal_reference<>()),
+            "derivative of task acceleration w.r.t. generalized acceleration")
         .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "frame Jacobian")

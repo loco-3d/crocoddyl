@@ -26,9 +26,9 @@ struct TaskModelAbstractVisitor
   void visit(PyClass& cl) const {
     cl.def(
          bp::init<std::shared_ptr<State>, std::size_t, std::size_t,
-                  bp::optional<bool, bool, bool>>(
+                  bp::optional<bool, bool, bool, bool>>(
              bp::args("self", "state", "nr", "nu", "q_dependent",
-                      "v_dependent", "u_dependent"),
+                      "v_dependent", "u_dependent", "has_acceleration"),
              "Initialize the task model.\n\n"
              ":param state: state description\n"
              ":param nr: dimension of the task vector\n"
@@ -38,7 +38,9 @@ struct TaskModelAbstractVisitor
              ":param v_dependent: define if the task depends on v "
              "(default true)\n"
              ":param u_dependent: define if the task depends on u "
-             "(default true)"))
+             "(default true)\n"
+             ":param has_acceleration: define if the task provides an "
+             "acceleration component (default true)"))
         .def("calc", pure_virtual(&Model::calc),
              bp::args("self", "data", "x", "u"),
              "Compute the task quantity, rate, and acceleration.\n\n"
@@ -69,7 +71,10 @@ struct TaskModelAbstractVisitor
         .add_property("v_dependent", bp::make_function(&Model::get_v_dependent),
                       "flag that indicates if the task depends on v")
         .add_property("u_dependent", bp::make_function(&Model::get_u_dependent),
-                      "flag that indicates if the task depends on u");
+                      "flag that indicates if the task depends on u")
+        .add_property("has_acceleration",
+                      bp::make_function(&Model::get_has_acceleration),
+                      "whether the task defines an acceleration component");
   }
 };
 
@@ -131,9 +136,9 @@ struct TaskDataAbstractVisitor
       "  Vx = dv/dx, Vu = dv/du\n"                                          \
       "  Ax = da/dx, Au = da/du.",                                         \
       bp::init<std::shared_ptr<typename Model::StateAbstract>, std::size_t, \
-               std::size_t, bp::optional<bool, bool, bool>>(                \
+               std::size_t, bp::optional<bool, bool, bool, bool>>(          \
           bp::args("self", "state", "nr", "nu", "q_dependent",           \
-                   "v_dependent", "u_dependent"),                         \
+                   "v_dependent", "u_dependent", "has_acceleration"),   \
           "Initialize the task model.\n\n"                                 \
           ":param state: state description\n"                              \
           ":param nr: dimension of the task vector\n"                     \
@@ -143,7 +148,9 @@ struct TaskDataAbstractVisitor
           ":param v_dependent: define if the task depends on v (default " \
           "true)\n"                                                        \
           ":param u_dependent: define if the task depends on u (default " \
-          "true)"))                                                        \
+          "true)\n"                                                       \
+          ":param has_acceleration: define if the task provides an "      \
+          "acceleration component (default true)"))                       \
       .def(TaskModelAbstractVisitor<Model_wrap>())                         \
       .def(CastVisitor<Model_wrap>())                                      \
       .def(PrintableVisitor<Model_wrap>())                                 \
