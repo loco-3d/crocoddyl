@@ -19,7 +19,7 @@ TaskModelFrameTranslationTpl<Scalar>::TaskModelFrameTranslationTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
     const Vector3s& xref, const pinocchio::ReferenceFrame type,
     const std::size_t nu)
-    : Base(state, 3, nu, true, true, false),
+    : Base(state, 3, nu, true, true, true),
       id_(id),
       xref_(xref),
       type_(pinocchio::WORLD),
@@ -138,10 +138,14 @@ void TaskModelFrameTranslationTpl<Scalar>::calcDiff(
   data->Vx.rightCols(nv).noalias() = d->fVdv.template topRows<3>();
   data->Ax.leftCols(nv).noalias() = d->fAdq.template topRows<3>();
   data->Ax.rightCols(nv).noalias() = d->fAdv.template topRows<3>();
+  if (d->joint != nullptr) {
+    data->Ax.noalias() += d->fVdv.template topRows<3>() * d->joint->da_dx;
+    data->Au.noalias() = d->fVdv.template topRows<3>() * d->joint->da_du;
+  }
 }
 
 template <typename Scalar>
-std::shared_ptr<TaskDataAbstractTpl<Scalar> >
+std::shared_ptr<TaskDataAbstractTpl<Scalar>>
 TaskModelFrameTranslationTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,

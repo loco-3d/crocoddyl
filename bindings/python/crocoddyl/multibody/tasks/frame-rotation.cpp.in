@@ -108,6 +108,12 @@ struct TaskDataFrameRotationVisitor
           bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
           "pinocchio data")
         .add_property(
+            "joint",
+            bp::make_getter(
+                &Data::joint,
+                bp::return_value_policy<bp::return_by_value>()),
+            "shared generalized-acceleration data, when available")
+        .add_property(
             "rRf",
             bp::make_getter(&Data::rRf, bp::return_internal_reference<>()),
             "rotation error composition")
@@ -133,6 +139,11 @@ struct TaskDataFrameRotationVisitor
             "dJ_a",
             bp::make_getter(&Data::dJ_a, bp::return_internal_reference<>()),
             "log-map Jacobian derivative contracted with frame acceleration")
+        .add_property(
+            "a_partial_da",
+            bp::make_getter(&Data::a_partial_da,
+                            bp::return_internal_reference<>()),
+            "derivative of task acceleration w.r.t. generalized acceleration")
         .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "frame Jacobian")
