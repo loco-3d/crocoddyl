@@ -79,38 +79,39 @@ struct TaskDataAbstractVisitor
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.def_readwrite("compute_acceleration", &Data::compute_acceleration,
-                     "flag that requests acceleration computation")
+                     "whether the task should compute a, Ax, and Au")
       .add_property(
           "shared",
           bp::make_getter(&Data::shared, bp::return_internal_reference<>()),
-          "shared data")
+          "shared action-model data collector")
         .add_property(
             "y", bp::make_getter(&Data::y, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::y), "task quantity")
+            bp::make_setter(&Data::y), "task quantity y(x, u)")
         .add_property(
             "v", bp::make_getter(&Data::v, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::v), "task rate")
+            bp::make_setter(&Data::v), "task rate v(x, u) = dy/dt")
         .add_property(
             "a", bp::make_getter(&Data::a, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::a), "task acceleration")
+            bp::make_setter(&Data::a),
+            "task acceleration a(x, u) = d2y/dt2")
         .add_property(
             "Yx", bp::make_getter(&Data::Yx, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Yx), "Jacobian of the task quantity")
+            bp::make_setter(&Data::Yx), "Jacobian dy/dx")
         .add_property(
             "Yu", bp::make_getter(&Data::Yu, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Yu), "Jacobian of the task quantity")
+            bp::make_setter(&Data::Yu), "Jacobian dy/du")
         .add_property(
             "Vx", bp::make_getter(&Data::Vx, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Vx), "Jacobian of the task rate")
+            bp::make_setter(&Data::Vx), "Jacobian dv/dx")
         .add_property(
             "Vu", bp::make_getter(&Data::Vu, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Vu), "Jacobian of the task rate")
+            bp::make_setter(&Data::Vu), "Jacobian dv/du")
         .add_property(
             "Ax", bp::make_getter(&Data::Ax, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Ax), "Jacobian of the task acceleration")
+            bp::make_setter(&Data::Ax), "Jacobian da/dx")
         .add_property(
             "Au", bp::make_getter(&Data::Au, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Au), "Jacobian of the task acceleration");
+            bp::make_setter(&Data::Au), "Jacobian da/du");
   }
 };
 

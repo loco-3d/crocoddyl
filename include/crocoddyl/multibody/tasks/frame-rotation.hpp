@@ -138,6 +138,9 @@ class TaskModelFrameRotationTpl : public TaskModelAbstractTpl<_Scalar> {
   std::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
+/**
+ * @brief Cached values and derivatives for the frame-rotation task.
+ */
 template <typename _Scalar>
 struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -185,19 +188,19 @@ struct TaskDataFrameRotationTpl : public TaskDataAbstractTpl<_Scalar> {
 
   virtual ~TaskDataFrameRotationTpl() = default;
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Matrix3s rRf;
-  Matrix3s rJf;
-  Motion vf;
-  Motion af;
-  Matrix3s Hlogf;
-  Matrix3s dJ_v;
-  Matrix3s dJ_a;
-  Matrix6xs fJf;
-  Matrix6xs fVdq;
-  Matrix6xs fVdv;
-  Matrix6xs fAdq;
-  Matrix6xs fAdv;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
+  Matrix3s rRf;    //!< Rotation-error composition in the selected convention
+  Matrix3s rJf;    //!< Jacobian of the SO(3) logarithm
+  Motion vf;       //!< Frame velocity in the selected reference frame
+  Motion af;       //!< Frame acceleration in the selected reference frame
+  Matrix3s Hlogf;  //!< Hessian of the SO(3) logarithm
+  Matrix3s dJ_v;   //!< Derivative of rJf contracted with frame velocity
+  Matrix3s dJ_a;   //!< Derivative of rJf contracted with frame acceleration
+  Matrix6xs fJf;   //!< Frame Jacobian in the selected reference frame
+  Matrix6xs fVdq;  //!< Partial derivative of frame velocity with respect to q
+  Matrix6xs fVdv;  //!< Partial derivative of frame velocity with respect to v
+  Matrix6xs fAdq;  //!< Partial derivative of frame acceleration w.r.t. q
+  Matrix6xs fAdv;  //!< Partial derivative of frame acceleration w.r.t. v
 
   using Base::shared;
 };

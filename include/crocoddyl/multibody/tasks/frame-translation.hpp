@@ -149,6 +149,9 @@ class TaskModelFrameTranslationTpl : public TaskModelAbstractTpl<_Scalar> {
   std::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
+/**
+ * @brief Cached values and derivatives for the frame-translation task.
+ */
 template <typename _Scalar>
 struct TaskDataFrameTranslationTpl : public TaskDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -191,13 +194,13 @@ struct TaskDataFrameTranslationTpl : public TaskDataAbstractTpl<_Scalar> {
   virtual ~TaskDataFrameTranslationTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
-  Motion vf;                              //!< Frame spatial velocity
-  Motion af;                              //!< Frame spatial acceleration
-  Matrix6xs fJf;                          //!< Local Jacobian of the frame
-  Matrix6xs fVdq;                         //!< Derivative of vf w.r.t. q
-  Matrix6xs fVdv;                         //!< Derivative of vf w.r.t. v
-  Matrix6xs fAdq;                         //!< Derivative of af w.r.t. q
-  Matrix6xs fAdv;                         //!< Derivative of af w.r.t. v
+  Motion vf;  //!< Frame velocity in the task's reference-frame convention
+  Motion af;  //!< Frame acceleration in the task's reference-frame convention
+  Matrix6xs fJf;   //!< Local Jacobian of the frame
+  Matrix6xs fVdq;  //!< Partial derivative of frame velocity with respect to q
+  Matrix6xs fVdv;  //!< Partial derivative of frame velocity with respect to v
+  Matrix6xs fAdq;  //!< Partial derivative of frame acceleration w.r.t. q
+  Matrix6xs fAdv;  //!< Partial derivative of frame acceleration w.r.t. v
 
   using Base::shared;
 };

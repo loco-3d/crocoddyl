@@ -153,7 +153,10 @@ struct TaskDataFramePlacementVisitor
             "Jacobian of the local pose error")
         .add_property(
             "vf", bp::make_getter(&Data::vf, bp::return_internal_reference<>()),
-            "frame velocity")
+            "frame velocity in the selected reference frame")
+        .add_property(
+            "af", bp::make_getter(&Data::af, bp::return_internal_reference<>()),
+            "frame acceleration in the selected reference frame")
         .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "frame Jacobian")
@@ -164,7 +167,15 @@ struct TaskDataFramePlacementVisitor
         .add_property(
             "fVdv",
             bp::make_getter(&Data::fVdv, bp::return_internal_reference<>()),
-            "frame velocity derivative w.r.t v");
+            "partial derivative of frame velocity w.r.t. v")
+        .add_property(
+            "fAdq",
+            bp::make_getter(&Data::fAdq, bp::return_internal_reference<>()),
+            "partial derivative of frame acceleration w.r.t. q")
+        .add_property(
+            "fAdv",
+            bp::make_getter(&Data::fAdv, bp::return_internal_reference<>()),
+            "partial derivative of frame acceleration w.r.t. v");
   }
 };
 

@@ -154,6 +154,9 @@ class TaskModelFramePlacementTpl : public TaskModelAbstractTpl<_Scalar> {
   std::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
+/**
+ * @brief Cached values and derivatives for the frame-placement task.
+ */
 template <typename _Scalar>
 struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -202,7 +205,7 @@ struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
 
   virtual ~TaskDataFramePlacementTpl() = default;
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
   SE3 rMf;             //!< Pose-error composition for the selected convention
   Matrix6s rJf;        //!< Jacobian of the SE(3) logarithm
   Motion y_local;      //!< Local pose error used by LOCAL_WORLD_ALIGNED
@@ -212,8 +215,8 @@ struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
   Matrix6xs fJf;       //!< Frame Jacobian in the selected intermediate frame
   Matrix6xs fVdq;  //!< Partial derivative of frame velocity with respect to q
   Matrix6xs fVdv;  //!< Partial derivative of frame velocity with respect to v
-  Matrix6xs fAdq;  //!< Frame-acceleration derivative with respect to q
-  Matrix6xs fAdv;  //!< Frame-acceleration derivative with respect to v
+  Matrix6xs fAdq;  //!< Partial derivative of frame acceleration w.r.t. q
+  Matrix6xs fAdv;  //!< Partial derivative of frame acceleration w.r.t. v
 
   using Base::shared;
 };
