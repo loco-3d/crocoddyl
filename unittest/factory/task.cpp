@@ -9,10 +9,12 @@
 #include "task.hpp"
 
 #include "../random_generator.hpp"
+#include "crocoddyl/multibody/tasks/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/tasks/com-position.hpp"
 #include "crocoddyl/multibody/tasks/frame-placement.hpp"
 #include "crocoddyl/multibody/tasks/frame-rotation.hpp"
 #include "crocoddyl/multibody/tasks/frame-translation.hpp"
+#include "crocoddyl/multibody/tasks/joint-position.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -33,6 +35,12 @@ std::ostream& operator<<(std::ostream& os, TaskModelTypes::Type type) {
       break;
     case TaskModelTypes::TaskModelCoMPosition:
       os << "TaskModelCoMPosition";
+      break;
+    case TaskModelTypes::TaskModelCentroidalMomentum:
+      os << "TaskModelCentroidalMomentum";
+      break;
+    case TaskModelTypes::TaskModelJointPosition:
+      os << "TaskModelJointPosition";
       break;
     case TaskModelTypes::NbTaskModelTypes:
       os << "NbTaskModelTypes";
@@ -65,6 +73,10 @@ std::shared_ptr<crocoddyl::TaskModelAbstract> TaskModelFactory::create(
   pinocchio::FrameIndex frame_index = state->get_pinocchio()->frames.size() - 1;
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
   Eigen::Vector3d com_ref = Eigen::Vector3d::Random();
+  Eigen::Matrix<double, 6, 1> h_ref = Eigen::Matrix<double, 6, 1>::Random();
+  Eigen::Matrix<double, 6, 1> hdot_ref = Eigen::Matrix<double, 6, 1>::Random();
+  Eigen::VectorXd x_ref = state->rand();
+  Eigen::VectorXd a_ref = Eigen::VectorXd::Random(state->get_nv());
   std::shared_ptr<crocoddyl::TaskModelAbstract> task;
 
   switch (task_type) {
@@ -89,6 +101,14 @@ std::shared_ptr<crocoddyl::TaskModelAbstract> TaskModelFactory::create(
     case TaskModelTypes::TaskModelCoMPosition:
       task =
           std::make_shared<crocoddyl::TaskModelCoMPosition>(state, com_ref, nu);
+      break;
+    case TaskModelTypes::TaskModelCentroidalMomentum:
+      task = std::make_shared<crocoddyl::TaskModelCentroidalMomentum>(
+          state, h_ref, hdot_ref, nu);
+      break;
+    case TaskModelTypes::TaskModelJointPosition:
+      task = std::make_shared<crocoddyl::TaskModelJointPosition>(state, x_ref,
+                                                                 a_ref, nu);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong TaskModelTypes::Type given");

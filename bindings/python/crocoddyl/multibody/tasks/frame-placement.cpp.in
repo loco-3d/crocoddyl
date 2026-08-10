@@ -164,11 +164,6 @@ struct TaskDataFramePlacementVisitor
             "af", bp::make_getter(&Data::af, bp::return_internal_reference<>()),
             "frame acceleration in the selected reference frame")
         .add_property(
-            "a_partial_da",
-            bp::make_getter(&Data::a_partial_da,
-                            bp::return_internal_reference<>()),
-            "derivative of task acceleration w.r.t. generalized acceleration")
-        .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "frame Jacobian")
         .add_property(

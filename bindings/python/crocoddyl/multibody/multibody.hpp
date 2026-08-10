@@ -55,10 +55,12 @@ void exposeResidualFrameRotation();
 void exposeResidualFrameTranslation();
 void exposeResidualFrameVelocity();
 void exposeResidualImpulseCoM();
+void exposeTaskCentroidalMomentum();
 void exposeTaskFrameRotation();
 void exposeTaskFrameTranslation();
 void exposeTaskFramePlacement();
 void exposeTaskCoMPosition();
+void exposeTaskJointPosition();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION

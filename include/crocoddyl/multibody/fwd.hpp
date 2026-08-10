@@ -156,6 +156,11 @@ struct ResidualDataPairCollisionTpl;
 
 // task
 template <typename Scalar>
+class TaskModelCentroidalMomentumTpl;
+template <typename Scalar>
+struct TaskDataCentroidalMomentumTpl;
+
+template <typename Scalar>
 class TaskModelFrameRotationTpl;
 template <typename Scalar>
 struct TaskDataFrameRotationTpl;
@@ -174,6 +179,11 @@ template <typename Scalar>
 class TaskModelCoMPositionTpl;
 template <typename Scalar>
 struct TaskDataCoMPositionTpl;
+
+template <typename Scalar>
+class TaskModelJointPositionTpl;
+template <typename Scalar>
+struct TaskDataJointPositionTpl;
 
 // impulse
 template <typename Scalar>
@@ -354,6 +364,8 @@ typedef ResidualModelPairCollisionTpl<double> ResidualModelPairCollision;
 typedef ResidualDataPairCollisionTpl<double> ResidualDataPairCollision;
 #endif
 
+typedef TaskModelCentroidalMomentumTpl<double> TaskModelCentroidalMomentum;
+typedef TaskDataCentroidalMomentumTpl<double> TaskDataCentroidalMomentum;
 typedef TaskModelFrameRotationTpl<double> TaskModelFrameRotation;
 typedef TaskDataFrameRotationTpl<double> TaskDataFrameRotation;
 typedef TaskModelFrameTranslationTpl<double> TaskModelFrameTranslation;
@@ -362,6 +374,8 @@ typedef TaskModelFramePlacementTpl<double> TaskModelFramePlacement;
 typedef TaskDataFramePlacementTpl<double> TaskDataFramePlacement;
 typedef TaskModelCoMPositionTpl<double> TaskModelCoMPosition;
 typedef TaskDataCoMPositionTpl<double> TaskDataCoMPosition;
+typedef TaskModelJointPositionTpl<double> TaskModelJointPosition;
+typedef TaskDataJointPositionTpl<double> TaskDataJointPosition;
 
 typedef ImpulseModelAbstractTpl<double> ImpulseModelAbstract;
 typedef ImpulseDataAbstractTpl<double> ImpulseDataAbstract;
