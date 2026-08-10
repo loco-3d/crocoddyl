@@ -68,6 +68,7 @@ struct GuidanceModelLinearVisitor
                                          ":param nr: task dimension\n"       \
                                          ":param gain: scalar gain"))        \
       .def(GuidanceModelLinearVisitor<Model>())                               \
+      .def(CastVisitor<Model>())                                              \
       .def(PrintableVisitor<Model>())                                         \
       .def(CopyableVisitor<Model>());
 
