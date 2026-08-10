@@ -20,14 +20,24 @@ namespace crocoddyl {
 /**
  * @brief Frame placement task model.
  *
- * The task quantity is the 6D pose error
+ * The task quantity is a 6D pose error expressed in the selected reference
+ * frame. Let \f$M=(R,t)\f$ be the current frame placement,
+ * \f$M_{\mathrm{ref}}\f$ the absolute reference placement, and
  * \f[
- *   y = \log_6\!\left(M_{\mathrm{ref}}^{-1} M\right),
+ *   y_L = \log_6\!\left(M_{\mathrm{ref}}^{-1} M\right).
  * \f]
- * where \f$M\f$ is the current frame placement and \f$M_{\mathrm{ref}}\f$ is
- * the reference placement. The reference placement is always an absolute pose
- * in the world, while the `ReferenceFrame` type selects how the task rate and
- * acceleration are expressed:
+ * The three conventions are
+ * \f[
+ * \begin{aligned}
+ *   \mathrm{LOCAL}:\quad & y = y_L, \\
+ *   \mathrm{WORLD}:\quad & y =
+ *       \log_6\!\left(M M_{\mathrm{ref}}^{-1}\right), \\
+ *   \mathrm{LOCAL\_WORLD\_ALIGNED}:\quad & y =
+ *       \begin{bmatrix}R&0\\0&R\end{bmatrix} y_L.
+ * \end{aligned}
+ * \f]
+ * The reference placement is always an absolute pose in the world. The task
+ * rate and acceleration use the same reference-frame convention as the error:
  * \f[
  *   v = {}^{\mathrm{rf}}\!V_f,\qquad
  *   a = {}^{\mathrm{rf}}\!A_f.
@@ -49,6 +59,7 @@ class TaskModelFramePlacementTpl : public TaskModelAbstractTpl<_Scalar> {
   typedef TaskDataFramePlacementTpl<Scalar> Data;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef typename MathBase::Matrix3s Matrix3s;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::VectorXs VectorXs;
   typedef pinocchio::MotionTpl<Scalar> Motion;
@@ -162,13 +173,16 @@ struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
       : Base(model, data),
         rMf(SE3::Identity()),
         rJf(Matrix6s::Zero()),
+        y_local(Motion::Zero()),
         vf(Motion::Zero()),
         af(Motion::Zero()),
+        Yx_local(6, model->get_state()->get_nv()),
         fJf(6, model->get_state()->get_nv()),
         fVdq(6, model->get_state()->get_nv()),
         fVdv(6, model->get_state()->get_nv()),
         fAdq(6, model->get_state()->get_nv()),
         fAdv(6, model->get_state()->get_nv()) {
+    Yx_local.setZero();
     fJf.setZero();
     fVdq.setZero();
     fVdv.setZero();
@@ -189,15 +203,17 @@ struct TaskDataFramePlacementTpl : public TaskDataAbstractTpl<_Scalar> {
   virtual ~TaskDataFramePlacementTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;
-  SE3 rMf;
-  Matrix6s rJf;
-  Motion vf;
-  Motion af;
-  Matrix6xs fJf;
-  Matrix6xs fVdq;
-  Matrix6xs fVdv;
-  Matrix6xs fAdq;
-  Matrix6xs fAdv;
+  SE3 rMf;             //!< Pose-error composition for the selected convention
+  Matrix6s rJf;        //!< Jacobian of the SE(3) logarithm
+  Motion y_local;      //!< Local pose error used by LOCAL_WORLD_ALIGNED
+  Motion vf;           //!< Frame velocity in the selected reference frame
+  Motion af;           //!< Frame acceleration in the selected reference frame
+  Matrix6xs Yx_local;  //!< Jacobian of the local pose error
+  Matrix6xs fJf;       //!< Frame Jacobian in the selected intermediate frame
+  Matrix6xs fVdq;  //!< Partial derivative of frame velocity with respect to q
+  Matrix6xs fVdv;  //!< Partial derivative of frame velocity with respect to v
+  Matrix6xs fAdq;  //!< Frame-acceleration derivative with respect to q
+  Matrix6xs fAdv;  //!< Frame-acceleration derivative with respect to v
 
   using Base::shared;
 };

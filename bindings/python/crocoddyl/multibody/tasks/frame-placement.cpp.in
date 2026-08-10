@@ -28,10 +28,11 @@ struct TaskModelFramePlacementVisitor
                     std::size_t>(
                bp::args("self", "state", "id", "pref", "nu"),
                "Initialize the frame placement task.\n\n"
-               "The task quantity is\n"
-               "  y = log6(pref^{-1} M)\n\n"
-               "where M is the current frame placement and pref is the "
-               "absolute reference placement.\n\n"
+               "The task quantity uses the selected reference frame:\n"
+               "  LOCAL: y = log6(pref^{-1} M)\n"
+               "  WORLD: y = log6(M pref^{-1})\n"
+               "  LOCAL_WORLD_ALIGNED: y = diag(R,R) "
+               "log6(pref^{-1} M)\n\n"
                "The task rate is the 6D spatial velocity expressed in the "
                "selected reference frame:\n"
                "  LOCAL: v = {}^f V_f\n"
@@ -50,10 +51,8 @@ struct TaskModelFramePlacementVisitor
             bp::args("self", "state", "id", "pref"),
             "Initialize the frame placement task.\n\n"
             "The default control dimension is state.nv.\n"
-            "The task quantity is y = log6(pref^{-1} M), the task rate is "
-            "the selected reference-frame spatial velocity, and the task "
-            "acceleration is the selected reference-frame spatial "
-            "acceleration.\n"
+            "The task error, spatial velocity, and spatial acceleration use "
+            "the selected reference-frame convention (LOCAL by default).\n"
             ":param state: state of the multibody system\n"
             ":param id: reference frame id\n"
             ":param pref: reference frame placement"))
@@ -61,10 +60,11 @@ struct TaskModelFramePlacementVisitor
                       pinocchio::ReferenceFrame, std::size_t>(
             bp::args("self", "state", "id", "pref", "type", "nu"),
             "Initialize the frame placement task.\n\n"
-            "The task quantity is\n"
-            "  y = log6(pref^{-1} M)\n\n"
-            "where M is the current frame placement and pref is the "
-            "absolute reference placement.\n\n"
+            "The task quantity uses the selected reference frame:\n"
+            "  LOCAL: y = log6(pref^{-1} M)\n"
+            "  WORLD: y = log6(M pref^{-1})\n"
+            "  LOCAL_WORLD_ALIGNED: y = diag(R,R) "
+            "log6(pref^{-1} M)\n\n"
             "The task rate is the 6D spatial velocity expressed in the "
             "selected reference frame:\n"
             "  LOCAL: v = {}^f V_f\n"
@@ -85,10 +85,8 @@ struct TaskModelFramePlacementVisitor
             bp::args("self", "state", "id", "pref", "type"),
             "Initialize the frame placement task.\n\n"
             "The default control dimension is state.nv.\n"
-            "The task quantity is y = log6(pref^{-1} M), the task rate is "
-            "the selected reference-frame spatial velocity, and the task "
-            "acceleration is the selected reference-frame spatial "
-            "acceleration.\n"
+            "The task error, spatial velocity, and spatial acceleration use "
+            "the selected reference-frame convention.\n"
             ":param state: state of the multibody system\n"
             ":param id: reference frame id\n"
             ":param pref: reference frame placement\n"
@@ -146,6 +144,14 @@ struct TaskDataFramePlacementVisitor
             bp::make_getter(&Data::rJf, bp::return_internal_reference<>()),
             "log-map Jacobian")
         .add_property(
+            "y_local",
+            bp::make_getter(&Data::y_local, bp::return_internal_reference<>()),
+            "local pose error used by LOCAL_WORLD_ALIGNED")
+        .add_property(
+            "Yx_local",
+            bp::make_getter(&Data::Yx_local, bp::return_internal_reference<>()),
+            "Jacobian of the local pose error")
+        .add_property(
             "vf", bp::make_getter(&Data::vf, bp::return_internal_reference<>()),
             "frame velocity")
         .add_property(
@@ -171,10 +177,10 @@ struct TaskDataFramePlacementVisitor
   bp::class_<Model, bp::bases<ModelBase>>(                                  \
       "TaskModelFramePlacement",                                           \
       "This task defines a 6D frame placement error.\n\n"                  \
-      "The task quantity is\n"                                              \
-      "  y = log6(pref^{-1} M)\n\n"                                         \
-      "where M is the current frame placement and pref is the absolute "    \
-      "reference placement.\n\n"                                            \
+      "The task quantity uses the selected reference frame:\n"             \
+      "  LOCAL: y = log6(pref^{-1} M)\n"                                   \
+      "  WORLD: y = log6(M pref^{-1})\n"                                   \
+      "  LOCAL_WORLD_ALIGNED: y = diag(R,R) log6(pref^{-1} M)\n\n"         \
       "The task rate is the 6D spatial velocity expressed in the selected " \
       "reference frame:\n"                                                  \
       "  LOCAL: v = {}^f V_f\n"                                             \
@@ -189,10 +195,8 @@ struct TaskDataFramePlacementVisitor
                std::size_t>(                                                \
           bp::args("self", "state", "id", "pref", "nu"),                \
           "Initialize the frame placement task.\n\n"                       \
-          "The task quantity is y = log6(pref^{-1} M), the task rate is "   \
-          "the selected reference-frame spatial velocity, and the task "    \
-          "acceleration is the selected reference-frame spatial "           \
-          "acceleration.\n"                                                 \
+          "The task error, spatial velocity, and spatial acceleration use " \
+          "the selected reference-frame convention (LOCAL by default).\n"   \
           ":param state: state of the multibody system\n"                  \
           ":param id: reference frame id\n"                                \
           ":param pref: reference frame placement\n"                       \
@@ -201,10 +205,11 @@ struct TaskDataFramePlacementVisitor
                     pinocchio::ReferenceFrame, std::size_t>(                \
           bp::args("self", "state", "id", "pref", "type", "nu"),      \
           "Initialize the frame placement task.\n\n"                       \
-          "The task quantity is\n"                                          \
-          "  y = log6(pref^{-1} M)\n\n"                                     \
-          "where M is the current frame placement and pref is the absolute "\
-          "reference placement.\n\n"                                        \
+          "The task quantity uses the selected reference frame:\n"         \
+          "  LOCAL: y = log6(pref^{-1} M)\n"                               \
+          "  WORLD: y = log6(M pref^{-1})\n"                               \
+          "  LOCAL_WORLD_ALIGNED: y = diag(R,R) "                          \
+          "log6(pref^{-1} M)\n\n"                                         \
           "The task rate is the 6D spatial velocity expressed in the "      \
           "selected reference frame:\n"                                     \
           "  LOCAL: v = {}^f V_f\n"                                         \
@@ -224,10 +229,8 @@ struct TaskDataFramePlacementVisitor
                     pinocchio::ReferenceFrame>(                             \
           bp::args("self", "state", "id", "pref", "type"),            \
           "Initialize the frame placement task.\n\n"                       \
-          "The task quantity is y = log6(pref^{-1} M), the task rate is "   \
-          "the selected reference-frame spatial velocity, and the task "    \
-          "acceleration is the selected reference-frame spatial "           \
-          "acceleration.\n"                                                 \
+          "The task error, spatial velocity, and spatial acceleration use " \
+          "the selected reference-frame convention.\n"                     \
           ":param state: state of the multibody system\n"                  \
           ":param id: reference frame id\n"                                \
           ":param pref: reference frame placement\n"                       \

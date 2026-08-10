@@ -80,10 +80,12 @@ std::shared_ptr<crocoddyl::TaskModelAbstract> TaskModelFactory::create(
       task = std::make_shared<crocoddyl::TaskModelFrameTranslation>(
           state, frame_index, frame_SE3.translation(), type, nu);
     } break;
-    case TaskModelTypes::TaskModelFramePlacement:
+    case TaskModelTypes::TaskModelFramePlacement: {
+      const auto type = static_cast<pinocchio::ReferenceFrame>(
+          random_int_in_range<int>(0, 2));
       task = std::make_shared<crocoddyl::TaskModelFramePlacement>(
-          state, frame_index, frame_SE3, nu);
-      break;
+          state, frame_index, frame_SE3, type, nu);
+    } break;
     case TaskModelTypes::TaskModelCoMPosition:
       task =
           std::make_shared<crocoddyl::TaskModelCoMPosition>(state, com_ref, nu);
