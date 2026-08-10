@@ -143,19 +143,19 @@ struct TaskDataAbstractTpl {
   }
   virtual ~TaskDataAbstractTpl() = default;
 
-  DataCollectorAbstract* shared;
-  bool compute_acceleration;  //!< Request computation of task acceleration
+  DataCollectorAbstract* shared;  //!< Shared action-model data collector
+  bool compute_acceleration;      //!< Request computation of task acceleration
 
-  VectorXs y;
-  VectorXs v;
-  VectorXs a;
+  VectorXs y;  //!< Task quantity \f$y(x,u)\f$
+  VectorXs v;  //!< Task rate \f$v(x,u)=\dot{y}(x,u)\f$
+  VectorXs a;  //!< Task acceleration \f$a(x,u)=\ddot{y}(x,u)\f$
 
-  MatrixXs Yx;
-  MatrixXs Yu;
-  MatrixXs Vx;
-  MatrixXs Vu;
-  MatrixXs Ax;
-  MatrixXs Au;
+  MatrixXs Yx;  //!< Jacobian \f$\partial y/\partial x\f$
+  MatrixXs Yu;  //!< Jacobian \f$\partial y/\partial u\f$
+  MatrixXs Vx;  //!< Jacobian \f$\partial v/\partial x\f$
+  MatrixXs Vu;  //!< Jacobian \f$\partial v/\partial u\f$
+  MatrixXs Ax;  //!< Jacobian \f$\partial a/\partial x\f$
+  MatrixXs Au;  //!< Jacobian \f$\partial a/\partial u\f$
 };
 
 template <typename Scalar>

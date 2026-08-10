@@ -95,9 +95,23 @@ struct TaskDataCoMPositionVisitor
             bp::make_getter(&Data::vcom, bp::return_internal_reference<>()),
             "current CoM velocity")
         .add_property(
+            "acom",
+            bp::make_getter(&Data::acom, bp::return_internal_reference<>()),
+            "current CoM acceleration")
+        .add_property(
             "dvc_dq",
             bp::make_getter(&Data::dvc_dq, bp::return_internal_reference<>()),
-            "derivative of the CoM velocity w.r.t. q");
+            "partial derivative of the CoM velocity w.r.t. q")
+        .add_property(
+            "dacom_dq",
+            bp::make_getter(&Data::dacom_dq,
+                            bp::return_internal_reference<>()),
+            "partial derivative of the CoM acceleration w.r.t. q")
+        .add_property(
+            "dacom_dv",
+            bp::make_getter(&Data::dacom_dv,
+                            bp::return_internal_reference<>()),
+            "partial derivative of the CoM acceleration w.r.t. v");
   }
 };
 

@@ -119,6 +119,9 @@ class TaskModelCoMPositionTpl : public TaskModelAbstractTpl<_Scalar> {
   std::shared_ptr<typename StateMultibody::PinocchioModel> pin_model_;
 };
 
+/**
+ * @brief Cached values and derivatives for the center-of-mass position task.
+ */
 template <typename _Scalar>
 struct TaskDataCoMPositionTpl : public TaskDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -157,13 +160,13 @@ struct TaskDataCoMPositionTpl : public TaskDataAbstractTpl<_Scalar> {
 
   virtual ~TaskDataCoMPositionTpl() = default;
 
-  pinocchio::DataTpl<Scalar>* pinocchio;
-  Vector3s com;
-  Vector3s vcom;
-  Vector3s acom;
-  Matrix3xs dvc_dq;
-  Matrix3xs dacom_dq;
-  Matrix3xs dacom_dv;
+  pinocchio::DataTpl<Scalar>* pinocchio;  //!< Shared Pinocchio data
+  Vector3s com;                           //!< Center-of-mass position
+  Vector3s vcom;                          //!< Center-of-mass velocity
+  Vector3s acom;                          //!< Center-of-mass acceleration
+  Matrix3xs dvc_dq;    //!< Partial derivative of CoM velocity w.r.t. q
+  Matrix3xs dacom_dq;  //!< Partial derivative of CoM acceleration w.r.t. q
+  Matrix3xs dacom_dv;  //!< Partial derivative of CoM acceleration w.r.t. v
 
   using Base::shared;
 };

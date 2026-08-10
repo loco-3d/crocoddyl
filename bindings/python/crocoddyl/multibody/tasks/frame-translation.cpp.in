@@ -130,7 +130,10 @@ struct TaskDataFrameTranslationVisitor
           "pinocchio data")
         .add_property(
             "vf", bp::make_getter(&Data::vf, bp::return_internal_reference<>()),
-            "frame spatial velocity")
+            "frame velocity in the task reference-frame convention")
+        .add_property(
+            "af", bp::make_getter(&Data::af, bp::return_internal_reference<>()),
+            "frame acceleration in the task reference-frame convention")
         .add_property(
             "fJf", bp::make_getter(&Data::fJf, bp::return_internal_reference<>()),
             "local frame Jacobian")
@@ -141,7 +144,15 @@ struct TaskDataFrameTranslationVisitor
         .add_property(
             "fVdv",
             bp::make_getter(&Data::fVdv, bp::return_internal_reference<>()),
-            "derivative of the frame spatial velocity w.r.t. v");
+            "partial derivative of frame velocity w.r.t. v")
+        .add_property(
+            "fAdq",
+            bp::make_getter(&Data::fAdq, bp::return_internal_reference<>()),
+            "partial derivative of frame acceleration w.r.t. q")
+        .add_property(
+            "fAdv",
+            bp::make_getter(&Data::fAdv, bp::return_internal_reference<>()),
+            "partial derivative of frame acceleration w.r.t. v");
   }
 };
 
