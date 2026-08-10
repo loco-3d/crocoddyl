@@ -84,12 +84,14 @@ struct ResidualModelTaskSecondOrderVisitor
              "Create the second-order task residual data.\n\n"
              ":param data: shared data")
         .add_property("task",
-                      bp::make_function(&Model::get_task,
-                                        bp::return_internal_reference<>()),
+                      bp::make_function(
+                          &Model::get_task,
+                          bp::return_value_policy<bp::return_by_value>()),
                       "task model")
         .add_property("guidance",
-                      bp::make_function(&Model::get_guidance,
-                                        bp::return_internal_reference<>()),
+                      bp::make_function(
+                          &Model::get_guidance,
+                          bp::return_value_policy<bp::return_by_value>()),
                       &Model::set_guidance, "guidance model")
         .add_property("gain", bp::make_function(&Model::get_gain,
                                                 bp::return_internal_reference<>()),
@@ -104,11 +106,14 @@ struct ResidualDataTaskSecondOrderVisitor
   void visit(PyClass& cl) const {
     cl.add_property(
           "task",
-          bp::make_getter(&Data::task, bp::return_internal_reference<>()),
+          bp::make_getter(&Data::task,
+                          bp::return_value_policy<bp::return_by_value>()),
           "task data")
         .add_property(
             "guidance",
-            bp::make_getter(&Data::guidance, bp::return_internal_reference<>()),
+            bp::make_getter(
+                &Data::guidance,
+                bp::return_value_policy<bp::return_by_value>()),
             "guidance data")
         .add_property(
             "v_error",
