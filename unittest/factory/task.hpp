@@ -27,6 +27,8 @@ struct TaskModelTypes {
     TaskModelFrameTranslation,
     TaskModelFramePlacement,
     TaskModelCoMPosition,
+    TaskModelCentroidalMomentum,
+    TaskModelJointPosition,
     NbTaskModelTypes
   };
   static std::vector<Type> init_all() {

@@ -39,12 +39,23 @@ void updateAllPinocchio(
     pinocchio::ModelTpl<Scalar, Options, JointCollectionTpl>* const model,
     pinocchio::DataTpl<Scalar, Options, JointCollectionTpl>* data,
     const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
-    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>&) {
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& u) {
+  const Eigen::Matrix<Scalar, Eigen::Dynamic, 1> a =
+      Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(model->nv);
+  updateAllPinocchio(model, data, x, u, a);
+}
+
+template <typename Scalar, int Options,
+          template <typename, int> class JointCollectionTpl>
+void updateAllPinocchio(
+    pinocchio::ModelTpl<Scalar, Options, JointCollectionTpl>* const model,
+    pinocchio::DataTpl<Scalar, Options, JointCollectionTpl>* data,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>&,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& a) {
   const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& q = x.segment(0, model->nq);
   const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& v =
       x.segment(model->nq, model->nv);
-  Eigen::Matrix<Scalar, Eigen::Dynamic, 1> a =
-      Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Zero(model->nv);
   Eigen::Matrix<Scalar, 6, Eigen::Dynamic> tmp;
   tmp.resize(6, model->nv);
   pinocchio::forwardKinematics(*model, *data, q, v, a);
@@ -62,6 +73,9 @@ void updateAllPinocchio(
   // Restore the CoM quantities at the end so task numdiff and CoM task
   // derivatives see consistent Pinocchio data.
   pinocchio::centerOfMass(*model, *data, q, v, a);
+  // Pinocchio's kinematics routines store spatial accelerations but do not
+  // populate this generalized-acceleration cache.
+  data->ddq = a;
 }
 
 }  // namespace unittest

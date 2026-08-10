@@ -14,6 +14,7 @@
 #include <memory>
 #include <sstream>
 
+#include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/task.hpp"
 #include "unittest_common.hpp"
@@ -30,6 +31,36 @@ const std::vector<StateModelTypes::Type> multibody_state_types = {
     StateModelTypes::StateMultibody_HyQ,
     StateModelTypes::StateMultibody_Talos,
     StateModelTypes::StateMultibody_RandomHumanoid};
+
+template <typename Scalar>
+struct TaskDataCollectorTpl : crocoddyl::DataCollectorMultibodyTpl<Scalar>,
+                              crocoddyl::DataCollectorJointTpl<Scalar> {
+  typedef crocoddyl::StateMultibodyTpl<Scalar> State;
+  typedef crocoddyl::ActuationModelFullTpl<Scalar> Actuation;
+  typedef crocoddyl::JointDataAbstractTpl<Scalar> JointData;
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1> VectorXs;
+
+  TaskDataCollectorTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                       const std::shared_ptr<State>& state,
+                       const std::size_t nu)
+      : crocoddyl::DataCollectorMultibodyTpl<Scalar>(pinocchio),
+        crocoddyl::DataCollectorJointTpl<Scalar>(std::make_shared<JointData>(
+            state, std::make_shared<Actuation>(state), nu)) {
+    if (nu == state->get_nv()) {
+      this->joint->da_du.diagonal().setOnes();
+    }
+  }
+
+  const VectorXs& set_acceleration(const VectorXs& a) {
+    this->joint->a.setZero();
+    if (a.size() == this->joint->a.size()) {
+      this->joint->a = a;
+    }
+    return this->joint->a;
+  }
+};
+
+typedef TaskDataCollectorTpl<double> TaskDataCollector;
 
 std::string make_task_test_case_name(const char* test_kind,
                                      const TaskModelTypes::Type task_type,
@@ -51,15 +82,16 @@ void check_casted_task_results(
   pinocchio::ModelTpl<float>& pinocchio_model_f =
       *casted_state->get_pinocchio().get();
   pinocchio::DataTpl<float> pinocchio_data_f(pinocchio_model_f);
-  crocoddyl::DataCollectorMultibodyTpl<float> casted_shared_data(
-      &pinocchio_data_f);
+  TaskDataCollectorTpl<float> casted_shared_data(
+      &pinocchio_data_f, casted_state, casted_model->get_nu());
   const auto casted_data = casted_model->createData(&casted_shared_data);
   casted_data->compute_acceleration = data->compute_acceleration;
 
   const Eigen::VectorXf x_f = x.cast<float>();
   const Eigen::VectorXf u_f = u.cast<float>();
-  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model_f, &pinocchio_data_f,
-                                          x_f, u_f);
+  crocoddyl::unittest::updateAllPinocchio(
+      &pinocchio_model_f, &pinocchio_data_f, x_f, u_f,
+      casted_shared_data.set_acceleration(u_f));
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
 
@@ -86,9 +118,10 @@ void check_task_partial_derivatives_against_numdiff(
     const std::shared_ptr<crocoddyl::TaskDataAbstract>& data,
     const std::shared_ptr<crocoddyl::StateMultibody>& state,
     pinocchio::Model& pinocchio_model, pinocchio::Data& pinocchio_data,
-    const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    TaskDataCollector* const shared_data, const Eigen::VectorXd& x,
+    const Eigen::VectorXd& u) {
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x,
-                                          u);
+                                          u, shared_data->set_acceleration(u));
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
   check_casted_task_results(model, data, x, u);
@@ -116,13 +149,15 @@ void check_task_partial_derivatives_against_numdiff(
     state->integrate(x, dx, x_plus);
     state->integrate(x, -dx, x_minus);
     crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
-                                            x_plus, u);
+                                            x_plus, u,
+                                            shared_data->set_acceleration(u));
     model->calc(data, x_plus, u);
     const Eigen::VectorXd y_plus = data->y;
     const Eigen::VectorXd v_plus = data->v;
     const Eigen::VectorXd a_plus = data->a;
     crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
-                                            x_minus, u);
+                                            x_minus, u,
+                                            shared_data->set_acceleration(u));
     model->calc(data, x_minus, u);
     const Eigen::VectorXd y_minus = data->y;
     const Eigen::VectorXd v_minus = data->v;
@@ -139,14 +174,16 @@ void check_task_partial_derivatives_against_numdiff(
     Eigen::VectorXd u_minus = u;
     u_plus[i] += step;
     u_minus[i] -= step;
-    crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
-                                            x, u_plus);
+    crocoddyl::unittest::updateAllPinocchio(
+        &pinocchio_model, &pinocchio_data, x, u_plus,
+        shared_data->set_acceleration(u_plus));
     model->calc(data, x, u_plus);
     const Eigen::VectorXd y_plus = data->y;
     const Eigen::VectorXd v_plus = data->v;
     const Eigen::VectorXd a_plus = data->a;
-    crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data,
-                                            x, u_minus);
+    crocoddyl::unittest::updateAllPinocchio(
+        &pinocchio_model, &pinocchio_data, x, u_minus,
+        shared_data->set_acceleration(u_minus));
     model->calc(data, x, u_minus);
     const Eigen::VectorXd y_minus = data->y;
     const Eigen::VectorXd v_minus = data->v;
@@ -178,7 +215,7 @@ void test_construct_data(const TaskModelTypes::Type task_type,
       std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+  TaskDataCollector shared_data(&pinocchio_data, state, model->get_nu());
   const std::shared_ptr<crocoddyl::TaskDataAbstract>& data =
       model->createData(&shared_data);
 
@@ -200,7 +237,7 @@ void test_construct_data(const TaskModelTypes::Type task_type,
                     state->get_ndx());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Au.rows()), model->get_nr());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Au.cols()), model->get_nu());
-  BOOST_CHECK(data->compute_acceleration);
+  BOOST_CHECK_EQUAL(data->compute_acceleration, model->get_has_acceleration());
   BOOST_CHECK(data->y.isZero());
   BOOST_CHECK(data->v.isZero());
   BOOST_CHECK(data->a.isZero());
@@ -224,14 +261,14 @@ void test_calc_returns_a_value(const TaskModelTypes::Type task_type,
       std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+  TaskDataCollector shared_data(&pinocchio_data, state, model->get_nu());
   const std::shared_ptr<crocoddyl::TaskDataAbstract>& data =
       model->createData(&shared_data);
 
   const Eigen::VectorXd x = sampleUnitTestState(state, 2.5e-1);
   const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x,
-                                          u);
+                                          u, shared_data.set_acceleration(u));
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
 
@@ -259,7 +296,7 @@ void test_calc_without_acceleration(const TaskModelTypes::Type task_type,
       std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+  TaskDataCollector shared_data(&pinocchio_data, state, model->get_nu());
   const std::shared_ptr<crocoddyl::TaskDataAbstract>& data =
       model->createData(&shared_data);
 
@@ -268,7 +305,7 @@ void test_calc_without_acceleration(const TaskModelTypes::Type task_type,
   const Eigen::VectorXd x = sampleUnitTestState(state, 2.5e-1);
   const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x,
-                                          u);
+                                          u, shared_data.set_acceleration(u));
   model->calc(data, x, u);
   model->calcDiff(data, x, u);
 
@@ -278,7 +315,67 @@ void test_calc_without_acceleration(const TaskModelTypes::Type task_type,
   BOOST_CHECK(data->Au.isZero());
 
   check_task_partial_derivatives_against_numdiff(
-      model, data, state, pinocchio_model, pinocchio_data, x, u);
+      model, data, state, pinocchio_model, pinocchio_data, &shared_data, x, u);
+}
+
+void test_calc_without_joint_data(const TaskModelTypes::Type task_type,
+                                  const StateModelTypes::Type state_type) {
+  seedUnitTestRandomGenerators(
+      getUnitTestSeed() + 1009u * (static_cast<unsigned int>(task_type) + 1u) +
+      2003u * (static_cast<unsigned int>(state_type) + 1u) + 5u);
+  TaskModelFactory factory;
+  const std::shared_ptr<crocoddyl::TaskModelAbstract> model =
+      factory.create(task_type, state_type);
+  const std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
+  pinocchio::Data pinocchio_data(pinocchio_model);
+  TaskDataCollector shared_data_with_joint(&pinocchio_data, state,
+                                           model->get_nu());
+  crocoddyl::DataCollectorMultibody shared_data_without_joint(&pinocchio_data);
+  const std::shared_ptr<crocoddyl::TaskDataAbstract> data_with_joint =
+      model->createData(&shared_data_with_joint);
+  const std::shared_ptr<crocoddyl::TaskDataAbstract> data_without_joint =
+      model->createData(&shared_data_without_joint);
+
+  const Eigen::VectorXd x = sampleUnitTestState(state, 2.5e-1);
+  const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
+  const Eigen::VectorXd a = random_vector<double>(state->get_nv()) * 2.5e-1;
+
+  // Compare fixed-acceleration partial derivatives. The action-model chain
+  // rule is intentionally disabled in the collector used as the reference.
+  shared_data_with_joint.joint->da_dx.setZero();
+  shared_data_with_joint.joint->da_du.setZero();
+  crocoddyl::unittest::updateAllPinocchio(
+      &pinocchio_model, &pinocchio_data, x, u,
+      shared_data_with_joint.set_acceleration(a));
+  model->calc(data_with_joint, x, u);
+  model->calcDiff(data_with_joint, x, u);
+
+  crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x,
+                                          u, a);
+  model->calc(data_without_joint, x, u);
+  model->calcDiff(data_without_joint, x, u);
+
+  const double tol = 10. * std::numeric_limits<double>::epsilon();
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->y, data_with_joint->y, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->v, data_with_joint->v, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->a, data_with_joint->a, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Yx, data_with_joint->Yx, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Yu, data_with_joint->Yu, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Vx, data_with_joint->Vx, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Vu, data_with_joint->Vu, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Ax, data_with_joint->Ax, tol, tol));
+  BOOST_CHECK(
+      isCloseAbsRel(data_without_joint->Au, data_with_joint->Au, tol, tol));
 }
 
 void test_partial_derivatives_against_numdiff(
@@ -294,14 +391,14 @@ void test_partial_derivatives_against_numdiff(
       std::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
-  crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
+  TaskDataCollector shared_data(&pinocchio_data, state, model->get_nu());
   const std::shared_ptr<crocoddyl::TaskDataAbstract>& data =
       model->createData(&shared_data);
 
   const Eigen::VectorXd x = sampleUnitTestState(state, 2.5e-1);
   const Eigen::VectorXd u = random_vector<double>(model->get_nu()) * 2.5e-1;
   check_task_partial_derivatives_against_numdiff(
-      model, data, state, pinocchio_model, pinocchio_data, x, u);
+      model, data, state, pinocchio_model, pinocchio_data, &shared_data, x, u);
 }
 
 void register_unit_tests(const TaskModelTypes::Type task_type) {
@@ -316,6 +413,8 @@ void register_unit_tests(const TaskModelTypes::Type task_type) {
         make_task_test_case_name("calc_returns_a_value", task_type, state_type);
     const std::string noaccel_name = make_task_test_case_name(
         "calc_without_acceleration", task_type, state_type);
+    const std::string nojoint_name = make_task_test_case_name(
+        "calc_without_joint_data", task_type, state_type);
     const std::string numdiff_name = make_task_test_case_name(
         "partial_derivatives_against_numdiff", task_type, state_type);
     ts->add(BOOST_TEST_CASE_NAME(
@@ -327,6 +426,9 @@ void register_unit_tests(const TaskModelTypes::Type task_type) {
     ts->add(BOOST_TEST_CASE_NAME(
         boost::bind(&test_calc_without_acceleration, task_type, state_type),
         noaccel_name));
+    ts->add(BOOST_TEST_CASE_NAME(
+        boost::bind(&test_calc_without_joint_data, task_type, state_type),
+        nojoint_name));
     ts->add(BOOST_TEST_CASE_NAME(
         boost::bind(&test_partial_derivatives_against_numdiff, task_type,
                     state_type),

@@ -83,6 +83,28 @@ void updateAllPinocchio(
     const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& u =
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1>());
 
+/**
+ * @brief Compute all the Pinocchio data at a prescribed generalized
+ * acceleration.
+ *
+ * This overload keeps the generalized acceleration separate from the control
+ * vector because the latter does not generally represent acceleration.
+ *
+ * @param model[in]  Pinocchio model
+ * @param data[out]  Pinocchio data
+ * @param x[in]      State vector
+ * @param u[in]      Control vector (unused, kept for numdiff callbacks)
+ * @param a[in]      Generalized acceleration
+ */
+template <typename Scalar, int Options,
+          template <typename, int> class JointCollectionTpl>
+void updateAllPinocchio(
+    pinocchio::ModelTpl<Scalar, Options, JointCollectionTpl>* const model,
+    pinocchio::DataTpl<Scalar, Options, JointCollectionTpl>* data,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& u,
+    const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& a);
+
 }  // namespace unittest
 }  // namespace crocoddyl
 
