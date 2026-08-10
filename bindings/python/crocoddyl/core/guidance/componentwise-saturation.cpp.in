@@ -89,6 +89,7 @@ struct GuidanceDataComponentwiseSaturationVisitor
           ":param gain: componentwise guidance gains\n"                     \
           ":param max_rate: componentwise maximum desired rates"))          \
       .def(GuidanceModelComponentwiseSaturationVisitor<Model>())             \
+      .def(CastVisitor<Model>())                                              \
       .def(PrintableVisitor<Model>())                                         \
       .def(CopyableVisitor<Model>());                                          \
   bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
