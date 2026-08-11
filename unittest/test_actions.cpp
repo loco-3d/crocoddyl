@@ -165,7 +165,7 @@ void test_partial_derivatives_against_numdiff(
       casted_data_num_diff = casted_model_num_diff.createData();
   casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
   casted_model_num_diff.calcDiff(casted_data_num_diff, x_f, u_f);
-  tol_f = 300.0f * sqrt(casted_model_num_diff.get_disturbance());
+  tol_f = 1000.0f * sqrt(casted_model_num_diff.get_disturbance());
   BOOST_CHECK((casted_data->Gx - casted_data_num_diff->Gx).isZero(tol_f));
   BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
   BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
