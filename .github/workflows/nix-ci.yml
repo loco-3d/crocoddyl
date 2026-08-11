@@ -30,4 +30,5 @@ jobs:
         with:
           name: gepetto
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix build -L
+      - run: nix build -L --max-jobs 1 --cores $(( $(nproc) - 1 ))
+
