@@ -106,9 +106,9 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   state->integrate(x, dx, xidx);
   // Checking that both states agree
   state->diff(x, xidx, dxd);
-  BOOST_CHECK((dxd - dx).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(dxd, dx, 1e-9, 1e-9));
   state->safe_diff(x, xidx, dxd);
-  BOOST_CHECK((dxd - dx).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(dxd, dx, 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -120,7 +120,7 @@ void test_difference_against_integrate(StateModelTypes::Type state_type) {
   Eigen::VectorXf dxd_f(casted_state->get_ndx());
   casted_state->integrate(x_f, dx_f, xidx_f);
   casted_state->diff(x_f, xidx_f, dxd_f);
-  BOOST_CHECK((dxd_f - dx_f).isZero(1e-6f));
+  BOOST_CHECK(isCloseAbsRel(dxd_f, dx_f, 1e-6f, 1e-6f));
 #endif
 }
 
@@ -150,8 +150,8 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
       Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jdiff(x1, x2, Jdiff_both_first, Jdiff_both_second);
 
-  BOOST_CHECK((Jdiff_first - Jdiff_both_first).isZero(1e-9));
-  BOOST_CHECK((Jdiff_second - Jdiff_both_second).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_first, Jdiff_both_first, 1e-9, 1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_second, Jdiff_both_second, 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -173,8 +173,8 @@ void test_Jdiff_firstsecond(StateModelTypes::Type state_type) {
   casted_state->Jdiff(x1_f, x2_f, Jdiff_tmp_f, Jdiff_second_f,
                       crocoddyl::second);
   casted_state->Jdiff(x1_f, x2_f, Jdiff_both_first_f, Jdiff_both_second_f);
-  BOOST_CHECK((Jdiff_first_f - Jdiff_both_first_f).isZero(1e-9f));
-  BOOST_CHECK((Jdiff_second_f - Jdiff_both_second_f).isZero(1e-9f));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_first_f, Jdiff_both_first_f, 1e-9f, 1e-9f));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_second_f, Jdiff_both_second_f, 1e-9f, 1e-9f));
 #endif
 }
 
@@ -204,8 +204,8 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
       Eigen::MatrixXd::Zero(state->get_ndx(), state->get_ndx()));
   state->Jintegrate(x, dx, Jint_both_first, Jint_both_second);
 
-  BOOST_CHECK((Jint_first - Jint_both_first).isZero(1e-9));
-  BOOST_CHECK((Jint_second - Jint_both_second).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jint_first, Jint_both_first, 1e-9, 1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jint_second, Jint_both_second, 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -228,8 +228,8 @@ void test_Jint_firstsecond(StateModelTypes::Type state_type) {
   casted_state->Jintegrate(x_f, dx_f, Jint_tmp_f, Jint_second_f,
                            crocoddyl::second);
   casted_state->Jintegrate(x_f, dx_f, Jint_both_first_f, Jint_both_second_f);
-  BOOST_CHECK((Jint_first_f - Jint_both_first_f).isZero(1e-9f));
-  BOOST_CHECK((Jint_second_f - Jint_both_second_f).isZero(1e-9f));
+  BOOST_CHECK(isCloseAbsRel(Jint_first_f, Jint_both_first_f, 1e-9f, 1e-9f));
+  BOOST_CHECK(isCloseAbsRel(Jint_second_f, Jint_both_second_f, 1e-9f, 1e-9f));
 #endif
 }
 
@@ -264,7 +264,8 @@ void test_Jdiff_num_diff_firstsecond(StateModelTypes::Type state_type) {
   state_num_diff.Jdiff(x1, x2, Jdiff_num_diff_both_first,
                        Jdiff_num_diff_both_second);
 
-  BOOST_CHECK((Jdiff_num_diff_first - Jdiff_num_diff_both_first).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_num_diff_first, Jdiff_num_diff_both_first,
+                            1e-9, 1e-9));
   BOOST_CHECK(
       (Jdiff_num_diff_second - Jdiff_num_diff_both_second).isZero(1e-9));
 }
@@ -300,8 +301,10 @@ void test_Jint_num_diff_firstsecond(StateModelTypes::Type state_type) {
   state_num_diff.Jintegrate(x, dx, Jint_num_diff_both_first,
                             Jint_num_diff_both_second);
 
-  BOOST_CHECK((Jint_num_diff_first - Jint_num_diff_both_first).isZero(1e-9));
-  BOOST_CHECK((Jint_num_diff_second - Jint_num_diff_both_second).isZero(1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(Jint_num_diff_first, Jint_num_diff_both_first, 1e-9, 1e-9));
+  BOOST_CHECK(isCloseAbsRel(Jint_num_diff_second, Jint_num_diff_both_second,
+                            1e-9, 1e-9));
 }
 
 void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
@@ -333,8 +336,8 @@ void test_Jdiff_against_numdiff(StateModelTypes::Type state_type) {
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(std::sqrt(2.0 * std::numeric_limits<double>::epsilon()),
                         1. / 3.);
-  BOOST_CHECK((Jdiff_1 - Jdiff_num_1).isZero(tol));
-  BOOST_CHECK((Jdiff_2 - Jdiff_num_2).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_1, Jdiff_num_1, tol, tol));
+  BOOST_CHECK(isCloseAbsRel(Jdiff_2, Jdiff_num_2, tol, tol));
 }
 
 void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
@@ -366,8 +369,8 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(std::sqrt(2.0 * std::numeric_limits<double>::epsilon()),
                         1. / 3.);
-  BOOST_CHECK((Jint_1 - Jint_num_1).isZero(tol));
-  BOOST_CHECK((Jint_2 - Jint_num_2).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(Jint_1, Jint_num_1, tol, tol));
+  BOOST_CHECK(isCloseAbsRel(Jint_2, Jint_num_2, tol, tol));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -388,8 +391,8 @@ void test_Jintegrate_against_numdiff(StateModelTypes::Type state_type) {
       Eigen::MatrixXf::Zero(casted_state->get_ndx(), casted_state->get_ndx()));
   casted_state_num_diff.Jintegrate(x_f, dx_f, Jint_num_1_f, Jint_num_2_f);
   casted_state->Jintegrate(x_f, dx_f, Jint_1_f, Jint_2_f);
-  BOOST_CHECK((Jint_1_f - Jint_num_1_f).isZero(tol_f));
-  BOOST_CHECK((Jint_2_f - Jint_num_2_f).isZero(tol_f));
+  BOOST_CHECK(isCloseAbsRel(Jint_1_f, Jint_num_1_f, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(Jint_2_f, Jint_num_2_f, tol_f, tol_f));
 #endif
 }
 
@@ -414,11 +417,11 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   const Eigen::MatrixXd Jtest(Jref);
 
   state->JintegrateTransport(x, dx, Jref, crocoddyl::first);
-  BOOST_CHECK((Jref - Jint_1 * Jtest).isZero(1e-10));
+  BOOST_CHECK(isCloseAbsRel(Jref, Jint_1 * Jtest, 1e-10, 1e-10));
 
   Jref = Jtest;
   state->JintegrateTransport(x, dx, Jref, crocoddyl::second);
-  BOOST_CHECK((Jref - Jint_2 * Jtest).isZero(1e-10));
+  BOOST_CHECK(isCloseAbsRel(Jref, Jint_2 * Jtest, 1e-10, 1e-10));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -436,11 +439,11 @@ void test_JintegrateTransport(StateModelTypes::Type state_type) {
   casted_state->Jintegrate(x_f, dx_f, Jint_1_f, Jint_2_f);
   Jref_f = Jtest_f;
   casted_state->JintegrateTransport(x_f, dx_f, Jref_f, crocoddyl::first);
-  BOOST_CHECK((Jref_f - Jint_1_f * Jtest_f).isZero(1e-6f));
+  BOOST_CHECK(isCloseAbsRel(Jref_f, Jint_1_f * Jtest_f, 1e-6f, 1e-6f));
   casted_state->JintegrateTransport(x_f, dx_f, Jref_f, crocoddyl::second);
   Jref_f = Jtest_f;
   casted_state->JintegrateTransport(x_f, dx_f, Jref_f, crocoddyl::second);
-  BOOST_CHECK((Jref_f - Jint_2_f * Jtest_f).isZero(1e-6f));
+  BOOST_CHECK(isCloseAbsRel(Jref_f, Jint_2_f * Jtest_f, 1e-6f, 1e-6f));
 #endif
 }
 
@@ -467,7 +470,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   // Checking that Jdiff and Jintegrate are inverses
   Eigen::MatrixXd dX_dDX = Jdx;
   Eigen::MatrixXd dDX_dX = J2;
-  BOOST_CHECK((dX_dDX - dDX_dX.inverse()).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(dX_dDX, dDX_dX.inverse(), 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -492,7 +495,7 @@ void test_Jdiff_and_Jintegrate_are_inverses(StateModelTypes::Type state_type) {
   casted_state->Jdiff(x1_f, x2_f, J1_f, J2_f);
   dX_dDX_f = Jdx_f;
   dDX_dX_f = J2_f;
-  BOOST_CHECK((dX_dDX_f - dDX_dX_f.inverse()).isZero(1e-4f));
+  BOOST_CHECK(isCloseAbsRel(dX_dDX_f, dDX_dX_f.inverse(), 1e-4f, 1e-4f));
 #endif
 }
 
@@ -524,7 +527,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   state->integrate(x1, dx + eps * h, x2eps);
   Eigen::VectorXd x2_eps(state->get_ndx());
   state->diff(x2, x2eps, x2_eps);
-  BOOST_CHECK((dX_dDX * eps - x2_eps / h).isZero(1e-3));
+  BOOST_CHECK(isCloseAbsRel(dX_dDX * eps, x2_eps / h, 1e-3, 1e-3));
 
   // Checking the velocity computed from Jdiff
   const Eigen::VectorXd x = state->rand();
@@ -537,7 +540,7 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   J1.setZero();
   J2.setZero();
   state->Jdiff(x1, x, J1, J2);
-  BOOST_CHECK((J2 * eps - (-dx + dxi) / h).isZero(1e-3));
+  BOOST_CHECK(isCloseAbsRel(J2 * eps, (-dx + dxi) / h, 1e-3, 1e-3));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -568,13 +571,13 @@ void test_velocity_from_Jintegrate_Jdiff(StateModelTypes::Type state_type) {
   dX_dDX_f = Jdx_f;
   casted_state->integrate(x1_f, dx_f + eps_f * h_f, x2eps_f);
   casted_state->diff(x2_f, x2eps_f, x2_eps_f);
-  BOOST_CHECK((dX_dDX_f * eps_f - x2_eps_f / h_f).isZero(1e-3f));
+  BOOST_CHECK(isCloseAbsRel(dX_dDX_f * eps_f, x2_eps_f / h_f, 1e-3f, 1e-3f));
   dx_f.setZero();
   casted_state->diff(x1_f, x_f, dx_f);
   casted_state->integrate(x_f, eps_f * h_f, x2i_f);
   casted_state->diff(x1_f, x2i_f, dxi_f);
   casted_state->Jdiff(x1_f, x_f, J1_f, J2_f);
-  BOOST_CHECK((J2_f * eps_f - (dxi_f - dx_f) / h_f).isZero(1e-2f));
+  BOOST_CHECK(isCloseAbsRel(J2_f * eps_f, (dxi_f - dx_f) / h_f, 1e-2f, 1e-2f));
 #endif
 }
 

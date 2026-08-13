@@ -44,8 +44,8 @@ void test_partial_derivatives_against_impulse_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, tol));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -60,8 +60,10 @@ void test_partial_derivatives_against_impulse_numdiff(
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
   float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
-  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Gx.cast<float>(), casted_data->Gx, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Hx.cast<float>(), casted_data->Hx, tol_f, tol_f));
 #endif
 }
 

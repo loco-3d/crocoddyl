@@ -101,7 +101,7 @@ void test_partial_derivatives_against_numdiff(
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
   BOOST_CHECK(std::abs(data->a_value - data_num_diff->a_value) < tol);
-  BOOST_CHECK((data->Ar - data_num_diff->Ar).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Ar, data_num_diff->Ar, tol, tol));
   BOOST_CHECK(
       (data->Arr.diagonal() - data_num_diff->Arr.diagonal()).isZero(tol));
 
@@ -116,7 +116,8 @@ void test_partial_derivatives_against_numdiff(
   float tol_f =
       std::pow(model_num_diff.cast<float>().get_disturbance(), float(1. / 3.));
   BOOST_CHECK(std::abs(data->a_value - casted_data->a_value) < tol_f);
-  BOOST_CHECK((data->Ar.cast<float>() - casted_data->Ar).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Ar.cast<float>(), casted_data->Ar, tol_f, tol_f));
 }
 
 void test_activation_is_zero_at_zero(

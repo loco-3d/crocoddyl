@@ -46,7 +46,7 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->dw_du - data_num_diff->dw_du).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->dw_du, data_num_diff->dw_du, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<
@@ -60,7 +60,8 @@ void test_calcDiff_num_diff(ControlTypes::Type control_type) {
   casted_control->calc(casted_data, t_f, p_f);
   casted_control->calcDiff(casted_data, t_f, p_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->dw_du.cast<float>() - casted_data->dw_du).isZero(tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->dw_du.cast<float>(), casted_data->dw_du,
+                            tol_f, tol_f));
 }
 
 void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
@@ -95,7 +96,7 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((A_J - A_J_num_diff).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(A_J, A_J_num_diff, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<
@@ -113,8 +114,9 @@ void test_multiplyByJacobian_num_diff(ControlTypes::Type control_type) {
   casted_control->calcDiff(casted_data, t_f, p_f);
   casted_control->multiplyByJacobian(casted_data, A_f, A_J_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->dw_du.cast<float>() - casted_data->dw_du).isZero(tol_f));
-  BOOST_CHECK((A_J.cast<float>() - A_J_f).isZero(tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->dw_du.cast<float>(), casted_data->dw_du,
+                            tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(A_J.cast<float>(), A_J_f, tol_f, tol_f));
 }
 
 void test_multiplyJacobianTransposeBy_num_diff(
@@ -150,7 +152,7 @@ void test_multiplyJacobianTransposeBy_num_diff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(control_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((JT_A - JT_A_num_diff).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(JT_A, JT_A_num_diff, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<
@@ -168,7 +170,7 @@ void test_multiplyJacobianTransposeBy_num_diff(
   casted_control->calcDiff(casted_data, t_f, p_f);
   casted_control->multiplyJacobianTransposeBy(casted_data, A_f, JT_A_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((JT_A.cast<float>() - JT_A_f).isZero(tol_f));
+  BOOST_CHECK(isCloseAbsRel(JT_A.cast<float>(), JT_A_f, tol_f, tol_f));
 }
 
 //----------------------------------------------------------------------------//

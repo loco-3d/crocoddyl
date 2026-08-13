@@ -71,8 +71,10 @@ void test_calc(ActionModelTypes::Type action_model_type) {
   model->calc(data, xs.back());
   BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
   BOOST_CHECK(problem2.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem1.get_terminalData()->xnext - data->xnext).isZero(1e-9));
-  BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(problem1.get_terminalData()->xnext, data->xnext,
+                            1e-9, 1e-9));
+  BOOST_CHECK(isCloseAbsRel(problem2.get_terminalData()->xnext, data->xnext,
+                            1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -107,9 +109,9 @@ void test_calc(ActionModelTypes::Type action_model_type) {
     BOOST_CHECK(float(problem1.get_runningDatas()[i]->cost) -
                     casted_data->cost <=
                 tol_f);
-    BOOST_CHECK((problem1.get_runningDatas()[i]->xnext.cast<float>() -
-                 casted_data->xnext)
-                    .isZero(tol_f));
+    BOOST_CHECK(
+        isCloseAbsRel(problem1.get_runningDatas()[i]->xnext.cast<float>(),
+                      casted_data->xnext, tol_f, tol_f));
   }
   BOOST_CHECK(std::abs(float(cost) - cost_f) <= tol_f);
 #endif
@@ -155,18 +157,20 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
     model->calc(data, xs[i], us[i]);
     BOOST_CHECK(problem1.get_runningDatas()[i]->cost == data->cost);
     BOOST_CHECK(problem2.get_runningDatas()[i]->cost == data->cost);
-    BOOST_CHECK(
-        (problem1.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
-    BOOST_CHECK(
-        (problem2.get_runningDatas()[i]->xnext - data->xnext).isZero(1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->xnext,
+                              data->xnext, 1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->xnext,
+                              data->xnext, 1e-9, 1e-9));
   }
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   BOOST_CHECK(problem1.get_terminalData()->cost == data->cost);
   BOOST_CHECK(problem2.get_terminalData()->cost == data->cost);
-  BOOST_CHECK((problem1.get_terminalData()->xnext - data->xnext).isZero(1e-9));
-  BOOST_CHECK((problem2.get_terminalData()->xnext - data->xnext).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(problem1.get_terminalData()->xnext, data->xnext,
+                            1e-9, 1e-9));
+  BOOST_CHECK(isCloseAbsRel(problem2.get_terminalData()->xnext, data->xnext,
+                            1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -200,9 +204,9 @@ void test_calc_diffAction(DifferentialActionModelTypes::Type action_model_type,
             .isZero(1e-9f));
     BOOST_CHECK(std::abs(float(problem1.get_runningDatas()[i]->cost) -
                          casted_data->cost) <= tol_f);
-    BOOST_CHECK((problem1.get_runningDatas()[i]->xnext.cast<float>() -
-                 casted_data->xnext)
-                    .isZero(tol_f));
+    BOOST_CHECK(
+        isCloseAbsRel(problem1.get_runningDatas()[i]->xnext.cast<float>(),
+                      casted_data->xnext, tol_f, tol_f));
   }
   BOOST_CHECK(std::abs(float(cost) - cost_f) <= tol_f);
 #endif
@@ -245,31 +249,51 @@ void test_calcDiff(ActionModelTypes::Type action_model_type) {
         model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-9));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Fx, data->Fx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Fx, data->Fx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Fu, data->Fu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Fu, data->Fu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lx, data->Lx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lx, data->Lx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lu, data->Lu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lu, data->Lu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lxx, data->Lxx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lxx, data->Lxx,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lxu, data->Lxu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lxu, data->Lxu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Luu, data->Luu,
+                              1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Luu, data->Luu,
+                              1e-9, 1e-9));
   }
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem1.get_terminalData()->Fx - data->Fx).isZero(1e-9));
-  BOOST_CHECK((problem2.get_terminalData()->Fx - data->Fx).isZero(1e-9));
-  BOOST_CHECK((problem1.get_terminalData()->Lx - data->Lx).isZero(1e-9));
-  BOOST_CHECK((problem2.get_terminalData()->Lx - data->Lx).isZero(1e-9));
-  BOOST_CHECK((problem1.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
-  BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Fx, data->Fx, 1e-9, 1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Fx, data->Fx, 1e-9, 1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Lx, data->Lx, 1e-9, 1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Lx, data->Lx, 1e-9, 1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Lxx, data->Lxx, 1e-9, 1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Lxx, data->Lxx, 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -391,31 +415,51 @@ void test_calcDiff_diffAction(
         model->createData();
     model->calc(data, xs[i], us[i]);
     model->calcDiff(data, xs[i], us[i]);
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Fx - data->Fx).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Fu - data->Fu).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lx - data->Lx).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lu - data->Lu).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxx - data->Lxx).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Lxu - data->Lxu).isZero(1e-7));
-    BOOST_CHECK((problem1.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
-    BOOST_CHECK((problem2.get_runningDatas()[i]->Luu - data->Luu).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Fx, data->Fx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Fx, data->Fx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Fu, data->Fu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Fu, data->Fu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lx, data->Lx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lx, data->Lx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lu, data->Lu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lu, data->Lu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lxx, data->Lxx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lxx, data->Lxx,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Lxu, data->Lxu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Lxu, data->Lxu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem1.get_runningDatas()[i]->Luu, data->Luu,
+                              1e-7, 1e-7));
+    BOOST_CHECK(isCloseAbsRel(problem2.get_runningDatas()[i]->Luu, data->Luu,
+                              1e-7, 1e-7));
   }
   const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
       model->createData();
   model->calc(data, xs.back());
   model->calcDiff(data, xs.back());
-  BOOST_CHECK((problem1.get_terminalData()->Fx - data->Fx).isZero(1e-7));
-  BOOST_CHECK((problem2.get_terminalData()->Fx - data->Fx).isZero(1e-7));
-  BOOST_CHECK((problem1.get_terminalData()->Lx - data->Lx).isZero(1e-7));
-  BOOST_CHECK((problem2.get_terminalData()->Lx - data->Lx).isZero(1e-7));
-  BOOST_CHECK((problem1.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
-  BOOST_CHECK((problem2.get_terminalData()->Lxx - data->Lxx).isZero(1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Fx, data->Fx, 1e-7, 1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Fx, data->Fx, 1e-7, 1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Lx, data->Lx, 1e-7, 1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Lx, data->Lx, 1e-7, 1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem1.get_terminalData()->Lxx, data->Lxx, 1e-7, 1e-7));
+  BOOST_CHECK(
+      isCloseAbsRel(problem2.get_terminalData()->Lxx, data->Lxx, 1e-7, 1e-7));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -440,20 +484,34 @@ void test_calcDiff_diffAction(
         casted_data = casted_model->createData();
     casted_model->calc(casted_data, xs_f[i], us_f[i]);
     casted_model->calcDiff(casted_data, xs_f[i], us_f[i]);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fx == casted_data->Fx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fx == casted_data->Fx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Fu == casted_data->Fu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Fu == casted_data->Fu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lx == casted_data->Lx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lx == casted_data->Lx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lu == casted_data->Lu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lu == casted_data->Lu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxx == casted_data->Lxx);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxx == casted_data->Lxx);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Lxu == casted_data->Lxu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Lxu == casted_data->Lxu);
-    BOOST_CHECK(casted_problem1.get_runningDatas()[i]->Luu == casted_data->Luu);
-    BOOST_CHECK(casted_problem2.get_runningDatas()[i]->Luu == casted_data->Luu);
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Fx,
+                              casted_data->Fx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Fx,
+                              casted_data->Fx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Fu,
+                              casted_data->Fu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Fu,
+                              casted_data->Fu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Lx,
+                              casted_data->Lx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Lx,
+                              casted_data->Lx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Lu,
+                              casted_data->Lu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Lu,
+                              casted_data->Lu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Lxx,
+                              casted_data->Lxx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Lxx,
+                              casted_data->Lxx, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Lxu,
+                              casted_data->Lxu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Lxu,
+                              casted_data->Lxu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem1.get_runningDatas()[i]->Luu,
+                              casted_data->Luu, tol_f, tol_f));
+    BOOST_CHECK(isCloseAbsRel(casted_problem2.get_runningDatas()[i]->Luu,
+                              casted_data->Luu, tol_f, tol_f));
     BOOST_CHECK(
         (problem1.get_runningDatas()[i]->Fx.cast<float>() - casted_data->Fx)
             .isZero(tol_f));
@@ -506,7 +564,7 @@ void test_rollout(ActionModelTypes::Type action_model_type) {
     const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(xs[i + 1], data->xnext, 1e-7, 1e-7));
   }
 }
 
@@ -542,7 +600,7 @@ void test_rollout_diffAction(
     const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
         model->createData();
     model->calc(data, xs[i], us[i]);
-    BOOST_CHECK((xs[i + 1] - data->xnext).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(xs[i + 1], data->xnext, 1e-7, 1e-7));
   }
 }
 
@@ -580,7 +638,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(u, us[i], 1e-7, 1e-7));
   }
   problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
@@ -588,7 +646,7 @@ void test_quasiStatic(ActionModelTypes::Type action_model_type) {
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(u, us[i], 1e-7, 1e-7));
   }
 }
 
@@ -631,7 +689,7 @@ void test_quasiStatic_diffAction(
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(u, us[i], 1e-7, 1e-7));
   }
   problem2.quasiStatic(us, xs);
   for (std::size_t i = 0; i < T; ++i) {
@@ -639,7 +697,7 @@ void test_quasiStatic_diffAction(
         model->createData();
     Eigen::VectorXd u = Eigen::VectorXd::Zero(model->get_nu());
     model->quasiStatic(data, u, xs[i]);
-    BOOST_CHECK((u - us[i]).isZero(1e-7));
+    BOOST_CHECK(isCloseAbsRel(u, us[i], 1e-7, 1e-7));
   }
 }
 

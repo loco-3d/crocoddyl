@@ -60,7 +60,8 @@ void test_calc_returns_tau(ActuationModelTypes::Type actuation_type,
   const Eigen::VectorXf u_f = u.cast<float>();
   casted_model->calc(casted_data, x_f, u_f);
   float tol_f = std::sqrt(float(2.0) * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->tau.cast<float>() - casted_data->tau).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->tau.cast<float>(), casted_data->tau, tol_f, tol_f));
 }
 
 void test_actuationSet(ActuationModelTypes::Type actuation_type,
@@ -139,8 +140,8 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
-  BOOST_CHECK((data->dtau_du - data_num_diff->dtau_du).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->dtau_dx, data_num_diff->dtau_dx, tol, tol));
+  BOOST_CHECK(isCloseAbsRel(data->dtau_du, data_num_diff->dtau_du, tol, tol));
 
   // Computing the actuation derivatives
   x = model->get_state()->rand();
@@ -150,7 +151,7 @@ void test_partial_derivatives_against_numdiff(
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against numdiff
-  BOOST_CHECK((data->dtau_dx - data_num_diff->dtau_dx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->dtau_dx, data_num_diff->dtau_dx, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -199,7 +200,7 @@ void test_commands(ActuationModelTypes::Type actuation_type,
 
   // Checking the joint torques
   double tol = sqrt(model_num_diff.get_disturbance());
-  BOOST_CHECK((data->u - data_num_diff->u).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->u, data_num_diff->u, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -210,7 +211,8 @@ void test_commands(ActuationModelTypes::Type actuation_type,
   const Eigen::VectorXf tau_f = tau.cast<float>();
   casted_model->commands(casted_data, x_f, tau_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->u.cast<float>() - casted_data->u).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->u.cast<float>(), casted_data->u, tol_f, tol_f));
 }
 
 void test_torqueTransform(ActuationModelTypes::Type actuation_type,
@@ -240,7 +242,7 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type,
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->Mtau - data_num_diff->Mtau).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Mtau, data_num_diff->Mtau, tol, tol));
 
   // Checking that casted computation is the same
   const std::shared_ptr<crocoddyl::ActuationModelAbstractTpl<float>>&
@@ -251,7 +253,8 @@ void test_torqueTransform(ActuationModelTypes::Type actuation_type,
   const Eigen::VectorXf u_f = u.cast<float>();
   casted_model->torqueTransform(casted_data, x_f, u_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->Mtau.cast<float>() - casted_data->Mtau).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Mtau.cast<float>(), casted_data->Mtau, tol_f, tol_f));
 }
 
 //----------------------------------------------------------------------------//

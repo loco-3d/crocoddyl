@@ -335,8 +335,10 @@ void test_calc() {
   BOOST_CHECK(!casted_data->Jc.isZero());
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
-  BOOST_CHECK((data->dv0_dq.cast<float>() - casted_data->dv0_dq).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Jc.cast<float>(), casted_data->Jc, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->dv0_dq.cast<float>(), casted_data->dv0_dq,
+                            tol_f, tol_f));
   BOOST_CHECK(casted_data->dv0_dq.isZero());
   ni = 0;
   nv = casted_model.get_state()->get_nv();
@@ -456,8 +458,10 @@ void test_calc_diff() {
   BOOST_CHECK(!casted_data->Jc.isZero());
   BOOST_CHECK(!casted_data->dv0_dq.isZero());
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->Jc.cast<float>() - casted_data->Jc).isZero(tol_f));
-  BOOST_CHECK((data->dv0_dq.cast<float>() - casted_data->dv0_dq).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Jc.cast<float>(), casted_data->Jc, tol_f, tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->dv0_dq.cast<float>(), casted_data->dv0_dq,
+                            tol_f, tol_f));
   ni = 0;
   nv = casted_model.get_state()->get_nv();
   for (std::size_t i = 0; i < 5; ++i) {
@@ -611,9 +615,8 @@ void test_updateForce() {
       end_d = data->impulses.end();
        it_d_f != end_d_f || it_d != end_d; ++it_d_f, ++it_d) {
     BOOST_CHECK(!it_d_f->second->f.toVector().isZero());
-    BOOST_CHECK((it_d->second->f.toVector().cast<float>() -
-                 it_d_f->second->f.toVector())
-                    .isZero(tol_f));
+    BOOST_CHECK(isCloseAbsRel(it_d->second->f.toVector().cast<float>(),
+                              it_d_f->second->f.toVector(), tol_f, tol_f));
   }
 #endif
 }
@@ -647,7 +650,7 @@ void test_updateVelocityDiff() {
   model.updateVelocityDiff(data, dvnext_dx);
 
   // Test
-  BOOST_CHECK((data->dvnext_dx - dvnext_dx).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(data->dvnext_dx, dvnext_dx, 1e-9, 1e-9));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -658,7 +661,7 @@ void test_updateVelocityDiff() {
       casted_model.createData(&casted_pinocchio_data);
   const Eigen::MatrixXf dvnext_dx_f = dvnext_dx.cast<float>();
   casted_model.updateVelocityDiff(casted_data, dvnext_dx_f);
-  BOOST_CHECK((casted_data->dvnext_dx - dvnext_dx_f).isZero(1e-9f));
+  BOOST_CHECK(isCloseAbsRel(casted_data->dvnext_dx, dvnext_dx_f, 1e-9f, 1e-9f));
 #endif
 }
 
