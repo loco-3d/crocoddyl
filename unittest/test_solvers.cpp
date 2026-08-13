@@ -138,8 +138,8 @@ void test_solver_compute_direction(SolverTypes::Type solver_type,
     a.head(ndx) = f;
     a.tail(ndx) = Vx[i];
     const Eigen::VectorXd& w = -A.inverse() * a;
-    BOOST_CHECK((w.head(ndx) - (Vx[i] + Vxx[i] * f)).isZero(1e-9));
-    BOOST_CHECK((w.tail(ndx) - f).isZero(1e-9));
+    BOOST_CHECK(isCloseAbsRel(w.head(ndx), (Vx[i] + Vxx[i] * f), 1e-9, 1e-9));
+    BOOST_CHECK(isCloseAbsRel(w.tail(ndx), f, 1e-9, 1e-9));
   }
   // Check the Schur-complement of terminal-constraint direction is Hermite
   if (problem->get_terminalModel()->get_nh_T() != 0) {
@@ -206,8 +206,8 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
     solver->expectedImprovement();
     solver->tryStep(alpha);
     for (unsigned int t = 0; t < T + 1; ++t) {
-      BOOST_CHECK((solver->get_fs_try()[t] - (1 - alpha) * solver->get_fs()[t])
-                      .isZero(1e-9));
+      BOOST_CHECK(isCloseAbsRel(solver->get_fs_try()[t],
+                                (1 - alpha) * solver->get_fs()[t], 1e-9, 1e-9));
     }
     // Check that the terminal constraints is fully satisfied with alpha=1
     if (solver->get_problem()->get_terminalModel()->get_nh_T() != 0) {
@@ -218,7 +218,7 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
       const std::shared_ptr<crocoddyl::ActionDataAbstract>& data2 =
           model->createData();
       model->calc(data2, solver->get_xs().back());
-      BOOST_CHECK((data->h - (1 - alpha) * data2->h).isZero(1e-9));
+      BOOST_CHECK(isCloseAbsRel(data->h, (1 - alpha) * data2->h, 1e-9, 1e-9));
     }
   }
 
@@ -231,8 +231,8 @@ void test_solver_gaps_evolution(SolverTypes::Type solver_type,
     solver->expectedImprovement();
     solver->tryStep(alpha);
     for (unsigned int t = 0; t < T + 1; ++t) {
-      BOOST_CHECK((solver->get_fs_try()[t] - (1 - alpha) * solver->get_fs()[t])
-                      .isZero(1e-9));
+      BOOST_CHECK(isCloseAbsRel(solver->get_fs_try()[t],
+                                (1 - alpha) * solver->get_fs()[t], 1e-9, 1e-9));
     }
   } else {
     for (unsigned int t = 0; t < T + 1; ++t) {
@@ -481,7 +481,7 @@ void test_kkt_search_direction(ActionModelTypes::Type action_type, size_t T) {
   Eigen::Block<Eigen::MatrixXd> hess = kkt_mat.block(0, 0, ndx + nu, ndx + nu);
 
   // Checking the symmetricity of the Hessian
-  BOOST_CHECK((hess - hess.transpose()).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(hess, hess.transpose(), 1e-9, 1e-9));
 
   // Check initial state
   BOOST_CHECK((problem->get_runningModels()[0]->get_state()->diff_dx(

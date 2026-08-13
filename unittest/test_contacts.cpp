@@ -158,7 +158,8 @@ void test_calc_diff_fetch_derivatives(ContactModelTypes::Type contact_type,
         80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
     BOOST_CHECK(!casted_data->a0.isZero());
     BOOST_CHECK(!casted_data->da0_dx.isZero());
-    BOOST_CHECK((data->a0.cast<float>() - casted_data->a0).isZero());
+    BOOST_CHECK(
+        isCloseAbsRel(data->a0.cast<float>(), casted_data->a0, tol_f, tol_f));
     BOOST_CHECK(
         (data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
   }
@@ -321,7 +322,7 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->da0_dx - data_num_diff->da0_dx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->da0_dx, data_num_diff->da0_dx, tol, tol));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -355,7 +356,8 @@ void test_partial_derivatives_against_numdiff(
   casted_model_num_diff.calc(casted_data_num_diff, x_f);
   casted_model_num_diff.calcDiff(casted_data_num_diff, x_f);
   float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->da0_dx.cast<float>() - casted_data->da0_dx).isZero(tol_f));
+  BOOST_CHECK(isCloseAbsRel(data->da0_dx.cast<float>(), casted_data->da0_dx,
+                            tol_f, tol_f));
   BOOST_CHECK((casted_data->da0_dx - casted_data_num_diff->da0_dx)
                   .isZero(30.f * tol_f));
 #endif

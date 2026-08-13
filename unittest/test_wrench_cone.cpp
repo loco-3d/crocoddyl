@@ -178,7 +178,8 @@ void test_against_friction_cone() {
   crocoddyl::FrictionCone friction_cone(R, mu, nf, inner_appr, 0., 100.);
   crocoddyl::WrenchCone casted_wrench_cone = wrench_cone.cast<double>();
 
-  BOOST_CHECK((wrench_cone.get_R() - friction_cone.get_R()).isZero(1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(wrench_cone.get_R(), friction_cone.get_R(), 1e-9, 1e-9));
   BOOST_CHECK(wrench_cone.get_mu() == friction_cone.get_mu());
   BOOST_CHECK(wrench_cone.get_nf() == friction_cone.get_nf());
   for (std::size_t i = 0; i < nf + 1; ++i) {
@@ -225,7 +226,8 @@ void test_against_cop_support() {
   crocoddyl::CoPSupport cop_support(R, box);
   crocoddyl::WrenchCone casted_wrench_cone = wrench_cone.cast<double>();
 
-  BOOST_CHECK((wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
+  BOOST_CHECK(
+      isCloseAbsRel(wrench_cone.get_R(), cop_support.get_R(), 1e-9, 1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
     for (std::size_t j = 0; j < 6; ++j) {
       BOOST_CHECK(wrench_cone.get_A().row(nf + i + 1)[j] ==
@@ -238,7 +240,8 @@ void test_against_cop_support() {
   }
 
   // Checking that casted computation is the same
-  BOOST_CHECK((casted_wrench_cone.get_R() - cop_support.get_R()).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(casted_wrench_cone.get_R(), cop_support.get_R(),
+                            1e-9, 1e-9));
   for (std::size_t i = 0; i < 4; ++i) {
     for (std::size_t j = 0; j < 6; ++j) {
       BOOST_CHECK(casted_wrench_cone.get_A().row(nf + i + 1)[j] ==

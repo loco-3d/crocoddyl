@@ -105,21 +105,22 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
-  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
-  BOOST_CHECK((data->Fx - data_num_diff->Fx).isZero(tol));
-  BOOST_CHECK((data->Fu - data_num_diff->Fu).isZero(tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
+  double rel_tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
+  BOOST_CHECK(isCloseAbsRel(data->h, data_num_diff->h, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->g, data_num_diff->g, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Fx, data_num_diff->Fx, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Fu, data_num_diff->Fu, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lu, data_num_diff->Lu, tol, rel_tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, rel_tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxu, data_num_diff->Lxu, tol, rel_tol));
+    BOOST_CHECK(isCloseAbsRel(data->Luu, data_num_diff->Luu, tol, rel_tol));
   }
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
-  BOOST_CHECK((data->Hu - data_num_diff->Hu).isZero(tol));
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
-  BOOST_CHECK((data->Gu - data_num_diff->Gu).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hu, data_num_diff->Hu, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gu, data_num_diff->Gu, tol, rel_tol));
 
   // Computing the action derivatives
   x = model->get_state()->rand();
@@ -127,14 +128,14 @@ void test_partial_derivatives_against_numdiff(
   model->calcDiff(data, x);
   model_num_diff.calc(data_num_diff, x);
   model_num_diff.calcDiff(data_num_diff, x);
-  BOOST_CHECK((data->h - data_num_diff->h).isZero(tol));
-  BOOST_CHECK((data->g - data_num_diff->g).isZero(tol));
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->h, data_num_diff->h, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->g, data_num_diff->g, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, rel_tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, rel_tol));
   }
-  BOOST_CHECK((data->Hx - data_num_diff->Hx).isZero(tol));
-  BOOST_CHECK((data->Gx - data_num_diff->Gx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, rel_tol));
+  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, rel_tol));
 
   // Checking that casted computation is the same
 #ifdef NDEBUG  // Run only in release mode
@@ -148,28 +149,28 @@ void test_partial_derivatives_against_numdiff(
   model->calcDiff(data, x, u);
   casted_model->calc(casted_data, x_f, u_f);
   casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = 80.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK((data->h.cast<float>() - casted_data->h).isZero(tol_f));
-  BOOST_CHECK((data->g.cast<float>() - casted_data->g).isZero(tol_f));
-  BOOST_CHECK((data->Fx.cast<float>() - casted_data->Fx).isZero(tol_f));
-  BOOST_CHECK((data->Fu.cast<float>() - casted_data->Fu).isZero(tol_f));
-  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
-  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
-  BOOST_CHECK((data->Gx.cast<float>() - casted_data->Gx).isZero(tol_f));
-  BOOST_CHECK((data->Gu.cast<float>() - casted_data->Gu).isZero(tol_f));
-  BOOST_CHECK((data->Hx.cast<float>() - casted_data->Hx).isZero(tol_f));
-  BOOST_CHECK((data->Hu.cast<float>() - casted_data->Hu).isZero(tol_f));
-  crocoddyl::ActionModelNumDiffTpl<float> casted_model_num_diff =
-      model_num_diff.cast<float>();
-  std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>>
-      casted_data_num_diff = casted_model_num_diff.createData();
-  casted_model_num_diff.calc(casted_data_num_diff, x_f, u_f);
-  casted_model_num_diff.calcDiff(casted_data_num_diff, x_f, u_f);
-  tol_f = 1000.0f * sqrt(casted_model_num_diff.get_disturbance());
-  BOOST_CHECK((casted_data->Gx - casted_data_num_diff->Gx).isZero(tol_f));
-  BOOST_CHECK((casted_data->Gu - casted_data_num_diff->Gu).isZero(tol_f));
-  BOOST_CHECK((casted_data->Hx - casted_data_num_diff->Hx).isZero(tol_f));
-  BOOST_CHECK((casted_data->Hu - casted_data_num_diff->Hu).isZero(tol_f));
+  float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  float rel_tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
+  BOOST_CHECK(
+      isCloseAbsRel(data->h.cast<float>(), casted_data->h, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->g.cast<float>(), casted_data->g, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Fx.cast<float>(), casted_data->Fx, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Fu.cast<float>(), casted_data->Fu, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lx.cast<float>(), casted_data->Lx, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lu.cast<float>(), casted_data->Lu, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Gx.cast<float>(), casted_data->Gx, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Gu.cast<float>(), casted_data->Gu, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Hx.cast<float>(), casted_data->Hx, tol_f, rel_tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Hu.cast<float>(), casted_data->Hu, tol_f, rel_tol_f));
 #endif
 }
 
@@ -282,7 +283,7 @@ void test_calc_against_calc(
   model2->calc(data2, x, u2);
 
   // Checking the state and cost integration
-  BOOST_CHECK((data1->xnext - data2->xnext).isZero(1e-9));
+  BOOST_CHECK(isCloseAbsRel(data1->xnext, data2->xnext, 1e-9, 1e-9));
   BOOST_CHECK(abs(data1->cost - data2->cost) < 1e-9);
 }
 

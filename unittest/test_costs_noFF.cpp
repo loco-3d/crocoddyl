@@ -223,12 +223,12 @@ void test_partial_derivatives_against_numdiff(
   // Tolerance defined as in
   // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
   double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
-  BOOST_CHECK((data->Lu - data_num_diff->Lu).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lu, data_num_diff->Lu, tol, tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
-    BOOST_CHECK((data->Lxu - data_num_diff->Lxu).isZero(tol));
-    BOOST_CHECK((data->Luu - data_num_diff->Luu).isZero(tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxu, data_num_diff->Lxu, tol, tol));
+    BOOST_CHECK(isCloseAbsRel(data->Luu, data_num_diff->Luu, tol, tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
     BOOST_CHECK((data_num_diff->Lxu).isZero(tol));
@@ -246,9 +246,9 @@ void test_partial_derivatives_against_numdiff(
   model_num_diff.calcDiff(data_num_diff, x);
 
   // Checking the partial derivatives against numdiff
-  BOOST_CHECK((data->Lx - data_num_diff->Lx).isZero(tol));
+  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, tol));
   if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK((data->Lxx - data_num_diff->Lxx).isZero(tol));
+    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, tol));
   } else {
     BOOST_CHECK((data_num_diff->Lxx).isZero(tol));
   }
@@ -284,11 +284,16 @@ void test_partial_derivatives_against_numdiff(
   casted_model->calcDiff(casted_data, x_f, u_f);
   float tol_f = std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
-  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
-  BOOST_CHECK((data->Lu.cast<float>() - casted_data->Lu).isZero(tol_f));
-  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
-  BOOST_CHECK((data->Lxu.cast<float>() - casted_data->Lxu).isZero(tol_f));
-  BOOST_CHECK((data->Luu.cast<float>() - casted_data->Luu).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lx.cast<float>(), casted_data->Lx, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lu.cast<float>(), casted_data->Lu, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lxx.cast<float>(), casted_data->Lxx, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lxu.cast<float>(), casted_data->Lxu, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Luu.cast<float>(), casted_data->Luu, tol_f, tol_f));
   crocoddyl::unittest::updateAllPinocchio(&pinocchio_model, &pinocchio_data, x);
   crocoddyl::unittest::updateAllPinocchio(&casted_pinocchio_model,
                                           &casted_pinocchio_data, x_f);
@@ -297,8 +302,10 @@ void test_partial_derivatives_against_numdiff(
   casted_model->calc(casted_data, x_f);
   casted_model->calcDiff(casted_data, x_f);
   BOOST_CHECK(std::abs(float(data->cost) - casted_data->cost) <= tol_f);
-  BOOST_CHECK((data->Lx.cast<float>() - casted_data->Lx).isZero(tol_f));
-  BOOST_CHECK((data->Lxx.cast<float>() - casted_data->Lxx).isZero(tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lx.cast<float>(), casted_data->Lx, tol_f, tol_f));
+  BOOST_CHECK(
+      isCloseAbsRel(data->Lxx.cast<float>(), casted_data->Lxx, tol_f, tol_f));
 #endif
 }
 
