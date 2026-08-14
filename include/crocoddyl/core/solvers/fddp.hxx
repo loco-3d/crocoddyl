@@ -1735,9 +1735,9 @@ bool SolverFDDPTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
     p_try_[i] = p_[i];
     problem_->update_p(p_[i], i);
   }
-  // Delegate to the base solve (xs/us initialisation, main loop)
-  return SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
-                               reg_init);
+  // Delegate to the base solver loop after initializing the parameters.
+  return SolverAbstract::solve(init_xs, init_us, DefaultVector<Scalar>::value,
+                               maxiter, is_feasible, reg_init);
 }
 
 // Parametrized backward pass

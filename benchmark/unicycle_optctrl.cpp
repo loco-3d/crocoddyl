@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   Eigen::ArrayXd duration(T);
   for (unsigned int i = 0; i < T; ++i) {
     crocoddyl::Timer timer;
-    solver.solve(xs, us, std::vector<Eigen::VectorXd>(), MAXITER);
+    solver.solve(xs, us, MAXITER);
     duration[i] = timer.get_duration();
   }
 

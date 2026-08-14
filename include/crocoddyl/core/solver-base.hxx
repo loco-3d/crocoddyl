@@ -47,8 +47,24 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                       const std::vector<VectorXs>& init_us,
+                                      const std::size_t maxiter,
+                                      const bool is_feasible,
+                                      const Scalar init_reg) {
+  return solve(init_xs, init_us, DefaultVector<Scalar>::value, maxiter,
+               is_feasible, init_reg);
+}
+
+template <typename Scalar>
+bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
+                                      const std::vector<VectorXs>& init_us,
+                                      const std::vector<VectorXs>& init_p,
                                       const std::size_t maxiter, const bool,
                                       const Scalar init_reg) {
+  if (!init_p.empty()) {
+    throw_pretty(
+        "SolverAbstract::solve(): parameter optimization is not supported by "
+        "this solver.");
+  }
   START_PROFILER("SolverAbstract::solve");
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
   const std::size_t ng_T = problem_->get_terminalModel()->get_ng_T();

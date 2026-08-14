@@ -23,16 +23,20 @@ struct SolverAbstractVisitor
     : public bp::def_visitor<SolverAbstractVisitor<Model>> {
   typedef typename Model::SolverAbstract SolverAbstract;
   typedef typename SolverAbstract::Scalar Scalar;
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_solves, Model::solve, 0,
-                                         5)
+  typedef typename SolverAbstract::VectorXs VectorXs;
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverAbstract_setCandidate,
                                          Model::setCandidate, 0, 3)
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def("solve", &Model::solve,
-           SolverAbstract_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter",
-                        "is_feasible", "reg_init"),
+    cl.def(
+          "solve",
+          static_cast<bool (Model::*)(
+              const std::vector<VectorXs>&, const std::vector<VectorXs>&,
+              const std::size_t, const bool, const Scalar)>(&Model::solve),
+          (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+           bp::arg("init_us") = bp::list(), bp::arg("maxiter") = 100,
+           bp::arg("is_feasible") = false,
+           bp::arg("reg_init") = std::numeric_limits<Scalar>::quiet_NaN()),
                "Compute the optimal trajectory xopt,uopt as lists of T+1 and T "
                "terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), iterate "
@@ -50,7 +54,31 @@ struct SolverAbstractVisitor
                ":param regInit: initial guess for the regularization value. Very "
                "low values are typical used with very good guess points (init_xs, "
                "init_us).\n"
-               ":returns A boolean that describes if convergence was reached."))
+               ":returns A boolean that describes if convergence was reached.")
+        .def(
+          "solve",
+          static_cast<bool (Model::*)(
+              const std::vector<VectorXs>&, const std::vector<VectorXs>&,
+              const std::vector<VectorXs>&, const std::size_t, const bool,
+              const Scalar)>(&Model::solve),
+          (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+           bp::arg("init_us") = bp::list(), bp::arg("init_p") = bp::list(),
+           bp::arg("maxiter") = 100, bp::arg("is_feasible") = false,
+           bp::arg("reg_init") = std::numeric_limits<Scalar>::quiet_NaN()),
+              "Compute the optimal state, control, and parameter "
+              "trajectories.\n\n"
+              ":param init_xs: initial guess for state trajectory with T+1 "
+              "elements (default []).\n"
+              ":param init_us: initial guess for control trajectory with T "
+              "elements (default []).\n"
+              ":param init_p: initial parameter vectors, one per phase "
+              "(default []).\n"
+              ":param maxiter: maximum allowed number of iterations (default "
+              "100).\n"
+              ":param is_feasible: true if the initial state trajectory is "
+              "feasible (default False).\n"
+              ":param reg_init: initial regularization value.\n"
+              ":returns A boolean that describes if convergence was reached.")
         .def("computeDirection", pure_virtual(&Model::computeDirection),
              (bp::args("recalc") = true),
              "Compute the search direction (dx, du) for the current guess (xs, "

@@ -40,6 +40,26 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
           "solve",
           static_cast<bool (Model::*)(
               const std::vector<VectorXs>&, const std::vector<VectorXs>&,
+              const std::size_t, const bool, const Scalar)>(&Model::solve),
+          (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+           bp::arg("init_us") = bp::list(), bp::arg("maxiter") = 100,
+           bp::arg("is_feasible") = false,
+           bp::arg("init_reg") = std::numeric_limits<Scalar>::quiet_NaN()),
+              "Solve an optimal-control problem.\n\n"
+              ":param init_xs: initial guess for state trajectory with T+1 "
+              "elements (default [])\n"
+              ":param init_us: initial guess for control trajectory with T "
+              "elements (default []).\n"
+              ":param maxiter: maximum allowed number of iterations (default "
+              "100).\n"
+              ":param is_feasible: true if the init_xs are obtained from "
+              "integrating the init_us (rollout) (default False).\n"
+              ":param init_reg: initial guess for the regularization value.\n"
+              ":returns True if convergence was reached.")
+        .def(
+          "solve",
+          static_cast<bool (Model::*)(
+              const std::vector<VectorXs>&, const std::vector<VectorXs>&,
               const std::vector<VectorXs>&, const std::size_t, const bool,
               const Scalar)>(&Model::solve),
           (bp::arg("self"), bp::arg("init_xs") = bp::list(),

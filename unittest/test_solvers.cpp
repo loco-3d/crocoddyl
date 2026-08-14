@@ -465,6 +465,28 @@ class SolverFDDPArrivalStateProbe : public crocoddyl::SolverFDDP {
 #endif
 };
 
+void test_fddp_legacy_solve_api() {
+  typedef crocoddyl::ActionModelLQR ActionModelLQR;
+
+  const std::size_t T = 2;
+  const std::shared_ptr<ActionModelLQR> model =
+      std::make_shared<ActionModelLQR>(4, 2);
+  const std::shared_ptr<ActionModelLQR> terminal_model =
+      std::make_shared<ActionModelLQR>(4, 0);
+  std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
+      T, model);
+  const Eigen::VectorXd x0 = sampleSolverState(model->get_state());
+  const std::shared_ptr<crocoddyl::ShootingProblem> problem =
+      std::make_shared<crocoddyl::ShootingProblem>(x0, running_models,
+                                                   terminal_model);
+  crocoddyl::SolverFDDP solver(problem);
+
+  std::vector<Eigen::VectorXd> xs;
+  std::vector<Eigen::VectorXd> us;
+  sampleSolverTrajectoryGuess(problem, &xs, &us);
+  BOOST_CHECK_NO_THROW(solver.solve(xs, us, 0, false, 0.1));
+}
+
 void test_fddp_single_shoot_arrival_state_forward_pass() {
   typedef crocoddyl::ActionModelLQR ActionModelLQR;
   typedef crocoddyl::LQRParams LQRParams;
@@ -1015,6 +1037,7 @@ void register_fddp_arrival_state_unit_tests() {
       BOOST_TEST_SUITE("test_SolverFDDP_single_shoot_arrival_state");
   std::cout << "Running test_SolverFDDP_single_shoot_arrival_state"
             << std::endl;
+  ts->add(BOOST_TEST_CASE(&test_fddp_legacy_solve_api));
   ts->add(BOOST_TEST_CASE(&test_fddp_single_shoot_arrival_state_forward_pass));
   ts->add(BOOST_TEST_CASE(&test_fddp_zero_control_running_dispatch));
   ts->add(BOOST_TEST_CASE(

@@ -111,6 +111,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   using SolverAbstract::computeFeasibility;
   using SolverAbstract::computeInequalityFeasibility;
   using SolverAbstract::resizeData;
+  using SolverAbstract::solve;
 
   /**
    * @brief Initialize the FDDP solver
@@ -150,12 +151,13 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    * @param[in] is_feasible  True if the initial guess is dynamically feasible
    * @param[in] reg_init     Initial regularization value
    */
-  virtual bool solve(
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_p = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
+  virtual bool solve(const std::vector<VectorXs>& init_xs,
+                     const std::vector<VectorXs>& init_us,
+                     const std::vector<VectorXs>& init_p,
+                     const std::size_t maxiter = 100,
+                     const bool is_feasible = false,
+                     const Scalar reg_init =
+                         std::numeric_limits<Scalar>::quiet_NaN()) override;
 
   /**
    * @copybrief SolverAbstract::calcDir

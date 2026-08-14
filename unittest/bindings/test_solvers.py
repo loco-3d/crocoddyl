@@ -53,6 +53,10 @@ class SolverAbstractTestCase(unittest.TestCase):
         for k1, k2 in zip(self.solver.k, self.solver_der.k):
             self.assertTrue(np.allclose(k1, k2, atol=1e-9), "k doesn't match.")
 
+    def test_legacy_positional_solve(self):
+        self.assertFalse(self.solver.solve(self.xs, self.us, 0, False, 0.1))
+        self.assertFalse(self.solver_der.solve(self.xs, self.us, 0, False, 0.1))
+
     def test_compute_search_direction(self):
         # Compute the direction
         self.solver.setCandidate([], [], False)

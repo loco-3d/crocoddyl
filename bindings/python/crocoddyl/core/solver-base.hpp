@@ -61,6 +61,7 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
   using SolverAbstract::ng_T_;
   using SolverAbstract::nh_T_;
   using SolverAbstract::problem_;
+  using SolverAbstract::solve;
   using SolverAbstract::steplength_;
   using SolverAbstract::stop_;
   using SolverAbstract::u_adj_;
@@ -74,18 +75,18 @@ class SolverAbstractTpl_wrap : public SolverAbstractTpl<_Scalar>,
       : SolverAbstract(problem), bp::wrapper<SolverAbstract>() {}
   ~SolverAbstractTpl_wrap() = default;
 
-  bool solve(
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar reg_init =
-          std::numeric_limits<Scalar>::quiet_NaN()) override {
+  bool solve(const std::vector<VectorXs>& init_xs,
+             const std::vector<VectorXs>& init_us,
+             const std::vector<VectorXs>& init_p,
+             const std::size_t maxiter = 100, const bool is_feasible = false,
+             const Scalar reg_init =
+                 std::numeric_limits<Scalar>::quiet_NaN()) override {
     if (bp::override solve = this->get_override("solve")) {
-      return bp::call<bool>(solve.ptr(), init_xs, init_us, maxiter, is_feasible,
-                            reg_init);
+      return bp::call<bool>(solve.ptr(), init_xs, init_us, init_p, maxiter,
+                            is_feasible, reg_init);
     }
-    return this->SolverAbstract::solve(init_xs, init_us, maxiter, is_feasible,
-                                       reg_init);
+    return this->SolverAbstract::solve(init_xs, init_us, init_p, maxiter,
+                                       is_feasible, reg_init);
   }
 
   void computeDirection(const bool recalc = true) override {

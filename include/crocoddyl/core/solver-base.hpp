@@ -113,6 +113,9 @@ class SolverAbstractTpl : public SolverBase {
    * below threshold. It also describes the globalization strategy used during
    * the numerical optimization.
    *
+   * The default implementation forwards to the parameter-aware overload with
+   * an empty parameter trajectory.
+   *
    * @param[in] init_xs      initial guess for state trajectory with \f$T+1\f$
    * elements (default [])
    * @param[in] init_us      initial guess for control trajectory with \f$T\f$
@@ -124,9 +127,34 @@ class SolverAbstractTpl : public SolverBase {
    * low values are typical used with very good guess points (default 1e-9).
    * @return A boolean that describes if convergence was reached.
    */
-  virtual bool solve(
+  bool solve(
       const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
       const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
+      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
+
+  /**
+   * @brief Compute the optimal state, control, and parameter trajectories
+   *
+   * This overload extends the optimal-control interface with an initial
+   * parameter guess. The default implementation accepts only an empty
+   * parameter trajectory and executes the standard solver loop. Solvers that
+   * optimize parameters should override it.
+   *
+   * @param[in] init_xs      initial guess for state trajectory with \f$T+1\f$
+   * elements
+   * @param[in] init_us      initial guess for control trajectory with \f$T\f$
+   * elements
+   * @param[in] init_p       initial parameter vectors, one per phase
+   * @param[in] maxiter      maximum allowed number of iterations (default 100)
+   * @param[in] is_feasible  true if the \p init_xs are obtained from
+   * integrating the \p init_us (rollout) (default false)
+   * @param[in] init_reg     initial guess for the regularization value
+   * @return A boolean that describes if convergence was reached.
+   */
+  virtual bool solve(
+      const std::vector<VectorXs>& init_xs,
+      const std::vector<VectorXs>& init_us, const std::vector<VectorXs>& init_p,
       const std::size_t maxiter = 100, const bool is_feasible = false,
       const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
 

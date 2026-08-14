@@ -24,9 +24,14 @@ inline SolverIpopt::SolverIpopt(std::shared_ptr<ShootingProblem> problem)
 
 inline bool SolverIpopt::solve(const std::vector<VectorXs>& init_xs,
                                const std::vector<VectorXs>& init_us,
+                               const std::vector<VectorXs>& init_p,
                                const std::size_t maxiter,
                                const bool is_feasible,
                                const Scalar /*reg_init*/) {
+  if (!init_p.empty()) {
+    throw_pretty(
+        "SolverIpopt::solve(): parameter optimization is not supported.");
+  }
   setCandidate(init_xs, init_us, is_feasible);
   ipopt_iface_->set_xs(xs_);
   ipopt_iface_->set_us(us_);

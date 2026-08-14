@@ -32,8 +32,13 @@ SolverKKTTpl<Scalar>::SolverKKTTpl(std::shared_ptr<ShootingProblem> problem)
 template <typename Scalar>
 bool SolverKKTTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                  const std::vector<VectorXs>& init_us,
+                                 const std::vector<VectorXs>& init_p,
                                  const std::size_t maxiter,
                                  const bool is_feasible, const Scalar) {
+  if (!init_p.empty()) {
+    throw_pretty(
+        "SolverKKT::solve(): parameter optimization is not supported.");
+  }
   setCandidate(init_xs, init_us, is_feasible);
   bool recalc = true;
   for (iter_ = 0; iter_ < maxiter; ++iter_) {
