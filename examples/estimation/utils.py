@@ -16,9 +16,9 @@ class SymmetryAxis(Enum):
 
 
 def import_control_example(module_name):
-    examples_dir = os.path.dirname(os.path.dirname(__file__))
-    if examples_dir not in sys.path:
-        sys.path.insert(0, examples_dir)
+    control_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "control")
+    if control_dir not in sys.path:
+        sys.path.insert(0, control_dir)
 
     argv = sys.argv[:]
     plot_env = os.environ.pop("CROCODDYL_PLOT", None)

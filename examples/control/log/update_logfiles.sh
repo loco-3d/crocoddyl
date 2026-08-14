@@ -12,7 +12,8 @@ else
 fi
 
 LOGPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-EXAMPLEPATH=${LOGPATH}/..
+CONTROLEXAMPLEPATH=${LOGPATH}/..
+EXAMPLEPATH=${CONTROLEXAMPLEPATH}/..
 TIMEOPTEXAMPLEPATH=${EXAMPLEPATH}/timeopt
 TIMEOPTLOGPATH=${TIMEOPTEXAMPLEPATH}/log
 ESTIMATIONEXAMPLEPATH=${EXAMPLEPATH}/estimation
@@ -43,7 +44,7 @@ echo "Updating the log files ..."
 update_logfile() {
   FILENAME=$1
   echo "    ${FILENAME}"
-  ${PYTHON_EXECUTABLE} -u ${EXAMPLEPATH}/${FILENAME}.py > ${LOGPATH}/${FILENAME}.log
+  ${PYTHON_EXECUTABLE} -u ${CONTROLEXAMPLEPATH}/${FILENAME}.py > ${LOGPATH}/${FILENAME}.log
 }
 
 update_timeopt_logfile() {
