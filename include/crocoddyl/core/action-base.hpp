@@ -134,30 +134,14 @@ class ActionModelAbstractTpl : public ActionModelBase {
    * @param[in] nh     Number of equality constraints (default 0)
    * @param[in] ng_T   Number of inequality terminal constraints (default 0)
    * @param[in] nh_T   Number of equality terminal constraints (default 0)
+   * @param[in] np     Dimension of the parameter vector (default 0)
    */
   ActionModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t nu, const std::size_t nr = 0,
                          const std::size_t ng = 0, const std::size_t nh = 0,
-                         const std::size_t ng_T = 0,
-                         const std::size_t nh_T = 0);
+                         const std::size_t ng_T = 0, const std::size_t nh_T = 0,
+                         const std::size_t np = 0);
 
-  /**
-   * @brief Initialize the parameterized action model
-   *
-   * @param[in] state  State description
-   * @param[in] nu     Dimension of control vector
-   * @param[in] nr     Dimension of cost-residual vector
-   * @param[in] ng     Number of inequality constraints
-   * @param[in] nh     Number of equality constraints
-   * @param[in] ng_T   Number of inequality terminal constraints
-   * @param[in] nh_T   Number of equality terminal constraints
-   * @param[in] np     Dimension of the parameter vector
-   */
-  ActionModelAbstractTpl(std::shared_ptr<StateAbstract> state,
-                         const std::size_t nu, const std::size_t nr,
-                         const std::size_t ng, const std::size_t nh,
-                         const std::size_t ng_T, const std::size_t nh_T,
-                         const std::size_t np);
   /**
    * @brief Copy constructor
    * @param other  Action model to be copied

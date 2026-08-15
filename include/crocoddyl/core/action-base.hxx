@@ -13,30 +13,6 @@ template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
     std::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t nu,
     const std::size_t nr, const std::size_t ng, const std::size_t nh,
-    const std::size_t ng_T, const std::size_t nh_T)
-    : nu_(nu),
-      nr_(nr),
-      np_(0),
-      ng_(ng),
-      nh_(nh),
-      ng_T_(ng_T),
-      nh_T_(nh_T),
-      state_(state),
-      unone_(MathBase::VectorXs::Zero(nu)),
-      g_lb_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
-                               -std::numeric_limits<Scalar>::infinity())),
-      g_ub_(VectorXs::Constant(ng > ng_T ? ng : ng_T,
-                               std::numeric_limits<Scalar>::infinity())),
-      u_lb_(MathBase::VectorXs::Constant(
-          nu, -std::numeric_limits<Scalar>::infinity())),
-      u_ub_(MathBase::VectorXs::Constant(
-          nu, std::numeric_limits<Scalar>::infinity())),
-      has_control_limits_(false) {}
-
-template <typename Scalar>
-ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
-    std::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t nu,
-    const std::size_t nr, const std::size_t ng, const std::size_t nh,
     const std::size_t ng_T, const std::size_t nh_T, const std::size_t np)
     : nu_(nu),
       nr_(nr),
