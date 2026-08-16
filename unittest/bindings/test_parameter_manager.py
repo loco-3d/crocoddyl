@@ -28,10 +28,10 @@ def make_action_params(module, dtype, state, np_, scale):
             data.p = np.asarray(p, dtype=dtype)
 
         def computeParamSensitivity(self, data, params, x, u):
-            del data, x, u
+            del data, params, x, u
             self.sensitivity_calls += 1
             columns = self.scale + np.arange(self.np, dtype=dtype)
-            params.dx_dp = np.tile(columns, (self.state.ndx, 1))
+            return np.tile(columns, (self.state.ndx, 1))
 
     return ActionParams()
 
@@ -49,10 +49,10 @@ def make_dynamics_params(module, dtype, state, np_, scale):
             data.p = np.asarray(p, dtype=dtype)
 
         def computeJointTorqueRegressor(self, data, params, x, u):
-            del data, x, u
+            del data, params, x, u
             self.regressor_calls += 1
             columns = self.scale + np.arange(self.np, dtype=dtype)
-            params.dtau_dp = np.tile(columns, (self.state.nv, 1))
+            return np.tile(columns, (self.state.nv, 1))
 
     return DynamicsParams()
 
@@ -184,14 +184,12 @@ class ParameterManagerTest(unittest.TestCase):
             state, crocoddyl.DynamicsType.ContinuousControl, 0, 2
         )
         dynamics_data = dynamics_model.createData()
-        data.params.dx_dp = np.full((state.ndx, 3), 999, dtype=dtype)
-        data.params.dtau_dp = np.full((state.nv, 3), 999, dtype=dtype)
-        manager.calcDiff_action(data, action_data, x, u)
-        manager.calcDiff_dynamics(data, dynamics_data, x, u)
+        dx_dp = manager.calcDiff_action(data, action_data, x, u)
+        dtau_dp = manager.calcDiff_dynamics(data, dynamics_data, x, u)
         expected_action = np.tile(np.array([10, 11, 30], dtype=dtype), (state.ndx, 1))
         expected_dynamics = np.tile(np.array([40, 50, 51], dtype=dtype), (state.nv, 1))
-        self.assertTrue(np.array_equal(data.params.dx_dp, expected_action))
-        self.assertTrue(np.array_equal(data.params.dtau_dp, expected_dynamics))
+        self.assertTrue(np.array_equal(dx_dp, expected_action))
+        self.assertTrue(np.array_equal(dtau_dp, expected_dynamics))
         self.assertEqual(
             (
                 action_alpha.sensitivity_calls,
@@ -222,7 +220,7 @@ class ParameterManagerTest(unittest.TestCase):
 
         manager.changeParamStatus("alpha", False)
         self.assertEqual((manager.np, manager.np_action), (4, 1))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.update(data, np.zeros(4, dtype=dtype))
         data.resize(manager)
         manager.update(data, np.arange(1, 5, dtype=dtype))
@@ -233,32 +231,20 @@ class ParameterManagerTest(unittest.TestCase):
         self.assertEqual((data.params.np_action, data.params.np_dynamics), (3, 3))
 
         data.params.p = np.ones(6, dtype=dtype)
-        data.params.dx_dp = np.ones((state.ndx, 3), dtype=dtype)
-        data.params.dtau_dp = np.ones((state.nv, 3), dtype=dtype)
         for item_data in data.action_params.todict().values():
             item_data.p = np.ones(item_data.np, dtype=dtype)
-            item_data.dx_dp = np.ones((state.ndx, item_data.np), dtype=dtype)
         for item_data in data.dynamics_params.todict().values():
             item_data.p = np.ones(item_data.np, dtype=dtype)
-            item_data.dtau_dp = np.ones((state.nv, item_data.np), dtype=dtype)
         data.params.active = False
         data.action_params["middle"].active = False
         data.setZero()
         self.assertTrue(np.array_equal(data.params.p, np.zeros(6, dtype=dtype)))
-        self.assertTrue(np.array_equal(data.params.dx_dp, np.zeros((state.ndx, 3))))
-        self.assertTrue(np.array_equal(data.params.dtau_dp, np.zeros((state.nv, 3))))
         self.assertFalse(data.params.active)
         self.assertFalse(data.action_params["middle"].active)
         for item_data in data.action_params.todict().values():
             self.assertTrue(np.array_equal(item_data.p, np.zeros(item_data.np)))
-            self.assertTrue(
-                np.array_equal(item_data.dx_dp, np.zeros_like(item_data.dx_dp))
-            )
         for item_data in data.dynamics_params.todict().values():
             self.assertTrue(np.array_equal(item_data.p, np.zeros(item_data.np)))
-            self.assertTrue(
-                np.array_equal(item_data.dtau_dp, np.zeros_like(item_data.dtau_dp))
-            )
 
         copied_item = copy.copy(original_item)
         self.assertIsNot(copied_item, original_item)
@@ -286,22 +272,22 @@ class ParameterManagerTest(unittest.TestCase):
 
         stale = manager.createData()
         manager.removeParam("middle")
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             stale.resize(manager)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.update(stale, p)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParameterManager(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParameterItem("null", None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParameterDataManager(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.addParam("null", None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.update(manager.createData(), np.zeros(manager.np + 1, dtype=dtype))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.addParam(
                 "wrong", make_action_params(module, dtype, module.StateVector(5), 1, 1)
             )
@@ -310,9 +296,9 @@ class ParameterManagerTest(unittest.TestCase):
         add_manager.addParam("first", make_action_params(module, dtype, state, 1, 1))
         before_add = add_manager.createData()
         add_manager.addParam("second", make_dynamics_params(module, dtype, state, 1, 2))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             before_add.resize(add_manager)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             add_manager.update(before_add, np.zeros(2, dtype=dtype))
 
         for alias in (

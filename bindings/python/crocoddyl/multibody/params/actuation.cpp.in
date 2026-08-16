@@ -22,9 +22,9 @@ struct ActuationMultibodyParamsVisitor
     cl.def("update", &Model::update, bp::args("self", "data", "p"),
            "Update the multibody actuation parameters.")
         .def("computeJointTorqueRegressor",
-             &Model::computeJointTorqueRegressor,
+             &Model::computeJointTorqueRegressor_x,
              bp::args("self", "data", "params", "x", "u"),
-             "Compute the multibody actuation torque regressor.")
+             "Compute and return the multibody actuation torque regressor.")
         .add_property(
         "actuation",
         bp::make_function(&Model::get_actuation,

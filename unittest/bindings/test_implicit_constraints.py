@@ -63,23 +63,23 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         self.assertEqual(data.da0_dx.shape, (3, state.ndx))
         self.assertEqual(data.dv0_dq.shape, (3, state.nv))
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ImplicitConstraintDataAbstract(None, pin_data)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ImplicitConstraintDataAbstract(probe, None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             probe.createData(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ImplicitConstraintItem("null", None)
 
         manager = module.ImplicitConstraintModelMultiple(state)
         manager.addConstraint("probe", probe)
         manager_data = manager.createData(pin_data)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ImplicitConstraintDataMultiple(None, pin_data)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ImplicitConstraintDataMultiple(manager, None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.createData(None)
         x = np.asarray(state.rand(), dtype=dtype)
         manager.calc(manager_data, x)
@@ -122,11 +122,11 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         self.assertEqual(contact.mask, [True, True, True, False, False, False])
         contact_data = contact.createData(pin_data)
         self.assertIsInstance(contact_data, module.ContactData)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ContactData(None, pin_data)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ContactData(contact, None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             contact.createData(None)
         copied_contact = copy.copy(contact)
         copied_contact_data = copy.copy(contact_data)
@@ -137,7 +137,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
             crocoddyl.DType.Float32 if module is crocoddyl else crocoddyl.DType.Float64
         )
         self.assertEqual(contact.cast(cast_dtype).nc, 3)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ContactModel(
                 state,
                 1,
@@ -146,7 +146,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
                 np.zeros(2, dtype=dtype),
                 [False] * 6,
             )
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ContactModel(
                 state,
                 1,
@@ -295,7 +295,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
                 atol=tolerance,
             )
             wrong_nc = 5 if nc == 6 else nc + 1
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 module.ResidualModelContactForce(
                     state, 1, zero_force, wrong_nc
                 ).createData(layout_shared)
@@ -384,7 +384,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
                 module.ResidualModelContactCoPPosition(state, 1, cop_support),
             )
             for residual in unsupported_residuals:
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     residual.createData(layout_shared)
 
         loop = module.KinematicLoopModel(
@@ -402,15 +402,15 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         self.assertEqual(loop.mask, [True, False, True, False, True, False])
         loop_data = loop.createData(pin_data)
         self.assertIsInstance(loop_data, module.KinematicLoopData)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.KinematicLoopData(None, pin_data)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.KinematicLoopData(loop, None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             loop.createData(None)
         self.assertIsInstance(copy.copy(loop_data), module.KinematicLoopData)
         self.assertEqual(loop.cast(cast_dtype).mask, loop.mask)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.KinematicLoopModel(
                 state,
                 1,
@@ -421,7 +421,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
                 np.zeros(2, dtype=dtype),
                 [False] * 6,
             )
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.KinematicLoopModel(
                 state,
                 1,
@@ -439,7 +439,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         actuation_model.calc(actuation, x, actuation_u)
         actuation_model.calcDiff(actuation, x, actuation_u)
         joint = module.JointDataAbstract(state, actuation_model, actuation_model.nu)
-        params = module.ParamsDataAbstract(state, 1, 1)
+        params = module.ParamsDataAbstract(1, 1)
         collectors = [
             (module.DataCollectorImplicitConstraint(manager_data), ("constraints",)),
             (
@@ -561,7 +561,7 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         impulse_com.calcDiff(impulse_com_data, x, np.empty(0, dtype=dtype))
         self.assertEqual(impulse_com_data.r.shape, (3,))
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             manager.addConstraint("null", None)
 
     def test_float64(self):

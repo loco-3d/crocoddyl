@@ -193,7 +193,7 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
                 generic_symmetry = module.ResidualModelSymmetryParameters(
                     state, S_generic, fixture["actuation"].nu, np_total
                 )
-                plain_params = module.ParamsDataAbstract(state, np_total, 0)
+                plain_params = module.ParamsDataAbstract(np_total, 0)
                 plain_params.p = p.copy()
                 plain_collector = module.DataCollectorParams(plain_params)
                 generic_symmetry_data = generic_symmetry.createData(plain_collector)
@@ -293,14 +293,14 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
 
                 manager.changeParamStatus("a_actuation", False)
                 manager_data.resize(manager)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     actuation.calc(actuation_data, x, u)
                 manager.changeParamStatus("a_actuation", True)
                 manager_data.resize(manager)
                 manager.update(manager_data, p)
                 actuation.calcDiff(actuation_data, x, u)
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelSymmetryParameters(
                         state,
                         np.zeros((2, 3), dtype=dtype),
@@ -308,18 +308,18 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
                         np_total,
                         "z_inertial",
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelSymmetryParameters(
                         state,
                         np.eye(np_total - 1, dtype=dtype),
                         fixture["actuation"].nu,
                         np_total,
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelTotalMass(
                         module.StateVector(4), 0.0, 2, np_total, "z_inertial"
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelInertialParameters(
                         state,
                         np.zeros(20, dtype=dtype),
@@ -405,13 +405,13 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
                     state, fixture["actuation"].nu, 0
                 )
                 self.assertEqual(plain.param_name, "")
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelPotentialEnergy(
                         state, fixture["actuation"].nu, np_total, 0.0, None
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelKineticEnergy(module.StateVector(4), 2, 0)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ResidualModelPotentialEnergy(
                         state,
                         fixture["actuation"].nu,
@@ -422,7 +422,7 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
 
                 fixture["manager"].changeParamStatus("z_inertial", False)
                 fixture["manager_data"].resize(fixture["manager"])
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     potential.calc(potential_data, x, u)
                 fixture["manager"].changeParamStatus("z_inertial", True)
                 fixture["manager_data"].resize(fixture["manager"])

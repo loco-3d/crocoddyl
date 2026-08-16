@@ -25,7 +25,7 @@ template <typename Scalar>
 std::shared_ptr<typename ParamsAbstractTpl<Scalar>::ParamsDataAbstract>
 ParamsAbstractTpl<Scalar>::createData() {
   return std::allocate_shared<ParamsDataAbstract>(
-      Eigen::aligned_allocator<ParamsDataAbstract>(), state_, np_, 0);
+      Eigen::aligned_allocator<ParamsDataAbstract>(), np_, 0);
 }
 
 template <typename Scalar>
@@ -144,12 +144,23 @@ ActionModelParamsAbstractTpl<Scalar>::ActionModelParamsAbstractTpl(
     : Base(state, np) {}
 
 template <typename Scalar>
+typename ActionModelParamsAbstractTpl<Scalar>::MatrixXs
+ActionModelParamsAbstractTpl<Scalar>::computeParamSensitivity_x(
+    const std::shared_ptr<ActionDataAbstract>& data,
+    const std::shared_ptr<ParamsDataAbstract>& params,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+  MatrixXs dx_dp(this->state_->get_ndx(), this->np_);
+  computeParamSensitivity(data, params, dx_dp, x, u);
+  return dx_dp;
+}
+
+template <typename Scalar>
 std::shared_ptr<
     typename ActionModelParamsAbstractTpl<Scalar>::ParamsDataAbstract>
 ActionModelParamsAbstractTpl<Scalar>::createData() {
   return std::allocate_shared<ActionModelParamsDataAbstractTpl<Scalar> >(
       Eigen::aligned_allocator<ActionModelParamsDataAbstractTpl<Scalar> >(),
-      this->state_, this->np_);
+      this->np_);
 }
 
 template <typename Scalar>
@@ -158,11 +169,22 @@ DynamicsParamsAbstractTpl<Scalar>::DynamicsParamsAbstractTpl(
     : Base(state, np) {}
 
 template <typename Scalar>
+typename DynamicsParamsAbstractTpl<Scalar>::MatrixXs
+DynamicsParamsAbstractTpl<Scalar>::computeJointTorqueRegressor_x(
+    const std::shared_ptr<DynamicsDataAbstract>& data,
+    const std::shared_ptr<ParamsDataAbstract>& params,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+  MatrixXs dtau_dp(this->state_->get_nv(), this->np_);
+  computeJointTorqueRegressor(data, params, dtau_dp, x, u);
+  return dtau_dp;
+}
+
+template <typename Scalar>
 std::shared_ptr<typename DynamicsParamsAbstractTpl<Scalar>::ParamsDataAbstract>
 DynamicsParamsAbstractTpl<Scalar>::createData() {
   return std::allocate_shared<DynamicsParamsDataAbstractTpl<Scalar> >(
       Eigen::aligned_allocator<DynamicsParamsDataAbstractTpl<Scalar> >(),
-      this->state_, this->np_);
+      this->np_);
 }
 
 }  // namespace crocoddyl

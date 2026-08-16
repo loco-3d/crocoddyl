@@ -33,9 +33,9 @@ void LQRParamsTpl<Scalar>::update(
 template <typename Scalar>
 void LQRParamsTpl<Scalar>::computeParamSensitivity(
     const std::shared_ptr<ActionDataAbstract>&,
-    const std::shared_ptr<ParamsDataAbstract>& params,
+    const std::shared_ptr<ParamsDataAbstract>&, Eigen::Ref<MatrixXs> dx_dp,
     const Eigen::Ref<const VectorXs>&, const Eigen::Ref<const VectorXs>&) {
-  params->dx_dp.setZero();
+  dx_dp.setZero();
 }
 
 template <typename Scalar>

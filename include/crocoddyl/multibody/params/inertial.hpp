@@ -81,7 +81,7 @@ class MultibodyInertialParamsTpl : public DynamicsParamsAbstractTpl<_Scalar> {
   virtual void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override;
 
   /** @brief Allocate specialized data returned through the base pointer type.
@@ -148,13 +148,13 @@ class MultibodyInertialParamsTpl : public DynamicsParamsAbstractTpl<_Scalar> {
 /**
  * @brief Data for MultibodyInertialParamsTpl
  *
- * The inherited payload owns \f$p\f$ and the \f$nv\times np\f$ torque
- * regressor in the dynamics partition. This data additionally owns one
- * physical vector and conversion Jacobian per selected body and a single
- * reusable parametrization workspace. Torque-regressor calculations use the
- * non-owning DataCollectorMultibodyTpl attached to the dynamics data. Copies
- * own independent numerical storage and an independently allocated
- * parametrization workspace while retaining the shared parametrization model.
+ * The inherited payload owns \f$p\f$. This data additionally owns one physical
+ * vector and conversion Jacobian per selected body and a single reusable
+ * parametrization workspace. Torque-regressor calculations write into
+ * node-local dynamics storage and use the non-owning DataCollectorMultibodyTpl
+ * attached to the dynamics data. Copies own independent numerical storage and
+ * an independently allocated parametrization workspace while retaining the
+ * shared parametrization model.
  */
 template <typename _Scalar>
 struct MultibodyInertialParamsDataTpl
@@ -192,7 +192,7 @@ struct MultibodyInertialParamsDataTpl
    */
   template <template <typename Scalar> class Model>
   explicit MultibodyInertialParamsDataTpl(Model<Scalar>* const model)
-      : Base(checkModel(model)->get_state(), checkModel(model)->get_np()),
+      : Base(checkModel(model)->get_np()),
         psi(model->get_joint_ids().size()),
         dpsi_dp(model->get_joint_ids().size()),
         parametrization(model->get_parametrization()->createData()),

@@ -122,15 +122,16 @@ void updateDissipativePowerFromActuation(
 template <typename Scalar>
 void updateDissipativePowerParams(
     const std::shared_ptr<ParameterManagerTpl<Scalar> >& params,
-    const std::shared_ptr<ParameterDataManagerTpl<Scalar> >& params_data,
+    const Eigen::Ref<const typename MathBaseTpl<Scalar>::MatrixXs>& dtau_dp,
     const Eigen::Ref<const typename MathBaseTpl<Scalar>::VectorXs>& v,
     typename MathBaseTpl<Scalar>::MatrixXs& dP_dp) {
   dP_dp.setZero();
-  if (params == nullptr || params_data == nullptr) {
+  if (params == nullptr) {
     return;
   }
 
   std::size_t offset = params->get_np_action();
+  std::size_t dynamics_offset = 0;
   for (typename ParameterManagerTpl<Scalar>::ParameterContainer::const_iterator
            it = params->get_dynamics_params().begin();
        it != params->get_dynamics_params().end(); ++it) {
@@ -146,24 +147,11 @@ void updateDissipativePowerParams(
             std::dynamic_pointer_cast<ActuationMultibodyParamsTpl<Scalar> >(
                 item->get_param());
     if (actuation_param != nullptr) {
-      typename ParameterDataManagerTpl<
-          Scalar>::ParameterDataContainer::const_iterator data_it =
-          params_data->dynamics_params.find(it->first);
-      if (data_it == params_data->dynamics_params.end()) {
-        throw_pretty("Invalid argument: missing parameter data for " +
-                     it->first);
-      }
-      const std::shared_ptr<ActuationMultibodyParamsDataTpl<Scalar> >
-          actuation_data = std::dynamic_pointer_cast<
-              ActuationMultibodyParamsDataTpl<Scalar> >(data_it->second);
-      if (actuation_data == nullptr) {
-        throw_pretty("Invalid argument: parameter data for " + it->first +
-                     " is not an ActuationMultibodyParamsData");
-      }
       dP_dp.middleCols(offset, np_item).row(0).noalias() =
-          v.transpose() * actuation_data->dtau_dp;
+          v.transpose() * dtau_dp.middleCols(dynamics_offset, np_item);
     }
     offset += np_item;
+    dynamics_offset += np_item;
   }
 }
 

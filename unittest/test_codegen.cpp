@@ -2318,7 +2318,6 @@ void test_codegen_cost_sum_cast_preserves_np() {
   typedef crocoddyl::DataCollectorParamsTpl<ADScalar> ADDataCollectorParams;
   typedef crocoddyl::ParamsDataAbstractTpl<ADScalar> ADParamsDataAbstract;
   typedef crocoddyl::ResidualModelParametersTpl<Scalar> ResidualModelParameters;
-  typedef crocoddyl::StateMultibodyTpl<ADScalar> ADStateMultibody;
   typedef crocoddyl::StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
 
@@ -2338,9 +2337,7 @@ void test_codegen_cost_sum_cast_preserves_np() {
   ADCostModelSum casted = costs.template cast<ADScalar>();
   BOOST_CHECK_EQUAL(casted.get_np(), np);
   const std::shared_ptr<ADParamsDataAbstract> params_data =
-      std::make_shared<ADParamsDataAbstract>(
-          std::make_shared<ADStateMultibody>(state->template cast<ADScalar>()),
-          np, 0u);
+      std::make_shared<ADParamsDataAbstract>(np, 0u);
   ADDataCollectorParams collector(params_data);
   const std::shared_ptr<crocoddyl::CostDataSumTpl<ADScalar>> data =
       casted.createData(&collector);

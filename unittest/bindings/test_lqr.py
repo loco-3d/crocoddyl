@@ -226,9 +226,9 @@ class LQRTest(unittest.TestCase):
             "h": (nh + 1,),
         }
         for field, shape in wrong_shapes.items():
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 setattr(model, field, np.zeros(shape, dtype=dtype))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.update_p(data, np.zeros(np_ + 1, dtype=dtype))
 
         legacy = make_values(dtype, nx, nu, 0, ng, nh)
@@ -343,7 +343,7 @@ class LQRTest(unittest.TestCase):
         p = np.linspace(-0.25, 0.75, np_, dtype=dtype)
         params.update(params_data, p)
         self.assertTrue(np.array_equal(params_data.p, p))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             params.update(params_data, np.zeros(np_ + 1, dtype=dtype))
 
         manager = module.ParameterManager(model.state)
@@ -430,21 +430,19 @@ class LQRTest(unittest.TestCase):
             )
         )
         manager.update(manager_data, p)
-        manager.calcDiff_action(manager_data, data, x, u)
-        self.assertTrue(
-            np.array_equal(manager_data.params.dx_dp, np.zeros((nx, np_), dtype=dtype))
-        )
+        dx_dp = manager.calcDiff_action(manager_data, data, x, u)
+        self.assertTrue(np.array_equal(dx_dp, np.zeros((nx, np_), dtype=dtype)))
 
         self.assertIsInstance(model.createData(None), module.ActionDataLQR)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.set_params(data, None)
         wrong_manager = module.ParameterManager(model.state)
         wrong_manager.addParam("wrong", module.LQRParams(model.state, np_ + 1))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.set_params(data, wrong_manager)
         manager.changeParamStatus("inactive", True)
         self.assertEqual(manager.np, np_ + 1)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.set_params(data, manager)
 
         model_copy = copy.copy(model)

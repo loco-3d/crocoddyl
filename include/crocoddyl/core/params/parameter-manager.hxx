@@ -195,7 +195,7 @@ template <typename Scalar>
 void ParameterManagerTpl<Scalar>::calcDiff_action(
     const std::shared_ptr<ParameterDataManager>& data,
     const std::shared_ptr<ActionDataAbstract>& action_data,
-    const Eigen::Ref<const VectorXs>& x,
+    Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) const {
   assertDataIsConsistent(data);
   if (action_data == nullptr) {
@@ -209,7 +209,12 @@ void ParameterManagerTpl<Scalar>::calcDiff_action(
     throw_pretty("Invalid argument: u has wrong dimension (it should be "
                  << action_data->Fu.cols() << ")");
   }
-  data->params->dx_dp.setZero();
+  if (static_cast<std::size_t>(dx_dp.rows()) != state_->get_ndx() ||
+      static_cast<std::size_t>(dx_dp.cols()) != np_action_) {
+    throw_pretty("Invalid argument: dx_dp has wrong dimension (it should be "
+                 << state_->get_ndx() << " by " << np_action_ << ")");
+  }
+  dx_dp.setZero();
 
   std::size_t offset = 0;
   typename ParameterContainer::const_iterator model_it = action_params_.begin();
@@ -222,18 +227,30 @@ void ParameterManagerTpl<Scalar>::calcDiff_action(
     if (item->active_) {
       const std::shared_ptr<ActionModelParamsAbstract> param =
           std::static_pointer_cast<ActionModelParamsAbstract>(item->param_);
-      param->computeParamSensitivity(action_data, data_it->second, x, u);
-      data->params->dx_dp.middleCols(offset, np) = data_it->second->dx_dp;
+      param->computeParamSensitivity(action_data, data_it->second,
+                                     dx_dp.middleCols(offset, np), x, u);
       offset += np;
     }
   }
 }
 
 template <typename Scalar>
+typename ParameterManagerTpl<Scalar>::MatrixXs
+ParameterManagerTpl<Scalar>::calcDiff_action_x(
+    const std::shared_ptr<ParameterDataManager>& data,
+    const std::shared_ptr<ActionDataAbstract>& action_data,
+    const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) const {
+  MatrixXs dx_dp(state_->get_ndx(), np_action_);
+  calcDiff_action(data, action_data, dx_dp, x, u);
+  return dx_dp;
+}
+
+template <typename Scalar>
 void ParameterManagerTpl<Scalar>::calcDiff_dynamics(
     const std::shared_ptr<ParameterDataManager>& data,
     const std::shared_ptr<DynamicsDataAbstract>& dynamics_data,
-    const Eigen::Ref<const VectorXs>& x,
+    Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
     const Eigen::Ref<const VectorXs>& u) const {
   assertDataIsConsistent(data);
   if (dynamics_data == nullptr) {
@@ -247,7 +264,12 @@ void ParameterManagerTpl<Scalar>::calcDiff_dynamics(
     throw_pretty("Invalid argument: u has wrong dimension (it should be "
                  << dynamics_data->Fu.cols() << ")");
   }
-  data->params->dtau_dp.setZero();
+  if (static_cast<std::size_t>(dtau_dp.rows()) != state_->get_nv() ||
+      static_cast<std::size_t>(dtau_dp.cols()) != np_dynamics_) {
+    throw_pretty("Invalid argument: dtau_dp has wrong dimension (it should be "
+                 << state_->get_nv() << " by " << np_dynamics_ << ")");
+  }
+  dtau_dp.setZero();
 
   std::size_t offset = 0;
   typename ParameterContainer::const_iterator model_it =
@@ -261,11 +283,23 @@ void ParameterManagerTpl<Scalar>::calcDiff_dynamics(
     if (item->active_) {
       const std::shared_ptr<DynamicsParamsAbstract> param =
           std::static_pointer_cast<DynamicsParamsAbstract>(item->param_);
-      param->computeJointTorqueRegressor(dynamics_data, data_it->second, x, u);
-      data->params->dtau_dp.middleCols(offset, np) = data_it->second->dtau_dp;
+      param->computeJointTorqueRegressor(dynamics_data, data_it->second,
+                                         dtau_dp.middleCols(offset, np), x, u);
       offset += np;
     }
   }
+}
+
+template <typename Scalar>
+typename ParameterManagerTpl<Scalar>::MatrixXs
+ParameterManagerTpl<Scalar>::calcDiff_dynamics_x(
+    const std::shared_ptr<ParameterDataManager>& data,
+    const std::shared_ptr<DynamicsDataAbstract>& dynamics_data,
+    const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) const {
+  MatrixXs dtau_dp(state_->get_nv(), np_dynamics_);
+  calcDiff_dynamics(data, dynamics_data, dtau_dp, x, u);
+  return dtau_dp;
 }
 
 template <typename Scalar>
@@ -463,13 +497,7 @@ void ParameterManagerTpl<Scalar>::assertDataIsConsistent(
   }
   if (data->params->np_action != np_action_ ||
       data->params->np_dynamics != np_dynamics_ || data->params->np != np_ ||
-      static_cast<std::size_t>(data->params->p.size()) != np_ ||
-      static_cast<std::size_t>(data->params->dx_dp.rows()) !=
-          state_->get_ndx() ||
-      static_cast<std::size_t>(data->params->dx_dp.cols()) != np_action_ ||
-      static_cast<std::size_t>(data->params->dtau_dp.rows()) !=
-          state_->get_nv() ||
-      static_cast<std::size_t>(data->params->dtau_dp.cols()) != np_dynamics_) {
+      static_cast<std::size_t>(data->params->p.size()) != np_) {
     throw_pretty(
         "Invalid argument: parameter data dimensions are stale. Resize after "
         "status changes or recreate after adding/removing models");
@@ -495,11 +523,7 @@ std::size_t ParameterManagerTpl<Scalar>::assertItemDataIsConsistent(
       !item->param_->checkData(item_data) ||
       item_data->np_action != np_action ||
       item_data->np_dynamics != np_dynamics ||
-      static_cast<std::size_t>(item_data->p.size()) != np ||
-      static_cast<std::size_t>(item_data->dx_dp.rows()) != state_->get_ndx() ||
-      static_cast<std::size_t>(item_data->dx_dp.cols()) != np_action ||
-      static_cast<std::size_t>(item_data->dtau_dp.rows()) != state_->get_nv() ||
-      static_cast<std::size_t>(item_data->dtau_dp.cols()) != np_dynamics) {
+      static_cast<std::size_t>(item_data->p.size()) != np) {
     throw_pretty("Invalid argument: " << (action ? "action" : "dynamics")
                                       << " parameter data for '" << name
                                       << "' is inconsistent");
@@ -515,8 +539,8 @@ ParameterDataManagerTpl<Scalar>::ParameterDataManagerTpl(
     throw_pretty("Invalid argument: parameter manager is null");
   }
   this->params = std::allocate_shared<ParamsDataAbstract>(
-      Eigen::aligned_allocator<ParamsDataAbstract>(), model->get_state(),
-      model->get_np_action(), model->get_np_dynamics());
+      Eigen::aligned_allocator<ParamsDataAbstract>(), model->get_np_action(),
+      model->get_np_dynamics());
 
   const typename ParameterManager::ParameterContainer& action_models =
       model->get_action_params();
@@ -529,13 +553,7 @@ ParameterDataManagerTpl<Scalar>::ParameterDataManagerTpl(
     if (item_data == nullptr ||
         !it->second->get_param()->checkData(item_data) ||
         item_data->np_action != np || item_data->np_dynamics != 0 ||
-        static_cast<std::size_t>(item_data->p.size()) != np ||
-        static_cast<std::size_t>(item_data->dx_dp.rows()) !=
-            model->get_state()->get_ndx() ||
-        static_cast<std::size_t>(item_data->dx_dp.cols()) != np ||
-        static_cast<std::size_t>(item_data->dtau_dp.rows()) !=
-            model->get_state()->get_nv() ||
-        item_data->dtau_dp.cols() != 0) {
+        static_cast<std::size_t>(item_data->p.size()) != np) {
       throw_pretty("Invalid argument: action parameter model '"
                    << it->first << "' created inconsistent data");
     }
@@ -553,13 +571,7 @@ ParameterDataManagerTpl<Scalar>::ParameterDataManagerTpl(
     if (item_data == nullptr ||
         !it->second->get_param()->checkData(item_data) ||
         item_data->np_action != 0 || item_data->np_dynamics != np ||
-        static_cast<std::size_t>(item_data->p.size()) != np ||
-        static_cast<std::size_t>(item_data->dx_dp.rows()) !=
-            model->get_state()->get_ndx() ||
-        item_data->dx_dp.cols() != 0 ||
-        static_cast<std::size_t>(item_data->dtau_dp.rows()) !=
-            model->get_state()->get_nv() ||
-        static_cast<std::size_t>(item_data->dtau_dp.cols()) != np) {
+        static_cast<std::size_t>(item_data->p.size()) != np) {
       throw_pretty("Invalid argument: dynamics parameter model '"
                    << it->first << "' created inconsistent data");
     }
@@ -608,13 +620,7 @@ void ParameterDataManagerTpl<Scalar>::resize(
     if (model_it->first != data_it->first || data_it->second == nullptr ||
         !model_it->second->get_param()->checkData(data_it->second) ||
         data_it->second->np_action != np || data_it->second->np_dynamics != 0 ||
-        static_cast<std::size_t>(data_it->second->p.size()) != np ||
-        static_cast<std::size_t>(data_it->second->dx_dp.rows()) !=
-            model->get_state()->get_ndx() ||
-        static_cast<std::size_t>(data_it->second->dx_dp.cols()) != np ||
-        static_cast<std::size_t>(data_it->second->dtau_dp.rows()) !=
-            model->get_state()->get_nv() ||
-        data_it->second->dtau_dp.cols() != 0) {
+        static_cast<std::size_t>(data_it->second->p.size()) != np) {
       throw_pretty(
           "Invalid argument: parameter data names are stale. Recreate data "
           "after adding or removing models");
@@ -627,13 +633,7 @@ void ParameterDataManagerTpl<Scalar>::resize(
     if (model_it->first != data_it->first || data_it->second == nullptr ||
         !model_it->second->get_param()->checkData(data_it->second) ||
         data_it->second->np_action != 0 || data_it->second->np_dynamics != np ||
-        static_cast<std::size_t>(data_it->second->p.size()) != np ||
-        static_cast<std::size_t>(data_it->second->dx_dp.rows()) !=
-            model->get_state()->get_ndx() ||
-        data_it->second->dx_dp.cols() != 0 ||
-        static_cast<std::size_t>(data_it->second->dtau_dp.rows()) !=
-            model->get_state()->get_nv() ||
-        static_cast<std::size_t>(data_it->second->dtau_dp.cols()) != np) {
+        static_cast<std::size_t>(data_it->second->p.size()) != np) {
       throw_pretty(
           "Invalid argument: parameter data names are stale. Recreate data "
           "after adding or removing models");

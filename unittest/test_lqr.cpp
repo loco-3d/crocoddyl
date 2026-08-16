@@ -557,10 +557,11 @@ void test_parameter_model_manager_and_scalar_casts() {
   Model sensitivity_model(nx, nu, np);
   const std::shared_ptr<typename Model::ActionDataAbstract> sensitivity_data =
       sensitivity_model.createData();
-  params_data->dx_dp.setOnes();
-  params->computeParamSensitivity(sensitivity_data, params_data,
+  typename Params::MatrixXs dx_dp(nx, np);
+  dx_dp.setOnes();
+  params->computeParamSensitivity(sensitivity_data, params_data, dx_dp,
                                   VectorXs::Zero(nx), VectorXs::Zero(nu));
-  BOOST_CHECK(params_data->dx_dp.isZero());
+  BOOST_CHECK(dx_dp.isZero());
 
   const crocoddyl::ParamsModelBase& params_base = *params;
   const std::shared_ptr<crocoddyl::ParamsAbstractTpl<OtherScalar> >
@@ -613,10 +614,10 @@ void test_parameter_model_manager_and_scalar_casts() {
   BOOST_CHECK(manager_data->params->p.isApprox(p));
   BOOST_CHECK(manager_data->action_params.at("lqr")->p.isApprox(p));
   BOOST_CHECK(manager_data->action_params.at("inactive")->p.isZero());
-  manager_data->params->dx_dp.setOnes();
-  manager->calcDiff_action(manager_data, data, VectorXs::Zero(nx),
+  dx_dp.setOnes();
+  manager->calcDiff_action(manager_data, data, dx_dp, VectorXs::Zero(nx),
                            VectorXs::Zero(nu));
-  BOOST_CHECK(manager_data->params->dx_dp.isZero());
+  BOOST_CHECK(dx_dp.isZero());
 
   const std::shared_ptr<typename Model::ActionDataAbstract> null_shared_data =
       model.createData(std::shared_ptr<ParameterDataManager>());

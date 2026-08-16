@@ -9,6 +9,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include <array>
 #include <type_traits>
 #include <utility>
 
@@ -46,6 +47,7 @@ class ActionParamsProbeTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   ActionParamsProbeTpl(std::shared_ptr<StateAbstract> state,
                        const std::size_t np, const Scalar scale)
@@ -73,14 +75,13 @@ class ActionParamsProbeTpl
   void computeParamSensitivity(
       const std::shared_ptr<ActionDataAbstract>&,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>&,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>&,
       const Eigen::Ref<const VectorXs>&) override {
     if (params == nullptr) {
       throw_pretty("Invalid argument: action parameter data is null");
     }
     for (std::size_t j = 0; j < this->np_; ++j) {
-      params->dx_dp.col(static_cast<Eigen::Index>(j))
-          .setConstant(scale + Scalar(j));
+      dx_dp.col(static_cast<Eigen::Index>(j)).setConstant(scale + Scalar(j));
     }
     ++sensitivity_calls;
   }
@@ -114,6 +115,7 @@ class DynamicsParamsProbeTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   DynamicsParamsProbeTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t np, const Scalar scale)
@@ -142,14 +144,13 @@ class DynamicsParamsProbeTpl
   void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>&,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>&,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>&,
       const Eigen::Ref<const VectorXs>&) override {
     if (params == nullptr) {
       throw_pretty("Invalid argument: dynamics parameter data is null");
     }
     for (std::size_t j = 0; j < this->np_; ++j) {
-      params->dtau_dp.col(static_cast<Eigen::Index>(j))
-          .setConstant(scale + Scalar(j));
+      dtau_dp.col(static_cast<Eigen::Index>(j)).setConstant(scale + Scalar(j));
     }
     ++regressor_calls;
   }
@@ -168,6 +169,77 @@ class DynamicsParamsProbeTpl
   mutable std::size_t check_calls;
   std::size_t update_calls;
   std::size_t regressor_calls;
+};
+
+template <typename _Scalar>
+class NodeDependentActionParamsTpl
+    : public crocoddyl::ActionModelParamsAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ActionModelParamsAbstractTpl<Scalar> Base;
+  typedef typename Base::ActionDataAbstract ActionDataAbstract;
+  typedef typename Base::MatrixXs MatrixXs;
+  typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  NodeDependentActionParamsTpl(std::shared_ptr<StateAbstract> state,
+                               const std::size_t np)
+      : Base(state, np) {}
+
+  void update(const std::shared_ptr<ParamsDataAbstract>& data,
+              const Eigen::Ref<const VectorXs>& p) override {
+    data->p = p;
+  }
+
+  void computeParamSensitivity(
+      const std::shared_ptr<ActionDataAbstract>&,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override {
+    for (std::size_t j = 0; j < this->np_; ++j) {
+      dx_dp.col(static_cast<Eigen::Index>(j))
+          .setConstant(x[0] + u[0] + params->p[static_cast<Eigen::Index>(j)]);
+    }
+  }
+};
+
+template <typename _Scalar>
+class NodeDependentDynamicsParamsTpl
+    : public crocoddyl::DynamicsParamsAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::DynamicsParamsAbstractTpl<Scalar> Base;
+  typedef typename Base::DynamicsDataAbstract DynamicsDataAbstract;
+  typedef typename Base::MatrixXs MatrixXs;
+  typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  NodeDependentDynamicsParamsTpl(std::shared_ptr<StateAbstract> state,
+                                 const std::size_t np)
+      : Base(state, np) {}
+
+  void update(const std::shared_ptr<ParamsDataAbstract>& data,
+              const Eigen::Ref<const VectorXs>& p) override {
+    data->p = p;
+  }
+
+  void computeJointTorqueRegressor(
+      const std::shared_ptr<DynamicsDataAbstract>& data,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override {
+    for (std::size_t j = 0; j < this->np_; ++j) {
+      dtau_dp.col(static_cast<Eigen::Index>(j))
+          .setConstant(x[0] + data->vdot[0] + u[0] +
+                       params->p[static_cast<Eigen::Index>(j)]);
+    }
+  }
 };
 
 template <typename Scalar>
@@ -368,11 +440,15 @@ void test_order_update_derivatives_and_data() {
       std::make_shared<DynamicsData>(&dynamics_model);
   const VectorXs x = VectorXs::LinSpaced(4, Scalar(0.1), Scalar(0.4));
   const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
-  data->params->dx_dp.setConstant(Scalar(999));
-  data->params->dtau_dp.setConstant(Scalar(999));
+  typename Manager::MatrixXs dx_dp(fixture.state->get_ndx(),
+                                   fixture.manager.get_np_action());
+  typename Manager::MatrixXs dtau_dp(fixture.state->get_nv(),
+                                     fixture.manager.get_np_dynamics());
+  dx_dp.setConstant(Scalar(999));
+  dtau_dp.setConstant(Scalar(999));
   const std::size_t action_checks_before = fixture.action_alpha->check_calls;
   const std::size_t dynamics_checks_before = fixture.dynamics_beta->check_calls;
-  fixture.manager.calcDiff_action(data, action_data, x, u);
+  fixture.manager.calcDiff_action(data, action_data, dx_dp, x, u);
   BOOST_CHECK_EQUAL(fixture.action_alpha->check_calls,
                     action_checks_before + 1u);
   BOOST_CHECK_EQUAL(fixture.action_middle->check_calls,
@@ -383,7 +459,7 @@ void test_order_update_derivatives_and_data() {
                     dynamics_idle_checks + 1u);
   BOOST_CHECK_EQUAL(fixture.dynamics_zulu->check_calls,
                     dynamics_zulu_checks + 1u);
-  fixture.manager.calcDiff_dynamics(data, dynamics_data, x, u);
+  fixture.manager.calcDiff_dynamics(data, dynamics_data, dtau_dp, x, u);
   BOOST_CHECK_EQUAL(fixture.action_alpha->check_calls,
                     action_checks_before + 1u);
   BOOST_CHECK_EQUAL(fixture.action_middle->check_calls,
@@ -395,28 +471,24 @@ void test_order_update_derivatives_and_data() {
                     dynamics_idle_checks + 2u);
   BOOST_CHECK_EQUAL(fixture.dynamics_zulu->check_calls,
                     dynamics_zulu_checks + 2u);
-  BOOST_CHECK(data->params->dx_dp.col(0).isConstant(Scalar(10)));
-  BOOST_CHECK(data->params->dx_dp.col(1).isConstant(Scalar(11)));
-  BOOST_CHECK(data->params->dx_dp.col(2).isConstant(Scalar(30)));
-  BOOST_CHECK(data->params->dtau_dp.col(0).isConstant(Scalar(40)));
-  BOOST_CHECK(data->params->dtau_dp.col(1).isConstant(Scalar(50)));
-  BOOST_CHECK(data->params->dtau_dp.col(2).isConstant(Scalar(51)));
+  BOOST_CHECK(dx_dp.col(0).isConstant(Scalar(10)));
+  BOOST_CHECK(dx_dp.col(1).isConstant(Scalar(11)));
+  BOOST_CHECK(dx_dp.col(2).isConstant(Scalar(30)));
+  BOOST_CHECK(dtau_dp.col(0).isConstant(Scalar(40)));
+  BOOST_CHECK(dtau_dp.col(1).isConstant(Scalar(50)));
+  BOOST_CHECK(dtau_dp.col(2).isConstant(Scalar(51)));
   BOOST_CHECK_EQUAL(fixture.action_alpha->sensitivity_calls, 1u);
   BOOST_CHECK_EQUAL(fixture.action_zeta->sensitivity_calls, 1u);
   BOOST_CHECK_EQUAL(fixture.action_middle->sensitivity_calls, 0u);
   BOOST_CHECK_EQUAL(fixture.dynamics_beta->regressor_calls, 1u);
   BOOST_CHECK_EQUAL(fixture.dynamics_zulu->regressor_calls, 1u);
   BOOST_CHECK_EQUAL(fixture.dynamics_idle->regressor_calls, 0u);
-  data->params->dx_dp.setConstant(Scalar(-999));
-  data->params->dtau_dp.setConstant(Scalar(-999));
-  fixture.manager.calcDiff_action(data, action_data, x, u);
-  fixture.manager.calcDiff_dynamics(data, dynamics_data, x, u);
-  BOOST_CHECK(data->params->dx_dp.col(0).isConstant(Scalar(10)));
-  BOOST_CHECK(data->params->dx_dp.col(1).isConstant(Scalar(11)));
-  BOOST_CHECK(data->params->dx_dp.col(2).isConstant(Scalar(30)));
-  BOOST_CHECK(data->params->dtau_dp.col(0).isConstant(Scalar(40)));
-  BOOST_CHECK(data->params->dtau_dp.col(1).isConstant(Scalar(50)));
-  BOOST_CHECK(data->params->dtau_dp.col(2).isConstant(Scalar(51)));
+  const typename Manager::MatrixXs returned_dx_dp =
+      fixture.manager.calcDiff_action_x(data, action_data, x, u);
+  const typename Manager::MatrixXs returned_dtau_dp =
+      fixture.manager.calcDiff_dynamics_x(data, dynamics_data, x, u);
+  BOOST_CHECK(returned_dx_dp.isApprox(dx_dp));
+  BOOST_CHECK(returned_dtau_dp.isApprox(dtau_dp));
   BOOST_CHECK_EQUAL(fixture.action_alpha->sensitivity_calls, 2u);
   BOOST_CHECK_EQUAL(fixture.action_zeta->sensitivity_calls, 2u);
   BOOST_CHECK_EQUAL(fixture.action_middle->sensitivity_calls, 0u);
@@ -434,39 +506,31 @@ void test_order_update_derivatives_and_data() {
   BOOST_CHECK(!stream.str().empty());
 
   data->params->p.setOnes();
-  data->params->dx_dp.setOnes();
-  data->params->dtau_dp.setOnes();
   data->params->active = false;
   for (typename Manager::ParameterDataManager::ParameterDataContainer::iterator
            it = data->action_params.begin();
        it != data->action_params.end(); ++it) {
     it->second->p.setOnes();
-    it->second->dx_dp.setOnes();
   }
   for (typename Manager::ParameterDataManager::ParameterDataContainer::iterator
            it = data->dynamics_params.begin();
        it != data->dynamics_params.end(); ++it) {
     it->second->p.setOnes();
-    it->second->dtau_dp.setOnes();
   }
   data->action_params.at("middle")->active = false;
   data->setZero();
   BOOST_CHECK(data->params->p.isZero());
-  BOOST_CHECK(data->params->dx_dp.isZero());
-  BOOST_CHECK(data->params->dtau_dp.isZero());
   BOOST_CHECK(!data->params->active);
   BOOST_CHECK(!data->action_params.at("middle")->active);
   for (typename Manager::ParameterDataManager::ParameterDataContainer::iterator
            it = data->action_params.begin();
        it != data->action_params.end(); ++it) {
     BOOST_CHECK(it->second->p.isZero());
-    BOOST_CHECK(it->second->dx_dp.isZero());
   }
   for (typename Manager::ParameterDataManager::ParameterDataContainer::iterator
            it = data->dynamics_params.begin();
        it != data->dynamics_params.end(); ++it) {
     BOOST_CHECK(it->second->p.isZero());
-    BOOST_CHECK(it->second->dtau_dp.isZero());
   }
 
   BOOST_CHECK_THROW(fixture.manager.update(data, VectorXs::Zero(5)),
@@ -477,17 +541,27 @@ void test_order_update_derivatives_and_data() {
       std::exception);
   BOOST_CHECK_THROW(
       fixture.manager.calcDiff_action(
-          data, std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >(), x,
-          u),
+          data, std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >(),
+          dx_dp, x, u),
       std::exception);
   BOOST_CHECK_THROW(fixture.manager.calcDiff_dynamics(
-                        data, std::shared_ptr<DynamicsData>(), x, u),
+                        data, std::shared_ptr<DynamicsData>(), dtau_dp, x, u),
                     std::exception);
+  BOOST_CHECK_THROW(fixture.manager.calcDiff_action(data, action_data, dx_dp,
+                                                    VectorXs::Zero(3), u),
+                    std::exception);
+  BOOST_CHECK_THROW(fixture.manager.calcDiff_dynamics(
+                        data, dynamics_data, dtau_dp, x, VectorXs::Zero(3)),
+                    std::exception);
+  typename Manager::MatrixXs wrong_dx_dp(fixture.state->get_ndx() + 1,
+                                         fixture.manager.get_np_action());
+  typename Manager::MatrixXs wrong_dtau_dp(
+      fixture.state->get_nv(), fixture.manager.get_np_dynamics() + 1);
   BOOST_CHECK_THROW(
-      fixture.manager.calcDiff_action(data, action_data, VectorXs::Zero(3), u),
+      fixture.manager.calcDiff_action(data, action_data, wrong_dx_dp, x, u),
       std::exception);
-  BOOST_CHECK_THROW(fixture.manager.calcDiff_dynamics(data, dynamics_data, x,
-                                                      VectorXs::Zero(3)),
+  BOOST_CHECK_THROW(fixture.manager.calcDiff_dynamics(data, dynamics_data,
+                                                      wrong_dtau_dp, x, u),
                     std::exception);
 }
 
@@ -768,22 +842,26 @@ void test_parameter_manager_no_allocation() {
   const VectorXs p = VectorXs::LinSpaced(6, Scalar(1), Scalar(6));
   const VectorXs x = VectorXs::LinSpaced(4, Scalar(0.1), Scalar(0.4));
   const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
+  typename Manager::MatrixXs dx_dp(fixture.state->get_ndx(),
+                                   fixture.manager.get_np_action());
+  typename Manager::MatrixXs dtau_dp(fixture.state->get_nv(),
+                                     fixture.manager.get_np_dynamics());
   fixture.manager.update(data, p);
-  fixture.manager.calcDiff_action(data, action_data, x, u);
-  fixture.manager.calcDiff_dynamics(data, dynamics_data, x, u);
+  fixture.manager.calcDiff_action(data, action_data, dx_dp, x, u);
+  fixture.manager.calcDiff_dynamics(data, dynamics_data, dtau_dp, x, u);
   data->setZero();
   data->resize(&fixture.manager);
   const Scalar* const p_ptr = data->params->p.data();
-  const Scalar* const dx_dp_ptr = data->params->dx_dp.data();
-  const Scalar* const dtau_dp_ptr = data->params->dtau_dp.data();
+  const Scalar* const dx_dp_ptr = dx_dp.data();
+  const Scalar* const dtau_dp_ptr = dtau_dp.data();
 
   const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
   Eigen::internal::set_is_malloc_allowed(false);
   try {
     for (std::size_t i = 0; i < 100; ++i) {
       fixture.manager.update(data, p);
-      fixture.manager.calcDiff_action(data, action_data, x, u);
-      fixture.manager.calcDiff_dynamics(data, dynamics_data, x, u);
+      fixture.manager.calcDiff_action(data, action_data, dx_dp, x, u);
+      fixture.manager.calcDiff_dynamics(data, dynamics_data, dtau_dp, x, u);
       data->setZero();
       data->resize(&fixture.manager);
     }
@@ -794,8 +872,73 @@ void test_parameter_manager_no_allocation() {
   }
 
   BOOST_CHECK_EQUAL(data->params->p.data(), p_ptr);
-  BOOST_CHECK_EQUAL(data->params->dx_dp.data(), dx_dp_ptr);
-  BOOST_CHECK_EQUAL(data->params->dtau_dp.data(), dtau_dp_ptr);
+  BOOST_CHECK_EQUAL(dx_dp.data(), dx_dp_ptr);
+  BOOST_CHECK_EQUAL(dtau_dp.data(), dtau_dp_ptr);
+}
+
+template <typename Scalar>
+void test_shared_parameter_context_with_parallel_node_workspaces() {
+  typedef crocoddyl::ActionModelLQRTpl<Scalar> ActionModel;
+  typedef crocoddyl::DynamicsDataAbstractTpl<Scalar> DynamicsData;
+  typedef crocoddyl::ParameterManagerTpl<Scalar> Manager;
+  typedef crocoddyl::StateVectorTpl<Scalar> State;
+  typedef typename Manager::MatrixXs MatrixXs;
+  typedef typename Manager::VectorXs VectorXs;
+
+  const std::shared_ptr<State> state = std::make_shared<State>(4);
+  Manager manager(state);
+  manager.addParam(
+      "node",
+      std::make_shared<NodeDependentActionParamsTpl<Scalar> >(state, 2));
+  manager.addParam(
+      "node_dynamics",
+      std::make_shared<NodeDependentDynamicsParamsTpl<Scalar> >(state, 2));
+  const std::shared_ptr<typename Manager::ParameterDataManager> params_data =
+      manager.createData();
+  VectorXs p(4);
+  p << Scalar(0.2), Scalar(0.6), Scalar(1.2), Scalar(1.6);
+  manager.update(params_data, p);
+
+  ActionModel action(4, 1);
+  std::array<std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> >, 2>
+      action_data = {{action.createData(), action.createData()}};
+  std::array<VectorXs, 2> x = {
+      {VectorXs::Constant(4, Scalar(1.)), VectorXs::Constant(4, Scalar(3.))}};
+  const VectorXs u = VectorXs::Constant(1, Scalar(0.5));
+  DynamicsDataModelStubTpl<Scalar> dynamics_model(state, 1);
+  std::array<std::shared_ptr<DynamicsData>, 2> dynamics_data = {
+      {std::make_shared<DynamicsData>(&dynamics_model),
+       std::make_shared<DynamicsData>(&dynamics_model)}};
+  dynamics_data[0]->vdot.setConstant(Scalar(2.));
+  dynamics_data[1]->vdot.setConstant(Scalar(4.));
+  std::array<MatrixXs, 2> dx_dp = {
+      {MatrixXs(state->get_ndx(), 2), MatrixXs(state->get_ndx(), 2)}};
+  std::array<MatrixXs, 2> dtau_dp = {
+      {MatrixXs(state->get_nv(), 2), MatrixXs(state->get_nv(), 2)}};
+
+  for (std::size_t repeat = 0; repeat < 100; ++repeat) {
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(2)
+#endif
+    for (std::size_t i = 0; i < 2; ++i) {
+      manager.calcDiff_action(params_data, action_data[i], dx_dp[i], x[i], u);
+      manager.calcDiff_dynamics(params_data, dynamics_data[i], dtau_dp[i], x[i],
+                                u);
+    }
+  }
+
+  for (std::size_t i = 0; i < 2; ++i) {
+    for (std::size_t j = 0; j < 2; ++j) {
+      BOOST_CHECK(
+          dx_dp[i]
+              .col(static_cast<Eigen::Index>(j))
+              .isConstant(x[i][0] + u[0] + p[static_cast<Eigen::Index>(j)]));
+      BOOST_CHECK(dtau_dp[i]
+                      .col(static_cast<Eigen::Index>(j))
+                      .isConstant(x[i][0] + dynamics_data[i]->vdot[0] + u[0] +
+                                  p[static_cast<Eigen::Index>(2 + j)]));
+    }
+  }
 }
 
 }  // namespace
@@ -816,6 +959,10 @@ bool init_function() {
   ts->add(BOOST_TEST_CASE(&test_manager_copy_and_nonempty_scalar_cast<float>));
   ts->add(BOOST_TEST_CASE(&test_parameter_manager_no_allocation<double>));
   ts->add(BOOST_TEST_CASE(&test_parameter_manager_no_allocation<float>));
+  ts->add(BOOST_TEST_CASE(
+      &test_shared_parameter_context_with_parallel_node_workspaces<double>));
+  ts->add(BOOST_TEST_CASE(
+      &test_shared_parameter_context_with_parallel_node_workspaces<float>));
   framework::master_test_suite().add(ts);
   return true;
 }

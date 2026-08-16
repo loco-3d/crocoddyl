@@ -559,15 +559,17 @@ void test_actuation_multibody_params_friction() {
 
   const Eigen::VectorXd x = state->rand();
   const Eigen::VectorXd u = Eigen::VectorXd::Random(actuation->get_nu());
+  Eigen::MatrixXd dtau_dp(state->get_nv(), params.get_np());
   params.computeJointTorqueRegressor(
-      std::shared_ptr<crocoddyl::DynamicsDataAbstract>(), data_base, x, u);
+      std::shared_ptr<crocoddyl::DynamicsDataAbstract>(), data_base, dtau_dp, x,
+      u);
 
   Eigen::MatrixXd expected = Eigen::MatrixXd::Zero(state->get_nv(), 3);
   friction->computeJointTorqueRegressor(
       expected.block(joint.idx_v(), 0, joint.nv(), 3),
       x.segment(joint.idx_q(), joint.nq()),
       x.segment(state->get_nq() + joint.idx_v(), joint.nv()), u);
-  BOOST_CHECK(data->dtau_dp.isApprox(expected));
+  BOOST_CHECK(dtau_dp.isApprox(expected));
 }
 
 void test_actuation_multibody_params_fixed_smoothing_friction() {
@@ -627,15 +629,15 @@ void test_actuation_multibody_params_fixed_smoothing_friction() {
   DynamicsDataProbeTpl<double> dynamics(state, actuation->get_nu());
   const std::shared_ptr<crocoddyl::DynamicsDataAbstract> dynamics_data =
       dynamics.createData();
-  manager->calcDiff_dynamics(data_base, dynamics_data, x, u);
+  Eigen::MatrixXd dtau_dp(state->get_nv(), manager->get_np_dynamics());
+  manager->calcDiff_dynamics(data_base, dynamics_data, dtau_dp, x, u);
 
   Eigen::MatrixXd expected = Eigen::MatrixXd::Zero(state->get_nv(), 2);
   friction->computeJointTorqueRegressor(
       expected.block(joint.idx_v(), 0, joint.nv(), 2),
       x.segment(joint.idx_q(), joint.nq()),
       x.segment(state->get_nq() + joint.idx_v(), joint.nv()), u);
-  BOOST_CHECK(data->dtau_dp.isApprox(expected));
-  BOOST_CHECK(data_base->params->dtau_dp.isApprox(expected));
+  BOOST_CHECK(dtau_dp.isApprox(expected));
 }
 
 void test_actuation_multibody_params_thruster() {
@@ -707,13 +709,17 @@ void test_actuation_multibody_params_thruster() {
   BOOST_CHECK(actuation->get_u_ub()
                   .tail(actuation->get_nu() - 4)
                   .isApprox(pin_model->effortLimit.tail(state->get_nv() - 6)));
+  Eigen::MatrixXd dtau_dp(state->get_nv(), params.get_np());
   params.computeJointTorqueRegressor(
-      std::shared_ptr<crocoddyl::DynamicsDataAbstract>(), data_base, x, u);
+      std::shared_ptr<crocoddyl::DynamicsDataAbstract>(), data_base, dtau_dp, x,
+      u);
 
-  Eigen::MatrixXd expected = Eigen::MatrixXd::Zero(state->get_nv(), 4);
+  Eigen::MatrixXd expected_reference =
+      Eigen::MatrixXd::Zero(state->get_nv(), 4);
   thruster->computeJointTorqueRegressor(
-      expected.topRows(6), x.head(7), x.segment(state->get_nq(), 6), u.head(4));
-  BOOST_CHECK(data->dtau_dp.isApprox(expected));
+      expected_reference.topRows(6), x.head(7), x.segment(state->get_nq(), 6),
+      u.head(4));
+  BOOST_CHECK(dtau_dp.isApprox(expected_reference));
 }
 
 template <typename Scalar>
@@ -957,8 +963,6 @@ void test_multibody_parameter_layout_manager_and_copy() {
                   base_data) != nullptr);
   BOOST_CHECK_EQUAL(data->np_action, 0);
   BOOST_CHECK_EQUAL(data->np_dynamics, 3);
-  BOOST_CHECK_EQUAL(data->dtau_dp.rows(), state->get_nv());
-  BOOST_CHECK_EQUAL(data->dtau_dp.cols(), 3);
 
   VectorXs p(3);
   p << Scalar(-0.9), Scalar(0.8), Scalar(-1.1);
@@ -981,8 +985,10 @@ void test_multibody_parameter_layout_manager_and_copy() {
       dynamics_data = dynamics.createData();
   const VectorXs x = state->rand();
   const VectorXs u = VectorXs::Constant(actuation->get_nu(), Scalar(0.3));
-  manager.calcDiff_dynamics(manager_data, dynamics_data, x, u);
-  BOOST_CHECK(manager_data->params->dtau_dp.allFinite());
+  typename ParameterManager::MatrixXs dtau_dp(state->get_nv(),
+                                              manager.get_np_dynamics());
+  manager.calcDiff_dynamics(manager_data, dynamics_data, dtau_dp, x, u);
+  BOOST_CHECK(dtau_dp.allFinite());
 
   ParamsData copied(*data);
   copied.gamma.setZero();

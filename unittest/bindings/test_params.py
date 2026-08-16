@@ -49,8 +49,9 @@ class ActionParamsOverride(crocoddyl.ActionModelParamsAbstract):
         return data
 
     def computeParamSensitivity(self, data, params, x, u):
+        del data, params
         self.sensitivity_calls += 1
-        params.dx_dp = np.full((self.state.ndx, self.np), x.sum() + u.sum())
+        return np.full((self.state.ndx, self.np), x.sum() + u.sum())
 
 
 class ParamsTest(unittest.TestCase):
@@ -81,17 +82,15 @@ class ParamsTest(unittest.TestCase):
         model.ub = ub
         self.assertTrue(np.array_equal(model.lb, lb))
         self.assertTrue(np.array_equal(model.ub, ub))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.lb = np.zeros(4)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.ub = np.zeros(4)
 
         data = model.createData()
         self.assertEqual((data.np, data.np_action, data.np_dynamics), (3, 3, 0))
         self.assertTrue(model.checkData(data))
-        self.assertFalse(
-            model.checkData(crocoddyl.ParamsDataAbstract(self.state, 4, 0))
-        )
+        self.assertFalse(model.checkData(crocoddyl.ParamsDataAbstract(4, 0)))
         data.p = np.ones(3)
         model.update(data, np.zeros(3))
         self.assertTrue(np.array_equal(data.p, np.ones(3)))
@@ -137,19 +136,18 @@ class ParamsTest(unittest.TestCase):
         action_data = action.createData()
         x = np.array([0.1, 0.2, 0.3, 0.4])
         u = np.array([0.5, 0.6])
-        model.computeParamSensitivity(action_data, params, x, u)
+        dx_dp = crocoddyl.ActionModelParamsAbstract.computeParamSensitivity(
+            model, action_data, params, x, u
+        )
         self.assertEqual(model.sensitivity_calls, 1)
-        self.assertTrue(np.allclose(params.dx_dp, x.sum() + u.sum()))
+        self.assertTrue(np.allclose(dx_dp, x.sum() + u.sum()))
 
         action_data_payload = crocoddyl.ActionModelParamsDataAbstract(model)
         base_data_from_derived = crocoddyl.ParamsDataAbstract(model)
         for data in (action_data_payload, base_data_from_derived):
             self.assertEqual((data.np, data.np_action, data.np_dynamics), (3, 3, 0))
             data.p = p
-            data.dx_dp = np.ones((self.state.ndx, 3))
-            data.dtau_dp = np.empty((self.state.nv, 0))
             self.assertTrue(np.array_equal(data.p, p))
-            self.assertTrue(np.array_equal(data.dx_dp, np.ones((self.state.ndx, 3))))
 
         model.update(action_data_payload, p)
         self.assertTrue(model.checkData(action_data_payload))
@@ -157,10 +155,10 @@ class ParamsTest(unittest.TestCase):
         self.assertIs(collector.params, action_data_payload)
 
         with self.assertRaises(TypeError):
-            crocoddyl.ActionModelParamsDataAbstract(self.state, 3)
-        with self.assertRaises(Exception):
+            crocoddyl.ActionModelParamsDataAbstract(3)
+        with self.assertRaises(crocoddyl.Exception):
             crocoddyl.ParamsDataAbstract(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             crocoddyl.ActionModelParamsDataAbstract(None)
 
         default_model = crocoddyl.ActionModelParamsAbstract(self.state, 3)
@@ -194,11 +192,13 @@ class ParamsTest(unittest.TestCase):
                 return data
 
             def computeJointTorqueRegressor(self, data, params, x, u):
+                del params
                 self.regressor_calls += 1
                 columns = np.arange(1, self.np + 1, dtype=dtype)
                 rows = x[: self.state.nv] + u.sum()
-                params.dtau_dp = np.outer(rows, columns).astype(dtype)
-                data.dP_dp = params.dtau_dp.sum(axis=0, keepdims=True)
+                dtau_dp = np.outer(rows, columns).astype(dtype)
+                data.dP_dp = dtau_dp.sum(axis=0, keepdims=True)
+                return dtau_dp
 
         state = module.StateVector(4)
         np_ = 3
@@ -213,8 +213,6 @@ class ParamsTest(unittest.TestCase):
         self.assertEqual(
             (params.np, params.np_action, params.np_dynamics), (np_, 0, np_)
         )
-        self.assertEqual(params.dx_dp.shape, (state.ndx, 0))
-        self.assertEqual(params.dtau_dp.shape, (state.nv, np_))
 
         fallback_params = module.DynamicsParamsAbstract.createData(model)
         self.assertIsInstance(fallback_params, module.DynamicsParamsDataAbstract)
@@ -235,21 +233,23 @@ class ParamsTest(unittest.TestCase):
         dynamics_data = dynamics.createData()
         x = np.array([0.1, 0.2, 0.3, 0.4], dtype=dtype)
         u = np.array([0.5, 0.6], dtype=dtype)
-        model.computeJointTorqueRegressor(dynamics_data, params, x, u)
+        dtau_dp = module.DynamicsParamsAbstract.computeJointTorqueRegressor(
+            model, dynamics_data, params, x, u
+        )
         expected = np.outer(x[: state.nv] + u.sum(), np.arange(1, np_ + 1, dtype=dtype))
         self.assertEqual(model.regressor_calls, 1)
-        self.assertTrue(np.allclose(params.dtau_dp, expected))
+        self.assertTrue(np.allclose(dtau_dp, expected))
         self.assertTrue(
             np.allclose(dynamics_data.dP_dp, expected.sum(axis=0, keepdims=True))
         )
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.lb = np.zeros(np_ + 1, dtype=dtype)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.ub = np.zeros(np_ + 1, dtype=dtype)
         with self.assertRaises(TypeError):
-            module.DynamicsParamsDataAbstract(state, np_)
-        with self.assertRaises(Exception):
+            module.DynamicsParamsDataAbstract(np_)
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsParamsDataAbstract(None)
 
         bare_model = module.DynamicsParamsAbstract(state, np_)
@@ -285,7 +285,8 @@ class ParamsTest(unittest.TestCase):
                 return data_
 
             def computeParamSensitivity(self, data, params, x, u):
-                params.dx_dp = np.full((self.state.ndx, self.np), 4.0, dtype=np.float32)
+                del data, params, x, u
+                return np.full((self.state.ndx, self.np), 4.0, dtype=np.float32)
 
         action_model = FloatActionParams(state, 2)
         action_params = action_model.createData()
@@ -308,13 +309,14 @@ class ParamsTest(unittest.TestCase):
         collector = crocoddyl_float32.DataCollectorParams(action_params)
         self.assertIs(collector.params, action_params)
         action = crocoddyl_float32.ActionModelLQR(4, 2)
-        action_model.computeParamSensitivity(
+        dx_dp = crocoddyl_float32.ActionModelParamsAbstract.computeParamSensitivity(
+            action_model,
             action.createData(),
             action_params,
             np.zeros(4, dtype=np.float32),
             np.zeros(2, dtype=np.float32),
         )
-        self.assertTrue(np.array_equal(action_params.dx_dp, np.full((4, 2), 4.0)))
+        self.assertTrue(np.array_equal(dx_dp, np.full((4, 2), 4.0)))
         self.assertEqual(converted.p.dtype, np.float32)
 
         bare_model = crocoddyl_float32.ActionModelParamsAbstract(state, 2)

@@ -54,21 +54,22 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
             with self.subTest(module=module.__name__):
 
                 class Probe(module.InertialParametrizationAbstract):
-                    def __init__(self):
+                    def __init__(self, scalar_dtype=dtype):
                         super().__init__()
                         self.calls = 0
+                        self.dtype = scalar_dtype
 
                     def fromParametrization(self, data, psi, p):
                         self.calls += 1
-                        psi[:] = np.asarray(p, dtype=dtype) + dtype(1)
+                        psi[:] = np.asarray(p, dtype=self.dtype) + self.dtype(1)
 
                     def toParametrization(self, p, psi):
                         self.calls += 1
-                        p[:] = np.asarray(psi, dtype=dtype) - dtype(1)
+                        p[:] = np.asarray(psi, dtype=self.dtype) - self.dtype(1)
 
                     def updateParametrizationDerivative(self, data, dpsi_dp, p, psi):
                         self.calls += 1
-                        dpsi_dp[:, :] = np.eye(10, dtype=dtype)
+                        dpsi_dp[:, :] = np.eye(10, dtype=self.dtype)
 
                 model = Probe()
                 data = model.createData()
@@ -95,7 +96,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                     fallback.createData(),
                     module.InertialParametrizationDataAbstract,
                 )
-                with self.assertRaises(Exception):
+                with self.assertRaises(RuntimeError):
                     fallback.fromParametrization(data, psi, p)
 
     def test_conversions_derivatives_edges_casts_and_copies(self):
@@ -170,9 +171,9 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                         getattr(target_module, type(model).__name__),
                     )
 
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 module.LogCholeskyParametrizationData(None)
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 module.ExpEigenValueParametrizationData(None)
 
     def test_multibody_layout_resolution_update_copy_and_cast(self):
@@ -202,7 +203,6 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 no_bodies = toggled.createData()
                 self.assertEqual(len(no_bodies.psi), 0)
                 self.assertEqual(len(no_bodies.dpsi_dp), 0)
-                self.assertEqual(no_bodies.dtau_dp.shape, (state.nv, 0))
                 toggled.update(no_bodies, np.zeros(0, dtype=dtype))
                 toggled.changeBodyStatus(joint_name, True)
                 self.assertEqual(toggled.np, 10)
@@ -335,13 +335,12 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                     model.ub[20:], np.full(10, max_value, dtype=dtype)
                 )
                 self.assertFalse(model.checkData(data))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     model.update(data, model.zero())
                 self.assertEqual(model.zero().shape, (30,))
                 self.assertEqual(model.rand().shape, (30,))
                 expanded = model.createData()
                 self.assertEqual(len(expanded.psi), 3)
-                self.assertEqual(expanded.dtau_dp.shape, (state.nv, 30))
 
                 model.changeBodyStatus(frame_name, False)
                 self.assertEqual(model.np, 20)
@@ -376,7 +375,6 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 )
                 final_data = model.createData()
                 model.update(final_data, model.zero())
-                self.assertEqual(final_data.dtau_dp.shape, (state.nv, 30))
                 self.assertTrue(
                     all(np.linalg.norm(jacobian) > 0 for jacobian in final_data.dpsi_dp)
                 )
@@ -386,14 +384,14 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 short_psi.append(np.zeros(10, dtype=dtype))
                 wrong_psi.psi = short_psi
                 self.assertFalse(model.checkData(wrong_psi))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     model.update(wrong_psi, model.zero())
                 wrong_dpsi_dp = model.createData()
                 short_dpsi_dp = module.StdVec_Matrix10()
                 short_dpsi_dp.append(np.zeros((10, 10), dtype=dtype))
                 wrong_dpsi_dp.dpsi_dp = short_dpsi_dp
                 self.assertFalse(model.checkData(wrong_dpsi_dp))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     model.update(wrong_dpsi_dp, model.zero())
 
                 independent_model = copy.copy(model)
@@ -424,17 +422,17 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                     state, module.LogCholeskyParametrization(), []
                 )
                 self.assertEqual(empty.np, 0)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.MultibodyInertialParams(
                         state, parametrization, [joint_name, joint_name]
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.MultibodyInertialParams(state, parametrization, ["universe"])
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.MultibodyInertialParams(
                         state, parametrization, ["missing-body"]
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.MultibodyInertialParamsData(None)
 
     def test_parameter_manager_and_regressor_binding(self):
@@ -482,9 +480,9 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 second_body = self.state64.pinocchio.names[2]
                 inertial.changeBodyStatus(second_body, True)
                 self.assertEqual(inertial.np, 20)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     manager.update(manager_data, p)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     dynamics.update_p(data, p)
 
                 reconfigured = module.MultibodyInertialParams(
@@ -499,7 +497,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 reconfigured.changeBodyStatus(second_body, True)
                 rebuilt.addParam("inertial", reconfigured)
                 self.assertEqual(rebuilt.np, 20)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     rebuilt.update(old_data, np.zeros(20, dtype=dtype))
                 rebuilt_data = rebuilt.createData()
                 rebuilt_p = np.zeros(20, dtype=dtype)

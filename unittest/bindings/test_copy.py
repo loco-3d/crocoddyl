@@ -84,7 +84,7 @@ class ActionsTest(CopyModelTestCase):
 
 
 class DynamicsModelsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
     actuation = crocoddyl.ActuationModelMultibody(state)
@@ -262,7 +262,7 @@ class ControlsTest(CopyModelTestCase):
 
 
 class JointDynamicsTest(CopyModelTestCase):
-    MODEL = list()
+    MODEL = []
     DATA = True
     if hasattr(crocoddyl, "JointDynamicsModelIdentity"):
         MODEL.append(crocoddyl.JointDynamicsModelIdentity(2, 1, 1))
@@ -296,7 +296,7 @@ class DataCollectorsTest(CopyModelTestCase):
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
     jdata = crocoddyl.JointDataAbstract(state, actuation, actuation.nu)
-    params = crocoddyl.ParamsDataAbstract(state, 2, 3)
+    params = crocoddyl.ParamsDataAbstract(2, 3)
     MODEL.append(params)
     MODEL.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.DataCollectorParams(params))

@@ -276,8 +276,8 @@ struct DynamicsDataImpulseForwardTpl : public DynamicsDataAbstractTpl<_Scalar> {
                 : (params != nullptr
                        ? params->params
                        : std::allocate_shared<ParamsDataAbstract>(
-                             Eigen::aligned_allocator<ParamsDataAbstract>(),
-                             model->get_state(), 0, model->get_np()))),
+                             Eigen::aligned_allocator<ParamsDataAbstract>(), 0,
+                             model->get_np()))),
         joint(std::make_shared<JointDataAbstract>(model->get_state(), 0, 0)),
         multibody(&pinocchio, joint,
                   model->get_constraints()->createData(&pinocchio),

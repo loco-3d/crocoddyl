@@ -45,9 +45,9 @@ class TimeParameterizationTest(unittest.TestCase):
                 time.timeopt = False
                 self.assertAlmostEqual(time.timeStep2, 0.04, places=6)
                 self.assertFalse(time.timeopt)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     time.timeStep = -1e-3
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTime(-1e-3)
                 with self.assertRaises(AttributeError):
                     time.timeStep2 = 1.0
@@ -77,8 +77,6 @@ class TimeParameterizationTest(unittest.TestCase):
                 self.assertIsInstance(data, module.ParamsDataAbstract)
                 self.assertEqual((data.np, data.np_action, data.np_dynamics), (1, 1, 0))
                 self.assertEqual(data.p.shape, (1,))
-                self.assertEqual(data.dx_dp.shape, (state.ndx,))
-                self.assertEqual(data.dtau_dp.shape, (state.nv, 0))
                 self.assertTrue(model.checkData(data))
 
                 p = np.array([np.log(0.03)], dtype=dtype)
@@ -99,10 +97,10 @@ class TimeParameterizationTest(unittest.TestCase):
                 model.ub = np.array([-2.0], dtype=dtype)
                 self.assertTrue(np.array_equal(model.lb, [-8.0]))
                 self.assertTrue(np.array_equal(model.ub, [-2.0]))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     model.update(data, np.zeros(2, dtype=dtype))
-                with self.assertRaises(Exception):
-                    model.update(module.ParamsDataAbstract(state, 1, 0), p)
+                with self.assertRaises(crocoddyl.Exception):
+                    model.update(module.ParamsDataAbstract(1, 0), p)
 
                 collector = module.DataCollectorParams(data)
                 self.assertIs(collector.params, data)
@@ -131,17 +129,17 @@ class TimeParameterizationTest(unittest.TestCase):
                 manager.update(manager_data, np.zeros(0, dtype=dtype))
                 self.assertAlmostEqual(time.timeStep, 0.03, places=5)
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParams(None, time)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParams(state, None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParams(
                         state, module.IntegratorTime(0.01, False)
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParams(module.StateVector(3), time)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParamsData(None)
 
         model64 = crocoddyl.IntegratorTimeoptParams(
@@ -190,7 +188,7 @@ class TimeParameterizationTest(unittest.TestCase):
                 euler.calc(data, x)
                 self.assertTrue(np.array_equal(data.xnext, x))
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParams(euler)
 
                 rk = module.IntegratedActionModelRK(

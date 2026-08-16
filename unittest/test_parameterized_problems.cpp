@@ -41,6 +41,7 @@ class CountingActionParamsTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   CountingActionParamsTpl(std::shared_ptr<StateAbstract> state,
                           const std::size_t np)
@@ -55,12 +56,12 @@ class CountingActionParamsTpl
     ++update_calls;
   }
 
-  void computeParamSensitivity(
-      const std::shared_ptr<ActionDataAbstract>&,
-      const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>&,
-      const Eigen::Ref<const VectorXs>&) override {
-    params->dx_dp.setZero();
+  void computeParamSensitivity(const std::shared_ptr<ActionDataAbstract>&,
+                               const std::shared_ptr<ParamsDataAbstract>&,
+                               Eigen::Ref<MatrixXs> dx_dp,
+                               const Eigen::Ref<const VectorXs>&,
+                               const Eigen::Ref<const VectorXs>&) override {
+    dx_dp.setZero();
   }
 
   template <typename NewScalar>
@@ -85,6 +86,7 @@ class CountingDynamicsParamsTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   CountingDynamicsParamsTpl(std::shared_ptr<StateAbstract> state,
                             const std::size_t np)
@@ -99,12 +101,12 @@ class CountingDynamicsParamsTpl
     ++update_calls;
   }
 
-  void computeJointTorqueRegressor(
-      const std::shared_ptr<DynamicsDataAbstract>&,
-      const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>&,
-      const Eigen::Ref<const VectorXs>&) override {
-    params->dtau_dp.setZero();
+  void computeJointTorqueRegressor(const std::shared_ptr<DynamicsDataAbstract>&,
+                                   const std::shared_ptr<ParamsDataAbstract>&,
+                                   Eigen::Ref<MatrixXs> dtau_dp,
+                                   const Eigen::Ref<const VectorXs>&,
+                                   const Eigen::Ref<const VectorXs>&) override {
+    dtau_dp.setZero();
   }
 
   template <typename NewScalar>

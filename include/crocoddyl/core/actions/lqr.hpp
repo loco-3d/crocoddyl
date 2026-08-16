@@ -37,6 +37,7 @@ class LQRParamsTpl : public ActionModelParamsAbstractTpl<_Scalar> {
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   LQRParamsTpl(std::shared_ptr<StateAbstract> state, const std::size_t np);
   LQRParamsTpl(const std::size_t nx, const std::size_t np);
@@ -47,7 +48,7 @@ class LQRParamsTpl : public ActionModelParamsAbstractTpl<_Scalar> {
   virtual void computeParamSensitivity(
       const std::shared_ptr<ActionDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override;
 
   template <typename NewScalar>

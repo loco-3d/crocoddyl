@@ -329,13 +329,14 @@ void DynamicsModelConstrainedInverseTpl<Scalar>::calcDiff_p(
   const VectorXs& regressor_u = dyn_type_ == DynamicsType::ContinuousControl
                                     ? d->multibody.actuation->u
                                     : tau_meas_;
-  params_->calcDiff_dynamics(d->params, d->parameter_regressor, x, regressor_u);
-
   const std::size_t np_action = params_->get_np_action();
   const std::size_t np_dynamics = params_->get_np_dynamics();
+  auto dtau_dp = d->parameter_regressor->Fp.middleCols(np_action, np_dynamics);
+  params_->calcDiff_dynamics(d->params, d->parameter_regressor, dtau_dp, x,
+                             regressor_u);
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
-  internal::updateDissipativePowerParams(params_, d->params, v, data->dP_dp);
+  internal::updateDissipativePowerParams(params_, dtau_dp, v, data->dP_dp);
   if (np_dynamics == 0) {
     return;
   }
@@ -351,15 +352,13 @@ void DynamicsModelConstrainedInverseTpl<Scalar>::calcDiff_p(
          nrow < nh_act;
          ++k) {
       if (!d->multibody.actuation->tau_set[k]) {
-        data->Hp.row(nrow).middleCols(np_action, np_dynamics) =
-            d->params->params->dtau_dp.row(k);
+        data->Hp.row(nrow).middleCols(np_action, np_dynamics) = dtau_dp.row(k);
         ++nrow;
       }
     }
     (void)nc;
   } else {
-    data->Hp.topRows(nv).middleCols(np_action, np_dynamics) =
-        d->params->params->dtau_dp;
+    data->Hp.topRows(nv).middleCols(np_action, np_dynamics) = dtau_dp;
   }
 }
 

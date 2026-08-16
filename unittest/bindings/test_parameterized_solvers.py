@@ -163,10 +163,10 @@ class ParameterizedSolversTest(unittest.TestCase):
             for data, expected in zip(problem.params_data, manager_p_before):
                 self.assertTrue(np.array_equal(data.params.p, expected))
 
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 solver.solve(xs, us, init_p[:1], 0, True)
             wrong = [init_p[0], init_p[1][:1]]
-            with self.assertRaises(Exception):
+            with self.assertRaises(crocoddyl.Exception):
                 solver.solve(xs, us, wrong, 0, True)
 
             class Callback(module.CallbackAbstract):
@@ -233,8 +233,6 @@ class ParameterizedSolversTest(unittest.TestCase):
         )
         for solver_type in (module.SolverFDDP, module.SolverIntro):
             standard = solver_type(standard_problem)
-            with self.assertRaises(TypeError):
-                standard.solve([], [], 1)
             self.assertFalse(standard.solve([], [], maxiter=0))
             casted = standard.cast(cast_dtype)
             self.assertEqual(casted.problem.T, standard_problem.T)

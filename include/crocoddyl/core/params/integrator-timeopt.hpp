@@ -36,6 +36,7 @@ class IntegratorTimeoptParamsTpl
   typedef typename Base::ActionDataAbstract ActionDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   CROCODDYL_DERIVED_CAST(ParamsModelBase, IntegratorTimeoptParamsTpl)
 
@@ -50,7 +51,7 @@ class IntegratorTimeoptParamsTpl
   virtual void computeParamSensitivity(
       const std::shared_ptr<ActionDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override;
 
   virtual std::shared_ptr<ParamsDataAbstract> createData() override;
@@ -100,9 +101,7 @@ struct IntegratorTimeoptParamsDataTpl
  public:
   template <template <typename Scalar> class Model>
   explicit IntegratorTimeoptParamsDataTpl(Model<Scalar>* const model)
-      : Base(checkModel(model)->get_state(), checkModel(model)->get_np()),
-        dt(Scalar(0.)),
-        dt_dp(Scalar(0.)) {}
+      : Base(checkModel(model)->get_np()), dt(Scalar(0.)), dt_dp(Scalar(0.)) {}
   virtual ~IntegratorTimeoptParamsDataTpl() = default;
 
   virtual void resize(const std::size_t np_action,

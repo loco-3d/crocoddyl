@@ -361,8 +361,7 @@ void test_parameter_residuals() {
       generic_symmetry_data;
   const std::shared_ptr<crocoddyl::ParamsDataAbstractTpl<Scalar> >
       plain_params =
-          std::make_shared<crocoddyl::ParamsDataAbstractTpl<Scalar> >(
-              fixture.state, np, 0);
+          std::make_shared<crocoddyl::ParamsDataAbstractTpl<Scalar> >(np, 0);
   plain_params->p = fixture.manager_data->params->p;
   crocoddyl::DataCollectorParamsTpl<Scalar> plain_collector(plain_params);
   BOOST_REQUIRE(plain_collector.parameter_data == nullptr);

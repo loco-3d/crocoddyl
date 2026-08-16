@@ -239,8 +239,8 @@ struct DynamicsDataConstrainedForwardTpl
                 : (params != nullptr
                        ? params->params
                        : std::allocate_shared<ParamsDataAbstract>(
-                             Eigen::aligned_allocator<ParamsDataAbstract>(),
-                             model->get_state(), 0, model->get_np()))),
+                             Eigen::aligned_allocator<ParamsDataAbstract>(), 0,
+                             model->get_np()))),
         multibody(
             &pinocchio, model->get_actuation()->createData(),
             std::make_shared<JointDataAbstract>(

@@ -139,9 +139,6 @@ void test_construction_data_update_bounds_copy_and_failures() {
   BOOST_CHECK_EQUAL(data->np, 1u);
   BOOST_CHECK_EQUAL(data->np_action, 1u);
   BOOST_CHECK_EQUAL(data->np_dynamics, 0u);
-  BOOST_CHECK_EQUAL(data->dx_dp.rows(), fixture.state->get_ndx());
-  BOOST_CHECK_EQUAL(data->dx_dp.cols(), 1);
-  BOOST_CHECK_EQUAL(data->dtau_dp.cols(), 0);
   BOOST_CHECK(data->active);
   const std::shared_ptr<Data> wrong_dimensions =
       std::dynamic_pointer_cast<Data>(model.createData());
@@ -199,9 +196,8 @@ void test_construction_data_update_bounds_copy_and_failures() {
 
   BOOST_CHECK_THROW(model.update(data, VectorXs::Zero(2)),
                     crocoddyl::Exception);
-  BOOST_CHECK_THROW(
-      model.update(std::make_shared<ParamsData>(fixture.state, 1, 0), p),
-      crocoddyl::Exception);
+  BOOST_CHECK_THROW(model.update(std::make_shared<ParamsData>(1, 0), p),
+                    crocoddyl::Exception);
   BOOST_CHECK_THROW(
       Model(std::shared_ptr<typename Model::StateAbstract>(), fixture.time),
       crocoddyl::Exception);
@@ -284,8 +280,9 @@ void test_shared_and_copied_time_running_terminal_and_sensitivity() {
   model.update(params, p);
   fixture.action->calc(data1, x, u);
   data1->dynamics->vdot = data1->differential->xout;
-  model.computeParamSensitivity(data1, params, x, u);
-  const VectorXs analytical = params->dx_dp.col(0);
+  typename Model::MatrixXs dx_dp(fixture.state->get_ndx(), 1);
+  model.computeParamSensitivity(data1, params, dx_dp, x, u);
+  const VectorXs analytical = dx_dp.col(0);
 
   const Scalar disturbance =
       std::is_same<Scalar, float>::value ? Scalar(2e-3) : Scalar(1e-4);
@@ -309,12 +306,12 @@ void test_shared_and_copied_time_running_terminal_and_sensitivity() {
       "Time sensitivity error: "
           << (analytical - numerical).cwiseAbs().maxCoeff());
 
-  BOOST_CHECK_THROW(
-      model.computeParamSensitivity(
-          std::shared_ptr<typename Action::ActionDataAbstract>(), params, x, u),
-      crocoddyl::Exception);
   BOOST_CHECK_THROW(model.computeParamSensitivity(
-                        data1, params, VectorXs::Zero(x.size() + 1), u),
+                        std::shared_ptr<typename Action::ActionDataAbstract>(),
+                        params, dx_dp, x, u),
+                    crocoddyl::Exception);
+  BOOST_CHECK_THROW(model.computeParamSensitivity(
+                        data1, params, dx_dp, VectorXs::Zero(x.size() + 1), u),
                     crocoddyl::Exception);
 }
 
@@ -404,10 +401,11 @@ void test_manager_activation_and_no_allocation() {
   manager.update(manager_data, p);
   fixture.action->calc(action_data, x, u);
   action_data->dynamics->vdot = action_data->differential->xout;
-  manager.calcDiff_action(manager_data, action_data, x, u);
+  typename Manager::MatrixXs dx_dp(fixture.state->get_ndx(), 1);
+  manager.calcDiff_action(manager_data, action_data, dx_dp, x, u);
   BOOST_CHECK_SMALL(fixture.time->get_time_step() - Scalar(0.035),
                     Scalar(30) * Eigen::NumTraits<Scalar>::epsilon());
-  BOOST_CHECK(!manager_data->params->dx_dp.isZero());
+  BOOST_CHECK(!dx_dp.isZero());
 
   manager.changeParamStatus("time", false);
   BOOST_CHECK_EQUAL(manager.get_np(), 0u);
@@ -423,13 +421,13 @@ void test_manager_activation_and_no_allocation() {
   const std::shared_ptr<typename Model::ParamsDataAbstract> params =
       manager_data->action_params.at("time");
   const Scalar* const p_ptr = params->p.data();
-  const Scalar* const dx_dp_ptr = params->dx_dp.data();
+  const Scalar* const dx_dp_ptr = dx_dp.data();
   const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
   try {
     Eigen::internal::set_is_malloc_allowed(false);
     for (std::size_t i = 0; i < 100; ++i) {
       manager.update(manager_data, p);
-      manager.calcDiff_action(manager_data, action_data, x, u);
+      manager.calcDiff_action(manager_data, action_data, dx_dp, x, u);
       params->setZero();
       params->resize(1, 0);
     }
@@ -439,7 +437,7 @@ void test_manager_activation_and_no_allocation() {
     throw;
   }
   BOOST_CHECK_EQUAL(params->p.data(), p_ptr);
-  BOOST_CHECK_EQUAL(params->dx_dp.data(), dx_dp_ptr);
+  BOOST_CHECK_EQUAL(dx_dp.data(), dx_dp_ptr);
 }
 
 void test_scalar_cast() {

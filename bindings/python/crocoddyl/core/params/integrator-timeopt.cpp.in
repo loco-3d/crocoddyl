@@ -21,9 +21,10 @@ struct IntegratorTimeoptParamsVisitor
   void visit(PyClass& cl) const {
     cl.def("update", &Model::update, bp::args("self", "data", "p"),
            "Update the shared time using dt = exp(p[0]).")
-        .def("computeParamSensitivity", &Model::computeParamSensitivity,
+        .def("computeParamSensitivity",
+             &Model::computeParamSensitivity_x,
              bp::args("self", "data", "params", "x", "u"),
-             "Compute the Euler state sensitivity to log(dt).")
+             "Compute and return the Euler state sensitivity to log(dt).")
         .def("createData", &Model::createData, bp::args("self"),
              "Create specialized integration-time parameter data.")
         .add_property(

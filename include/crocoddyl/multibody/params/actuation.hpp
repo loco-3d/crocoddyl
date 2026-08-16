@@ -37,6 +37,7 @@ class ActuationMultibodyParamsTpl : public DynamicsParamsAbstractTpl<_Scalar> {
   typedef typename Base::DynamicsDataAbstract DynamicsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   CROCODDYL_DERIVED_CAST(ParamsModelBase, ActuationMultibodyParamsTpl)
 
@@ -75,7 +76,7 @@ class ActuationMultibodyParamsTpl : public DynamicsParamsAbstractTpl<_Scalar> {
   virtual void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override;
 
   /** @brief Create specialized data with an empty action partition */
@@ -107,9 +108,10 @@ class ActuationMultibodyParamsTpl : public DynamicsParamsAbstractTpl<_Scalar> {
  *
  * This specialized dynamics payload has \f$n_{p,\mathrm{action}}=0\f$ and
  * \f$n_{p,\mathrm{dynamics}}=n_p\f$. It inherits \f$p\f$, active state,
- * offsets and \f$d\tau/dp\f$, and stores internal parameters \f$\gamma\f$ and
- * \f$d\gamma/dp\f$. resize() preserves this partition and setZero() clears all
- * inherited and specialized derivative storage.
+ * offsets, and stores internal parameters \f$\gamma\f$ and
+ * \f$d\gamma/dp\f$. The torque regressor is written to node-local dynamics
+ * storage. resize() preserves this partition and setZero() clears all shared
+ * parameter-dependent quantities.
  */
 template <typename _Scalar>
 struct ActuationMultibodyParamsDataTpl
@@ -126,13 +128,13 @@ struct ActuationMultibodyParamsDataTpl
    * @brief Allocate specialized actuation-parameter data
    *
    * The model supplies dimensions only and is not retained. The resulting
-   * payload owns its action/dynamics partition and derivative buffers.
+   * payload owns its action/dynamics partition and transformed parameters.
    *
    * @param[in] model Multibody-actuation parameter model
    */
   template <template <typename Scalar> class Model>
   explicit ActuationMultibodyParamsDataTpl(Model<Scalar>* const model)
-      : Base(model->get_state(), model->get_np()),
+      : Base(model->get_np()),
         gamma(model->get_np()),
         dgamma_dp(model->get_np(), model->get_np()) {
     setZero();
@@ -156,7 +158,7 @@ struct ActuationMultibodyParamsDataTpl
     setZero();
   }
 
-  /** @brief Zero inherited storage, physical parameters and their Jacobian */
+  /** @brief Zero the shared parameter context and transformed quantities */
   virtual void setZero() override {
     Base::setZero();
     gamma.setZero();

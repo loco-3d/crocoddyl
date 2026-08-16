@@ -54,9 +54,10 @@ template <typename Scalar>
 void ActuationMultibodyParamsTpl<Scalar>::computeJointTorqueRegressor(
     const std::shared_ptr<DynamicsDataAbstract>&,
     const std::shared_ptr<ParamsDataAbstract>& params,
-    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
-  const std::shared_ptr<ActuationMultibodyParamsData> d = castData(params);
-  actuation_->computeJointTorqueRegressor(d->dtau_dp, x, u);
+    Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
+  castData(params);
+  actuation_->computeJointTorqueRegressor(dtau_dp, x, u);
 }
 
 template <typename Scalar>

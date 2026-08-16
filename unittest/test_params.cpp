@@ -32,6 +32,7 @@ class ActionParamsProbeTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   ActionParamsProbeTpl(std::shared_ptr<StateAbstract> state,
                        const std::size_t np)
@@ -42,12 +43,12 @@ class ActionParamsProbeTpl
     data->p = p;
   }
 
-  void computeParamSensitivity(
-      const std::shared_ptr<ActionDataAbstract>&,
-      const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
-      const Eigen::Ref<const VectorXs>& u) override {
-    params->dx_dp.setConstant(x.sum() + u.sum());
+  void computeParamSensitivity(const std::shared_ptr<ActionDataAbstract>&,
+                               const std::shared_ptr<ParamsDataAbstract>&,
+                               Eigen::Ref<MatrixXs> dx_dp,
+                               const Eigen::Ref<const VectorXs>& x,
+                               const Eigen::Ref<const VectorXs>& u) override {
+    dx_dp.setConstant(x.sum() + u.sum());
     ++sensitivity_calls;
   }
 
@@ -101,6 +102,7 @@ class DynamicsParamsProbeTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   DynamicsParamsProbeTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t np, const Scalar scale = Scalar(1))
@@ -122,17 +124,17 @@ class DynamicsParamsProbeTpl
   void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override {
     if (data == nullptr || params == nullptr) {
       throw_pretty("Invalid argument: dynamics or parameter data is null");
     }
     for (std::size_t j = 0; j < this->get_np(); ++j) {
-      params->dtau_dp.col(static_cast<Eigen::Index>(j)) =
+      dtau_dp.col(static_cast<Eigen::Index>(j)) =
           scale * Scalar(j + 1) *
-          (x.head(params->dtau_dp.rows()).array() + u.sum()).matrix();
+          (x.head(dtau_dp.rows()).array() + u.sum()).matrix();
     }
-    data->dP_dp = params->dtau_dp.colwise().sum();
+    data->dP_dp = dtau_dp.colwise().sum();
     ++regressor_calls;
   }
 
@@ -191,7 +193,7 @@ void test_params_model_defaults_bounds_data_and_copy() {
   BOOST_CHECK_EQUAL(data->np_action, np);
   BOOST_CHECK_EQUAL(data->np_dynamics, 0u);
   BOOST_CHECK(model.checkData(data));
-  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(state, np + 1, 0)));
+  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(np + 1, 0)));
   BOOST_CHECK(!model.checkData(std::shared_ptr<ParamsData>()));
 
   data->p.setOnes();
@@ -243,9 +245,14 @@ void test_action_params_model_update_sensitivity_data_and_copy() {
       action.createData();
   const VectorXs x = VectorXs::LinSpaced(nx, Scalar(0.1), Scalar(0.4));
   const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
-  model.computeParamSensitivity(action_data, params, x, u);
+  typename ParamsModel::MatrixXs dx_dp(state->get_ndx(), np);
+  model.computeParamSensitivity(action_data, params, dx_dp, x, u);
   BOOST_CHECK_EQUAL(model.sensitivity_calls, 1u);
-  BOOST_CHECK(params->dx_dp.isConstant(x.sum() + u.sum()));
+  BOOST_CHECK(dx_dp.isConstant(x.sum() + u.sum()));
+  const typename ParamsModel::MatrixXs returned_dx_dp =
+      model.computeParamSensitivity_x(action_data, params, x, u);
+  BOOST_CHECK_EQUAL(model.sensitivity_calls, 2u);
+  BOOST_CHECK(returned_dx_dp.isApprox(dx_dp));
 
   ParamsModel copied(model);
   BOOST_CHECK_EQUAL(copied.get_np(), np);
@@ -296,14 +303,10 @@ void test_dynamics_params_model_data_regressor_copy_and_cast() {
   BOOST_CHECK_EQUAL(params->np, np);
   BOOST_CHECK_EQUAL(params->np_action, 0u);
   BOOST_CHECK_EQUAL(params->np_dynamics, np);
-  BOOST_CHECK_EQUAL(params->dx_dp.rows(), state->get_ndx());
-  BOOST_CHECK_EQUAL(params->dx_dp.cols(), 0);
-  BOOST_CHECK_EQUAL(params->dtau_dp.rows(), state->get_nv());
-  BOOST_CHECK_EQUAL(params->dtau_dp.cols(), static_cast<Eigen::Index>(np));
   BOOST_CHECK(params->p.isZero());
   BOOST_CHECK(params->active);
   BOOST_CHECK(model.checkData(params));
-  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(state, 0, np + 1)));
+  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(0, np + 1)));
   BOOST_CHECK(!model.checkData(std::shared_ptr<ParamsData>()));
 
   const VectorXs p = VectorXs::LinSpaced(np, Scalar(0.2), Scalar(0.6));
@@ -319,29 +322,30 @@ void test_dynamics_params_model_data_regressor_copy_and_cast() {
       std::make_shared<DynamicsData>(&dynamics_model);
   const VectorXs x = VectorXs::LinSpaced(nx, Scalar(0.1), Scalar(0.4));
   const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
-  model.computeJointTorqueRegressor(dynamics_data, params, x, u);
+  typename ParamsModel::MatrixXs dtau_dp(state->get_nv(), np);
+  model.computeJointTorqueRegressor(dynamics_data, params, dtau_dp, x, u);
   BOOST_CHECK_EQUAL(model.regressor_calls, 1u);
   for (std::size_t j = 0; j < np; ++j) {
     const VectorXs expected =
         model.scale * Scalar(j + 1) *
         (x.head(state->get_nv()).array() + u.sum()).matrix();
-    BOOST_CHECK(
-        params->dtau_dp.col(static_cast<Eigen::Index>(j)).isApprox(expected));
+    BOOST_CHECK(dtau_dp.col(static_cast<Eigen::Index>(j)).isApprox(expected));
   }
-  BOOST_CHECK(dynamics_data->dP_dp.isApprox(params->dtau_dp.colwise().sum()));
+  BOOST_CHECK(dynamics_data->dP_dp.isApprox(dtau_dp.colwise().sum()));
+  const typename ParamsModel::MatrixXs returned_dtau_dp =
+      model.computeJointTorqueRegressor_x(dynamics_data, params, x, u);
+  BOOST_CHECK_EQUAL(model.regressor_calls, 2u);
+  BOOST_CHECK(returned_dtau_dp.isApprox(dtau_dp));
   BOOST_CHECK_THROW(model.computeJointTorqueRegressor(
-                        std::shared_ptr<DynamicsData>(), params, x, u),
+                        std::shared_ptr<DynamicsData>(), params, dtau_dp, x, u),
                     std::exception);
 
   params->active = false;
   DynamicsParamsData copied(*dynamics_params);
   BOOST_CHECK(copied.p.isApprox(params->p));
-  BOOST_CHECK(copied.dtau_dp.isApprox(params->dtau_dp));
   BOOST_CHECK_EQUAL(copied.active, params->active);
   params->p.setZero();
-  params->dtau_dp.setZero();
   BOOST_CHECK(copied.p.isApprox(p));
-  BOOST_CHECK(!copied.dtau_dp.isZero());
   dynamics_params->resize(0, np + 1);
   BOOST_CHECK_EQUAL(dynamics_params->np_action, 0u);
   BOOST_CHECK_EQUAL(dynamics_params->np_dynamics, np + 1);

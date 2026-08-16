@@ -232,8 +232,8 @@ void IntegratedActionModelEulerTpl<Scalar>::calcDiff(
               "Invalid argument: Euler integrated action data has no "
               "parameter-manager payload");
         }
-        params_->calcDiff_action(d->params, data, x, u);
-        d->Fp.leftCols(np_action).noalias() += d->params->params->dx_dp;
+        params_->calcDiff_action(d->params, data, d->Fp.leftCols(np_action), x,
+                                 u);
       }
     }
 

@@ -70,13 +70,14 @@ struct ActionModelParamsAbstractVisitor
              "Create the action-parameter data.\n\n"
              ":return parameter data")
         .def("computeParamSensitivity",
-             pure_virtual(&Model::computeParamSensitivity),
+             &Model::computeParamSensitivity_x,
              bp::args("self", "data", "params", "x", "u"),
              "Compute action sensitivity with respect to parameters.\n\n"
              ":param data: action data\n"
              ":param params: parameter data\n"
              ":param x: state point\n"
-             ":param u: control point");
+             ":param u: control point\n"
+             ":return: state sensitivity matrix");
   }
 };
 
@@ -95,13 +96,14 @@ struct DynamicsParamsAbstractVisitor
              "Create the dynamics-parameter data.\n\n"
              ":return parameter data")
         .def("computeJointTorqueRegressor",
-             pure_virtual(&Model::computeJointTorqueRegressor),
+             &Model::computeJointTorqueRegressor_x,
              bp::args("self", "data", "params", "x", "u"),
              "Compute the joint-torque regressor with respect to parameters.\n\n"
              ":param data: dynamics data\n"
              ":param params: parameter data\n"
              ":param x: state point\n"
-             ":param u: control point");
+             ":param u: control point\n"
+             ":return: joint-torque regressor matrix");
   }
 };
 

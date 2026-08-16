@@ -25,8 +25,7 @@ std::shared_ptr<ParamsDataAbstractTpl<Scalar> > createParamsDataAbstract(
   }
   typedef ParamsDataAbstractTpl<Scalar> ParamsData;
   return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
-      model->get_np(), 0);
+      Eigen::aligned_allocator<ParamsData>(), model->get_np(), 0);
 }
 
 template <typename Scalar>
@@ -38,8 +37,7 @@ createActionModelParamsDataAbstract(
   }
   typedef ActionModelParamsDataAbstractTpl<Scalar> ParamsData;
   return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
-      model->get_np());
+      Eigen::aligned_allocator<ParamsData>(), model->get_np());
 }
 
 template <typename Scalar>
@@ -51,8 +49,7 @@ createDynamicsParamsDataAbstract(
   }
   typedef DynamicsParamsDataAbstractTpl<Scalar> ParamsData;
   return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_state(),
-      model->get_np());
+      Eigen::aligned_allocator<ParamsData>(), model->get_np());
 }
 
 template <typename ParamsData>
@@ -69,18 +66,6 @@ struct ParamsDataAbstractVisitor
         .add_property(
             "p", bp::make_getter(&ParamsData::p, bp::return_internal_reference<>()),
             bp::make_setter(&ParamsData::p), "active parameter vector")
-        .add_property(
-            "dx_dp",
-            bp::make_getter(&ParamsData::dx_dp,
-                            bp::return_internal_reference<>()),
-            bp::make_setter(&ParamsData::dx_dp),
-            "action sensitivity Jacobian")
-        .add_property(
-            "dtau_dp",
-            bp::make_getter(&ParamsData::dtau_dp,
-                            bp::return_internal_reference<>()),
-            bp::make_setter(&ParamsData::dtau_dp),
-            "dynamics torque-regressor Jacobian")
         .def_readwrite("active", &ParamsData::active, "active status")
         .def("resize", &ParamsData::resize,
              bp::args("self", "np_action", "np_dynamics"),
@@ -107,19 +92,18 @@ struct DataCollectorParamsVisitor
 
 #define CROCODDYL_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)                  \
   typedef ParamsDataAbstractTpl<Scalar> ParamsData;                             \
-  typedef typename ParamsData::StateAbstract State;                             \
   bp::register_ptr_to_python<std::shared_ptr<ParamsData>>();                    \
   bp::class_<ParamsData>(                                                       \
       "ParamsDataAbstract",                                                     \
       "Abstract class for parameter payloads.\n\n"                              \
       "The payload owns a contiguous active parameter vector whose action "     \
-      "parameters form the prefix and dynamics parameters form the suffix, "    \
-      "together with the shared action and torque sensitivity buffers. "        \
-      "Resizing preserves active status and zeros the buffers.\n\n",              \
-      bp::init<std::shared_ptr<State>, std::size_t, std::size_t>(              \
-          bp::args("self", "state", "np_action", "np_dynamics"),               \
+      "parameters form the prefix and dynamics parameters form the suffix. "    \
+      "Derivative matrices are stored in node-local action and dynamics "       \
+      "data. Resizing preserves active status and zeros the parameter "         \
+      "vector.\n\n",                                                            \
+      bp::init<std::size_t, std::size_t>(                                      \
+          bp::args("self", "np_action", "np_dynamics"),                        \
           "Create the parameter payload.\n\n"                                   \
-          ":param state: state description\n"                                   \
           ":param np_action: action-parameter dimension\n"                      \
           ":param np_dynamics: dynamics-parameter dimension"))                  \
       .def("__init__",                                                          \
@@ -136,7 +120,7 @@ struct DataCollectorParamsVisitor
   bp::class_<ActionParamsData, bp::bases<ActionParamsDataBase> >(            \
       "ActionModelParamsDataAbstract",                                      \
       "Action-model parameter payload. Its complete parameter vector "      \
-      "occupies the action prefix and it owns its sensitivity buffers.\n\n", \
+      "occupies the action prefix.\n\n",                                    \
       bp::no_init)                                                           \
       .def("__init__",                                                       \
            bp::make_constructor(                                             \
@@ -151,8 +135,8 @@ struct DataCollectorParamsVisitor
   bp::class_<DynamicsParamsData, bp::bases<DynamicsParamsDataBase> >(        \
       "DynamicsParamsDataAbstract",                                        \
       "Dynamics-parameter payload. Its complete parameter vector occupies " \
-      "the dynamics suffix and its inherited buffers include the joint-"    \
-      "torque regressor. Resizing preserves active status.\n\n",            \
+      "the dynamics suffix. Regressors are stored in node-local dynamics "  \
+      "data. Resizing preserves active status.\n\n",                       \
       bp::no_init)                                                          \
       .def("__init__",                                                      \
            bp::make_constructor(&createDynamicsParamsDataAbstract<Scalar>,  \

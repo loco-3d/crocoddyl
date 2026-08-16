@@ -279,17 +279,20 @@ void DynamicsModelConstrainedForwardTpl<Scalar>::calcDiff_p(
   }
 
   d->parameter_regressor->vdot = d->vdot;
-  if (dyn_type_ == DynamicsType::ContinuousEstimation) {
-    params_->calcDiff_dynamics(d->params, d->parameter_regressor, x, tau_meas_);
-  } else {
-    params_->calcDiff_dynamics(d->params, d->parameter_regressor, x, u);
-  }
-
   const std::size_t np_action = params_->get_np_action();
   const std::size_t np_dynamics = params_->get_np_dynamics();
+  auto dtau_dp = d->parameter_regressor->Fp.middleCols(np_action, np_dynamics);
+  if (dyn_type_ == DynamicsType::ContinuousEstimation) {
+    params_->calcDiff_dynamics(d->params, d->parameter_regressor, dtau_dp, x,
+                               tau_meas_);
+  } else {
+    params_->calcDiff_dynamics(d->params, d->parameter_regressor, dtau_dp, x,
+                               u);
+  }
+
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(state_->get_nv());
-  internal::updateDissipativePowerParams(params_, d->params, v, data->dP_dp);
+  internal::updateDissipativePowerParams(params_, dtau_dp, v, data->dP_dp);
   if (np_dynamics == 0) {
     return;
   }
@@ -297,7 +300,7 @@ void DynamicsModelConstrainedForwardTpl<Scalar>::calcDiff_p(
   const std::size_t nv = state_->get_nv();
   const Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   data->Fp.middleCols(np_action, np_dynamics).noalias() =
-      -a_partial_dtau * d->params->params->dtau_dp;
+      -a_partial_dtau * dtau_dp;
 }
 
 template <typename Scalar>

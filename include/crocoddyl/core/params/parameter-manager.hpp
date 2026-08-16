@@ -88,7 +88,8 @@ struct ParameterItemTpl {
  * first partition and dynamics parameters the second, with lexicographic name
  * order inside each partition. Inactive items remain owned by the manager but
  * consume no offset. Global offsets refer to the complete vector; action and
- * dynamics derivative buffers use offsets relative to their own partitions.
+ * caller-provided derivative matrices use offsets relative to their own
+ * partitions.
  *
  * The manager owns its item bookkeeping and shares each parameter model. A
  * copied manager receives independent items, sets and dimensions while
@@ -97,8 +98,10 @@ struct ParameterItemTpl {
  *
  * Data must be created after adding or removing models. Activation changes
  * retain the per-item layout and require `ParameterDataManagerTpl::resize()`.
- * Call `update()` before either derivative operation. All data, vector and
- * state/control dimensions are checked and reported with Crocoddyl exceptions.
+ * Call `update()` before either derivative operation. Parameter data is shared
+ * and read-only during derivative evaluation; derivative matrices are supplied
+ * by each node. All data, vector and state/control dimensions are checked and
+ * reported with Crocoddyl exceptions.
  */
 template <typename _Scalar>
 class ParameterManagerTpl {
@@ -117,6 +120,7 @@ class ParameterManagerTpl {
   typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
   typedef ParameterItemTpl<Scalar> ParameterItem;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   typedef std::map<std::string, std::shared_ptr<ParameterItem> >
       ParameterContainer;
@@ -184,21 +188,62 @@ class ParameterManagerTpl {
               const Eigen::Ref<const VectorXs>& p) const;
 
   /**
-   * @brief Compute and stack every active action sensitivity exactly once
+   * @brief Compute every active action sensitivity into node-local storage
+   *
+   * @param[out] dx_dp  Matrix of size ndx by np_action
    * @throw crocoddyl::Exception for null/stale data or wrong state/control
    * sizes
    */
   void calcDiff_action(const std::shared_ptr<ParameterDataManager>& data,
                        const std::shared_ptr<ActionDataAbstract>& action_data,
+                       Eigen::Ref<MatrixXs> dx_dp,
                        const Eigen::Ref<const VectorXs>& x,
                        const Eigen::Ref<const VectorXs>& u) const;
 
   /**
-   * @brief Compute and stack every active dynamics regressor exactly once
+   * @brief Compute and return every active action sensitivity
+   *
+   * This convenience function allocates the sensitivity matrix and calls
+   * calcDiff_action().
+   *
+   * @param[in] data         Consistent parameter-manager data
+   * @param[in] action_data  Action data owned by the caller
+   * @param[in] x            State point
+   * @param[in] u            Control point
+   * @return Matrix of size ndx by np_action
+   */
+  MatrixXs calcDiff_action_x(
+      const std::shared_ptr<ParameterDataManager>& data,
+      const std::shared_ptr<ActionDataAbstract>& action_data,
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) const;
+
+  /**
+   * @brief Compute every active dynamics regressor into node-local storage
+   *
+   * @param[out] dtau_dp  Matrix of size nv by np_dynamics
    * @throw crocoddyl::Exception for null/stale data or wrong state/control
    * sizes
    */
   void calcDiff_dynamics(
+      const std::shared_ptr<ParameterDataManager>& data,
+      const std::shared_ptr<DynamicsDataAbstract>& dynamics_data,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) const;
+
+  /**
+   * @brief Compute and return every active dynamics regressor
+   *
+   * This convenience function allocates the regressor matrix and calls
+   * calcDiff_dynamics().
+   *
+   * @param[in] data           Consistent parameter-manager data
+   * @param[in] dynamics_data  Dynamics data owned by the caller
+   * @param[in] x              State point
+   * @param[in] u              Control point
+   * @return Matrix of size nv by np_dynamics
+   */
+  MatrixXs calcDiff_dynamics_x(
       const std::shared_ptr<ParameterDataManager>& data,
       const std::shared_ptr<DynamicsDataAbstract>& dynamics_data,
       const Eigen::Ref<const VectorXs>& x,

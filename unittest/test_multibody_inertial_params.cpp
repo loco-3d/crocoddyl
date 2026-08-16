@@ -270,7 +270,6 @@ void test_multibody_layout_update_copy_and_cast() {
   BOOST_REQUIRE(no_bodies_data != nullptr);
   BOOST_CHECK(no_bodies_data->psi.empty());
   BOOST_CHECK(no_bodies_data->dpsi_dp.empty());
-  BOOST_CHECK_EQUAL(no_bodies_data->dtau_dp.cols(), 0);
   toggled.update(no_bodies, VectorXs(0));
   toggled.changeBodyStatus(names[0], true);
   BOOST_CHECK_EQUAL(toggled.get_np(), 10);
@@ -450,7 +449,6 @@ void test_multibody_layout_update_copy_and_cast() {
   BOOST_REQUIRE(final_inertial_data != nullptr);
   const VectorXs final_zero = model.zero();
   model.update(final_data, final_zero);
-  BOOST_CHECK_EQUAL(final_inertial_data->dtau_dp.cols(), 30);
   for (std::size_t j = 0; j < final_inertial_data->dpsi_dp.size(); ++j) {
     BOOST_CHECK_GT(static_cast<double>(final_inertial_data->dpsi_dp[j].norm()),
                    0.);
@@ -501,7 +499,7 @@ void test_multibody_layout_update_copy_and_cast() {
       crocoddyl::Exception);
   BOOST_CHECK(!model.checkData(
       std::make_shared<crocoddyl::DynamicsParamsDataAbstractTpl<Scalar> >(
-          state, model.get_np())));
+          model.get_np())));
 }
 
 template <typename Scalar>
@@ -712,7 +710,8 @@ void test_manager_dynamics_and_no_allocation() {
           manager_data->dynamics_params.at("inertial"));
   params->update(params_data, p);
   forward->calc(forward_data, x, u);
-  params->computeJointTorqueRegressor(forward_data, params_data, x, u);
+  MatrixXs dtau_dp(state->get_nv(), params->get_np());
+  params->computeJointTorqueRegressor(forward_data, params_data, dtau_dp, x, u);
   typedef crocoddyl::DataCollectorMultibodyTpl<Scalar> MultibodyCollector;
   MultibodyCollector* const multibody =
       dynamic_cast<MultibodyCollector*>(forward_data->shared);
@@ -727,25 +726,25 @@ void test_manager_dynamics_and_no_allocation() {
       multibody->pinocchio->jointTorqueRegressor.middleCols(
           input_offset, Params::kParametersPerBody) *
       params_data->dpsi_dp[0];
-  BOOST_CHECK(params_data->dtau_dp.isApprox(
+  BOOST_CHECK(dtau_dp.isApprox(
       expected_regressor, Scalar(ScalarTraits<Scalar>::derivativeTolerance())));
 
   crocoddyl::DataCollectorAbstractTpl<Scalar>* const valid_shared =
       forward_data->shared;
   forward_data->shared = nullptr;
-  BOOST_CHECK_THROW(
-      params->computeJointTorqueRegressor(forward_data, params_data, x, u),
-      crocoddyl::Exception);
+  BOOST_CHECK_THROW(params->computeJointTorqueRegressor(
+                        forward_data, params_data, dtau_dp, x, u),
+                    crocoddyl::Exception);
   crocoddyl::DataCollectorAbstractTpl<Scalar> wrong_collector;
   forward_data->shared = &wrong_collector;
-  BOOST_CHECK_THROW(
-      params->computeJointTorqueRegressor(forward_data, params_data, x, u),
-      crocoddyl::Exception);
+  BOOST_CHECK_THROW(params->computeJointTorqueRegressor(
+                        forward_data, params_data, dtau_dp, x, u),
+                    crocoddyl::Exception);
   MultibodyCollector null_pinocchio(nullptr);
   forward_data->shared = &null_pinocchio;
-  BOOST_CHECK_THROW(
-      params->computeJointTorqueRegressor(forward_data, params_data, x, u),
-      crocoddyl::Exception);
+  BOOST_CHECK_THROW(params->computeJointTorqueRegressor(
+                        forward_data, params_data, dtau_dp, x, u),
+                    crocoddyl::Exception);
   forward_data->shared = valid_shared;
 
   const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
@@ -753,7 +752,8 @@ void test_manager_dynamics_and_no_allocation() {
     Eigen::internal::set_is_malloc_allowed(false);
     for (std::size_t i = 0; i < 100; ++i) {
       params->update(params_data, p);
-      params->computeJointTorqueRegressor(forward_data, params_data, x, u);
+      params->computeJointTorqueRegressor(forward_data, params_data, dtau_dp, x,
+                                          u);
     }
     Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
   } catch (...) {
@@ -769,9 +769,9 @@ void test_manager_dynamics_and_no_allocation() {
   BOOST_CHECK_THROW(forward->update_p(forward_data, p), crocoddyl::Exception);
   BOOST_CHECK_THROW(params->update(params_data, VectorXs::Zero(20)),
                     crocoddyl::Exception);
-  BOOST_CHECK_THROW(
-      params->computeJointTorqueRegressor(forward_data, params_data, x, u),
-      crocoddyl::Exception);
+  BOOST_CHECK_THROW(params->computeJointTorqueRegressor(
+                        forward_data, params_data, dtau_dp, x, u),
+                    crocoddyl::Exception);
 
   const std::shared_ptr<Params> reconfigured = std::make_shared<Params>(
       state, parametrization,

@@ -313,16 +313,17 @@ void DynamicsModelImpulseForwardTpl<Scalar>::calcDiff_p(
   d->tmp_xparams = x;
   d->tmp_xparams.tail(nv).setZero();
   const VectorXs& regressor_u = d->parameter_regressor->u;
+  auto dtau_dp = d->parameter_regressor->Fp.middleCols(np_action, np_dynamics);
 
   d->parameter_regressor->vdot = d->joint->a;
-  params_->calcDiff_dynamics(d->params, d->parameter_regressor, d->tmp_xparams,
-                             regressor_u);
-  d->tmp_dtau_dp.leftCols(np_dynamics) = d->params->params->dtau_dp;
+  params_->calcDiff_dynamics(d->params, d->parameter_regressor, dtau_dp,
+                             d->tmp_xparams, regressor_u);
+  d->tmp_dtau_dp.leftCols(np_dynamics) = dtau_dp;
 
   d->parameter_regressor->vdot.setZero();
-  params_->calcDiff_dynamics(d->params, d->parameter_regressor, d->tmp_xparams,
-                             regressor_u);
-  d->tmp_dtau_dp.leftCols(np_dynamics) -= d->params->params->dtau_dp;
+  params_->calcDiff_dynamics(d->params, d->parameter_regressor, dtau_dp,
+                             d->tmp_xparams, regressor_u);
+  d->tmp_dtau_dp.leftCols(np_dynamics) -= dtau_dp;
 
   const Eigen::Block<MatrixXs> a_partial_dtau = d->Kinv.topLeftCorner(nv, nv);
   data->Fp.bottomRows(nv).middleCols(np_action, np_dynamics).noalias() =

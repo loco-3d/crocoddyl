@@ -68,12 +68,13 @@ struct ParameterManagerVisitor
              "Return a parameter item's status.")
         .def("update", &Model::update, bp::args("self", "data", "p"),
              "Update the aggregate and active per-item parameter vectors.")
-        .def("calcDiff_action", &Model::calcDiff_action,
+        .def("calcDiff_action", &Model::calcDiff_action_x,
              bp::args("self", "data", "action_data", "x", "u"),
-             "Stack active action-parameter sensitivities.")
-        .def("calcDiff_dynamics", &Model::calcDiff_dynamics,
+             "Compute and return active action-parameter sensitivities.")
+        .def("calcDiff_dynamics", &Model::calcDiff_dynamics_x,
              bp::args("self", "data", "dynamics_data", "x", "u"),
-             "Stack active dynamics-parameter torque regressors.")
+             "Compute and return active dynamics-parameter torque "
+             "regressors.")
         .def("zero", &Model::zero, bp::args("self"),
              "Return the zero active-parameter vector.")
         .def("rand", &Model::rand, bp::args("self"),

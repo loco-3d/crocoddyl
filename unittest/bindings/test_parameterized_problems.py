@@ -31,7 +31,8 @@ def make_dynamics_params(module, dtype, state, np_):
             data.p = self.current_p
 
         def computeJointTorqueRegressor(self, data, params, x, u):
-            params.dtau_dp = np.zeros(params.dtau_dp.shape, dtype=dtype)
+            del data, params, x, u
+            return np.zeros((state.nv, np_), dtype=dtype)
 
     item = DynamicsParams()
     manager = module.ParameterManager(state)
@@ -246,19 +247,19 @@ class ParameterizedProblemsTest(unittest.TestCase):
         problem.update_p(p1, 1)
         self.assertEqual(shallow.calc(xs, us), cost)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_p(p0, 2)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.get_running_phase_models(2)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.calc(xs[:-1], us)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParametrizedShootingProblem(x0, [], terminal, params0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParametrizedShootingProblem(x0, [phase0_a], None, params0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParametrizedShootingProblem(x0, [phase1], phase1, params0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ParametrizedShootingProblem(
                 x0,
                 [phase0_a],
@@ -269,7 +270,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
 
         params0.addParam("inactive", module.LQRParams(phase0_a.state, 1), False)
         params0.changeParamStatus("inactive", True)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_p(np.zeros(2, dtype=dtype), 0)
 
     def check_ordinary_shooting_mutations(self, module, dtype):
@@ -400,19 +401,19 @@ class ParameterizedProblemsTest(unittest.TestCase):
         problem.update_p(p1, 1)
         self.assertEqual(shallow.calc(xs, ws), problem.calc(xs, ws))
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_tau(3, np.zeros(1, dtype=dtype))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_tau(0, np.zeros(2, dtype=dtype))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_us(updated_tau[:-1])
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             problem.calc(xs[:-1], ws)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ObservationProblem(x0, [], [observer0a], terminal, params0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ObservationProblem(x0, tau[:1], [None], terminal, params0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ObservationProblem(x0, tau[:1], [observer1], observer1, params0)
 
     def test_float64(self):

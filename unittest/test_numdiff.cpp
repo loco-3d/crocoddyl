@@ -43,6 +43,7 @@ class SharedDynamicsParamsTpl
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
 
   SharedDynamicsParamsTpl(std::shared_ptr<StateAbstract> state,
                           std::shared_ptr<VectorXs> value)
@@ -58,12 +59,12 @@ class SharedDynamicsParamsTpl
     *value_ = p;
   }
 
-  void computeJointTorqueRegressor(
-      const std::shared_ptr<DynamicsDataAbstract>&,
-      const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>&,
-      const Eigen::Ref<const VectorXs>&) override {
-    params->dtau_dp.setZero();
+  void computeJointTorqueRegressor(const std::shared_ptr<DynamicsDataAbstract>&,
+                                   const std::shared_ptr<ParamsDataAbstract>&,
+                                   Eigen::Ref<MatrixXs> dtau_dp,
+                                   const Eigen::Ref<const VectorXs>&,
+                                   const Eigen::Ref<const VectorXs>&) override {
+    dtau_dp.setZero();
   }
 
   template <typename NewScalar>

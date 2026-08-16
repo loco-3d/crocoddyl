@@ -96,9 +96,9 @@ struct MultibodyInertialParamsVisitor
         .def("update", &Model::update, bp::args("self", "data", "p"),          \
              "Update the selected inertial parameters.")                     \
         .def("computeJointTorqueRegressor",                                  \
-             &Model::computeJointTorqueRegressor,                            \
+             &Model::computeJointTorqueRegressor_x,                           \
              bp::args("self", "data", "params", "x", "u"),                  \
-             "Compute the inertial joint-torque regressor.")                 \
+             "Compute and return the inertial joint-torque regressor.")      \
         .def("changeBodyStatus", &Model::changeBodyStatus,                   \
              bp::args("self", "body_name", "active"),                       \
              "Activate or deactivate a body parameter block. Existing data " \

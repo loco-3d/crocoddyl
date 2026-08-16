@@ -106,7 +106,6 @@ void MultibodyInertialParamsTpl<Scalar>::update(
   }
   pinocchio::ModelTpl<Scalar>& pin_model = *state_multibody_->get_pinocchio();
   d->p = p;
-  d->dtau_dp.setZero();
   for (std::size_t j = 0; j < joint_ids_.size(); ++j) {
     const Eigen::Index offset =
         static_cast<Eigen::Index>(j * kParametersPerBody);
@@ -124,7 +123,8 @@ template <typename Scalar>
 void MultibodyInertialParamsTpl<Scalar>::computeJointTorqueRegressor(
     const std::shared_ptr<DynamicsDataAbstract>& data,
     const std::shared_ptr<ParamsDataAbstract>& params,
-    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u) {
+    Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>& u) {
   (void)u;
   if (data == nullptr) {
     throw_pretty("Invalid argument: dynamics data is null");
@@ -150,6 +150,11 @@ void MultibodyInertialParamsTpl<Scalar>::computeJointTorqueRegressor(
         "Invalid argument: multibody collector has null Pinocchio data");
   }
   const std::size_t nv = state_multibody_->get_nv();
+  if (static_cast<std::size_t>(dtau_dp.rows()) != nv ||
+      static_cast<std::size_t>(dtau_dp.cols()) != this->np_) {
+    throw_pretty("Invalid argument: dtau_dp has wrong dimension (it should be "
+                 << nv << " by " << this->np_ << ")");
+  }
   if (static_cast<std::size_t>(data->vdot.size()) != nv) {
     throw_pretty(
         "Invalid argument: dynamics data does not expose a "
@@ -163,14 +168,14 @@ void MultibodyInertialParamsTpl<Scalar>::computeJointTorqueRegressor(
   pinocchio::computeJointTorqueRegressor(*state_multibody_->get_pinocchio(),
                                          *multibody->pinocchio, q, v,
                                          data->vdot);
-  d->dtau_dp.setZero();
+  dtau_dp.setZero();
   const MatrixXs& dtau_dpsi = multibody->pinocchio->jointTorqueRegressor;
   for (std::size_t j = 0; j < joint_ids_.size(); ++j) {
     const Eigen::Index input_offset =
         static_cast<Eigen::Index>((joint_ids_[j] - 1) * kParametersPerBody);
     const Eigen::Index output_offset =
         static_cast<Eigen::Index>(j * kParametersPerBody);
-    d->dtau_dp.middleCols(output_offset, kParametersPerBody).noalias() =
+    dtau_dp.middleCols(output_offset, kParametersPerBody).noalias() =
         dtau_dpsi.middleCols(input_offset, kParametersPerBody) * d->dpsi_dp[j];
   }
 }

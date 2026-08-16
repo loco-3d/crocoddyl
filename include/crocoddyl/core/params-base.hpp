@@ -156,6 +156,7 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the action-parameter model
@@ -170,16 +171,34 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
   /**
    * @brief Compute action sensitivity with respect to parameters
    *
-   * @param[in] data    Action data owned by the caller
-   * @param[in] params  Shared parameter payload
+   * @param[in] data     Action data owned by the caller
+   * @param[in] params   Shared, read-only parameter payload
+   * @param[out] dx_dp   Node-local state sensitivity
    * @param[in] x       State point
    * @param[in] u       Control point
    */
   virtual void computeParamSensitivity(
       const std::shared_ptr<ActionDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) = 0;
+
+  /**
+   * @brief Compute and return action sensitivity with respect to parameters
+   *
+   * This convenience function allocates the sensitivity matrix and calls
+   * computeParamSensitivity().
+   *
+   * @param[in] data    Action data owned by the caller
+   * @param[in] params  Shared, read-only parameter payload
+   * @param[in] x       State point
+   * @param[in] u       Control point
+   * @return Node-local state sensitivity
+   */
+  MatrixXs computeParamSensitivity_x(
+      const std::shared_ptr<ActionDataAbstract>& data,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the action-partitioned parameter data
@@ -206,6 +225,7 @@ class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
   typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
   typedef typename Base::StateAbstract StateAbstract;
   typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the dynamics-parameter model
@@ -220,16 +240,34 @@ class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
   /**
    * @brief Compute the joint-torque regressor with respect to parameters
    *
-   * @param[in] data    Dynamics data owned by the caller
-   * @param[in] params  Shared dynamics-parameter payload
+   * @param[in] data      Dynamics data owned by the caller
+   * @param[in] params    Shared, read-only parameter payload
+   * @param[out] dtau_dp  Node-local joint-torque regressor
    * @param[in] x       State point
    * @param[in] u       Control point
    */
   virtual void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) = 0;
+
+  /**
+   * @brief Compute and return the joint-torque parameter regressor
+   *
+   * This convenience function allocates the regressor matrix and calls
+   * computeJointTorqueRegressor().
+   *
+   * @param[in] data    Dynamics data owned by the caller
+   * @param[in] params  Shared, read-only parameter payload
+   * @param[in] x       State point
+   * @param[in] u       Control point
+   * @return Node-local joint-torque regressor
+   */
+  MatrixXs computeJointTorqueRegressor_x(
+      const std::shared_ptr<DynamicsDataAbstract>& data,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
 
   /**
    * @brief Create the dynamics-partitioned parameter data

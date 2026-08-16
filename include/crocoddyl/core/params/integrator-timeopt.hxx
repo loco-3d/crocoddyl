@@ -71,7 +71,8 @@ template <typename Scalar>
 void IntegratorTimeoptParamsTpl<Scalar>::computeParamSensitivity(
     const std::shared_ptr<ActionDataAbstract>& data,
     const std::shared_ptr<ParamsDataAbstract>& params,
-    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
+    Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
+    const Eigen::Ref<const VectorXs>&) {
   typedef IntegratedActionDataEulerTpl<Scalar> IntegratedActionDataEuler;
 
   if (static_cast<std::size_t>(x.size()) != this->state_->get_nx()) {
@@ -90,17 +91,22 @@ void IntegratorTimeoptParamsTpl<Scalar>::computeParamSensitivity(
     throw_pretty(
         "Invalid argument: action data does not contain dynamics data");
   }
+  if (static_cast<std::size_t>(dx_dp.rows()) != this->state_->get_ndx() ||
+      dx_dp.cols() != 1) {
+    throw_pretty("Invalid argument: dx_dp has wrong dimension (it should be "
+                 << this->state_->get_ndx() << " by 1)");
+  }
 
   const std::size_t nq = this->state_->get_nq();
   const std::size_t nv = this->state_->get_nv();
   const Scalar dt = integrator_time_->get_time_step();
   const Scalar dt2 = integrator_time_->get_time_step2();
 
-  d->dx_dp.setZero();
-  d->dx_dp.topRows(nv).col(0).noalias() =
+  dx_dp.setZero();
+  dx_dp.topRows(nv).col(0).noalias() =
       dt * x.segment(nq, nv) + Scalar(2.) * dt2 * action_data->dynamics->vdot;
-  d->dx_dp.bottomRows(nv).col(0).noalias() = dt * action_data->dynamics->vdot;
-  this->state_->JintegrateTransport(x, action_data->dx, d->dx_dp, first);
+  dx_dp.bottomRows(nv).col(0).noalias() = dt * action_data->dynamics->vdot;
+  this->state_->JintegrateTransport(x, action_data->dx, dx_dp, first);
 }
 
 template <typename Scalar>

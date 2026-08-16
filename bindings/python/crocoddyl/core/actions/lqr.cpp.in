@@ -342,9 +342,10 @@ struct ActionModelLQRVisitor
             ":param np: dimension of the parameter vector"))                 \
         .def("update", &Model::update, bp::args("self", "data", "p"),        \
              "Update the LQR parameter vector.")                             \
-        .def("computeParamSensitivity", &Model::computeParamSensitivity,     \
+        .def("computeParamSensitivity",                                     \
+             &Model::computeParamSensitivity_x,                              \
              bp::args("self", "data", "params", "x", "u"),                 \
-             "Set the direct LQR state sensitivity to zero.")                \
+             "Return the zero direct LQR state sensitivity.")                \
         .def("createData", &Model::createData, bp::args("self"),             \
              "Create the parameter data.\n\n"                                \
              ":return parameter data")                                       \

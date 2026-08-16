@@ -68,6 +68,7 @@ class ActionModelParamsAbstractTpl_wrap
   typedef typename ParamsModel::ActionDataAbstract ActionDataAbstract;
   typedef typename ParamsModel::StateAbstract State;
   typedef typename ParamsModel::VectorXs VectorXs;
+  typedef typename ParamsModel::MatrixXs MatrixXs;
 
   ActionModelParamsAbstractTpl_wrap(std::shared_ptr<State> state,
                                     const std::size_t np = 0)
@@ -89,10 +90,24 @@ class ActionModelParamsAbstractTpl_wrap
   void computeParamSensitivity(
       const std::shared_ptr<ActionDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dx_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override {
-    return bp::call<void>(this->get_override("computeParamSensitivity").ptr(),
-                          data, params, (VectorXs)x, (VectorXs)u);
+    boost::python::override compute_param_sensitivity =
+        this->get_override("computeParamSensitivity");
+    if (!compute_param_sensitivity) {
+      PyErr_SetString(PyExc_RuntimeError,
+                      "Pure virtual method computeParamSensitivity has no "
+                      "Python override");
+      bp::throw_error_already_set();
+    }
+    MatrixXs value = bp::call<MatrixXs>(compute_param_sensitivity.ptr(), data,
+                                        params, (VectorXs)x, (VectorXs)u);
+    if (value.rows() != dx_dp.rows() || value.cols() != dx_dp.cols()) {
+      throw_pretty(
+          "Invalid argument: computeParamSensitivity returned a matrix with "
+          "wrong dimensions");
+    }
+    dx_dp = value;
   }
 
   std::shared_ptr<ParamsDataAbstract> createData() override {
@@ -120,6 +135,7 @@ class DynamicsParamsAbstractTpl_wrap
   typedef typename ParamsModel::ParamsDataAbstract ParamsDataAbstract;
   typedef typename ParamsModel::StateAbstract State;
   typedef typename ParamsModel::VectorXs VectorXs;
+  typedef typename ParamsModel::MatrixXs MatrixXs;
 
   DynamicsParamsAbstractTpl_wrap(std::shared_ptr<State> state,
                                  const std::size_t np = 0)
@@ -141,11 +157,24 @@ class DynamicsParamsAbstractTpl_wrap
   void computeJointTorqueRegressor(
       const std::shared_ptr<DynamicsDataAbstract>& data,
       const std::shared_ptr<ParamsDataAbstract>& params,
-      const Eigen::Ref<const VectorXs>& x,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
       const Eigen::Ref<const VectorXs>& u) override {
-    return bp::call<void>(
-        this->get_override("computeJointTorqueRegressor").ptr(), data, params,
-        (VectorXs)x, (VectorXs)u);
+    boost::python::override compute_joint_torque_regressor =
+        this->get_override("computeJointTorqueRegressor");
+    if (!compute_joint_torque_regressor) {
+      PyErr_SetString(PyExc_RuntimeError,
+                      "Pure virtual method computeJointTorqueRegressor has no "
+                      "Python override");
+      bp::throw_error_already_set();
+    }
+    MatrixXs value = bp::call<MatrixXs>(compute_joint_torque_regressor.ptr(),
+                                        data, params, (VectorXs)x, (VectorXs)u);
+    if (value.rows() != dtau_dp.rows() || value.cols() != dtau_dp.cols()) {
+      throw_pretty(
+          "Invalid argument: computeJointTorqueRegressor returned a matrix "
+          "with wrong dimensions");
+    }
+    dtau_dp = value;
   }
 
   std::shared_ptr<ParamsDataAbstract> createData() override {
