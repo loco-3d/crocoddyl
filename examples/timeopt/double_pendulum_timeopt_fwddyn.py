@@ -88,7 +88,6 @@ params.addParam("timeopt", crocoddyl.IntegratorTimeoptParams(state, runningTime)
 problem = crocoddyl.ParametrizedShootingProblem(
     x0, [runningModel] * T, terminalModel, params
 )
-problem.nthreads = 1
 problem.update_p(p0, phase_idx=0)
 solver = crocoddyl.SolverFDDP(problem)
 solver.th_minImprove = 1e-4
