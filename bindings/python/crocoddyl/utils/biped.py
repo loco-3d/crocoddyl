@@ -21,7 +21,7 @@ class SimpleBipedGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
-        friction_type=crocoddyl.JointFrictionType.COULOMB_VISCOUS,
+        friction_type=None,
         friction_parameters=None,
     ):
         """Construct biped-gait problem.
@@ -36,16 +36,16 @@ class SimpleBipedGaitProblem:
         :param fwddyn: True for forward-dynamics, False for inverse-dynamics
             formulations.
         :param friction_type: per-joint friction model used in the actuation
-            model. Set to None to recover identity joint actuation.
+            model. By default, use identity joint actuation.
         :param friction_parameters: log-parameters for the selected friction
-            model. By default, use static/Coulomb plus viscous friction.
+            model. When omitted, use nominal Coulomb-viscous parameters.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
         self.friction_type = friction_type
         self.friction_parameters = (
-            np.array([np.log(0.15), np.log(30.0), np.log(0.2)])
+            np.array([np.log(0.15), np.log(10.0), np.log(0.2)])
             if friction_parameters is None
             else np.asarray(friction_parameters, dtype=float)
         )

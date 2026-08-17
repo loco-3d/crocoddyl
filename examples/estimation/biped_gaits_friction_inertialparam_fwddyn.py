@@ -23,6 +23,7 @@ estimation = create_gait_estimation_problem(
     control_solver,
     fwddyn=True,
     parametrization=crocoddyl.ExpEigenValueParametrization(),
+    friction_type=crocoddyl.JointFrictionType.COULOMB_VISCOUS,
 )
 
 solver = crocoddyl.SolverFDDP(

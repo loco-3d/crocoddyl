@@ -1,43 +1,43 @@
 *** quadruped gait friction and inertial parameter estimation (invdyn) ***
 iter    cost       merit      stop      |grad|      preg       dreg      step   ||ffeas||  ||gfeas||  ||hfeas||   dV-exp       dV      dPhi-exp     dPhi
-   0  2.548e-02  2.548e-02  2.001e+02  7.923e-07  1.000e-09  1.000e-09  0.5000  4.184e+00  0.000e+00  1.959e+02 -1.237e-02 -2.547e-02 -1.237e-02 -2.547e-02
-   1  1.050e-02  1.722e-02  9.188e+01  4.976e-02  1.000e-09  1.000e-09  0.5000  2.092e+00  0.000e+00  8.979e+01  1.500e-02  1.498e-02  1.896e-02  2.290e-02
-   2  3.184e-03  6.613e-03  2.672e+01  1.677e-02  1.000e-09  1.000e-09  1.0000  0.000e+00  0.000e+00  2.672e+01  8.252e-03  7.313e-03  1.661e-02  1.567e-02
-   3  9.234e-04  1.532e-03  5.000e+00  4.238e-03  1.000e-09  1.000e-09  1.0000  0.000e+00  0.000e+00  5.000e+00  2.278e-03  2.261e-03  4.923e-03  4.906e-03
-   4  5.991e-04  7.257e-04  1.370e+00  5.684e-04  1.000e-08  1.000e-08  1.0000  0.000e+00  0.000e+00  1.370e+00  3.233e-04  3.242e-04  6.585e-04  6.595e-04
-   5  5.438e-04  5.510e-04  1.253e-01  9.304e-05  1.000e-07  1.000e-07  1.0000  0.000e+00  0.000e+00  1.253e-01  5.460e-05  5.531e-05  1.255e-04  1.262e-04
-   6  5.410e-04  5.411e-04  1.564e-03  3.376e-06  1.000e-06  1.000e-06  1.0000  0.000e+00  0.000e+00  1.564e-03  2.679e-06  2.795e-06  6.457e-06  6.573e-06
-   7  5.409e-04  5.409e-04  2.692e-05  1.003e-07  1.000e-05  1.000e-05  1.0000  0.000e+00  0.000e+00  2.692e-05  8.761e-08  9.587e-08  2.106e-07  2.189e-07
-   8  5.409e-04  5.409e-04  5.636e-07  3.714e-09  1.000e-04  1.000e-04  1.0000  0.000e+00  0.000e+00  5.636e-07  3.608e-09  4.136e-09  8.655e-09  9.182e-09
-   9  5.409e-04  5.409e-04  7.700e-09  3.240e-10  1.000e-03  1.000e-03  1.0000  0.000e+00  0.000e+00  7.700e-09  3.230e-10  3.734e-10  7.781e-10  8.285e-10
+   0  2.018e-02  2.018e-02  1.749e+02  0.000e+00  1.000e-09  1.000e-09  0.5000  4.184e+00  0.000e+00  1.707e+02 -1.114e-02 -2.018e-02 -1.114e-02 -2.018e-02
+   1  8.164e-03  1.342e-02  8.874e+01  4.006e-02  1.000e-09  1.000e-09  0.5000  2.092e+00  0.000e+00  8.665e+01  1.183e-02  1.201e-02  1.438e-02  1.711e-02
+   2  2.222e-03  4.244e-03  1.960e+01  1.295e-02  1.000e-09  1.000e-09  1.0000  0.000e+00  0.000e+00  1.960e+01  6.408e-03  5.943e-03  1.354e-02  1.307e-02
+   3  8.249e-04  1.144e-03  3.084e+00  2.610e-03  1.000e-09  1.000e-09  1.0000  0.000e+00  0.000e+00  3.084e+00  1.419e-03  1.397e-03  3.127e-03  3.105e-03
+   4  6.128e-04  7.377e-04  1.276e+00  3.805e-04  1.000e-08  1.000e-08  1.0000  0.000e+00  0.000e+00  1.276e+00  2.113e-04  2.121e-04  3.883e-04  3.891e-04
+   5  5.781e-04  5.817e-04  7.368e-02  5.828e-05  1.000e-07  1.000e-07  1.0000  0.000e+00  0.000e+00  7.368e-02  3.396e-05  3.468e-05  9.280e-05  9.352e-05
+   6  5.763e-04  5.763e-04  6.188e-04  2.074e-06  1.000e-06  1.000e-06  1.0000  0.000e+00  0.000e+00  6.188e-04  1.663e-06  1.769e-06  4.019e-06  4.125e-06
+   7  5.763e-04  5.763e-04  1.144e-05  5.355e-08  1.000e-05  1.000e-05  1.0000  0.000e+00  0.000e+00  1.144e-05  4.720e-08  5.441e-08  1.134e-07  1.206e-07
+   8  5.763e-04  5.763e-04  2.791e-07  2.344e-09  1.000e-04  1.000e-04  1.0000  0.000e+00  0.000e+00  2.791e-07  2.287e-09  2.840e-09  5.474e-09  6.027e-09
+   9  5.763e-04  5.763e-04  4.018e-09  2.083e-10  1.000e-03  1.000e-03  1.0000  0.000e+00  0.000e+00  4.018e-09  2.076e-10  2.626e-10  5.000e-10  5.550e-10
 
 Estimated vs. ground-truth inertial parameters:
-  body 1: mass est=17.4104  gt=16.8435
-  body 2: mass est=1.3161  gt=1.4246
-  body 3: mass est=1.6544  gt=1.6350
-  body 4: mass est=0.3132  gt=0.3484
-  body 5: mass est=1.3105  gt=1.4246
-  body 6: mass est=1.6271  gt=1.6350
-  body 7: mass est=0.3086  gt=0.3484
-  body 8: mass est=1.3143  gt=1.4246
-  body 9: mass est=1.6453  gt=1.6350
-  body 10: mass est=0.3140  gt=0.3484
-  body 11: mass est=1.3138  gt=1.4246
-  body 12: mass est=1.6394  gt=1.6350
-  body 13: mass est=0.3083  gt=0.3484
+  body 1: mass est=17.4147  gt=16.8435
+  body 2: mass est=1.3186  gt=1.4246
+  body 3: mass est=1.6541  gt=1.6350
+  body 4: mass est=0.3131  gt=0.3484
+  body 5: mass est=1.3103  gt=1.4246
+  body 6: mass est=1.6277  gt=1.6350
+  body 7: mass est=0.3082  gt=0.3484
+  body 8: mass est=1.3149  gt=1.4246
+  body 9: mass est=1.6391  gt=1.6350
+  body 10: mass est=0.3136  gt=0.3484
+  body 11: mass est=1.3147  gt=1.4246
+  body 12: mass est=1.6390  gt=1.6350
+  body 13: mass est=0.3073  gt=0.3484
 
 Estimated vs. ground-truth friction parameters:
-  LF_HAA: coulomb est=0.1253 gt=0.1500, sharpness est=21.3230 gt=30.0000, viscous est=0.1481 gt=0.2000
-  LF_HFE: coulomb est=0.1125 gt=0.1500, sharpness est=20.9930 gt=30.0000, viscous est=0.2085 gt=0.2000
-  LF_KFE: coulomb est=0.1376 gt=0.1500, sharpness est=21.6383 gt=30.0000, viscous est=0.2023 gt=0.2000
-  LH_HAA: coulomb est=0.1322 gt=0.1500, sharpness est=21.4618 gt=30.0000, viscous est=0.1474 gt=0.2000
-  LH_HFE: coulomb est=0.1113 gt=0.1500, sharpness est=20.9935 gt=30.0000, viscous est=0.2093 gt=0.2000
-  LH_KFE: coulomb est=0.1302 gt=0.1500, sharpness est=21.0493 gt=30.0000, viscous est=0.2037 gt=0.2000
-  RF_HAA: coulomb est=0.1325 gt=0.1500, sharpness est=21.3312 gt=30.0000, viscous est=0.1503 gt=0.2000
-  RF_HFE: coulomb est=0.1138 gt=0.1500, sharpness est=21.0051 gt=30.0000, viscous est=0.2097 gt=0.2000
-  RF_KFE: coulomb est=0.1318 gt=0.1500, sharpness est=21.0782 gt=30.0000, viscous est=0.2036 gt=0.2000
-  RH_HAA: coulomb est=0.1383 gt=0.1500, sharpness est=21.5218 gt=30.0000, viscous est=0.1481 gt=0.2000
-  RH_HFE: coulomb est=0.1132 gt=0.1500, sharpness est=21.0164 gt=30.0000, viscous est=0.2086 gt=0.2000
-  RH_KFE: coulomb est=0.1348 gt=0.1500, sharpness est=21.2532 gt=30.0000, viscous est=0.2032 gt=0.2000
+  LF_HAA: coulomb est=0.1243 gt=0.1500, sharpness est=7.2578 gt=10.0000, viscous est=0.1490 gt=0.2000
+  LF_HFE: coulomb est=0.1126 gt=0.1500, sharpness est=6.9880 gt=10.0000, viscous est=0.2082 gt=0.2000
+  LF_KFE: coulomb est=0.1383 gt=0.1500, sharpness est=7.4027 gt=10.0000, viscous est=0.2023 gt=0.2000
+  LH_HAA: coulomb est=0.1305 gt=0.1500, sharpness est=7.4912 gt=10.0000, viscous est=0.1485 gt=0.2000
+  LH_HFE: coulomb est=0.1114 gt=0.1500, sharpness est=6.9928 gt=10.0000, viscous est=0.2093 gt=0.2000
+  LH_KFE: coulomb est=0.1331 gt=0.1500, sharpness est=7.2320 gt=10.0000, viscous est=0.2033 gt=0.2000
+  RF_HAA: coulomb est=0.1322 gt=0.1500, sharpness est=7.3288 gt=10.0000, viscous est=0.1515 gt=0.2000
+  RF_HFE: coulomb est=0.1141 gt=0.1500, sharpness est=6.9991 gt=10.0000, viscous est=0.2094 gt=0.2000
+  RF_KFE: coulomb est=0.1346 gt=0.1500, sharpness est=7.2373 gt=10.0000, viscous est=0.2032 gt=0.2000
+  RH_HAA: coulomb est=0.1388 gt=0.1500, sharpness est=7.6516 gt=10.0000, viscous est=0.1501 gt=0.2000
+  RH_HFE: coulomb est=0.1136 gt=0.1500, sharpness est=7.0106 gt=10.0000, viscous est=0.2086 gt=0.2000
+  RH_KFE: coulomb est=0.1396 gt=0.1500, sharpness est=7.4614 gt=10.0000, viscous est=0.2025 gt=0.2000
 
-Parameter constraint violation: equality=6.544e-12, inequality=0.000e+00
+Parameter constraint violation: equality=1.975e-12, inequality=0.000e+00

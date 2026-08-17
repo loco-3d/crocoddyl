@@ -456,6 +456,8 @@ def create_gait_estimation_problem(
     control_solver,
     fwddyn,
     parametrization=None,
+    friction_type=crocoddyl.JointFrictionType.COULOMB_VISCOUS,
+    friction_parameters=None,
     initial_inertial_scale=0.9,
     initial_friction_scale=0.7,
     enforce_total_mass_constraint=False,
@@ -475,8 +477,20 @@ def create_gait_estimation_problem(
         )
     )
 
-    friction_parameters = np.array(gait.friction_parameters, copy=True)
-    friction_type = gait.friction_type
+    if gait.friction_type != friction_type:
+        raise ValueError(
+            "The control and estimation problems must use the same friction model"
+        )
+    control_friction_parameters = np.asarray(gait.friction_parameters, dtype=float)
+    friction_parameters = (
+        np.array(control_friction_parameters, copy=True)
+        if friction_parameters is None
+        else np.asarray(friction_parameters, dtype=float)
+    )
+    if not np.array_equal(friction_parameters, control_friction_parameters):
+        raise ValueError(
+            "The control and estimation problems must use the same friction parameters"
+        )
     actuation = create_friction_actuation(state, friction_parameters, friction_type)
     joint_ids, groundtruth_actuation_p, initial_actuation_p = (
         create_friction_parameter_vectors(

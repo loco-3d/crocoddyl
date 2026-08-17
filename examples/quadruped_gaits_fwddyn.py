@@ -26,7 +26,19 @@ if crocoddyl.WITH_ODYN:
 
 # Setting up the 3d walking problem
 lfFoot, rfFoot, lhFoot, rhFoot = "LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"
-gait = SimpleQuadrupedalGaitProblem(anymal.model, lfFoot, rfFoot, lhFoot, rhFoot)
+friction_type = (
+    crocoddyl.JointFrictionType.COULOMB_VISCOUS
+    if os.environ.get("CROCODDYL_ESTIMATION_IMPORT") == "1"
+    else None
+)
+gait = SimpleQuadrupedalGaitProblem(
+    anymal.model,
+    lfFoot,
+    rfFoot,
+    lhFoot,
+    rhFoot,
+    friction_type=friction_type,
+)
 
 # Setting up all tasks
 GAITPHASES = [

@@ -27,7 +27,14 @@ x0_SQP = np.concatenate([q0, v0])
 # Setting up the 3d walking problem
 rightFoot = "right_sole_link"
 leftFoot = "left_sole_link"
-gait = SimpleBipedGaitProblem(talos_legs.model, rightFoot, leftFoot)
+friction_type = (
+    crocoddyl.JointFrictionType.COULOMB_VISCOUS
+    if os.environ.get("CROCODDYL_ESTIMATION_IMPORT") == "1"
+    else None
+)
+gait = SimpleBipedGaitProblem(
+    talos_legs.model, rightFoot, leftFoot, friction_type=friction_type
+)
 
 # Setting up all tasks
 GAITPHASES = [

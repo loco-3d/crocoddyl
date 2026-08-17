@@ -24,6 +24,7 @@ estimation = create_gait_estimation_problem(
     control_solver,
     fwddyn=False,
     parametrization=crocoddyl.ExpEigenValueParametrization(),
+    friction_type=crocoddyl.JointFrictionType.COULOMB_VISCOUS,
     enforce_total_mass_constraint=True,
 )
 
