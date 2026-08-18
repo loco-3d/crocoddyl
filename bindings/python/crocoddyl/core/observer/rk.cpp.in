@@ -12,40 +12,12 @@
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/copyable.hpp"
 #include "python/crocoddyl/utils/printable.hpp"
-#include "python/crocoddyl/utils/vector-converter.hpp"
 
 #define SCALAR_@SCALAR_NAME@
 #define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
-
-template <typename Container>
-struct StdVectorElementOwnerPythonVisitor
-    : public bp::def_visitor<StdVectorElementOwnerPythonVisitor<Container>> {
-  template <class PyClass>
-  void visit(PyClass& cl) const {
-    cl.def(
-        "__getitem__", &getItem,
-        bp::return_value_policy<
-            bp::return_by_value,
-            bp::with_custodian_and_ward_postcall<0, 1>>());
-  }
-
- private:
-  static typename Container::value_type getItem(Container& container,
-                                                bp::ssize_t index) {
-    const bp::ssize_t size = static_cast<bp::ssize_t>(container.size());
-    if (index < 0) {
-      index += size;
-    }
-    if (index < 0 || index >= size) {
-      PyErr_SetString(PyExc_IndexError, "Index out of range");
-      bp::throw_error_already_set();
-    }
-    return container[static_cast<std::size_t>(index)];
-  }
-};
 
 #define CROCODDYL_INTEG_OBSERVER_RK_PYTHON_BINDINGS(Scalar)                    \
   typedef IntegratedObserverModelRKTpl<Scalar> Model;                          \
@@ -55,8 +27,6 @@ struct StdVectorElementOwnerPythonVisitor
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                    \
   typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                      \
   typedef CostModelSumTpl<Scalar> CostModelSum;                                \
-  typedef CostDataSumTpl<Scalar> CostDataSum;                                  \
-  typedef std::vector<std::shared_ptr<CostDataSum>> CostDataVector;             \
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;            \
   typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;                \
   typedef typename Model::VectorXs VectorXs;                                   \
@@ -151,9 +121,6 @@ struct StdVectorElementOwnerPythonVisitor
       .def(CastVisitor<Model>())                                               \
       .def(CopyableVisitor<Model>());                                          \
   bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
-  StdVectorPythonVisitor<CostDataVector, true>::expose(                        \
-      "StdVec_ObserverRKCostData",                                             \
-      StdVectorElementOwnerPythonVisitor<CostDataVector>());                   \
   bp::class_<Data, bp::bases<DataBase>>(                                       \
       "IntegratedObserverDataRK", "Data for the RK integrated observer model.", \
       bp::no_init)                                                              \
