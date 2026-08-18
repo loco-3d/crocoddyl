@@ -14,7 +14,13 @@ WITHPLOT = "plot" in sys.argv or "CROCODDYL_PLOT" in os.environ
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # Load the B1 closed-chain leg model
-robot = example_robot_data.load("b1_leg_6D")
+try:
+    robot = example_robot_data.load("b1_leg_6D")
+except ValueError as error:
+    if "not found" not in str(error):
+        raise
+    print("Skipping b1_leg_6d_fwddyn: b1_leg_6D is not available.")
+    sys.exit(0)
 constraint_models = robot.get_constraints()
 q0 = robot.q0.copy()
 model = robot.model
