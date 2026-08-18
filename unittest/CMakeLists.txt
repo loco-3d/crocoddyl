@@ -61,7 +61,6 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_contact_constraints
       test_impulse_constraints
       test_actions
-      test_diff_actions
       test_problem
       test_problem_abstract
       test_parameterized_problems

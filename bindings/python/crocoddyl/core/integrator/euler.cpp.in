@@ -13,6 +13,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -43,7 +44,9 @@ struct IntegratedActionModelEulerVisitor
                ":param control: the control parametrization\n"
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
-               "derivatives (default True)."))
+               "derivatives (default True).")[deprecated<>(
+               "Deprecated. Use the constructor taking dynModel, costModel "
+               "and constraints.")])
         .def(bp::init<std::shared_ptr<DynamicsModelAbstract>,
                       std::shared_ptr<CostModelSum>,
                       bp::optional<std::shared_ptr<ConstraintModelManager>,
@@ -176,7 +179,9 @@ struct IntegratedActionDataEulerVisitor
           ":param diffModel: differential action model\n"                    \
           ":param stepTime: step time (default 1e-3)\n"                      \
           ":param withCostResidual: includes the cost residuals and "        \
-          "derivatives (default True)."))                                    \
+          "derivatives (default True).")[deprecated<>(                       \
+          "Deprecated. Use the constructor taking dynModel, costModel and "  \
+          "constraints.")])                                                  \
       .def(IntegratedActionModelEulerVisitor<Model>())                       \
       .def(CastVisitor<Model>())                                             \
       .def(PrintableVisitor<Model>())                                        \

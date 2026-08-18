@@ -74,6 +74,7 @@ class IntegratedActionModelRKTpl
 
   /**
    * @brief Initialize the RK integrator
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * @param[in] model      Differential action model
    * @param[in] control    Control parametrization
@@ -81,14 +82,16 @@ class IntegratedActionModelRKTpl
    * @param[in] time_step  Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelRKTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      std::shared_ptr<ControlParametrizationModelAbstract> control,
-      const RKType rktype, const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelRKTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 std::shared_ptr<ControlParametrizationModelAbstract> control,
+                 const RKType rktype, const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize the RK integrator
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the
    * control parametrization.
@@ -98,10 +101,11 @@ class IntegratedActionModelRKTpl
    * @param[in] time_step  Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelRKTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      const RKType rktype, const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelRKTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 const RKType rktype, const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize from continuous dynamics, costs and constraints
@@ -366,34 +370,30 @@ struct IntegratedActionDataRKTpl
             MatrixXs::Zero(model->get_state()->get_ndx(), model->get_np())) {
     dx.setZero();
 
-    differential.reserve(model->get_ni());
-    dynamics.reserve(model->get_ni());
-    costs.reserve(model->get_ni());
     control.reserve(model->get_ni());
     constraints.reset();
     params = params_data;
 
     for (std::size_t i = 0; i < model->get_ni(); ++i) {
-      control.push_back(std::shared_ptr<ControlParametrizationDataAbstract>(
-          model->get_control()->createData()));
+      control.push_back(model->get_control()->createData());
     }
 
     if (model->get_dynamics() != nullptr) {
+      dynamics.reserve(model->get_ni());
+      costs.reserve(model->get_ni());
       for (std::size_t i = 0; i < model->get_ni(); ++i) {
-        dynamics.push_back(std::shared_ptr<DynamicsDataAbstract>(
-            params_data != nullptr
-                ? model->get_dynamics()->createData(params_data)
-                : model->get_dynamics()->createData()));
-        costs.push_back(std::shared_ptr<CostDataSum>(
-            model->get_costs()->createData(dynamics[i]->shared)));
+        dynamics.push_back(params_data != nullptr
+                               ? model->get_dynamics()->createData(params_data)
+                               : model->get_dynamics()->createData());
+        costs.push_back(model->get_costs()->createData(dynamics[i]->shared));
       }
       if (model->get_constraints() != nullptr) {
         constraints = model->get_constraints()->createData(dynamics[0]->shared);
       }
     } else {
+      differential.reserve(model->get_ni());
       for (std::size_t i = 0; i < model->get_ni(); ++i) {
-        differential.push_back(std::shared_ptr<DifferentialActionDataAbstract>(
-            model->get_differential()->createData()));
+        differential.push_back(model->get_differential()->createData());
       }
     }
 
@@ -512,7 +512,7 @@ struct IntegratedActionDataRKTpl
   }
 
   std::vector<std::shared_ptr<DifferentialActionDataAbstract> >
-      differential;  //!< List of differential model data
+      differential;  //!< List of legacy differential model data
   std::vector<std::shared_ptr<DynamicsDataAbstract> >
       dynamics;  //!< List of dynamics model data
   std::vector<std::shared_ptr<CostDataSum> >

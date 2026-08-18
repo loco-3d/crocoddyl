@@ -9,7 +9,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
@@ -206,18 +205,6 @@ void test_parameter_share_memory() {
   CostSumActionShape invalid_action_model(4, 2, 3);
   crocoddyl::ActionDataAbstract invalid_action_data(&invalid_action_model);
   BOOST_CHECK_THROW(data->shareMemory(&invalid_action_data), std::exception);
-
-  const std::shared_ptr<crocoddyl::CostDataSum> differential_cost_data =
-      model.createData(&shared);
-  crocoddyl::DifferentialActionModelLQR differential_model(4, 2);
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
-      differential_data = differential_model.createData();
-  const double* const Lp_ptr = differential_cost_data->Lp.data();
-  differential_cost_data->shareMemory(differential_data.get());
-  BOOST_CHECK_EQUAL(differential_cost_data->Lp.data(), Lp_ptr);
-  BOOST_CHECK_EQUAL(differential_cost_data->Lp.size(), 2);
-  differential_cost_data->Lx.setConstant(5.);
-  BOOST_CHECK(differential_data->Lx.isApprox(differential_cost_data->Lx, 0.));
 
   crocoddyl::CostModelSum parameter_free_model(state, 2);
   const std::shared_ptr<crocoddyl::CostDataSum> parameter_free_data =

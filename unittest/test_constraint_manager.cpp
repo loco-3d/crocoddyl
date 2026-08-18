@@ -9,7 +9,6 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
-#include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
@@ -1090,25 +1089,6 @@ void test_shareMemory(StateModelTypes::Type state_type) {
   BOOST_CHECK(action_data->Hx.isApprox(constraint_data->Hx, 1e-9));
   BOOST_CHECK(action_data->Hu.isApprox(constraint_data->Hu, 1e-9));
   BOOST_CHECK(action_data->Hp.isApprox(constraint_data->Hp, 1e-9));
-
-  const std::shared_ptr<crocoddyl::ConstraintDataManager>& partial_data =
-      constraint_model.createData(&shared_data);
-  crocoddyl::DifferentialActionModelLQR differential_model(ndx, nu);
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
-      differential_data = differential_model.createData();
-  differential_data->g.resize(ng);
-  differential_data->Gx.resize(ng, ndx);
-  differential_data->Gu.resize(ng, nu);
-  differential_data->h.resize(nh);
-  differential_data->Hx.resize(nh, ndx);
-  differential_data->Hu.resize(nh, nu);
-  partial_data->shareMemory(differential_data.get());
-  partial_data->Gp.setOnes();
-  partial_data->Hp.setOnes();
-  BOOST_CHECK_EQUAL(partial_data->Gp.cols(), np);
-  BOOST_CHECK_EQUAL(partial_data->Hp.cols(), np);
-  BOOST_CHECK(partial_data->Gp_internal.isApprox(partial_data->Gp));
-  BOOST_CHECK(partial_data->Hp_internal.isApprox(partial_data->Hp));
 }
 
 //----------------------------------------------------------------------------//

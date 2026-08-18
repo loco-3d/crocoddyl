@@ -12,6 +12,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 #define SCALAR_@SCALAR_NAME@
 
@@ -46,7 +47,9 @@ struct IntegratedActionModelRKVisitor
                "and four)\n"
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
-               "derivatives (default True)."))
+               "derivatives (default True).")[deprecated<>(
+               "Deprecated. Use the constructor taking dynModel, costModel "
+               "and constraints.")])
         .def(bp::init<std::shared_ptr<DynamicsModelAbstract>,
                       std::shared_ptr<CostModelSum>,
                       bp::optional<std::shared_ptr<ConstraintModelManager>,
@@ -294,7 +297,9 @@ struct IntegratedActionDataRKVisitor
           "four)\n"                                                            \
           ":param stepTime: step time (default 1e-3)\n"                        \
           ":param withCostResidual: includes the cost residuals and "          \
-          "derivatives (default True)."))                                      \
+          "derivatives (default True).")[deprecated<>(                         \
+          "Deprecated. Use the constructor taking dynModel, costModel and "    \
+          "constraints.")])                                                    \
       .def(IntegratedActionModelRKVisitor<Model>())                            \
       .def(CastVisitor<Model>())                                               \
       .def(PrintableVisitor<Model>())                                          \

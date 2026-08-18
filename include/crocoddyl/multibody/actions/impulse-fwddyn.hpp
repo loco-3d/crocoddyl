@@ -13,7 +13,7 @@
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -53,11 +53,13 @@ namespace crocoddyl {
  * important to remark that `calcDiff()` computes the derivatives using the
  * latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
+ * @deprecated Use `DynamicsModelImpulseForwardTpl`.
+ *
  * \sa `ActionModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class [[deprecated("Use DynamicsModelImpulseForward.")]]
-ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
+class ActionModelImpulseFwdDynamicsTpl
+    : public ActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ActionModelBase, ActionModelImpulseFwdDynamicsTpl)
@@ -91,12 +93,14 @@ ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] enable_force     Enable the computation of the contact force
    * derivatives (default false)
    */
-  ActionModelImpulseFwdDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ImpulseModelMultiple> impulses,
-      std::shared_ptr<CostModelSum> costs, const Scalar r_coeff = Scalar(0.),
-      const Scalar JMinvJt_damping = Scalar(0.),
-      const bool enable_force = false);
+  DEPRECATED("Use DynamicsModelImpulseForward",
+             ActionModelImpulseFwdDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ImpulseModelMultiple> impulses,
+                 std::shared_ptr<CostModelSum> costs,
+                 const Scalar r_coeff = Scalar(0.),
+                 const Scalar JMinvJt_damping = Scalar(0.),
+                 const bool enable_force = false));
 
   /**
    * @brief Initialize the impulse forward-dynamics action model
@@ -116,14 +120,15 @@ ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param[in] enable_force     Enable the computation of the contact force
    * derivatives (default false)
    */
-  ActionModelImpulseFwdDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ImpulseModelMultiple> impulses,
-      std::shared_ptr<CostModelSum> costs,
-      std::shared_ptr<ConstraintModelManager> constraints,
-      const Scalar r_coeff = Scalar(0.),
-      const Scalar JMinvJt_damping = Scalar(0.),
-      const bool enable_force = false);
+  DEPRECATED("Use DynamicsModelImpulseForward",
+             ActionModelImpulseFwdDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ImpulseModelMultiple> impulses,
+                 std::shared_ptr<CostModelSum> costs,
+                 std::shared_ptr<ConstraintModelManager> constraints,
+                 const Scalar r_coeff = Scalar(0.),
+                 const Scalar JMinvJt_damping = Scalar(0.),
+                 const bool enable_force = false));
   virtual ~ActionModelImpulseFwdDynamicsTpl() = default;
 
   /**
@@ -326,9 +331,12 @@ ActionModelImpulseFwdDynamicsTpl : public ActionModelAbstractTpl<_Scalar> {
   pinocchio::MotionTpl<Scalar> gravity_;  //! Gravity acceleration
 };
 
+/**
+ * @brief Data for the deprecated impulse forward-dynamics action model
+ * @deprecated Use `DynamicsDataImpulseForwardTpl`.
+ */
 template <typename _Scalar>
-struct [[deprecated("Use DynamicsDataImpulseForward.")]]
-ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
+struct ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -337,7 +345,9 @@ ActionDataImpulseFwdDynamicsTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit ActionDataImpulseFwdDynamicsTpl(Model<Scalar>* const model)
+  DEPRECATED(
+      "Use DynamicsDataImpulseForward",
+      explicit ActionDataImpulseFwdDynamicsTpl(Model<Scalar>* const model))
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(&pinocchio, model->get_impulses()->createData(&pinocchio)),

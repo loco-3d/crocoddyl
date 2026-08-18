@@ -17,8 +17,9 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/multibody.hpp"
+#include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
+#include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -31,10 +32,13 @@ void build_arm_action_models(
     std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >& runningModel,
     std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar> >&
         terminalModel) {
-  typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>
-      DifferentialActionModelFreeFwdDynamics;
+  typedef typename crocoddyl::DynamicsModelConstrainedForwardTpl<Scalar>
+      DynamicsModelConstrainedForward;
+  typedef typename crocoddyl::ImplicitConstraintModelMultipleTpl<Scalar>
+      ImplicitConstraintModelMultiple;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar>
       IntegratedActionModelEuler;
+  typedef typename crocoddyl::IntegratorTimeTpl<Scalar> IntegratorTime;
   typedef typename crocoddyl::ActuationModelMultibodyTpl<Scalar>
       ActuationModelMultibody;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
@@ -93,17 +97,19 @@ void build_arm_action_models(
   std::shared_ptr<ActuationModelMultibody> actuation =
       std::make_shared<ActuationModelMultibody>(state);
 
-  // Next, we need to create an action model for running and terminal knots. The
-  // forward dynamics (computed using ABA) are implemented
-  // inside DifferentialActionModelFullyActuated.
-  std::shared_ptr<DifferentialActionModelFreeFwdDynamics> runningDAM =
-      std::make_shared<DifferentialActionModelFreeFwdDynamics>(
-          state, actuation, runningCostModel);
+  std::shared_ptr<ImplicitConstraintModelMultiple> constraints =
+      std::make_shared<ImplicitConstraintModelMultiple>(state,
+                                                        actuation->get_nu());
+  std::shared_ptr<DynamicsModelConstrainedForward> dynamics =
+      std::make_shared<DynamicsModelConstrainedForward>(state, actuation,
+                                                        constraints);
 
-  runningModel =
-      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-2));
-  terminalModel =
-      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
+  runningModel = std::make_shared<IntegratedActionModelEuler>(
+      dynamics, runningCostModel, nullptr, nullptr,
+      std::make_shared<IntegratorTime>(Scalar(1e-2)));
+  terminalModel = std::make_shared<IntegratedActionModelEuler>(
+      dynamics, terminalCostModel, nullptr, nullptr,
+      std::make_shared<IntegratorTime>(Scalar(0.)));
 }
 
 }  // namespace benchmark

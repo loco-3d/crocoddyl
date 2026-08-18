@@ -71,20 +71,23 @@ class IntegratedActionModelEulerTpl
 
   /**
    * @brief Initialize the symplectic Euler integrator
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * @param[in] model               Differential action model
    * @param[in] control             Control parametrization
    * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelEulerTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      std::shared_ptr<ControlParametrizationModelAbstract> control,
-      const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelEulerTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 std::shared_ptr<ControlParametrizationModelAbstract> control,
+                 const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize the symplectic Euler integrator
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * This initialization uses `ControlParametrizationPolyZeroTpl` for the
    * control parametrization.
@@ -93,10 +96,11 @@ class IntegratedActionModelEulerTpl
    * @param[in] time_step           Step time (default 1e-3)
    * @param[in] with_cost_residual  Compute cost residual (default true)
    */
-  IntegratedActionModelEulerTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelEulerTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize from continuous dynamics, costs and constraints
@@ -313,7 +317,7 @@ struct IntegratedActionDataEulerTpl
   }
 
   std::shared_ptr<DifferentialActionDataAbstract>
-      differential;                                //!< Differential model data
+      differential;  //!< Legacy differential model data
   std::shared_ptr<DynamicsDataAbstract> dynamics;  //!< Dynamics model data
   std::shared_ptr<CostDataSum> costs;              //!< Cost model data
   std::shared_ptr<ConstraintDataManager>

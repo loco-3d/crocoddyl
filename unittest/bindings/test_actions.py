@@ -3,11 +3,7 @@ import unittest
 from random import randint
 
 import numpy as np
-from factory import (
-    DifferentialLQRModelDerived,
-    LQRModelDerived,
-    UnicycleModelDerived,
-)
+from factory import LQRModelDerived, UnicycleModelDerived
 
 import crocoddyl
 
@@ -130,30 +126,16 @@ class ActionModelAbstractTestCase(unittest.TestCase):
             "Wrong cost residuals.",
         )
 
-        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
-            # Checking the dimension of the next state
-            self.assertEqual(
-                self.DATA.xnext.shape,
-                self.DATA_DER.xnext.shape,
-                "Wrong next state dimension.",
-            )
-            # Checking the next state value
-            self.assertTrue(
-                np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
-                "Wrong next state.",
-            )
-        elif isinstance(self.MODEL, crocoddyl.DifferentialActionModelAbstract):
-            # Checking the dimension of the next state
-            self.assertEqual(
-                self.DATA.xout.shape,
-                self.DATA_DER.xout.shape,
-                "Wrong next state dimension.",
-            )
-            # Checking the next state value
-            self.assertTrue(
-                np.allclose(self.DATA.xout, self.DATA_DER.xout, atol=1e-9),
-                "Wrong next state.",
-            )
+        # Checking the dimension and value of the next state
+        self.assertEqual(
+            self.DATA.xnext.shape,
+            self.DATA_DER.xnext.shape,
+            "Wrong next state dimension.",
+        )
+        self.assertTrue(
+            np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
+            "Wrong next state.",
+        )
 
     def test_calc_x(self):
         # Run calc for both action models
@@ -168,30 +150,16 @@ class ActionModelAbstractTestCase(unittest.TestCase):
             "Wrong cost residuals.",
         )
 
-        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
-            # Checking the dimension of the next state
-            self.assertEqual(
-                self.DATA.xnext.shape,
-                self.DATA_DER.xnext.shape,
-                "Wrong next state dimension.",
-            )
-            # Checking the next state value
-            self.assertTrue(
-                np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
-                "Wrong next state.",
-            )
-        elif isinstance(self.MODEL, crocoddyl.DifferentialActionModelAbstract):
-            # Checking the dimension of the next state
-            self.assertEqual(
-                self.DATA.xout.shape,
-                self.DATA_DER.xout.shape,
-                "Wrong next state dimension.",
-            )
-            # Checking the next state value
-            self.assertTrue(
-                np.allclose(self.DATA.xout, self.DATA_DER.xout, atol=1e-9),
-                "Wrong next state.",
-            )
+        # Checking the dimension and value of the next state
+        self.assertEqual(
+            self.DATA.xnext.shape,
+            self.DATA_DER.xnext.shape,
+            "Wrong next state dimension.",
+        )
+        self.assertTrue(
+            np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
+            "Wrong next state.",
+        )
 
     def test_calcDiff(self):
         # Run calcDiff for both action models
@@ -201,16 +169,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x, self.u)
         self.MODEL_DER.calcDiff(self.DATA_DER, self.x, self.u)
         # Checking the next state value
-        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
-            self.assertTrue(
-                np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
-                "Wrong next state.",
-            )
-        elif isinstance(self.MODEL, crocoddyl.DifferentialActionModelAbstract):
-            self.assertTrue(
-                np.allclose(self.DATA.xout, self.DATA_DER.xout, atol=1e-9),
-                "Wrong next state.",
-            )
+        self.assertTrue(
+            np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
+            "Wrong next state.",
+        )
         # Checking the Jacobians of the dynamic
         self.assertTrue(
             np.allclose(self.DATA.Fx, self.DATA_DER.Fx, atol=1e-9), "Wrong Fx."
@@ -243,11 +205,10 @@ class ActionModelAbstractTestCase(unittest.TestCase):
         self.MODEL_DER.calc(self.DATA_DER, self.x)
         self.MODEL_DER.calcDiff(self.DATA_DER, self.x)
         # Checking the next state value
-        if isinstance(self.MODEL, crocoddyl.ActionModelAbstract):
-            self.assertTrue(
-                np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
-                "Wrong next state.",
-            )
+        self.assertTrue(
+            np.allclose(self.DATA.xnext, self.DATA_DER.xnext, atol=1e-9),
+            "Wrong next state.",
+        )
         # Checking the Jacobians and Hessians of the cost
         self.assertTrue(
             np.allclose(self.DATA.Lx, self.DATA_DER.Lx, atol=1e-9), "Wrong Lx."
@@ -282,30 +243,6 @@ class RandomLQRTest(ActionModelAbstractTestCase):
     )
 
 
-class DifferentialLQRTest(ActionModelAbstractTestCase):
-    NQ = randint(2, 21)
-    NU = randint(2, NQ)
-    MODEL = crocoddyl.DifferentialActionModelLQR(NQ, NU)
-    MODEL_DER = DifferentialLQRModelDerived(NQ, NU)
-
-
-class RandomDifferentialLQRTest(ActionModelAbstractTestCase):
-    NQ = randint(2, 21)
-    NU = randint(2, NQ)
-    MODEL = crocoddyl.DifferentialActionModelLQR.Random(NQ, NU)
-    MODEL_DER = DifferentialLQRModelDerived.fromLQR(
-        MODEL.Aq,
-        MODEL.Av,
-        MODEL.B,
-        MODEL.Q,
-        MODEL.R,
-        MODEL.N,
-        MODEL.f,
-        MODEL.q,
-        MODEL.r,
-    )
-
-
 if __name__ == "__main__":
     # test to be run
     test_classes_to_run = [
@@ -313,8 +250,6 @@ if __name__ == "__main__":
         UnicycleTest,
         LQRTest,
         RandomLQRTest,
-        DifferentialLQRTest,
-        RandomDifferentialLQRTest,
     ]
     loader = unittest.TestLoader()
     suites_list = []

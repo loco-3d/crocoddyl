@@ -14,7 +14,7 @@
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "factory/action.hpp"
 #include "factory/control.hpp"
-#include "factory/diff_action.hpp"
+#include "factory/dynamics.hpp"
 #include "factory/integrator.hpp"
 #include "unittest_common.hpp"
 
@@ -81,6 +81,20 @@ class ActionModelParameterProbeTpl
 };
 
 typedef ActionModelParameterProbeTpl<double> ActionModelParameterProbe;
+
+std::shared_ptr<crocoddyl::ActionModelAbstract> create_dynamics_action_model(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
+  const DynamicsModelFactoryResult components =
+      DynamicsModelFactory().create(dynamics_type);
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>
+      control =
+          ControlFactory().create(control_type, components.dynamics->get_nu());
+  return IntegratorFactory().create(integrator_type, components.dynamics,
+                                    components.costs, components.constraints,
+                                    control);
+}
 
 template <typename Scalar>
 void check_action_parameter_dimensions(
@@ -512,22 +526,11 @@ void test_check_action_data(ActionModelTypes::Type action_model_type) {
   test_check_data(model);
 }
 
-void test_check_integrated_action_data(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_check_data(model);
+void test_check_action_data(const DynamicsModelTypes::Type dynamics_type,
+                            const IntegratorTypes::Type integrator_type,
+                            const ControlTypes::Type control_type) {
+  test_check_data(create_dynamics_action_model(dynamics_type, integrator_type,
+                                               control_type));
 }
 
 void test_calc_action_model(ActionModelTypes::Type action_model_type) {
@@ -538,22 +541,11 @@ void test_calc_action_model(ActionModelTypes::Type action_model_type) {
   test_calc(model);
 }
 
-void test_calc_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_calc(model);
+void test_calc_action_model(const DynamicsModelTypes::Type dynamics_type,
+                            const IntegratorTypes::Type integrator_type,
+                            const ControlTypes::Type control_type) {
+  test_calc(create_dynamics_action_model(dynamics_type, integrator_type,
+                                         control_type));
 }
 
 void test_partial_derivatives_action_model(
@@ -565,87 +557,12 @@ void test_partial_derivatives_action_model(
   test_partial_derivatives_against_numdiff(model);
 }
 
-void test_partial_derivatives_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_partial_derivatives_against_numdiff(model);
-}
-
-/**
- * Test two action models that should provide the same result when calling calc
- * if the first part of the control input u of model2 is equal to the control
- * input of model1. A typical case would be an integrated action model using an
- * Euler integration scheme, which can be coupled either with a constant control
- * parametrization (model1) or a linear control parametrization (model2), and
- * should thus provide the same result as long as the control input at the
- * beginning of the step has the same value.
- */
-void test_calc_against_calc(
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model1,
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model2) {
-  // create the corresponding data object and set the cost to nan
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data1 =
-      model1->createData();
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data2 =
-      model2->createData();
-
-  // Generating random values for the state and control
-  const Eigen::VectorXd x = model1->get_state()->rand();
-  Eigen::VectorXd u1 = Eigen::VectorXd::Random(model1->get_nu());
-  Eigen::VectorXd u2 = Eigen::VectorXd::Random(model2->get_nu());
-  // copy u1 to the first part of u2 (assuming u2 is larger than u1)
-  u2.head(u1.size()) = u1;
-
-  // Computing the action
-  model1->calc(data1, x, u1);
-  model2->calc(data2, x, u2);
-
-  // Checking the state and cost integration
-  BOOST_CHECK(isCloseAbsRel(data1->xnext, data2->xnext, 1e-9, 1e-9));
-  BOOST_CHECK(abs(data1->cost - data2->cost) < 1e-9);
-}
-
-void register_test_calc_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type1,
-    ControlTypes::Type control_type2) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl1 =
-      factory_ctrl.create(control_type1, dam->get_nu());
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl2 =
-      factory_ctrl.create(control_type2, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model1 =
-      factory_int.create(integrator_type, dam, ctrl1);
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model2 =
-      factory_int.create(integrator_type, dam, ctrl2);
-
-  boost::test_tools::output_test_stream test_name;
-  test_name << "test_calc_integrated_action_model_" << dam_type << "_"
-            << integrator_type << "_" << control_type1 << "_" << control_type2;
-  std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_against_calc, model1, model2)));
-  framework::master_test_suite().add(ts);
+void test_partial_derivatives_action_model(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
+  test_partial_derivatives_against_numdiff(create_dynamics_action_model(
+      dynamics_type, integrator_type, control_type));
 }
 
 //----------------------------------------------------------------------------//
@@ -656,32 +573,41 @@ void register_action_model_unit_tests(
   test_name << "test_" << action_model_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(ActionModelTypes::Type)>(&test_check_action_data),
+      action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(ActionModelTypes::Type)>(&test_calc_action_model),
+      action_model_type)));
   ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_check_action_data, action_model_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_action_model, action_model_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_action_model, action_model_type)));
+      BOOST_TEST_CASE(boost::bind(static_cast<void (*)(ActionModelTypes::Type)>(
+                                      &test_partial_derivatives_action_model),
+                                  action_model_type)));
   framework::master_test_suite().add(ts);
 }
 
-void register_integrated_action_model_unit_tests(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
+void register_action_model_unit_tests(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << dam_type << "_" << integrator_type << "_"
+  test_name << "test_" << dynamics_type << "_" << integrator_type << "_"
             << control_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_check_integrated_action_data, dam_type,
-                                  integrator_type, control_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_integrated_action_model, dam_type,
-                                  integrator_type, control_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_integrated_action_model, dam_type,
-                  integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(&test_check_action_data),
+      dynamics_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(&test_calc_action_model),
+      dynamics_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(
+          &test_partial_derivatives_action_model),
+      dynamics_type, integrator_type, control_type)));
   framework::master_test_suite().add(ts);
 }
 
@@ -703,44 +629,29 @@ bool init_function() {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
   }
 
-  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyTwoRK3);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyTwoRK4);
+  for (std::vector<DynamicsModelTypes::Type>::const_iterator it =
+           DynamicsModelTypes::all.begin();
+       it != DynamicsModelTypes::all.end(); ++it) {
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorEuler,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK2,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK2,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyTwoRK3);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyTwoRK4);
   }
 
-  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_test_calc_integrated_action_model(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyZero, ControlTypes::PolyOne);
-    register_test_calc_integrated_action_model(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyOne, ControlTypes::PolyTwoRK4);
-  }
   return true;
 }
 

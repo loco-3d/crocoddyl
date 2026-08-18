@@ -92,7 +92,6 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 euler = module.IntegratedActionModelEuler(
                     dynamics, costs, constraints, None, time
                 )
-                self.assertIsNone(euler.differential)
                 self.assertIs(euler.dynamics, dynamics)
                 self.assertIs(euler.costs, costs)
                 self.assertIs(euler.constraints, constraints)
@@ -169,7 +168,7 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 self.assertTrue(np.array_equal(data.xnext, x))
                 self.assertEqual(data.g.shape, (constraints.ng_T,))
                 self.assertEqual(data.h.shape, (constraints.nh_T,))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     euler.calc(data, x, np.zeros(euler.nu + 1, dtype=dtype))
 
                 rk_models = []
@@ -205,21 +204,21 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                         self.assertTrue(np.array_equal(getattr(rk_data, name), value))
                     self.assertTrue(np.array_equal(rk_data.xnext, x))
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     rk_models[-1][0].calc(rk_models[0][1], x, u)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     rk_models[-1][0].calcDiff(rk_models[0][1], x, u)
 
                 impulse, impulse_costs, _ = self.make_impulse(module, dtype, state)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionModelEuler(impulse, impulse_costs)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionModelEuler(None, costs)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionDataAbstract(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionDataEuler(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionDataRK(None)
 
         casted = crocoddyl.IntegratedActionModelEuler(
@@ -273,30 +272,20 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 continuous, continuous_costs, _ = self.make_continuous(
                     module, dtype, state
                 )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedActionModel(continuous, continuous_costs)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedActionModel(None, costs)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedActionData(None)
 
     def test_python_terminal_override_receives_no_control(self):
-        for module, dtype, _ in self.scalar_cases():
+        for module, dtype, state in self.scalar_cases():
             with self.subTest(module=module.__name__):
 
-                class Differential(module.DifferentialActionModelAbstract):
-                    def __init__(self):
-                        super().__init__(module.StateVector(4), 2)
-
-                    def calc(self, data, x, u=None):
-                        pass
-
-                    def calcDiff(self, data, x, u=None):
-                        pass
-
-                class Integrated(module.IntegratedActionModelAbstract):
-                    def __init__(self, differential):
-                        super().__init__(differential, 0.01)
+                class IntegratedDynamics(module.IntegratedActionModelAbstract):
+                    def __init__(self, dynamics, costs, constraints):
+                        super().__init__(dynamics, costs, constraints)
                         self.calc_u = "unset"
                         self.calc_diff_u = "unset"
 
@@ -306,10 +295,13 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                     def calcDiff(self, data, x, u=None):
                         self.calc_diff_u = u
 
-                model = Integrated(Differential())
+                dynamics, costs, constraints = self.make_continuous(
+                    module, dtype, state
+                )
+                model = IntegratedDynamics(dynamics, costs, constraints)
                 data = model.createData()
-                x = np.zeros(4, dtype=dtype)
-                u = np.zeros(2, dtype=dtype)
+                x = np.zeros(state.nx, dtype=dtype)
+                u = np.zeros(model.nu, dtype=dtype)
                 model.calc(data, x, u)
                 self.assertIsNotNone(model.calc_u)
                 model.calc(data, x)
@@ -318,6 +310,9 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 self.assertIsNotNone(model.calc_diff_u)
                 model.calcDiff(data, x)
                 self.assertIsNone(model.calc_diff_u)
+                self.assertIs(model.dynamics, dynamics)
+                self.assertIs(model.costs, costs)
+                self.assertIs(model.constraints, constraints)
 
 
 if __name__ == "__main__":

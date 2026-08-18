@@ -23,7 +23,7 @@ MAXITER = 1
 CALLBACKS = False
 
 
-def createProblem(model):
+def createProblem():
     robot_model = ROBOT.model
     q0 = robot_model.referenceConfigurations["arm_up"]
     x0 = np.concatenate([q0, np.zeros(robot_model.nv)])
@@ -55,15 +55,22 @@ def createProblem(model):
     runningCostModel.addCost("uReg", uRegCost, 1e-1)
     terminalCostModel.addCost("gripperPose", goalTrackingCost, 1e3)
 
-    # Next, we need to create an action model for running and terminal knots. The
-    # forward dynamics (computed using ABA) are implemented
-    # inside DifferentialActionModelFullyActuated.
     actuation = crocoddyl.ActuationModelMultibody(state)
+    constraints = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+    dynamics = crocoddyl.DynamicsModelConstrainedForward(state, actuation, constraints)
     runningModel = crocoddyl.IntegratedActionModelEuler(
-        model(state, actuation, runningCostModel), 1e-2
+        dynamics,
+        runningCostModel,
+        None,
+        None,
+        crocoddyl.IntegratorTime(1e-2),
     )
     terminalModel = crocoddyl.IntegratedActionModelEuler(
-        model(state, actuation, terminalCostModel), 0.0
+        dynamics,
+        terminalCostModel,
+        None,
+        None,
+        crocoddyl.IntegratorTime(0.0),
     )
 
     # For this optimal control problem, we define 100 knots (or running action
@@ -123,7 +130,7 @@ def runShootingProblemCalcDiffBenchmark(xs, us, problem):
 
 
 np.set_printoptions(precision=2)
-xs, us, problem = createProblem(crocoddyl.DifferentialActionModelFreeFwdDynamics)
+xs, us, problem = createProblem()
 print("NQ:", problem.terminalModel.state.nq)
 print("Number of nodes:", problem.T)
 avrg_dur, min_dur, max_dur = runDDPSolveBenchmark(xs, us, problem)

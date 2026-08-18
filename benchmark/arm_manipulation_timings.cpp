@@ -17,8 +17,9 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/utils/timer.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/multibody.hpp"
+#include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
+#include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -106,24 +107,27 @@ int main(int argc, char* argv[]) {
   runningCostModel->addCost("uReg", uRegCost, 1e-4);
   terminalCostModel->addCost("gripperPose", goalTrackingCost, 1);
 
-  std::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
-      runningDAM =
-          std::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(
-              state, actuation, runningCostModel);
-
-  std::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics>
-      terminalDAM =
-          std::make_shared<crocoddyl::DifferentialActionModelFreeFwdDynamics>(
-              state, actuation, terminalCostModel);
+  std::shared_ptr<crocoddyl::ImplicitConstraintModelMultiple>
+      dynamics_constraints =
+          std::make_shared<crocoddyl::ImplicitConstraintModelMultiple>(
+              state, actuation->get_nu());
+  std::shared_ptr<crocoddyl::DynamicsModelConstrainedForward> runningDynamics =
+      std::make_shared<crocoddyl::DynamicsModelConstrainedForward>(
+          state, actuation, dynamics_constraints);
 
   std::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithEuler =
-      std::make_shared<crocoddyl::IntegratedActionModelEuler>(runningDAM, 1e-3);
+      std::make_shared<crocoddyl::IntegratedActionModelEuler>(
+          runningDynamics, runningCostModel, nullptr, nullptr,
+          std::make_shared<crocoddyl::IntegratorTime>(1e-3));
   std::shared_ptr<crocoddyl::ActionModelAbstract> runningModelWithRK4 =
       std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          runningDAM, crocoddyl::RKType::four, 1e-3);
+          runningDynamics, runningCostModel, nullptr, nullptr,
+          std::make_shared<crocoddyl::IntegratorTime>(1e-3),
+          crocoddyl::RKType::four);
   std::shared_ptr<crocoddyl::ActionModelAbstract> terminalModel =
-      std::make_shared<crocoddyl::IntegratedActionModelEuler>(terminalDAM,
-                                                              1e-3);
+      std::make_shared<crocoddyl::IntegratedActionModelEuler>(
+          runningDynamics, terminalCostModel, nullptr, nullptr,
+          std::make_shared<crocoddyl::IntegratorTime>(1e-3));
 
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract> >
       runningModelsWithEuler(N, runningModelWithEuler);
@@ -144,11 +148,11 @@ int main(int argc, char* argv[]) {
       runningModelWithEuler->createData();
   std::shared_ptr<crocoddyl::ActionDataAbstract> runningModelWithRK4_data =
       runningModelWithRK4->createData();
-  std::shared_ptr<crocoddyl::DifferentialActionDataAbstract> runningDAM_data =
-      runningDAM->createData();
-  crocoddyl::DifferentialActionDataFreeFwdDynamics* d =
-      static_cast<crocoddyl::DifferentialActionDataFreeFwdDynamics*>(
-          runningDAM_data.get());
+  std::shared_ptr<crocoddyl::DynamicsDataAbstract> runningDynamics_data =
+      runningDynamics->createData();
+  crocoddyl::DynamicsDataConstrainedForward* d =
+      static_cast<crocoddyl::DynamicsDataConstrainedForward*>(
+          runningDynamics_data.get());
   std::shared_ptr<crocoddyl::ActuationDataAbstract> actuation_data =
       actuation->createData();
   std::shared_ptr<crocoddyl::CostDataAbstract> goalTrackingCost_data =
@@ -441,7 +445,7 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningDAM->calc(runningDAM_data, x1s[_smooth], us[_smooth]);
+    runningDynamics->calc(runningDynamics_data, x1s[_smooth], us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   std::cout << "FreeFwdDynamics" << std::endl;
@@ -450,7 +454,7 @@ int main(int argc, char* argv[]) {
   duration.setZero();
   SMOOTH(T) {
     timer.reset();
-    runningDAM->calcDiff(runningDAM_data, x1s[_smooth], us[_smooth]);
+    runningDynamics->calcDiff(runningDynamics_data, x1s[_smooth], us[_smooth]);
     duration[_smooth] = timer.get_us_duration();
   }
   printStatistics("calcDiff", duration);

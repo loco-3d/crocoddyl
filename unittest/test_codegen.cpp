@@ -38,13 +38,9 @@
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/residuals/parameters.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
-#include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 #include "crocoddyl/multibody/actuations/joint-friction.hpp"
 #include "crocoddyl/multibody/actuations/multibody.hpp"
-#include "crocoddyl/multibody/contacts/contact-3d.hpp"
-#include "crocoddyl/multibody/contacts/contact-6d.hpp"
-#include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
 #include "crocoddyl/multibody/dynamics/impulse-forward.hpp"
 #include "crocoddyl/multibody/implicit-constraints/contact.hpp"
@@ -65,22 +61,6 @@
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "factory/solver.hpp"
 #include "unittest_common.hpp"
-
-#if !defined(CROCODDYL_DISABLE_WARNING_DEPRECATED)
-#if defined(__clang__) || defined(__GNUC__)
-#define CROCODDYL_DISABLE_WARNING_DEPRECATED \
-  _Pragma("GCC diagnostic push")             \
-      _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
-#define CROCODDYL_ENABLE_WARNING_DEPRECATED _Pragma("GCC diagnostic pop")
-#elif defined(_MSC_VER)
-#define CROCODDYL_DISABLE_WARNING_DEPRECATED \
-  __pragma(warning(push)) __pragma(warning(disable : 4996))
-#define CROCODDYL_ENABLE_WARNING_DEPRECATED __pragma(warning(pop))
-#else
-#define CROCODDYL_DISABLE_WARNING_DEPRECATED
-#define CROCODDYL_ENABLE_WARNING_DEPRECATED
-#endif
-#endif
 
 using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
@@ -593,28 +573,21 @@ build_bipedal_action_model() {
       ResidualModelContactForce;
   typedef typename crocoddyl::ResidualModelCentroidalMomentumTpl<Scalar>
       ResidualModelCentroidalMomentum;
-  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar>
-      ContactModelAbstract;
-  typedef typename crocoddyl::ContactModelMultipleTpl<Scalar>
-      ContactModelMultiple;
-  typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
-  typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
+  typedef typename crocoddyl::ContactModelTpl<Scalar> ContactModel;
+  typedef typename crocoddyl::ConstraintModelManagerTpl<Scalar>
+      ConstraintModelManager;
   typedef typename crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
-  typedef typename crocoddyl::ContactModelAbstractTpl<Scalar>
-      ContactModelAbstract;
-  typedef typename crocoddyl::ContactModelMultipleTpl<Scalar>
-      ContactModelMultiple;
-  typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
-  typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
+  typedef typename crocoddyl::DynamicsModelConstrainedForwardTpl<Scalar>
+      DynamicsModelConstrainedForward;
+  typedef typename crocoddyl::ImplicitConstraintModelMultipleTpl<Scalar>
+      ImplicitConstraintModelMultiple;
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar>
       ActionModelAbstract;
   typedef typename crocoddyl::ActuationModelFloatingBaseTpl<Scalar>
       ActuationModelFloatingBase;
-  typedef
-      typename crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<Scalar>
-          DifferentialActionModelContactFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar>
       IntegratedActionModelEuler;
+  typedef typename crocoddyl::IntegratorTimeTpl<Scalar> IntegratorTime;
 
   const std::string RF = "leg_right_6_joint";
   const std::string LF = "leg_left_6_joint";
@@ -680,40 +653,41 @@ build_bipedal_action_model() {
   runningCostModel->addCost("comcost", comCost, Scalar(1e-4));
   runningCostModel->addCost("centroidal", centroidalCost, Scalar(1e-4));
 
-  std::shared_ptr<ContactModelMultiple> contact_models =
-      std::make_shared<ContactModelMultiple>(state, actuation->get_nu());
-
-  std::shared_ptr<ContactModelAbstract> support_contact_model6D =
-      std::make_shared<ContactModel6D>(
+  std::shared_ptr<ImplicitConstraintModelMultiple> contact_models =
+      std::make_shared<ImplicitConstraintModelMultiple>(state,
+                                                        actuation->get_nu());
+  typename ContactModel::MaskArray mask6d = {
+      {true, true, true, true, true, true}};
+  std::shared_ptr<ContactModel> support_contact_model6D =
+      std::make_shared<ContactModel>(
           state, model.getFrameId(RF), pinocchio::SE3Tpl<Scalar>::Identity(),
           pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
-          Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(
+          Vector2s(Scalar(0.), Scalar(50.)), mask6d);
+  contact_models->addConstraint(
       model.frames[model.getFrameId(RF)].name + "_contact",
       support_contact_model6D);
 
-  std::shared_ptr<ContactModelAbstract> support_contact_model3D =
-      std::make_shared<ContactModel3D>(
-          state, model.getFrameId(LF), Vector3s::Zero(),
+  typename ContactModel::MaskArray mask3d = {
+      {true, true, true, false, false, false}};
+  std::shared_ptr<ContactModel> support_contact_model3D =
+      std::make_shared<ContactModel>(
+          state, model.getFrameId(LF), pinocchio::SE3Tpl<Scalar>::Identity(),
           pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
-          Vector2s(Scalar(0.), Scalar(50.)));
-  contact_models->addContact(
+          Vector2s(Scalar(0.), Scalar(50.)), mask3d);
+  contact_models->addConstraint(
       model.frames[model.getFrameId(LF)].name + "_contact",
       support_contact_model3D);
 
-  // Next, we need to create an action model for running and terminal knots. The
-  // forward dynamics (computed using ABA) are implemented
-  // inside DifferentialActionModelFullyActuated.
-  std::shared_ptr<DifferentialActionModelContactFwdDynamics> runningDAM =
-      std::make_shared<DifferentialActionModelContactFwdDynamics>(
-          state, actuation, contact_models, runningCostModel);
-
-  // VectorXs armature(state->get_nq());
-  // armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  // runningDAM->set_armature(armature);
-  // terminalDAM->set_armature(armature);
+  std::shared_ptr<DynamicsModelConstrainedForward> runningDynamics =
+      std::make_shared<DynamicsModelConstrainedForward>(state, actuation,
+                                                        contact_models);
   std::shared_ptr<ActionModelAbstract> runningModel =
-      std::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
+      std::make_shared<IntegratedActionModelEuler>(
+          runningDynamics, runningCostModel,
+          std::shared_ptr<ConstraintModelManager>(),
+          std::shared_ptr<
+              crocoddyl::ControlParametrizationModelAbstractTpl<Scalar>>(),
+          std::make_shared<IntegratorTime>(Scalar(1e-3)));
   return runningModel;
 }
 

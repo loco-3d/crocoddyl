@@ -62,25 +62,21 @@ class ActionsTest(CopyModelTestCase):
     # core actions
     MODEL.append(crocoddyl.ActionModelUnicycle())
     MODEL.append(crocoddyl.ActionModelLQR(2, 2))
-    MODEL.append(crocoddyl.DifferentialActionModelLQR(2, 2))
     # integrated actions
-    MODEL.append(
-        crocoddyl.IntegratedActionModelEuler(
-            crocoddyl.DifferentialActionModelLQR(2, 2), 0.1
-        )
-    )
+    state = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
+    actuation = crocoddyl.ActuationModelMultibody(state)
+    implicit = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+    dynamics = crocoddyl.DynamicsModelConstrainedForward(state, actuation, implicit)
+    costs = crocoddyl.CostModelSum(state, actuation.nu)
+    constraints = crocoddyl.ConstraintModelManager(state, actuation.nu)
+    MODEL.append(crocoddyl.IntegratedActionModelEuler(dynamics, costs, constraints))
     MODEL.append(
         crocoddyl.IntegratedActionModelRK(
-            crocoddyl.DifferentialActionModelLQR(2, 2), crocoddyl.RKType.two, 0.1
+            dynamics, costs, constraints, None, None, crocoddyl.RKType.two
         )
     )
     # numdiff actions
     MODEL.append(crocoddyl.ActionModelNumDiff(crocoddyl.ActionModelLQR(2, 2)))
-    MODEL.append(
-        crocoddyl.DifferentialActionModelNumDiff(
-            crocoddyl.DifferentialActionModelLQR(2, 2)
-        )
-    )
 
 
 class DynamicsModelsTest(CopyModelTestCase):

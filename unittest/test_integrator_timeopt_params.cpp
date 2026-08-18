@@ -21,8 +21,6 @@
 #include "crocoddyl/core/params/parameter-manager.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
-#include "crocoddyl/multibody/actions/free-fwddyn.hpp"
-#include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 #include "unittest_common.hpp"
@@ -77,6 +75,10 @@ class TimeDynamicsProbeTpl
     data->Fu.setIdentity();
   }
 
+  bool checkData(const std::shared_ptr<DynamicsDataAbstract>& data) override {
+    return data != nullptr;
+  }
+
   template <typename NewScalar>
   TimeDynamicsProbeTpl<NewScalar> cast() const {
     return TimeDynamicsProbeTpl<NewScalar>(
@@ -86,10 +88,8 @@ class TimeDynamicsProbeTpl
 
 template <typename Scalar>
 struct TimeFixtureTpl {
-  typedef crocoddyl::ActuationModelMultibodyTpl<Scalar> Actuation;
+  typedef crocoddyl::ConstraintModelManagerTpl<Scalar> ConstraintManager;
   typedef crocoddyl::CostModelSumTpl<Scalar> CostModelSum;
-  typedef crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar>
-      DifferentialAction;
   typedef crocoddyl::IntegratedActionModelEulerTpl<Scalar> Action;
   typedef crocoddyl::IntegratorTimeTpl<Scalar> IntegratorTime;
   typedef TimeDynamicsProbeTpl<Scalar> Dynamics;
@@ -97,22 +97,19 @@ struct TimeFixtureTpl {
   TimeFixtureTpl()
       : state(create_state<Scalar>()),
         dynamics(std::make_shared<Dynamics>(state)),
-        actuation(std::make_shared<Actuation>(state)),
-        costs(std::make_shared<CostModelSum>(state, actuation->get_nu())),
-        differential(
-            std::make_shared<DifferentialAction>(state, actuation, costs)),
-        action(std::make_shared<Action>(differential, Scalar(0.02))),
-        time(action->get_integrator_time()) {
-    time->set_timeopt(true);
-  }
+        costs(std::make_shared<CostModelSum>(state, dynamics->get_nu())),
+        constraints(
+            std::make_shared<ConstraintManager>(state, dynamics->get_nu())),
+        time(std::make_shared<IntegratorTime>(Scalar(0.02), true)),
+        action(std::make_shared<Action>(dynamics, costs, constraints, nullptr,
+                                        time)) {}
 
   std::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state;
   std::shared_ptr<Dynamics> dynamics;
-  std::shared_ptr<Actuation> actuation;
   std::shared_ptr<CostModelSum> costs;
-  std::shared_ptr<DifferentialAction> differential;
-  std::shared_ptr<Action> action;
+  std::shared_ptr<ConstraintManager> constraints;
   std::shared_ptr<IntegratorTime> time;
+  std::shared_ptr<Action> action;
 };
 
 template <typename Scalar>
@@ -244,8 +241,6 @@ void test_shared_and_copied_time_running_terminal_and_sensitivity() {
   BOOST_REQUIRE(data1 != nullptr);
   BOOST_REQUIRE(data2 != nullptr);
   BOOST_REQUIRE(copied_data != nullptr);
-  data1->dynamics = fixture.dynamics->createData();
-  data2->dynamics = fixture.dynamics->createData();
   BOOST_CHECK(fixture.action->checkData(data1));
 
   const VectorXs x = fixture.state->rand();
@@ -279,7 +274,6 @@ void test_shared_and_copied_time_running_terminal_and_sensitivity() {
   p[0] = log(Scalar(0.03));
   model.update(params, p);
   fixture.action->calc(data1, x, u);
-  data1->dynamics->vdot = data1->differential->xout;
   typename Model::MatrixXs dx_dp(fixture.state->get_ndx(), 1);
   model.computeParamSensitivity(data1, params, dx_dp, x, u);
   const VectorXs analytical = dx_dp.col(0);
@@ -321,29 +315,27 @@ void test_live_constraint_forwarding() {
   typedef crocoddyl::ConstraintModelResidualTpl<Scalar> ConstraintResidual;
   typedef crocoddyl::ResidualModelControlTpl<Scalar> ResidualControl;
   typedef crocoddyl::ResidualModelStateTpl<Scalar> ResidualState;
-  typedef
-      typename TimeFixtureTpl<Scalar>::DifferentialAction DifferentialAction;
   typedef typename TimeFixtureTpl<Scalar>::Action Action;
+  typedef typename TimeFixtureTpl<Scalar>::IntegratorTime IntegratorTime;
   typedef typename Action::VectorXs VectorXs;
 
   TimeFixtureTpl<Scalar> fixture;
   const std::shared_ptr<ConstraintManager> constraints =
       std::make_shared<ConstraintManager>(fixture.state,
-                                          fixture.actuation->get_nu());
-  const std::shared_ptr<DifferentialAction> differential =
-      std::make_shared<DifferentialAction>(fixture.state, fixture.actuation,
-                                           fixture.costs, constraints);
-  const std::shared_ptr<Action> action =
-      std::make_shared<Action>(differential, Scalar(0.02));
+                                          fixture.dynamics->get_nu());
+  const std::shared_ptr<IntegratorTime> time =
+      std::make_shared<IntegratorTime>(Scalar(0.02));
+  const std::shared_ptr<Action> action = std::make_shared<Action>(
+      fixture.dynamics, fixture.costs, constraints, nullptr, time);
   BOOST_CHECK_EQUAL(action->get_ng(), 0u);
   BOOST_CHECK_EQUAL(action->get_nh(), 0u);
 
   const std::shared_ptr<ResidualControl> residual =
       std::make_shared<ResidualControl>(fixture.state,
-                                        fixture.actuation->get_nu());
+                                        fixture.dynamics->get_nu());
   const std::shared_ptr<ResidualState> state_residual =
       std::make_shared<ResidualState>(fixture.state,
-                                      fixture.actuation->get_nu());
+                                      fixture.dynamics->get_nu());
   const VectorXs lower = VectorXs::Constant(residual->get_nr(), Scalar(-0.5));
   const VectorXs upper = VectorXs::Constant(residual->get_nr(), Scalar(0.5));
   constraints->addConstraint("inequality",
@@ -353,12 +345,12 @@ void test_live_constraint_forwarding() {
       "equality", std::make_shared<ConstraintResidual>(fixture.state,
                                                        state_residual, true));
 
-  BOOST_CHECK_EQUAL(action->get_ng(), differential->get_ng());
-  BOOST_CHECK_EQUAL(action->get_nh(), differential->get_nh());
-  BOOST_CHECK_EQUAL(action->get_ng_T(), differential->get_ng_T());
-  BOOST_CHECK_EQUAL(action->get_nh_T(), differential->get_nh_T());
-  BOOST_CHECK(action->get_g_lb().isApprox(differential->get_g_lb()));
-  BOOST_CHECK(action->get_g_ub().isApprox(differential->get_g_ub()));
+  BOOST_CHECK_EQUAL(action->get_ng(), constraints->get_ng());
+  BOOST_CHECK_EQUAL(action->get_nh(), constraints->get_nh());
+  BOOST_CHECK_EQUAL(action->get_ng_T(), constraints->get_ng_T());
+  BOOST_CHECK_EQUAL(action->get_nh_T(), constraints->get_nh_T());
+  BOOST_CHECK(action->get_g_lb().isApprox(constraints->get_lb()));
+  BOOST_CHECK(action->get_g_ub().isApprox(constraints->get_ub()));
   BOOST_CHECK_EQUAL(action->get_ng(), residual->get_nr());
   BOOST_CHECK_EQUAL(action->get_nh(), state_residual->get_nr());
   BOOST_CHECK_EQUAL(action->get_ng_T(), 0u);
@@ -391,7 +383,6 @@ void test_manager_activation_and_no_allocation() {
   const std::shared_ptr<ActionData> action_data =
       std::dynamic_pointer_cast<ActionData>(fixture.action->createData());
   BOOST_REQUIRE(action_data != nullptr);
-  action_data->dynamics = fixture.dynamics->createData();
   const VectorXs x = fixture.state->rand();
   const VectorXs u =
       VectorXs::LinSpaced(fixture.action->get_nu(), Scalar(0.1), Scalar(0.5));
@@ -400,7 +391,6 @@ void test_manager_activation_and_no_allocation() {
   p[0] = log(Scalar(0.035));
   manager.update(manager_data, p);
   fixture.action->calc(action_data, x, u);
-  action_data->dynamics->vdot = action_data->differential->xout;
   typename Manager::MatrixXs dx_dp(fixture.state->get_ndx(), 1);
   manager.calcDiff_action(manager_data, action_data, dx_dp, x, u);
   BOOST_CHECK_SMALL(fixture.time->get_time_step() - Scalar(0.035),

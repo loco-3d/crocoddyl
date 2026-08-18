@@ -30,13 +30,22 @@ class IntegratedActionModelAbstractTpl_wrap
       IntegratedActionData;
   typedef typename crocoddyl::DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModel;
+  typedef typename IntegratedActionModel::DynamicsModelAbstract DynamicsModel;
+  typedef typename IntegratedActionModel::CostModelSum CostModelSum;
+  typedef typename IntegratedActionModel::ConstraintModelManager
+      ConstraintModelManager;
   typedef typename crocoddyl::ActionDataAbstractTpl<Scalar> ActionData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
   typedef typename IntegratedActionModel::ControlParametrizationModelAbstract
       ControlModel;
+  typedef typename IntegratedActionModel::IntegratorTime IntegratorTime;
   typedef typename IntegratedActionModel::VectorXs VectorXs;
+  using IntegratedActionModel::constraints_;
   using IntegratedActionModel::control_;
+  using IntegratedActionModel::costs_;
   using IntegratedActionModel::differential_;
+  using IntegratedActionModel::dynamics_;
+  using IntegratedActionModel::integrator_time_;
   using IntegratedActionModel::nu_;
   using IntegratedActionModel::state_;
   using IntegratedActionModel::time_step_;
@@ -55,6 +64,16 @@ class IntegratedActionModelAbstractTpl_wrap
       const Scalar timestep = Scalar(1e-3),
       const bool with_cost_residual = true)
       : IntegratedActionModel(model, control, timestep, with_cost_residual),
+        bp::wrapper<IntegratedActionModel>() {}
+
+  IntegratedActionModelAbstractTpl_wrap(
+      std::shared_ptr<DynamicsModel> dynamics,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr,
+      std::shared_ptr<ControlModel> control = nullptr,
+      std::shared_ptr<IntegratorTime> integrator_time = nullptr)
+      : IntegratedActionModel(dynamics, costs, constraints, control,
+                              integrator_time),
         bp::wrapper<IntegratedActionModel>() {}
 
   void calc(const std::shared_ptr<ActionData>& data,
@@ -127,7 +146,21 @@ class IntegratedActionModelAbstractTpl_wrap
   template <typename NewScalar>
   IntegratedActionModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef IntegratedActionModelAbstractTpl_wrap<NewScalar> ReturnType;
-    if (control_) {
+    if (dynamics_ != nullptr) {
+      typedef CostModelSumTpl<NewScalar> CostModelSumNew;
+      typedef ConstraintModelManagerTpl<NewScalar> ConstraintModelManagerNew;
+      ReturnType ret(
+          dynamics_->template cast<NewScalar>(),
+          std::make_shared<CostModelSumNew>(costs_->template cast<NewScalar>()),
+          constraints_ != nullptr
+              ? std::make_shared<ConstraintModelManagerNew>(
+                    constraints_->template cast<NewScalar>())
+              : nullptr,
+          control_->template cast<NewScalar>(),
+          std::make_shared<IntegratorTimeTpl<NewScalar>>(
+              integrator_time_->template cast<NewScalar>()));
+      return ret;
+    } else if (control_) {
       ReturnType ret(
           differential_->template cast<NewScalar>(),
           control_->template cast<NewScalar>(),

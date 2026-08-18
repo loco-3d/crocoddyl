@@ -159,10 +159,15 @@ class TimeParameterizationTest(unittest.TestCase):
             with self.subTest(module=module.__name__):
                 actuation = module.ActuationModelMultibody(state)
                 costs = module.CostModelSum(state, actuation.nu)
-                differential = module.DifferentialActionModelFreeFwdDynamics(
-                    state, actuation, costs
+                implicit = module.ImplicitConstraintModelMultiple(state, actuation.nu)
+                dynamics = module.DynamicsModelConstrainedForward(
+                    state, actuation, implicit
                 )
-                euler = module.IntegratedActionModelEuler(differential, 0.02)
+                constraints = module.ConstraintModelManager(state, actuation.nu)
+                time = module.IntegratorTime(0.02)
+                euler = module.IntegratedActionModelEuler(
+                    dynamics, costs, constraints, None, time
+                )
                 euler_shared = copy.copy(euler)
                 euler.integrator_time.timeopt = True
                 params = module.IntegratorTimeoptParams(state, euler.integrator_time)
@@ -188,11 +193,17 @@ class TimeParameterizationTest(unittest.TestCase):
                 euler.calc(data, x)
                 self.assertTrue(np.array_equal(data.xnext, x))
 
-                with self.assertRaises(crocoddyl.Exception):
+                with self.assertRaises(TypeError):
                     module.IntegratorTimeoptParams(euler)
 
+                rk_time = module.IntegratorTime(0.02)
                 rk = module.IntegratedActionModelRK(
-                    differential, crocoddyl.RKType.two, 0.02
+                    dynamics,
+                    costs,
+                    constraints,
+                    None,
+                    rk_time,
+                    crocoddyl.RKType.two,
                 )
                 rk.integrator_time.timeopt = True
                 rk_params = module.IntegratorTimeoptParams(state, rk.integrator_time)

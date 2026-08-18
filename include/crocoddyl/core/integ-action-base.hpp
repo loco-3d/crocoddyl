@@ -78,29 +78,33 @@ class IntegratedActionModelAbstractTpl
 
   /**
    * @brief Initialize a legacy integrator with explicit control parametrization
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * @param[in] model               Differential action model
    * @param[in] control             Control parametrization
    * @param[in] time_step           Integration step
    * @param[in] with_cost_residual  Whether to expose cost residuals
    */
-  IntegratedActionModelAbstractTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      std::shared_ptr<ControlParametrizationModelAbstract> control,
-      const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelAbstractTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 std::shared_ptr<ControlParametrizationModelAbstract> control,
+                 const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize a legacy integrator with zero-order control
+   * @deprecated Use the dynamics, costs and constraints constructor
    *
    * @param[in] model               Differential action model
    * @param[in] time_step           Integration step
    * @param[in] with_cost_residual  Whether to expose cost residuals
    */
-  IntegratedActionModelAbstractTpl(
-      std::shared_ptr<DifferentialActionModelAbstract> model,
-      const Scalar time_step = Scalar(1e-3),
-      const bool with_cost_residual = true);
+  DEPRECATED("Use the constructor taking dynamics, costs and constraints",
+             IntegratedActionModelAbstractTpl(
+                 std::shared_ptr<DifferentialActionModelAbstract> model,
+                 const Scalar time_step = Scalar(1e-3),
+                 const bool with_cost_residual = true));
 
   /**
    * @brief Initialize an integrator from dynamics, costs and constraints

@@ -10,6 +10,7 @@
 
 // Auto-generated file for @SCALAR_TYPE@
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -21,8 +22,12 @@ struct IntegratedActionModelAbstractVisitor
   typedef typename Model::IntegratedActionModel IntegratedActionModel;
   typedef typename Model::IntegratedActionData IntegratedActionData;
   typedef typename Model::DifferentialActionModel DifferentialActionModel;
+  typedef typename Model::DynamicsModel DynamicsModel;
+  typedef typename Model::CostModelSum CostModelSum;
+  typedef typename Model::ConstraintModelManager ConstraintModelManager;
   typedef typename Model::ActionData ActionData;
   typedef typename Model::ControlModel ControlModel;
+  typedef typename Model::IntegratorTime IntegratorTime;
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -37,7 +42,24 @@ struct IntegratedActionModelAbstractVisitor
                ":param control: the control parametrization\n"
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
-               "derivatives (default True)."))
+               "derivatives (default True).")[deprecated<>(
+               "Deprecated. Use the constructor taking dynModel, costModel "
+               "and constraints.")])
+        .def(bp::init<std::shared_ptr<DynamicsModel>,
+                      std::shared_ptr<CostModelSum>,
+                      bp::optional<std::shared_ptr<ConstraintModelManager>,
+                                   std::shared_ptr<ControlModel>,
+                                   std::shared_ptr<IntegratorTime> > >(
+                 bp::args("self", "dynModel", "costModel", "constraints",
+                          "control", "integratorTime"),
+                 "Initialize the integrated-action model from dynamics and "
+                 "costs.\n\n"
+                 ":param dynModel: dynamics model\n"
+                 ":param costModel: cost model stack\n"
+                 ":param constraints: constraint manager (default None)\n"
+                 ":param control: control parametrization (default None)\n"
+                 ":param integratorTime: shared integrator time (default "
+                 "None)"))
         .def("calc",
              bp::pure_virtual(static_cast<void (Model::*)(
                  const std::shared_ptr<ActionData>&,
@@ -144,7 +166,9 @@ struct IntegratedActionModelAbstractVisitor
           ":param diffModel: differential action model\n"                   \
           ":param timestep: integration time step (default 1e-3)\n"         \
           ":param withCostResidual: includes the cost residuals and "       \
-          "derivatives (default True)."))                                   \
+          "derivatives (default True).")[deprecated<>(                      \
+          "Deprecated. Use the constructor taking dynModel, costModel and " \
+          "constraints.")])                                                 \
       .def(IntegratedActionModelAbstractVisitor<Model_wrap>())              \
       .def(PrintableVisitor<Model_wrap>());
 

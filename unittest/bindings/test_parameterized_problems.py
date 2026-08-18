@@ -231,8 +231,6 @@ class ParameterizedProblemsTest(unittest.TestCase):
         problem.x0 = modified_x0
         self.assertTrue(np.array_equal(problem.x0, modified_x0))
         problem.x0 = x0
-        problem.nthreads = 1
-        self.assertEqual(problem.nthreads, 1)
         problem.is_updated = True
         self.assertTrue(problem.is_updated)
         self.assertFalse(problem.is_updated)
@@ -252,7 +250,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
         with self.assertRaises(crocoddyl.Exception):
             problem.get_running_phase_models(2)
         with self.assertRaises(crocoddyl.Exception):
-            problem.calc(xs[:-1], us)
+            problem.calc(xs.tolist()[:-1], us)
         with self.assertRaises(crocoddyl.Exception):
             module.ParametrizedShootingProblem(x0, [], terminal, params0)
         with self.assertRaises(crocoddyl.Exception):
@@ -346,7 +344,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
             problem.runningModels = [observer0a, observer0b, observer1]
         with self.assertRaises(AttributeError):
             problem.terminalModel = terminal
-        self.assertEqual((problem.T, problem.n_phases, problem.nthreads), (3, 2, 1))
+        self.assertEqual((problem.T, problem.n_phases), (3, 2))
         self.assertEqual(list(problem.phase_idxs), [0, 2])
         self.assertEqual(list(problem.phase_edxs), [2, 3])
         self.assertEqual(len(problem.get_running_phase_models(0)), 2)
@@ -408,7 +406,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
         with self.assertRaises(crocoddyl.Exception):
             problem.update_us(updated_tau[:-1])
         with self.assertRaises(crocoddyl.Exception):
-            problem.calc(xs[:-1], ws)
+            problem.calc(xs.tolist()[:-1], ws)
         with self.assertRaises(crocoddyl.Exception):
             module.ObservationProblem(x0, [], [observer0a], terminal, params0)
         with self.assertRaises(crocoddyl.Exception):

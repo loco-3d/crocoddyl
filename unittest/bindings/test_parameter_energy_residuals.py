@@ -405,7 +405,7 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
                     state, fixture["actuation"].nu, 0
                 )
                 self.assertEqual(plain.param_name, "")
-                with self.assertRaises(crocoddyl.Exception):
+                with self.assertRaises(TypeError):
                     module.ResidualModelPotentialEnergy(
                         state, fixture["actuation"].nu, np_total, 0.0, None
                     )

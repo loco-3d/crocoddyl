@@ -14,7 +14,6 @@
 #include <sstream>
 #include <type_traits>
 
-#include "crocoddyl/core/actions/diff-lqr.hpp"
 #include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/controls/poly-one.hpp"
@@ -106,62 +105,6 @@ class OrderingDynamicsProbeTpl
     return OrderingDynamicsProbeTpl<NewScalar>(
         this->get_state()->template cast<NewScalar>(), this->get_dyn_type(),
         this->get_nu());
-  }
-};
-
-template <typename _Scalar>
-class ResidualDifferentialActionProbeTpl
-    : public crocoddyl::DifferentialActionModelAbstractTpl<_Scalar> {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  CROCODDYL_DERIVED_CAST(crocoddyl::DifferentialActionModelBase,
-                         ResidualDifferentialActionProbeTpl)
-
-  typedef _Scalar Scalar;
-  typedef crocoddyl::DifferentialActionModelAbstractTpl<Scalar> Base;
-  typedef typename Base::DifferentialActionDataAbstract
-      DifferentialActionDataAbstract;
-  typedef typename Base::VectorXs VectorXs;
-  using Base::calc;
-  using Base::calcDiff;
-
-  ResidualDifferentialActionProbeTpl()
-      : Base(std::make_shared<crocoddyl::StateVectorTpl<Scalar>>(2), 1, 2) {}
-
-  void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x,
-            const Eigen::Ref<const VectorXs>& u) override {
-    data->xout[0] = x[1] + u[0];
-    data->r << x[0] + u[0], x[1] - u[0];
-    data->cost = Scalar(0.5) * data->r.squaredNorm();
-  }
-
-  void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-            const Eigen::Ref<const VectorXs>& x) override {
-    data->r << x[0], x[1];
-    data->cost = Scalar(0.5) * data->r.squaredNorm();
-  }
-
-  void calcDiff(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>&,
-                const Eigen::Ref<const VectorXs>&) override {
-    data->Fx.setZero();
-    data->Fu.setZero();
-    data->Lx.setZero();
-    data->Lu.setZero();
-    data->Lxx.setZero();
-    data->Lxu.setZero();
-    data->Luu.setZero();
-  }
-
-  bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data) override {
-    return data != nullptr;
-  }
-
-  template <typename NewScalar>
-  ResidualDifferentialActionProbeTpl<NewScalar> cast() const {
-    return ResidualDifferentialActionProbeTpl<NewScalar>();
   }
 };
 
@@ -1175,7 +1118,6 @@ void test_euler_and_rk_dynamics_backends() {
   const std::shared_ptr<Euler> euler =
       std::make_shared<Euler>(fixture.dynamics, fixture.costs,
                               fixture.constraints, nullptr, fixture.time);
-  BOOST_CHECK(euler->get_differential() == nullptr);
   BOOST_CHECK(euler->get_dynamics() == fixture.dynamics);
   BOOST_CHECK(euler->get_integrator_time() == fixture.time);
   check_action_derivatives<Scalar>(euler, x, u);
@@ -1245,22 +1187,6 @@ void test_euler_and_rk_dynamics_backends() {
       live_rk->template cast<OtherScalar>();
   BOOST_CHECK_CLOSE(static_cast<double>(rk_cast.get_dt()), 0.037, 1e-3);
 
-  const std::shared_ptr<crocoddyl::DifferentialActionModelLQRTpl<Scalar>>
-      differential =
-          std::make_shared<crocoddyl::DifferentialActionModelLQRTpl<Scalar>>(4,
-                                                                             2);
-  Euler legacy_euler(differential, Scalar(0.02));
-  legacy_euler.get_integrator_time()->set_time_step(Scalar(0.041));
-  const crocoddyl::IntegratedActionModelEulerTpl<OtherScalar>
-      legacy_euler_cast = legacy_euler.template cast<OtherScalar>();
-  BOOST_CHECK_CLOSE(static_cast<double>(legacy_euler_cast.get_dt()), 0.041,
-                    1e-3);
-  RK legacy_rk(differential, crocoddyl::four, Scalar(0.02));
-  legacy_rk.get_integrator_time()->set_time_step(Scalar(0.043));
-  const crocoddyl::IntegratedActionModelRKTpl<OtherScalar> legacy_rk_cast =
-      legacy_rk.template cast<OtherScalar>();
-  BOOST_CHECK_CLOSE(static_cast<double>(legacy_rk_cast.get_dt()), 0.043, 1e-3);
-
   VectorXs quasi = VectorXs::Zero(euler->get_nu());
   const VectorXs x_static = fixture.state->zero();
   BOOST_CHECK_NO_THROW(
@@ -1286,42 +1212,12 @@ void test_euler_and_rk_dynamics_backends() {
 }
 
 template <typename Scalar>
-void test_rk_legacy_residual_behavior() {
+void test_rk_dynamics_residual_behavior() {
   typedef IntegrationFixtureTpl<Scalar> Fixture;
-  typedef ResidualDifferentialActionProbeTpl<Scalar> Differential;
   typedef crocoddyl::IntegratedActionModelRKTpl<Scalar> RK;
   typedef typename Fixture::VectorXs VectorXs;
-
-  const std::shared_ptr<Differential> differential =
-      std::make_shared<Differential>();
-  VectorXs x(2);
-  x << Scalar(0.4), Scalar(-0.3);
-  VectorXs u(1);
-  u << Scalar(0.2);
-  const VectorXs running_expected =
-      (VectorXs(2) << Scalar(0.6), Scalar(-0.5)).finished();
-  const VectorXs terminal_expected = x;
   const crocoddyl::RKType types[] = {crocoddyl::two, crocoddyl::three,
                                      crocoddyl::four};
-
-  for (std::size_t i = 0; i < 3; ++i) {
-    RK model(differential, types[i], Scalar(0.02), true);
-    const std::shared_ptr<typename RK::Data> data =
-        std::dynamic_pointer_cast<typename RK::Data>(model.createData());
-    BOOST_REQUIRE(data != nullptr);
-    BOOST_REQUIRE(!data->differential.empty());
-    BOOST_TEST_CONTEXT("legacy RK" << static_cast<std::size_t>(types[i])) {
-      data->r.setConstant(Scalar(-1));
-      model.calc(data, x, u);
-      BOOST_CHECK(data->r.isApprox(data->differential[0]->r));
-      BOOST_CHECK(data->r.isApprox(running_expected));
-
-      data->r.setConstant(Scalar(-1));
-      model.calc(data, x);
-      BOOST_CHECK(data->r.isApprox(data->differential[0]->r));
-      BOOST_CHECK(data->r.isApprox(terminal_expected));
-    }
-  }
 
   Fixture fixture;
   const VectorXs dynamics_x = fixture.state_point();
@@ -1776,8 +1672,8 @@ bool init_function() {
   test_suite* ts = BOOST_TEST_SUITE("test_action_integration");
   ts->add(BOOST_TEST_CASE(&test_euler_and_rk_dynamics_backends<double>));
   ts->add(BOOST_TEST_CASE(&test_euler_and_rk_dynamics_backends<float>));
-  ts->add(BOOST_TEST_CASE(&test_rk_legacy_residual_behavior<double>));
-  ts->add(BOOST_TEST_CASE(&test_rk_legacy_residual_behavior<float>));
+  ts->add(BOOST_TEST_CASE(&test_rk_dynamics_residual_behavior<double>));
+  ts->add(BOOST_TEST_CASE(&test_rk_dynamics_residual_behavior<float>));
   ts->add(BOOST_TEST_CASE(&test_discretized_dynamics_backend<double>));
   ts->add(BOOST_TEST_CASE(&test_discretized_dynamics_backend<float>));
   ts->add(BOOST_TEST_CASE(&test_control_parametrization_chain_rules<double>));
