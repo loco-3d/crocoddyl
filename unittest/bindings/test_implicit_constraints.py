@@ -11,7 +11,13 @@ import unittest
 
 import numpy as np
 import pinocchio
-import pinocchio.float32
+
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
 
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
@@ -51,7 +57,11 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         cls.state64 = crocoddyl.StateMultibody(
             pinocchio.buildSampleModelHumanoidRandom()
         )
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def check_scalar(self, module, dtype, state):
         tolerance = 1e-5 if dtype == np.float32 else 1e-12
@@ -133,10 +143,13 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         self.assertEqual(copied_contact.nc, contact.nc)
         self.assertEqual(copied_contact.mask, contact.mask)
         self.assertTrue(np.array_equal(copied_contact_data.Jc, contact_data.Jc))
-        cast_dtype = (
-            crocoddyl.DType.Float32 if module is crocoddyl else crocoddyl.DType.Float64
-        )
-        self.assertEqual(contact.cast(cast_dtype).nc, 3)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cast_dtype = (
+                crocoddyl.DType.Float32
+                if module is crocoddyl
+                else crocoddyl.DType.Float64
+            )
+            self.assertEqual(contact.cast(cast_dtype).nc, 3)
         with self.assertRaises(crocoddyl.Exception):
             module.ContactModel(
                 state,
@@ -409,7 +422,8 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
         with self.assertRaises(crocoddyl.Exception):
             loop.createData(None)
         self.assertIsInstance(copy.copy(loop_data), module.KinematicLoopData)
-        self.assertEqual(loop.cast(cast_dtype).mask, loop.mask)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            self.assertEqual(loop.cast(cast_dtype).mask, loop.mask)
         with self.assertRaises(crocoddyl.Exception):
             module.KinematicLoopModel(
                 state,
@@ -567,6 +581,9 @@ class ImplicitConstraintsBindingTest(unittest.TestCase):
     def test_float64(self):
         self.check_scalar(crocoddyl, np.float64, self.state64)
 
+    @unittest.skipUnless(
+        PINOCCHIO_FLOAT32_AVAILABLE, "pinocchio.float32 is not available"
+    )
     def test_float32(self):
         self.check_scalar(crocoddyl_float32, np.float32, self.state32)
 

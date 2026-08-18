@@ -12,6 +12,13 @@ import unittest
 import numpy as np
 import pinocchio
 
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
+
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
 
@@ -36,18 +43,29 @@ class ParameterEnergyResidualBindingsTest(unittest.TestCase):
             cls.state64.pinocchio.inertias[i].mass for i in (1, 2)
         )
         cls.joint_nq = cls.state64.pinocchio.joints[1].nq
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64, crocoddyl.DType.Float32),
-            (
-                crocoddyl_float32,
-                np.float32,
-                self.state32,
-                crocoddyl.DType.Float64,
-            ),
+        cast_dtype = (
+            crocoddyl.DType.Float32
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else crocoddyl.DType.Float64
         )
+        cases = [(crocoddyl, np.float64, self.state64, cast_dtype)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append(
+                (
+                    crocoddyl_float32,
+                    np.float32,
+                    self.state32,
+                    crocoddyl.DType.Float64,
+                )
+            )
+        return cases
 
     @staticmethod
     def make_fixture(module, dtype, state, joint_nq, body_names):

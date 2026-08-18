@@ -12,6 +12,13 @@ import unittest
 import numpy as np
 import pinocchio
 
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
+
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
 
@@ -20,18 +27,29 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64, crocoddyl.DType.Float32),
-            (
-                crocoddyl_float32,
-                np.float32,
-                self.state32,
-                crocoddyl.DType.Float64,
-            ),
+        cast_dtype = (
+            crocoddyl.DType.Float32
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else crocoddyl.DType.Float64
         )
+        cases = [(crocoddyl, np.float64, self.state64, cast_dtype)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append(
+                (
+                    crocoddyl_float32,
+                    np.float32,
+                    self.state32,
+                    crocoddyl.DType.Float64,
+                )
+            )
+        return cases
 
     @staticmethod
     def finite_difference(model, data, p, dtype):
@@ -130,7 +148,11 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
             ]
         )
         for module, dtype, _, cast_dtype in self.scalar_cases():
-            target_module = crocoddyl_float32 if dtype == np.float64 else crocoddyl
+            target_module = (
+                crocoddyl_float32
+                if cast_dtype == crocoddyl.DType.Float32
+                else crocoddyl
+            )
             for model, p64 in (
                 (module.LogCholeskyParametrization(), p_log64),
                 (module.ExpEigenValueParametrization(), p_exp64),
@@ -179,7 +201,11 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
     def test_multibody_layout_resolution_update_copy_and_cast(self):
         for module, dtype, state, cast_dtype in self.scalar_cases():
             with self.subTest(module=module.__name__):
-                target_module = crocoddyl_float32 if dtype == np.float64 else crocoddyl
+                target_module = (
+                    crocoddyl_float32
+                    if cast_dtype == crocoddyl.DType.Float32
+                    else crocoddyl
+                )
                 pin_model = self.state64.pinocchio
                 joint_name = pin_model.names[1]
                 frame_name = next(

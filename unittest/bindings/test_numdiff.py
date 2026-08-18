@@ -13,6 +13,13 @@ import unittest
 import numpy as np
 import pinocchio
 
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
+
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
 
@@ -97,7 +104,7 @@ class NumDiffBindingsTest(unittest.TestCase):
         legacy_numdiff.calc(legacy_data, legacy_x, legacy_u)
         legacy_numdiff.calcDiff(legacy_data, legacy_x, legacy_u)
         self.assertEqual(legacy_numdiff.cast(cast_dtype).np, 0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ActionModelNumDiff(model, None, True)
 
         manager = module.ParameterManager(model.state)
@@ -156,20 +163,20 @@ class NumDiffBindingsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(copied.Fp, data.Fp))
         casted = numdiff.cast(cast_dtype)
         self.assertEqual((casted.state.nx, casted.nu, casted.np), (nx, nu, np_))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             numdiff.update_p(data, np.zeros(np_ + 1, dtype=dtype))
         wrong_manager = module.ParameterManager(model.state)
         wrong_manager.addParam("wrong", module.LQRParams(model.state, np_ + 1))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             numdiff.createData(wrong_manager.createData())
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ActionModelNumDiff(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ActionDataNumDiff(None)
 
     def check_dynamics(self, module, dtype, cast_dtype):
         model = DynamicsProbe.make(module, dtype)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelNumDiff(model, None)
         numdiff = module.DynamicsModelNumDiff(model)
         data = numdiff.createData()
@@ -196,12 +203,15 @@ class NumDiffBindingsTest(unittest.TestCase):
         self.assertEqual(data.Fu.shape, (2, 2))
         self.assertIsInstance(copy.copy(data), module.DynamicsDataNumDiff)
         self.assertEqual(numdiff.cast(cast_dtype).state.nx, 4)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             numdiff.calcDiff(data, np.zeros(5, dtype=dtype), u)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelNumDiff(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsDataNumDiff(None)
+
+        if module is crocoddyl_float32 and not PINOCCHIO_FLOAT32_AVAILABLE:
+            return
 
         state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
         state = (
@@ -254,11 +264,11 @@ class NumDiffBindingsTest(unittest.TestCase):
         assert_close(self, data.u, u, dtype)
         self.assertIsInstance(copy.copy(data), module.ActuationDataNumDiff)
         self.assertEqual(numdiff.cast(cast_dtype).state.nx, 4)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             numdiff.disturbance = -1
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ActuationModelNumDiff(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ActuationDataNumDiff(None)
 
     def check_residual(self, module, dtype, cast_dtype):
@@ -277,11 +287,11 @@ class NumDiffBindingsTest(unittest.TestCase):
         numdiff.calcDiff(data, x)
         self.assertIsInstance(copy.copy(data), module.ResidualDataNumDiff)
         self.assertEqual(numdiff.cast(cast_dtype).state.nx, 4)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             numdiff.calc(data, np.zeros(5, dtype=dtype), u)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ResidualModelNumDiff(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.ResidualDataNumDiff(None, shared)
 
         state = module.StateVector(4)
@@ -311,12 +321,12 @@ class NumDiffBindingsTest(unittest.TestCase):
         parameter_numdiff.update_p(explicit, p)
         manager.update(manager_data, p)
         other_manager_data = manager.createData()
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             parameter_numdiff.createData(manager_data, other_manager_data)
 
         for explicit_data in (False, True):
 
-            def create_inferred_data():
+            def create_inferred_data(explicit_data=explicit_data):
                 local_manager_data = manager.createData()
                 if explicit_data:
                     return parameter_numdiff.createData(
@@ -333,7 +343,7 @@ class NumDiffBindingsTest(unittest.TestCase):
             del lifetime_data
             gc.collect()
 
-            def retain_parameter_data():
+            def retain_parameter_data(explicit_data=explicit_data):
                 local_manager_data = manager.createData()
                 if explicit_data:
                     local_data = parameter_numdiff.createData(

@@ -11,7 +11,13 @@ import unittest
 
 import numpy as np
 import pinocchio
-import pinocchio.float32
+
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
 
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
@@ -21,7 +27,11 @@ class MultibodyDynamicsBindingsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def make_contact(self, module, state, dtype, nu, mask):
         frame_id = len(state.pinocchio.frames) - 1
@@ -109,11 +119,12 @@ class MultibodyDynamicsBindingsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(copied_forward_data.Fx, forward_data.Fx))
         forward_data.Fx = np.zeros_like(forward_data.Fx)
         self.assertFalse(np.array_equal(copied_forward_data.Fx, forward_data.Fx))
-        casted_forward = forward.cast(cast_dtype)
-        self.assertIsInstance(
-            casted_forward, other_module.DynamicsModelConstrainedForward
-        )
-        self.assertEqual(casted_forward.nu, forward.nu)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            casted_forward = forward.cast(cast_dtype)
+            self.assertIsInstance(
+                casted_forward, other_module.DynamicsModelConstrainedForward
+            )
+            self.assertEqual(casted_forward.nu, forward.nu)
 
         forward_data.Fu = np.full(forward_data.Fu.shape, 4.0, dtype=dtype)
         forward.calc(forward_data, x)
@@ -405,27 +416,30 @@ class MultibodyDynamicsBindingsTest(unittest.TestCase):
             atol=derivative_tolerance,
         )
 
-        self.assertEqual(parameter_forward.cast(cast_dtype).np, manager.np)
-        self.assertEqual(parameter_inverse_models[0].cast(cast_dtype).np, manager.np)
-        self.assertEqual(parameter_impulse.cast(cast_dtype).np, manager.np)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            self.assertEqual(parameter_forward.cast(cast_dtype).np, manager.np)
+            self.assertEqual(
+                parameter_inverse_models[0].cast(cast_dtype).np, manager.np
+            )
+            self.assertEqual(parameter_impulse.cast(cast_dtype).np, manager.np)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelConstrainedForward(None, actuation, constraints)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelConstrainedForward(state, None, constraints)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelConstrainedForward(state, actuation, None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsDataConstrainedForward(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsDataConstrainedInverse(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsDataImpulseForward(None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             forward.calc(forward_data, np.zeros(state.nx + 1, dtype=dtype), u)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             forward.calc(forward_data, x, np.zeros(forward.nu + 1, dtype=dtype))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             impulse.calc(impulse_data, x, np.zeros(1, dtype=dtype))
 
     def test_float64(self):
@@ -437,6 +451,9 @@ class MultibodyDynamicsBindingsTest(unittest.TestCase):
             crocoddyl.DType.Float32,
         )
 
+    @unittest.skipUnless(
+        PINOCCHIO_FLOAT32_AVAILABLE, "pinocchio.float32 is not available"
+    )
     def test_float32(self):
         self.check_scalar(
             crocoddyl_float32,

@@ -12,6 +12,13 @@ import unittest
 import numpy as np
 import pinocchio
 
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
+
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
 
@@ -71,7 +78,11 @@ class MultibodyActuationBindingTest(unittest.TestCase):
         cls.state64 = crocoddyl.StateMultibody(
             pinocchio.buildSampleModelHumanoidRandom()
         )
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
         one_dof_model = pinocchio.Model()
         cls.one_dof_joint_id = one_dof_model.addJoint(
             0, pinocchio.JointModelRY(), pinocchio.SE3.Identity(), "joint"
@@ -82,7 +93,11 @@ class MultibodyActuationBindingTest(unittest.TestCase):
             pinocchio.SE3.Identity(),
         )
         cls.one_dof_state64 = crocoddyl.StateMultibody(one_dof_model)
-        cls.one_dof_state32 = cls.one_dof_state64.cast(crocoddyl.DType.Float32)
+        cls.one_dof_state32 = (
+            cls.one_dof_state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
         pin_model = cls.state64.pinocchio
         cls.root_id = pin_model.getJointId("root_joint")
         cls.first_id = cls.root_id + 1
@@ -106,15 +121,19 @@ class MultibodyActuationBindingTest(unittest.TestCase):
             crocoddyl.Thruster(pose, 0.1 + 0.01 * i, signs[i], 0.1, 5.0)
             for i, pose in enumerate(poses)
         ]
-        cls.thrusters32 = [
-            thruster.cast(crocoddyl.DType.Float32) for thruster in cls.thrusters64
-        ]
+        cls.thrusters32 = (
+            [thruster.cast(crocoddyl.DType.Float32) for thruster in cls.thrusters64]
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64, self.thrusters64),
-            (crocoddyl_float32, np.float32, self.state32, self.thrusters32),
-        )
+        cases = [(crocoddyl, np.float64, self.state64, self.thrusters64)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append(
+                (crocoddyl_float32, np.float32, self.state32, self.thrusters32)
+            )
+        return cases
 
     def test_abstract_dispatch_fallback_and_errors(self):
         for module, dtype, state, _ in self.scalar_cases():
@@ -182,14 +201,14 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 self.assertIsInstance(fallback_data, module.JointDynamicsDataAbstract)
                 fallback_matrix = np.ones((0, 0), dtype=dtype)
                 fallback.updateParametrizationDerivative(fallback_matrix)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     fallback.calc(
                         fallback_data,
                         np.zeros(1, dtype=dtype),
                         np.zeros(1, dtype=dtype),
                         np.zeros(1, dtype=dtype),
                     )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.JointDynamicsDataAbstract(None)
 
     def test_identity_and_all_friction_modes(self):
@@ -243,7 +262,7 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                     self.assertTrue(passive.passive)
                     self.assertEqual(passive.nu, 0)
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.JointDynamicsModelFriction(
                         3,
                         1,
@@ -252,10 +271,9 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                     )
 
     def test_c_order_mutable_regressors(self):
-        cases = (
-            (crocoddyl, np.float64, self.one_dof_state64),
-            (crocoddyl_float32, np.float32, self.one_dof_state32),
-        )
+        cases = [(crocoddyl, np.float64, self.one_dof_state64)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append((crocoddyl_float32, np.float32, self.one_dof_state32))
         for module, dtype, state in cases:
             with self.subTest(module=module.__name__):
                 p = np.array([1.3, 2.0, 5.0, 0.2, 4.0, np.log(0.5)], dtype=dtype)
@@ -414,17 +432,17 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 self.assertFalse(np.allclose(data_copy.gamma, params_data.gamma))
                 self.assertIs(params_copy.actuation, actuation)
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ActuationMultibodyParams(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ActuationMultibodyParamsData(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ActuationModelMultibody(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ActuationModelMultibody(state, [None])
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     actuation.calc(data, x, np.zeros(actuation.nu + 1, dtype=dtype))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     params.update(params_data, np.zeros(3, dtype=dtype))
 
 

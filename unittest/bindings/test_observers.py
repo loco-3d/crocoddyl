@@ -16,6 +16,13 @@ import unittest
 import numpy as np
 import pinocchio
 
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
+
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
 
@@ -24,19 +31,30 @@ class ObserverBindingsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
         cls.body_name = cls.state64.pinocchio.names[1]
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64, crocoddyl.DType.Float32),
-            (
-                crocoddyl_float32,
-                np.float32,
-                self.state32,
-                crocoddyl.DType.Float64,
-            ),
+        cast_dtype = (
+            crocoddyl.DType.Float32
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else crocoddyl.DType.Float64
         )
+        cases = [(crocoddyl, np.float64, self.state64, cast_dtype)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append(
+                (
+                    crocoddyl_float32,
+                    np.float32,
+                    self.state32,
+                    crocoddyl.DType.Float64,
+                )
+            )
+        return cases
 
     @staticmethod
     def state_point(state, dtype):
@@ -119,9 +137,10 @@ class ObserverBindingsTest(unittest.TestCase):
             with self.subTest(module=module.__name__):
 
                 class Observer(module.ObserverModelAbstract):
-                    def __init__(self):
-                        super().__init__(state, 2, 3, 0, 0, 0, 0, 0, 0)
+                    def __init__(self, bound_state=state, bound_dtype=dtype):
+                        super().__init__(bound_state, 2, 3, 0, 0, 0, 0, 0, 0)
                         self.calls = []
+                        self.dtype = bound_dtype
 
                     def calc(self, data, x, u=None):
                         self.calls.append(("calc", u is None))
@@ -143,7 +162,7 @@ class ObserverBindingsTest(unittest.TestCase):
 
                     def quasiStatic(self, data, x, maxiter=100, tol=1e-9):
                         self.calls.append(("quasiStatic", maxiter, tol))
-                        return np.full(self.nu, 0.25, dtype=dtype)
+                        return np.full(self.nu, 0.25, dtype=self.dtype)
 
                     def createData(self):
                         self.calls.append(("createData",))
@@ -176,8 +195,8 @@ class ObserverBindingsTest(unittest.TestCase):
                 self.assertIsInstance(data, module.ObserverDataAbstract)
 
                 class FallbackObserver(module.ObserverModelAbstract):
-                    def __init__(self):
-                        super().__init__(state, 0, 0)
+                    def __init__(self, bound_state=state):
+                        super().__init__(bound_state, 0, 0)
 
                     def calc(self, data, x, u=None):
                         data.xnext = x
@@ -192,7 +211,7 @@ class ObserverBindingsTest(unittest.TestCase):
                 fallback_data = fallback.createData()
                 fallback.set_params(fallback_data, manager)
                 self.assertEqual(fallback.quasiStatic(fallback_data, x).size, 0)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ObserverDataAbstract(None)
 
     def test_euler_rk_numdiff_parameters_energy_and_terminal(self):
@@ -478,7 +497,7 @@ class ObserverBindingsTest(unittest.TestCase):
                     0.02,
                     crocoddyl.RKType.four,
                 )
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     rk4.calc(rk2.createData(), x, w)
 
                 energy_dynamics, energy_costs, _ = self.make_continuous(
@@ -495,11 +514,11 @@ class ObserverBindingsTest(unittest.TestCase):
                 self.assertTrue(np.all(np.isfinite(energy_data.dE_dv)))
                 self.assertGreater(abs(float(energy_data.cost)), 0.0)
 
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ObserverModelNumDiff(euler, None, False)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ObserverModelNumDiff(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.ObserverDataNumDiff(None)
 
     def test_discretized_observer(self):
@@ -689,13 +708,13 @@ class ObserverBindingsTest(unittest.TestCase):
                 with self.assertRaises(TypeError):
                     copy.copy(data)
                 self.assertIsNot(copy.copy(model), model)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedObserverModel(None, costs, 0)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedObserverData(None)
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     model.calc(data, x, np.zeros(state.ndx + 1, dtype=dtype))
-                with self.assertRaises(Exception):
+                with self.assertRaises(crocoddyl.Exception):
                     module.DiscretizedObserverModel(dynamics, costs, 1, constraints)
 
     def test_generic_discrete_dynamics_dispatch(self):
@@ -704,12 +723,14 @@ class ObserverBindingsTest(unittest.TestCase):
                 state = module.StateVector(4)
 
                 class DiscreteDynamics(module.DynamicsModelAbstract):
-                    def __init__(self):
+                    def __init__(self, bound_state=state, bound_dtype=dtype):
                         super().__init__(
-                            state, crocoddyl.DynamicsType.DiscreteTime, 0, 2
+                            bound_state, crocoddyl.DynamicsType.DiscreteTime, 0, 2
                         )
                         self.calc_terminal = []
                         self.diff_terminal = []
+                        self.ndx = bound_state.ndx
+                        self.dtype = bound_dtype
 
                     def calc(self, data, x, u=None):
                         self.calc_terminal.append(u is None)
@@ -717,8 +738,8 @@ class ObserverBindingsTest(unittest.TestCase):
 
                     def calcDiff_xu(self, data, x, u=None):
                         self.diff_terminal.append(u is None)
-                        data.Fx = np.eye(state.ndx, dtype=dtype)
-                        data.Fu = np.zeros((state.ndx, 2), dtype=dtype)
+                        data.Fx = np.eye(self.ndx, dtype=self.dtype)
+                        data.Fu = np.zeros((self.ndx, 2), dtype=self.dtype)
 
                 dynamics = DiscreteDynamics()
                 costs = module.CostModelSum(state, state.ndx)
@@ -799,7 +820,10 @@ class ObserverBindingsTest(unittest.TestCase):
             assert np.isfinite(retained_stage_cost.cost)
             """
         )
-        for module_name in ("crocoddyl", "crocoddyl.float32"):
+        module_names = ["crocoddyl"]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            module_names.append("crocoddyl.float32")
+        for module_name in module_names:
             with self.subTest(module=module_name):
                 result = subprocess.run(
                     [sys.executable, "-c", script, module_name],
@@ -807,6 +831,7 @@ class ObserverBindingsTest(unittest.TestCase):
                     env=os.environ.copy(),
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
 

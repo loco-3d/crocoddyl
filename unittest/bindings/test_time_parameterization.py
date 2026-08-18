@@ -7,10 +7,18 @@
 ###############################################################################
 
 import copy
+import importlib
 import unittest
 
 import example_robot_data
 import numpy as np
+
+try:
+    importlib.import_module("pinocchio.float32")
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
 
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
@@ -21,13 +29,17 @@ class TimeParameterizationTest(unittest.TestCase):
     def setUpClass(cls):
         robot = example_robot_data.load("talos_arm")
         cls.state64 = crocoddyl.StateMultibody(robot.model)
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64),
-            (crocoddyl_float32, np.float32, self.state32),
-        )
+        cases = [(crocoddyl, np.float64, self.state64)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append((crocoddyl_float32, np.float32, self.state32))
+        return cases
 
     def test_integrator_time_construction_sync_copy_and_errors(self):
         for module, dtype, _ in self.scalar_cases():
@@ -142,17 +154,18 @@ class TimeParameterizationTest(unittest.TestCase):
                 with self.assertRaises(crocoddyl.Exception):
                     module.IntegratorTimeoptParamsData(None)
 
-        model64 = crocoddyl.IntegratorTimeoptParams(
-            self.state64, crocoddyl.IntegratorTime(0.02, True)
-        )
-        model64.lb = np.array([-8.0])
-        model64.ub = np.array([-2.0])
-        model32 = model64.cast(crocoddyl.DType.Float32)
-        self.assertIsInstance(model32, crocoddyl_float32.IntegratorTimeoptParams)
-        self.assertEqual(model32.state.nx, model64.state.nx)
-        self.assertTrue(np.allclose(model32.lb, model64.lb))
-        self.assertTrue(np.allclose(model32.ub, model64.ub))
-        self.assertIsNot(model32.integrator_time, model64.integrator_time)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            model64 = crocoddyl.IntegratorTimeoptParams(
+                self.state64, crocoddyl.IntegratorTime(0.02, True)
+            )
+            model64.lb = np.array([-8.0])
+            model64.ub = np.array([-2.0])
+            model32 = model64.cast(crocoddyl.DType.Float32)
+            self.assertIsInstance(model32, crocoddyl_float32.IntegratorTimeoptParams)
+            self.assertEqual(model32.state.nx, model64.state.nx)
+            self.assertTrue(np.allclose(model32.lb, model64.lb))
+            self.assertTrue(np.allclose(model32.ub, model64.ub))
+            self.assertIsNot(model32.integrator_time, model64.integrator_time)
 
     def test_existing_integrators_refresh_shared_time_and_keep_terminal_route(self):
         for module, dtype, state in self.scalar_cases():

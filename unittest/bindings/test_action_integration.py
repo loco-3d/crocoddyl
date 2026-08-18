@@ -11,7 +11,13 @@ import unittest
 
 import numpy as np
 import pinocchio
-import pinocchio.float32
+
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
 
 import crocoddyl
 import crocoddyl.float32 as crocoddyl_float32
@@ -21,13 +27,17 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
-        cls.state32 = cls.state64.cast(crocoddyl.DType.Float32)
+        cls.state32 = (
+            cls.state64.cast(crocoddyl.DType.Float32)
+            if PINOCCHIO_FLOAT32_AVAILABLE
+            else None
+        )
 
     def scalar_cases(self):
-        return (
-            (crocoddyl, np.float64, self.state64),
-            (crocoddyl_float32, np.float32, self.state32),
-        )
+        cases = [(crocoddyl, np.float64, self.state64)]
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            cases.append((crocoddyl_float32, np.float32, self.state32))
+        return cases
 
     def make_continuous(self, module, dtype, state):
         actuation = module.ActuationModelMultibody(state)
@@ -126,8 +136,9 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                     if dtype == np.float64
                     else crocoddyl.DType.Float64
                 )
-                live_cast = euler.cast(cast_dtype)
-                self.assertAlmostEqual(live_cast.dt, 0.037, places=5)
+                if PINOCCHIO_FLOAT32_AVAILABLE:
+                    live_cast = euler.cast(cast_dtype)
+                    self.assertAlmostEqual(live_cast.dt, 0.037, places=5)
                 time.timeStep = 0.02
 
                 manager = module.ParameterManager(state)
@@ -221,10 +232,11 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 with self.assertRaises(crocoddyl.Exception):
                     module.IntegratedActionDataRK(None)
 
-        casted = crocoddyl.IntegratedActionModelEuler(
-            *self.make_continuous(crocoddyl, np.float64, self.state64)
-        ).cast(crocoddyl.DType.Float32)
-        self.assertIsInstance(casted, crocoddyl_float32.IntegratedActionModelEuler)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            casted = crocoddyl.IntegratedActionModelEuler(
+                *self.make_continuous(crocoddyl, np.float64, self.state64)
+            ).cast(crocoddyl.DType.Float32)
+            self.assertIsInstance(casted, crocoddyl_float32.IntegratedActionModelEuler)
 
     def test_discretized_direct_dynamics_and_errors(self):
         for module, dtype, state in self.scalar_cases():

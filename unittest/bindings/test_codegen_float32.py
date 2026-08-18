@@ -14,7 +14,13 @@ import numpy as np
 import pinocchio
 import pinocchio.cppadcg as pinocg64
 import pinocchio.cppadcg_float32 as pinocg32
-import pinocchio.float32
+
+try:
+    import pinocchio.float32
+
+    PINOCCHIO_FLOAT32_AVAILABLE = True
+except ModuleNotFoundError:
+    PINOCCHIO_FLOAT32_AVAILABLE = False
 
 import crocoddyl
 import crocoddyl.cgfloat32 as crocoddylcg32
@@ -61,12 +67,13 @@ class CodeGenFloat32Test(unittest.TestCase):
             crocoddylcg64.ActionModelLQR,
         )
 
-        state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
-        state32 = state64.cast(crocoddyl.DType.Float32)
-        state_ad32 = state32.cast(crocoddyl.DType.ADFloat32)
-        self.assertIsInstance(state32, crocoddyl32.StateMultibody)
-        self.assertIsInstance(state_ad32, crocoddylcg32.StateMultibody)
-        self.assertIsInstance(state_ad32.pinocchio, pinocg32.Model)
+        if PINOCCHIO_FLOAT32_AVAILABLE:
+            state64 = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
+            state32 = state64.cast(crocoddyl.DType.Float32)
+            state_ad32 = state32.cast(crocoddyl.DType.ADFloat32)
+            self.assertIsInstance(state32, crocoddyl32.StateMultibody)
+            self.assertIsInstance(state_ad32, crocoddylcg32.StateMultibody)
+            self.assertIsInstance(state_ad32.pinocchio, pinocg32.Model)
 
     def test_parameterized_action_codegen(self):
         old_cwd = os.getcwd()
@@ -386,7 +393,7 @@ class CodeGenFloat32Test(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
                 os.chdir(tmpdir)
-                for module, dtype, state, suffix, rtol, atol in (
+                scalar_cases = [
                     (
                         crocoddyl,
                         np.float64,
@@ -394,16 +401,20 @@ class CodeGenFloat32Test(unittest.TestCase):
                         "float64",
                         1e-3,
                         2e-4,
-                    ),
-                    (
-                        crocoddyl32,
-                        np.float32,
-                        state64.cast(crocoddyl.DType.Float32),
-                        "float32",
-                        6e-3,
-                        6e-4,
-                    ),
-                ):
+                    )
+                ]
+                if PINOCCHIO_FLOAT32_AVAILABLE:
+                    scalar_cases.append(
+                        (
+                            crocoddyl32,
+                            np.float32,
+                            state64.cast(crocoddyl.DType.Float32),
+                            "float32",
+                            6e-3,
+                            6e-4,
+                        )
+                    )
+                for module, dtype, state, suffix, rtol, atol in scalar_cases:
                     cases = continuous_cases(module, dtype, state)
                     cases.append(discretized_case(module, dtype, state))
                     for name, model, manager, p in cases:
@@ -525,7 +536,7 @@ class CodeGenFloat32Test(unittest.TestCase):
                 pin_model.lowerPositionLimit[:] = -1.0
                 pin_model.upperPositionLimit[:] = 1.0
                 state64 = crocoddyl.StateMultibody(pin_model)
-                for module, dtype, state, suffix, rtol, atol in (
+                scalar_cases = [
                     (
                         crocoddyl,
                         np.float64,
@@ -533,16 +544,20 @@ class CodeGenFloat32Test(unittest.TestCase):
                         "float64",
                         1e-8,
                         1e-9,
-                    ),
-                    (
-                        crocoddyl32,
-                        np.float32,
-                        state64.cast(crocoddyl.DType.Float32),
-                        "float32",
-                        3e-4,
-                        3e-5,
-                    ),
-                ):
+                    )
+                ]
+                if PINOCCHIO_FLOAT32_AVAILABLE:
+                    scalar_cases.append(
+                        (
+                            crocoddyl32,
+                            np.float32,
+                            state64.cast(crocoddyl.DType.Float32),
+                            "float32",
+                            3e-4,
+                            3e-5,
+                        )
+                    )
+                for module, dtype, state, suffix, rtol, atol in scalar_cases:
                     with self.subTest(module=module.__name__):
                         actuation = module.ActuationModelMultibody(state)
                         implicit = module.ImplicitConstraintModelMultiple(
