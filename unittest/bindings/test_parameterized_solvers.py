@@ -34,12 +34,8 @@ class ParameterizedSolversTest(unittest.TestCase):
         params1.addParam("lqr", module.LQRParams(phase1.state, 2))
         params0.addParam("inactive", module.LQRParams(phase0.state, 2), active=False)
         params1.addParam("inactive", module.LQRParams(phase1.state, 1), active=False)
-        args = [
-            np.zeros(4, dtype=dtype),
-            [[phase0, phase0], [phase1, phase1]],
-            terminal,
-            [params0, params1],
-        ]
+        phase_params0 = module.ParameterPhaseModel(params0)
+        phase_params1 = module.ParameterPhaseModel(params1)
         if mixed_constraints:
             constraints1 = module.ConstraintModelManager(phase1.state, 1, 2)
             constraints1.addConstraint(
@@ -51,8 +47,13 @@ class ParameterizedSolversTest(unittest.TestCase):
                     ),
                 ),
             )
-            args.append([None, constraints1])
-        problem = module.ShootingProblem(*args)
+            phase_params1 = module.ParameterPhaseModel(params1, constraints1)
+        problem = module.ShootingProblem(
+            np.zeros(4, dtype=dtype),
+            [[phase0, phase0], [phase1, phase1]],
+            terminal,
+            [phase_params0, phase_params1],
+        )
         us = [
             np.full(2, 0.1, dtype=dtype),
             np.full(2, -0.05, dtype=dtype),
@@ -89,8 +90,9 @@ class ParameterizedSolversTest(unittest.TestCase):
 
         params = module.ParameterManager(running.state)
         params.addParam("lqr", module.LQRParams(running.state, 1))
+        phase_params = module.ParameterPhaseModel(params)
         problem = module.ShootingProblem(
-            np.zeros(1, dtype=dtype), [running, running], terminal, params
+            np.zeros(1, dtype=dtype), [running, running], terminal, phase_params
         )
         us = [np.zeros(1, dtype=dtype), np.zeros(1, dtype=dtype)]
         return problem, problem.rollout(us), us
@@ -99,10 +101,10 @@ class ParameterizedSolversTest(unittest.TestCase):
         problem, xs, us = self.make_problem(module, dtype)
         self.assertEqual(problem.paramsModel[0].np, 1)
         self.assertEqual(problem.paramsModel[1].np, 2)
-        self.assertIn("lqr", problem.paramsModel[0].active_set)
-        self.assertIn("inactive", problem.paramsModel[0].inactive_set)
-        self.assertIn("lqr", problem.paramsModel[1].active_set)
-        self.assertIn("inactive", problem.paramsModel[1].inactive_set)
+        self.assertIn("lqr", problem.paramsModel[0].params.active_set)
+        self.assertIn("inactive", problem.paramsModel[0].params.inactive_set)
+        self.assertIn("lqr", problem.paramsModel[1].params.active_set)
+        self.assertIn("inactive", problem.paramsModel[1].params.inactive_set)
         cast_dtype = (
             crocoddyl.DType.Float32 if module is crocoddyl else crocoddyl.DType.Float64
         )
@@ -153,7 +155,9 @@ class ParameterizedSolversTest(unittest.TestCase):
                 self.assertTrue(np.allclose(actual, expected))
             problem_before = solver.problem
             p_before = [value.copy() for value in solver.p]
-            manager_p_before = [data.params.p.copy() for data in problem.paramsData]
+            manager_p_before = [
+                data.params.params.p.copy() for data in problem.paramsData
+            ]
             with self.assertRaisesRegex(Exception, "cannot be cast"):
                 solver.cast(cast_dtype)
             self.assertIs(solver.problem, problem_before)
@@ -161,7 +165,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             for actual, expected in zip(solver.p, p_before):
                 self.assertTrue(np.array_equal(actual, expected))
             for data, expected in zip(problem.paramsData, manager_p_before):
-                self.assertTrue(np.array_equal(data.params.p, expected))
+                self.assertTrue(np.array_equal(data.params.params.p, expected))
 
             with self.assertRaises(crocoddyl.Exception):
                 solver.solve(xs, us, init_p[:1], 0, True)
@@ -263,7 +267,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             self.assertTrue(np.allclose(solver.p[0], optimum, atol=tol, rtol=tol))
             self.assertTrue(
                 np.allclose(
-                    problem.paramsData[0].params.p,
+                    problem.paramsData[0].params.params.p,
                     optimum,
                     atol=tol,
                     rtol=tol,
@@ -287,30 +291,30 @@ class ParameterizedSolversTest(unittest.TestCase):
         solver = module.SolverFDDP(problem)
         self.assertFalse(solver.solve(xs, us, initial, 0, True))
         solver.computeDirection(True)
-        self.assertIsNone(problem.paramsConstraints[0])
-        self.assertIsNone(problem.paramsConstraintsData[0])
-        self.assertIsNotNone(problem.paramsConstraints[1])
-        self.assertIsNotNone(problem.paramsConstraintsData[1])
+        self.assertIsNone(problem.paramsModel[0].constraints)
+        self.assertIsNone(problem.paramsData[0].constraints)
+        self.assertIsNotNone(problem.paramsModel[1].constraints)
+        self.assertIsNotNone(problem.paramsData[1].constraints)
 
         accepted = [value.copy() for value in solver.p]
         candidate0 = accepted[0] + dtype(0.25)
         candidate1 = accepted[1] + dtype(0.35)
         problem.update_p(candidate0, 0)
         problem.update_p(candidate1, 1)
-        constraints = problem.paramsConstraints[1]
-        constraints_data = problem.paramsConstraintsData[1]
-        constraints.calc(
-            constraints_data,
+        phase_params = problem.paramsModel[1]
+        constraints_data = problem.paramsData[1].constraints
+        phase_params.calc(
+            problem.paramsData[1],
             np.zeros(4, dtype=dtype),
             np.zeros(1, dtype=dtype),
         )
         candidate_h = constraints_data.h.copy()
         solver.computeDirection(True)
         self.assertTrue(
-            np.allclose(problem.paramsData[0].params.p, accepted[0], atol=tol)
+            np.allclose(problem.paramsData[0].params.params.p, accepted[0], atol=tol)
         )
         self.assertTrue(
-            np.allclose(problem.paramsData[1].params.p, accepted[1], atol=tol)
+            np.allclose(problem.paramsData[1].params.params.p, accepted[1], atol=tol)
         )
         self.assertFalse(np.allclose(constraints_data.h, candidate_h, atol=tol))
         self.assertTrue(np.allclose(constraints_data.h, accepted[1], atol=tol))
@@ -327,7 +331,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             tau,
             [observer0, observer1],
             terminal,
-            params,
+            module.ParameterPhaseModel(params),
         )
         process_noise = [
             np.linspace(0.1, 0.4, 4, dtype=dtype),

@@ -97,7 +97,11 @@ terminalModel = crocoddyl.IntegratedObserverModelEuler(
 )
 
 problem = crocoddyl.ObservationProblem(
-    oc.solver.xs[0], oc.solver.us, runningModels, terminalModel, params
+    oc.solver.xs[0],
+    oc.solver.us,
+    runningModels,
+    terminalModel,
+    crocoddyl.ParameterPhaseModel(params),
 )
 problem.update_p(initial_p, phase_idx=0)
 

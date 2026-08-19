@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Auto-generated file for @SCALAR_TYPE@
-#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/optctrl/problem-abstract.hpp"
+#include "crocoddyl/core/params/parameter-phase.hpp"
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
@@ -21,14 +21,6 @@ namespace python {
 
 #define CROCODDYL_PROBLEM_ABSTRACT_PYTHON_BINDINGS(Scalar)                     \
   typedef ProblemAbstractTpl<Scalar> Problem;                                  \
-  typedef std::shared_ptr<typename Problem::ConstraintModelManager>            \
-      ConstraintModelManagerPtr;                                               \
-  typedef std::shared_ptr<typename Problem::ConstraintDataManager>             \
-      ConstraintDataManagerPtr;                                                \
-  StdVectorPythonVisitor<std::vector<ConstraintModelManagerPtr>,               \
-                         true>::expose("StdVec_ConstraintModelManager");       \
-  StdVectorPythonVisitor<std::vector<ConstraintDataManagerPtr>, true>::expose( \
-      "StdVec_ConstraintDataManager");                                         \
   bp::register_ptr_to_python<std::shared_ptr<Problem> >();                     \
   bp::class_<Problem, boost::noncopyable>(                                     \
       "ProblemAbstract",                                                       \
@@ -104,15 +96,15 @@ namespace python {
                         bp::return_value_policy<bp::copy_const_reference>()),  \
                     "exclusive phase end indices")                             \
       .add_property(                                                           \
-          "paramsConstraints",                                                \
-          bp::make_function(&Problem::get_paramsConstraintModel,               \
+          "paramsModel",                                                      \
+          bp::make_function(&Problem::get_paramsModel,                         \
                             bp::return_value_policy<bp::return_by_value>()),   \
-          "phase-level parameter-constraint models")                           \
+          "phase parameter models")                                           \
       .add_property(                                                           \
-          "paramsConstraintsData",                                            \
-          bp::make_function(&Problem::get_paramsConstraintData,                \
+          "paramsData",                                                       \
+          bp::make_function(&Problem::get_paramsData,                          \
                             bp::return_value_policy<bp::return_by_value>()),   \
-          "phase-level parameter-constraint data")                             \
+          "phase parameter data")                                             \
       .add_property("hasParamsConstraints",                                   \
                     bp::make_function(&Problem::has_parameter_constraints),    \
                     "whether parameter constraints are active");

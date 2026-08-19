@@ -316,22 +316,24 @@ def require_arrival_qp_parameter_constraints():
 
 
 def parameter_constraint_violations(problem, state, p_vectors):
-    if not hasattr(problem, "paramsConstraints"):
+    if not hasattr(problem, "paramsModel"):
         return float("nan"), float("nan")
 
     max_eq = 0.0
     max_ineq = 0.0
-    managers = list(problem.paramsConstraints)
-    datas = list(problem.paramsConstraintsData)
-    for phase_idx, (manager, data) in enumerate(zip(managers, datas)):
+    for phase_idx, (phase_model, phase_data) in enumerate(
+        zip(problem.paramsModel, problem.paramsData)
+    ):
+        manager = phase_model.constraints
+        data = phase_data.constraints
         if manager is None or data is None:
             continue
         if phase_idx < len(p_vectors):
             problem.update_p(np.asarray(p_vectors[phase_idx]), phase_idx=phase_idx)
         x0 = state.zero()
         u0 = np.zeros(int(manager.nu))
-        manager.calc(data, x0, u0)
-        manager.calcDiff(data, x0, u0)
+        phase_model.calc(phase_data, x0, u0)
+        phase_model.calcDiff(phase_data, x0, u0)
 
         h = np.array(data.h, copy=True)
         if h.size:
@@ -539,23 +541,14 @@ def create_gait_estimation_problem(
         )
     tau_meas = gait_measured_torques(control_solver, fwddyn)
     try:
-        if parameter_constraints is None:
-            problem = crocoddyl.ObservationProblem(
-                control_solver.xs[0],
-                tau_meas,
-                running_models,
-                terminal_model,
-                params,
-            )
-        else:
-            problem = crocoddyl.ObservationProblem(
-                control_solver.xs[0],
-                tau_meas,
-                running_models,
-                terminal_model,
-                params,
-                parameter_constraints,
-            )
+        phase_params = crocoddyl.ParameterPhaseModel(params, parameter_constraints)
+        problem = crocoddyl.ObservationProblem(
+            control_solver.xs[0],
+            tau_meas,
+            running_models,
+            terminal_model,
+            phase_params,
+        )
     except Exception as exc:
         if parameter_constraints is not None:
             raise RuntimeError(

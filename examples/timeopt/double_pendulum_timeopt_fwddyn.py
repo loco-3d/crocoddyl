@@ -85,7 +85,12 @@ p0 = np.array([np.log(dt)])
 # Creating the parameter manager, shooting problem, and solver
 params = crocoddyl.ParameterManager(state)
 params.addParam("timeopt", crocoddyl.IntegratorTimeoptParams(state, runningTime))
-problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel, params)
+problem = crocoddyl.ShootingProblem(
+    x0,
+    [runningModel] * T,
+    terminalModel,
+    crocoddyl.ParameterPhaseModel(params),
+)
 problem.update_p(p0, phase_idx=0)
 solver = crocoddyl.SolverFDDP(problem)
 solver.th_minImprove = 1e-4

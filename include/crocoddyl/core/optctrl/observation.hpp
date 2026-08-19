@@ -9,26 +9,24 @@
 #ifndef CROCODDYL_CORE_OPTCTRL_OBSERVATION_HPP_
 #define CROCODDYL_CORE_OPTCTRL_OBSERVATION_HPP_
 
-#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/observer-base.hpp"
 #include "crocoddyl/core/optctrl/problem-abstract.hpp"
-#include "crocoddyl/core/params/parameter-manager.hpp"
+#include "crocoddyl/core/params/parameter-phase.hpp"
 
 namespace crocoddyl {
 
 /**
- * @brief Optimal-estimation problem with measured torques and shared
- * parameters
+ * @brief Optimal-estimation problem with measured torques
  *
  * An observation problem estimates a state trajectory
  * \f$\{\mathbf{x}_t\}\f$ using process-noise controls
- * \f$\{\mathbf{w}_t\}\f$, measured torques and model parameters. The running
- * models can form either a single phase or multiple phases. Within each phase,
- * all observer data share one `ParameterManagerTpl` and one
- * `ParameterDataManagerTpl`. The terminal node uses the parameters of the last
- * phase. Models and parameter managers are shared, while trajectory data and
- * phase containers are owned by the problem.
+ * \f$\{\mathbf{w}_t\}\f$ and measured torques. Model parameters are optional.
+ * A parameterized problem can contain one or more phases; within each phase,
+ * all observer data share one `ParameterPhaseModelTpl` and its
+ * `ParameterPhaseDataTpl`. The terminal node uses the parameters of the last
+ * phase. Models are shared, while trajectory data and phase containers are
+ * owned by the problem.
  *
  * Parameter status/layout changes invalidate existing data and require
  * reconstruction of the problem. Measured torque belongs to each observer
@@ -46,12 +44,24 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   typedef ObserverModelAbstractTpl<Scalar> ObserverModelAbstract;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
-  typedef ParameterManagerTpl<Scalar> ParameterManager;
-  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
-  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
-  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef ParameterPhaseDataTpl<Scalar> ParameterPhaseData;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
+
+  /**
+   * @brief Construct an observation problem without model parameters
+   *
+   * @param[in] x0 Initial state
+   * @param[in] tau_meas Measured torques at all running nodes
+   * @param[in] running_models Running observer models
+   * @param[in] terminal_model Terminal observer model
+   */
+  ObservationProblemTpl(
+      const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
+      const std::vector<std::shared_ptr<ObserverModelAbstract> >&
+          running_models,
+      std::shared_ptr<ObserverModelAbstract> terminal_model);
 
   /**
    * @brief Construct a multi-phase observation problem
@@ -60,24 +70,14 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
    * @param[in] tau_meas Measured torques at all running nodes
    * @param[in] model_phases Running observer models grouped by phase
    * @param[in] terminal_model Terminal observer model
-   * @param[in] params_model One parameter manager per phase
+   * @param[in] params_model One parameter-phase model per phase
    */
   ObservationProblemTpl(
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
       const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
           model_phases,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      const std::vector<std::shared_ptr<ParameterManager> >& params_model);
-
-  /** @brief Construct a constrained multi-phase observation problem */
-  ObservationProblemTpl(
-      const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
-      const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
-          model_phases,
-      std::shared_ptr<ObserverModelAbstract> terminal_model,
-      const std::vector<std::shared_ptr<ParameterManager> >& params_model,
-      const std::vector<std::shared_ptr<ConstraintModelManager> >&
-          params_constraint_model);
+      const std::vector<std::shared_ptr<ParameterPhaseModel> >& params_model);
 
   /**
    * @brief Construct a single-phase observation problem
@@ -86,23 +86,14 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
    * @param[in] tau_meas Measured torques at all running nodes
    * @param[in] running_models Running observer models
    * @param[in] terminal_model Terminal observer model
-   * @param[in] params_model Parameter manager shared by the phase
+   * @param[in] params_model Parameter-phase model shared by the phase
    */
   ObservationProblemTpl(
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
       const std::vector<std::shared_ptr<ObserverModelAbstract> >&
           running_models,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      std::shared_ptr<ParameterManager> params_model);
-
-  /** @brief Construct a constrained single-phase observation problem */
-  ObservationProblemTpl(
-      const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
-      const std::vector<std::shared_ptr<ObserverModelAbstract> >&
-          running_models,
-      std::shared_ptr<ObserverModelAbstract> terminal_model,
-      std::shared_ptr<ParameterManager> params_model,
-      std::shared_ptr<ConstraintModelManager> params_constraint_model);
+      std::shared_ptr<ParameterPhaseModel> params_model);
 
   virtual ~ObservationProblemTpl() = default;
 
@@ -185,27 +176,19 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
       const std::size_t phase_idx) const;
 
-  /** @brief Return the shared parameter models, one per phase */
-  const std::vector<std::shared_ptr<ParameterManager> >& get_paramsModel()
-      const;
+  /** @brief Return the parameter-phase models, one per phase */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseModel> >&
+  get_paramsModel() const override;
 
-  /** @brief Return the owned parameter data, one per phase */
-  const std::vector<std::shared_ptr<ParameterDataManager> >& get_paramsData()
-      const;
+  /** @brief Return the parameter-phase data, one per phase */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseData> >&
+  get_paramsData() const override;
 
   /** @brief Return the inclusive running-node start of every phase */
   virtual const std::vector<std::size_t>& get_phase_idxs() const override;
 
   /** @brief Return the exclusive running-node end of every phase */
   virtual const std::vector<std::size_t>& get_phase_edxs() const override;
-
-  /** @brief Return the optional parameter-constraint managers */
-  virtual const std::vector<std::shared_ptr<ConstraintModelManager> >&
-  get_paramsConstraintModel() const override;
-
-  /** @brief Return the parameter-constraint data sharing phase payloads */
-  virtual const std::vector<std::shared_ptr<ConstraintDataManager> >&
-  get_paramsConstraintData() const override;
 
   /** @brief Return true if any phase has active parameter constraints */
   virtual bool has_parameter_constraints() const override;
@@ -215,9 +198,7 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
       const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
           model_phases,
-      std::shared_ptr<ObserverModelAbstract> terminal_model,
-      const std::vector<std::shared_ptr<ConstraintModelManager> >&
-          params_constraint_model);
+      std::shared_ptr<ObserverModelAbstract> terminal_model);
 
   Scalar cost_;
   std::size_t T_;
@@ -230,11 +211,8 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   std::vector<std::shared_ptr<ActionModelAbstract> > running_models_;
   std::vector<std::shared_ptr<ActionDataAbstract> > running_datas_;
   std::size_t n_phases_;
-  std::vector<std::shared_ptr<ParameterManager> > params_model_;
-  std::vector<std::shared_ptr<ParameterDataManager> > params_data_;
-  std::vector<std::shared_ptr<ConstraintModelManager> >
-      params_constraint_model_;
-  std::vector<std::shared_ptr<ConstraintDataManager> > params_constraint_data_;
+  std::vector<std::shared_ptr<ParameterPhaseModel> > params_model_;
+  std::vector<std::shared_ptr<ParameterPhaseData> > params_data_;
   std::vector<std::size_t> phase_start_;
   std::vector<std::size_t> phase_end_;
 };

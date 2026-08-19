@@ -52,8 +52,8 @@ class ProblemAbstractTest(unittest.TestCase):
         self.assertEqual(problem.n_phases, 0)
         self.assertEqual(len(problem.phase_idxs), 0)
         self.assertEqual(len(problem.phase_edxs), 0)
-        self.assertEqual(len(problem.paramsConstraints), 0)
-        self.assertEqual(len(problem.paramsConstraintsData), 0)
+        self.assertEqual(len(problem.paramsModel), 0)
+        self.assertEqual(len(problem.paramsData), 0)
         self.assertFalse(problem.hasParamsConstraints)
         with self.assertRaises(crocoddyl.Exception):
             problem.update_p(np.zeros(1, dtype=dtype), 0)

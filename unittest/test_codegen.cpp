@@ -1253,6 +1253,7 @@ void test_codegen_observer_parameterized_power_impl(const std::string& name) {
       IntegratedObserverModelAbstract;
   typedef crocoddyl::ObservationProblemTpl<Scalar> ObservationProblem;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
+  typedef crocoddyl::ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
 
@@ -1359,8 +1360,10 @@ void test_codegen_observer_parameterized_power_impl(const std::string& name) {
   const std::vector<std::shared_ptr<ObserverModelAbstract>> running_models{
       codegen_model};
   const std::vector<VectorXs> tau_meas{tau};
+  const std::shared_ptr<ParameterPhaseModel> params_model =
+      std::make_shared<ParameterPhaseModel>(direct_params);
   ObservationProblem problem(x, tau_meas, running_models, codegen_model,
-                             direct_params);
+                             params_model);
   problem.update_p(p);
   VectorXs xnext(direct_model->get_state()->get_nx());
   direct_model->get_state()->integrate(x, Scalar(0.25) * dx, xnext);

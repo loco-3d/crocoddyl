@@ -56,6 +56,7 @@ void exposeCore() {
   exposeCostResidual();
   exposeConstraintAbstract();
   exposeConstraintManager();
+  exposeParameterPhase();
   exposeConstraintResidual();
   exposeIntegratedObserverAbstract();
   exposeIntegratedObserverEuler();

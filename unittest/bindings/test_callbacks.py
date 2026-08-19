@@ -113,8 +113,9 @@ class CallbackAndPlottingTest(unittest.TestCase):
                 terminal = module.ActionModelLQR(1, 0, 1, 0, 0, True)
                 manager = module.ParameterManager(running.state)
                 manager.addParam("lqr", module.LQRParams(running.state, 1))
+                params_model = module.ParameterPhaseModel(manager)
                 problem = module.ShootingProblem(
-                    np.zeros(1, dtype=dtype), [running], terminal, manager
+                    np.zeros(1, dtype=dtype), [running], terminal, params_model
                 )
                 us = [np.zeros(1, dtype=dtype)]
                 solver = module.SolverFDDP(problem)

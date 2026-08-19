@@ -98,24 +98,21 @@ void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
   // For parameter-estimation problems: update p_try and push into models
   if (n_phases_ > 0) {
     acceptstep_ = false;
-    const std::vector<
-        std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-        constraints_models = problem_->get_paramsConstraintModel();
-    const std::vector<
-        std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-        constraints_datas = problem_->get_paramsConstraintData();
+    const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
+        problem_->get_paramsModel();
+    const std::vector<std::shared_ptr<ParameterPhaseData>>& params_datas =
+        problem_->get_paramsData();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       p_try_[i] = p_[i] + steplength * dp_[i];
       problem_->update_p(p_try_[i], i);
-      const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
-          constraints =
-              (i < constraints_models.size()) ? constraints_models[i] : nullptr;
+      const std::shared_ptr<ConstraintModelManager>& constraints =
+          params_models[i]->get_constraints();
       if (constraints != nullptr) {
-        if (i >= constraints_datas.size() || constraints_datas[i] == nullptr ||
-            i >= qp_x0_.size() || i >= qp_u0_.size()) {
+        if (params_datas[i]->constraints == nullptr || i >= qp_x0_.size() ||
+            i >= qp_u0_.size()) {
           throw_pretty("Invalid data: parameter-constraint data is missing");
         }
-        constraints->calc(constraints_datas[i], qp_x0_[i], qp_u0_[i]);
+        params_models[i]->calc(params_datas[i], qp_x0_[i], qp_u0_[i]);
       }
     }
   }
@@ -1314,9 +1311,8 @@ void SolverFDDPTpl<Scalar>::allocateData() {
     qp_solvers_.resize(n_phases_);
     qp_params_.resize(n_phases_);
 #endif
-    const std::vector<
-        std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-        constraints_models = problem_->get_paramsConstraintModel();
+    const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
+        problem_->get_paramsModel();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       const std::size_t np = models[phase_starts[i]]->get_np();
       p_[i] = VectorXs::Zero(np);
@@ -1344,9 +1340,8 @@ void SolverFDDPTpl<Scalar>::allocateData() {
       Vpp_svd_[i] = Eigen::JacobiSVD<MatrixXs>(
           np, np, Eigen::ComputeFullU | Eigen::ComputeFullV);
       qp_c_[i] = VectorXs::Zero(np);
-      const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
-          constraints =
-              (i < constraints_models.size()) ? constraints_models[i] : nullptr;
+      const std::shared_ptr<ConstraintModelManager>& constraints =
+          params_models[i]->get_constraints();
       if (constraints != nullptr) {
         qp_x0_[i] = constraints->get_state()->zero();
         qp_u0_[i] = VectorXs::Zero(constraints->get_nu());
@@ -1969,12 +1964,10 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
     case AStateQP: {
 #ifdef CROCODDYL_WITH_ODYN
       START_PROFILER("SolverFDDP::paramsPassQP");
-      const std::vector<
-          std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-          constraints_models = problem_->get_paramsConstraintModel();
-      const std::vector<
-          std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-          constraints_datas = problem_->get_paramsConstraintData();
+      const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
+          problem_->get_paramsModel();
+      const std::vector<std::shared_ptr<ParameterPhaseData>>& params_datas =
+          problem_->get_paramsData();
       for (std::size_t i = 0; i < n_phases_; ++i) {
         const std::size_t np = static_cast<std::size_t>(p_[i].size());
         if (np == 0) {
@@ -1989,16 +1982,14 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
         Vpp_llt_[i].solveInPlace(Kp_[i]);
 
         qp_c_[i].noalias() = Vp_phase_[i] + Vpx_f_phase_[i];
-        const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>
-            constraints =
-                (i < constraints_models.size()) ? constraints_models[i]
-                                                : nullptr;
-        const std::shared_ptr<typename ShootingProblem::ConstraintDataManager>
-            constraints_data =
-                (i < constraints_datas.size()) ? constraints_datas[i] : nullptr;
-        const bool has_constraints =
-            constraints != nullptr && constraints_data != nullptr &&
-            (constraints->get_nh() != 0 || constraints->get_ng() != 0);
+        const std::shared_ptr<ConstraintModelManager>& constraints_model =
+            params_models[i]->get_constraints();
+        const std::shared_ptr<ConstraintDataManager>& constraints_data =
+            params_datas[i]->constraints;
+        const bool has_constraints = constraints_model != nullptr &&
+                                     constraints_data != nullptr &&
+                                     (constraints_model->get_nh() != 0 ||
+                                      constraints_model->get_ng() != 0);
 
         if (!has_constraints) {
           kp_[i] = qp_c_[i];
@@ -2006,19 +1997,19 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
           continue;
         }
 
-        const std::size_t nh = constraints->get_nh();
-        const std::size_t ng = constraints->get_ng();
-        if (qp_x0_[i].size() !=
-                static_cast<Eigen::Index>(constraints->get_state()->get_nx()) ||
+        const std::size_t nh = constraints_model->get_nh();
+        const std::size_t ng = constraints_model->get_ng();
+        if (qp_x0_[i].size() != static_cast<Eigen::Index>(
+                                    constraints_model->get_state()->get_nx()) ||
             qp_u0_[i].size() !=
-                static_cast<Eigen::Index>(constraints->get_nu())) {
+                static_cast<Eigen::Index>(constraints_model->get_nu())) {
           STOP_PROFILER("SolverFDDP::paramsPassQP");
           throw_pretty(
               "parameter backward error: parameter constraint dimensions "
               "changed; recreate the solver");
         }
-        constraints->calc(constraints_data, qp_x0_[i], qp_u0_[i]);
-        constraints->calcDiff(constraints_data, qp_x0_[i], qp_u0_[i]);
+        params_models[i]->calc(params_datas[i], qp_x0_[i], qp_u0_[i]);
+        params_models[i]->calcDiff(params_datas[i], qp_x0_[i], qp_u0_[i]);
         if (!qp_models_[i] || !qp_datas_[i] || !qp_solvers_[i] ||
             !qp_params_[i]) {
           STOP_PROFILER("SolverFDDP::paramsPassQP");
@@ -2136,19 +2127,17 @@ void SolverFDDPTpl<Scalar>::calcDir() {
       problem_->update_p(p_[i], i);
     }
     if (problem_->has_parameter_constraints()) {
-      const std::vector<
-          std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-          constraints_models = problem_->get_paramsConstraintModel();
-      const std::vector<
-          std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-          constraints_datas = problem_->get_paramsConstraintData();
-      for (std::size_t i = 0; i < constraints_models.size(); ++i) {
-        const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>&
-            constraints = constraints_models[i];
+      const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
+          problem_->get_paramsModel();
+      const std::vector<std::shared_ptr<ParameterPhaseData>>& params_datas =
+          problem_->get_paramsData();
+      for (std::size_t i = 0; i < params_models.size(); ++i) {
+        const std::shared_ptr<ConstraintModelManager>& constraints =
+            params_models[i]->get_constraints();
         if (constraints == nullptr) {
           continue;
         }
-        if (i >= constraints_datas.size() || constraints_datas[i] == nullptr) {
+        if (params_datas[i]->constraints == nullptr) {
           throw_pretty("Invalid data: parameter-constraint data is missing");
         }
         if (i >= qp_x0_.size() || i >= qp_u0_.size() ||
@@ -2160,7 +2149,7 @@ void SolverFDDPTpl<Scalar>::calcDir() {
           throw_pretty(
               "Invalid data: parameter-constraint workspace is invalid");
         }
-        constraints->calc(constraints_datas[i], qp_x0_[i], qp_u0_[i]);
+        params_models[i]->calc(params_datas[i], qp_x0_[i], qp_u0_[i]);
       }
     }
   }

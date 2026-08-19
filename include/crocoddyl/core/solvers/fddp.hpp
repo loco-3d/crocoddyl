@@ -100,6 +100,11 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
   typedef typename ProblemAbstract::ActionModelAbstract ActionModelAbstract;
   typedef typename ProblemAbstract::ActionDataAbstract ActionDataAbstract;
+  typedef typename SolverAbstract::ParameterPhaseModel ParameterPhaseModel;
+  typedef typename SolverAbstract::ParameterPhaseData ParameterPhaseData;
+  typedef
+      typename SolverAbstract::ConstraintModelManager ConstraintModelManager;
+  typedef typename SolverAbstract::ConstraintDataManager ConstraintDataManager;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;

@@ -149,8 +149,8 @@ void test_shooting_problem_polymorphic_interface() {
   BOOST_CHECK_EQUAL(base.get_n_phases(), 0u);
   BOOST_CHECK(base.get_phase_idxs().empty());
   BOOST_CHECK(base.get_phase_edxs().empty());
-  BOOST_CHECK(base.get_paramsConstraintModel().empty());
-  BOOST_CHECK(base.get_paramsConstraintData().empty());
+  BOOST_CHECK(base.get_paramsModel().empty());
+  BOOST_CHECK(base.get_paramsData().empty());
   BOOST_CHECK(!base.has_parameter_constraints());
   BOOST_CHECK_THROW(base.update_p(VectorXs::Zero(1)), crocoddyl::Exception);
 }

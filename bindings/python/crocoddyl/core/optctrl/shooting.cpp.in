@@ -51,7 +51,6 @@ struct ShootingProblemVisitor
     : public bp::def_visitor<ShootingProblemVisitor<Problem>> {
   typedef typename Problem::ActionModelAbstract ActionModel;
   typedef typename Problem::ActionDataAbstract ActionData;
-  typedef typename Problem::ParameterManager ParameterManager;
   typedef typename Problem::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -170,35 +169,18 @@ struct ShootingProblemVisitor
             "runningPhaseDatas",
             bp::make_function(&getShootingRunningPhaseDatas<Problem>,
                               bp::return_value_policy<bp::return_by_value>()),
-            "running action data grouped by parameter phase")
-        .add_property(
-            "paramsModel",
-            bp::make_function(&Problem::get_paramsModel,
-                              bp::return_value_policy<bp::return_by_value>()),
-            "parameter models, one per phase")
-        .add_property(
-            "paramsData",
-            bp::make_function(&Problem::get_paramsData,
-                              bp::return_value_policy<bp::return_by_value>()),
-            "parameter data, one per phase");
+            "running action data grouped by parameter phase");
   }
 };
 
 #define CROCODDYL_SHOOTING_PROBLEM_PYTHON_BINDINGS(Scalar)                    \
   typedef ShootingProblemTpl<Scalar> Problem;                                 \
   typedef ActionModelAbstractTpl<Scalar> ActionModel;                         \
-  typedef ParameterManagerTpl<Scalar> ParameterManager;                       \
-  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;               \
-  typedef typename Problem::ConstraintModelManager ConstraintManager;         \
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;                 \
   typedef typename Problem::VectorXs VectorXs;                                \
   typedef std::shared_ptr<ActionModel> ActionModelPtr;                        \
   typedef std::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionDataPtr;      \
-  typedef std::shared_ptr<ParameterManager> ParameterManagerPtr;              \
-  typedef std::shared_ptr<ParameterDataManager> ParameterDataManagerPtr;      \
-  StdVectorPythonVisitor<std::vector<ParameterManagerPtr>, true>::expose(     \
-      "StdVec_ParameterManager");                                            \
-  StdVectorPythonVisitor<std::vector<ParameterDataManagerPtr>, true>::expose( \
-      "StdVec_ParameterDataManager");                                        \
+  typedef std::shared_ptr<ParameterPhaseModel> ParameterPhaseModelPtr;        \
   StdVectorPythonVisitor<std::vector<std::vector<ActionModelPtr> >,           \
                          true>::expose("StdVec_StdVec_ActionModel");          \
   StdVectorPythonVisitor<std::vector<std::vector<ActionDataPtr> >,            \
@@ -222,28 +204,16 @@ struct ShootingProblemVisitor
           ":param runningModels: running action models (size T)\n"            \
           ":param terminalModel: terminal action model"))                     \
       .def(bp::init<VectorXs, std::vector<ActionModelPtr>, ActionModelPtr,    \
-                    ParameterManagerPtr>(                                    \
+                    ParameterPhaseModelPtr>(                                 \
           bp::args("self", "x0", "runningModels", "terminalModel",            \
                    "paramsModel"),                                           \
           "Initialize a single-phase parameterized shooting problem."))      \
-      .def(bp::init<VectorXs, std::vector<ActionModelPtr>, ActionModelPtr,    \
-                    ParameterManagerPtr,                                     \
-                    std::shared_ptr<ConstraintManager> >(                    \
-          bp::args("self", "x0", "runningModels", "terminalModel",            \
-                   "paramsModel", "paramsConstraints"),                     \
-          "Initialize a constrained single-phase parameterized problem."))   \
       .def(bp::init<VectorXs, std::vector<std::vector<ActionModelPtr> >,      \
-                    ActionModelPtr, std::vector<ParameterManagerPtr> >(       \
+                    ActionModelPtr,                                          \
+                    std::vector<ParameterPhaseModelPtr> >(                    \
           bp::args("self", "x0", "modelPhases", "terminalModel",             \
                    "paramsModel"),                                           \
           "Initialize a multi-phase parameterized shooting problem."))       \
-      .def(bp::init<                                                         \
-           VectorXs, std::vector<std::vector<ActionModelPtr> >,              \
-           ActionModelPtr, std::vector<ParameterManagerPtr>,                  \
-           std::vector<std::shared_ptr<ConstraintManager> > >(               \
-          bp::args("self", "x0", "modelPhases", "terminalModel",             \
-                   "paramsModel", "paramsConstraints"),                     \
-          "Initialize a constrained multi-phase parameterized problem."))    \
       .def(ShootingProblemVisitor<Problem>())                                 \
       .def(PrintableVisitor<Problem>())                                       \
       .def(CopyableVisitor<Problem>());

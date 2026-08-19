@@ -11,13 +11,14 @@ namespace crocoddyl {
 template <typename Scalar>
 ObservationProblemTpl<Scalar>::ObservationProblemTpl(
     const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
-    const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
-        model_phases,
-    std::shared_ptr<ObserverModelAbstract> terminal_model,
-    const std::vector<std::shared_ptr<ParameterManager> >& params_model)
+    const std::vector<std::shared_ptr<ObserverModelAbstract> >& running_models,
+    std::shared_ptr<ObserverModelAbstract> terminal_model)
     : ObservationProblemTpl(
-          x0, tau_meas, model_phases, terminal_model, params_model,
-          std::vector<std::shared_ptr<ConstraintModelManager> >()) {}
+          x0, tau_meas,
+          std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >{
+              running_models},
+          terminal_model,
+          std::vector<std::shared_ptr<ParameterPhaseModel> >()) {}
 
 template <typename Scalar>
 ObservationProblemTpl<Scalar>::ObservationProblemTpl(
@@ -25,33 +26,22 @@ ObservationProblemTpl<Scalar>::ObservationProblemTpl(
     const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
         model_phases,
     std::shared_ptr<ObserverModelAbstract> terminal_model,
-    const std::vector<std::shared_ptr<ParameterManager> >& params_model,
-    const std::vector<std::shared_ptr<ConstraintModelManager> >&
-        params_constraint_model)
+    const std::vector<std::shared_ptr<ParameterPhaseModel> >& params_model)
     : cost_(Scalar(0)),
       T_(0),
       x0_(x0),
       nx_(0),
       ndx_(0),
       is_updated_(false),
-      n_phases_(model_phases.size()),
-      params_model_(params_model),
-      params_constraint_model_(params_constraint_model) {
-  if (params_model_.size() != n_phases_) {
+      n_phases_(params_model.empty() ? 0 : model_phases.size()),
+      params_model_(params_model) {
+  if (!params_model_.empty() && params_model_.size() != model_phases.size()) {
     throw_pretty(
         "Invalid argument: paramsModel must have one entry per phase (got "
-        << params_model_.size() << " parameter models for " << n_phases_
-        << " phases)");
+        << params_model_.size() << " parameter models for "
+        << model_phases.size() << " phases)");
   }
-  if (!params_constraint_model_.empty() &&
-      params_constraint_model_.size() != n_phases_) {
-    throw_pretty(
-        "Invalid argument: paramsConstraintModel must be empty or have one "
-        "entry per phase (got "
-        << params_constraint_model_.size() << " constraints for " << n_phases_
-        << " phases)");
-  }
-  init(x0, tau_meas, model_phases, terminal_model, params_constraint_model_);
+  init(x0, tau_meas, model_phases, terminal_model);
 }
 
 template <typename Scalar>
@@ -59,38 +49,20 @@ ObservationProblemTpl<Scalar>::ObservationProblemTpl(
     const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
     const std::vector<std::shared_ptr<ObserverModelAbstract> >& running_models,
     std::shared_ptr<ObserverModelAbstract> terminal_model,
-    std::shared_ptr<ParameterManager> params_model)
+    std::shared_ptr<ParameterPhaseModel> params_model)
     : ObservationProblemTpl(
           x0, tau_meas,
           std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >{
               running_models},
           terminal_model,
-          std::vector<std::shared_ptr<ParameterManager> >{params_model}) {}
-
-template <typename Scalar>
-ObservationProblemTpl<Scalar>::ObservationProblemTpl(
-    const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
-    const std::vector<std::shared_ptr<ObserverModelAbstract> >& running_models,
-    std::shared_ptr<ObserverModelAbstract> terminal_model,
-    std::shared_ptr<ParameterManager> params_model,
-    std::shared_ptr<ConstraintModelManager> params_constraint_model)
-    : ObservationProblemTpl(
-          x0, tau_meas,
-          std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >{
-              running_models},
-          terminal_model,
-          std::vector<std::shared_ptr<ParameterManager> >{params_model},
-          std::vector<std::shared_ptr<ConstraintModelManager> >{
-              params_constraint_model}) {}
+          std::vector<std::shared_ptr<ParameterPhaseModel> >{params_model}) {}
 
 template <typename Scalar>
 void ObservationProblemTpl<Scalar>::init(
     const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
     const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
         model_phases,
-    std::shared_ptr<ObserverModelAbstract> terminal_model,
-    const std::vector<std::shared_ptr<ConstraintModelManager> >&
-        params_constraint_model) {
+    std::shared_ptr<ObserverModelAbstract> terminal_model) {
   if (model_phases.empty()) {
     throw_pretty("Invalid argument: model_phases is empty");
   }
@@ -98,7 +70,7 @@ void ObservationProblemTpl<Scalar>::init(
     throw_pretty("Invalid argument: terminal_model is null");
   }
 
-  for (std::size_t i = 0; i < n_phases_; ++i) {
+  for (std::size_t i = 0; i < model_phases.size(); ++i) {
     if (model_phases[i].empty()) {
       throw_pretty("Invalid argument: phase " << i << " has no models");
     }
@@ -128,24 +100,25 @@ void ObservationProblemTpl<Scalar>::init(
   running_models_.reserve(T_);
   running_datas_.resize(T_);
   params_data_.reserve(n_phases_);
-  params_constraint_data_.resize(n_phases_);
   phase_start_.reserve(n_phases_);
   phase_end_.reserve(n_phases_);
 
   std::size_t t = 0;
-  for (std::size_t i = 0; i < n_phases_; ++i) {
-    const std::shared_ptr<ParameterManager>& params_model = params_model_[i];
-    if (params_model == nullptr || params_model->get_state() == nullptr) {
-      throw_pretty("Invalid argument: paramsModel[" << i << "] is null");
+  for (std::size_t i = 0; i < model_phases.size(); ++i) {
+    std::shared_ptr<ParameterPhaseModel> params_model;
+    if (n_phases_ != 0) {
+      params_model = params_model_[i];
+      if (params_model == nullptr || params_model->get_state() == nullptr) {
+        throw_pretty("Invalid argument: paramsModel[" << i << "] is null");
+      }
+      if (params_model->get_state()->get_nx() != nx_ ||
+          params_model->get_state()->get_ndx() != ndx_) {
+        throw_pretty("Invalid argument: paramsModel["
+                     << i << "] has an incompatible state");
+      }
+      params_data_.push_back(params_model->createData());
+      phase_start_.push_back(t);
     }
-    if (params_model->get_state()->get_nx() != nx_ ||
-        params_model->get_state()->get_ndx() != ndx_) {
-      throw_pretty("Invalid argument: paramsModel["
-                   << i << "] has an incompatible state");
-    }
-
-    params_data_.push_back(params_model->createData());
-    phase_start_.push_back(t);
     for (std::size_t j = 0; j < model_phases[i].size(); ++j) {
       const std::shared_ptr<ObserverModelAbstract>& model = model_phases[i][j];
       if (model == nullptr || model->get_state() == nullptr) {
@@ -157,56 +130,61 @@ void ObservationProblemTpl<Scalar>::init(
         throw_pretty("Invalid argument: model in phase "
                      << i << ", node " << j << " has an incompatible state");
       }
-      if (model->get_np() != params_model->get_np()) {
-        throw_pretty("Invalid argument: model in phase "
-                     << i << ", node " << j << " has np=" << model->get_np()
-                     << " but paramsModel[" << i
-                     << "] has np=" << params_model->get_np());
-      }
       running_models_.push_back(model);
-      running_datas_[t] = model->createData(params_data_[i]);
-      model->set_params(running_datas_[t], params_model);
+      if (n_phases_ != 0) {
+        if (model->get_np() != params_model->get_np()) {
+          throw_pretty("Invalid argument: model in phase "
+                       << i << ", node " << j << " has np=" << model->get_np()
+                       << " but paramsModel[" << i
+                       << "] has np=" << params_model->get_np());
+        }
+        running_datas_[t] = model->createData(params_data_[i]->params);
+        model->set_params(running_datas_[t], params_model->get_params());
+      } else {
+        if (model->get_np() != 0) {
+          throw_pretty("Invalid argument: non-parameterized model in node "
+                       << t << " has np=" << model->get_np());
+        }
+        running_datas_[t] = model->createData();
+      }
       model->update_tau(tau_meas[t]);
       ++t;
     }
 
-    if (!params_constraint_model.empty() &&
-        params_constraint_model[i] != nullptr) {
-      const std::shared_ptr<ConstraintModelManager>& constraints =
-          params_constraint_model[i];
-      if (constraints->get_state() == nullptr ||
-          constraints->get_state()->get_nx() != nx_ ||
-          constraints->get_state()->get_ndx() != ndx_) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
-                     << i << "] has an incompatible state");
-      }
-      if (constraints->get_np() != params_model->get_np()) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
-                     << i << "] has np=" << constraints->get_np()
-                     << " but paramsModel[" << i
-                     << "] has np=" << params_model->get_np());
-      }
+    if (n_phases_ != 0 && params_model->get_constraints() != nullptr) {
+      const std::shared_ptr<
+          typename ParameterPhaseModel::ConstraintModelManager>& constraints =
+          params_model->get_constraints();
       if (constraints->get_nu() != model_phases[i][0]->get_nu()) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
+        throw_pretty("Invalid argument: paramsModel["
                      << i << "] has nu=" << constraints->get_nu()
                      << " but the phase control dimension is "
                      << model_phases[i][0]->get_nu());
       }
-      params_constraint_data_[i] =
-          constraints->createData(params_data_[i].get());
     }
-    phase_end_.push_back(t);
+    if (n_phases_ != 0) {
+      phase_end_.push_back(t);
+    }
   }
 
-  if (terminal_model->get_np() != params_model_.back()->get_np()) {
-    throw_pretty("Invalid argument: terminal_model has np="
-                 << terminal_model->get_np()
-                 << " but the final phase paramsModel has np="
-                 << params_model_.back()->get_np());
-  }
   terminal_model_ = terminal_model;
-  terminal_data_ = terminal_model->createData(params_data_.back());
-  terminal_model->set_params(terminal_data_, params_model_.back());
+  if (n_phases_ != 0) {
+    if (terminal_model->get_np() != params_model_.back()->get_np()) {
+      throw_pretty("Invalid argument: terminal_model has np="
+                   << terminal_model->get_np()
+                   << " but the final phase paramsModel has np="
+                   << params_model_.back()->get_np());
+    }
+    terminal_data_ = terminal_model->createData(params_data_.back()->params);
+    terminal_model->set_params(terminal_data_,
+                               params_model_.back()->get_params());
+  } else {
+    if (terminal_model->get_np() != 0) {
+      throw_pretty("Invalid argument: non-parameterized terminal_model has np="
+                   << terminal_model->get_np());
+    }
+    terminal_data_ = terminal_model->createData();
+  }
 }
 
 template <typename Scalar>
@@ -224,15 +202,9 @@ Scalar ObservationProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
     running_models_[t]->calc(running_datas_[t], xs[t], us[t]);
   }
   terminal_model_->calc(terminal_data_, xs.back());
-  for (std::size_t i = 0; i < params_constraint_model_.size(); ++i) {
-    const std::shared_ptr<ConstraintModelManager>& constraints =
-        params_constraint_model_[i];
-    const std::shared_ptr<ConstraintDataManager>& data =
-        params_constraint_data_[i];
-    if (constraints != nullptr && data != nullptr) {
-      data->resize(constraints.get(), true);
-      constraints->calc(data, xs[phase_start_[i]], us[phase_start_[i]]);
-    }
+  for (std::size_t i = 0; i < params_model_.size(); ++i) {
+    params_model_[i]->calc(params_data_[i], xs[phase_start_[i]],
+                           us[phase_start_[i]]);
   }
 
   cost_ = Scalar(0);
@@ -258,16 +230,11 @@ Scalar ObservationProblemTpl<Scalar>::calcDiff(
     running_models_[t]->calcDiff(running_datas_[t], xs[t], us[t]);
   }
   terminal_model_->calcDiff(terminal_data_, xs.back());
-  for (std::size_t i = 0; i < params_constraint_model_.size(); ++i) {
-    const std::shared_ptr<ConstraintModelManager>& constraints =
-        params_constraint_model_[i];
-    const std::shared_ptr<ConstraintDataManager>& data =
-        params_constraint_data_[i];
-    if (constraints != nullptr && data != nullptr) {
-      data->resize(constraints.get(), true);
-      constraints->calc(data, xs[phase_start_[i]], us[phase_start_[i]]);
-      constraints->calcDiff(data, xs[phase_start_[i]], us[phase_start_[i]]);
-    }
+  for (std::size_t i = 0; i < params_model_.size(); ++i) {
+    params_model_[i]->calc(params_data_[i], xs[phase_start_[i]],
+                           us[phase_start_[i]]);
+    params_model_[i]->calcDiff(params_data_[i], xs[phase_start_[i]],
+                               us[phase_start_[i]]);
   }
 
   cost_ = Scalar(0);
@@ -438,15 +405,15 @@ std::size_t ObservationProblemTpl<Scalar>::get_n_phases() const {
 }
 
 template <typename Scalar>
-const std::vector<
-    std::shared_ptr<typename ObservationProblemTpl<Scalar>::ParameterManager> >&
+const std::vector<std::shared_ptr<
+    typename ObservationProblemTpl<Scalar>::ParameterPhaseModel> >&
 ObservationProblemTpl<Scalar>::get_paramsModel() const {
   return params_model_;
 }
 
 template <typename Scalar>
 const std::vector<std::shared_ptr<
-    typename ObservationProblemTpl<Scalar>::ParameterDataManager> >&
+    typename ObservationProblemTpl<Scalar>::ParameterPhaseData> >&
 ObservationProblemTpl<Scalar>::get_paramsData() const {
   return params_data_;
 }
@@ -464,26 +431,9 @@ const std::vector<std::size_t>& ObservationProblemTpl<Scalar>::get_phase_edxs()
 }
 
 template <typename Scalar>
-const std::vector<std::shared_ptr<
-    typename ObservationProblemTpl<Scalar>::ConstraintModelManager> >&
-ObservationProblemTpl<Scalar>::get_paramsConstraintModel() const {
-  return params_constraint_model_;
-}
-
-template <typename Scalar>
-const std::vector<std::shared_ptr<
-    typename ObservationProblemTpl<Scalar>::ConstraintDataManager> >&
-ObservationProblemTpl<Scalar>::get_paramsConstraintData() const {
-  return params_constraint_data_;
-}
-
-template <typename Scalar>
 bool ObservationProblemTpl<Scalar>::has_parameter_constraints() const {
-  for (std::size_t i = 0; i < params_constraint_model_.size(); ++i) {
-    const std::shared_ptr<ConstraintModelManager>& constraints =
-        params_constraint_model_[i];
-    if (constraints != nullptr &&
-        (constraints->get_nh() != 0 || constraints->get_ng() != 0)) {
+  for (std::size_t i = 0; i < params_model_.size(); ++i) {
+    if (params_model_[i]->has_constraints()) {
       return true;
     }
   }

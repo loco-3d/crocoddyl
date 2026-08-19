@@ -131,29 +131,13 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const VectorXs& x0,
     const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
     std::shared_ptr<ActionModelAbstract> terminal_model,
-    std::shared_ptr<ParameterManager> params_model)
+    std::shared_ptr<ParameterPhaseModel> params_model)
     : ShootingProblemTpl(
           x0,
           std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >{
               running_models},
           terminal_model,
-          std::vector<std::shared_ptr<ParameterManager> >{params_model}) {}
-
-template <typename Scalar>
-ShootingProblemTpl<Scalar>::ShootingProblemTpl(
-    const VectorXs& x0,
-    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
-    std::shared_ptr<ActionModelAbstract> terminal_model,
-    std::shared_ptr<ParameterManager> params_model,
-    std::shared_ptr<ConstraintModelManager> params_constraint_model)
-    : ShootingProblemTpl(
-          x0,
-          std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >{
-              running_models},
-          terminal_model,
-          std::vector<std::shared_ptr<ParameterManager> >{params_model},
-          std::vector<std::shared_ptr<ConstraintModelManager> >{
-              params_constraint_model}) {}
+          std::vector<std::shared_ptr<ParameterPhaseModel> >{params_model}) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
@@ -161,34 +145,12 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
         model_phases,
     std::shared_ptr<ActionModelAbstract> terminal_model,
-    const std::vector<std::shared_ptr<ParameterManager> >& params_model)
-    : ShootingProblemTpl(
-          x0, model_phases, terminal_model, params_model,
-          std::vector<std::shared_ptr<ConstraintModelManager> >()) {}
-
-template <typename Scalar>
-ShootingProblemTpl<Scalar>::ShootingProblemTpl(
-    const VectorXs& x0,
-    const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
-        model_phases,
-    std::shared_ptr<ActionModelAbstract> terminal_model,
-    const std::vector<std::shared_ptr<ParameterManager> >& params_model,
-    const std::vector<std::shared_ptr<ConstraintModelManager> >&
-        params_constraint_model)
+    const std::vector<std::shared_ptr<ParameterPhaseModel> >& params_model)
     : ShootingProblemTpl(x0, flattenModelPhases(model_phases),
                          checkedTerminalModel(terminal_model)) {
   n_phases_ = model_phases.size();
   params_model_ = params_model;
-  params_constraint_model_ = params_constraint_model;
-  if (!params_constraint_model_.empty() &&
-      params_constraint_model_.size() != n_phases_) {
-    throw_pretty(
-        "Invalid argument: paramsConstraintModel must be empty or have one "
-        "entry per phase (got "
-        << params_constraint_model_.size() << " constraints for " << n_phases_
-        << " phases)");
-  }
-  initParameterization(model_phases, params_constraint_model_);
+  initParameterization(model_phases);
 }
 
 template <typename Scalar>
@@ -208,8 +170,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       n_phases_(problem.n_phases_),
       params_model_(problem.params_model_),
       params_data_(problem.params_data_),
-      params_constraint_model_(problem.params_constraint_model_),
-      params_constraint_data_(problem.params_constraint_data_),
       phase_start_(problem.phase_start_),
       phase_end_(problem.phase_end_) {}
 
@@ -255,9 +215,7 @@ ShootingProblemTpl<Scalar>::flattenModelPhases(
 template <typename Scalar>
 void ShootingProblemTpl<Scalar>::initParameterization(
     const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
-        model_phases,
-    const std::vector<std::shared_ptr<ConstraintModelManager> >&
-        params_constraint_model) {
+        model_phases) {
   if (params_model_.size() != n_phases_) {
     throw_pretty(
         "Invalid argument: paramsModel must have one entry per phase (got "
@@ -266,13 +224,12 @@ void ShootingProblemTpl<Scalar>::initParameterization(
   }
 
   params_data_.reserve(n_phases_);
-  params_constraint_data_.resize(n_phases_);
   phase_start_.reserve(n_phases_);
   phase_end_.reserve(n_phases_);
 
   std::size_t t = 0;
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    const std::shared_ptr<ParameterManager>& params_model = params_model_[i];
+    const std::shared_ptr<ParameterPhaseModel>& params_model = params_model_[i];
     if (params_model == nullptr) {
       throw_pretty("Invalid argument: paramsModel[" << i << "] is null");
     }
@@ -283,6 +240,8 @@ void ShootingProblemTpl<Scalar>::initParameterization(
                    << i << "] has an incompatible state");
     }
 
+    const std::shared_ptr<typename ParameterPhaseModel::ParameterManager>&
+        params = params_model->get_params();
     params_data_.push_back(params_model->createData());
     phase_start_.push_back(t);
     for (std::size_t j = 0; j < model_phases[i].size(); ++j) {
@@ -293,34 +252,20 @@ void ShootingProblemTpl<Scalar>::initParameterization(
                      << " but paramsModel[" << i
                      << "] has np=" << params_model->get_np());
       }
-      running_datas_[t] = model->createData(params_data_[i]);
-      model->set_params(running_datas_[t], params_model);
+      running_datas_[t] = model->createData(params_data_[i]->params);
+      model->set_params(running_datas_[t], params);
       ++t;
     }
-    if (!params_constraint_model.empty() &&
-        params_constraint_model[i] != nullptr) {
-      const std::shared_ptr<ConstraintModelManager>& constraints =
-          params_constraint_model[i];
-      if (constraints->get_state() == nullptr ||
-          constraints->get_state()->get_nx() != nx_ ||
-          constraints->get_state()->get_ndx() != ndx_) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
-                     << i << "] has an incompatible state");
-      }
-      if (constraints->get_np() != params_model->get_np()) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
-                     << i << "] has np=" << constraints->get_np()
-                     << " but paramsModel[" << i
-                     << "] has np=" << params_model->get_np());
-      }
+    if (params_model->get_constraints() != nullptr) {
+      const std::shared_ptr<
+          typename ParameterPhaseModel::ConstraintModelManager>& constraints =
+          params_model->get_constraints();
       if (constraints->get_nu() != model_phases[i][0]->get_nu()) {
-        throw_pretty("Invalid argument: paramsConstraintModel["
+        throw_pretty("Invalid argument: paramsModel["
                      << i << "] has nu=" << constraints->get_nu()
                      << " but the phase control dimension is "
                      << model_phases[i][0]->get_nu());
       }
-      params_constraint_data_[i] =
-          constraints->createData(params_data_[i].get());
     }
     phase_end_.push_back(t);
   }
@@ -331,8 +276,9 @@ void ShootingProblemTpl<Scalar>::initParameterization(
                  << " but the final phase paramsModel has np="
                  << params_model_.back()->get_np());
   }
-  terminal_data_ = terminal_model_->createData(params_data_.back());
-  terminal_model_->set_params(terminal_data_, params_model_.back());
+  terminal_data_ = terminal_model_->createData(params_data_.back()->params);
+  terminal_model_->set_params(terminal_data_,
+                              params_model_.back()->get_params());
 }
 
 template <typename Scalar>
@@ -603,8 +549,7 @@ template <typename NewScalar>
 ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
   typedef ShootingProblemTpl<NewScalar> ReturnType;
   typedef ActionModelAbstractTpl<NewScalar> NewActionModel;
-  typedef ParameterManagerTpl<NewScalar> NewParameterManager;
-  typedef ConstraintModelManagerTpl<NewScalar> NewConstraintManager;
+  typedef ParameterPhaseModelTpl<NewScalar> NewParameterPhaseModel;
   const std::shared_ptr<NewActionModel> terminal_model =
       terminal_model_->template cast<NewScalar>();
   if (n_phases_ == 0) {
@@ -622,27 +567,17 @@ ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
       model_phases[i].push_back(running_models_[t]->template cast<NewScalar>());
     }
   }
-  std::vector<std::shared_ptr<NewParameterManager> > params_model;
+  std::vector<std::shared_ptr<NewParameterPhaseModel> > params_model;
   params_model.reserve(n_phases_);
-  std::vector<std::shared_ptr<NewConstraintManager> > params_constraint_model;
-  if (!params_constraint_model_.empty()) {
-    params_constraint_model.reserve(n_phases_);
-  }
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    params_model.push_back(std::make_shared<NewParameterManager>(
+    params_model.push_back(std::make_shared<NewParameterPhaseModel>(
         params_model_[i]->template cast<NewScalar>()));
-    if (!params_constraint_model_.empty()) {
-      params_constraint_model.push_back(
-          params_constraint_model_[i] != nullptr
-              ? std::make_shared<NewConstraintManager>(
-                    params_constraint_model_[i]->template cast<NewScalar>())
-              : nullptr);
-    }
   }
   ReturnType ret(x0_.template cast<NewScalar>(), model_phases, terminal_model,
-                 params_model, params_constraint_model);
+                 params_model);
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    ret.update_p(params_data_[i]->params->p.template cast<NewScalar>(), i);
+    ret.update_p(params_data_[i]->params->params->p.template cast<NewScalar>(),
+                 i);
   }
   ret.set_nthreads(static_cast<int>(nthreads_));
   return ret;
@@ -865,14 +800,14 @@ ShootingProblemTpl<Scalar>::get_runningPhaseDatas(
 
 template <typename Scalar>
 const std::vector<
-    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ParameterManager> >&
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ParameterPhaseModel> >&
 ShootingProblemTpl<Scalar>::get_paramsModel() const {
   return params_model_;
 }
 
 template <typename Scalar>
-const std::vector<std::shared_ptr<
-    typename ShootingProblemTpl<Scalar>::ParameterDataManager> >&
+const std::vector<
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ParameterPhaseData> >&
 ShootingProblemTpl<Scalar>::get_paramsData() const {
   return params_data_;
 }
@@ -890,26 +825,9 @@ const std::vector<std::size_t>& ShootingProblemTpl<Scalar>::get_phase_edxs()
 }
 
 template <typename Scalar>
-const std::vector<std::shared_ptr<
-    typename ShootingProblemTpl<Scalar>::ConstraintModelManager> >&
-ShootingProblemTpl<Scalar>::get_paramsConstraintModel() const {
-  return params_constraint_model_;
-}
-
-template <typename Scalar>
-const std::vector<std::shared_ptr<
-    typename ShootingProblemTpl<Scalar>::ConstraintDataManager> >&
-ShootingProblemTpl<Scalar>::get_paramsConstraintData() const {
-  return params_constraint_data_;
-}
-
-template <typename Scalar>
 bool ShootingProblemTpl<Scalar>::has_parameter_constraints() const {
-  for (std::size_t i = 0; i < params_constraint_model_.size(); ++i) {
-    const std::shared_ptr<ConstraintModelManager>& constraints =
-        params_constraint_model_[i];
-    if (constraints != nullptr &&
-        (constraints->get_nh() != 0 || constraints->get_ng() != 0)) {
+  for (std::size_t i = 0; i < params_model_.size(); ++i) {
+    if (params_model_[i]->has_constraints()) {
       return true;
     }
   }

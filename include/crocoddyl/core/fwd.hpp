@@ -322,6 +322,12 @@ template <typename Scalar>
 struct ParameterDataManagerTpl;
 
 template <typename Scalar>
+class ParameterPhaseModelTpl;
+
+template <typename Scalar>
+struct ParameterPhaseDataTpl;
+
+template <typename Scalar>
 struct ParamsDataAbstractTpl;
 
 template <typename Scalar>
@@ -643,6 +649,8 @@ typedef DynamicsParamsAbstractTpl<double> DynamicsParamsAbstract;
 typedef ParameterItemTpl<double> ParameterItem;
 typedef ParameterManagerTpl<double> ParameterManager;
 typedef ParameterDataManagerTpl<double> ParameterDataManager;
+typedef ParameterPhaseModelTpl<double> ParameterPhaseModel;
+typedef ParameterPhaseDataTpl<double> ParameterPhaseData;
 typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;
 typedef ActionModelParamsDataAbstractTpl<double> ActionModelParamsDataAbstract;
 typedef DynamicsParamsDataAbstractTpl<double> DynamicsParamsDataAbstract;

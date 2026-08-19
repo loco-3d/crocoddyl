@@ -43,6 +43,7 @@ struct ParameterizedSolverFixture {
   typedef crocoddyl::ConstraintModelResidualTpl<Scalar> ResidualConstraint;
   typedef crocoddyl::LQRParamsTpl<Scalar> LQRParams;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
+  typedef crocoddyl::ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
   typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef crocoddyl::ResidualModelParametersTpl<Scalar> ParameterResidual;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
@@ -93,15 +94,18 @@ struct ParameterizedSolverFixture {
                           phase1_model->get_state(),
                           std::make_shared<ParameterResidual>(
                               phase1_model->get_state(), reference1, 1)));
+    phase_params0 =
+        std::make_shared<ParameterPhaseModel>(params0, constraints0);
+    phase_params1 =
+        std::make_shared<ParameterPhaseModel>(params1, constraints1);
 
     std::vector<std::vector<std::shared_ptr<ActionModel>>> phases(2);
     phases[0] = {phase0_model, phase0_model};
     phases[1] = {phase1_model, phase1_model};
     problem = std::make_shared<Problem>(
         VectorXs::Zero(nx), phases, terminal_model,
-        std::vector<std::shared_ptr<ParameterManager>>{params0, params1},
-        std::vector<std::shared_ptr<ConstraintManager>>{constraints0,
-                                                        constraints1});
+        std::vector<std::shared_ptr<ParameterPhaseModel>>{phase_params0,
+                                                          phase_params1});
     problem->set_nthreads(1);
     us = {VectorXs::Constant(2, Scalar(0.1)),
           VectorXs::Constant(2, Scalar(-0.05)),
@@ -116,6 +120,8 @@ struct ParameterizedSolverFixture {
   std::shared_ptr<LQR> terminal_model;
   std::shared_ptr<ParameterManager> params0;
   std::shared_ptr<ParameterManager> params1;
+  std::shared_ptr<ParameterPhaseModel> phase_params0;
+  std::shared_ptr<ParameterPhaseModel> phase_params1;
   std::shared_ptr<ConstraintManager> constraints0;
   std::shared_ptr<ConstraintManager> constraints1;
   std::shared_ptr<Problem> problem;
@@ -131,6 +137,7 @@ struct QuadraticParameterFixture {
   typedef crocoddyl::ActionModelLQRTpl<Scalar> LQR;
   typedef crocoddyl::LQRParamsTpl<Scalar> LQRParams;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
+  typedef crocoddyl::ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
   typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -166,10 +173,11 @@ struct QuadraticParameterFixture {
     params = std::make_shared<ParameterManager>(running->get_state());
     params->addParam("lqr",
                      std::make_shared<LQRParams>(running->get_state(), 1));
+    phase_params = std::make_shared<ParameterPhaseModel>(params);
     problem = std::make_shared<Problem>(
         VectorXs::Zero(1),
         std::vector<std::shared_ptr<ActionModel>>(2, running), terminal,
-        params);
+        phase_params);
     problem->set_nthreads(1);
     us.assign(2, VectorXs::Zero(1));
     xs.resize(us.size() + 1);
@@ -179,6 +187,7 @@ struct QuadraticParameterFixture {
   std::shared_ptr<LQR> running;
   std::shared_ptr<LQR> terminal;
   std::shared_ptr<ParameterManager> params;
+  std::shared_ptr<ParameterPhaseModel> phase_params;
   std::shared_ptr<Problem> problem;
   std::vector<VectorXs> xs;
   std::vector<VectorXs> us;
@@ -242,7 +251,7 @@ void check_quadratic_parameter_solver() {
   BOOST_CHECK_GT(solver.get_iter(), 0);
   BOOST_REQUIRE_EQUAL(solver.get_p().size(), 1);
   BOOST_CHECK(solver.get_p()[0].isApprox(fixture.optimum, tol));
-  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
       fixture.optimum, tol));
   const Scalar recomputed_cost =
       fixture.problem->calc(solver.get_xs(), solver.get_us());
@@ -287,9 +296,9 @@ void check_parameterized_fddp() {
   BOOST_CHECK(solver.get_p()[1].isApprox(init_p[1]));
   BOOST_CHECK(solver.get_p_try()[0].isApprox(solver.get_p()[0]));
   BOOST_CHECK(solver.get_p_try()[1].isApprox(solver.get_p()[1]));
-  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
       solver.get_p()[0]));
-  BOOST_CHECK(fixture.problem->get_paramsData()[1]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[1]->params->params->p.isApprox(
       solver.get_p()[1]));
 
   solver.computeDirection(true);
@@ -340,15 +349,17 @@ void check_parameterized_fddp() {
   const std::vector<VectorXs> p_before = solver.get_p();
   std::vector<VectorXs> manager_p_before(solver.get_p().size());
   for (std::size_t i = 0; i < manager_p_before.size(); ++i) {
-    manager_p_before[i] = fixture.problem->get_paramsData()[i]->params->p;
+    manager_p_before[i] =
+        fixture.problem->get_paramsData()[i]->params->params->p;
   }
   BOOST_CHECK_THROW(solver.template cast<OtherScalar>(), crocoddyl::Exception);
   BOOST_CHECK(solver.get_problem() == problem_before);
   BOOST_CHECK(fixture.problem == problem_before);
   for (std::size_t i = 0; i < p_before.size(); ++i) {
     BOOST_CHECK(solver.get_p()[i].isApprox(p_before[i]));
-    BOOST_CHECK(fixture.problem->get_paramsData()[i]->params->p.isApprox(
-        manager_p_before[i]));
+    BOOST_CHECK(
+        fixture.problem->get_paramsData()[i]->params->params->p.isApprox(
+            manager_p_before[i]));
   }
   std::vector<VectorXs> wrong_count(1, VectorXs::Zero(1));
   BOOST_CHECK_THROW(solver.solve(fixture.xs, fixture.us, wrong_count, 0, true),
@@ -366,6 +377,9 @@ void check_rejected_parameter_restoration() {
   typedef crocoddyl::ConstraintModelResidualTpl<Scalar> ResidualConstraint;
   typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef crocoddyl::ResidualModelParametersTpl<Scalar> ParameterResidual;
+  typedef crocoddyl::ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef
+      typename ParameterPhaseModel::ConstraintDataManager ConstraintDataManager;
   typedef crocoddyl::SolverFDDPTpl<Scalar> Solver;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   const Scalar tol =
@@ -387,11 +401,13 @@ void check_rejected_parameter_restoration() {
                                  VectorXs::Constant(1, Scalar(-1.)),
                                  VectorXs::Constant(1, Scalar(1.))),
                              false);
+  const std::shared_ptr<ParameterPhaseModel> phase_params =
+      std::make_shared<ParameterPhaseModel>(fixture.params, constraints);
   const std::shared_ptr<Problem> problem = std::make_shared<Problem>(
       VectorXs::Zero(1),
       std::vector<std::shared_ptr<typename Problem::ActionModelAbstract>>(
           2, fixture.running),
-      fixture.terminal, fixture.params, constraints);
+      fixture.terminal, phase_params);
   problem->set_nthreads(1);
   std::vector<VectorXs> xs(fixture.us.size() + 1);
   problem->rollout(fixture.us, xs);
@@ -400,8 +416,8 @@ void check_rejected_parameter_restoration() {
       std::static_pointer_cast<typename Solver::ProblemAbstract>(problem));
   solver.solve(xs, fixture.us, std::vector<VectorXs>(1, accepted), 0, true);
   solver.computeDirection(true);
-  const std::shared_ptr<typename Problem::ConstraintDataManager>&
-      constraints_data = problem->get_paramsConstraintData()[0];
+  const std::shared_ptr<ConstraintDataManager>& constraints_data =
+      problem->get_paramsData()[0]->constraints;
   BOOST_REQUIRE_EQUAL(constraints->get_inactive_set().count("inactive"), 1);
   BOOST_CHECK(constraints_data->g.isApprox(accepted, tol));
 
@@ -409,7 +425,8 @@ void check_rejected_parameter_restoration() {
   BOOST_CHECK(!solver.get_p_try()[0].isApprox(accepted, tol));
   BOOST_CHECK(constraints_data->g.isApprox(solver.get_p_try()[0], tol));
   solver.calcDir();
-  BOOST_CHECK(problem->get_paramsData()[0]->params->p.isApprox(accepted, tol));
+  BOOST_CHECK(
+      problem->get_paramsData()[0]->params->params->p.isApprox(accepted, tol));
   BOOST_CHECK(constraints_data->g.isApprox(accepted, tol));
   BOOST_CHECK_SMALL(static_cast<double>(solver.get_gfeas() - Scalar(0.1)),
                     static_cast<double>(tol));
@@ -421,10 +438,8 @@ template <typename Scalar>
 void check_mixed_parameter_constraint_restoration() {
   typedef crocoddyl::SolverFDDPTpl<Scalar> Solver;
   typedef typename ParameterizedSolverFixture<Scalar>::ActionModel ActionModel;
-  typedef typename ParameterizedSolverFixture<Scalar>::ConstraintManager
-      ConstraintManager;
-  typedef typename ParameterizedSolverFixture<Scalar>::ParameterManager
-      ParameterManager;
+  typedef typename ParameterizedSolverFixture<Scalar>::ParameterPhaseModel
+      ParameterPhaseModel;
   typedef typename ParameterizedSolverFixture<Scalar>::Problem Problem;
   typedef typename ParameterizedSolverFixture<Scalar>::VectorXs VectorXs;
   const Scalar tol =
@@ -435,10 +450,10 @@ void check_mixed_parameter_constraint_restoration() {
   phases[1] = {fixture.phase1_model, fixture.phase1_model};
   const std::shared_ptr<Problem> problem = std::make_shared<Problem>(
       VectorXs::Zero(4), phases, fixture.terminal_model,
-      std::vector<std::shared_ptr<ParameterManager>>{fixture.params0,
-                                                     fixture.params1},
-      std::vector<std::shared_ptr<ConstraintManager>>{
-          std::shared_ptr<ConstraintManager>(), fixture.constraints1});
+      std::vector<std::shared_ptr<ParameterPhaseModel>>{
+          std::make_shared<ParameterPhaseModel>(fixture.params0),
+          std::make_shared<ParameterPhaseModel>(fixture.params1,
+                                                fixture.constraints1)});
   problem->set_nthreads(1);
   std::vector<VectorXs> xs(fixture.us.size() + 1);
   problem->rollout(fixture.us, xs);
@@ -451,35 +466,34 @@ void check_mixed_parameter_constraint_restoration() {
   solver.solve(xs, fixture.us, initial, 0, true);
   BOOST_CHECK_NO_THROW(solver.computeDirection(true));
 
-  const std::vector<std::shared_ptr<ConstraintManager>>& constraints_models =
-      problem->get_paramsConstraintModel();
-  const std::vector<std::shared_ptr<typename Problem::ConstraintDataManager>>&
-      constraints_datas = problem->get_paramsConstraintData();
-  BOOST_REQUIRE_EQUAL(constraints_models.size(), 2);
-  BOOST_REQUIRE_EQUAL(constraints_datas.size(), 2);
-  BOOST_CHECK(constraints_models[0] == nullptr);
-  BOOST_CHECK(constraints_datas[0] == nullptr);
-  BOOST_REQUIRE(constraints_models[1] != nullptr);
-  BOOST_REQUIRE(constraints_datas[1] != nullptr);
+  const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
+      problem->get_paramsModel();
+  BOOST_REQUIRE_EQUAL(params_models.size(), 2);
+  BOOST_CHECK(params_models[0]->get_constraints() == nullptr);
+  BOOST_CHECK(problem->get_paramsData()[0]->constraints == nullptr);
+  BOOST_REQUIRE(params_models[1]->get_constraints() != nullptr);
+  BOOST_REQUIRE(problem->get_paramsData()[1]->constraints != nullptr);
 
   const std::vector<VectorXs> accepted = solver.get_p();
   const VectorXs candidate0 = accepted[0] + VectorXs::Constant(1, Scalar(0.25));
   const VectorXs candidate1 = accepted[1] + VectorXs::Constant(2, Scalar(0.35));
   problem->update_p(candidate0, 0);
   problem->update_p(candidate1, 1);
-  constraints_models[1]->calc(constraints_datas[1],
-                              constraints_models[1]->get_state()->zero(),
-                              VectorXs::Zero(constraints_models[1]->get_nu()));
-  const VectorXs candidate_h = constraints_datas[1]->h;
+  params_models[1]->calc(
+      problem->get_paramsData()[1], params_models[1]->get_state()->zero(),
+      VectorXs::Zero(params_models[1]->get_constraints()->get_nu()));
+  const VectorXs candidate_h = problem->get_paramsData()[1]->constraints->h;
   BOOST_CHECK_NO_THROW(solver.computeDirection(true));
+  BOOST_CHECK(problem->get_paramsData()[0]->params->params->p.isApprox(
+      accepted[0], tol));
+  BOOST_CHECK(problem->get_paramsData()[1]->params->params->p.isApprox(
+      accepted[1], tol));
   BOOST_CHECK(
-      problem->get_paramsData()[0]->params->p.isApprox(accepted[0], tol));
-  BOOST_CHECK(
-      problem->get_paramsData()[1]->params->p.isApprox(accepted[1], tol));
-  BOOST_CHECK(!constraints_datas[1]->h.isApprox(candidate_h, tol));
+      !problem->get_paramsData()[1]->constraints->h.isApprox(candidate_h, tol));
   VectorXs reference(2);
   reference << Scalar(-0.2), Scalar(0.3);
-  BOOST_CHECK(constraints_datas[1]->h.isApprox(accepted[1] - reference, tol));
+  BOOST_CHECK(problem->get_paramsData()[1]->constraints->h.isApprox(
+      accepted[1] - reference, tol));
 }
 
 template <typename Scalar>
@@ -495,7 +509,7 @@ void check_line_search_exception_rejects_candidate() {
   BOOST_CHECK(!solver.accepted());
   solver.stopThrowing();
   solver.computeDirection(true);
-  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
       fixture.initial));
   BOOST_CHECK(solver.get_p()[0].isApprox(fixture.initial));
 }

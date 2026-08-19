@@ -49,47 +49,35 @@ getObservationRunningPhaseDatas(const Problem& problem) {
 #define CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(Scalar)                 \
   typedef ObservationProblemTpl<Scalar> Problem;                              \
   typedef ObserverModelAbstractTpl<Scalar> ObserverModel;                     \
-  typedef ParameterManagerTpl<Scalar> ParameterManager;                       \
-  typedef typename Problem::ConstraintModelManager ConstraintManager;         \
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;                 \
   typedef typename Problem::VectorXs VectorXs;                                \
   typedef std::shared_ptr<ObserverModel> ObserverModelPtr;                    \
-  typedef std::shared_ptr<ParameterManager> ParameterManagerPtr;              \
+  typedef std::shared_ptr<ParameterPhaseModel> ParameterPhaseModelPtr;        \
   StdVectorPythonVisitor<std::vector<std::vector<ObserverModelPtr> >,         \
                          true>::expose("StdVec_StdVec_ObserverModel");        \
   bp::register_ptr_to_python<std::shared_ptr<Problem> >();                    \
   bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
       "ObservationProblem",                                                  \
       "Optimal-estimation problem with measured torques, process noise and " \
-      "shared parameters. Supports single- and multi-phase horizons.",       \
+      "optional shared parameters.",                                        \
       bp::init<VectorXs, std::vector<VectorXs>,                              \
+               std::vector<ObserverModelPtr>, ObserverModelPtr>(             \
+          bp::args("self", "x0", "tauMeas", "runningModels",                \
+                   "terminalModel"),                                         \
+          "Initialize an observation problem without model parameters."))   \
+      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
                std::vector<ObserverModelPtr>, ObserverModelPtr,              \
-               ParameterManagerPtr>(                                         \
+               ParameterPhaseModelPtr>(                                     \
           bp::args("self", "x0", "tauMeas", "runningModels",                \
                    "terminalModel", "paramsModel"),                          \
           "Initialize a single-phase observation problem."))                 \
       .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
-                    std::vector<ObserverModelPtr>, ObserverModelPtr,          \
-                    ParameterManagerPtr,                                     \
-                    std::shared_ptr<ConstraintManager> >(                    \
-          bp::args("self", "x0", "tauMeas", "runningModels",                \
-                   "terminalModel", "paramsModel",                          \
-                   "paramsConstraints"),                                    \
-          "Initialize a constrained single-phase observation problem."))     \
-      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
                     std::vector<std::vector<ObserverModelPtr> >,              \
-                    ObserverModelPtr, std::vector<ParameterManagerPtr> >(     \
+                    ObserverModelPtr,                                        \
+                    std::vector<ParameterPhaseModelPtr> >(                    \
           bp::args("self", "x0", "tauMeas", "modelPhases",                 \
                    "terminalModel", "paramsModel"),                          \
           "Initialize a multi-phase observation problem."))                  \
-      .def(bp::init<                                                         \
-           VectorXs, std::vector<VectorXs>,                                  \
-           std::vector<std::vector<ObserverModelPtr> >, ObserverModelPtr,     \
-           std::vector<ParameterManagerPtr>,                                 \
-           std::vector<std::shared_ptr<ConstraintManager> > >(               \
-          bp::args("self", "x0", "tauMeas", "modelPhases",                 \
-                   "terminalModel", "paramsModel",                          \
-                   "paramsConstraints"),                                    \
-          "Initialize a constrained multi-phase observation problem."))      \
       .def("calc", &Problem::calc, bp::args("self", "xs", "us"),            \
            "Compute the total observation cost along a trajectory.")         \
       .def("calcDiff", &Problem::calcDiff, bp::args("self", "xs", "us"),    \
@@ -117,31 +105,6 @@ getObservationRunningPhaseDatas(const Problem& problem) {
           "running observer data grouped by parameter phase")               \
       .add_property("n_phases", bp::make_function(&Problem::get_n_phases),   \
                     "number of phases")                                      \
-      .add_property(                                                          \
-          "paramsModel",                                                      \
-          bp::make_function(&Problem::get_paramsModel,                        \
-                            bp::return_value_policy<bp::return_by_value>()),  \
-          "parameter models, one per phase")                                 \
-      .add_property(                                                          \
-          "paramsData",                                                       \
-          bp::make_function(&Problem::get_paramsData,                         \
-                            bp::return_value_policy<bp::return_by_value>()),  \
-          "parameter data, one per phase")                                   \
-      .add_property(                                                          \
-          "paramsConstraints",                                               \
-          bp::make_function(                                                  \
-              &Problem::get_paramsConstraintModel,                            \
-              bp::return_value_policy<bp::return_by_value>()),                \
-          "parameter constraints, one per phase")                            \
-      .add_property(                                                          \
-          "paramsConstraintsData",                                           \
-          bp::make_function(                                                  \
-              &Problem::get_paramsConstraintData,                             \
-              bp::return_value_policy<bp::return_by_value>()),                \
-          "parameter constraint data, one per phase")                        \
-      .add_property("hasParamsConstraints",                                  \
-                    bp::make_function(&Problem::has_parameter_constraints),   \
-                    "whether any parameter constraint is active")            \
       .add_property(                                                          \
           "phase_idxs",                                                       \
           bp::make_function(                                                  \

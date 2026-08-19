@@ -84,6 +84,10 @@ class SolverAbstractTpl : public SolverBase {
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef ParameterPhaseDataTpl<Scalar> ParameterPhaseData;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;

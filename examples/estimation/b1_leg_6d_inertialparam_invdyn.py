@@ -146,7 +146,11 @@ for data in oc.solver.problem.runningDatas:
     measured_taus.append(np.array(data.dynamics.multibody.joint.tau, copy=True))
 
 problem = crocoddyl.ObservationProblem(
-    oc.solver.xs[0], measured_taus, runningModels, terminalModel, params
+    oc.solver.xs[0],
+    measured_taus,
+    runningModels,
+    terminalModel,
+    crocoddyl.ParameterPhaseModel(params),
 )
 problem.update_p(initial_p, phase_idx=0)
 

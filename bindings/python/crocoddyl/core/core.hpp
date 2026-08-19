@@ -62,6 +62,7 @@ void exposeCostSum();
 void exposeCostResidual();
 void exposeConstraintAbstract();
 void exposeConstraintManager();
+void exposeParameterPhase();
 void exposeConstraintResidual();
 void exposeResidualNumDiff();
 void exposeActuationNumDiff();

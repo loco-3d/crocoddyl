@@ -229,7 +229,11 @@ terminalModel, _ = codegen_observer_model(
 )
 
 problem = crocoddyl.ObservationProblem(
-    oc.solver.xs[0], list(oc.solver.us)[:T], runningModels, terminalModel, params
+    oc.solver.xs[0],
+    list(oc.solver.us)[:T],
+    runningModels,
+    terminalModel,
+    crocoddyl.ParameterPhaseModel(params),
 )
 problem.update_p(initial_p, phase_idx=0)
 for t, data in enumerate(problem.runningDatas):

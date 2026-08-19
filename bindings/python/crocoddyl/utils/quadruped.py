@@ -140,7 +140,7 @@ class SimpleQuadrupedalGaitProblem:
                 phase_times.append(phase[0].integrator_time)
         if len(phase_times) != self._nphases:
             raise ValueError("phase_times should contain one IntegratorTime per phase")
-        params = []
+        params_models = []
         for i, phase in enumerate(phases):
             if not phase:
                 raise ValueError(f"time-opt phase {i} has no running models")
@@ -149,8 +149,8 @@ class SimpleQuadrupedalGaitProblem:
                 "timeopt",
                 crocoddyl.IntegratorTimeoptParams(self.state, phase_times[i]),
             )
-            params.append(params_i)
-        return crocoddyl.ShootingProblem(x0, phases, models[-1], params)
+            params_models.append(crocoddyl.ParameterPhaseModel(params_i))
+        return crocoddyl.ShootingProblem(x0, phases, models[-1], params_models)
 
     def _createTerminalFootConstraints(self, models):
         terminal_model = models[-1]

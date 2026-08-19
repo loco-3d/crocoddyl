@@ -23,9 +23,9 @@ namespace crocoddyl {
  *
  * `ProblemAbstractTpl` defines the common interface used by solvers to
  * evaluate and roll out a trajectory, inspect the problem structure and
- * model/data objects, and track structural updates. Standard shooting
- * problems use the default empty phase and parameter-constraint interface;
- * parameterized problems override those hooks and `update_p()`.
+ * model/data objects, and track structural updates. Problems without
+ * parameterized phases use the default empty phase interface; parameterized
+ * problems override those hooks and `update_p()`.
  */
 template <typename _Scalar>
 class ProblemAbstractTpl {
@@ -35,8 +35,8 @@ class ProblemAbstractTpl {
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
-  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
-  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef ParameterPhaseDataTpl<Scalar> ParameterPhaseData;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
 
@@ -152,17 +152,17 @@ class ProblemAbstractTpl {
     return empty;
   }
 
-  /** @brief Return the phase-level parameter-constraint models */
-  virtual const std::vector<std::shared_ptr<ConstraintModelManager> >&
-  get_paramsConstraintModel() const {
-    static const std::vector<std::shared_ptr<ConstraintModelManager> > empty;
+  /** @brief Return the phase-level parameter models */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseModel> >&
+  get_paramsModel() const {
+    static const std::vector<std::shared_ptr<ParameterPhaseModel> > empty;
     return empty;
   }
 
-  /** @brief Return the phase-level parameter-constraint data */
-  virtual const std::vector<std::shared_ptr<ConstraintDataManager> >&
-  get_paramsConstraintData() const {
-    static const std::vector<std::shared_ptr<ConstraintDataManager> > empty;
+  /** @brief Return the phase-level parameter data */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseData> >&
+  get_paramsData() const {
+    static const std::vector<std::shared_ptr<ParameterPhaseData> > empty;
     return empty;
   }
 

@@ -105,13 +105,14 @@ class ParameterizedProblemsTest(unittest.TestCase):
         params1.addParam("lqr", module.LQRParams(phase1.state, 2))
         constraints0 = make_parameter_constraints(module, dtype, phase0_a.state, 2, 1)
         constraints1 = make_parameter_constraints(module, dtype, phase1.state, 1, 2)
+        phase_params0 = module.ParameterPhaseModel(params0, constraints0)
+        phase_params1 = module.ParameterPhaseModel(params1, constraints1)
         x0 = np.linspace(-0.3, 0.3, 4, dtype=dtype)
         problem = module.ShootingProblem(
             x0=x0,
             modelPhases=[[phase0_a, phase0_b], [phase1]],
             terminalModel=terminal,
-            paramsModel=[params0, params1],
-            paramsConstraints=[constraints0, constraints1],
+            paramsModel=[phase_params0, phase_params1],
         )
 
         self.assertIsInstance(problem, module.ShootingProblem)
@@ -128,15 +129,15 @@ class ParameterizedProblemsTest(unittest.TestCase):
         self.assertEqual(problem.runningDatas[0].cost, 1.0)
         self.assertEqual(problem.runningDatas[2].cost, 2.0)
         self.assertTrue(problem.hasParamsConstraints)
-        self.assertIs(problem.paramsModel[0], params0)
-        self.assertIs(problem.paramsModel[1], params1)
+        self.assertIs(problem.paramsModel[0], phase_params0)
+        self.assertIs(problem.paramsModel[1], phase_params1)
 
         p0 = np.array([0.25], dtype=dtype)
         p1 = np.array([-0.2, 0.4], dtype=dtype)
         problem.update_p(p0, 0)
         problem.update_p(p1, 1)
-        self.assertTrue(np.array_equal(problem.paramsData[0].params.p, p0))
-        self.assertTrue(np.array_equal(problem.paramsData[1].params.p, p1))
+        self.assertTrue(np.array_equal(problem.paramsData[0].params.params.p, p0))
+        self.assertTrue(np.array_equal(problem.paramsData[1].params.params.p, p1))
         us = [
             np.full(2, 0.1, dtype=dtype),
             np.full(2, -0.2, dtype=dtype),
@@ -150,13 +151,13 @@ class ParameterizedProblemsTest(unittest.TestCase):
         self.assertEqual(problem.runningDatas[2].Fp.size, 8)
         self.assertEqual(problem.terminalData.Fp.size, 8)
 
-        constraints1.calc(problem.paramsConstraintsData[1], xs[2], us[2])
-        constraints1.calcDiff(problem.paramsConstraintsData[1], xs[2], us[2])
+        phase_params1.calc(problem.paramsData[1], xs[2], us[2])
+        phase_params1.calcDiff(problem.paramsData[1], xs[2], us[2])
         self.assertTrue(
-            np.allclose(problem.paramsConstraintsData[1].h[: len(us[2])], us[2])
+            np.allclose(problem.paramsData[1].constraints.h[: len(us[2])], us[2])
         )
         self.assertTrue(
-            np.allclose(problem.paramsConstraintsData[1].h[len(us[2]) :], p1)
+            np.allclose(problem.paramsData[1].constraints.h[len(us[2]) :], p1)
         )
 
         original_models = list(problem.runningModels)
@@ -166,9 +167,8 @@ class ParameterizedProblemsTest(unittest.TestCase):
         original_phase_idxs = list(problem.phase_idxs)
         original_phase_edxs = list(problem.phase_edxs)
         original_params = list(problem.paramsModel)
-        original_params_data = [data.params for data in problem.paramsData]
-        original_constraints = list(problem.paramsConstraints)
-        original_constraints_data = list(problem.paramsConstraintsData)
+        original_params_data = [data.params.params for data in problem.paramsData]
+        original_constraints_data = [data.constraints for data in problem.paramsData]
 
         def check_structural_identity():
             for current, original in zip(problem.runningModels, original_models):
@@ -178,10 +178,6 @@ class ParameterizedProblemsTest(unittest.TestCase):
             self.assertEqual(list(problem.phase_edxs), original_phase_edxs)
             for current, original in zip(problem.paramsModel, original_params):
                 self.assertIs(current, original)
-            for current, original in zip(
-                problem.paramsConstraints, original_constraints
-            ):
-                self.assertIs(current, original)
             for i, original in enumerate(original_datas):
                 original.cost = float(i + 1)
                 self.assertEqual(problem.runningDatas[i].cost, float(i + 1))
@@ -190,7 +186,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
             for i, original in enumerate(original_constraints_data):
                 original.h = np.full(original.h.shape, dtype(i + 2), dtype=dtype)
                 self.assertTrue(
-                    np.array_equal(problem.paramsConstraintsData[i].h, original.h)
+                    np.array_equal(problem.paramsData[i].constraints.h, original.h)
                 )
             problem.update_p(p0, 0)
             problem.update_p(p1, 1)
@@ -247,7 +243,9 @@ class ParameterizedProblemsTest(unittest.TestCase):
         shallow.runningDatas[0].cost = 7.0
         self.assertEqual(problem.runningDatas[0].cost, 7.0)
         deep.update_p(p1 / dtype(2), 1)
-        self.assertTrue(np.array_equal(problem.paramsData[1].params.p, p1 / dtype(2)))
+        self.assertTrue(
+            np.array_equal(problem.paramsData[1].params.params.p, p1 / dtype(2))
+        )
         problem.update_p(p1, 1)
         self.assertEqual(shallow.calc(xs, us), cost)
 
@@ -258,18 +256,20 @@ class ParameterizedProblemsTest(unittest.TestCase):
         with self.assertRaises(crocoddyl.Exception):
             problem.calc(xs.tolist()[:-1], us)
         with self.assertRaises(crocoddyl.Exception):
-            module.ShootingProblem(x0, [], terminal, params0)
+            module.ShootingProblem(x0, [], terminal, phase_params0)
         with self.assertRaises(crocoddyl.Exception):
-            module.ShootingProblem(x0, [phase0_a], None, params0)
+            module.ShootingProblem(x0, [phase0_a], None, phase_params0)
         with self.assertRaises(crocoddyl.Exception):
-            module.ShootingProblem(x0, [phase1], phase1, params0)
+            module.ShootingProblem(x0, [phase1], phase1, phase_params0)
         with self.assertRaises(crocoddyl.Exception):
             module.ShootingProblem(
                 x0,
                 [phase0_a],
                 phase0_a,
-                params0,
-                make_parameter_constraints(module, dtype, phase0_a.state, 1, 1),
+                module.ParameterPhaseModel(
+                    params0,
+                    make_parameter_constraints(module, dtype, phase0_a.state, 1, 1),
+                ),
             )
 
         params0.addParam("inactive", module.LQRParams(phase0_a.state, 1), False)
@@ -321,19 +321,45 @@ class ParameterizedProblemsTest(unittest.TestCase):
         )
         constraints0 = make_parameter_constraints(module, dtype, state, state.ndx, 1)
         constraints1 = make_parameter_constraints(module, dtype, state, state.ndx, 2)
+        phase_params0 = module.ParameterPhaseModel(params0, constraints0)
+        phase_params1 = module.ParameterPhaseModel(params1, constraints1)
         tau = [
             np.array([0.1], dtype=dtype),
             np.array([0.2], dtype=dtype),
             np.array([0.3], dtype=dtype),
         ]
         x0 = np.linspace(-0.2, 0.2, 4, dtype=dtype)
+
+        localization, _ = make_observer(module, dtype, state, 0, None)
+        localization_terminal, _ = make_observer(module, dtype, state, 0, None)
+        localization_problem = module.ObservationProblem(
+            x0=x0,
+            tauMeas=[np.array([0.4], dtype=dtype)],
+            runningModels=[localization],
+            terminalModel=localization_terminal,
+        )
+        self.assertEqual(localization_problem.n_phases, 0)
+        self.assertEqual(len(localization_problem.paramsModel), 0)
+        self.assertEqual(len(localization_problem.paramsData), 0)
+        self.assertEqual(len(localization_problem.phase_idxs), 0)
+        self.assertEqual(len(localization_problem.phase_edxs), 0)
+        self.assertFalse(localization_problem.hasParamsConstraints)
+        localization_ws = [np.linspace(-0.1, 0.2, 4, dtype=dtype)]
+        localization_xs = localization_problem.rollout(localization_ws)
+        localization_cost = localization_problem.calc(localization_xs, localization_ws)
+        self.assertEqual(
+            localization_problem.calcDiff(localization_xs, localization_ws),
+            localization_cost,
+        )
+        with self.assertRaises(crocoddyl.Exception):
+            localization_problem.update_p(np.empty(0, dtype=dtype))
+
         problem = module.ObservationProblem(
             x0=x0,
             tauMeas=tau,
             modelPhases=[[observer0a, observer0b], [observer1]],
             terminalModel=terminal,
-            paramsModel=[params0, params1],
-            paramsConstraints=[constraints0, constraints1],
+            paramsModel=[phase_params0, phase_params1],
         )
 
         self.assertIsInstance(problem, module.ProblemAbstract)
@@ -372,8 +398,8 @@ class ParameterizedProblemsTest(unittest.TestCase):
             (item0.update_calls, item1.update_calls),
             (item0_updates + 1, item1_updates + 1),
         )
-        self.assertTrue(np.array_equal(problem.paramsData[0].params.p, p0))
-        self.assertTrue(np.array_equal(problem.paramsData[1].params.p, p1))
+        self.assertTrue(np.array_equal(problem.paramsData[0].params.params.p, p0))
+        self.assertTrue(np.array_equal(problem.paramsData[1].params.params.p, p1))
         ws = [
             np.linspace(0.1, 0.4, 4, dtype=dtype),
             np.linspace(-0.4, -0.1, 4, dtype=dtype),
@@ -387,7 +413,7 @@ class ParameterizedProblemsTest(unittest.TestCase):
         self.assertTrue(np.allclose(problem.runningDatas[0].Fu, 0))
         self.assertTrue(np.allclose(problem.runningDatas[0].Fp, 1))
         self.assertTrue(np.allclose(problem.runningDatas[2].Fp[:, 1], 2))
-        phase1_data = problem.paramsConstraintsData[1]
+        phase1_data = problem.paramsData[1].constraints
         self.assertTrue(np.allclose(phase1_data.h[: state.ndx], ws[2]))
         self.assertTrue(np.allclose(phase1_data.h[state.ndx :], p1))
         self.assertTrue(np.array_equal(phase1_data.Hu[: state.ndx], np.eye(4)))
@@ -405,7 +431,9 @@ class ParameterizedProblemsTest(unittest.TestCase):
         shallow.runningDatas[0].cost = 7.0
         self.assertEqual(problem.runningDatas[0].cost, 7.0)
         deep.update_p(p1 / dtype(2), 1)
-        self.assertTrue(np.array_equal(problem.paramsData[1].params.p, p1 / dtype(2)))
+        self.assertTrue(
+            np.array_equal(problem.paramsData[1].params.params.p, p1 / dtype(2))
+        )
         problem.update_p(p1, 1)
         self.assertEqual(shallow.calc(xs, ws), problem.calc(xs, ws))
 
@@ -418,11 +446,13 @@ class ParameterizedProblemsTest(unittest.TestCase):
         with self.assertRaises(crocoddyl.Exception):
             problem.calc(xs.tolist()[:-1], ws)
         with self.assertRaises(crocoddyl.Exception):
-            module.ObservationProblem(x0, [], [observer0a], terminal, params0)
+            module.ObservationProblem(x0, [], [observer0a], terminal, phase_params0)
         with self.assertRaises(crocoddyl.Exception):
-            module.ObservationProblem(x0, tau[:1], [None], terminal, params0)
+            module.ObservationProblem(x0, tau[:1], [None], terminal, phase_params0)
         with self.assertRaises(crocoddyl.Exception):
-            module.ObservationProblem(x0, tau[:1], [observer1], observer1, params0)
+            module.ObservationProblem(
+                x0, tau[:1], [observer1], observer1, phase_params0
+            )
 
     def test_float64(self):
         self.check_parametrized_shooting(crocoddyl, np.float64)
@@ -446,8 +476,9 @@ for module, dtype in ((crocoddyl, np.float64), (crocoddyl_float32, np.float32)):
     model = module.ActionModelLQR(4, 2, 1, 0, 0)
     params = module.ParameterManager(model.state)
     params.addParam("lqr", module.LQRParams(model.state, 1))
+    phase_params = module.ParameterPhaseModel(params)
     problem = module.ShootingProblem(
-        np.zeros(4, dtype=dtype), [model], model, params
+        np.zeros(4, dtype=dtype), [model], model, phase_params
     )
     pdata = problem.paramsData[0]
     rdata = problem.runningDatas[0]
@@ -461,7 +492,7 @@ for module, dtype in ((crocoddyl, np.float64), (crocoddyl_float32, np.float32)):
     retained_model.calc(
         rdata, np.zeros(4, dtype=dtype), np.zeros(2, dtype=dtype)
     )
-    assert np.array_equal(pdata.params.p, np.array([0.3], dtype=dtype))
+    assert np.array_equal(pdata.params.params.p, np.array([0.3], dtype=dtype))
 """
         environment = os.environ.copy()
         result = subprocess.run(

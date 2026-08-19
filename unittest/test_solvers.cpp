@@ -506,7 +506,9 @@ void test_fddp_single_shoot_arrival_state_forward_pass() {
   const std::shared_ptr<crocoddyl::StateAbstract>& state = model->get_state();
   const Eigen::VectorXd x0 = sampleSolverState(state);
   const std::shared_ptr<ShootingProblem> problem =
-      std::make_shared<ShootingProblem>(x0, running_models, modelT, params);
+      std::make_shared<ShootingProblem>(
+          x0, running_models, modelT,
+          std::make_shared<crocoddyl::ParameterPhaseModel>(params));
   problem->set_nthreads(1);
   SolverFDDPArrivalStateProbe solver(
       problem, crocoddyl::DynamicsSolverType::SingleShoot,
@@ -668,8 +670,9 @@ void test_fddp_parametrized_arrival_state_no_malloc() {
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
   const std::shared_ptr<ShootingProblem> problem =
-      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
-                                        params);
+      std::make_shared<ShootingProblem>(
+          x0, running_models, terminal_model,
+          std::make_shared<crocoddyl::ParameterPhaseModel>(params));
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;
@@ -722,8 +725,9 @@ void test_fddp_astate_qp_skips_initial_state_marginalization() {
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
   const std::shared_ptr<ShootingProblem> problem =
-      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
-                                        params);
+      std::make_shared<ShootingProblem>(
+          x0, running_models, terminal_model,
+          std::make_shared<crocoddyl::ParameterPhaseModel>(params));
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;
@@ -800,8 +804,9 @@ void test_intro_parametrized_equality_no_malloc() {
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
   const std::shared_ptr<ShootingProblem> problem =
-      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
-                                        params);
+      std::make_shared<ShootingProblem>(
+          x0, running_models, terminal_model,
+          std::make_shared<crocoddyl::ParameterPhaseModel>(params));
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;
