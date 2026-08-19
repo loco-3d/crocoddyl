@@ -64,7 +64,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
               const Scalar)>(&Model::solve),
           (bp::arg("self"), bp::arg("init_xs") = bp::list(),
            bp::arg("init_us") = bp::list(),
-           bp::arg("init_p") = bp::list(), bp::arg("maxiter") = 100,
+           bp::arg("init_ps") = bp::list(), bp::arg("maxiter") = 100,
            bp::arg("is_feasible") = false,
            bp::arg("init_reg") = std::numeric_limits<Scalar>::quiet_NaN()),
               "Solve the optimal estimation/control problem.\n\n"
@@ -74,7 +74,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
               "elements (default [])\n"
               ":param init_us: initial guess for control trajectory with T "
               "elements (default []).\n"
-              ":param init_p: initial parameter vectors, one per phase "
+              ":param init_ps: initial parameter vectors, one per phase "
               "(default []).\n"
               ":param maxiter: maximum allowed number of iterations (default "
               "100).\n"
@@ -475,21 +475,21 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             bp::make_function(&Model::set_astate_solver),
             "Type of arrival-state solver used for parameter estimation.")
         .add_property(
-            "p",
+            "ps",
             make_function(
-                &Model::get_p,
+                &Model::get_ps,
                 bp::return_value_policy<bp::reference_existing_object>()),
             "Accepted parameter vectors, one per phase.")
         .add_property(
-            "p_try",
+            "ps_try",
             make_function(
-                &Model::get_p_try,
+                &Model::get_ps_try,
                 bp::return_value_policy<bp::reference_existing_object>()),
             "Candidate parameter vectors, one per phase.")
         .add_property(
-            "dp",
+            "dps",
             make_function(
-                &Model::get_dp,
+                &Model::get_dps,
                 bp::return_value_policy<bp::reference_existing_object>()),
             "Parameter increments (step direction), one per phase.")
         .add_property(
@@ -503,7 +503,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             make_function(
                 &Model::get_Kp,
                 bp::return_value_policy<bp::reference_existing_object>()),
-            "Parameter feedback gains (dp / dx0), one per phase.")
+            "Parameter feedback gains (dps / dx0), one per phase.")
         .add_property(
             "Vp",
             make_function(
@@ -521,7 +521,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             make_function(
                 &Model::get_Vpx,
                 bp::return_value_policy<bp::reference_existing_object>()),
-            "Value-function cross Hessian d2V / dp dx (per node).")
+            "Value-function cross Hessian d2V / dps dx (per node).")
         .add_property(
             "Vp_phase",
             make_function(
@@ -539,7 +539,7 @@ struct SolverFDDPVisitor : public bp::def_visitor<SolverFDDPVisitor<Model>> {
             make_function(
                 &Model::get_Vpx_phase,
                 bp::return_value_policy<bp::reference_existing_object>()),
-            "Phase-level value-function cross Hessian d2V / dp dx.")
+            "Phase-level value-function cross Hessian d2V / dps dx.")
         .add_property(
             "Qp",
             make_function(

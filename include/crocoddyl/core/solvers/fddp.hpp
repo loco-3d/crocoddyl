@@ -150,7 +150,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    *
    * @param[in] init_xs      Initial state trajectory (size T+1)
    * @param[in] init_us      Initial control trajectory (size T)
-   * @param[in] init_p       Initial parameter vectors, one per phase (size
+   * @param[in] init_ps       Initial parameter vectors, one per phase (size
    * n_phases)
    * @param[in] maxiter      Maximum number of iterations
    * @param[in] is_feasible  True if the initial guess is dynamically feasible
@@ -158,7 +158,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
    */
   virtual bool solve(const std::vector<VectorXs>& init_xs,
                      const std::vector<VectorXs>& init_us,
-                     const std::vector<VectorXs>& init_p,
+                     const std::vector<VectorXs>& init_ps,
                      const std::size_t maxiter = 100,
                      const bool is_feasible = false,
                      const Scalar reg_init =
@@ -167,7 +167,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   /**
    * @copybrief SolverAbstract::calcDir
    *
-   * For parameter-estimation problems, restores the accepted parameters p_
+   * For parameter-estimation problems, restores the accepted parameters ps_
    * into the problem models when a step was rejected, so that calcDiff sees
    * the correct parameter values.
    */
@@ -181,7 +181,7 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   /**
    * @copybrief SolverAbstract::computeCandidate
    *
-   * For parameter-estimation problems this also updates p_try and calls
+   * For parameter-estimation problems this also updates ps_try and calls
    * problem->update_p() before running the forward pass.
    */
   virtual void computeCandidate(const Scalar step_length = Scalar(1.)) override;
@@ -419,11 +419,11 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
       const std::size_t t, const std::shared_ptr<ActionModelAbstract>& model);
 
   /**
-   * @brief Solve for the optimal parameter direction dp
+   * @brief Solve for the optimal parameter direction dps
    *
    * Factorises `Vpp_phase_` (Cholesky for Schur/None, LU or QR nullspace
-   * for LuNull/QrNull) and computes `kp_`, `Kp_`, `dp_`.  Updates `k_` with
-   * the P*dp contribution.
+   * for LuNull/QrNull) and computes `kp_`, `Kp_`, `dps_`.  Updates `k_` with
+   * the P*dps contribution.
    */
   virtual void paramsPass();
 
@@ -441,13 +441,13 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   ArrivalStateSolverType get_astate_solver() const;
 
   /** Return the current parameter vectors (one per phase) */
-  const std::vector<VectorXs>& get_p() const;
+  const std::vector<VectorXs>& get_ps() const;
 
   /** Return the candidate parameter vectors (one per phase) */
-  const std::vector<VectorXs>& get_p_try() const;
+  const std::vector<VectorXs>& get_ps_try() const;
 
   /** Return the parameter search directions (one per phase) */
-  const std::vector<VectorXs>& get_dp() const;
+  const std::vector<VectorXs>& get_dps() const;
 
   /** Return the parameter feedforward gains (one per phase) */
   const std::vector<VectorXs>& get_kp() const;
@@ -996,11 +996,11 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   ArrivalStateSolverType astate_solver_;  //!< Arrival-state solver type
 
   // Per-phase quantities (size n_phases_)
-  std::size_t n_phases_;         //!< Number of parameter phases (0 = no params)
-  std::vector<VectorXs> p_;      //!< Current parameter vector per phase
-  std::vector<VectorXs> p_try_;  //!< Candidate parameter vector per phase
-  std::vector<VectorXs> dp_;     //!< Parameter search direction per phase
-  std::vector<VectorXs> kp_;     //!< Parameter feedforward gain per phase
+  std::size_t n_phases_;      //!< Number of parameter phases (0 = no params)
+  std::vector<VectorXs> ps_;  //!< Current parameter vector per phase
+  std::vector<VectorXs> ps_try_;  //!< Candidate parameter vector per phase
+  std::vector<VectorXs> dps_;     //!< Parameter search direction per phase
+  std::vector<VectorXs> kp_;      //!< Parameter feedforward gain per phase
   std::vector<MatrixXs> Kp_;  //!< Parameter feedback gain (np x ndx) per phase
   std::vector<VectorXs> Vp_phase_;     //!< Phase-start Vp per phase
   std::vector<MatrixXs> Vpp_phase_;    //!< Phase-start Vpp (np x np) per phase
@@ -1055,12 +1055,12 @@ class SolverFDDPTpl : public SolverAbstractTpl<_Scalar> {
   std::vector<MatrixXs> Qpx_;    //!< Hamiltonian mixed Hessian (np x ndx)
   std::vector<MatrixXs> Qpu_;    //!< Hamiltonian mixed Hessian (np x nu)
   std::vector<MatrixXs> P_;      //!< Parameter feedback gain (nu x np)
-  std::vector<VectorXs> P_dp_;   //!< P * dp used to update k (nu)
+  std::vector<VectorXs> P_dp_;   //!< P * dps used to update k (nu)
 
   // For expectedImprovement parameter contribution (size T+1 and T)
-  std::vector<VectorXs> Lpp_dp_;  //!< Lpp * dp  (np)
-  std::vector<VectorXs> Lpx_dp_;  //!< dp^T Lpx  (ndx)
-  std::vector<VectorXs> Lpu_dp_;  //!< dp^T Lpu  (nu)
+  std::vector<VectorXs> Lpp_dp_;  //!< Lpp * dps  (np)
+  std::vector<VectorXs> Lpx_dp_;  //!< dps^T Lpx  (ndx)
+  std::vector<VectorXs> Lpu_dp_;  //!< dps^T Lpu  (nu)
 
   // Arrival-state initial-state correction (Schur/LuNull/QrNull only)
   MatrixXs Vxx0_;  //!< Modified Vxx[0] after marginalising params

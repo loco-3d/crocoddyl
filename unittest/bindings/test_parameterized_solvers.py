@@ -108,19 +108,19 @@ class ParameterizedSolversTest(unittest.TestCase):
         cast_dtype = (
             crocoddyl.DType.Float32 if module is crocoddyl else crocoddyl.DType.Float64
         )
-        init_p = [
+        init_ps = [
             np.array([0.2], dtype=dtype),
             np.array([-0.3, 0.4], dtype=dtype),
         ]
         for solver_type in (module.SolverFDDP, module.SolverIntro):
             solver = solver_type(problem)
-            self.assertFalse(solver.solve(xs, us, init_p, 0, True))
-            for actual, expected in zip(solver.p, init_p):
+            self.assertFalse(solver.solve(xs, us, init_ps, 0, True))
+            for actual, expected in zip(solver.ps, init_ps):
                 self.assertTrue(np.array_equal(actual, expected))
-            for actual, expected in zip(solver.p_try, init_p):
+            for actual, expected in zip(solver.ps_try, init_ps):
                 self.assertTrue(np.array_equal(actual, expected))
             solver.computeDirection(True)
-            self.assertEqual([value.shape for value in solver.p], [(1,), (2,)])
+            self.assertEqual([value.shape for value in solver.ps], [(1,), (2,)])
             self.assertEqual(
                 [value.shape for value in solver.Vp],
                 [(1,), (1,), (2,), (2,), (2,)],
@@ -134,7 +134,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             self.assertEqual([value.size for value in solver.Qpu], [2, 2, 2, 2])
             self.assertEqual([value.size for value in solver.P], [2, 2, 2, 2])
             for collection in (
-                solver.dp,
+                solver.dps,
                 solver.kp,
                 solver.Kp,
                 solver.Vp,
@@ -148,28 +148,30 @@ class ParameterizedSolversTest(unittest.TestCase):
             ):
                 self.assertTrue(all(np.all(np.isfinite(value)) for value in collection))
             steplength = dtype(0.25)
-            expected_p_try = [p + steplength * dp for p, dp in zip(solver.p, solver.dp)]
+            expected_ps_try = [
+                ps + steplength * dps for ps, dps in zip(solver.ps, solver.dps)
+            ]
             solver.computeCandidate(float(steplength))
-            self.assertEqual([value.shape for value in solver.p_try], [(1,), (2,)])
-            for actual, expected in zip(solver.p_try, expected_p_try):
+            self.assertEqual([value.shape for value in solver.ps_try], [(1,), (2,)])
+            for actual, expected in zip(solver.ps_try, expected_ps_try):
                 self.assertTrue(np.allclose(actual, expected))
             problem_before = solver.problem
-            p_before = [value.copy() for value in solver.p]
-            manager_p_before = [
+            ps_before = [value.copy() for value in solver.ps]
+            manager_ps_before = [
                 data.params.params.p.copy() for data in problem.paramsData
             ]
             with self.assertRaisesRegex(Exception, "cannot be cast"):
                 solver.cast(cast_dtype)
             self.assertIs(solver.problem, problem_before)
             self.assertIs(solver.problem, problem)
-            for actual, expected in zip(solver.p, p_before):
+            for actual, expected in zip(solver.ps, ps_before):
                 self.assertTrue(np.array_equal(actual, expected))
-            for data, expected in zip(problem.paramsData, manager_p_before):
+            for data, expected in zip(problem.paramsData, manager_ps_before):
                 self.assertTrue(np.array_equal(data.params.params.p, expected))
 
             with self.assertRaises(crocoddyl.Exception):
-                solver.solve(xs, us, init_p[:1], 0, True)
-            wrong = [init_p[0], init_p[1][:1]]
+                solver.solve(xs, us, init_ps[:1], 0, True)
+            wrong = [init_ps[0], init_ps[1][:1]]
             with self.assertRaises(crocoddyl.Exception):
                 solver.solve(xs, us, wrong, 0, True)
 
@@ -184,12 +186,12 @@ class ParameterizedSolversTest(unittest.TestCase):
 
             callback = Callback()
             solver.setCallbacks([callback])
-            solver.solve(xs, us, init_p, 1, True, 1e-6)
+            solver.solve(xs, us, init_ps, 1, True, 1e-6)
             self.assertGreaterEqual(callback.calls, 1)
             self.assertIsInstance(callback.assert_solver, solver_type)
             self.assertEqual(callback.assert_solver.problem.T, problem.T)
             self.assertEqual(
-                [value.shape for value in callback.assert_solver.p], [(1,), (2,)]
+                [value.shape for value in callback.assert_solver.ps], [(1,), (2,)]
             )
 
         for eq_solver in (
@@ -200,7 +202,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             solver = module.SolverIntro(
                 problem, crocoddyl.DynamicsSolverType.FeasShoot, eq_solver
             )
-            solver.solve(xs, us, init_p, 0, True)
+            solver.solve(xs, us, init_ps, 0, True)
             solver.computeDirection(True)
             for model, data, gain in zip(
                 problem.runningModels, problem.runningDatas, solver.P
@@ -264,7 +266,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             solver = solver_type(problem)
             self.assertTrue(solver.solve(xs, us, [initial], 10, True))
             self.assertGreater(solver.iter, 0)
-            self.assertTrue(np.allclose(solver.p[0], optimum, atol=tol, rtol=tol))
+            self.assertTrue(np.allclose(solver.ps[0], optimum, atol=tol, rtol=tol))
             self.assertTrue(
                 np.allclose(
                     problem.paramsData[0].params.params.p,
@@ -296,7 +298,7 @@ class ParameterizedSolversTest(unittest.TestCase):
         self.assertIsNotNone(problem.paramsModel[1].constraints)
         self.assertIsNotNone(problem.paramsData[1].constraints)
 
-        accepted = [value.copy() for value in solver.p]
+        accepted = [value.copy() for value in solver.ps]
         candidate0 = accepted[0] + dtype(0.25)
         candidate1 = accepted[1] + dtype(0.35)
         problem.update_p(candidate0, 0)
@@ -339,11 +341,11 @@ class ParameterizedSolversTest(unittest.TestCase):
         ]
         xs = problem.rollout(process_noise)
         solver = module.SolverFDDP(problem)
-        init_p = [np.array([0.35], dtype=dtype)]
-        solver.solve(xs, process_noise, init_p, 0, True)
+        init_ps = [np.array([0.35], dtype=dtype)]
+        solver.solve(xs, process_noise, init_ps, 0, True)
         solver.computeDirection(True)
-        self.assertEqual(solver.p[0].shape, (1,))
-        self.assertTrue(np.all(np.isfinite(solver.dp[0])))
+        self.assertEqual(solver.ps[0].shape, (1,))
+        self.assertTrue(np.all(np.isfinite(solver.dps[0])))
 
     def test_float64(self):
         self.check_parameterized_solvers(crocoddyl, np.float64)

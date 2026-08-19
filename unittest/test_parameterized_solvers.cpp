@@ -232,12 +232,12 @@ void check_quadratic_parameter_solver() {
   const Scalar tol =
       std::is_same<Scalar, float>::value ? Scalar(2e-4) : Scalar(1e-9);
   QuadraticParameterFixture<Scalar> fixture;
-  const std::vector<VectorXs> init_p(1, fixture.initial);
+  const std::vector<VectorXs> init_ps(1, fixture.initial);
   const std::shared_ptr<typename Solver::ProblemAbstract> problem =
       fixture.problem;
 
   Solver trial(problem);
-  BOOST_CHECK(!trial.solve(fixture.xs, fixture.us, init_p, 0, true));
+  BOOST_CHECK(!trial.solve(fixture.xs, fixture.us, init_ps, 0, true));
   trial.computeDirection(true);
   trial.expectedImprovement();
   trial.tryStep(Scalar(0.));
@@ -247,10 +247,10 @@ void check_quadratic_parameter_solver() {
   BOOST_CHECK_CLOSE_FRACTION(trial.get_dV(), trial.get_dVexp(), tol);
 
   Solver solver(problem);
-  BOOST_CHECK(solver.solve(fixture.xs, fixture.us, init_p, 10, true));
+  BOOST_CHECK(solver.solve(fixture.xs, fixture.us, init_ps, 10, true));
   BOOST_CHECK_GT(solver.get_iter(), 0);
-  BOOST_REQUIRE_EQUAL(solver.get_p().size(), 1);
-  BOOST_CHECK(solver.get_p()[0].isApprox(fixture.optimum, tol));
+  BOOST_REQUIRE_EQUAL(solver.get_ps().size(), 1);
+  BOOST_CHECK(solver.get_ps()[0].isApprox(fixture.optimum, tol));
   BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
       fixture.optimum, tol));
   const Scalar recomputed_cost =
@@ -280,26 +280,26 @@ void check_parameterized_fddp() {
   ParameterizedSolverFixture<Scalar> fixture;
   Solver solver(fixture.problem, crocoddyl::FeasShoot, crocoddyl::LuNull,
                 crocoddyl::AStateNone);
-  std::vector<VectorXs> init_p(2);
-  init_p[0] = VectorXs::Constant(1, Scalar(-0.4));
-  init_p[1] = VectorXs::Constant(2, Scalar(0.5));
-  BOOST_CHECK(!solver.solve(fixture.xs, fixture.us, init_p, 0, true));
+  std::vector<VectorXs> init_ps(2);
+  init_ps[0] = VectorXs::Constant(1, Scalar(-0.4));
+  init_ps[1] = VectorXs::Constant(2, Scalar(0.5));
+  BOOST_CHECK(!solver.solve(fixture.xs, fixture.us, init_ps, 0, true));
 
-  BOOST_REQUIRE_EQUAL(solver.get_p().size(), 2);
+  BOOST_REQUIRE_EQUAL(solver.get_ps().size(), 2);
   BOOST_CHECK_EQUAL(fixture.params0->get_np(), 1);
   BOOST_CHECK_EQUAL(fixture.params1->get_np(), 2);
   BOOST_CHECK_EQUAL(fixture.params0->get_active_set().count("lqr"), 1);
   BOOST_CHECK_EQUAL(fixture.params0->get_inactive_set().count("inactive"), 1);
   BOOST_CHECK_EQUAL(fixture.params1->get_active_set().count("lqr"), 1);
   BOOST_CHECK_EQUAL(fixture.params1->get_inactive_set().count("inactive"), 1);
-  BOOST_CHECK(solver.get_p()[0].isApprox(init_p[0]));
-  BOOST_CHECK(solver.get_p()[1].isApprox(init_p[1]));
-  BOOST_CHECK(solver.get_p_try()[0].isApprox(solver.get_p()[0]));
-  BOOST_CHECK(solver.get_p_try()[1].isApprox(solver.get_p()[1]));
+  BOOST_CHECK(solver.get_ps()[0].isApprox(init_ps[0]));
+  BOOST_CHECK(solver.get_ps()[1].isApprox(init_ps[1]));
+  BOOST_CHECK(solver.get_ps_try()[0].isApprox(solver.get_ps()[0]));
+  BOOST_CHECK(solver.get_ps_try()[1].isApprox(solver.get_ps()[1]));
   BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
-      solver.get_p()[0]));
+      solver.get_ps()[0]));
   BOOST_CHECK(fixture.problem->get_paramsData()[1]->params->params->p.isApprox(
-      solver.get_p()[1]));
+      solver.get_ps()[1]));
 
   solver.computeDirection(true);
   const bool malloc_was_allowed = Eigen::internal::set_is_malloc_allowed(false);
@@ -326,45 +326,45 @@ void check_parameterized_fddp() {
   BOOST_CHECK_EQUAL(solver.get_Qpu()[2].cols(), 1);
   BOOST_CHECK_EQUAL(solver.get_P()[0].cols(), 1);
   BOOST_CHECK_EQUAL(solver.get_P()[2].cols(), 2);
-  for (std::size_t i = 0; i < solver.get_dp().size(); ++i) {
-    BOOST_CHECK(solver.get_dp()[i].allFinite());
+  for (std::size_t i = 0; i < solver.get_dps().size(); ++i) {
+    BOOST_CHECK(solver.get_dps()[i].allFinite());
     BOOST_CHECK(solver.get_Vp_phase()[i].allFinite());
     BOOST_CHECK(solver.get_Vpp_phase()[i].allFinite());
     BOOST_CHECK(solver.get_Vpx_phase()[i].allFinite());
   }
 
   const Scalar steplength = Scalar(0.25);
-  std::vector<VectorXs> expected_p_try(solver.get_p().size());
-  for (std::size_t i = 0; i < solver.get_p().size(); ++i) {
-    expected_p_try[i] = solver.get_p()[i] + steplength * solver.get_dp()[i];
+  std::vector<VectorXs> expected_ps_try(solver.get_ps().size());
+  for (std::size_t i = 0; i < solver.get_ps().size(); ++i) {
+    expected_ps_try[i] = solver.get_ps()[i] + steplength * solver.get_dps()[i];
   }
   solver.computeCandidate(steplength);
-  for (std::size_t i = 0; i < solver.get_p().size(); ++i) {
-    BOOST_CHECK(solver.get_p_try()[i].allFinite());
-    BOOST_CHECK(solver.get_p_try()[i].isApprox(expected_p_try[i]));
+  for (std::size_t i = 0; i < solver.get_ps().size(); ++i) {
+    BOOST_CHECK(solver.get_ps_try()[i].allFinite());
+    BOOST_CHECK(solver.get_ps_try()[i].isApprox(expected_ps_try[i]));
   }
 
   const std::shared_ptr<typename Solver::ProblemAbstract> problem_before =
       solver.get_problem();
-  const std::vector<VectorXs> p_before = solver.get_p();
-  std::vector<VectorXs> manager_p_before(solver.get_p().size());
-  for (std::size_t i = 0; i < manager_p_before.size(); ++i) {
-    manager_p_before[i] =
+  const std::vector<VectorXs> ps_before = solver.get_ps();
+  std::vector<VectorXs> manager_ps_before(solver.get_ps().size());
+  for (std::size_t i = 0; i < manager_ps_before.size(); ++i) {
+    manager_ps_before[i] =
         fixture.problem->get_paramsData()[i]->params->params->p;
   }
   BOOST_CHECK_THROW(solver.template cast<OtherScalar>(), crocoddyl::Exception);
   BOOST_CHECK(solver.get_problem() == problem_before);
   BOOST_CHECK(fixture.problem == problem_before);
-  for (std::size_t i = 0; i < p_before.size(); ++i) {
-    BOOST_CHECK(solver.get_p()[i].isApprox(p_before[i]));
+  for (std::size_t i = 0; i < ps_before.size(); ++i) {
+    BOOST_CHECK(solver.get_ps()[i].isApprox(ps_before[i]));
     BOOST_CHECK(
         fixture.problem->get_paramsData()[i]->params->params->p.isApprox(
-            manager_p_before[i]));
+            manager_ps_before[i]));
   }
   std::vector<VectorXs> wrong_count(1, VectorXs::Zero(1));
   BOOST_CHECK_THROW(solver.solve(fixture.xs, fixture.us, wrong_count, 0, true),
                     crocoddyl::Exception);
-  std::vector<VectorXs> wrong_dimension = init_p;
+  std::vector<VectorXs> wrong_dimension = init_ps;
   wrong_dimension[1].resize(1);
   BOOST_CHECK_THROW(
       solver.solve(fixture.xs, fixture.us, wrong_dimension, 0, true),
@@ -422,8 +422,8 @@ void check_rejected_parameter_restoration() {
   BOOST_CHECK(constraints_data->g.isApprox(accepted, tol));
 
   solver.computeCandidate(Scalar(1.));
-  BOOST_CHECK(!solver.get_p_try()[0].isApprox(accepted, tol));
-  BOOST_CHECK(constraints_data->g.isApprox(solver.get_p_try()[0], tol));
+  BOOST_CHECK(!solver.get_ps_try()[0].isApprox(accepted, tol));
+  BOOST_CHECK(constraints_data->g.isApprox(solver.get_ps_try()[0], tol));
   solver.calcDir();
   BOOST_CHECK(
       problem->get_paramsData()[0]->params->params->p.isApprox(accepted, tol));
@@ -474,7 +474,7 @@ void check_mixed_parameter_constraint_restoration() {
   BOOST_REQUIRE(params_models[1]->get_constraints() != nullptr);
   BOOST_REQUIRE(problem->get_paramsData()[1]->constraints != nullptr);
 
-  const std::vector<VectorXs> accepted = solver.get_p();
+  const std::vector<VectorXs> accepted = solver.get_ps();
   const VectorXs candidate0 = accepted[0] + VectorXs::Constant(1, Scalar(0.25));
   const VectorXs candidate1 = accepted[1] + VectorXs::Constant(2, Scalar(0.35));
   problem->update_p(candidate0, 0);
@@ -511,7 +511,7 @@ void check_line_search_exception_rejects_candidate() {
   solver.computeDirection(true);
   BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->params->p.isApprox(
       fixture.initial));
-  BOOST_CHECK(solver.get_p()[0].isApprox(fixture.initial));
+  BOOST_CHECK(solver.get_ps()[0].isApprox(fixture.initial));
 }
 
 template <typename Scalar>
@@ -520,17 +520,17 @@ void check_parameterized_intro_and_no_malloc() {
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
   ParameterizedSolverFixture<Scalar> fixture;
-  std::vector<VectorXs> init_p(2);
-  init_p[0] = VectorXs::Constant(1, Scalar(0.15));
-  init_p[1].resize(2);
-  init_p[1] << Scalar(-0.2), Scalar(0.3);
+  std::vector<VectorXs> init_ps(2);
+  init_ps[0] = VectorXs::Constant(1, Scalar(0.15));
+  init_ps[1].resize(2);
+  init_ps[1] << Scalar(-0.2), Scalar(0.3);
   const crocoddyl::EqualitySolverType solvers[] = {
       crocoddyl::LuNull, crocoddyl::QrNull, crocoddyl::Schur};
   MatrixXs lu_basis;
   for (const crocoddyl::EqualitySolverType eq_solver : solvers) {
     Solver solver(fixture.problem, crocoddyl::FeasShoot, eq_solver,
                   crocoddyl::LuNull, crocoddyl::AStateNone);
-    solver.solve(fixture.xs, fixture.us, init_p, 0, true);
+    solver.solve(fixture.xs, fixture.us, init_ps, 0, true);
     solver.computeDirection(true);
     const std::vector<
         std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar>>>& datas =
@@ -578,13 +578,13 @@ void check_parameterized_intro_and_no_malloc() {
       Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
       throw;
     }
-    BOOST_CHECK_EQUAL(solver.get_dp()[0].size(), 1);
-    BOOST_CHECK_EQUAL(solver.get_dp()[1].size(), 2);
+    BOOST_CHECK_EQUAL(solver.get_dps()[0].size(), 1);
+    BOOST_CHECK_EQUAL(solver.get_dps()[1].size(), 2);
   }
 
   Solver solver(fixture.problem, crocoddyl::FeasShoot, crocoddyl::Schur,
                 crocoddyl::LuNull, crocoddyl::AStateNone);
-  solver.solve(fixture.xs, fixture.us, init_p, 0, true);
+  solver.solve(fixture.xs, fixture.us, init_ps, 0, true);
   solver.set_equality_solver(crocoddyl::QrNull);
   solver.computeDirection(true);
   for (std::size_t t = 0; t < fixture.problem->get_T(); ++t) {

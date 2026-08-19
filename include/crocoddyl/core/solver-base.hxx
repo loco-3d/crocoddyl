@@ -57,10 +57,10 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                       const std::vector<VectorXs>& init_us,
-                                      const std::vector<VectorXs>& init_p,
+                                      const std::vector<VectorXs>& init_ps,
                                       const std::size_t maxiter, const bool,
                                       const Scalar init_reg) {
-  if (!init_p.empty()) {
+  if (!init_ps.empty()) {
     throw_pretty(
         "SolverAbstract::solve(): parameter optimization is not supported by "
         "this solver.");

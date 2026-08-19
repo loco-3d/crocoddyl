@@ -62,7 +62,7 @@ struct SolverAbstractVisitor
               const std::vector<VectorXs>&, const std::size_t, const bool,
               const Scalar)>(&Model::solve),
           (bp::arg("self"), bp::arg("init_xs") = bp::list(),
-           bp::arg("init_us") = bp::list(), bp::arg("init_p") = bp::list(),
+           bp::arg("init_us") = bp::list(), bp::arg("init_ps") = bp::list(),
            bp::arg("maxiter") = 100, bp::arg("is_feasible") = false,
            bp::arg("reg_init") = std::numeric_limits<Scalar>::quiet_NaN()),
               "Compute the optimal state, control, and parameter "
@@ -71,7 +71,7 @@ struct SolverAbstractVisitor
               "elements (default []).\n"
               ":param init_us: initial guess for control trajectory with T "
               "elements (default []).\n"
-              ":param init_p: initial parameter vectors, one per phase "
+              ":param init_ps: initial parameter vectors, one per phase "
               "(default []).\n"
               ":param maxiter: maximum allowed number of iterations (default "
               "100).\n"

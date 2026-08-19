@@ -149,7 +149,7 @@ class SolverAbstractTpl : public SolverBase {
    * elements
    * @param[in] init_us      initial guess for control trajectory with \f$T\f$
    * elements
-   * @param[in] init_p       initial parameter vectors, one per phase
+   * @param[in] init_ps       initial parameter vectors, one per phase
    * @param[in] maxiter      maximum allowed number of iterations (default 100)
    * @param[in] is_feasible  true if the \p init_xs are obtained from
    * integrating the \p init_us (rollout) (default false)
@@ -158,8 +158,9 @@ class SolverAbstractTpl : public SolverBase {
    */
   virtual bool solve(
       const std::vector<VectorXs>& init_xs,
-      const std::vector<VectorXs>& init_us, const std::vector<VectorXs>& init_p,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
+      const std::vector<VectorXs>& init_us,
+      const std::vector<VectorXs>& init_ps, const std::size_t maxiter = 100,
+      const bool is_feasible = false,
       const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
 
   /**

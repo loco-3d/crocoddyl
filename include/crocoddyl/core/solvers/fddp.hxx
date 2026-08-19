@@ -95,7 +95,7 @@ void SolverFDDPTpl<Scalar>::computeDirection(const bool recalc) {
 template <typename Scalar>
 void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
   START_PROFILER("SolverFDDP::computeCandidate");
-  // For parameter-estimation problems: update p_try and push into models
+  // For parameter-estimation problems: update ps_try and push into models
   if (n_phases_ > 0) {
     acceptstep_ = false;
     const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
@@ -103,8 +103,8 @@ void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
     const std::vector<std::shared_ptr<ParameterPhaseData>>& params_datas =
         problem_->get_paramsData();
     for (std::size_t i = 0; i < n_phases_; ++i) {
-      p_try_[i] = p_[i] + steplength * dp_[i];
-      problem_->update_p(p_try_[i], i);
+      ps_try_[i] = ps_[i] + steplength * dps_[i];
+      problem_->update_p(ps_try_[i], i);
       const std::shared_ptr<ConstraintModelManager>& constraints =
           params_models[i]->get_constraints();
       if (constraints != nullptr) {
@@ -216,9 +216,9 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
           DV_[1] -= dx.dot(Vx_[0]);
           DV_[2] -= dx.dot(Vxx_[0] * dx);
         }
-        DV_[1] -= dp_[nph].dot(Vp_phase_[nph]);
-        DV_[2] -= Scalar(2.) * dp_[nph].dot(Vpx_phase_[nph] * dx);
-        DV_[2] -= dp_[nph].dot(Vpp_phase_[nph] * dp_[nph]);
+        DV_[1] -= dps_[nph].dot(Vp_phase_[nph]);
+        DV_[2] -= Scalar(2.) * dps_[nph].dot(Vpx_phase_[nph] * dx);
+        DV_[2] -= dps_[nph].dot(Vpp_phase_[nph] * dps_[nph]);
       }
     } else {
       const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
@@ -229,13 +229,13 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
         const std::size_t tend = phase_ends[nph];
         for (std::size_t t = tstart; t < tend; ++t) {
           const std::shared_ptr<ActionDataAbstract>& dt = datas[t];
-          Lpp_dp_[t].noalias() = dt->Lpp * dp_[nph];
-          Lpx_dp_[t].noalias() = dt->Lpx.transpose() * dp_[nph];
-          DV_[1] -= dp_[nph].dot(dt->Lp);
-          DV_[2] -= dp_[nph].dot(Lpp_dp_[t]);
+          Lpp_dp_[t].noalias() = dt->Lpp * dps_[nph];
+          Lpx_dp_[t].noalias() = dt->Lpx.transpose() * dps_[nph];
+          DV_[1] -= dps_[nph].dot(dt->Lp);
+          DV_[2] -= dps_[nph].dot(Lpp_dp_[t]);
           DV_[2] -= Scalar(2.) * Lpx_dp_[t].dot(dxs_[t]);
           if (dt->Lu.size() > 0) {
-            Lpu_dp_[t].noalias() = dt->Lpu.transpose() * dp_[nph];
+            Lpu_dp_[t].noalias() = dt->Lpu.transpose() * dps_[nph];
             DV_[2] -= Scalar(2.) * Lpu_dp_[t].dot(dus_[t]);
           }
         }
@@ -244,10 +244,10 @@ SolverFDDPTpl<Scalar>::expectedImprovement() {
       const std::shared_ptr<ActionDataAbstract>& d_T =
           problem_->get_terminalData();
       const std::size_t last = n_phases_ - 1;
-      Lpp_dp_.back().noalias() = d_T->Lpp * dp_[last];
-      Lpx_dp_.back().noalias() = d_T->Lpx.transpose() * dp_[last];
-      DV_[1] -= dp_[last].dot(d_T->Lp);
-      DV_[2] -= dp_[last].dot(Lpp_dp_.back());
+      Lpp_dp_.back().noalias() = d_T->Lpp * dps_[last];
+      Lpx_dp_.back().noalias() = d_T->Lpx.transpose() * dps_[last];
+      DV_[1] -= dps_[last].dot(d_T->Lp);
+      DV_[2] -= dps_[last].dot(Lpp_dp_.back());
       DV_[2] -= Scalar(2.) * Lpx_dp_.back().dot(dxs_.back());
     }
   }
@@ -394,9 +394,9 @@ void SolverFDDPTpl<Scalar>::resizeTerminalData() {
                                    nh_T);
     Vpc_next_.conservativeResize(Vpc_next_.rows(), nh_T);
     for (std::size_t i = 0; i < n_phases_; ++i) {
-      Vpc_phase_[i].conservativeResize(p_[i].size(), nh_T);
-      dPc_[i].conservativeResize(p_[i].size(), nh_T);
-      Kpc_[i].conservativeResize(p_[i].size(), nh_T);
+      Vpc_phase_[i].conservativeResize(ps_[i].size(), nh_T);
+      dPc_[i].conservativeResize(ps_[i].size(), nh_T);
+      Kpc_[i].conservativeResize(ps_[i].size(), nh_T);
     }
   }
   dHc_.conservativeResize(nh_T, nh_T);
@@ -566,14 +566,14 @@ void SolverFDDPTpl<Scalar>::updateDir() {
     const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       kp_[i].noalias() -= Kpc_[i] * beta_plus_;
-      dp_[i].noalias() -= dPc_[i] * beta_plus_;
+      dps_[i].noalias() -= dPc_[i] * beta_plus_;
     }
     // Rebuild P_dp contribution and update k_
     std::size_t tstart = 0;
     for (std::size_t i = 0; i < n_phases_; ++i) {
       for (std::size_t t = tstart; t < phase_ends[i]; ++t) {
         k_[t] -= P_dp_[t];
-        P_dp_[t].noalias() = P_[t] * dp_[i];
+        P_dp_[t].noalias() = P_[t] * dps_[i];
         k_[t] += P_dp_[t];
       }
       tstart = phase_ends[i];
@@ -749,9 +749,9 @@ void SolverFDDPTpl<Scalar>::linearRollout() {
       dus_[t].noalias() -= K_[t] * dxs_[t];
       dxs_[t + 1].noalias() += d->Fu * dus_[t];
     }
-    // Parameter contribution: Fp * dp
+    // Parameter contribution: Fp * dps
     if (has_params) {
-      dxs_[t + 1].noalias() += d->Fp * dp_[nph];
+      dxs_[t + 1].noalias() += d->Fp * dps_[nph];
       if (nph + 1 < n_phases_ && (t + 1) == (*phase_starts)[nph + 1]) {
         ++nph;
       }
@@ -1007,7 +1007,7 @@ void SolverFDDPTpl<Scalar>::updateCandidate() {
   // Accept the parameter candidate on step acceptance
   if (n_phases_ > 0) {
     for (std::size_t i = 0; i < n_phases_; ++i) {
-      p_[i] = p_try_[i];
+      ps_[i] = ps_try_[i];
     }
   }
 }
@@ -1269,9 +1269,9 @@ void SolverFDDPTpl<Scalar>::allocateData() {
     Lpx_dp_.back() = VectorXs::Zero(ndx);
     Vpc_.back() = MatrixXs::Zero(terminal_np, nh_T);
     // Per-phase arrays
-    p_.resize(n_phases_);
-    p_try_.resize(n_phases_);
-    dp_.resize(n_phases_);
+    ps_.resize(n_phases_);
+    ps_try_.resize(n_phases_);
+    dps_.resize(n_phases_);
     kp_.resize(n_phases_);
     Kp_.resize(n_phases_);
     Vp_phase_.resize(n_phases_);
@@ -1315,9 +1315,9 @@ void SolverFDDPTpl<Scalar>::allocateData() {
         problem_->get_paramsModel();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       const std::size_t np = models[phase_starts[i]]->get_np();
-      p_[i] = VectorXs::Zero(np);
-      p_try_[i] = VectorXs::Zero(np);
-      dp_[i] = VectorXs::Zero(np);
+      ps_[i] = VectorXs::Zero(np);
+      ps_try_[i] = VectorXs::Zero(np);
+      dps_[i] = VectorXs::Zero(np);
       kp_[i] = VectorXs::Zero(np);
       Kp_[i] = MatrixXs::Zero(np, ndx);
       Vp_phase_[i] = VectorXs::Zero(np);
@@ -1708,27 +1708,27 @@ void SolverFDDPTpl<Scalar>::set_zero_upsilon(const bool zero_upsilon) {
 template <typename Scalar>
 bool SolverFDDPTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                   const std::vector<VectorXs>& init_us,
-                                  const std::vector<VectorXs>& init_p,
+                                  const std::vector<VectorXs>& init_ps,
                                   const std::size_t maxiter,
                                   const bool is_feasible,
                                   const Scalar reg_init) {
-  // Initialise parameter vectors from init_p (one per phase)
-  if (!init_p.empty()) {
-    if (init_p.size() != n_phases_) {
+  // Initialise parameter vectors from init_ps (one per phase)
+  if (!init_ps.empty()) {
+    if (init_ps.size() != n_phases_) {
       throw_pretty(
-          "Invalid argument: init_p must contain one vector per phase.");
+          "Invalid argument: init_ps must contain one vector per phase.");
     }
     for (std::size_t i = 0; i < n_phases_; ++i) {
-      if (init_p[i].size() != p_[i].size()) {
-        throw_pretty("Invalid argument: init_p[" << i
-                                                 << "] has wrong dimension.");
+      if (init_ps[i].size() != ps_[i].size()) {
+        throw_pretty("Invalid argument: init_ps[" << i
+                                                  << "] has wrong dimension.");
       }
-      p_[i] = init_p[i];
+      ps_[i] = init_ps[i];
     }
   }
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    p_try_[i] = p_[i];
-    problem_->update_p(p_[i], i);
+    ps_try_[i] = ps_[i];
+    problem_->update_p(ps_[i], i);
   }
   // Delegate to the base solver loop after initializing the parameters.
   return SolverAbstract::solve(init_xs, init_us, DefaultVector<Scalar>::value,
@@ -1875,7 +1875,7 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
     case AStateSchur:
     case AStateNone: {
       for (std::size_t i = 0; i < n_phases_; ++i) {
-        if (p_[i].size() == 0) {
+        if (ps_[i].size() == 0) {
           continue;
         }
         Vpp_llt_[i].compute(Vpp_phase_[i]);
@@ -1892,7 +1892,7 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
     case AStateLuNull:
     case AStateQrNull: {
       for (std::size_t i = 0; i < n_phases_; ++i) {
-        const std::size_t np = static_cast<std::size_t>(p_[i].size());
+        const std::size_t np = static_cast<std::size_t>(ps_[i].size());
         if (np == 0) {
           continue;
         }
@@ -1969,7 +1969,7 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
       const std::vector<std::shared_ptr<ParameterPhaseData>>& params_datas =
           problem_->get_paramsData();
       for (std::size_t i = 0; i < n_phases_; ++i) {
-        const std::size_t np = static_cast<std::size_t>(p_[i].size());
+        const std::size_t np = static_cast<std::size_t>(ps_[i].size());
         if (np == 0) {
           continue;
         }
@@ -2039,9 +2039,9 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
           qp_model.G.topRows(ng) = constraints_data->Gp;
           qp_model.G.bottomRows(ng) = -constraints_data->Gp;
           qp_model.h.head(ng) =
-              constraints->get_ub().head(ng) - constraints_data->g;
+              constraints_model->get_ub().head(ng) - constraints_data->g;
           qp_model.h.tail(ng) =
-              constraints_data->g - constraints->get_lb().head(ng);
+              constraints_data->g - constraints_model->get_lb().head(ng);
         }
 
         const odyn::Status status = qp_solver.solve(
@@ -2063,15 +2063,15 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
     }
   }
 
-  // Compute dp = -kp (feedforward) - Kp * dx_phase_start (feedback)
+  // Compute dps = -kp (feedforward) - Kp * dx_phase_start (feedback)
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    dp_[i] = -kp_[i];
+    dps_[i] = -kp_[i];
   }
   // For phases > 0, couple the parameter direction to the state direction
   // at the phase start (dxs_[phase_starts[nph]])
   for (std::size_t i = 1; i < n_phases_; ++i) {
     const std::size_t t = phase_starts[i];
-    dp_[i].noalias() -= Kp_[i] * dxs_[t];
+    dps_[i].noalias() -= Kp_[i] * dxs_[t];
   }
 
   // Arrival-state solver: marginalise the initial state
@@ -2086,15 +2086,15 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
     }
     dxs_[0] = -Vx0_;
     Vxx0_llt_.solveInPlace(dxs_[0]);
-    dp_[0].noalias() -= Kp_[0] * dxs_[0];
+    dps_[0].noalias() -= Kp_[0] * dxs_[0];
   }
 
-  // Update k_ with P * dp  contribution so control policy uses params
+  // Update k_ with P * dps contribution so control policy uses params
   const std::vector<std::size_t>& phase_ends = problem_->get_phase_edxs();
   std::size_t t0 = 0;
   for (std::size_t i = 0; i < n_phases_; ++i) {
     for (std::size_t t = t0; t < phase_ends[i]; ++t) {
-      P_dp_[t].noalias() = P_[t] * dp_[i];
+      P_dp_[t].noalias() = P_[t] * dps_[i];
       k_[t] += P_dp_[t];
     }
     t0 = phase_ends[i];
@@ -2107,7 +2107,7 @@ template <typename Scalar>
 void SolverFDDPTpl<Scalar>::paramsBatchPass() {
   if (n_phases_ == 0) return;
   for (std::size_t i = 0; i < n_phases_; ++i) {
-    if (p_[i].size() == 0) {
+    if (ps_[i].size() == 0) {
       continue;
     }
     Kpc_[i] = Vpc_phase_[i];
@@ -2124,7 +2124,7 @@ void SolverFDDPTpl<Scalar>::calcDir() {
   if (!acceptstep_ && n_phases_ > 0) {
     // Restore the last accepted parameters so calcDiff sees correct values
     for (std::size_t i = 0; i < n_phases_; ++i) {
-      problem_->update_p(p_[i], i);
+      problem_->update_p(ps_[i], i);
     }
     if (problem_->has_parameter_constraints()) {
       const std::vector<std::shared_ptr<ParameterPhaseModel>>& params_models =
@@ -2173,20 +2173,20 @@ ArrivalStateSolverType SolverFDDPTpl<Scalar>::get_astate_solver() const {
 
 template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
-SolverFDDPTpl<Scalar>::get_p() const {
-  return p_;
+SolverFDDPTpl<Scalar>::get_ps() const {
+  return ps_;
 }
 
 template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
-SolverFDDPTpl<Scalar>::get_p_try() const {
-  return p_try_;
+SolverFDDPTpl<Scalar>::get_ps_try() const {
+  return ps_try_;
 }
 
 template <typename Scalar>
 const std::vector<typename MathBaseTpl<Scalar>::VectorXs>&
-SolverFDDPTpl<Scalar>::get_dp() const {
-  return dp_;
+SolverFDDPTpl<Scalar>::get_dps() const {
+  return dps_;
 }
 
 template <typename Scalar>

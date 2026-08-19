@@ -442,8 +442,8 @@ class SolverFDDPArrivalStateProbe : public crocoddyl::SolverFDDP {
 #ifdef CROCODDYL_WITH_ODYN
   void run_astate_qp_semidefinite_initial_value_case() {
     BOOST_REQUIRE_EQUAL(n_phases_, 1);
-    BOOST_REQUIRE_EQUAL(p_.size(), 1);
-    BOOST_REQUIRE_GT(p_[0].size(), 0);
+    BOOST_REQUIRE_EQUAL(ps_.size(), 1);
+    BOOST_REQUIRE_GT(ps_[0].size(), 0);
     BOOST_REQUIRE(!Vxx_.empty());
 
     Vpp_phase_[0].setIdentity();
@@ -460,7 +460,7 @@ class SolverFDDPArrivalStateProbe : public crocoddyl::SolverFDDP {
 
     paramsPass();
 
-    BOOST_CHECK(dp_[0].isZero(1e-12));
+    BOOST_CHECK(dps_[0].isZero(1e-12));
   }
 #endif
 };
@@ -698,8 +698,8 @@ void test_fddp_parametrized_arrival_state_no_malloc() {
     Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
     throw;
   }
-  BOOST_REQUIRE_EQUAL(solver.get_p().size(), 1);
-  BOOST_CHECK(solver.get_p()[0].isApprox(p, 1e-12));
+  BOOST_REQUIRE_EQUAL(solver.get_ps().size(), 1);
+  BOOST_CHECK(solver.get_ps()[0].isApprox(p, 1e-12));
 }
 
 #ifdef CROCODDYL_WITH_ODYN
@@ -831,8 +831,8 @@ void test_intro_parametrized_equality_no_malloc() {
     Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
     throw;
   }
-  BOOST_REQUIRE_EQUAL(solver.get_p().size(), 1);
-  BOOST_CHECK(solver.get_p()[0].isApprox(p, 1e-12));
+  BOOST_REQUIRE_EQUAL(solver.get_ps().size(), 1);
+  BOOST_CHECK(solver.get_ps()[0].isApprox(p, 1e-12));
 }
 
 //____________________________________________________________________________//
