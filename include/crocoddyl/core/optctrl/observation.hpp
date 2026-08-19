@@ -18,15 +18,17 @@
 namespace crocoddyl {
 
 /**
- * @brief Multi-phase optimal-estimation problem
+ * @brief Optimal-estimation problem with measured torques and shared
+ * parameters
  *
  * An observation problem estimates a state trajectory
  * \f$\{\mathbf{x}_t\}\f$ using process-noise controls
- * \f$\{\mathbf{w}_t\}\f$, measured torques and phase-shared parameters. Each
- * non-empty phase owns one `ParameterManagerTpl` and one
- * `ParameterDataManagerTpl`; all observer data in that phase share the same
- * payload, and the terminal node uses the final phase. Models and managers are
- * shared while trajectory and phase containers are owned by the problem.
+ * \f$\{\mathbf{w}_t\}\f$, measured torques and model parameters. The running
+ * models can form either a single phase or multiple phases. Within each phase,
+ * all observer data share one `ParameterManagerTpl` and one
+ * `ParameterDataManagerTpl`. The terminal node uses the parameters of the last
+ * phase. Models and parameter managers are shared, while trajectory data and
+ * phase containers are owned by the problem.
  *
  * Parameter status/layout changes invalidate existing data and require
  * reconstruction of the problem. Measured torque belongs to each observer

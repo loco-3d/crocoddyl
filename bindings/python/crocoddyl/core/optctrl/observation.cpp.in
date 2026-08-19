@@ -32,8 +32,8 @@ namespace python {
   bp::register_ptr_to_python<std::shared_ptr<Problem> >();                    \
   bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
       "ObservationProblem",                                                  \
-      "Multi-phase optimal-estimation problem with measured torques, "       \
-      "process noise and shared parameters.",                                \
+      "Optimal-estimation problem with measured torques, process noise and " \
+      "shared parameters. Supports single- and multi-phase horizons.",       \
       bp::init<VectorXs, std::vector<VectorXs>,                              \
                std::vector<ObserverModelPtr>, ObserverModelPtr,              \
                ParameterManagerPtr>(                                         \
