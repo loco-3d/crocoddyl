@@ -57,6 +57,7 @@ void exposeCore() {
   exposeConstraintAbstract();
   exposeConstraintManager();
   exposeConstraintResidual();
+  exposeIntegratedObserverAbstract();
   exposeIntegratedObserverEuler();
   exposeIntegratedObserverRK();
   exposeDiscretizedObserver();

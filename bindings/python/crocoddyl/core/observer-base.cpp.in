@@ -19,6 +19,7 @@ struct ObserverModelAbstractVisitor
     : public bp::def_visitor<ObserverModelAbstractVisitor<Model>> {
   typedef typename Model::ObserverModel ObserverModel;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
   typedef typename Model::Scalar Scalar;
   typedef typename Model::VectorXs VectorXs;
   BOOST_PYTHON_FUNCTION_OVERLOADS(ObserverModel_quasiStatic_wraps,
@@ -26,11 +27,11 @@ struct ObserverModelAbstractVisitor
 
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def("set_params", &Model::set_params,
+    cl.def("set_params", &ObserverModel::set_params,
            &Model::default_set_params,
            bp::args("self", "data", "params"),
            "Wire a parameter manager into the observer model and data.")
-        .def("update_p", bp::pure_virtual(&Model::update_p),
+        .def("update_p", bp::pure_virtual(&ObserverModel::update_p),
            bp::args("self", "data", "p"),
            "Update the observer parameters.\n\n"
            "This observer-specific entry point updates the model parameters "
@@ -38,8 +39,8 @@ struct ObserverModelAbstractVisitor
            ":param data: observer action data\n"
            ":param p: parameter vector")
         .def("createData",
-             static_cast<std::shared_ptr<ActionData> (Model::*)()>(
-                 &Model::createData),
+             static_cast<std::shared_ptr<ActionData> (ObserverModel::*)()>(
+                 &ObserverModel::createData),
              &Model::default_createData,
              bp::args("self"),
              "Create the observer data.\n\n"
@@ -47,6 +48,13 @@ struct ObserverModelAbstractVisitor
              "allocated. This function returns the allocated data for a "
              "predefined observer model.\n"
              ":return observer data")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ObserverModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &ObserverModel::createData),
+             bp::args("self", "params_data"),
+             "Create the observer data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
         .def("quasiStatic", &quasiStatic,
              ObserverModel_quasiStatic_wraps(
                  bp::args("self", "data", "x", "maxiter", "tol"),

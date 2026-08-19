@@ -160,6 +160,9 @@ class IntegratedActionModelAbstractTpl
   /** @brief Return the compositional constraint manager, or nullptr. */
   const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
+  /** @brief Return the parameter manager, or nullptr. */
+  const std::shared_ptr<ParameterManager>& get_params() const;
+
   /** @brief Return the shared control parametrization. */
   const std::shared_ptr<ControlParametrizationModelAbstract>& get_control()
       const;

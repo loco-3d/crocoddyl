@@ -189,6 +189,11 @@ class DiscretizedActionModelTpl : public ActionModelAbstractTpl<_Scalar> {
   const std::shared_ptr<ConstraintModelManager>& get_constraints() const;
 
   /**
+   * @brief Return the parameter manager (may be nullptr)
+   */
+  const std::shared_ptr<ParameterManager>& get_params() const;
+
+  /**
    * @brief Print relevant information of the discretized action model
    *
    * @param[out] os  Output stream object

@@ -22,92 +22,13 @@ namespace python {
 #define CROCODDYL_INTEG_OBSERVER_EULER_PYTHON_BINDINGS(Scalar)                  \
   typedef IntegratedObserverModelEulerTpl<Scalar> Model;                        \
   typedef IntegratedObserverModelAbstractTpl<Scalar> ModelBase;                 \
-  typedef ObserverModelAbstractTpl<Scalar> ObserverModelBase;                   \
   typedef IntegratedObserverDataEulerTpl<Scalar> Data;                          \
   typedef IntegratedObserverDataAbstractTpl<Scalar> DataBase;                   \
-  typedef ObserverDataAbstractTpl<Scalar> ObserverDataBase;                     \
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                     \
   typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                       \
   typedef CostModelSumTpl<Scalar> CostModelSum;                                 \
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;             \
-  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;                 \
   typedef typename Model::VectorXs VectorXs;                                    \
-  /* Register the abstract base and data so bp::bases<> resolves correctly */   \
-  bp::register_ptr_to_python<std::shared_ptr<ModelBase>>();                     \
-  bp::class_<ModelBase, bp::bases<ObserverModelBase>, boost::noncopyable>(      \
-      "IntegratedObserverModelAbstract",                                        \
-      "Abstract integrated observer model (base class — not instantiable).",    \
-      bp::no_init)                                                               \
-      .def("set_params", &ModelBase::set_params,                                \
-           bp::args("self", "data", "params"),                                  \
-           "Wire a ParameterManager into this node.")                           \
-      .def("update_p", &ModelBase::update_p, bp::args("self", "data", "p"),     \
-           "Propagate a new parameter vector.")                                  \
-      .def("update_tau", &ModelBase::update_tau, bp::args("self", "tau_meas"),  \
-           "Update the measured torques.")                                      \
-      .add_property("dynamics",                                                  \
-                    bp::make_function(&ModelBase::get_dynamics,                 \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()))              \
-      .add_property("costs",                                                     \
-                    bp::make_function(&ModelBase::get_costs,                    \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()))              \
-      .add_property("constraints",                                               \
-                    bp::make_function(&ModelBase::get_constraints,              \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()))              \
-      .add_property("params",                                                    \
-                    bp::make_function(&ModelBase::get_params,                   \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()))              \
-      .add_property("dt",                                                        \
-                    bp::make_function(&ModelBase::get_dt),                      \
-                    bp::make_function(&ModelBase::set_dt))                      \
-      .add_property("ng",  bp::make_function(&ModelBase::get_ng),               \
-                    "number of running inequality constraints")                  \
-      .add_property("nh",  bp::make_function(&ModelBase::get_nh),               \
-                    "number of running equality constraints")                    \
-      .add_property("ng_T", bp::make_function(&ModelBase::get_ng_T),            \
-                    "number of terminal inequality constraints")                 \
-      .add_property("nh_T", bp::make_function(&ModelBase::get_nh_T),            \
-                    "number of terminal equality constraints")                   \
-      .add_property("g_lb",                                                       \
-                    bp::make_function(&ModelBase::get_g_lb,                       \
-                                      bp::return_internal_reference<>()),         \
-                    "live inequality lower bounds")                              \
-      .add_property("g_ub",                                                       \
-                    bp::make_function(&ModelBase::get_g_ub,                       \
-                                      bp::return_internal_reference<>()),         \
-                    "live inequality upper bounds");                             \
-  bp::register_ptr_to_python<std::shared_ptr<DataBase>>();                      \
-  bp::class_<DataBase, bp::bases<ObserverDataBase>, boost::noncopyable>(        \
-      "IntegratedObserverDataAbstract",                                         \
-      "Abstract data for integrated observer models.",                          \
-      bp::no_init)                                                               \
-      .add_property(                                                             \
-          "dynamics",                                                            \
-          bp::make_getter(&DataBase::dynamics,                                  \
-                          bp::return_value_policy<bp::return_by_value>()),      \
-          "dynamics data")                                                       \
-      .add_property(                                                             \
-          "costs",                                                               \
-          bp::make_getter(&DataBase::costs,                                     \
-                          bp::return_value_policy<                               \
-                              bp::return_by_value,                               \
-                              bp::with_custodian_and_ward_postcall<0, 1>>()),    \
-          "cost data")                                                           \
-      .add_property(                                                             \
-          "constraints",                                                         \
-          bp::make_getter(&DataBase::constraints,                               \
-                          bp::return_value_policy<                               \
-                              bp::return_by_value,                               \
-                              bp::with_custodian_and_ward_postcall<0, 1>>()),    \
-          "running constraint data")                                             \
-      .add_property(                                                             \
-          "dx", bp::make_getter(&DataBase::dx,                                  \
-                                bp::return_internal_reference<>()),             \
-          "integrated state increment");                                         \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                         \
   bp::class_<Model, bp::bases<ModelBase>>(                                      \
       "IntegratedObserverModelEuler",                                           \
@@ -149,56 +70,6 @@ namespace python {
                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),           \
            bp::args("self", "data", "x"),                                       \
            "Compute the derivatives (terminal node).")                          \
-      .def("createData",                                                        \
-           static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)()>(      \
-               &Model::createData),                                             \
-           bp::args("self"),                                                     \
-           "Create the integrated observer data.")                              \
-      .def("createData",                                                         \
-           static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)(          \
-               const std::shared_ptr<ParameterDataManager>&)>(                  \
-               &Model::createData),                                              \
-           bp::args("self", "params_data"),                                     \
-           "Create the integrated observer data with a parameter data "         \
-           "manager.\n\n"                                                        \
-           ":param params_data: parameter data manager (from "                  \
-           "ParameterManager.createData())")                                    \
-      .def("set_params", &ModelBase::set_params,                                \
-           bp::args("self", "data", "params"),                                  \
-           "Wire a ParameterManager into this node.\n\n"                        \
-           ":param data: observer action data\n"                                \
-           ":param params: parameter manager")                                  \
-      .def("update_p", &ModelBase::update_p, bp::args("self", "data", "p"),     \
-           "Propagate a new parameter vector into this node.\n\n"               \
-           ":param data: observer action data\n"                                \
-           ":param p: parameter vector")                                        \
-      .def("update_tau", &ModelBase::update_tau, bp::args("self", "tau_meas"),  \
-           "Update the measured torques.\n\n"                                   \
-           ":param tau_meas: measured torque vector")                           \
-      .add_property("dynamics",                                                  \
-                    bp::make_function(&ModelBase::get_dynamics,                 \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()),              \
-                    "continuous-time dynamics model")                           \
-      .add_property("costs",                                                     \
-                    bp::make_function(&ModelBase::get_costs,                    \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()),              \
-                    "cost model")                                               \
-      .add_property("constraints",                                               \
-                    bp::make_function(&ModelBase::get_constraints,              \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()),              \
-                    "constraint model")                                         \
-      .add_property("params",                                                    \
-                    bp::make_function(&ModelBase::get_params,                   \
-                                      bp::return_value_policy<                  \
-                                          bp::return_by_value>()),              \
-                    "parameter manager")                                        \
-      .add_property("dt",                                                        \
-                    bp::make_function(&ModelBase::get_dt),                      \
-                    bp::make_function(&ModelBase::set_dt),                      \
-                    "integration time step")                                    \
       .def(PrintableVisitor<Model>())                                            \
       .def(CastVisitor<Model>())                                                 \
       .def(CopyableVisitor<Model>());                                            \

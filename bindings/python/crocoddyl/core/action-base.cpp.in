@@ -21,6 +21,7 @@ struct ActionModelAbstractVisitor
     : public bp::def_visitor<ActionModelAbstractVisitor<Model>> {
   typedef typename Model::ActionModel ActionModel;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
   typedef typename Model::VectorXs VectorXs;
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps,
                                          ActionModel::quasiStatic_x, 2, 4)
@@ -70,8 +71,8 @@ struct ActionModelAbstractVisitor
              ":param data: action data\n"
              ":param x: state point (dim. state.nx)")
         .def("createData",
-             static_cast<std::shared_ptr<ActionData> (Model::*)()>(
-                 &Model::createData),
+             static_cast<std::shared_ptr<ActionData> (ActionModel::*)()>(
+                 &ActionModel::createData),
              &Model::default_createData,
              bp::args("self"),
              "Create the action data.\n\n"
@@ -79,11 +80,18 @@ struct ActionModelAbstractVisitor
              "allocated.\n"
              "This function returns the allocated data for a predefined AM.\n"
              ":return AM data.")
-        .def("set_params", &Model::set_params,
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ActionModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &ActionModel::createData),
+             bp::args("self", "params_data"),
+             "Create the action data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
+        .def("set_params", &ActionModel::set_params,
+             &Model::default_set_params,
              bp::args("self", "data", "params"),
              "Wire a parameter manager into the action model and data.")
-        .def("update_p", &Model::update_p,
-             bp::args("self", "data", "p"),
+        .def("update_p", &update_p, bp::args("self", "data", "p"),
              "Update the active parameter vector in the action data.")
         .def("quasiStatic", &Model::quasiStatic_x,
              ActionModel_quasiStatic_wraps(
@@ -170,6 +178,12 @@ struct ActionModelAbstractVisitor
         .add_property("has_control_limits",
                       bp::make_function(&Model::get_has_control_limits),
                       "indicates whether problem has finite control limits");
+  }
+
+  static void update_p(ActionModel& self,
+                       const std::shared_ptr<ActionData>& data,
+                       const Eigen::Ref<const VectorXs>& p) {
+    self.update_p(data, p);
   }
 };
 

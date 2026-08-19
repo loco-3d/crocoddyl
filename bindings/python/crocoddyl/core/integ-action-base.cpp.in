@@ -9,6 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/params/parameter-manager.hpp"
+
 #include "python/crocoddyl/core/integ-action-base.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
@@ -26,6 +28,7 @@ struct IntegratedActionModelAbstractVisitor
   typedef typename Model::CostModelSum CostModelSum;
   typedef typename Model::ConstraintModelManager ConstraintModelManager;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
   typedef typename Model::ControlModel ControlModel;
   typedef typename Model::IntegratorTime IntegratorTime;
   typedef typename Model::VectorXs VectorXs;
@@ -100,8 +103,9 @@ struct IntegratedActionModelAbstractVisitor
                  &IntegratedActionModel::calcDiff),
              bp::args("self", "data", "x"))
         .def("createData",
-             static_cast<std::shared_ptr<ActionData> (Model::*)()>(
-                 &Model::createData),
+             static_cast<std::shared_ptr<ActionData> (
+                 IntegratedActionModel::*)()>(
+                 &IntegratedActionModel::createData),
              &Model::default_createData,
              bp::args("self"),
              "Create the integrated-action data.\n\n"
@@ -109,6 +113,14 @@ struct IntegratedActionModelAbstractVisitor
              "to be allocated. This function returns the allocated data for a "
              "predefined IAM.\n"
              ":return integrated-action data.")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (
+                 IntegratedActionModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &IntegratedActionModel::createData),
+             bp::args("self", "params_data"),
+             "Create the integrated-action data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
         .add_property(
             "differential",
             bp::make_function(&Model::get_differential,
@@ -129,6 +141,11 @@ struct IntegratedActionModelAbstractVisitor
             bp::make_function(&Model::get_constraints,
                               bp::return_value_policy<bp::return_by_value>()),
             "constraint manager")
+        .add_property(
+            "params",
+            bp::make_function(&IntegratedActionModel::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
         .add_property(
             "control",
             bp::make_function(&Model::get_control,

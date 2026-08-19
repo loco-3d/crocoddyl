@@ -27,7 +27,6 @@ namespace python {
     typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                     \
     typedef CostModelSumTpl<Scalar> CostModelSum;                               \
     typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;           \
-    typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;               \
     typedef typename Model::VectorXs VectorXs;                                  \
     bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
     bp::class_<Model, bp::bases<ModelBase>>(                                    \
@@ -76,29 +75,6 @@ namespace python {
                  const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),         \
              bp::args("self", "data", "x"),                                     \
              "Compute the derivatives (terminal node).")                        \
-        .def("createData",                                                       \
-             static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)()>(    \
-                 &Model::createData),                                            \
-             bp::args("self"),                                                  \
-             "Create the discretized observer data.")                           \
-        .def("createData",                                                       \
-             static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)(        \
-                 const std::shared_ptr<ParameterDataManager>&)>(                \
-                 &Model::createData),                                            \
-             bp::args("self", "params_data"),                                  \
-             "Create data with an existing parameter-data manager.")           \
-        .def("set_params", &Model::set_params,                                  \
-             bp::args("self", "data", "params"),                                \
-             "Wire a ParameterManager into this node.\n\n"                      \
-             ":param data: observer data\n"                                     \
-             ":param params: parameter manager")                                \
-        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),       \
-             "Propagate a new parameter vector.\n\n"                            \
-             ":param data: observer data\n"                                     \
-             ":param p: parameter vector")                                      \
-        .def("update_tau", &Model::update_tau, bp::args("self", "tau_meas"),    \
-             "Update the measured torques.\n\n"                                 \
-             ":param tau_meas: measured torque vector")                         \
         .add_property(                                                           \
             "dynamics",                                                          \
             bp::make_function(&Model::get_dynamics,                             \

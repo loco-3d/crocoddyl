@@ -300,6 +300,12 @@ IntegratedActionModelAbstractTpl<Scalar>::get_constraints() const {
 }
 
 template <typename Scalar>
+const std::shared_ptr<ParameterManagerTpl<Scalar> >&
+IntegratedActionModelAbstractTpl<Scalar>::get_params() const {
+  return params_;
+}
+
+template <typename Scalar>
 const std::shared_ptr<ControlParametrizationModelAbstractTpl<Scalar> >&
 IntegratedActionModelAbstractTpl<Scalar>::get_control() const {
   return control_;

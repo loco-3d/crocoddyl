@@ -28,7 +28,6 @@ namespace python {
   typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                      \
   typedef CostModelSumTpl<Scalar> CostModelSum;                                \
   typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;            \
-  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;                \
   typedef typename Model::VectorXs VectorXs;                                   \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
   bp::class_<Model, bp::bases<ModelBase>>(                                     \
@@ -72,51 +71,10 @@ namespace python {
                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),          \
            bp::args("self", "data", "x"),                                     \
            "Compute the derivatives (terminal node).")                        \
-      .def("createData",                                                       \
-           static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)()>(     \
-               &Model::createData),                                            \
-           bp::args("self"),                                                   \
-           "Create the RK integrated observer data.")                         \
-      .def("createData",                                                       \
-           static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)(         \
-               const std::shared_ptr<ParameterDataManager>&)>(                 \
-               &Model::createData),                                             \
-           bp::args("self", "params_data"),                                   \
-           "Create the RK integrated observer data with parameter data.")      \
-      .def("set_params", &ModelBase::set_params,                               \
-           bp::args("self", "data", "params"),                                \
-           "Wire a ParameterManager into this node.")                         \
-      .def("update_p", &ModelBase::update_p, bp::args("self", "data", "p"),   \
-           "Propagate a new parameter vector into this node.")                \
-      .def("update_tau", &ModelBase::update_tau, bp::args("self", "tau_meas"), \
-           "Update the measured torques.")                                    \
       .add_property("rktype", bp::make_function(&Model::get_rk_type),         \
                     "Runge-Kutta scheme")                                     \
       .add_property("ni", bp::make_function(&Model::get_ni),                 \
                     "number of Runge-Kutta stages")                           \
-      .add_property("dynamics",                                                \
-                    bp::make_function(&ModelBase::get_dynamics,                \
-                                      bp::return_value_policy<                 \
-                                          bp::return_by_value>()),             \
-                    "continuous-time dynamics model")                         \
-      .add_property("costs",                                                   \
-                    bp::make_function(&ModelBase::get_costs,                   \
-                                      bp::return_value_policy<                 \
-                                          bp::return_by_value>()),             \
-                    "cost model")                                             \
-      .add_property("constraints",                                             \
-                    bp::make_function(&ModelBase::get_constraints,             \
-                                      bp::return_value_policy<                 \
-                                          bp::return_by_value>()),             \
-                    "constraint model")                                       \
-      .add_property("params",                                                  \
-                    bp::make_function(&ModelBase::get_params,                 \
-                                      bp::return_value_policy<                \
-                                          bp::return_by_value>()),             \
-                    "parameter manager")                                      \
-      .add_property("dt", bp::make_function(&ModelBase::get_dt),              \
-                    bp::make_function(&ModelBase::set_dt),                     \
-                    "integration time step")                                  \
       .def(PrintableVisitor<Model>())                                          \
       .def(CastVisitor<Model>())                                               \
       .def(CopyableVisitor<Model>());                                          \

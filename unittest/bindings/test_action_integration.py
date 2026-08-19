@@ -144,6 +144,10 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 manager = module.ParameterManager(state)
                 manager.addParam("time", module.IntegratorTimeoptParams(state, time))
                 euler.set_params(data, manager)
+                self.assertIs(euler.params, manager)
+                shared_data = euler.createData(manager.createData())
+                self.assertIsInstance(shared_data, module.IntegratedActionDataEuler)
+                self.assertIsNotNone(shared_data.params)
                 p = np.array([np.log(0.025)], dtype=dtype)
                 euler.update_p(data, p)
                 euler.calc(data, x, u)
@@ -192,6 +196,9 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                         dynamics, costs, constraints, None, time, rk_type
                     )
                     rk_data = rk.createData()
+                    rk.set_params(rk_data, manager)
+                    rk.update_p(rk_data, p)
+                    self.assertIs(rk.params, manager)
                     rk_models.append((rk, rk_data))
                     rk.calc(rk_data, x, u)
                     rk.calcDiff(rk_data, x, u)
@@ -248,6 +255,7 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 self.assertIs(model.dynamics, dynamics)
                 self.assertIs(model.costs, costs)
                 self.assertIs(model.constraints, constraints)
+                self.assertIsNone(model.params)
                 x = self.state_point(state, dtype)
                 u = np.empty(0, dtype=dtype)
                 model.calc(data, x, u)
@@ -325,6 +333,7 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 self.assertIs(model.dynamics, dynamics)
                 self.assertIs(model.costs, costs)
                 self.assertIs(model.constraints, constraints)
+                self.assertIsNone(model.params)
 
 
 if __name__ == "__main__":

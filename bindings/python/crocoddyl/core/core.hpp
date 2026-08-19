@@ -28,6 +28,7 @@ void exposeActionCodeGen();
 void exposeDifferentialActionAbstract();
 void exposeIntegratorTime();
 void exposeIntegratedActionAbstract();
+void exposeIntegratedObserverAbstract();
 void exposeResidualAbstract();
 void exposeTaskAbstract();
 void exposeGuidanceAbstract();

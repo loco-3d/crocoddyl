@@ -120,6 +120,11 @@ class ActionModelAbstractTpl_wrap
     return ActionModel::set_params(data, params);
   }
 
+  void default_set_params(const std::shared_ptr<ActionData>& data,
+                          std::shared_ptr<ParameterManager> params) {
+    return this->ActionModel::set_params(data, params);
+  }
+
   void update_p(const std::shared_ptr<ActionData>& data,
                 const Eigen::Ref<const VectorXs>& p) override {
     if (boost::python::override update_p = this->get_override("update_p")) {

@@ -69,11 +69,6 @@ struct DiscretizedActionModelVisitor
                 &Model::createData),
             bp::args("self", "params_data"),
             "Create the discretized action data with parameter-manager data.")
-        .def("set_params", &Model::set_params,
-             bp::args("self", "data", "params"),
-             "Wire a ParameterManager into this node.")
-        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
-             "Propagate a new parameter vector into this node.")
         .add_property(
             "dynamics",
             bp::make_function(&Model::get_dynamics,
@@ -88,7 +83,12 @@ struct DiscretizedActionModelVisitor
             "constraints",
             bp::make_function(&Model::get_constraints,
                               bp::return_value_policy<bp::return_by_value>()),
-            "constraint manager");
+            "constraint manager")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager");
   }
 };
 

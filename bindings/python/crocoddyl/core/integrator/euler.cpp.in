@@ -95,24 +95,7 @@ struct IntegratedActionModelEulerVisitor
              static_cast<void (Model::*)(const std::shared_ptr<Data>&,
                                          const Eigen::Ref<const VectorXs>&)>(
                  &Model::calcDiff),
-             bp::args("self", "data", "x"))
-        .def("createData",
-             static_cast<std::shared_ptr<Data> (Model::*)()>(
-                 &Model::createData),
-             bp::args("self"),
-             "Create the Euler integrator data.")
-        .def(
-            "createData",
-            static_cast<std::shared_ptr<Data> (Model::*)(
-                const std::shared_ptr<typename Model::ParameterDataManager>&)>(
-                &Model::createData),
-            bp::args("self", "params_data"),
-            "Create the Euler integrator data with parameter-manager data.")
-        .def("set_params", &Model::set_params,
-             bp::args("self", "data", "params"),
-             "Wire a ParameterManager into this node.")
-        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
-             "Propagate a new parameter vector into this node.");
+             bp::args("self", "data", "x"));
   }
 };
 

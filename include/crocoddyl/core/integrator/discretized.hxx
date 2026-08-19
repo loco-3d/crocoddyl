@@ -548,6 +548,12 @@ DiscretizedActionModelTpl<Scalar>::get_constraints() const {
 }
 
 template <typename Scalar>
+const std::shared_ptr<ParameterManagerTpl<Scalar> >&
+DiscretizedActionModelTpl<Scalar>::get_params() const {
+  return params_;
+}
+
+template <typename Scalar>
 void DiscretizedActionModelTpl<Scalar>::print(std::ostream& os) const {
   os << "DiscretizedActionModel {" << *dynamics_ << "}";
 }
