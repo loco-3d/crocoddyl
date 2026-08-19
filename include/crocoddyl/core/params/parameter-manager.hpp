@@ -178,7 +178,7 @@ class ParameterManagerTpl {
   bool getParamStatus(const std::string& name) const;
 
   /**
-   * @brief Update the aggregate vector and every active item payload
+   * @brief Update the aggregate vector and every active item data
    *
    * @param[in] data  Consistent parameter-manager data
    * @param[in] p     Active vector ordered by action then dynamics partitions
@@ -335,19 +335,19 @@ class ParameterManagerTpl {
 /**
  * @brief Complete data owned by `ParameterManagerTpl`
  *
- * The aggregate payload owns the action-prefix/dynamics-suffix layout, and
- * both maps own one specialized payload for every model, including inactive
- * items. The inherited `parameter_data` pointer is a non-owning self-link and
- * is valid only for this object's lifetime.
+ * The aggregate parameter vector owns the action-prefix/dynamics-suffix
+ * layout, and both maps own one specialized parameter data object for every
+ * model, including inactive items. The inherited `parameter_data` pointer is
+ * a non-owning self-link and is valid only for this object's lifetime.
  *
  * `resize()` supports activation changes with an unchanged model/name set. An
  * add or remove invalidates the data and requires recreation; stale layouts or
  * names are rejected before access. `setZero()` preserves every dimension and
- * activation flag while zeroing the aggregate and all per-item payloads.
- * Copies share aggregate and per-item payload ownership, matching collector
- * semantics, and rebuild the non-owning self-link to the copied object. Thus,
- * payload mutations remain shared while the copied collector cannot dangle
- * through the original manager-data object.
+ * activation flag while zeroing the aggregate and all per-item data. Copies
+ * share aggregate and per-item data ownership, matching collector semantics,
+ * and rebuild the non-owning self-link to the copied object. Thus, data
+ * mutations remain shared while the copied collector cannot dangle through the
+ * original manager-data object.
  */
 template <typename _Scalar>
 struct ParameterDataManagerTpl : public DataCollectorParamsTpl<_Scalar> {
@@ -380,8 +380,8 @@ struct ParameterDataManagerTpl : public DataCollectorParamsTpl<_Scalar> {
   void resize(const ParameterManager* const model);
 
   /**
-   * @brief Zero the aggregate and every active/inactive item payload
-   * @throw crocoddyl::Exception if an aggregate or per-item payload is null
+   * @brief Zero the aggregate and every active/inactive item data
+   * @throw crocoddyl::Exception if an aggregate or per-item data is null
    */
   void setZero();
 

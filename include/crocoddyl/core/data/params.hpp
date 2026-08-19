@@ -15,14 +15,14 @@
 namespace crocoddyl {
 
 /**
- * @brief Shared parameter data payload
+ * @brief Shared parameter data
  *
- * This caller-owned payload stores the active parameter vector as a contiguous
+ * This caller-owned data stores the active parameter vector as a contiguous
  * action-parameter prefix followed by a dynamics-parameter suffix. It owns the
  * parameter vector and parameter-dependent quantities computed by derived
  * classes. Derivative workspaces deliberately live in the action or dynamics
- * data associated with each shooting node, so this payload can be shared
- * safely by all nodes in a parameter phase.
+ * data associated with each shooting node, so this data can be shared safely
+ * by all nodes in a parameter phase.
  */
 template <typename _Scalar>
 struct ParamsDataAbstractTpl {
@@ -33,7 +33,7 @@ struct ParamsDataAbstractTpl {
   typedef typename MathBase::VectorXs VectorXs;
 
   /**
-   * @brief Initialize the shared parameter payload
+   * @brief Initialize the shared parameter data
    *
    * @param[in] np_action    Action-parameter prefix dimension
    * @param[in] np_dynamics  Dynamics-parameter suffix dimension
@@ -78,7 +78,7 @@ struct ParamsDataAbstractTpl {
 };
 
 /**
- * @brief Action-parameter data payload
+ * @brief Action-parameter data
  *
  * This caller-owned specialization places its complete parameter vector in
  * the action prefix and leaves the dynamics suffix empty.
@@ -92,7 +92,7 @@ struct ActionModelParamsDataAbstractTpl
   typedef ParamsDataAbstractTpl<Scalar> Base;
 
   /**
-   * @brief Initialize the action-parameter payload
+   * @brief Initialize the action-parameter data
    *
    * @param[in] np     Action-parameter dimension
    */
@@ -102,13 +102,13 @@ struct ActionModelParamsDataAbstractTpl
 };
 
 /**
- * @brief Dynamics-parameter data payload
+ * @brief Dynamics-parameter data
  *
  * This caller-owned specialization places its complete parameter vector in
  * the dynamics suffix and leaves the action prefix empty. It owns the
- * parameter vector. Resizing and zeroing follow the inherited payload
- * semantics and preserve the active status. It stores no model pointer; the
- * caller controls its lifetime.
+ * parameter vector. Resizing and zeroing follow the inherited data semantics
+ * and preserve the active status. It stores no model pointer; the caller
+ * controls its lifetime.
  */
 template <typename _Scalar>
 struct DynamicsParamsDataAbstractTpl : public ParamsDataAbstractTpl<_Scalar> {
@@ -118,7 +118,7 @@ struct DynamicsParamsDataAbstractTpl : public ParamsDataAbstractTpl<_Scalar> {
   typedef ParamsDataAbstractTpl<Scalar> Base;
 
   /**
-   * @brief Initialize the dynamics-parameter payload
+   * @brief Initialize the dynamics-parameter data
    *
    * @param[in] np     Dynamics-parameter dimension
    */
@@ -130,7 +130,7 @@ struct DynamicsParamsDataAbstractTpl : public ParamsDataAbstractTpl<_Scalar> {
 /**
  * @brief Collector for shared parameter data
  *
- * The collector shares ownership of the parameter payload. Its optional
+ * The collector shares ownership of the parameter data. Its optional
  * ParameterDataManagerTpl link is non-owning and, when non-null, the manager
  * must outlive every collector that references it.
  */
@@ -141,7 +141,7 @@ struct DataCollectorParamsTpl : virtual DataCollectorAbstractTpl<Scalar> {
   /**
    * @brief Initialize the parameter-data collector
    *
-   * @param[in] params          Shared parameter payload
+   * @param[in] params          Shared parameter data
    * @param[in] parameter_data  Optional non-owning parameter-manager data link
    */
   DataCollectorParamsTpl(

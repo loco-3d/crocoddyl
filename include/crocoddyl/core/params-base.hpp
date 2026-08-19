@@ -28,8 +28,8 @@ class ParamsModelBase {
  * @brief Abstract interface for parameter models
  *
  * A parameter model owns its state description, dimension and bounds. It
- * samples a local parameter vector and updates a caller-owned shared parameter
- * payload. The default update is a no-op; derived models can override it.
+ * samples a local parameter vector and updates caller-owned parameter data.
+ * The default update is a no-op; derived models can override it.
  */
 template <typename _Scalar>
 class ParamsAbstractTpl : public ParamsModelBase {
@@ -62,7 +62,7 @@ class ParamsAbstractTpl : public ParamsModelBase {
                       const Eigen::Ref<const VectorXs>& p);
 
   /**
-   * @brief Create an action-partitioned parameter payload
+   * @brief Create an action-partitioned parameter data object
    */
   virtual std::shared_ptr<ParamsDataAbstract> createData();
 
@@ -143,7 +143,8 @@ class ParamsAbstractTpl : public ParamsModelBase {
  *
  * This interface extends ParamsAbstractTpl with the computation of the state
  * sensitivity to its action-parameter vector. It creates caller-owned data
- * whose parameter vector occupies the action prefix of the shared payload.
+ * whose parameter vector occupies the action prefix of the shared parameter
+ * data.
  */
 template <typename _Scalar>
 class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
@@ -172,7 +173,7 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
    * @brief Compute action sensitivity with respect to parameters
    *
    * @param[in] data     Action data owned by the caller
-   * @param[in] params   Shared, read-only parameter payload
+   * @param[in] params   Shared, read-only parameter data
    * @param[out] dx_dp   Node-local state sensitivity
    * @param[in] x       State point
    * @param[in] u       Control point
@@ -190,7 +191,7 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
    * computeParamSensitivity().
    *
    * @param[in] data    Action data owned by the caller
-   * @param[in] params  Shared, read-only parameter payload
+   * @param[in] params  Shared, read-only parameter data
    * @param[in] x       State point
    * @param[in] u       Control point
    * @return Node-local state sensitivity
@@ -212,7 +213,7 @@ class ActionModelParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
  * This interface extends ParamsAbstractTpl with the computation of the joint
  * torque sensitivity to its dynamics-parameter vector. It creates
  * caller-owned data whose parameter vector occupies the dynamics suffix of
- * the shared payload.
+ * the shared parameter data.
  */
 template <typename _Scalar>
 class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
@@ -241,7 +242,7 @@ class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
    * @brief Compute the joint-torque regressor with respect to parameters
    *
    * @param[in] data      Dynamics data owned by the caller
-   * @param[in] params    Shared, read-only parameter payload
+   * @param[in] params    Shared, read-only parameter data
    * @param[out] dtau_dp  Node-local joint-torque regressor
    * @param[in] x       State point
    * @param[in] u       Control point
@@ -259,7 +260,7 @@ class DynamicsParamsAbstractTpl : public ParamsAbstractTpl<_Scalar> {
    * computeJointTorqueRegressor().
    *
    * @param[in] data    Dynamics data owned by the caller
-   * @param[in] params  Shared, read-only parameter payload
+   * @param[in] params  Shared, read-only parameter data
    * @param[in] x       State point
    * @param[in] u       Control point
    * @return Node-local joint-torque regressor

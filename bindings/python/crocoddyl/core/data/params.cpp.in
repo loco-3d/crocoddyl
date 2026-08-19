@@ -69,11 +69,11 @@ struct ParamsDataAbstractVisitor
         .def_readwrite("active", &ParamsData::active, "active status")
         .def("resize", &ParamsData::resize,
              bp::args("self", "np_action", "np_dynamics"),
-             "Resize the parameter payload.\n\n"
+             "Resize the parameter data.\n\n"
              ":param np_action: action-parameter dimension\n"
              ":param np_dynamics: dynamics-parameter dimension")
         .def("setZero", &ParamsData::setZero, bp::args("self"),
-             "Set the parameter payload to zero.");
+             "Set the parameter data to zero.");
   }
 };
 
@@ -86,7 +86,7 @@ struct DataCollectorParamsVisitor
         "params",
         bp::make_getter(&Data::params,
                         bp::return_value_policy<bp::return_by_value>()),
-        "parameter payload");
+        "parameter data");
   }
 };
 
@@ -95,15 +95,15 @@ struct DataCollectorParamsVisitor
   bp::register_ptr_to_python<std::shared_ptr<ParamsData>>();                    \
   bp::class_<ParamsData>(                                                       \
       "ParamsDataAbstract",                                                     \
-      "Abstract class for parameter payloads.\n\n"                              \
-      "The payload owns a contiguous active parameter vector whose action "     \
+      "Abstract class for parameter data.\n\n"                                  \
+      "The data owns a contiguous active parameter vector whose action "       \
       "parameters form the prefix and dynamics parameters form the suffix. "    \
-      "Derivative matrices are stored in node-local action and dynamics "       \
-      "data. Resizing preserves active status and zeros the parameter "         \
+      "Derivative matrices are stored in node-local action and dynamics "      \
+      "data. Resizing preserves active status and zeros the parameter "        \
       "vector.\n\n",                                                            \
       bp::init<std::size_t, std::size_t>(                                      \
           bp::args("self", "np_action", "np_dynamics"),                        \
-          "Create the parameter payload.\n\n"                                   \
+          "Create the parameter data.\n\n"                                      \
           ":param np_action: action-parameter dimension\n"                      \
           ":param np_dynamics: dynamics-parameter dimension"))                  \
       .def("__init__",                                                          \
@@ -119,7 +119,7 @@ struct DataCollectorParamsVisitor
   bp::register_ptr_to_python<std::shared_ptr<ActionParamsData> >();          \
   bp::class_<ActionParamsData, bp::bases<ActionParamsDataBase> >(            \
       "ActionModelParamsDataAbstract",                                      \
-      "Action-model parameter payload. Its complete parameter vector "      \
+      "Action-model parameter data. Its complete parameter vector "         \
       "occupies the action prefix.\n\n",                                    \
       bp::no_init)                                                           \
       .def("__init__",                                                       \
@@ -134,8 +134,8 @@ struct DataCollectorParamsVisitor
   bp::register_ptr_to_python<std::shared_ptr<DynamicsParamsData> >();        \
   bp::class_<DynamicsParamsData, bp::bases<DynamicsParamsDataBase> >(        \
       "DynamicsParamsDataAbstract",                                        \
-      "Dynamics-parameter payload. Its complete parameter vector occupies " \
-      "the dynamics suffix. Regressors are stored in node-local dynamics "  \
+      "Dynamics-parameter data. Its complete parameter vector occupies "    \
+      "the dynamics suffix. Regressors are stored in node-local dynamics " \
       "data. Resizing preserves active status.\n\n",                       \
       bp::no_init)                                                          \
       .def("__init__",                                                      \
@@ -150,11 +150,11 @@ struct DataCollectorParamsVisitor
   typedef ParamsDataAbstractTpl<Scalar> ParamsData;                          \
   bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
   bp::class_<Data, bp::bases<DataBase>>(                                     \
-      "DataCollectorParams", "Parameter-payload data collector.\n\n",        \
+      "DataCollectorParams", "Parameter-data collector.\n\n",                \
       bp::init<std::shared_ptr<ParamsData>>(                                 \
           bp::args("self", "params"),                                        \
           "Create parameter data collection.\n\n"                            \
-          ":param params: parameter payload"))                               \
+          ":param params: parameter data"))                                  \
       .def(DataCollectorParamsVisitor<Data>())                               \
       .def(CopyableVisitor<Data>());
 

@@ -124,7 +124,7 @@ struct ParameterDataManagerVisitor
     cl.def("resize", &Data::resize, bp::args("self", "model"),
            "Resize after status-only changes; recreate after add/remove.")
         .def("setZero", &Data::setZero, bp::args("self"),
-             "Zero the aggregate and every per-item payload.")
+             "Zero the aggregate and every per-item data.")
         .add_property(
             "action_params",
             bp::make_getter(&Data::action_params,
@@ -193,10 +193,10 @@ struct ParameterDataManagerVisitor
   bp::register_ptr_to_python<std::shared_ptr<Data> >();                   \
   bp::class_<Data, bp::bases<DataCollectorParams> >(                     \
       "ParameterDataManager",                                           \
-      "Complete parameter-manager data. It owns an aggregate payload and " \
-      "one specialized payload per item, including inactive items. The "  \
-      "inherited manager link is non-owning and valid for this object's "  \
-      "lifetime.\n\n",                                                   \
+      "Complete parameter-manager data. It owns an aggregate parameter "   \
+      "vector and one specialized parameter data object per item, "       \
+      "including inactive items. The inherited manager link is non-owning "\
+      "and valid for this object's lifetime.\n\n",                        \
       bp::init<const Model*>(                                             \
           bp::args("self", "model"),                                    \
           "Initialize complete data from a manager.\n\n"                 \

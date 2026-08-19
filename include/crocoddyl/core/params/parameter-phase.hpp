@@ -21,7 +21,7 @@ namespace crocoddyl {
  * This class composes a parameter manager with the optional constraints that
  * act on the same phase parameter vector. It owns neither node data nor
  * trajectory variables. `createData()` allocates both data objects together,
- * ensuring that the constraint data shares the phase parameter payload.
+ * ensuring that the constraint data shares the phase parameter data.
  */
 template <typename _Scalar>
 class ParameterPhaseModelTpl {
@@ -96,8 +96,8 @@ class ParameterPhaseModelTpl {
  * @brief Data associated with one parameterized phase
  *
  * The parameter data is created first and used as the shared collector for the
- * optional constraint data. Both payloads therefore have the same lifetime and
- * cannot become misaligned across phase indices.
+ * optional constraint data. Both data objects therefore have the same lifetime
+ * and cannot become misaligned across phase indices.
  */
 template <typename _Scalar>
 struct ParameterPhaseDataTpl {

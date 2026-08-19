@@ -76,9 +76,9 @@ class IntegratorTimeoptParamsTpl
 /**
  * @brief Data for the logarithmic integration-time parameter
  *
- * The inherited payload has one active action parameter and no dynamics
- * partition. `dt` and `dt_dp` are scalar cached values; resizing and zeroing
- * preserve the inherited active state.
+ * The inherited parameter data has one active action parameter and no
+ * dynamics partition. `dt` and `dt_dp` are scalar cached values; resizing and
+ * zeroing preserve the inherited active state.
  */
 template <typename _Scalar>
 struct IntegratorTimeoptParamsDataTpl

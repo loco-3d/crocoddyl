@@ -116,8 +116,8 @@ struct DynamicsParamsAbstractVisitor
     bp::class_<Model_wrap, boost::noncopyable>(                               \
         "ParamsAbstract",                                                     \
         "Abstract class for parameter models.\n\n"                            \
-        "A parameter model owns its dimension and bounds, and updates a "     \
-        "caller-owned shared parameter payload.",                            \
+        "A parameter model owns its dimension and bounds, and updates "       \
+        "caller-owned parameter data.",                                       \
         bp::init<std::shared_ptr<State>, bp::optional<std::size_t> >(         \
             bp::args("self", "state", "np"),                                  \
             "Initialize the parameter model.\n\n"                             \
