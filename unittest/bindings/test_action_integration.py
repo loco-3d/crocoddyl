@@ -112,6 +112,13 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                 data = euler.createData()
                 self.assertIsInstance(data, module.IntegratedActionDataEuler)
                 self.assertIsInstance(data.dynamics, module.DynamicsDataAbstract)
+                self.assertIsInstance(data.costs, module.CostDataSum)
+                self.assertIsInstance(data.constraints, module.ConstraintDataManager)
+                self.assertIsInstance(
+                    data.control, module.ControlParametrizationDataAbstract
+                )
+                self.assertIsNone(data.params)
+                self.assertEqual(data.dx.shape, (state.ndx,))
                 euler.calc(data, x, u)
                 euler.calcDiff(data, x, u)
                 self.assertEqual(data.Fx.shape, (state.ndx, state.ndx))
@@ -204,6 +211,12 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
                     rk.calcDiff(rk_data, x, u)
                     self.assertEqual(rk.ni, stages)
                     self.assertEqual(len(rk_data.dynamics), stages)
+                    self.assertEqual(len(rk_data.costs), stages)
+                    self.assertEqual(len(rk_data.control), stages)
+                    self.assertIsInstance(
+                        rk_data.constraints, module.ConstraintDataManager
+                    )
+                    self.assertEqual(rk_data.dx.shape, (state.ndx,))
                     self.assertTrue(np.all(np.isfinite(rk_data.Fx)))
                     rk_sentinels = {
                         "Fu": np.full(rk_data.Fu.shape, 21, dtype=dtype),

@@ -105,39 +105,6 @@ struct IntegratedActionDataEulerVisitor
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.add_property(
-          "differential",
-          bp::make_getter(&Data::differential,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "differential action data")
-        .add_property(
-            "dynamics",
-            bp::make_getter(&Data::dynamics,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "dynamics data")
-        .add_property(
-            "costs",
-            bp::make_getter(&Data::costs,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "cost data")
-        .add_property(
-            "constraints",
-            bp::make_getter(&Data::constraints,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "constraint-manager data")
-        .add_property(
-            "params",
-            bp::make_getter(&Data::params,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "parameter-manager data")
-        .add_property(
-            "control",
-            bp::make_getter(&Data::control,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "control parametrization data")
-        .add_property(
-            "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
-            "state rate.")
-        .add_property(
             "Lwu",
             bp::make_getter(&Data::Lwu, bp::return_internal_reference<>()),
             "Hessian of the cost wrt the differential control (w) and "
@@ -180,6 +147,7 @@ struct IntegratedActionDataEulerVisitor
       bp::init<Model*>(bp::args("self", "model"),                         \
                        "Create sympletic Euler integrator data.\n\n"      \
                        ":param model: sympletic Euler integrator model")) \
+      .def(IntegratedActionDataAbstractVisitor<Data>())                   \
       .def(IntegratedActionDataEulerVisitor<Data>())                      \
       .def(CopyableVisitor<Data>());
 

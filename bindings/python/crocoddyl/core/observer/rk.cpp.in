@@ -83,12 +83,12 @@ namespace python {
       "IntegratedObserverDataRK", "Data for the RK integrated observer model.", \
       bp::no_init)                                                              \
       .add_property(                                                             \
-          "dynamics",                                                            \
+          "dynamics_stage",                                                      \
           bp::make_getter(&Data::dynamics_stage,                                \
                           bp::return_value_policy<bp::return_by_value>()),      \
           "Runge-Kutta stage dynamics data")                                    \
       .add_property(                                                             \
-          "costs",                                                               \
+          "costs_stage",                                                         \
           bp::make_getter(&Data::costs_stage,                                   \
                           bp::return_value_policy<                               \
                               bp::return_by_value,                               \

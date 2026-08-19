@@ -116,45 +116,10 @@ struct IntegratedActionDataRKVisitor
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.add_property(
-          "differential",
-          bp::make_getter(&Data::differential,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "list of differential action data")
-        .add_property(
-            "dynamics",
-            bp::make_getter(&Data::dynamics,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "list of dynamics data")
-        .add_property(
-            "costs",
-            bp::make_getter(&Data::costs,
-                            bp::return_value_policy<
-                                bp::return_by_value,
-                                bp::with_custodian_and_ward_postcall<0, 1>>()),
-            "list of cost data")
-        .add_property(
-            "constraints",
-            bp::make_getter(&Data::constraints,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "constraint-manager data")
-        .add_property(
-            "params",
-            bp::make_getter(&Data::params,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "parameter-manager data")
-        .add_property(
-            "control",
-            bp::make_getter(&Data::control,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "list of control parametrization data")
-        .add_property(
             "integral",
             bp::make_getter(&Data::integral,
                             bp::return_value_policy<bp::return_by_value>()),
             "list of RK terms related to the cost")
-        .add_property(
-            "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
-            "state rate.")
         .add_property(
             "ki", bp::make_getter(&Data::ki, bp::return_internal_reference<>()),
             "list of RK terms related to system dynamics")
@@ -306,6 +271,7 @@ struct IntegratedActionDataRKVisitor
       bp::init<Model*>(bp::args("self", "model"),                           \
                        "Create RK integrator data.\n\n"                     \
                        ":param model: RK integrator model"))                \
+      .def(IntegratedActionDataAbstractVisitor<Data>())                       \
       .def(IntegratedActionDataRKVisitor<Data>())                            \
       .def(CopyableVisitor<Data>());
 

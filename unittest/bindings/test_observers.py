@@ -439,15 +439,17 @@ class ObserverBindingsTest(unittest.TestCase):
                     self.assertEqual((rk.rktype, rk.ni), (rktype, stages))
                     self.assertEqual(rk.nr, 0)
                     self.assertEqual(rk_data.r.size, 0)
-                    self.assertEqual(len(rk_data.dynamics), stages)
-                    self.assertEqual(len(rk_data.costs), stages)
+                    self.assertIsInstance(rk_data.dynamics, module.DynamicsDataAbstract)
+                    self.assertIsInstance(rk_data.costs, module.CostDataSum)
+                    self.assertEqual(len(rk_data.dynamics_stage), stages)
+                    self.assertEqual(len(rk_data.costs_stage), stages)
                     np.testing.assert_array_equal(
                         rk_data.g,
-                        np.concatenate((rk_data.dynamics[0].g, rk_data.constraints.g)),
+                        np.concatenate((rk_data.dynamics.g, rk_data.constraints.g)),
                     )
                     np.testing.assert_array_equal(
                         rk_data.h,
-                        np.concatenate((rk_data.dynamics[0].h, rk_data.constraints.h)),
+                        np.concatenate((rk_data.dynamics.h, rk_data.constraints.h)),
                     )
                     self.assertEqual(
                         rk.quasiStatic(
@@ -816,7 +818,7 @@ class ObserverBindingsTest(unittest.TestCase):
             )
             rk_data = rk.createData()
             rk.calc(rk_data, x, u)
-            retained_stage_cost = rk_data.costs[0]
+            retained_stage_cost = rk_data.costs_stage[0]
             del rk_data
             gc.collect()
             costs.calc(retained_stage_cost, x, u)

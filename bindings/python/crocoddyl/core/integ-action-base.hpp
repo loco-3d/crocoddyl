@@ -12,9 +12,65 @@
 
 #include "crocoddyl/core/integ-action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
+
+/**
+ * @brief Expose the data shared by all integrated-action implementations
+ *
+ * The concrete Euler and Runge--Kutta data use different storage types for
+ * some of these members (a single object versus a vector of stage objects).
+ * Keeping this as a templated binding visitor centralizes their common Python
+ * API without forcing those incompatible types into the C++ data base class.
+ */
+template <typename Data>
+struct IntegratedActionDataAbstractVisitor
+    : public bp::def_visitor<IntegratedActionDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "differential",
+          bp::make_getter(
+              &Data::differential,
+              deprecated<bp::return_value_policy<bp::return_by_value>>(
+                  "Deprecated. Differential action data belongs to the "
+                  "legacy integrator API; use dynamics, costs and constraints "
+                  "data instead.")),
+          "legacy differential action data")
+        .add_property(
+            "dynamics",
+            bp::make_getter(&Data::dynamics,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "dynamics data")
+        .add_property(
+            "costs",
+            bp::make_getter(&Data::costs,
+                            bp::return_value_policy<
+                                bp::return_by_value,
+                                bp::with_custodian_and_ward_postcall<0, 1>>()),
+            "cost data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint-manager data")
+        .add_property(
+            "params",
+            bp::make_getter(&Data::params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "parameter-manager data")
+        .add_property(
+            "control",
+            bp::make_getter(&Data::control,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "control-parametrization data")
+        .add_property(
+            "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
+            "integrated state increment");
+  }
+};
 
 template <typename Scalar>
 class IntegratedActionModelAbstractTpl_wrap

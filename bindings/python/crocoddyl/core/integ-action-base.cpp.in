@@ -123,9 +123,13 @@ struct IntegratedActionModelAbstractVisitor
              ":param params_data: parameter data manager")
         .add_property(
             "differential",
-            bp::make_function(&Model::get_differential,
-                              bp::return_value_policy<bp::return_by_value>()),
-            "differential action model")
+            bp::make_function(
+                &Model::get_differential,
+                deprecated<bp::return_value_policy<bp::return_by_value>>(
+                    "Deprecated. Integrated action models backed by a "
+                    "differential action model belong to the legacy API; use "
+                    "dynamics, costs and constraints instead.")),
+            "legacy differential action model")
         .add_property(
             "dynamics",
             bp::make_function(&Model::get_dynamics,
