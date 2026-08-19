@@ -85,11 +85,11 @@ class DynamicsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(model.p_lb, [-3.0, -2.0, -1.0]))
         self.assertTrue(np.array_equal(model.p_ub, [1.0, 2.0, 3.0]))
         self.assertTrue(np.array_equal(model.tau_meas, [0.25, 0.5]))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.p_lb = np.zeros(4, dtype=dtype)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.p_ub = np.zeros(4, dtype=dtype)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.update_tau(np.zeros(3, dtype=dtype))
 
         data = model.createData()
@@ -129,11 +129,11 @@ class DynamicsTest(unittest.TestCase):
         model.calcDiff(data, x)
         self.assertEqual((model.xu_calls, model.p_calls), (2, 1))
         self.assertEqual(model.xu_terminal, [False, True])
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             module.DynamicsModelAbstract.calcDiff_p(model, data, x, u)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.calcDiff(data, np.zeros(5, dtype=dtype), u)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             model.calcDiff(data, x, np.zeros(3, dtype=dtype))
 
         copied_data = copy.deepcopy(data)
@@ -244,8 +244,8 @@ class DynamicsTest(unittest.TestCase):
             (dynamics_type.ContinuousEstimation, (2,), (2, 4)),
             (dynamics_type.DiscreteTime, (4,), (4, 4)),
         )
-        for dynamics_type, vdot_shape, fx_shape in expected:
-            model = make_probe(module, dtype, dynamics_type)
+        for model_type, vdot_shape, fx_shape in expected:
+            model = make_probe(module, dtype, model_type)
             data = module.DynamicsModelAbstract.createData(model)
             self.assertEqual(data.vdot.shape, vdot_shape)
             self.assertEqual(data.Fx.shape, fx_shape)

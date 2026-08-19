@@ -92,13 +92,13 @@ class CostSumParametersTest(unittest.TestCase):
         self.assertTrue(np.allclose(self.data.Lpp, 2.0))
         self.assertTrue(np.allclose(self.data.Lpx, 3.0))
         self.assertTrue(np.allclose(self.data.Lpu, 4.0))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             self.data.Lp = np.zeros(3)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             self.data.Lpp = np.zeros((3, 3))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             self.data.Lpx = np.zeros((3, 4))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             self.data.Lpu = np.zeros((2, 3))
 
         data_copy = copy.copy(self.data)
@@ -133,9 +133,9 @@ class CostSumParametersTest(unittest.TestCase):
 
     def test_dimension_validation_and_single_control_shapes(self):
         invalid = crocoddyl.CostModelSum(self.residual.state, 2, 3)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             invalid.addCost("invalid", self.cost, 1.0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             invalid.addCost(crocoddyl.CostItem("invalid", self.cost, 1.0))
 
         parameter_free_residual = ParameterResidual(np_=0)
@@ -164,7 +164,7 @@ class CostSumParametersTest(unittest.TestCase):
         self.assertTrue(np.allclose(action_data.Lpu, self.data.Lpu))
 
         incompatible_data = ParameterAction(3).createData()
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             self.data.shareMemory(incompatible_data)
 
 

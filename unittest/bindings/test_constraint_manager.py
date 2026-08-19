@@ -133,9 +133,9 @@ class ConstraintParametersTest(unittest.TestCase):
 
         data.Gp = np.ones((manager.ng, manager.np))
         data.Hp = np.full((manager.nh, manager.np), 2.0)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             data.Gp = np.zeros((manager.ng, manager.np + 1))
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             data.Hp = np.zeros((manager.nh, manager.np + 1))
         data_copy = copy.copy(data)
         model_copy = copy.copy(manager)
@@ -150,7 +150,7 @@ class ConstraintParametersTest(unittest.TestCase):
         self.assertEqual(data.Hp.shape, (manager.nh_T, manager.np))
 
         mismatch = crocoddyl.ConstraintModelManager(self.state, 2, 3)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             mismatch.addConstraint("bad", ParameterConstraint(np_=4))
         mismatch.addConstraint("parameter_free", control_equality)
         self.assertEqual(mismatch.np, 3)
@@ -170,7 +170,7 @@ class ConstraintParametersTest(unittest.TestCase):
         self.assertTrue(np.array_equal(action_data.Hp, data.Hp))
 
         incompatible = ParameterAction(manager.ng, manager.nh, manager.np + 1)
-        with self.assertRaises(Exception):
+        with self.assertRaises(crocoddyl.Exception):
             data.shareMemory(incompatible.createData())
 
 
