@@ -154,14 +154,14 @@ class ProblemAbstractTpl {
 
   /** @brief Return the phase-level parameter-constraint models */
   virtual const std::vector<std::shared_ptr<ConstraintModelManager> >&
-  get_parameter_constraints_models() const {
+  get_paramsConstraintModel() const {
     static const std::vector<std::shared_ptr<ConstraintModelManager> > empty;
     return empty;
   }
 
   /** @brief Return the phase-level parameter-constraint data */
   virtual const std::vector<std::shared_ptr<ConstraintDataManager> >&
-  get_parameter_constraints_datas() const {
+  get_paramsConstraintData() const {
     static const std::vector<std::shared_ptr<ConstraintDataManager> > empty;
     return empty;
   }

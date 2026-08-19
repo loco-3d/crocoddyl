@@ -47,7 +47,7 @@ class SimpleQuadrupedalGaitProblem:
             formulations.
         :param termConstraint: if True, soften running tracking costs and move
             foot tracking to terminal equality constraints where supported.
-        :param timeopt: if True, build a ``ParametrizedShootingProblem`` with
+        :param timeopt: if True, build a parameterized ``ShootingProblem`` with
             one log-time parameter per phase.
         :param n_phases: number of shared time-optimization phases.
         :param time_reg_weight: running weight for the log-time regularization.
@@ -150,7 +150,7 @@ class SimpleQuadrupedalGaitProblem:
                 crocoddyl.IntegratorTimeoptParams(self.state, phase_times[i]),
             )
             params.append(params_i)
-        return crocoddyl.ParametrizedShootingProblem(x0, phases, models[-1], params)
+        return crocoddyl.ShootingProblem(x0, phases, models[-1], params)
 
     def _createTerminalFootConstraints(self, models):
         terminal_model = models[-1]

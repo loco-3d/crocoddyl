@@ -72,7 +72,7 @@ namespace python {
           "runningModels",                                                     \
           bp::make_function(&Problem::get_runningModels,                       \
                             bp::return_value_policy<bp::return_by_value>()),   \
-          "running action models")                                             \
+          "running action models flattened in time order")                    \
       .add_property(                                                           \
           "terminalModel",                                                     \
           bp::make_function(&Problem::get_terminalModel,                       \
@@ -82,7 +82,7 @@ namespace python {
           "runningDatas",                                                      \
           bp::make_function(&Problem::get_runningDatas,                        \
                             bp::return_value_policy<bp::return_by_value>()),   \
-          "running action data")                                               \
+          "running action data flattened in time order")                      \
       .add_property(                                                           \
           "terminalData",                                                      \
           bp::make_function(&Problem::get_terminalData,                        \
@@ -104,16 +104,16 @@ namespace python {
                         bp::return_value_policy<bp::copy_const_reference>()),  \
                     "exclusive phase end indices")                             \
       .add_property(                                                           \
-          "parameter_constraints",                                             \
-          bp::make_function(&Problem::get_parameter_constraints_models,        \
+          "paramsConstraints",                                                \
+          bp::make_function(&Problem::get_paramsConstraintModel,               \
                             bp::return_value_policy<bp::return_by_value>()),   \
           "phase-level parameter-constraint models")                           \
       .add_property(                                                           \
-          "parameter_constraints_data",                                        \
-          bp::make_function(&Problem::get_parameter_constraints_datas,         \
+          "paramsConstraintsData",                                            \
+          bp::make_function(&Problem::get_paramsConstraintData,                \
                             bp::return_value_policy<bp::return_by_value>()),   \
           "phase-level parameter-constraint data")                             \
-      .add_property("has_parameter_constraints",                               \
+      .add_property("hasParamsConstraints",                                   \
                     bp::make_function(&Problem::has_parameter_constraints),    \
                     "whether parameter constraints are active");
 

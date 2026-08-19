@@ -52,10 +52,10 @@ class ProblemAbstractTest(unittest.TestCase):
         self.assertEqual(problem.n_phases, 0)
         self.assertEqual(len(problem.phase_idxs), 0)
         self.assertEqual(len(problem.phase_edxs), 0)
-        self.assertEqual(len(problem.parameter_constraints), 0)
-        self.assertEqual(len(problem.parameter_constraints_data), 0)
-        self.assertFalse(problem.has_parameter_constraints)
-        with self.assertRaises(Exception):
+        self.assertEqual(len(problem.paramsConstraints), 0)
+        self.assertEqual(len(problem.paramsConstraintsData), 0)
+        self.assertFalse(problem.hasParamsConstraints)
+        with self.assertRaises(crocoddyl.Exception):
             problem.update_p(np.zeros(1, dtype=dtype), 0)
 
         shallow = copy.copy(problem)

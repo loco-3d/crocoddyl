@@ -33,9 +33,6 @@ template <typename Scalar>
 class ShootingProblemTpl;
 
 template <typename Scalar>
-class ParametrizedShootingProblemTpl;
-
-template <typename Scalar>
 class ObservationProblemTpl;
 
 template <typename Scalar>
@@ -489,7 +486,6 @@ struct ObserverDataCodeGenTpl;
 /********************Template Instantiation*************/
 typedef ProblemAbstractTpl<double> ProblemAbstract;
 typedef ShootingProblemTpl<double> ShootingProblem;
-typedef ParametrizedShootingProblemTpl<double> ParametrizedShootingProblem;
 typedef ObservationProblemTpl<double> ObservationProblem;
 typedef SolverAbstractTpl<double> SolverAbstract;
 typedef SolverFDDPTpl<double> SolverFDDP;

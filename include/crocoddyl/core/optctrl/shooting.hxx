@@ -24,7 +24,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
       nthreads_(1),
-      is_updated_(false) {
+      is_updated_(false),
+      n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -78,7 +79,9 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nthreads_(1) {
+      nthreads_(1),
+      is_updated_(false),
+      n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -125,6 +128,71 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
+    const VectorXs& x0,
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+    std::shared_ptr<ActionModelAbstract> terminal_model,
+    std::shared_ptr<ParameterManager> params_model)
+    : ShootingProblemTpl(
+          x0,
+          std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >{
+              running_models},
+          terminal_model,
+          std::vector<std::shared_ptr<ParameterManager> >{params_model}) {}
+
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(
+    const VectorXs& x0,
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+    std::shared_ptr<ActionModelAbstract> terminal_model,
+    std::shared_ptr<ParameterManager> params_model,
+    std::shared_ptr<ConstraintModelManager> params_constraint_model)
+    : ShootingProblemTpl(
+          x0,
+          std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >{
+              running_models},
+          terminal_model,
+          std::vector<std::shared_ptr<ParameterManager> >{params_model},
+          std::vector<std::shared_ptr<ConstraintModelManager> >{
+              params_constraint_model}) {}
+
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(
+    const VectorXs& x0,
+    const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+        model_phases,
+    std::shared_ptr<ActionModelAbstract> terminal_model,
+    const std::vector<std::shared_ptr<ParameterManager> >& params_model)
+    : ShootingProblemTpl(
+          x0, model_phases, terminal_model, params_model,
+          std::vector<std::shared_ptr<ConstraintModelManager> >()) {}
+
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(
+    const VectorXs& x0,
+    const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+        model_phases,
+    std::shared_ptr<ActionModelAbstract> terminal_model,
+    const std::vector<std::shared_ptr<ParameterManager> >& params_model,
+    const std::vector<std::shared_ptr<ConstraintModelManager> >&
+        params_constraint_model)
+    : ShootingProblemTpl(x0, flattenModelPhases(model_phases),
+                         checkedTerminalModel(terminal_model)) {
+  n_phases_ = model_phases.size();
+  params_model_ = params_model;
+  params_constraint_model_ = params_constraint_model;
+  if (!params_constraint_model_.empty() &&
+      params_constraint_model_.size() != n_phases_) {
+    throw_pretty(
+        "Invalid argument: paramsConstraintModel must be empty or have one "
+        "entry per phase (got "
+        << params_constraint_model_.size() << " constraints for " << n_phases_
+        << " phases)");
+  }
+  initParameterization(model_phases, params_constraint_model_);
+}
+
+template <typename Scalar>
+ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const ShootingProblemTpl<Scalar>& problem)
     : cost_(Scalar(0.)),
       T_(problem.get_T()),
@@ -136,10 +204,136 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       nx_(problem.get_nx()),
       ndx_(problem.get_ndx()),
       nthreads_(problem.nthreads_),
-      is_updated_(problem.is_updated_) {}
+      is_updated_(problem.is_updated_),
+      n_phases_(problem.n_phases_),
+      params_model_(problem.params_model_),
+      params_data_(problem.params_data_),
+      params_constraint_model_(problem.params_constraint_model_),
+      params_constraint_data_(problem.params_constraint_data_),
+      phase_start_(problem.phase_start_),
+      phase_end_(problem.phase_end_) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
+
+template <typename Scalar>
+std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionModelAbstract>
+ShootingProblemTpl<Scalar>::checkedTerminalModel(
+    std::shared_ptr<ActionModelAbstract> terminal_model) {
+  if (terminal_model == nullptr) {
+    throw_pretty("Invalid argument: terminal_model is null");
+  }
+  return terminal_model;
+}
+
+template <typename Scalar>
+std::vector<
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionModelAbstract> >
+ShootingProblemTpl<Scalar>::flattenModelPhases(
+    const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+        model_phases) {
+  if (model_phases.empty()) {
+    throw_pretty("Invalid argument: model_phases is empty");
+  }
+
+  std::vector<std::shared_ptr<ActionModelAbstract> > models;
+  for (std::size_t i = 0; i < model_phases.size(); ++i) {
+    if (model_phases[i].empty()) {
+      throw_pretty("Invalid argument: phase " << i << " has no models");
+    }
+    for (std::size_t j = 0; j < model_phases[i].size(); ++j) {
+      if (model_phases[i][j] == nullptr) {
+        throw_pretty("Invalid argument: model in phase " << i << ", node " << j
+                                                         << " is null");
+      }
+      models.push_back(model_phases[i][j]);
+    }
+  }
+  return models;
+}
+
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::initParameterization(
+    const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+        model_phases,
+    const std::vector<std::shared_ptr<ConstraintModelManager> >&
+        params_constraint_model) {
+  if (params_model_.size() != n_phases_) {
+    throw_pretty(
+        "Invalid argument: paramsModel must have one entry per phase (got "
+        << params_model_.size() << " parameter models for " << n_phases_
+        << " phases)");
+  }
+
+  params_data_.reserve(n_phases_);
+  params_constraint_data_.resize(n_phases_);
+  phase_start_.reserve(n_phases_);
+  phase_end_.reserve(n_phases_);
+
+  std::size_t t = 0;
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    const std::shared_ptr<ParameterManager>& params_model = params_model_[i];
+    if (params_model == nullptr) {
+      throw_pretty("Invalid argument: paramsModel[" << i << "] is null");
+    }
+    if (params_model->get_state() == nullptr ||
+        params_model->get_state()->get_nx() != nx_ ||
+        params_model->get_state()->get_ndx() != ndx_) {
+      throw_pretty("Invalid argument: paramsModel["
+                   << i << "] has an incompatible state");
+    }
+
+    params_data_.push_back(params_model->createData());
+    phase_start_.push_back(t);
+    for (std::size_t j = 0; j < model_phases[i].size(); ++j) {
+      const std::shared_ptr<ActionModelAbstract>& model = model_phases[i][j];
+      if (model->get_np() != params_model->get_np()) {
+        throw_pretty("Invalid argument: model in phase "
+                     << i << ", node " << j << " has np=" << model->get_np()
+                     << " but paramsModel[" << i
+                     << "] has np=" << params_model->get_np());
+      }
+      running_datas_[t] = model->createData(params_data_[i]);
+      model->set_params(running_datas_[t], params_model);
+      ++t;
+    }
+    if (!params_constraint_model.empty() &&
+        params_constraint_model[i] != nullptr) {
+      const std::shared_ptr<ConstraintModelManager>& constraints =
+          params_constraint_model[i];
+      if (constraints->get_state() == nullptr ||
+          constraints->get_state()->get_nx() != nx_ ||
+          constraints->get_state()->get_ndx() != ndx_) {
+        throw_pretty("Invalid argument: paramsConstraintModel["
+                     << i << "] has an incompatible state");
+      }
+      if (constraints->get_np() != params_model->get_np()) {
+        throw_pretty("Invalid argument: paramsConstraintModel["
+                     << i << "] has np=" << constraints->get_np()
+                     << " but paramsModel[" << i
+                     << "] has np=" << params_model->get_np());
+      }
+      if (constraints->get_nu() != model_phases[i][0]->get_nu()) {
+        throw_pretty("Invalid argument: paramsConstraintModel["
+                     << i << "] has nu=" << constraints->get_nu()
+                     << " but the phase control dimension is "
+                     << model_phases[i][0]->get_nu());
+      }
+      params_constraint_data_[i] =
+          constraints->createData(params_data_[i].get());
+    }
+    phase_end_.push_back(t);
+  }
+
+  if (terminal_model_->get_np() != params_model_.back()->get_np()) {
+    throw_pretty("Invalid argument: terminal_model has np="
+                 << terminal_model_->get_np()
+                 << " but the final phase paramsModel has np="
+                 << params_model_.back()->get_np());
+  }
+  terminal_data_ = terminal_model_->createData(params_data_.back());
+  terminal_model_->set_params(terminal_data_, params_model_.back());
+}
 
 template <typename Scalar>
 Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
@@ -408,10 +602,49 @@ template <typename Scalar>
 template <typename NewScalar>
 ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
   typedef ShootingProblemTpl<NewScalar> ReturnType;
-  ReturnType ret(x0_.template cast<NewScalar>(),
-                 vector_cast<NewScalar>(running_models_),
-                 terminal_model_->template cast<NewScalar>());
-  ret.set_nthreads((int)nthreads_);
+  typedef ActionModelAbstractTpl<NewScalar> NewActionModel;
+  typedef ParameterManagerTpl<NewScalar> NewParameterManager;
+  typedef ConstraintModelManagerTpl<NewScalar> NewConstraintManager;
+  const std::shared_ptr<NewActionModel> terminal_model =
+      terminal_model_->template cast<NewScalar>();
+  if (n_phases_ == 0) {
+    ReturnType ret(x0_.template cast<NewScalar>(),
+                   vector_cast<NewScalar>(running_models_), terminal_model);
+    ret.set_nthreads(static_cast<int>(nthreads_));
+    return ret;
+  }
+
+  std::vector<std::vector<std::shared_ptr<NewActionModel> > > model_phases(
+      n_phases_);
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    model_phases[i].reserve(phase_end_[i] - phase_start_[i]);
+    for (std::size_t t = phase_start_[i]; t < phase_end_[i]; ++t) {
+      model_phases[i].push_back(running_models_[t]->template cast<NewScalar>());
+    }
+  }
+  std::vector<std::shared_ptr<NewParameterManager> > params_model;
+  params_model.reserve(n_phases_);
+  std::vector<std::shared_ptr<NewConstraintManager> > params_constraint_model;
+  if (!params_constraint_model_.empty()) {
+    params_constraint_model.reserve(n_phases_);
+  }
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    params_model.push_back(std::make_shared<NewParameterManager>(
+        params_model_[i]->template cast<NewScalar>()));
+    if (!params_constraint_model_.empty()) {
+      params_constraint_model.push_back(
+          params_constraint_model_[i] != nullptr
+              ? std::make_shared<NewConstraintManager>(
+                    params_constraint_model_[i]->template cast<NewScalar>())
+              : nullptr);
+    }
+  }
+  ReturnType ret(x0_.template cast<NewScalar>(), model_phases, terminal_model,
+                 params_model, params_constraint_model);
+  for (std::size_t i = 0; i < n_phases_; ++i) {
+    ret.update_p(params_data_[i]->params->p.template cast<NewScalar>(), i);
+  }
+  ret.set_nthreads(static_cast<int>(nthreads_));
   return ret;
 }
 
@@ -574,6 +807,113 @@ bool ShootingProblemTpl<Scalar>::is_updated() {
   const bool status = is_updated_;
   is_updated_ = false;
   return status;
+}
+
+template <typename Scalar>
+void ShootingProblemTpl<Scalar>::update_p(const Eigen::Ref<const VectorXs>& p,
+                                          const std::size_t phase_idx) {
+  if (n_phases_ == 0) {
+    throw_pretty("Invalid call: shooting problem has no parameter phases");
+  }
+  if (phase_idx >= n_phases_) {
+    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
+                                                << n_phases_);
+  }
+  params_model_[phase_idx]->update(params_data_[phase_idx], p);
+}
+
+template <typename Scalar>
+std::size_t ShootingProblemTpl<Scalar>::get_n_phases() const {
+  return n_phases_;
+}
+
+template <typename Scalar>
+std::vector<
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionModelAbstract> >
+ShootingProblemTpl<Scalar>::get_runningPhaseModels(
+    const std::size_t phase_idx) const {
+  if (phase_idx >= n_phases_) {
+    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
+                                                << n_phases_);
+  }
+  std::vector<std::shared_ptr<ActionModelAbstract> > phase_models;
+  phase_models.reserve(phase_end_[phase_idx] - phase_start_[phase_idx]);
+  for (std::size_t t = phase_start_[phase_idx]; t < phase_end_[phase_idx];
+       ++t) {
+    phase_models.push_back(running_models_[t]);
+  }
+  return phase_models;
+}
+
+template <typename Scalar>
+std::vector<
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionDataAbstract> >
+ShootingProblemTpl<Scalar>::get_runningPhaseDatas(
+    const std::size_t phase_idx) const {
+  if (phase_idx >= n_phases_) {
+    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
+                                                << n_phases_);
+  }
+  std::vector<std::shared_ptr<ActionDataAbstract> > phase_datas;
+  phase_datas.reserve(phase_end_[phase_idx] - phase_start_[phase_idx]);
+  for (std::size_t t = phase_start_[phase_idx]; t < phase_end_[phase_idx];
+       ++t) {
+    phase_datas.push_back(running_datas_[t]);
+  }
+  return phase_datas;
+}
+
+template <typename Scalar>
+const std::vector<
+    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ParameterManager> >&
+ShootingProblemTpl<Scalar>::get_paramsModel() const {
+  return params_model_;
+}
+
+template <typename Scalar>
+const std::vector<std::shared_ptr<
+    typename ShootingProblemTpl<Scalar>::ParameterDataManager> >&
+ShootingProblemTpl<Scalar>::get_paramsData() const {
+  return params_data_;
+}
+
+template <typename Scalar>
+const std::vector<std::size_t>& ShootingProblemTpl<Scalar>::get_phase_idxs()
+    const {
+  return phase_start_;
+}
+
+template <typename Scalar>
+const std::vector<std::size_t>& ShootingProblemTpl<Scalar>::get_phase_edxs()
+    const {
+  return phase_end_;
+}
+
+template <typename Scalar>
+const std::vector<std::shared_ptr<
+    typename ShootingProblemTpl<Scalar>::ConstraintModelManager> >&
+ShootingProblemTpl<Scalar>::get_paramsConstraintModel() const {
+  return params_constraint_model_;
+}
+
+template <typename Scalar>
+const std::vector<std::shared_ptr<
+    typename ShootingProblemTpl<Scalar>::ConstraintDataManager> >&
+ShootingProblemTpl<Scalar>::get_paramsConstraintData() const {
+  return params_constraint_data_;
+}
+
+template <typename Scalar>
+bool ShootingProblemTpl<Scalar>::has_parameter_constraints() const {
+  for (std::size_t i = 0; i < params_constraint_model_.size(); ++i) {
+    const std::shared_ptr<ConstraintModelManager>& constraints =
+        params_constraint_model_[i];
+    if (constraints != nullptr &&
+        (constraints->get_nh() != 0 || constraints->get_ng() != 0)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 template <typename Scalar>

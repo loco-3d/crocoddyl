@@ -578,10 +578,9 @@ Scalar SolverAbstractTpl<Scalar>::computeInequalityFeasibility() {
       problem_->get_runningDatas();
   const bool has_parameter_constraints = problem_->has_parameter_constraints();
   const std::vector<std::shared_ptr<ConstraintModelManagerTpl<Scalar>>>&
-      parameter_constraints_models =
-          problem_->get_parameter_constraints_models();
+      parameter_constraints_models = problem_->get_paramsConstraintModel();
   const std::vector<std::shared_ptr<ConstraintDataManagerTpl<Scalar>>>&
-      parameter_constraints_datas = problem_->get_parameter_constraints_datas();
+      parameter_constraints_datas = problem_->get_paramsConstraintData();
   for (std::size_t t = 0; t < T; ++t) {
     if (models[t]->get_ng() > 0) {
       g_adj_[t] = datas[t]
@@ -714,10 +713,9 @@ Scalar SolverAbstractTpl<Scalar>::computeEqualityFeasibility() {
       problem_->get_runningDatas();
   const bool has_parameter_constraints = problem_->has_parameter_constraints();
   const std::vector<std::shared_ptr<ConstraintModelManagerTpl<Scalar>>>&
-      parameter_constraints_models =
-          problem_->get_parameter_constraints_models();
+      parameter_constraints_models = problem_->get_paramsConstraintModel();
   const std::vector<std::shared_ptr<ConstraintDataManagerTpl<Scalar>>>&
-      parameter_constraints_datas = problem_->get_parameter_constraints_datas();
+      parameter_constraints_datas = problem_->get_paramsConstraintData();
   switch (feasnorm_) {
     case LInf:
       for (std::size_t t = 0; t < T; ++t) {

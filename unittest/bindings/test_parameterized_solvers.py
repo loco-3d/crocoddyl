@@ -52,7 +52,7 @@ class ParameterizedSolversTest(unittest.TestCase):
                 ),
             )
             args.append([None, constraints1])
-        problem = module.ParametrizedShootingProblem(*args)
+        problem = module.ShootingProblem(*args)
         us = [
             np.full(2, 0.1, dtype=dtype),
             np.full(2, -0.05, dtype=dtype),
@@ -89,7 +89,7 @@ class ParameterizedSolversTest(unittest.TestCase):
 
         params = module.ParameterManager(running.state)
         params.addParam("lqr", module.LQRParams(running.state, 1))
-        problem = module.ParametrizedShootingProblem(
+        problem = module.ShootingProblem(
             np.zeros(1, dtype=dtype), [running, running], terminal, params
         )
         us = [np.zeros(1, dtype=dtype), np.zeros(1, dtype=dtype)]
@@ -97,12 +97,12 @@ class ParameterizedSolversTest(unittest.TestCase):
 
     def check_parameterized_solvers(self, module, dtype):
         problem, xs, us = self.make_problem(module, dtype)
-        self.assertEqual(problem.params[0].np, 1)
-        self.assertEqual(problem.params[1].np, 2)
-        self.assertIn("lqr", problem.params[0].active_set)
-        self.assertIn("inactive", problem.params[0].inactive_set)
-        self.assertIn("lqr", problem.params[1].active_set)
-        self.assertIn("inactive", problem.params[1].inactive_set)
+        self.assertEqual(problem.paramsModel[0].np, 1)
+        self.assertEqual(problem.paramsModel[1].np, 2)
+        self.assertIn("lqr", problem.paramsModel[0].active_set)
+        self.assertIn("inactive", problem.paramsModel[0].inactive_set)
+        self.assertIn("lqr", problem.paramsModel[1].active_set)
+        self.assertIn("inactive", problem.paramsModel[1].inactive_set)
         cast_dtype = (
             crocoddyl.DType.Float32 if module is crocoddyl else crocoddyl.DType.Float64
         )
@@ -153,14 +153,14 @@ class ParameterizedSolversTest(unittest.TestCase):
                 self.assertTrue(np.allclose(actual, expected))
             problem_before = solver.problem
             p_before = [value.copy() for value in solver.p]
-            manager_p_before = [data.params.p.copy() for data in problem.params_data]
+            manager_p_before = [data.params.p.copy() for data in problem.paramsData]
             with self.assertRaisesRegex(Exception, "cannot be cast"):
                 solver.cast(cast_dtype)
             self.assertIs(solver.problem, problem_before)
             self.assertIs(solver.problem, problem)
             for actual, expected in zip(solver.p, p_before):
                 self.assertTrue(np.array_equal(actual, expected))
-            for data, expected in zip(problem.params_data, manager_p_before):
+            for data, expected in zip(problem.paramsData, manager_p_before):
                 self.assertTrue(np.array_equal(data.params.p, expected))
 
             with self.assertRaises(crocoddyl.Exception):
@@ -263,7 +263,7 @@ class ParameterizedSolversTest(unittest.TestCase):
             self.assertTrue(np.allclose(solver.p[0], optimum, atol=tol, rtol=tol))
             self.assertTrue(
                 np.allclose(
-                    problem.params_data[0].params.p,
+                    problem.paramsData[0].params.p,
                     optimum,
                     atol=tol,
                     rtol=tol,
@@ -287,18 +287,18 @@ class ParameterizedSolversTest(unittest.TestCase):
         solver = module.SolverFDDP(problem)
         self.assertFalse(solver.solve(xs, us, initial, 0, True))
         solver.computeDirection(True)
-        self.assertIsNone(problem.parameter_constraints[0])
-        self.assertIsNone(problem.parameter_constraints_data[0])
-        self.assertIsNotNone(problem.parameter_constraints[1])
-        self.assertIsNotNone(problem.parameter_constraints_data[1])
+        self.assertIsNone(problem.paramsConstraints[0])
+        self.assertIsNone(problem.paramsConstraintsData[0])
+        self.assertIsNotNone(problem.paramsConstraints[1])
+        self.assertIsNotNone(problem.paramsConstraintsData[1])
 
         accepted = [value.copy() for value in solver.p]
         candidate0 = accepted[0] + dtype(0.25)
         candidate1 = accepted[1] + dtype(0.35)
         problem.update_p(candidate0, 0)
         problem.update_p(candidate1, 1)
-        constraints = problem.parameter_constraints[1]
-        constraints_data = problem.parameter_constraints_data[1]
+        constraints = problem.paramsConstraints[1]
+        constraints_data = problem.paramsConstraintsData[1]
         constraints.calc(
             constraints_data,
             np.zeros(4, dtype=dtype),
@@ -307,10 +307,10 @@ class ParameterizedSolversTest(unittest.TestCase):
         candidate_h = constraints_data.h.copy()
         solver.computeDirection(True)
         self.assertTrue(
-            np.allclose(problem.params_data[0].params.p, accepted[0], atol=tol)
+            np.allclose(problem.paramsData[0].params.p, accepted[0], atol=tol)
         )
         self.assertTrue(
-            np.allclose(problem.params_data[1].params.p, accepted[1], atol=tol)
+            np.allclose(problem.paramsData[1].params.p, accepted[1], atol=tol)
         )
         self.assertFalse(np.allclose(constraints_data.h, candidate_h, atol=tol))
         self.assertTrue(np.allclose(constraints_data.h, accepted[1], atol=tol))

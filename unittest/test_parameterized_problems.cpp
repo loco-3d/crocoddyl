@@ -18,7 +18,7 @@
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/observer/discretized.hpp"
 #include "crocoddyl/core/optctrl/observation.hpp"
-#include "crocoddyl/core/optctrl/parametrized-shooting.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/residuals/parameters.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
@@ -271,9 +271,8 @@ create_parameter_constraints(
 template <typename Scalar>
 void test_parametrized_shooting_problem() {
   typedef crocoddyl::ActionModelLQRTpl<Scalar> ActionModel;
-  typedef crocoddyl::ParametrizedShootingProblemTpl<Scalar> Problem;
+  typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef crocoddyl::ProblemAbstractTpl<Scalar> ProblemAbstract;
-  typedef crocoddyl::ShootingProblemTpl<Scalar> ShootingProblem;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
 
@@ -304,17 +303,24 @@ void test_parametrized_shooting_problem() {
       std::vector<std::shared_ptr<typename Problem::ConstraintModelManager> >{
           constraints0, constraints1});
   ProblemAbstract& base = problem;
-  ShootingProblem& shooting_base = problem;
 
   BOOST_CHECK_EQUAL(base.get_T(), 3);
   BOOST_CHECK_EQUAL(base.get_n_phases(), 2);
   BOOST_CHECK(problem.get_phase_idxs() == std::vector<std::size_t>({0, 2}));
   BOOST_CHECK(problem.get_phase_edxs() == std::vector<std::size_t>({2, 3}));
-  BOOST_CHECK_EQUAL(problem.get_running_phase_models(0).size(), 2);
-  BOOST_CHECK_EQUAL(problem.get_running_phase_datas(1).size(), 1);
+  BOOST_CHECK_EQUAL(problem.get_runningPhaseModels(0).size(), 2);
+  BOOST_CHECK_EQUAL(problem.get_runningPhaseDatas(1).size(), 1);
+  BOOST_CHECK(problem.get_runningPhaseModels(0)[0] ==
+              problem.get_runningModels()[0]);
+  BOOST_CHECK(problem.get_runningPhaseModels(1)[0] ==
+              problem.get_runningModels()[2]);
+  BOOST_CHECK(problem.get_runningPhaseDatas(0)[0] ==
+              problem.get_runningDatas()[0]);
+  BOOST_CHECK(problem.get_runningPhaseDatas(1)[0] ==
+              problem.get_runningDatas()[2]);
   BOOST_CHECK(problem.has_parameter_constraints());
-  BOOST_CHECK(problem.get_params()[0] == params0);
-  BOOST_CHECK(problem.get_params()[1] == params1);
+  BOOST_CHECK(problem.get_paramsModel()[0] == params0);
+  BOOST_CHECK(problem.get_paramsModel()[1] == params1);
 
   const VectorXs p0 = VectorXs::Constant(1, Scalar(0.25));
   VectorXs p1(2);
@@ -325,18 +331,18 @@ void test_parametrized_shooting_problem() {
   problem.update_p(p1, 1);
   BOOST_CHECK_EQUAL(item0->update_calls, item0_updates + 1);
   BOOST_CHECK_EQUAL(item1->update_calls, item1_updates + 1);
-  BOOST_CHECK(problem.get_params_data()[0]->params->p.isApprox(p0));
-  BOOST_CHECK(problem.get_params_data()[1]->params->p.isApprox(p1));
-  BOOST_CHECK(problem.get_params_data()[0]->parameter_data ==
-              problem.get_params_data()[0].get());
-  BOOST_CHECK(problem.get_params_data()[1]->parameter_data ==
-              problem.get_params_data()[1].get());
+  BOOST_CHECK(problem.get_paramsData()[0]->params->p.isApprox(p0));
+  BOOST_CHECK(problem.get_paramsData()[1]->params->p.isApprox(p1));
+  BOOST_CHECK(problem.get_paramsData()[0]->parameter_data ==
+              problem.get_paramsData()[0].get());
+  BOOST_CHECK(problem.get_paramsData()[1]->parameter_data ==
+              problem.get_paramsData()[1].get());
   for (std::size_t t = 0; t < 2; ++t) {
     const std::shared_ptr<crocoddyl::ActionDataLQRTpl<Scalar> > data =
         std::dynamic_pointer_cast<crocoddyl::ActionDataLQRTpl<Scalar> >(
             problem.get_runningDatas()[t]);
     BOOST_REQUIRE(data != nullptr);
-    BOOST_CHECK(data->params == problem.get_params_data()[0]);
+    BOOST_CHECK(data->params == problem.get_paramsData()[0]);
   }
   const std::shared_ptr<crocoddyl::ActionDataLQRTpl<Scalar> > phase1_data =
       std::dynamic_pointer_cast<crocoddyl::ActionDataLQRTpl<Scalar> >(
@@ -346,10 +352,10 @@ void test_parametrized_shooting_problem() {
           problem.get_terminalData());
   BOOST_REQUIRE(phase1_data != nullptr);
   BOOST_REQUIRE(terminal_data != nullptr);
-  BOOST_CHECK(phase1_data->params == problem.get_params_data()[1]);
-  BOOST_CHECK(terminal_data->params == problem.get_params_data()[1]);
-  BOOST_CHECK(problem.get_parameter_constraints_datas()[0]->shared ==
-              problem.get_params_data()[0].get());
+  BOOST_CHECK(phase1_data->params == problem.get_paramsData()[1]);
+  BOOST_CHECK(terminal_data->params == problem.get_paramsData()[1]);
+  BOOST_CHECK(problem.get_paramsConstraintData()[0]->shared ==
+              problem.get_paramsData()[0].get());
 
   std::vector<VectorXs> us(3);
   us[0] = VectorXs::Constant(2, Scalar(0.1));
@@ -363,17 +369,14 @@ void test_parametrized_shooting_problem() {
   BOOST_CHECK(problem.get_runningDatas()[2]->Fp.cols() == 2);
   BOOST_CHECK(problem.get_terminalData()->Fp.cols() == 2);
 
-  constraints1->calc(problem.get_parameter_constraints_datas()[1], xs[2],
-                     us[2]);
-  constraints1->calcDiff(problem.get_parameter_constraints_datas()[1], xs[2],
-                         us[2]);
-  BOOST_CHECK(problem.get_parameter_constraints_datas()[1]
+  constraints1->calc(problem.get_paramsConstraintData()[1], xs[2], us[2]);
+  constraints1->calcDiff(problem.get_paramsConstraintData()[1], xs[2], us[2]);
+  BOOST_CHECK(problem.get_paramsConstraintData()[1]
                   ->h.head(us[2].size())
                   .isApprox(us[2]));
   BOOST_CHECK(
-      problem.get_parameter_constraints_datas()[1]->h.tail(p1.size()).isApprox(
-          p1));
-  BOOST_CHECK(problem.get_parameter_constraints_datas()[1]
+      problem.get_paramsConstraintData()[1]->h.tail(p1.size()).isApprox(p1));
+  BOOST_CHECK(problem.get_paramsConstraintData()[1]
                   ->Hp.bottomRows(p1.size())
                   .isIdentity());
 
@@ -388,13 +391,13 @@ void test_parametrized_shooting_problem() {
   const std::vector<std::size_t> original_phase_idxs = problem.get_phase_idxs();
   const std::vector<std::size_t> original_phase_edxs = problem.get_phase_edxs();
   const std::vector<std::shared_ptr<ParameterManager> > original_params =
-      problem.get_params();
+      problem.get_paramsModel();
   const std::vector<std::shared_ptr<typename Problem::ParameterDataManager> >
-      original_params_data = problem.get_params_data();
+      original_params_data = problem.get_paramsData();
   const std::vector<std::shared_ptr<typename Problem::ConstraintModelManager> >
-      original_constraints = problem.get_parameter_constraints_models();
+      original_constraints = problem.get_paramsConstraintModel();
   const std::vector<std::shared_ptr<typename Problem::ConstraintDataManager> >
-      original_constraints_data = problem.get_parameter_constraints_datas();
+      original_constraints_data = problem.get_paramsConstraintData();
   const auto requires_reconstruction = [](const crocoddyl::Exception& e) {
     return std::string(e.what()).find("must be reconstructed") !=
            std::string::npos;
@@ -406,11 +409,10 @@ void test_parametrized_shooting_problem() {
     BOOST_CHECK(problem.get_terminalData() == original_terminal_data);
     BOOST_CHECK(problem.get_phase_idxs() == original_phase_idxs);
     BOOST_CHECK(problem.get_phase_edxs() == original_phase_edxs);
-    BOOST_CHECK(problem.get_params() == original_params);
-    BOOST_CHECK(problem.get_params_data() == original_params_data);
-    BOOST_CHECK(problem.get_parameter_constraints_models() ==
-                original_constraints);
-    BOOST_CHECK(problem.get_parameter_constraints_datas() ==
+    BOOST_CHECK(problem.get_paramsModel() == original_params);
+    BOOST_CHECK(problem.get_paramsData() == original_params_data);
+    BOOST_CHECK(problem.get_paramsConstraintModel() == original_constraints);
+    BOOST_CHECK(problem.get_paramsConstraintData() ==
                 original_constraints_data);
     for (std::size_t t = 0; t < 2; ++t) {
       const std::shared_ptr<crocoddyl::ActionDataLQRTpl<Scalar> > data =
@@ -449,27 +451,6 @@ void test_parametrized_shooting_problem() {
   BOOST_CHECK_EXCEPTION(problem.set_terminalModel(terminal),
                         crocoddyl::Exception, requires_reconstruction);
   check_structural_identity();
-  BOOST_CHECK_EXCEPTION(
-      shooting_base.circularAppend(phase0_a, original_datas[0]),
-      crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-  BOOST_CHECK_EXCEPTION(shooting_base.circularAppend(phase0_a),
-                        crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-  BOOST_CHECK_EXCEPTION(
-      shooting_base.updateNode(0, phase0_a, original_datas[0]),
-      crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-  BOOST_CHECK_EXCEPTION(shooting_base.updateModel(0, phase0_a),
-                        crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-  BOOST_CHECK_EXCEPTION(shooting_base.set_runningModels(original_models),
-                        crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-  BOOST_CHECK_EXCEPTION(shooting_base.set_terminalModel(terminal),
-                        crocoddyl::Exception, requires_reconstruction);
-  check_structural_identity();
-
   VectorXs modified_x0 = x0;
   modified_x0.array() += Scalar(0.1);
   problem.set_x0(modified_x0);
@@ -484,11 +465,27 @@ void test_parametrized_shooting_problem() {
 
   Problem copied(problem);
   BOOST_CHECK(copied.get_runningDatas()[0] == problem.get_runningDatas()[0]);
-  BOOST_CHECK(copied.get_params_data()[1] == problem.get_params_data()[1]);
+  BOOST_CHECK(copied.get_paramsData()[1] == problem.get_paramsData()[1]);
   BOOST_CHECK_EQUAL(copied.calc(xs, us), cost);
 
+  typedef typename std::conditional<std::is_same<Scalar, double>::value, float,
+                                    double>::type OtherScalar;
+  const crocoddyl::ShootingProblemTpl<OtherScalar> casted =
+      problem.template cast<OtherScalar>();
+  BOOST_CHECK_EQUAL(casted.get_n_phases(), problem.get_n_phases());
+  BOOST_CHECK(casted.get_phase_idxs() == problem.get_phase_idxs());
+  BOOST_CHECK(casted.get_phase_edxs() == problem.get_phase_edxs());
+  BOOST_CHECK_EQUAL(casted.get_paramsModel().size(),
+                    problem.get_paramsModel().size());
+  BOOST_CHECK(casted.get_paramsData()[0]->params->p.isApprox(
+      p0.template cast<OtherScalar>()));
+  BOOST_CHECK(casted.get_paramsData()[1]->params->p.isApprox(
+      p1.template cast<OtherScalar>()));
+  BOOST_CHECK(casted.has_parameter_constraints());
+
   BOOST_CHECK_THROW(problem.update_p(p0, 2), crocoddyl::Exception);
-  BOOST_CHECK_THROW(problem.get_running_phase_models(2), crocoddyl::Exception);
+  BOOST_CHECK_THROW(problem.get_runningPhaseModels(2), crocoddyl::Exception);
+  BOOST_CHECK_THROW(problem.get_runningPhaseDatas(2), crocoddyl::Exception);
   BOOST_CHECK_THROW(problem.calc(std::vector<VectorXs>(3), us),
                     crocoddyl::Exception);
   BOOST_CHECK_THROW(problem.rollout_us(std::vector<VectorXs>(2)),
@@ -581,7 +578,11 @@ void test_observation_problem() {
   BOOST_CHECK_EQUAL(base.get_nthreads(), 1);
   BOOST_CHECK(problem.get_phase_idxs() == std::vector<std::size_t>({0, 2}));
   BOOST_CHECK(problem.get_phase_edxs() == std::vector<std::size_t>({2, 3}));
-  BOOST_CHECK_EQUAL(problem.get_running_phase_models(0).size(), 2);
+  BOOST_CHECK_EQUAL(problem.get_runningPhaseModels(0).size(), 2);
+  BOOST_CHECK_EQUAL(problem.get_runningPhaseDatas(1).size(), 1);
+  BOOST_CHECK(problem.get_runningPhaseModels(1)[0] == observer1);
+  BOOST_CHECK(problem.get_runningPhaseDatas(1)[0] ==
+              problem.get_runningDatas()[2]);
   BOOST_CHECK(problem.has_parameter_constraints());
   BOOST_CHECK(observer0a->get_tau_meas().isApprox(tau_meas[0]));
   BOOST_CHECK(observer0b->get_tau_meas().isApprox(tau_meas[1]));
@@ -596,8 +597,8 @@ void test_observation_problem() {
   problem.update_p(p1, 1);
   BOOST_CHECK_EQUAL(item0->update_calls, item0_updates + 1);
   BOOST_CHECK_EQUAL(item1->update_calls, item1_updates + 1);
-  BOOST_CHECK(problem.get_params_data()[0]->params->p.isApprox(p0));
-  BOOST_CHECK(problem.get_params_data()[1]->params->p.isApprox(p1));
+  BOOST_CHECK(problem.get_paramsData()[0]->params->p.isApprox(p0));
+  BOOST_CHECK(problem.get_paramsData()[1]->params->p.isApprox(p1));
   const std::shared_ptr<crocoddyl::DiscretizedObserverDataTpl<Scalar> >
       running0_data = std::dynamic_pointer_cast<
           crocoddyl::DiscretizedObserverDataTpl<Scalar> >(
@@ -614,11 +615,11 @@ void test_observation_problem() {
   BOOST_REQUIRE(running2_data != nullptr);
   BOOST_REQUIRE(terminal_data != nullptr);
   BOOST_CHECK(running0_data->dynamics->shared ==
-              problem.get_params_data()[0].get());
+              problem.get_paramsData()[0].get());
   BOOST_CHECK(running2_data->dynamics->shared ==
-              problem.get_params_data()[1].get());
+              problem.get_paramsData()[1].get());
   BOOST_CHECK(terminal_data->dynamics->shared ==
-              problem.get_params_data()[1].get());
+              problem.get_paramsData()[1].get());
 
   std::vector<VectorXs> ws(3);
   ws[0] = VectorXs::LinSpaced(4, Scalar(0.1), Scalar(0.4));
@@ -636,7 +637,7 @@ void test_observation_problem() {
   BOOST_CHECK(problem.get_runningDatas()[2]->Fp.col(1).isConstant(Scalar(2)));
 
   const std::shared_ptr<typename Problem::ConstraintDataManager>& phase1_data =
-      problem.get_parameter_constraints_datas()[1];
+      problem.get_paramsConstraintData()[1];
   BOOST_CHECK(phase1_data->h.head(ws[2].size()).isApprox(ws[2]));
   BOOST_CHECK(phase1_data->h.tail(p1.size()).isApprox(p1));
   BOOST_CHECK(phase1_data->Hu.topRows(ws[2].size()).isIdentity());
@@ -652,7 +653,7 @@ void test_observation_problem() {
 
   Problem copied(problem);
   BOOST_CHECK(copied.get_runningDatas()[0] == problem.get_runningDatas()[0]);
-  BOOST_CHECK(copied.get_params_data()[1] == problem.get_params_data()[1]);
+  BOOST_CHECK(copied.get_paramsData()[1] == problem.get_paramsData()[1]);
   BOOST_CHECK_EQUAL(copied.calc(xs, ws), problem.calc(xs, ws));
   copied.set_is_updated(true);
   BOOST_CHECK(copied.is_updated());
@@ -691,7 +692,7 @@ void test_observation_problem() {
 template <typename Scalar>
 void test_problem_validation_and_layout_changes() {
   typedef crocoddyl::ActionModelLQRTpl<Scalar> ActionModel;
-  typedef crocoddyl::ParametrizedShootingProblemTpl<Scalar> ShootingProblem;
+  typedef crocoddyl::ShootingProblemTpl<Scalar> ShootingProblem;
   typedef crocoddyl::ObservationProblemTpl<Scalar> ObservationProblem;
   typedef crocoddyl::StateVectorTpl<Scalar> State;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
@@ -785,7 +786,7 @@ void test_problem_validation_and_layout_changes() {
           resized},
       resized, params);
   rebuilt.update_p(VectorXs::Zero(2));
-  BOOST_CHECK_EQUAL(rebuilt.get_params_data()[0]->params->p.size(), 2);
+  BOOST_CHECK_EQUAL(rebuilt.get_paramsData()[0]->params->p.size(), 2);
 
   const std::shared_ptr<State> state = std::make_shared<State>(4);
   std::shared_ptr<CountingDynamicsParamsTpl<Scalar> > dynamics_item;

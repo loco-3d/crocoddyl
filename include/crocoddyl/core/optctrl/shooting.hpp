@@ -11,8 +11,10 @@
 #define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/optctrl/problem-abstract.hpp"
+#include "crocoddyl/core/params/parameter-manager.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -27,8 +29,14 @@ namespace crocoddyl {
  * set of next states and cost values per each node \f$k\f$. Instead, `calcDiff`
  * updates the derivatives of all action models. Finally, `rollout` integrates
  * the system dynamics. This class is used to decouple problem formulation and
- * resolution. Structural mutation is supported only for standard problems
- * without phase-owned data; phased problems must be reconstructed.
+ * resolution.
+ *
+ * A shooting problem can optionally own action parameters shared by one or
+ * more phases. All action data in a parameter phase refer to the same
+ * `ParameterDataManagerTpl`, and the terminal node uses the final phase.
+ * Parameter layouts are fixed at construction. Structural mutation is
+ * supported only for problems without phase-owned data; parameterized problems
+ * must be reconstructed when their model or phase layout changes.
  */
 template <typename _Scalar>
 class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
@@ -38,6 +46,10 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterManagerTpl<Scalar> ParameterManager;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
 
@@ -68,6 +80,54 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
       std::shared_ptr<ActionModelAbstract> terminal_model,
       const std::vector<std::shared_ptr<ActionDataAbstract> >& running_datas,
       std::shared_ptr<ActionDataAbstract> terminal_data);
+
+  /**
+   * @brief Construct a single-phase parameterized shooting problem
+   *
+   * @param[in] x0 Initial state
+   * @param[in] running_models Running action models
+   * @param[in] terminal_model Terminal action model
+   * @param[in] params_model Parameter manager shared by all nodes
+   */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      std::shared_ptr<ParameterManager> params_model);
+
+  /** @brief Construct a constrained single-phase parameterized problem */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      std::shared_ptr<ParameterManager> params_model,
+      std::shared_ptr<ConstraintModelManager> params_constraint_model);
+
+  /**
+   * @brief Construct a multi-phase parameterized shooting problem
+   *
+   * @param[in] x0 Initial state
+   * @param[in] model_phases Running action models grouped by parameter phase
+   * @param[in] terminal_model Terminal action model
+   * @param[in] params_model One parameter manager per phase
+   */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      const std::vector<std::shared_ptr<ParameterManager> >& params_model);
+
+  /** @brief Construct a constrained multi-phase parameterized problem */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      const std::vector<std::shared_ptr<ParameterManager> >& params_model,
+      const std::vector<std::shared_ptr<ConstraintModelManager> >&
+          params_constraint_model);
+
   /**
    * @brief Initialize the shooting problem
    */
@@ -216,9 +276,7 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
    */
   virtual const VectorXs& get_x0() const override;
 
-  /**
-   * @brief Return the running models
-   */
+  /** @brief Return all running models flattened in time order */
   virtual const std::vector<std::shared_ptr<ActionModelAbstract> >&
   get_runningModels() const override;
 
@@ -228,9 +286,7 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   virtual const std::shared_ptr<ActionModelAbstract>& get_terminalModel()
       const override;
 
-  /**
-   * @brief Return the running datas
-   */
+  /** @brief Return all running data flattened in time order */
   virtual const std::vector<std::shared_ptr<ActionDataAbstract> >&
   get_runningDatas() const override;
 
@@ -290,6 +346,54 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
    */
   virtual bool is_updated() override;
 
+  /** @brief Update the active parameter vector of one phase exactly once */
+  virtual void update_p(const Eigen::Ref<const VectorXs>& p,
+                        const std::size_t phase_idx = 0) override;
+
+  /** @brief Return the number of parameterized running phases */
+  virtual std::size_t get_n_phases() const override;
+
+  /**
+   * @brief Return the running action models of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ActionModelAbstract> > get_runningPhaseModels(
+      const std::size_t phase_idx) const;
+
+  /**
+   * @brief Return the running action data of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
+      const std::size_t phase_idx) const;
+
+  /** @brief Return the shared parameter models, one per phase */
+  const std::vector<std::shared_ptr<ParameterManager> >& get_paramsModel()
+      const;
+
+  /** @brief Return the owned parameter data, one per phase */
+  const std::vector<std::shared_ptr<ParameterDataManager> >& get_paramsData()
+      const;
+
+  /** @brief Return the inclusive running-node start of every parameter phase */
+  virtual const std::vector<std::size_t>& get_phase_idxs() const override;
+
+  /** @brief Return the exclusive running-node end of every parameter phase */
+  virtual const std::vector<std::size_t>& get_phase_edxs() const override;
+
+  /** @brief Return the optional parameter-constraint managers */
+  virtual const std::vector<std::shared_ptr<ConstraintModelManager> >&
+  get_paramsConstraintModel() const override;
+
+  /** @brief Return the parameter-constraint data sharing phase payloads */
+  virtual const std::vector<std::shared_ptr<ConstraintDataManager> >&
+  get_paramsConstraintData() const override;
+
+  /** @brief Return true if any phase has active parameter constraints */
+  virtual bool has_parameter_constraints() const override;
+
   /**
    * @brief Print information on the 'ShootingProblem'
    */
@@ -314,8 +418,30 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
                           //!< application
   bool is_updated_;
 
+  std::size_t n_phases_;  //!< Number of parameter phases (zero if disabled)
+  std::vector<std::shared_ptr<ParameterManager> > params_model_;
+  std::vector<std::shared_ptr<ParameterDataManager> > params_data_;
+  std::vector<std::shared_ptr<ConstraintModelManager> >
+      params_constraint_model_;
+  std::vector<std::shared_ptr<ConstraintDataManager> > params_constraint_data_;
+  std::vector<std::size_t> phase_start_;
+  std::vector<std::size_t> phase_end_;
+
  private:
   void allocateData();
+
+  static std::shared_ptr<ActionModelAbstract> checkedTerminalModel(
+      std::shared_ptr<ActionModelAbstract> terminal_model);
+
+  static std::vector<std::shared_ptr<ActionModelAbstract> > flattenModelPhases(
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases);
+
+  void initParameterization(
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases,
+      const std::vector<std::shared_ptr<ConstraintModelManager> >&
+          params_constraint_model);
 };
 
 }  // namespace crocoddyl

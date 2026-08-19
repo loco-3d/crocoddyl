@@ -128,9 +128,7 @@ x0 = np.concatenate([hector.q0, np.zeros(state.nv)])
 p0 = np.array([np.log(dt)])
 params = crocoddyl.ParameterManager(state)
 params.addParam("timeopt", crocoddyl.IntegratorTimeoptParams(state, runningTime))
-problem = crocoddyl.ParametrizedShootingProblem(
-    x0, [runningModel] * T, terminalModel, params
-)
+problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel, params)
 problem.update_p(p0, phase_idx=0)
 solver = crocoddyl.SolverFDDP(problem)
 solver.th_minImprove = 1e-4

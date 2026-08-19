@@ -60,14 +60,14 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
    * @param[in] tau_meas Measured torques at all running nodes
    * @param[in] model_phases Running observer models grouped by phase
    * @param[in] terminal_model Terminal observer model
-   * @param[in] params One parameter manager per phase
+   * @param[in] params_model One parameter manager per phase
    */
   ObservationProblemTpl(
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
       const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
           model_phases,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      const std::vector<std::shared_ptr<ParameterManager> >& params);
+      const std::vector<std::shared_ptr<ParameterManager> >& params_model);
 
   /** @brief Construct a constrained multi-phase observation problem */
   ObservationProblemTpl(
@@ -75,9 +75,9 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
       const std::vector<std::vector<std::shared_ptr<ObserverModelAbstract> > >&
           model_phases,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      const std::vector<std::shared_ptr<ParameterManager> >& params,
+      const std::vector<std::shared_ptr<ParameterManager> >& params_model,
       const std::vector<std::shared_ptr<ConstraintModelManager> >&
-          parameter_constraints);
+          params_constraint_model);
 
   /**
    * @brief Construct a single-phase observation problem
@@ -86,14 +86,14 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
    * @param[in] tau_meas Measured torques at all running nodes
    * @param[in] running_models Running observer models
    * @param[in] terminal_model Terminal observer model
-   * @param[in] params Parameter manager shared by the phase
+   * @param[in] params_model Parameter manager shared by the phase
    */
   ObservationProblemTpl(
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
       const std::vector<std::shared_ptr<ObserverModelAbstract> >&
           running_models,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      std::shared_ptr<ParameterManager> params);
+      std::shared_ptr<ParameterManager> params_model);
 
   /** @brief Construct a constrained single-phase observation problem */
   ObservationProblemTpl(
@@ -101,8 +101,8 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
       const std::vector<std::shared_ptr<ObserverModelAbstract> >&
           running_models,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
-      std::shared_ptr<ParameterManager> params,
-      std::shared_ptr<ConstraintModelManager> parameter_constraints);
+      std::shared_ptr<ParameterManager> params_model,
+      std::shared_ptr<ConstraintModelManager> params_constraint_model);
 
   virtual ~ObservationProblemTpl() = default;
 
@@ -141,7 +141,7 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   virtual const std::shared_ptr<ActionModelAbstract>& get_terminalModel()
       const override;
 
-  /** @brief Return the running observer data */
+  /** @brief Return all running observer data flattened in time order */
   virtual const std::vector<std::shared_ptr<ActionDataAbstract> >&
   get_runningDatas() const override;
 
@@ -169,19 +169,28 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   /** @brief Update measured torques at all running nodes */
   void update_us(const std::vector<VectorXs>& tau_meas);
 
-  /** @brief Return the observer models in one phase */
-  std::vector<std::shared_ptr<ObserverModelAbstract> > get_running_phase_models(
+  /**
+   * @brief Return the running observer models of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ObserverModelAbstract> > get_runningPhaseModels(
       const std::size_t phase_idx) const;
 
-  /** @brief Return the observer data in one phase */
-  std::vector<std::shared_ptr<ActionDataAbstract> > get_running_phase_datas(
+  /**
+   * @brief Return the running observer data of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
       const std::size_t phase_idx) const;
 
-  /** @brief Return the shared parameter managers, one per phase */
-  const std::vector<std::shared_ptr<ParameterManager> >& get_params() const;
+  /** @brief Return the shared parameter models, one per phase */
+  const std::vector<std::shared_ptr<ParameterManager> >& get_paramsModel()
+      const;
 
   /** @brief Return the owned parameter data, one per phase */
-  const std::vector<std::shared_ptr<ParameterDataManager> >& get_params_data()
+  const std::vector<std::shared_ptr<ParameterDataManager> >& get_paramsData()
       const;
 
   /** @brief Return the inclusive running-node start of every phase */
@@ -192,11 +201,11 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
 
   /** @brief Return the optional parameter-constraint managers */
   virtual const std::vector<std::shared_ptr<ConstraintModelManager> >&
-  get_parameter_constraints_models() const override;
+  get_paramsConstraintModel() const override;
 
   /** @brief Return the parameter-constraint data sharing phase payloads */
   virtual const std::vector<std::shared_ptr<ConstraintDataManager> >&
-  get_parameter_constraints_datas() const override;
+  get_paramsConstraintData() const override;
 
   /** @brief Return true if any phase has active parameter constraints */
   virtual bool has_parameter_constraints() const override;
@@ -208,7 +217,7 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
           model_phases,
       std::shared_ptr<ObserverModelAbstract> terminal_model,
       const std::vector<std::shared_ptr<ConstraintModelManager> >&
-          parameter_constraints);
+          params_constraint_model);
 
   Scalar cost_;
   std::size_t T_;
@@ -221,11 +230,11 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   std::vector<std::shared_ptr<ActionModelAbstract> > running_models_;
   std::vector<std::shared_ptr<ActionDataAbstract> > running_datas_;
   std::size_t n_phases_;
-  std::vector<std::shared_ptr<ParameterManager> > params_;
+  std::vector<std::shared_ptr<ParameterManager> > params_model_;
   std::vector<std::shared_ptr<ParameterDataManager> > params_data_;
-  std::vector<std::shared_ptr<ConstraintModelManager> > parameter_constraints_;
-  std::vector<std::shared_ptr<ConstraintDataManager> >
-      parameter_constraints_data_;
+  std::vector<std::shared_ptr<ConstraintModelManager> >
+      params_constraint_model_;
+  std::vector<std::shared_ptr<ConstraintDataManager> > params_constraint_data_;
   std::vector<std::size_t> phase_start_;
   std::vector<std::size_t> phase_end_;
 };

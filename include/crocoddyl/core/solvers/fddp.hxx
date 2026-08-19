@@ -100,10 +100,10 @@ void SolverFDDPTpl<Scalar>::computeCandidate(const Scalar steplength) {
     acceptstep_ = false;
     const std::vector<
         std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-        constraints_models = problem_->get_parameter_constraints_models();
+        constraints_models = problem_->get_paramsConstraintModel();
     const std::vector<
         std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-        constraints_datas = problem_->get_parameter_constraints_datas();
+        constraints_datas = problem_->get_paramsConstraintData();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       p_try_[i] = p_[i] + steplength * dp_[i];
       problem_->update_p(p_try_[i], i);
@@ -1316,7 +1316,7 @@ void SolverFDDPTpl<Scalar>::allocateData() {
 #endif
     const std::vector<
         std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-        constraints_models = problem_->get_parameter_constraints_models();
+        constraints_models = problem_->get_paramsConstraintModel();
     for (std::size_t i = 0; i < n_phases_; ++i) {
       const std::size_t np = models[phase_starts[i]]->get_np();
       p_[i] = VectorXs::Zero(np);
@@ -1971,10 +1971,10 @@ void SolverFDDPTpl<Scalar>::paramsPass() {
       START_PROFILER("SolverFDDP::paramsPassQP");
       const std::vector<
           std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-          constraints_models = problem_->get_parameter_constraints_models();
+          constraints_models = problem_->get_paramsConstraintModel();
       const std::vector<
           std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-          constraints_datas = problem_->get_parameter_constraints_datas();
+          constraints_datas = problem_->get_paramsConstraintData();
       for (std::size_t i = 0; i < n_phases_; ++i) {
         const std::size_t np = static_cast<std::size_t>(p_[i].size());
         if (np == 0) {
@@ -2138,10 +2138,10 @@ void SolverFDDPTpl<Scalar>::calcDir() {
     if (problem_->has_parameter_constraints()) {
       const std::vector<
           std::shared_ptr<typename ShootingProblem::ConstraintModelManager>>&
-          constraints_models = problem_->get_parameter_constraints_models();
+          constraints_models = problem_->get_paramsConstraintModel();
       const std::vector<
           std::shared_ptr<typename ShootingProblem::ConstraintDataManager>>&
-          constraints_datas = problem_->get_parameter_constraints_datas();
+          constraints_datas = problem_->get_paramsConstraintData();
       for (std::size_t i = 0; i < constraints_models.size(); ++i) {
         const std::shared_ptr<typename ShootingProblem::ConstraintModelManager>&
             constraints = constraints_models[i];

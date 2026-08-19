@@ -316,13 +316,13 @@ def require_arrival_qp_parameter_constraints():
 
 
 def parameter_constraint_violations(problem, state, p_vectors):
-    if not hasattr(problem, "parameter_constraints"):
+    if not hasattr(problem, "paramsConstraints"):
         return float("nan"), float("nan")
 
     max_eq = 0.0
     max_ineq = 0.0
-    managers = list(problem.parameter_constraints)
-    datas = list(problem.parameter_constraints_data)
+    managers = list(problem.paramsConstraints)
+    datas = list(problem.paramsConstraintsData)
     for phase_idx, (manager, data) in enumerate(zip(managers, datas)):
         if manager is None or data is None:
             continue

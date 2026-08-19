@@ -201,7 +201,7 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 self.assertIsInstance(fallback_data, module.JointDynamicsDataAbstract)
                 fallback_matrix = np.ones((0, 0), dtype=dtype)
                 fallback.updateParametrizationDerivative(fallback_matrix)
-                with self.assertRaises(crocoddyl.Exception):
+                with self.assertRaises(RuntimeError):
                     fallback.calc(
                         fallback_data,
                         np.zeros(1, dtype=dtype),

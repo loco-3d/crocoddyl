@@ -18,7 +18,7 @@
 #endif
 
 #include "crocoddyl/core/actions/lqr.hpp"
-#include "crocoddyl/core/optctrl/parametrized-shooting.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/intro.hpp"
 #include "crocoddyl/core/utils/callbacks.hpp"
@@ -491,7 +491,7 @@ void test_fddp_single_shoot_arrival_state_forward_pass() {
   typedef crocoddyl::ActionModelLQR ActionModelLQR;
   typedef crocoddyl::LQRParams LQRParams;
   typedef crocoddyl::ParameterManager ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblem ParametrizedShootingProblem;
+  typedef crocoddyl::ShootingProblem ShootingProblem;
 
   const std::size_t T = 2;
   const std::shared_ptr<ActionModelLQR> model =
@@ -505,9 +505,8 @@ void test_fddp_single_shoot_arrival_state_forward_pass() {
       T, model);
   const std::shared_ptr<crocoddyl::StateAbstract>& state = model->get_state();
   const Eigen::VectorXd x0 = sampleSolverState(state);
-  const std::shared_ptr<ParametrizedShootingProblem> problem =
-      std::make_shared<ParametrizedShootingProblem>(x0, running_models, modelT,
-                                                    params);
+  const std::shared_ptr<ShootingProblem> problem =
+      std::make_shared<ShootingProblem>(x0, running_models, modelT, params);
   problem->set_nthreads(1);
   SolverFDDPArrivalStateProbe solver(
       problem, crocoddyl::DynamicsSolverType::SingleShoot,
@@ -651,7 +650,7 @@ void test_fddp_parametrized_arrival_state_no_malloc() {
   typedef crocoddyl::ActionModelLQR ActionModelLQR;
   typedef crocoddyl::LQRParams LQRParams;
   typedef crocoddyl::ParameterManager ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblem ParametrizedShootingProblem;
+  typedef crocoddyl::ShootingProblem ShootingProblem;
 
   const std::size_t nx = 8;
   const std::size_t nu = 4;
@@ -668,9 +667,9 @@ void test_fddp_parametrized_arrival_state_no_malloc() {
   const Eigen::VectorXd x0 = sampleSolverState(model->get_state());
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
-  const std::shared_ptr<ParametrizedShootingProblem> problem =
-      std::make_shared<ParametrizedShootingProblem>(x0, running_models,
-                                                    terminal_model, params);
+  const std::shared_ptr<ShootingProblem> problem =
+      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
+                                        params);
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;
@@ -705,7 +704,7 @@ void test_fddp_astate_qp_skips_initial_state_marginalization() {
   typedef crocoddyl::ActionModelLQR ActionModelLQR;
   typedef crocoddyl::LQRParams LQRParams;
   typedef crocoddyl::ParameterManager ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblem ParametrizedShootingProblem;
+  typedef crocoddyl::ShootingProblem ShootingProblem;
 
   const std::size_t nx = 8;
   const std::size_t nu = 4;
@@ -722,9 +721,9 @@ void test_fddp_astate_qp_skips_initial_state_marginalization() {
   const Eigen::VectorXd x0 = sampleSolverState(model->get_state());
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
-  const std::shared_ptr<ParametrizedShootingProblem> problem =
-      std::make_shared<ParametrizedShootingProblem>(x0, running_models,
-                                                    terminal_model, params);
+  const std::shared_ptr<ShootingProblem> problem =
+      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
+                                        params);
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;
@@ -748,7 +747,7 @@ void test_intro_parametrized_equality_no_malloc() {
   typedef crocoddyl::ActionModelLQR ActionModelLQR;
   typedef crocoddyl::LQRParams LQRParams;
   typedef crocoddyl::ParameterManager ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblem ParametrizedShootingProblem;
+  typedef crocoddyl::ShootingProblem ShootingProblem;
 
   const std::size_t nx = 8;
   const std::size_t nu = 4;
@@ -800,9 +799,9 @@ void test_intro_parametrized_equality_no_malloc() {
   const Eigen::VectorXd x0 = sampleSolverState(model->get_state());
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> running_models(
       T, model);
-  const std::shared_ptr<ParametrizedShootingProblem> problem =
-      std::make_shared<ParametrizedShootingProblem>(x0, running_models,
-                                                    terminal_model, params);
+  const std::shared_ptr<ShootingProblem> problem =
+      std::make_shared<ShootingProblem>(x0, running_models, terminal_model,
+                                        params);
   problem->set_nthreads(1);
 
   std::vector<Eigen::VectorXd> xs;

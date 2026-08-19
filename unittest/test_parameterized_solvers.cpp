@@ -16,7 +16,7 @@
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/integrator/discretized.hpp"
-#include "crocoddyl/core/optctrl/parametrized-shooting.hpp"
+#include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/residuals/parameters.hpp"
 #include "crocoddyl/core/solvers/fddp.hpp"
 #include "crocoddyl/core/solvers/intro.hpp"
@@ -43,7 +43,7 @@ struct ParameterizedSolverFixture {
   typedef crocoddyl::ConstraintModelResidualTpl<Scalar> ResidualConstraint;
   typedef crocoddyl::LQRParamsTpl<Scalar> LQRParams;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblemTpl<Scalar> Problem;
+  typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef crocoddyl::ResidualModelParametersTpl<Scalar> ParameterResidual;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -131,7 +131,7 @@ struct QuadraticParameterFixture {
   typedef crocoddyl::ActionModelLQRTpl<Scalar> LQR;
   typedef crocoddyl::LQRParamsTpl<Scalar> LQRParams;
   typedef crocoddyl::ParameterManagerTpl<Scalar> ParameterManager;
-  typedef crocoddyl::ParametrizedShootingProblemTpl<Scalar> Problem;
+  typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::MatrixXs MatrixXs;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
 
@@ -242,7 +242,7 @@ void check_quadratic_parameter_solver() {
   BOOST_CHECK_GT(solver.get_iter(), 0);
   BOOST_REQUIRE_EQUAL(solver.get_p().size(), 1);
   BOOST_CHECK(solver.get_p()[0].isApprox(fixture.optimum, tol));
-  BOOST_CHECK(fixture.problem->get_params_data()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
       fixture.optimum, tol));
   const Scalar recomputed_cost =
       fixture.problem->calc(solver.get_xs(), solver.get_us());
@@ -287,9 +287,9 @@ void check_parameterized_fddp() {
   BOOST_CHECK(solver.get_p()[1].isApprox(init_p[1]));
   BOOST_CHECK(solver.get_p_try()[0].isApprox(solver.get_p()[0]));
   BOOST_CHECK(solver.get_p_try()[1].isApprox(solver.get_p()[1]));
-  BOOST_CHECK(fixture.problem->get_params_data()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
       solver.get_p()[0]));
-  BOOST_CHECK(fixture.problem->get_params_data()[1]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[1]->params->p.isApprox(
       solver.get_p()[1]));
 
   solver.computeDirection(true);
@@ -340,14 +340,14 @@ void check_parameterized_fddp() {
   const std::vector<VectorXs> p_before = solver.get_p();
   std::vector<VectorXs> manager_p_before(solver.get_p().size());
   for (std::size_t i = 0; i < manager_p_before.size(); ++i) {
-    manager_p_before[i] = fixture.problem->get_params_data()[i]->params->p;
+    manager_p_before[i] = fixture.problem->get_paramsData()[i]->params->p;
   }
   BOOST_CHECK_THROW(solver.template cast<OtherScalar>(), crocoddyl::Exception);
   BOOST_CHECK(solver.get_problem() == problem_before);
   BOOST_CHECK(fixture.problem == problem_before);
   for (std::size_t i = 0; i < p_before.size(); ++i) {
     BOOST_CHECK(solver.get_p()[i].isApprox(p_before[i]));
-    BOOST_CHECK(fixture.problem->get_params_data()[i]->params->p.isApprox(
+    BOOST_CHECK(fixture.problem->get_paramsData()[i]->params->p.isApprox(
         manager_p_before[i]));
   }
   std::vector<VectorXs> wrong_count(1, VectorXs::Zero(1));
@@ -364,7 +364,7 @@ template <typename Scalar>
 void check_rejected_parameter_restoration() {
   typedef crocoddyl::ConstraintModelManagerTpl<Scalar> ConstraintManager;
   typedef crocoddyl::ConstraintModelResidualTpl<Scalar> ResidualConstraint;
-  typedef crocoddyl::ParametrizedShootingProblemTpl<Scalar> Problem;
+  typedef crocoddyl::ShootingProblemTpl<Scalar> Problem;
   typedef crocoddyl::ResidualModelParametersTpl<Scalar> ParameterResidual;
   typedef crocoddyl::SolverFDDPTpl<Scalar> Solver;
   typedef typename crocoddyl::MathBaseTpl<Scalar>::VectorXs VectorXs;
@@ -401,7 +401,7 @@ void check_rejected_parameter_restoration() {
   solver.solve(xs, fixture.us, std::vector<VectorXs>(1, accepted), 0, true);
   solver.computeDirection(true);
   const std::shared_ptr<typename Problem::ConstraintDataManager>&
-      constraints_data = problem->get_parameter_constraints_datas()[0];
+      constraints_data = problem->get_paramsConstraintData()[0];
   BOOST_REQUIRE_EQUAL(constraints->get_inactive_set().count("inactive"), 1);
   BOOST_CHECK(constraints_data->g.isApprox(accepted, tol));
 
@@ -409,7 +409,7 @@ void check_rejected_parameter_restoration() {
   BOOST_CHECK(!solver.get_p_try()[0].isApprox(accepted, tol));
   BOOST_CHECK(constraints_data->g.isApprox(solver.get_p_try()[0], tol));
   solver.calcDir();
-  BOOST_CHECK(problem->get_params_data()[0]->params->p.isApprox(accepted, tol));
+  BOOST_CHECK(problem->get_paramsData()[0]->params->p.isApprox(accepted, tol));
   BOOST_CHECK(constraints_data->g.isApprox(accepted, tol));
   BOOST_CHECK_SMALL(static_cast<double>(solver.get_gfeas() - Scalar(0.1)),
                     static_cast<double>(tol));
@@ -452,9 +452,9 @@ void check_mixed_parameter_constraint_restoration() {
   BOOST_CHECK_NO_THROW(solver.computeDirection(true));
 
   const std::vector<std::shared_ptr<ConstraintManager>>& constraints_models =
-      problem->get_parameter_constraints_models();
+      problem->get_paramsConstraintModel();
   const std::vector<std::shared_ptr<typename Problem::ConstraintDataManager>>&
-      constraints_datas = problem->get_parameter_constraints_datas();
+      constraints_datas = problem->get_paramsConstraintData();
   BOOST_REQUIRE_EQUAL(constraints_models.size(), 2);
   BOOST_REQUIRE_EQUAL(constraints_datas.size(), 2);
   BOOST_CHECK(constraints_models[0] == nullptr);
@@ -473,9 +473,9 @@ void check_mixed_parameter_constraint_restoration() {
   const VectorXs candidate_h = constraints_datas[1]->h;
   BOOST_CHECK_NO_THROW(solver.computeDirection(true));
   BOOST_CHECK(
-      problem->get_params_data()[0]->params->p.isApprox(accepted[0], tol));
+      problem->get_paramsData()[0]->params->p.isApprox(accepted[0], tol));
   BOOST_CHECK(
-      problem->get_params_data()[1]->params->p.isApprox(accepted[1], tol));
+      problem->get_paramsData()[1]->params->p.isApprox(accepted[1], tol));
   BOOST_CHECK(!constraints_datas[1]->h.isApprox(candidate_h, tol));
   VectorXs reference(2);
   reference << Scalar(-0.2), Scalar(0.3);
@@ -495,7 +495,7 @@ void check_line_search_exception_rejects_candidate() {
   BOOST_CHECK(!solver.accepted());
   solver.stopThrowing();
   solver.computeDirection(true);
-  BOOST_CHECK(fixture.problem->get_params_data()[0]->params->p.isApprox(
+  BOOST_CHECK(fixture.problem->get_paramsData()[0]->params->p.isApprox(
       fixture.initial));
   BOOST_CHECK(solver.get_p()[0].isApprox(fixture.initial));
 }

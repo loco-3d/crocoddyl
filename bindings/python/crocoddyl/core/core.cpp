@@ -71,7 +71,6 @@ void exposeCore() {
   exposeStateNumDiff();
   exposeProblemAbstract();
   exposeShootingProblem();
-  exposeParametrizedShootingProblem();
   exposeObservationProblem();
   exposeSolverAbstract();
   exposeStateEuclidean();
