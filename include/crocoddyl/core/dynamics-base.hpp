@@ -60,6 +60,12 @@ class DynamicsModelBase {
  *   \end{aligned}
  * \f]
  *
+ * Some concrete models also populate a scalar dissipative-power term
+ * `dissipative_P` together with its velocity and parameter Jacobians. This
+ * term is an energy-loss rate, not a constraint residual and not a cost
+ * residual. It is used to account for non-conservative effects such as
+ * friction or damping, and it is left at zero by models that do not need it.
+ *
  * The running-node `calcDiff()` method dispatches to `calcDiff_xu()` and, when
  * \f$n_p > 0\f$, also to `calcDiff_p()`, building a first-order approximation:
  * \f[
@@ -378,12 +384,14 @@ class DynamicsModelAbstractTpl : public DynamicsModelBase {
  * @brief Data structure for dynamics models
  *
  * The data stores the dynamics value and its state, control and parameter
- * Jacobians, equality and inequality constraint values/Jacobians, measured
- * dissipative power and its derivatives, and quasi-static workspace. For
- * continuous dynamics, `vdot` and the rows of `Fx`, `Fu` and `Fp` have
- * dimension `nv`; for discrete dynamics, `vdot` has dimension `nx` and the
- * Jacobian rows have dimension `ndx`. The optional `shared` collector is
- * non-owning and must outlive the data while attached.
+ * Jacobians, equality and inequality constraint values/Jacobians, a scalar
+ * dissipative-power term and its derivatives, and quasi-static workspace. The
+ * dissipative-power fields are optional bookkeeping: models that do not
+ * account for losses keep them at zero. For continuous dynamics, `vdot` and
+ * the rows of `Fx`, `Fu` and `Fp` have dimension `nv`; for discrete dynamics,
+ * `vdot` has dimension `nx` and the Jacobian rows have dimension `ndx`. The
+ * optional `shared` collector is non-owning and must outlive the data while
+ * attached.
  */
 template <typename _Scalar>
 struct DynamicsDataAbstractTpl {
@@ -473,17 +481,17 @@ struct DynamicsDataAbstractTpl {
                   //!< \f$\mathbf{u}\f$
   MatrixXs Fp;    //!< Jacobian of the dynamics w.r.t. the parameters
                   //!< \f$\mathbf{p}\f$
-  VectorXs dissipative_P;  //!< Dissipative power
-  MatrixXs dP_dv;          //!< Dissipative-power Jacobian w.r.t. velocity
-  MatrixXs dP_dp;          //!< Dissipative-power Jacobian w.r.t. parameters
-  VectorXs h;              //!< Equality constraint values
-  MatrixXs Hx;  //!< Jacobian of equality constraints w.r.t. the state
-  MatrixXs Hu;  //!< Jacobian of equality constraints w.r.t. the control
-  MatrixXs Hp;  //!< Jacobian of equality constraints w.r.t. the parameters
-  VectorXs g;   //!< Inequality constraint values
-  MatrixXs Gx;  //!< Jacobian of inequality constraints w.r.t. the state
-  MatrixXs Gu;  //!< Jacobian of inequality constraints w.r.t. the control
-  MatrixXs Gp;  //!< Jacobian of inequality constraints w.r.t. the parameters
+  VectorXs dissipative_P;  //!< Scalar dissipative power (energy-loss rate)
+  MatrixXs dP_dv;  //!< Jacobian of the dissipative power w.r.t. velocity
+  MatrixXs dP_dp;  //!< Jacobian of the dissipative power w.r.t. parameters
+  VectorXs h;      //!< Equality constraint values
+  MatrixXs Hx;     //!< Jacobian of equality constraints w.r.t. the state
+  MatrixXs Hu;     //!< Jacobian of equality constraints w.r.t. the control
+  MatrixXs Hp;     //!< Jacobian of equality constraints w.r.t. the parameters
+  VectorXs g;      //!< Inequality constraint values
+  MatrixXs Gx;     //!< Jacobian of inequality constraints w.r.t. the state
+  MatrixXs Gu;     //!< Jacobian of inequality constraints w.r.t. the control
+  MatrixXs Gp;     //!< Jacobian of inequality constraints w.r.t. the parameters
   VectorXs tmp_ustatic;  //!< Temporary vector for quasi-static computation
 };
 

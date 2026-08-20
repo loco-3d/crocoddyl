@@ -157,6 +157,7 @@ void DiscretizedObserverModelTpl<Scalar>::calc(
   d->xnext = x;
   costs_->calc(d->costs, x);
   d->cost = d->costs->cost;
+  // Discrete observers expose the field for API uniformity, but it stays 0.
   d->dissipative_E.setZero();
   d->dE_dv.setZero();
   d->dE_dp.setZero();
@@ -269,6 +270,7 @@ void DiscretizedObserverModelTpl<Scalar>::calcDiff(
   // xnext = x at terminal nodes, so Fx = I_{ndx} and Fp = 0.
   d->Fx.setIdentity();
   d->Fp.setZero();
+  // Terminal discrete observer nodes do not accumulate dissipative energy.
   d->dissipative_E.setZero();
   d->dE_dv.setZero();
   d->dE_dp.setZero();

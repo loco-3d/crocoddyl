@@ -46,6 +46,7 @@ void IntegratedObserverModelEulerTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(nv);
   const VectorXs& a = d->dynamics->vdot;
+  // Integrate the scalar dissipative power from the dynamics over the step.
   d->dissipative_E.noalias() = d->dynamics->dissipative_P * time_step_;
   d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
   d->dx.tail(nv).noalias() = a * time_step_;

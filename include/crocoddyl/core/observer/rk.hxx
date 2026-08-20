@@ -87,6 +87,7 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
   d->dx.noalias() += this->compute_projected_noise(d, x, u.head(ndx));
   state_->integrate(x, d->dx, d->xnext);
 
+  // RK observers do not integrate dissipative power, so keep the field zero.
   d->dissipative_E.setZero();
   d->r.setZero();
   d->g.setZero();
@@ -134,6 +135,7 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
 
   d->xnext = x;
   d->dx.setZero();
+  // Terminal nodes also do not carry dissipative-energy accumulation here.
   d->dissipative_E.setZero();
   d->cost = d->costs_stage[0]->cost;
   d->r.setZero();

@@ -92,6 +92,13 @@ class ActiveConstraintModeGuardTpl {
   bool restore_;
 };
 
+/**
+ * @brief Compute the scalar dissipative power induced by multibody actuation.
+ *
+ * The returned term is an instantaneous energy-loss rate. It is zero when the
+ * actuation data does not expose a multibody friction contribution. When
+ * requested, the helper also fills the velocity Jacobian of that power term.
+ */
 template <typename Scalar>
 void updateDissipativePowerFromActuation(
     const std::shared_ptr<ActuationDataAbstractTpl<Scalar> >& actuation_data,
@@ -119,6 +126,13 @@ void updateDissipativePowerFromActuation(
   }
 }
 
+/**
+ * @brief Propagate dissipative-power derivatives for actuation parameters.
+ *
+ * This helper mirrors the parameter layout used by the multibody parameter
+ * manager. Only actuation-related parameters contribute to the returned
+ * derivative blocks; unrelated dynamics parameters keep zero contribution.
+ */
 template <typename Scalar>
 void updateDissipativePowerParams(
     const std::shared_ptr<ParameterManagerTpl<Scalar> >& params,

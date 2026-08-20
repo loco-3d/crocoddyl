@@ -42,7 +42,10 @@ Model* check_observer_data_model(Model* const model) {
  *
  * This base layer intentionally stays thin: it adds the observer-specific API
  * while reusing the existing action-model state, cost, constraint, and
- * derivative storage.
+ * derivative storage. Some integrated observer variants also carry optional
+ * dissipative-energy bookkeeping through the same data path; that quantity is
+ * scalar-valued and stored as a size-1 Eigen vector for consistency with the
+ * rest of the action-data plumbing.
  */
 template <typename _Scalar>
 class ObserverModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> {
@@ -126,6 +129,16 @@ class ObserverModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> {
   VectorXs tau_meas_;  //!< Measured torques
 };
 
+/**
+ * @brief Action data specialized for observers
+ *
+ * Observer data reuses the standard action-model fields and adds optional
+ * integrated dissipative-energy bookkeeping. The dissipative term is modeled
+ * as a scalar quantity stored in a 1-vector, and the current observer
+ * implementations only expose derivatives with respect to velocity and
+ * parameters because the underlying dissipative-power helpers depend on
+ * \f$\mathbf{v}\f$ and \f$\mathbf{p}\f$.
+ */
 template <typename _Scalar>
 struct ObserverDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -162,9 +175,9 @@ struct ObserverDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
     dE_dp.setZero();
   }
 
-  VectorXs dissipative_E;  //!< Integrated dissipative energy
-  MatrixXs dE_dv;          //!< Jacobian of dissipative energy w.r.t. velocity
-  MatrixXs dE_dp;          //!< Jacobian of dissipative energy w.r.t. parameters
+  VectorXs dissipative_E;  //!< Time-integrated dissipative energy (size 1)
+  MatrixXs dE_dv;          //!< Jacobian of dissipative_E w.r.t. velocity
+  MatrixXs dE_dp;          //!< Jacobian of dissipative_E w.r.t. parameters
 };
 
 }  // namespace crocoddyl
