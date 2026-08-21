@@ -152,7 +152,7 @@ solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, us, [p0], 200, False)
 
 print("step integration (guess): ", dt)
-print("step integration (optimal): ", np.exp(solver.p[0][0]))
+print("step integration (optimal): ", np.exp(solver.ps[0][0]))
 
 np.set_printoptions(precision=4, suppress=True)
 print("Target CoM position = ", com_ref)

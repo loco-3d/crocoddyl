@@ -85,7 +85,7 @@ solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, us, init_p, 100, False)
 
 print("step integration (guess): ", dt)
-print("step integration (optimal): ", np.exp(np.array([p[0] for p in solver.p])))
+print("step integration (optimal): ", np.exp(np.array([p[0] for p in solver.ps])))
 
 if WITHDISPLAY:
     display = crocoddyl.MeshcatDisplay(robot)

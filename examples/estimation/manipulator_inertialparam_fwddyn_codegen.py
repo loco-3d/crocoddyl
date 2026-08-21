@@ -258,11 +258,11 @@ print("*** manipulator inertial parameter estimation codegen (fwddyn) ***")
 solver.solve(
     init_xs=list(oc.solver.xs)[: T + 1],
     init_us=[],
-    init_p=[initial_p],
+    init_ps=[initial_p],
     maxiter=MAXITER,
 )
 
-p_est = solver.p[0]
+p_est = solver.ps[0]
 print("\nEstimated vs. ground-truth inertial parameters:")
 inertial_p_est = p_est[inertial_slice]
 for i in range(nbodies):

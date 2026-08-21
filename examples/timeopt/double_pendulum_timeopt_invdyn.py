@@ -118,7 +118,7 @@ print("*** SOLVE (HybridShoot: {Ts}) ***".format_map(locals()))
 solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, us, [p0], 300, False)
 print("step integration (guess): ", dt)
-print("step integration (optimal): ", np.exp(solver.p[0][0]))
+print("step integration (optimal): ", np.exp(solver.ps[0][0]))
 
 # Printing the terminal state
 np.set_printoptions(precision=4, suppress=True)

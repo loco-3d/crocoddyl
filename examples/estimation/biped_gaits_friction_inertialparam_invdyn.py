@@ -39,11 +39,11 @@ print("*** biped gait friction and inertial parameter estimation (invdyn) ***")
 solver.solve(
     init_xs=list(control_solver.xs),
     init_us=[],
-    init_p=[estimation["initial_p"]],
+    init_ps=[estimation["initial_p"]],
     maxiter=100,
 )
 
-p_est = solver.p[0]
+p_est = solver.ps[0]
 print_inertial_estimation(
     estimation["state"],
     estimation["parametrization"],

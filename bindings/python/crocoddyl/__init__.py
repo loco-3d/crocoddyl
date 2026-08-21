@@ -1016,7 +1016,7 @@ class _CallbackLoggerMixin:
         self.us = copy.copy(solver.us)
         self.fs.append(copy.copy(solver.fs))
         if hasattr(solver, "p") and len(solver.p) > 0:
-            self.p.append([np.array(p, copy=True) for p in solver.p])
+            self.p.append([np.array(p, copy=True) for p in solver.ps])
         if hasattr(solver, "Vpp_phase") and len(solver.Vpp_phase) > 0:
             self.Vpp_phase.append(
                 [np.array(Vpp, copy=True) for Vpp in solver.Vpp_phase]
@@ -1179,7 +1179,7 @@ def _initialParameterPrecision(solver, initial_p):
         problem = solver.problem
         if len(problem.runningModels) == 0:
             return None
-        accepted_p = [np.array(p, dtype=float, copy=True) for p in solver.p]
+        accepted_p = [np.array(p, dtype=float, copy=True) for p in solver.ps]
         model = problem.runningModels[0]
         data = problem.runningDatas[0]
         x = np.asarray(solver.xs[0], dtype=float)
@@ -1255,7 +1255,7 @@ def computeInertialCovariances(
         raise ValueError("The solver must use CallbackLogger to plot its parameters.")
 
     log = callbacks[-1]
-    p_entries = log.p if len(log.p) > 0 else [solver.p]
+    p_entries = log.p if len(log.p) > 0 else [solver.ps]
     p_log = [np.asarray(entry[0], dtype=float) for entry in p_entries]
     precision_log = [
         np.asarray(entry[0], dtype=float) if len(entry) > 0 else None

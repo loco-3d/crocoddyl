@@ -132,9 +132,9 @@ else:
     solver.setCallbacks([crocoddyl.CallbackVerbose()])
 
 print("*** manipulator inertial parameter estimation (invdyn) ***")
-solver.solve(init_xs=list(oc.solver.xs), init_us=[], init_p=[initial_p], maxiter=100)
+solver.solve(init_xs=list(oc.solver.xs), init_us=[], init_ps=[initial_p], maxiter=100)
 
-p_est = solver.p[0]
+p_est = solver.ps[0]
 print("\nEstimated vs. ground-truth inertial parameters:")
 inertial_p_est = p_est[inertial_slice]
 for i in range(nbodies):

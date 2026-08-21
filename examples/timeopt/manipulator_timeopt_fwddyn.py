@@ -126,7 +126,7 @@ solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve(xs, [], [p0], 200)
 
 print("step integration (guess): ", dt)
-print("step integration (optimal): ", np.exp(solver.p[0][0]))
+print("step integration (optimal): ", np.exp(solver.ps[0][0]))
 
 # Printing the terminal end-effector pose
 pinocchio_data = state.pinocchio.createData()

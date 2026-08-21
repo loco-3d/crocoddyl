@@ -156,7 +156,7 @@ solver.setDynamicsSolver(crocoddyl.DynamicsSolverType.HybridShoot, Ts)
 solver.solve([], [], [p0], 100)
 
 print("step integration (guess): ", dt)
-print("step integration (optimal): ", np.exp(solver.p[0][0]))
+print("step integration (optimal): ", np.exp(solver.ps[0][0]))
 
 # Printing the terminal pose
 np.set_printoptions(precision=4, suppress=True)
