@@ -92,8 +92,6 @@ struct JointDynamicsModelFrictionVisitor
                       bp::make_function(
                           &Model::get_fixed_smoothing_parametrization),
                       "fixed smoothing/sharpness parametrization")
-        .add_property("np", bp::make_function(&Model::get_np),
-                      "friction parameter dimension")
         .add_property("passive", bp::make_function(&Model::get_passive),
                       "true if the joint is passive");
   }

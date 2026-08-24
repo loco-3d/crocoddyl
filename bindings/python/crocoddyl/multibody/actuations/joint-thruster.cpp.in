@@ -66,8 +66,6 @@ struct JointDynamicsModelThrusterVisitor
                       "thruster configuration")
         .add_property("nthrusters", bp::make_function(&Model::get_nthrusters),
                       "number of thrusters")
-        .add_property("np", bp::make_function(&Model::get_np),
-                      "thruster parameter dimension")
         .add_property(
             "Wthrust",
             bp::make_function(
