@@ -46,12 +46,6 @@ struct JointDynamicsModelThrusterVisitor
              "thruster torque coefficients.")
         .def("set_thrusters", &Model::set_thrusters, bp::args("self", "thrusters"),
              "Set the thruster configuration.")
-        .def("set_parameters", &Model::set_parameters, bp::args("self", "p"),
-             "Set the thruster torque coefficients.")
-        .def("get_parameters", &Model::get_parameters, bp::args("self"),
-             "Get the thruster torque coefficients.")
-        .def("get_parametrization", &Model::get_parametrization, bp::args("self"),
-             "Get the thruster torque parametrization.")
         .def("updateParametrizationDerivative",
              &Model::updateParametrizationDerivative, bp::args("self", "dgamma_dp"),
              "Update the Jacobian of the internal thruster parameters.\n\n"

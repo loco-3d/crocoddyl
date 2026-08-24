@@ -27,7 +27,7 @@ def make_joint_probe(module, dtype, joint_id=3):
     class JointProbe(module.JointDynamicsModelAbstract):
         def __init__(self):
             super().__init__(joint_id, 1, 1, 1)
-            self.parameters = np.array([dtype(0.4)], dtype=dtype)
+            self._parametrization = np.array([dtype(0.4)], dtype=dtype)
             self.create_calls = 0
             self.update_calls = 0
             self.regressor_calls = 0
@@ -49,13 +49,13 @@ def make_joint_probe(module, dtype, joint_id=3):
             return 1
 
         def set_parameters(self, p):
-            self.parameters = np.asarray(p, dtype=dtype).copy()
+            self._parametrization = np.asarray(p, dtype=dtype).copy()
 
         def get_parameters(self):
-            return self.parameters.copy()
+            return self._parametrization.copy()
 
         def get_parametrization(self):
-            return self.parameters.copy()
+            return self._parametrization.copy()
 
         def updateParametrizationDerivative(self, dgamma_dp):
             self.update_calls += 1
@@ -166,6 +166,9 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 )
                 self.assertEqual(model.regressor_calls, 1)
                 self.assertFalse(hasattr(model, "_updateParametrizationDerivative"))
+                model.parameters = np.array([dtype(0.6)], dtype=dtype)
+                self.assertTrue(np.allclose(model.parameters, [0.6]))
+                self.assertTrue(np.allclose(model.parametrization, [0.6]))
 
                 actuation = module.ActuationModelMultibody(state, [model])
                 actuation_data = actuation.createData()
@@ -283,6 +286,8 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                     p,
                     crocoddyl.JointFrictionType.FULL,
                 )
+                np.testing.assert_allclose(model.parametrization, p)
+                np.testing.assert_allclose(model.parameters[-1], np.exp(p[-1]))
                 q = np.array([0.1], dtype=dtype)
                 v = np.array([0.37], dtype=dtype)
                 u = np.array([0.61], dtype=dtype)
@@ -344,7 +349,7 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 old_mapping = data_a.dtau_du.copy()
 
                 parameters = np.array([0.2, 0.3, 0.4, 0.5], dtype=dtype)
-                model.set_parameters(parameters)
+                model.parameters = parameters
                 model.calc(data_a, q, v, u)
                 model.calc(data_b, q, v, u)
                 model.calcDiff(data_a, q, v, u)
@@ -365,7 +370,7 @@ class MultibodyActuationBindingTest(unittest.TestCase):
                 copied_data = copy.copy(data_a)
                 copied_data.tau = np.ones(6, dtype=dtype)
                 self.assertFalse(np.allclose(copied_data.tau, data_a.tau))
-                self.assertTrue(np.allclose(copied_model.get_parameters(), parameters))
+                self.assertTrue(np.allclose(copied_model.parameters, parameters))
                 self.assertEqual(model.thrusters[0].min_thrust, dtype(0.1))
                 self.assertEqual(model.thrusters[0].max_thrust, dtype(5.0))
 
@@ -373,7 +378,7 @@ class MultibodyActuationBindingTest(unittest.TestCase):
             crocoddyl.DType.Float32
         )
         self.assertIsInstance(casted, crocoddyl_float32.JointDynamicsModelThruster)
-        self.assertTrue(np.allclose(casted.get_parameters(), [0.1, 0.11, 0.12, 0.13]))
+        self.assertTrue(np.allclose(casted.parameters, [0.1, 0.11, 0.12, 0.13]))
 
     def test_multibody_offsets_parameters_manager_and_failures(self):
         for module, dtype, state, thrusters in self.scalar_cases():

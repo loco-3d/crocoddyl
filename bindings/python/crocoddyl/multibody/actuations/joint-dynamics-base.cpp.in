@@ -19,6 +19,8 @@ struct JointDynamicsModelAbstractVisitor
     : public bp::def_visitor<JointDynamicsModelAbstractVisitor<Model> > {
   template <class PyClass>
   void visit(PyClass& cl) const {
+    typedef JointDynamicsModelAbstractTpl<typename Model::Scalar> ModelBase;
+
     cl.def("calc", pure_virtual(&Model::calc), bp::args("self", "data", "q", "v", "u"),
            "Compute the joint actuation dynamics.\n\n"
            ":param data: joint dynamics data\n"
@@ -40,15 +42,18 @@ struct JointDynamicsModelAbstractVisitor
              ":param q: joint configuration\n"
              ":param v: joint velocity\n"
              ":param tau: joint torque")
-        .def("set_parameters", &Model::set_parameters,
-             &Model::default_set_parameters, bp::args("self", "p"),
-             "Set the joint dynamics parameters.")
-        .def("get_parameters", &Model::get_parameters,
-             &Model::default_get_parameters, bp::args("self"),
-             "Get the joint dynamics parameters in gamma form.")
-        .def("get_parametrization", &Model::get_parametrization,
-             &Model::default_get_parametrization, bp::args("self"),
-             "Get the joint dynamics parameters in external coordinates.")
+        .add_property(
+            "parameters",
+            bp::make_function(&ModelBase::get_parameters,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&ModelBase::set_parameters),
+            "Physical joint-dynamics parameters.")
+        .add_property(
+            "parametrization",
+            bp::make_function(&ModelBase::get_parametrization,
+                              bp::return_value_policy<bp::return_by_value>()),
+                              &Model::default_get_parametrization,
+            "Get or set the unconstrained joint-dynamics parameterization.")
         .def("updateParametrizationDerivative",
              &Model::updateParametrizationDerivative,
              &Model::default_updateParametrizationDerivative,
@@ -75,7 +80,7 @@ struct JointDynamicsModelAbstractVisitor
                       "joint velocity dimension")
         .add_property("nu", bp::make_function(&Model::get_nu),
                       "joint control dimension")
-        .add_property("np", bp::make_function(&Model::get_np),
+        .add_property("np", bp::make_function(&ModelBase::get_np),
                       "joint parameter dimension");
   }
 };

@@ -66,12 +66,6 @@ struct JointDynamicsModelFrictionVisitor
              ":param q: joint configuration\n"
              ":param v: joint velocity\n"
              ":param u: joint control input")
-        .def("set_parameters", &Model::set_parameters, bp::args("self", "p"),
-             "Set the friction parametrization.")
-        .def("get_parameters", &Model::get_parameters, bp::args("self"),
-             "Get the friction parameters in gamma form.")
-        .def("get_parametrization", &Model::get_parametrization, bp::args("self"),
-             "Get the friction parameters in mu form.")
         .def("updateParametrizationDerivative",
              &Model::updateParametrizationDerivative, bp::args("self", "dgamma_dp"),
              "Update the Jacobian of the internal friction parameters.\n\n"
