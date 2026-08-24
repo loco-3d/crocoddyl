@@ -95,13 +95,16 @@ void test_observer_base_create_data_and_getters() {
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(observer_data->Fp.cols()), 1);
   BOOST_CHECK_EQUAL(
       static_cast<std::size_t>(observer_data->dissipative_E.size()), 1);
-  BOOST_CHECK_EQUAL(observer_data->dE_dv.rows(), 1);
-  BOOST_CHECK_EQUAL(observer_data->dE_dv.cols(), state->get_nv());
-  BOOST_CHECK_EQUAL(observer_data->dE_dp.rows(), 1);
-  BOOST_CHECK_EQUAL(observer_data->dE_dp.cols(), 1);
+  BOOST_CHECK_EQUAL(observer_data->Ex.rows(), 1);
+  BOOST_CHECK_EQUAL(observer_data->Ex.cols(), state->get_ndx());
+  BOOST_CHECK_EQUAL(observer_data->Eu.rows(), 1);
+  BOOST_CHECK_EQUAL(observer_data->Eu.cols(), model.get_nu());
+  BOOST_CHECK_EQUAL(observer_data->Ep.rows(), 1);
+  BOOST_CHECK_EQUAL(observer_data->Ep.cols(), 1);
   BOOST_CHECK(observer_data->dissipative_E.isZero());
-  BOOST_CHECK(observer_data->dE_dv.isZero());
-  BOOST_CHECK(observer_data->dE_dp.isZero());
+  BOOST_CHECK(observer_data->Ex.isZero());
+  BOOST_CHECK(observer_data->Eu.isZero());
+  BOOST_CHECK(observer_data->Ep.isZero());
 
   crocoddyl::DataCollectorObserverTpl<double> shared;
   BOOST_CHECK(!shared.hasObserverData());
@@ -111,10 +114,10 @@ void test_observer_base_create_data_and_getters() {
   BOOST_CHECK(shared.int_Fx != nullptr);
   BOOST_CHECK(shared.int_Fu != nullptr);
   BOOST_CHECK(shared.int_Fp != nullptr);
-  BOOST_CHECK(shared.dissipative_E != nullptr);
-  BOOST_CHECK(shared.dE_dv != nullptr);
-  BOOST_CHECK(shared.dE_dp != nullptr);
-  BOOST_CHECK_EQUAL(static_cast<std::size_t>(shared.dissipative_E->size()), 1);
+  BOOST_CHECK(shared.dissipative_E == &observer_data->dissipative_E);
+  BOOST_CHECK(shared.Ex == &observer_data->Ex);
+  BOOST_CHECK(shared.Eu == &observer_data->Eu);
+  BOOST_CHECK(shared.Ep == &observer_data->Ep);
 }
 
 void test_observer_base_update_tau_and_parameters() {

@@ -153,6 +153,7 @@ struct IntegratedObserverDataRKTpl
     const std::size_t np = model->get_np();
 
     resize_vector(integral, ni, Scalar(0.));
+    resize_vector(dissipative_integral, ni, Scalar(0.));
     resize_vector(ki, ni, ndx);
     resize_vector(y, ni, nx);
     resize_vector(dx_rk, ni, ndx);
@@ -162,6 +163,9 @@ struct IntegratedObserverDataRKTpl
     resize_matrix_vector(dy_dx, ni, ndx, ndx);
     resize_matrix_vector(dy_du, ni, ndx, nu);
     resize_matrix_vector(dy_dp, ni, ndx, np);
+    resize_matrix_vector(dEi_dx, ni, 1, ndx);
+    resize_matrix_vector(dEi_du, ni, 1, nu);
+    resize_matrix_vector(dEi_dp, ni, 1, np);
     resize_vector(dli_dx, ni, ndx);
     resize_vector(dli_du, ni, nu);
     resize_vector(dli_dp, ni, np);
@@ -195,6 +199,7 @@ struct IntegratedObserverDataRKTpl
     Base::setZero();
     for (std::size_t i = 0; i < integral.size(); ++i) {
       integral[i] = Scalar(0.);
+      dissipative_integral[i] = Scalar(0.);
       ki[i].setZero();
       y[i].setZero();
       dx_rk[i].setZero();
@@ -204,6 +209,9 @@ struct IntegratedObserverDataRKTpl
       dy_dx[i].setZero();
       dy_du[i].setZero();
       dy_dp[i].setZero();
+      dEi_dx[i].setZero();
+      dEi_du[i].setZero();
+      dEi_dp[i].setZero();
       dli_dx[i].setZero();
       dli_du[i].setZero();
       dli_dp[i].setZero();
@@ -231,6 +239,7 @@ struct IntegratedObserverDataRKTpl
   std::vector<std::shared_ptr<DynamicsDataAbstract> > dynamics_stage;
   std::vector<std::shared_ptr<CostDataSum> > costs_stage;
   std::vector<Scalar> integral;
+  std::vector<Scalar> dissipative_integral;
   std::vector<VectorXs> ki;
   std::vector<VectorXs> y;
   std::vector<VectorXs> dx_rk;
@@ -240,6 +249,9 @@ struct IntegratedObserverDataRKTpl
   std::vector<MatrixXs> dy_dx;
   std::vector<MatrixXs> dy_du;
   std::vector<MatrixXs> dy_dp;
+  std::vector<MatrixXs> dEi_dx;
+  std::vector<MatrixXs> dEi_du;
+  std::vector<MatrixXs> dEi_dp;
   std::vector<VectorXs> dli_dx;
   std::vector<VectorXs> dli_du;
   std::vector<VectorXs> dli_dp;
@@ -265,11 +277,12 @@ struct IntegratedObserverDataRKTpl
   using Base::constraints;
   using Base::cost;
   using Base::costs;
-  using Base::dE_dp;
-  using Base::dE_dv;
   using Base::dissipative_E;
   using Base::dx;
   using Base::dynamics;
+  using Base::Ep;
+  using Base::Eu;
+  using Base::Ex;
   using Base::Fp;
   using Base::Fu;
   using Base::Fx;

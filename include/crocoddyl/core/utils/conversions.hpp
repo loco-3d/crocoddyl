@@ -137,10 +137,15 @@ template <>
 struct cast_impl<CppAD::AD<CppAD::cg::CG<double>>, float> {
   EIGEN_DEVICE_FUNC static inline float run(
       const CppAD::AD<CppAD::cg::CG<double>>& x) {
-    // Perform the conversion. This example extracts the value from the AD type.
-    // You might need to adjust this depending on the specific implementation of
-    // CppAD::cg::CG<double>.
     return static_cast<float>(CppAD::Value(x).getValue());
+  }
+};
+
+template <>
+struct cast_impl<CppAD::AD<CppAD::cg::CG<float>>, double> {
+  EIGEN_DEVICE_FUNC static inline double run(
+      const CppAD::AD<CppAD::cg::CG<float>>& x) {
+    return static_cast<double>(CppAD::Value(x).getValue());
   }
 };
 

@@ -278,9 +278,15 @@ void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
-  has_control_limits_ =
-      isfinite(u_lb_.template cast<ScalarType>().array()).any() &&
-      isfinite(u_ub_.template cast<ScalarType>().array()).any();
+  bool has_lower_limit = false;
+  bool has_upper_limit = false;
+  for (std::size_t i = 0; i < nu_; ++i) {
+    has_lower_limit =
+        has_lower_limit || std::isfinite(scalar_cast<ScalarType>(u_lb_[i]));
+    has_upper_limit =
+        has_upper_limit || std::isfinite(scalar_cast<ScalarType>(u_ub_[i]));
+  }
+  has_control_limits_ = has_lower_limit && has_upper_limit;
 }
 
 template <typename Scalar>

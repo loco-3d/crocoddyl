@@ -244,9 +244,11 @@ class ObserverBindingsTest(unittest.TestCase):
                 )
                 np.testing.assert_array_equal(euler.tau_meas, tau)
                 self.assertEqual(data.Fp.shape, (state.ndx, manager.np))
-                self.assertEqual(data.dE_dp.shape, (manager.np,))
+                self.assertEqual(data.Ex.shape, (state.ndx,))
+                self.assertEqual(data.Eu.shape, (euler.nu,))
+                self.assertEqual(data.Ep.shape, (manager.np,))
                 self.assertTrue(np.all(np.isfinite(data.Fp)))
-                self.assertTrue(np.all(np.isfinite(data.dE_dp)))
+                self.assertTrue(np.all(np.isfinite(data.Ep)))
                 self.assertGreater(abs(float(data.cost)), 0.0)
                 np.testing.assert_array_equal(
                     data.g,
@@ -465,9 +467,10 @@ class ObserverBindingsTest(unittest.TestCase):
                     rk.calc(rk_data, x, w)
                     rk.calcDiff(rk_data, x, w)
                     np.testing.assert_array_equal(rk.g_lb, expected_lb)
-                    self.assertTrue(np.all(rk_data.dissipative_E == dtype(0)))
-                    self.assertTrue(np.all(rk_data.dE_dv == dtype(0)))
-                    self.assertTrue(np.all(rk_data.dE_dp == dtype(0)))
+                    self.assertTrue(np.all(np.isfinite(rk_data.dissipative_E)))
+                    self.assertTrue(np.all(np.isfinite(rk_data.Ex)))
+                    self.assertTrue(np.all(np.isfinite(rk_data.Eu)))
+                    self.assertTrue(np.all(np.isfinite(rk_data.Ep)))
                     rk_sentinels = self.control_sentinels(rk_data, dtype, 21)
                     for name, value in rk_sentinels.items():
                         setattr(rk_data, name, value)
@@ -507,15 +510,21 @@ class ObserverBindingsTest(unittest.TestCase):
                 energy_dynamics, energy_costs, _ = self.make_continuous(
                     module, dtype, state, 0, True
                 )
-                energy_model = module.IntegratedObserverModelEuler(
-                    energy_dynamics, energy_costs, None, 0.02
+                energy_model = module.IntegratedObserverModelRK(
+                    energy_dynamics,
+                    energy_costs,
+                    None,
+                    0.02,
+                    crocoddyl.RKType.four,
                 )
                 energy_data = energy_model.createData()
                 energy_w = np.linspace(-0.12, 0.14, energy_model.nu, dtype=dtype)
                 energy_model.calc(energy_data, x, energy_w)
                 energy_model.calcDiff(energy_data, x, energy_w)
                 self.assertTrue(np.all(np.isfinite(energy_data.dissipative_E)))
-                self.assertTrue(np.all(np.isfinite(energy_data.dE_dv)))
+                self.assertTrue(np.all(np.isfinite(energy_data.Ex)))
+                self.assertTrue(np.all(np.isfinite(energy_data.Eu)))
+                self.assertTrue(np.all(np.isfinite(energy_data.Ep)))
                 self.assertGreater(abs(float(energy_data.cost)), 0.0)
 
                 with self.assertRaises(crocoddyl.Exception):
@@ -667,9 +676,6 @@ class ObserverBindingsTest(unittest.TestCase):
                 sentinels = self.control_sentinels(data, dtype, 31)
                 for name, value in sentinels.items():
                     setattr(data, name, value)
-                data.dissipative_E = np.full_like(data.dissipative_E, 41)
-                data.dE_dv = np.full_like(data.dE_dv, 42)
-                data.dE_dp = np.full_like(data.dE_dp, 43)
                 model.calc(data, x)
                 model.calcDiff(data, x)
                 for name, value in sentinels.items():
@@ -677,8 +683,9 @@ class ObserverBindingsTest(unittest.TestCase):
                 self.assertEqual(data.g.shape, (model.ng_T,))
                 self.assertEqual(data.h.shape, (model.nh_T,))
                 self.assertTrue(np.all(data.dissipative_E == dtype(0)))
-                self.assertTrue(np.all(data.dE_dv == dtype(0)))
-                self.assertTrue(np.all(data.dE_dp == dtype(0)))
+                self.assertTrue(np.all(data.Ex == dtype(0)))
+                self.assertTrue(np.all(data.Eu == dtype(0)))
+                self.assertTrue(np.all(data.Ep == dtype(0)))
                 target_module = (
                     crocoddyl_float32
                     if cast_dtype == crocoddyl.DType.Float32

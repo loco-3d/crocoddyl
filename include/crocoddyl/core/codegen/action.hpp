@@ -1306,9 +1306,10 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   }
 
   using Base::cost;
-  using Base::dE_dp;
-  using Base::dE_dv;
   using Base::dissipative_E;
+  using Base::Ep;
+  using Base::Eu;
+  using Base::Ex;
   using Base::Fp;
   using Base::Fu;
   using Base::Fx;
@@ -1391,7 +1392,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_D1(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
@@ -1421,8 +1421,9 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     Hp = H_map.middleRows(ndx + nu, np).transpose();
     it_J1 += nh * ninput;
     Eigen::Map<VectorXs> dE_map(J1.data() + it_J1, ninput);
-    dE_dv = dE_map.segment(ndx - nv, nv).transpose();
-    dE_dp = dE_map.segment(ndx + nu, np).transpose();
+    Ex = dE_map.head(ndx).transpose();
+    Eu = dE_map.segment(ndx, nu).transpose();
+    Ep = dE_map.segment(ndx + nu, np).transpose();
     Eigen::Map<MatrixXs> H1_map(H1.data(), ninput, ninput);
     Lxx = H1_map.topLeftCorner(ndx, ndx);
     Luu = H1_map.middleCols(ndx, nu).middleRows(ndx, nu);
@@ -1435,7 +1436,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_D1_T(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t ng = model->get_ng_T();
     const std::size_t nh = model->get_nh_T();
     const std::size_t np = model->get_np();
@@ -1463,8 +1463,9 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     }
     it_J1 += nh * ninput;
     Eigen::Map<VectorXs> dE_map(J1_T.data() + it_J1, ninput);
-    dE_dv = dE_map.segment(ndx - nv, nv).transpose();
-    dE_dp = dE_map.segment(ndx, np).transpose();
+    Ex = dE_map.head(ndx).transpose();
+    Eu.setZero();
+    Ep = dE_map.segment(ndx, np).transpose();
     Eigen::Map<MatrixXs> H1_map(H1_T.data(), ninput, ninput);
     Lxx = H1_map.topLeftCorner(ndx, ndx);
     Lpp = H1_map.middleRows(ndx, np).middleCols(ndx, np);
@@ -1476,7 +1477,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_D2(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
@@ -1503,8 +1503,9 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     Hp = H_map.middleRows(nbase + ndx + nu, np).transpose();
     Eigen::Map<VectorXs> dE_map(J2.data() + ninput * (1 + ndx + ng + nh),
                                 ninput);
-    dE_dv = dE_map.segment(nbase + ndx - nv, nv).transpose();
-    dE_dp = dE_map.segment(nbase + ndx + nu, np).transpose();
+    Ex = dE_map.segment(nbase, ndx).transpose();
+    Eu = dE_map.segment(nbase + ndx, nu).transpose();
+    Ep = dE_map.segment(nbase + ndx + nu, np).transpose();
     Eigen::Map<MatrixXs> H2_map(H2.data(), ninput, ninput);
     Lxx = H2_map.block(nbase, nbase, ndx, ndx);
     Lxu = H2_map.block(nbase, nbase + ndx, ndx, nu);
@@ -1517,7 +1518,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_D2_T(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t ng = model->get_ng_T();
     const std::size_t nh = model->get_nh_T();
     const std::size_t np = model->get_np();
@@ -1548,8 +1548,9 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     }
     Eigen::Map<VectorXs> dE_map(J2_T.data() + ninput * (1 + ndx + ng + nh),
                                 ninput);
-    dE_dv = dE_map.segment(nbase + ndx - nv, nv).transpose();
-    dE_dp = dE_map.segment(nbase + ndx, np).transpose();
+    Ex = dE_map.segment(nbase, ndx).transpose();
+    Eu.setZero();
+    Ep = dE_map.segment(nbase + ndx, np).transpose();
     Eigen::Map<MatrixXs> H2_map(H2_T.data(), ninput, ninput);
     Lxx = H2_map.block(nbase, nbase, ndx, ndx);
     Lpp = H2_map.block(nbase + ndx, nbase + ndx, np, np);
@@ -1559,7 +1560,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_Y2(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
@@ -1601,15 +1601,16 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     it_Y2 += nh * nu;
     Hp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, np);
     it_Y2 += nh * np;
-    dE_dv = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, 1, nv);
-    it_Y2 += nv;
-    dE_dp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, 1, np);
+    Ex = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, 1, ndx);
+    it_Y2 += ndx;
+    Eu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, 1, nu);
+    it_Y2 += nu;
+    Ep = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, 1, np);
   }
 
   template <template <typename Scalar> class Model>
   void set_Y2_T(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t ng = model->get_ng_T();
     const std::size_t nh = model->get_nh_T();
     const std::size_t np = model->get_np();
@@ -1644,9 +1645,10 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
       Hp.topRows(nh) = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, nh, np);
     }
     it_Y2 += nh * np;
-    dE_dv = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, 1, nv);
-    it_Y2 += nv;
-    dE_dp = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, 1, np);
+    Ex = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, 1, ndx);
+    it_Y2 += ndx;
+    Eu.setZero();
+    Ep = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, 1, np);
     Fx.setIdentity();
     Fp.setZero();
   }
@@ -1654,7 +1656,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_Yh(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
@@ -1696,9 +1697,11 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
     it_Yh += nh * nu;
     Hp = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, nh, np);
     it_Yh += nh * np;
-    dE_dv = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, 1, nv);
-    it_Yh += nv;
-    dE_dp = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, 1, np);
+    Ex = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, 1, ndx);
+    it_Yh += ndx;
+    Eu = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, 1, nu);
+    it_Yh += nu;
+    Ep = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, 1, np);
   }
 
   template <template <typename Scalar> class Model>
@@ -1733,7 +1736,6 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
   template <template <typename Scalar> class Model>
   void set_Yh_T(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t nv = model->get_state()->get_nv();
     const std::size_t ng = model->get_ng_T();
     const std::size_t nh = model->get_nh_T();
     const std::size_t np = model->get_np();
@@ -1768,9 +1770,10 @@ struct ObserverDataCodeGenTpl : public ObserverDataAbstractTpl<_Scalar> {
       Hp.topRows(nh) = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, nh, np);
     }
     it_Yh += nh * np;
-    dE_dv = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, 1, nv);
-    it_Yh += nv;
-    dE_dp = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, 1, np);
+    Ex = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, 1, ndx);
+    it_Yh += ndx;
+    Eu.setZero();
+    Ep = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, 1, np);
     Fx.setIdentity();
     Fp.setZero();
   }

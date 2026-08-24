@@ -996,6 +996,7 @@ class _CallbackLoggerMixin:
     def __init__(self):
         self.xs = []
         self.us = []
+        self.ps = []
         self.fs = []
         self.iters = []
         self.costs = []
@@ -1006,7 +1007,6 @@ class _CallbackLoggerMixin:
         self.steps = []
         self.ffeass = []
         self.hfeass = []
-        self.p = []
         self.Vpp_phase = []
 
     def __call__(self, solver):
@@ -1015,8 +1015,8 @@ class _CallbackLoggerMixin:
         self.xs = copy.copy(solver.xs)
         self.us = copy.copy(solver.us)
         self.fs.append(copy.copy(solver.fs))
-        if hasattr(solver, "p") and len(solver.p) > 0:
-            self.p.append([np.array(p, copy=True) for p in solver.ps])
+        if hasattr(solver, "ps") and len(solver.ps) > 0:
+            self.ps.append([np.array(p, copy=True) for p in solver.ps])
         if hasattr(solver, "Vpp_phase") and len(solver.Vpp_phase) > 0:
             self.Vpp_phase.append(
                 [np.array(Vpp, copy=True) for Vpp in solver.Vpp_phase]
@@ -1251,11 +1251,11 @@ def computeInertialCovariances(
 ):
     """Compute physical inertial estimates and standard deviations by iteration."""
     callbacks = solver.getCallbacks()
-    if len(callbacks) == 0 or not hasattr(callbacks[-1], "p"):
+    if len(callbacks) == 0 or not hasattr(callbacks[-1], "ps"):
         raise ValueError("The solver must use CallbackLogger to plot its parameters.")
 
     log = callbacks[-1]
-    p_entries = log.p if len(log.p) > 0 else [solver.ps]
+    p_entries = log.ps if len(log.ps) > 0 else [solver.ps]
     p_log = [np.asarray(entry[0], dtype=float) for entry in p_entries]
     precision_log = [
         np.asarray(entry[0], dtype=float) if len(entry) > 0 else None
@@ -1687,6 +1687,7 @@ def saveLogfile(filename, log):
     data = {
         "xs": log.xs,
         "us": log.us,
+        "ps": log.ps,
         "fs": log.fs,
         "steps": log.steps,
         "iters": log.iters,
@@ -1695,7 +1696,6 @@ def saveLogfile(filename, log):
         "dual-reg": log.dregs,
         "stops": log.stops,
         "grads": log.grads,
-        "p": log.p,
         "Vpp_phase": log.Vpp_phase,
     }
     with open(filename, "wb") as f:

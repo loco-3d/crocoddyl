@@ -28,6 +28,7 @@
 #include "crocoddyl/multibody/actuations/multibody.hpp"
 #include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
 #include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
+#include "crocoddyl/multibody/params/actuation.hpp"
 #include "crocoddyl/multibody/params/inertial.hpp"
 #include "crocoddyl/multibody/params/log-cholesky.hpp"
 #include "crocoddyl/multibody/residuals/state.hpp"
@@ -103,6 +104,51 @@ std::shared_ptr<IntegratedObserverModelRK> create_model(
       state, state->get_ndx() + dynamics->get_nu());
   return std::make_shared<IntegratedObserverModelRK>(dynamics, costs, nullptr,
                                                      1e-3, rktype);
+}
+
+std::shared_ptr<IntegratedObserverModelRK> create_dissipative_model(
+    const crocoddyl::RKType rktype,
+    std::shared_ptr<ParameterManager>& params_out) {
+  typedef crocoddyl::JointDynamicsModelAbstract JointModel;
+  typedef crocoddyl::JointDynamicsModelFriction Friction;
+  const std::shared_ptr<StateMultibody> state = create_state();
+
+  const pinocchio::JointIndex njoints =
+      static_cast<pinocchio::JointIndex>(state->get_pinocchio()->njoints);
+  pinocchio::JointIndex joint_id = 1;
+  for (; joint_id < njoints; ++joint_id) {
+    if (state->get_pinocchio()->joints[joint_id].nv() == 1) {
+      break;
+    }
+  }
+  if (joint_id >= njoints) {
+    throw_pretty("Invalid test model: no single-DoF joint was found");
+  }
+  Eigen::Vector2d friction_p;
+  friction_p << std::log(0.3), std::log(4.0);
+  const std::shared_ptr<Friction> friction = std::make_shared<Friction>(
+      joint_id,
+      static_cast<std::size_t>(state->get_pinocchio()->joints[joint_id].nq()),
+      friction_p, crocoddyl::JointFrictionType::Coulomb);
+  const std::vector<std::shared_ptr<JointModel> > joints(1, friction);
+  const std::shared_ptr<ActuationModelMultibody> actuation =
+      std::make_shared<ActuationModelMultibody>(state, joints);
+  const std::shared_ptr<crocoddyl::ActuationMultibodyParams> actuation_params =
+      std::make_shared<crocoddyl::ActuationMultibodyParams>(actuation);
+  params_out = std::make_shared<ParameterManager>(state);
+  params_out->addParam("actuation", actuation_params);
+
+  const std::shared_ptr<ImplicitConstraintModelMultiple> constraints =
+      std::make_shared<ImplicitConstraintModelMultiple>(state,
+                                                        actuation->get_nu());
+  const std::shared_ptr<DynamicsModelConstrainedForward> dynamics =
+      std::make_shared<DynamicsModelConstrainedForward>(state, actuation,
+                                                        constraints);
+  const std::size_t observer_nu = state->get_ndx() + dynamics->get_nu();
+  const std::shared_ptr<CostModelSum> costs =
+      std::make_shared<CostModelSum>(state, observer_nu, params_out->get_np());
+  return std::make_shared<IntegratedObserverModelRK>(dynamics, costs, nullptr,
+                                                     2e-2, rktype);
 }
 
 std::shared_ptr<IntegratedObserverModelRK> create_numdiff_model(
@@ -208,6 +254,65 @@ create_continuous_estimation_state_tracking_model(
                                                      nullptr, 1e-2, rktype);
 }
 
+void test_observer_rk_dissipative_energy(const crocoddyl::RKType rktype) {
+  std::shared_ptr<ParameterManager> params;
+  const std::shared_ptr<IntegratedObserverModelRK> model =
+      create_dissipative_model(rktype, params);
+  ObserverModelNumDiff model_nd(
+      std::static_pointer_cast<ObserverModelAbstract>(model), params);
+  const std::shared_ptr<IntegratedObserverDataRK> data =
+      std::dynamic_pointer_cast<IntegratedObserverDataRK>(
+          model->createData(params->createData()));
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data_nd =
+      model_nd.createData(params->createData());
+  BOOST_REQUIRE(data != nullptr);
+  model->set_params(data, params);
+
+  const std::shared_ptr<StateMultibody> state =
+      std::dynamic_pointer_cast<StateMultibody>(model->get_state());
+  BOOST_REQUIRE(state != nullptr);
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd w = 5e-2 * Eigen::VectorXd::Random(model->get_nu());
+  Eigen::VectorXd p = params->zero();
+  p.array() += 0.05;
+  model->update_p(data, p);
+  model_nd.update_p(data_nd, p);
+
+  model->calc(data, x, w);
+  model->calcDiff(data, x, w);
+  model_nd.calc(data_nd, x, w);
+  model_nd.calcDiff(data_nd, x, w);
+
+  double expected_energy = 0.;
+  if (rktype == crocoddyl::two) {
+    expected_energy = data->dynamics_stage[1]->dissipative_P[0];
+  } else if (rktype == crocoddyl::three) {
+    expected_energy = (data->dynamics_stage[0]->dissipative_P[0] +
+                       3. * data->dynamics_stage[2]->dissipative_P[0]) /
+                      4.;
+  } else {
+    expected_energy = (data->dynamics_stage[0]->dissipative_P[0] +
+                       2. * data->dynamics_stage[1]->dissipative_P[0] +
+                       2. * data->dynamics_stage[2]->dissipative_P[0] +
+                       data->dynamics_stage[3]->dissipative_P[0]) /
+                      6.;
+  }
+  expected_energy *= model->get_dt();
+
+  const double tol = std::pow(model_nd.get_disturbance(), 1. / 3.);
+  const double nonzero_tol = 10. * std::numeric_limits<double>::epsilon();
+  BOOST_CHECK_SMALL(data->dissipative_E[0] - expected_energy, 1e-12);
+  BOOST_CHECK_GT(data->Ex.norm(), nonzero_tol);
+  BOOST_CHECK_GT(data->Eu.norm(), nonzero_tol);
+  BOOST_CHECK_GT(data->Ep.norm(), nonzero_tol);
+  const std::shared_ptr<crocoddyl::ObserverDataAbstract> obs_data_nd =
+      std::dynamic_pointer_cast<crocoddyl::ObserverDataAbstract>(data_nd);
+  BOOST_REQUIRE(obs_data_nd != nullptr);
+  BOOST_CHECK((data->Ex - obs_data_nd->Ex).isZero(tol));
+  BOOST_CHECK((data->Eu - obs_data_nd->Eu).isZero(tol));
+  BOOST_CHECK((data->Ep - obs_data_nd->Ep).isZero(tol));
+}
+
 void test_observer_rk_numdiff(const crocoddyl::RKType rktype) {
   const std::shared_ptr<IntegratedObserverModelRK> model = create_model(rktype);
   ObserverModelNumDiff model_nd(
@@ -280,8 +385,9 @@ void test_observer_rk_terminal_path() {
   BOOST_CHECK(data->Fu.isZero(1e-12));
   BOOST_CHECK(data->Fp.isZero(1e-12));
   BOOST_CHECK(data->dissipative_E.isZero(1e-12));
-  BOOST_CHECK(data->dE_dv.isZero(1e-12));
-  BOOST_CHECK(data->dE_dp.isZero(1e-12));
+  BOOST_CHECK(data->Ex.isZero(1e-12));
+  BOOST_CHECK(data->Eu.isZero(1e-12));
+  BOOST_CHECK(data->Ep.isZero(1e-12));
 }
 
 void test_observer_rk_parameter_derivatives_running(
@@ -550,6 +656,12 @@ void test_observer_rk_calc_diff_no_malloc_with_parameters() {
 }  // namespace
 
 void register_unit_tests() {
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_observer_rk_dissipative_energy, crocoddyl::two)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_observer_rk_dissipative_energy, crocoddyl::three)));
+  framework::master_test_suite().add(BOOST_TEST_CASE(
+      boost::bind(&test_observer_rk_dissipative_energy, crocoddyl::four)));
   framework::master_test_suite().add(
       BOOST_TEST_CASE(boost::bind(&test_observer_rk_numdiff, crocoddyl::two)));
   framework::master_test_suite().add(BOOST_TEST_CASE(

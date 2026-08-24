@@ -112,6 +112,7 @@ void computeKineticEnergyJacobian(
     const pinocchio::ModelTpl<Scalar>& model, pinocchio::DataTpl<Scalar>& data,
     const Eigen::Ref<const typename MathBaseTpl<Scalar>::VectorXs>& q,
     const Eigen::Ref<const typename MathBaseTpl<Scalar>::VectorXs>& v,
+    const Eigen::Ref<const typename MathBaseTpl<Scalar>::VectorXs>& a,
     typename MathBaseTpl<Scalar>::MatrixXs& J,
     typename MathBaseTpl<Scalar>::MatrixXs& Jout,
     typename MathBaseTpl<Scalar>::MatrixXs& dV_dqv,
@@ -119,7 +120,7 @@ void computeKineticEnergyJacobian(
     Eigen::Matrix<Scalar, 6, 1>& tmp6) {
   const std::size_t nv = static_cast<std::size_t>(model.nv);
 
-  pinocchio::computeForwardKinematicsDerivatives(model, data, q, v);
+  pinocchio::computeForwardKinematicsDerivatives(model, data, q, v, a);
 
   dV_dqv.setZero();
   dT_dqv.setZero();

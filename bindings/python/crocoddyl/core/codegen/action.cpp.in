@@ -292,16 +292,7 @@ struct ObserverDataCodeGenVisitor
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()))
         .add_property(
             "Y2_T",
-            bp::make_getter(&Data::Y2_T, bp::return_internal_reference<>()))
-        .add_property("dissipative_E",
-                      bp::make_getter(&Data::dissipative_E,
-                                      bp::return_internal_reference<>()))
-        .add_property("dE_dv",
-                      bp::make_getter(&Data::dE_dv,
-                                      bp::return_internal_reference<>()))
-        .add_property("dE_dp",
-                      bp::make_getter(&Data::dE_dp,
-                                      bp::return_internal_reference<>()));
+            bp::make_getter(&Data::Y2_T, bp::return_internal_reference<>()));
   }
 };
 

@@ -57,7 +57,7 @@ void ResidualModelPowerTpl<Scalar>::calc(
   const Scalar Ep =
       pinocchio::computeMechanicalEnergy(*pin_model_, *d->pinocchio, qp, vp);
   data->r[0] = Ep - Em - P_ref_;
-  if (!actuation_param_name_.empty() && d->observer->dissipative_E != nullptr) {
+  if (!actuation_param_name_.empty()) {
     data->r[0] += (*d->observer->dissipative_E)[0];
   }
 }
@@ -96,12 +96,12 @@ void ResidualModelPowerTpl<Scalar>::calcDiff(
       d->observer->xnext->segment(nq, nv);
 
   internal::computeKineticEnergyJacobian<Scalar>(*pin_model_, *d->pinocchio, qm,
-                                                 vm, d->J, d->Jout, d->dV_dqv,
-                                                 d->dK_dqv, d->tmp6);
+                                                 vm, d->anone, d->J, d->Jout,
+                                                 d->dV_dqv, d->dK_dqv, d->tmp6);
   d->dTm_dqv = d->dK_dqv;
   internal::computeKineticEnergyJacobian<Scalar>(*pin_model_, *d->pinocchio, qp,
-                                                 vp, d->J, d->Jout, d->dV_dqv,
-                                                 d->dK_dqv, d->tmp6);
+                                                 vp, d->anone, d->J, d->Jout,
+                                                 d->dV_dqv, d->dK_dqv, d->tmp6);
   d->dTp_dqv = d->dK_dqv;
 
   d->dUp_dq =
@@ -146,7 +146,7 @@ void ResidualModelPowerTpl<Scalar>::calcDiff(
   data->Rp.noalias() += d->dEp_dx.transpose() * (*d->observer->int_Fp);
 
   if (d->actuation_data != nullptr) {
-    data->Rp += *d->observer->dE_dp;
+    data->Rp += *d->observer->Ep;
   }
 
   data->Rx.noalias() = d->dUp_dq.transpose() * d->observer->int_Fx->topRows(nv);
@@ -156,7 +156,8 @@ void ResidualModelPowerTpl<Scalar>::calcDiff(
   data->Ru.noalias() += d->dTp_dqv.transpose() * (*d->observer->int_Fu);
   data->Rx.row(0) -= d->dTm_dqv.transpose();
   if (d->actuation_data != nullptr) {
-    data->Rx.rightCols(nv) += *d->observer->dE_dv;
+    data->Rx += *d->observer->Ex;
+    data->Ru += *d->observer->Eu;
   }
 }
 

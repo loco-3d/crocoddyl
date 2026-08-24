@@ -119,6 +119,7 @@ struct ResidualDataKineticEnergyTpl : public ResidualDataAbstractTpl<_Scalar> {
         parameter_data(internal::getParameterDataManager<Scalar>(data)),
         inertial_data(nullptr),
         np_offset(0),
+        anone(VectorXs::Zero(model->get_state()->get_nv())),
         J(6, model->get_state()->get_nv()),
         Jout(6, model->get_state()->get_nv()),
         dV_dqv(6 * model->get_state()->get_nv(), model->get_state()->get_ndx()),
@@ -163,6 +164,7 @@ struct ResidualDataKineticEnergyTpl : public ResidualDataAbstractTpl<_Scalar> {
   ParameterDataManager* parameter_data;
   MultibodyInertialParamsData* inertial_data;
   std::size_t np_offset;
+  VectorXs anone;
   MatrixXs J;
   MatrixXs Jout;
   MatrixXs dV_dqv;

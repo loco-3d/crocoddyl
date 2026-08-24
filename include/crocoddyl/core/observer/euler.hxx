@@ -151,8 +151,10 @@ void IntegratedObserverModelEulerTpl<Scalar>::calcDiff(
     dynamics_->calcDiff(d->dynamics, x, u_zero_);
   }
 
-  d->dE_dv.noalias() = d->dynamics->dP_dv * time_step_;
-  d->dE_dp.noalias() = d->dynamics->dP_dp * time_step_;
+  d->Ex.setZero();
+  d->Ex.rightCols(nv).noalias() = d->dynamics->dP_dv * time_step_;
+  d->Eu.setZero();
+  d->Ep.noalias() = d->dynamics->dP_dp * time_step_;
 
   d->Fx.topRows(nv).noalias() = d->dynamics->Fx * time_step2_;
   d->Fx.bottomRows(nv).noalias() = d->dynamics->Fx * time_step_;
@@ -265,8 +267,10 @@ void IntegratedObserverModelEulerTpl<Scalar>::calcDiff(
   d->Fx.setZero();
   d->Fp.setZero();
   state_->Jintegrate(x, d->dx, d->Fx, d->Fx);
-  d->dE_dv.setZero();
-  d->dE_dp.setZero();
+  d->dissipative_E.setZero();
+  d->Ex.setZero();
+  d->Eu.setZero();
+  d->Ep.setZero();
 
   costs_->calcDiff(d->costs, x);
   d->Lx = d->costs->Lx;

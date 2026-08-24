@@ -70,6 +70,6 @@ iter    cost       merit      stop      |grad|      preg       dreg      step   
   12  1.479e+02  1.479e+02  5.974e-04  8.817e-02  1.000e-09  1.000e-09  1.0000  8.227e-06  0.000e+00  5.008e-05 -8.897e-02 -8.927e-02 -7.818e-02 -7.849e-02
   13  1.479e+02  1.479e+02  2.696e-05  1.389e-03  1.000e-09  1.000e-09  1.0000  8.776e-06  0.000e+00  1.818e-05  2.816e-04 -7.558e-05  4.979e-04  1.407e-04
 step integration (guess):  0.01
-step integration (optimal):  0.006091097194617812
+step integration (optimal):  0.00609109719461799
 Target CoM position =  [0.0867 0.001  0.5155]
 Reached CoM position =  [0.0867 0.001  0.5155]

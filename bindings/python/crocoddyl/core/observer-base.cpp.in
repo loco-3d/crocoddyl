@@ -143,14 +143,13 @@ struct ObserverModelAbstractVisitor
   bp::class_<Data, bp::bases<ActionDataAbstract>, boost::noncopyable>(       \
       "ObserverDataAbstract",                                                \
       "Abstract class for observer data.\n\n"                                \
-       "Observer data extends ActionDataAbstract with dissipative-energy "     \
-       "storage used by observer models.",                                    \
+       "Observer data extends ActionDataAbstract with integrated "            \
+       "dissipative-energy storage.",                                         \
       bp::init<Model*>(                                                      \
           bp::args("self", "model"),                                         \
           "Create common data shared between observer models.\n\n"           \
-            "The observer data uses the model in order to process observer "    \
-            "terms through a unified action-data interface and stores "         \
-            "observer-specific dissipative quantities.\n"                       \
+          "The observer data uses the model to process observer terms "       \
+          "through a unified action-data interface.\n"                       \
           ":param model: observer model"))                                   \
       .add_property(                                                         \
           "dissipative_E",                                                   \
@@ -159,15 +158,17 @@ struct ObserverModelAbstractVisitor
           bp::make_setter(&Data::dissipative_E),                             \
           "integrated dissipative energy")                                   \
       .add_property(                                                         \
-          "dE_dv",                                                           \
-          bp::make_getter(&Data::dE_dv, bp::return_internal_reference<>()),  \
-          bp::make_setter(&Data::dE_dv),                                     \
-          "dissipative-energy derivative with respect to velocity")          \
+          "Ex", bp::make_getter(&Data::Ex, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Ex),                                        \
+          "dissipative-energy Jacobian with respect to state")               \
       .add_property(                                                         \
-          "dE_dp",                                                           \
-          bp::make_getter(&Data::dE_dp, bp::return_internal_reference<>()),  \
-          bp::make_setter(&Data::dE_dp),                                     \
-          "dissipative-energy derivative with respect to parameters")        \
+          "Eu", bp::make_getter(&Data::Eu, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Eu),                                        \
+          "dissipative-energy Jacobian with respect to control")             \
+      .add_property(                                                         \
+          "Ep", bp::make_getter(&Data::Ep, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Ep),                                        \
+          "dissipative-energy Jacobian with respect to parameters")          \
       .def(CopyableVisitor<Data>());
 
 void exposeObserverAbstract() {

@@ -1226,21 +1226,24 @@ void compare_codegen_observer_data(
   check_codegen_matrix_approx(codegen_observer_data->dissipative_E,
                               direct_observer_data->dissipative_E, tol,
                               prefix + " dissipative_E");
-  check_codegen_matrix_approx(codegen_observer_data->dE_dv,
-                              direct_observer_data->dE_dv, tol,
-                              prefix + " dE_dv");
-  check_codegen_matrix_approx(codegen_observer_data->dE_dp,
-                              direct_observer_data->dE_dp, tol,
-                              prefix + " dE_dp");
+  check_codegen_matrix_approx(codegen_observer_data->Ex,
+                              direct_observer_data->Ex, tol, prefix + " Ex");
+  check_codegen_matrix_approx(codegen_observer_data->Eu,
+                              direct_observer_data->Eu, tol, prefix + " Eu");
+  check_codegen_matrix_approx(codegen_observer_data->Ep,
+                              direct_observer_data->Ep, tol, prefix + " Ep");
   check_codegen_matrix_approx(codegen_observer_data->dissipative_E,
                               numdiff_observer_data->dissipative_E, tol,
                               prefix + " numdiff dissipative_E");
-  check_codegen_matrix_approx(codegen_observer_data->dE_dv,
-                              numdiff_observer_data->dE_dv, tol,
-                              prefix + " numdiff dE_dv");
-  check_codegen_matrix_approx(codegen_observer_data->dE_dp,
-                              numdiff_observer_data->dE_dp, tol,
-                              prefix + " numdiff dE_dp");
+  check_codegen_matrix_approx(codegen_observer_data->Ex,
+                              numdiff_observer_data->Ex, tol,
+                              prefix + " numdiff Ex");
+  check_codegen_matrix_approx(codegen_observer_data->Eu,
+                              numdiff_observer_data->Eu, tol,
+                              prefix + " numdiff Eu");
+  check_codegen_matrix_approx(codegen_observer_data->Ep,
+                              numdiff_observer_data->Ep, tol,
+                              prefix + " numdiff Ep");
 }
 
 template <typename Scalar>

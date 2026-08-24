@@ -141,7 +141,6 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
   const VectorXs e0 = d0_obs->dissipative_E;
 
   const std::size_t ndx = model_->get_state()->get_ndx();
-  const std::size_t nv = model_->get_state()->get_nv();
   const std::size_t nu = model_->get_nu();
   const std::size_t ng = model_->get_ng();
   const std::size_t nh = model_->get_nh();
@@ -167,12 +166,9 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
     if (nh != 0) {
       data->Hx.col(ix) = (d->data_x[ix]->h - h0) / d->xh_jac;
     }
-    // dissipative energy Jacobian w.r.t. velocity (velocity = x[nv:])
-    if (ix >= nv) {
-      const auto* dxi_obs = static_cast<const ObserverDataAbstractTpl<Scalar>*>(
-          d->data_x[ix].get());
-      d->dE_dv.col(ix - nv) = (dxi_obs->dissipative_E - e0) / d->xh_jac;
-    }
+    const auto* dxi_obs = static_cast<const ObserverDataAbstractTpl<Scalar>*>(
+        d->data_x[ix].get());
+    data_obs->Ex.col(ix) = (dxi_obs->dissipative_E - e0) / d->xh_jac;
     d->dx(ix) = Scalar(0.);
   }
   data->Fx /= d->xh_jac;
@@ -194,6 +190,9 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
     if (nh != 0) {
       data->Hu.col(iw) = (d->data_w[iw]->h - h0) / d->wh_jac;
     }
+    const auto* dwi_obs = static_cast<const ObserverDataAbstractTpl<Scalar>*>(
+        d->data_w[iw].get());
+    data_obs->Eu.col(iw) = (dwi_obs->dissipative_E - e0) / d->wh_jac;
     d->dw(iw) = Scalar(0.);
   }
   data->Fu /= d->wh_jac;
@@ -218,7 +217,7 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
       }
       const auto* dpi_obs = static_cast<const ObserverDataAbstractTpl<Scalar>*>(
           d->data_p[ip].get());
-      data_obs->dE_dp.col(ip) = (dpi_obs->dissipative_E - e0) / d->ph_jac;
+      data_obs->Ep.col(ip) = (dpi_obs->dissipative_E - e0) / d->ph_jac;
       d->dp(ip) = Scalar(0.);
       model_->update_p(d->data_p[ip], d->p);
       perturbed_ip = np_;
@@ -430,6 +429,9 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
   const std::size_t ndx = model_->get_state()->get_ndx();
   const std::size_t ng_T = model_->get_ng_T();
   const std::size_t nh_T = model_->get_nh_T();
+  data_obs->Ex.setZero();
+  data_obs->Eu.setZero();
+  data_obs->Ep.setZero();
 
   model_->get_state()->diff(model_->get_state()->zero(), x, d->dx);
   d->x_norm = d->dx.norm();
@@ -483,9 +485,6 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
 
   if (np_ > 0) {
     const VectorXs& xnext0 = d->data_0->xnext;
-    const auto* d0_obs =
-        static_cast<const ObserverDataAbstractTpl<Scalar>*>(d->data_0.get());
-    const VectorXs e0 = d0_obs->dissipative_E;
     d->dp.setZero();
     d->ph_jac = e_jac_ * std::max(Scalar(1.), d->p.norm());
     for (std::size_t ip = 0; ip < np_; ++ip) {
@@ -502,9 +501,6 @@ void ObserverModelNumDiffTpl<Scalar>::calcDiff(
       if (nh_T != 0) {
         data->Hp.col(ip) = (d->data_p[ip]->h - h0) / d->ph_jac;
       }
-      const auto* dpi_obs = static_cast<const ObserverDataAbstractTpl<Scalar>*>(
-          d->data_p[ip].get());
-      data_obs->dE_dp.col(ip) = (dpi_obs->dissipative_E - e0) / d->ph_jac;
       d->dp(ip) = Scalar(0.);
       model_->update_p(d->data_p[ip], d->p);
       perturbed_ip = np_;

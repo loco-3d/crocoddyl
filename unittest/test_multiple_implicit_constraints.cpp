@@ -81,16 +81,18 @@ struct ObserverPayload {
         Fu(MatrixXs::Random(2, 1)),
         Fp(MatrixXs::Random(2, 1)),
         dissipative_E(VectorXs::Random(1)),
-        dE_dv(MatrixXs::Random(1, 1)),
-        dE_dp(MatrixXs::Random(1, 1)) {}
+        Ex(MatrixXs::Random(1, 2)),
+        Eu(MatrixXs::Random(1, 1)),
+        Ep(MatrixXs::Random(1, 1)) {}
 
   VectorXs xnext;
   MatrixXs Fx;
   MatrixXs Fu;
   MatrixXs Fp;
   VectorXs dissipative_E;
-  MatrixXs dE_dv;
-  MatrixXs dE_dp;
+  MatrixXs Ex;
+  MatrixXs Eu;
+  MatrixXs Ep;
 };
 
 void test_constructor() {
@@ -687,8 +689,9 @@ void test_observer_collector() {
   BOOST_CHECK(collector.int_Fu == &observer.Fu);
   BOOST_CHECK(collector.int_Fp == &observer.Fp);
   BOOST_CHECK(collector.dissipative_E == &observer.dissipative_E);
-  BOOST_CHECK(collector.dE_dv == &observer.dE_dv);
-  BOOST_CHECK(collector.dE_dp == &observer.dE_dp);
+  BOOST_CHECK(collector.Ex == &observer.Ex);
+  BOOST_CHECK(collector.Eu == &observer.Eu);
+  BOOST_CHECK(collector.Ep == &observer.Ep);
 }
 
 void test_observer_collector_double() { test_observer_collector<double>(); }

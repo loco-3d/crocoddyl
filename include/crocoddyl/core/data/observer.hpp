@@ -29,8 +29,9 @@ struct DataCollectorObserverTpl : virtual DataCollectorAbstractTpl<Scalar> {
         int_Fu(nullptr),
         int_Fp(nullptr),
         dissipative_E(nullptr),
-        dE_dv(nullptr),
-        dE_dp(nullptr) {}
+        Ex(nullptr),
+        Eu(nullptr),
+        Ep(nullptr) {}
   virtual ~DataCollectorObserverTpl() {}
 
   template <class ObserverData>
@@ -43,14 +44,15 @@ struct DataCollectorObserverTpl : virtual DataCollectorAbstractTpl<Scalar> {
     int_Fu = &data->Fu;
     int_Fp = &data->Fp;
     dissipative_E = &data->dissipative_E;
-    dE_dv = &data->dE_dv;
-    dE_dp = &data->dE_dp;
+    Ex = &data->Ex;
+    Eu = &data->Eu;
+    Ep = &data->Ep;
   }
 
   bool hasObserverData() const {
     return xnext != nullptr && int_Fx != nullptr && int_Fu != nullptr &&
-           int_Fp != nullptr && dissipative_E != nullptr && dE_dv != nullptr &&
-           dE_dp != nullptr;
+           int_Fp != nullptr && dissipative_E != nullptr && Ex != nullptr &&
+           Eu != nullptr && Ep != nullptr;
   }
 
   VectorXs* xnext;
@@ -58,8 +60,9 @@ struct DataCollectorObserverTpl : virtual DataCollectorAbstractTpl<Scalar> {
   MatrixXs* int_Fu;
   MatrixXs* int_Fp;
   VectorXs* dissipative_E;
-  MatrixXs* dE_dv;
-  MatrixXs* dE_dp;
+  MatrixXs* Ex;
+  MatrixXs* Eu;
+  MatrixXs* Ep;
 };
 
 }  // namespace crocoddyl

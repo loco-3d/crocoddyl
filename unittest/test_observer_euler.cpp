@@ -219,6 +219,10 @@ void test_observer_euler_calc_matches_manual_discretization() {
           data->dynamics->shared);
   BOOST_REQUIRE(shared != nullptr);
   BOOST_CHECK(shared->hasObserverData());
+  BOOST_CHECK(shared->dissipative_E == &data->dissipative_E);
+  BOOST_CHECK(shared->Ex == &data->Ex);
+  BOOST_CHECK(shared->Eu == &data->Eu);
+  BOOST_CHECK(shared->Ep == &data->Ep);
 
   const std::shared_ptr<StateMultibody> state =
       std::dynamic_pointer_cast<StateMultibody>(model->get_state());
@@ -299,8 +303,11 @@ void test_observer_euler_calc_diff_matches_manual_jacobians() {
   BOOST_CHECK(data->Fx.isApprox(expected_Fx, 1e-10));
   BOOST_CHECK(data->Fu.isApprox(expected_Fu, 1e-10));
   BOOST_CHECK(data->Fp.isZero(1e-12));
-  BOOST_CHECK(data->dE_dv.isApprox(dyn_data->dP_dv * dt, 1e-12));
-  BOOST_CHECK(data->dE_dp.isApprox(dyn_data->dP_dp * dt, 1e-12));
+  Eigen::MatrixXd expected_Ex = Eigen::MatrixXd::Zero(1, ndx);
+  expected_Ex.rightCols(nv) = dyn_data->dP_dv * dt;
+  BOOST_CHECK(data->Ex.isApprox(expected_Ex, 1e-12));
+  BOOST_CHECK(data->Eu.isZero(1e-12));
+  BOOST_CHECK(data->Ep.isApprox(dyn_data->dP_dp * dt, 1e-12));
 }
 
 void test_observer_euler_terminal_path() {
@@ -327,8 +334,9 @@ void test_observer_euler_terminal_path() {
   BOOST_CHECK(data->Fu.isZero(1e-12));
   BOOST_CHECK(data->Fp.isZero(1e-12));
   BOOST_CHECK(data->dissipative_E.isZero(1e-12));
-  BOOST_CHECK(data->dE_dv.isZero(1e-12));
-  BOOST_CHECK(data->dE_dp.isZero(1e-12));
+  BOOST_CHECK(data->Ex.isZero(1e-12));
+  BOOST_CHECK(data->Eu.isZero(1e-12));
+  BOOST_CHECK(data->Ep.isZero(1e-12));
 }
 
 void test_observer_euler_power_cost_uses_integrated_energy() {
@@ -459,8 +467,9 @@ void test_observer_numdiff_partial_derivatives_running() {
       std::dynamic_pointer_cast<crocoddyl::ObserverDataAbstract>(data_nd);
   BOOST_REQUIRE(obs_data != nullptr);
   BOOST_REQUIRE(obs_data_nd != nullptr);
-  BOOST_CHECK((obs_data->dE_dv - obs_data_nd->dE_dv).isZero(tol));
-  BOOST_CHECK((obs_data->dE_dp - obs_data_nd->dE_dp).isZero(tol));
+  BOOST_CHECK((obs_data->Ex - obs_data_nd->Ex).isZero(tol));
+  BOOST_CHECK((obs_data->Eu - obs_data_nd->Eu).isZero(tol));
+  BOOST_CHECK((obs_data->Ep - obs_data_nd->Ep).isZero(tol));
 }
 
 void test_observer_numdiff_partial_derivatives_terminal() {

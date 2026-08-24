@@ -260,9 +260,10 @@ struct DiscretizedObserverDataTpl : public ObserverDataAbstractTpl<_Scalar> {
   VectorXs u_zero;  //!< Zero command used by the discrete dynamics
 
   using Base::cost;
-  using Base::dE_dp;
-  using Base::dE_dv;
   using Base::dissipative_E;
+  using Base::Ep;
+  using Base::Eu;
+  using Base::Ex;
   using Base::Fp;
   using Base::Fu;
   using Base::Fx;

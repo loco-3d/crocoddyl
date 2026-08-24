@@ -166,8 +166,9 @@ void test_discretized_observer_scalar() {
   data->Gu.setConstant(Scalar(16));
   data->Hu.setConstant(Scalar(17));
   data->dissipative_E.setConstant(Scalar(18));
-  data->dE_dv.setConstant(Scalar(19));
-  data->dE_dp.setConstant(Scalar(20));
+  data->Ex.setConstant(Scalar(19));
+  data->Eu.setConstant(Scalar(20));
+  data->Ep.setConstant(Scalar(21));
   model->calc(data, x);
   model->calcDiff(data, x);
   BOOST_CHECK(data->Fu.isConstant(Scalar(11)));
@@ -178,8 +179,9 @@ void test_discretized_observer_scalar() {
   BOOST_CHECK(data->Gu.isConstant(Scalar(16)));
   BOOST_CHECK(data->Hu.isConstant(Scalar(17)));
   BOOST_CHECK(data->dissipative_E.isZero());
-  BOOST_CHECK(data->dE_dv.isZero());
-  BOOST_CHECK(data->dE_dp.isZero());
+  BOOST_CHECK(data->Ex.isZero());
+  BOOST_CHECK(data->Eu.isZero());
+  BOOST_CHECK(data->Ep.isZero());
 
   typedef typename std::conditional<std::is_same<Scalar, float>::value, double,
                                     float>::type OtherScalar;

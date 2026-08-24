@@ -27,10 +27,10 @@ namespace crocoddyl {
  * @brief One-step mechanical-energy balance residual
  *
  * The running residual is \f$r=E(x^+)-E(x)+E_d-P^*\f$, using an observer
- * payload prepared by Euler integration. Missing running observation values or
- * derivatives produce zero outputs. Optional active inertial and actuation
- * parameter entries contribute direct D075 parameter derivatives. The
- * terminal residual and derivatives are zero.
+ * payload prepared by the integrated observer. Missing running observation
+ * values or derivatives produce zero outputs. Optional active inertial and
+ * actuation parameter entries contribute directly to the residual's parameter
+ * derivatives. The terminal residual and derivatives are zero.
  */
 template <typename _Scalar>
 class ResidualModelPowerTpl : public ResidualModelAbstractTpl<_Scalar> {
@@ -131,6 +131,7 @@ struct ResidualDataPowerTpl : public ResidualDataAbstractTpl<_Scalar> {
         inertial_data(nullptr),
         actuation_data(nullptr),
         inertial_np_offset(0),
+        anone(VectorXs::Zero(model->get_state()->get_nv())),
         J(6, model->get_state()->get_nv()),
         Jout(6, model->get_state()->get_nv()),
         dV_dqv(6 * model->get_state()->get_nv(), model->get_state()->get_ndx()),
@@ -209,6 +210,7 @@ struct ResidualDataPowerTpl : public ResidualDataAbstractTpl<_Scalar> {
   MultibodyInertialParamsData* inertial_data;
   ActuationMultibodyParamsData* actuation_data;
   std::size_t inertial_np_offset;
+  VectorXs anone;
   MatrixXs J;
   MatrixXs Jout;
   MatrixXs dV_dqv;

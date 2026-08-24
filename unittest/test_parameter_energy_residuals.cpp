@@ -54,23 +54,24 @@ struct ObserverPayloadTpl {
   typedef Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> MatrixXs;
 
   ObserverPayloadTpl(const std::size_t nx, const std::size_t ndx,
-                     const std::size_t nv, const std::size_t nu,
-                     const std::size_t np)
+                     const std::size_t nu, const std::size_t np)
       : xnext(VectorXs::Zero(nx)),
         Fx(MatrixXs::Zero(ndx, ndx)),
         Fu(MatrixXs::Zero(ndx, nu)),
         Fp(MatrixXs::Zero(ndx, np)),
         dissipative_E(VectorXs::Zero(1)),
-        dE_dv(MatrixXs::Zero(1, nv)),
-        dE_dp(MatrixXs::Zero(1, np)) {}
+        Ex(MatrixXs::Zero(1, ndx)),
+        Eu(MatrixXs::Zero(1, nu)),
+        Ep(MatrixXs::Zero(1, np)) {}
 
   VectorXs xnext;
   MatrixXs Fx;
   MatrixXs Fu;
   MatrixXs Fp;
   VectorXs dissipative_E;
-  MatrixXs dE_dv;
-  MatrixXs dE_dp;
+  MatrixXs Ex;
+  MatrixXs Eu;
+  MatrixXs Ep;
 };
 
 template <typename Scalar>
@@ -620,12 +621,14 @@ void prepareObserver(
     }
   }
   observer.dissipative_E[0] = Scalar(0.07);
-  observer.dE_dv.row(0) = VectorXs::LinSpaced(fixture.state->get_nv(),
-                                              Scalar(-0.004), Scalar(0.006))
-                              .transpose();
-  observer.dE_dp.row(0) = VectorXs::LinSpaced(fixture.manager->get_np(),
-                                              Scalar(-0.003), Scalar(0.005))
-                              .transpose();
+  observer.Ex.row(0) =
+      VectorXs::LinSpaced(ndx, Scalar(-0.004), Scalar(0.006)).transpose();
+  observer.Eu.row(0) =
+      VectorXs::LinSpaced(observer.Eu.cols(), Scalar(-0.005), Scalar(0.007))
+          .transpose();
+  observer.Ep.row(0) = VectorXs::LinSpaced(fixture.manager->get_np(),
+                                           Scalar(-0.003), Scalar(0.005))
+                           .transpose();
   fixture.collector->shareObserverData(&observer);
   BOOST_REQUIRE_EQUAL(observer.Fx.rows(), static_cast<Eigen::Index>(ndx));
 }
@@ -645,8 +648,7 @@ void test_power_and_no_allocation() {
   VectorXs xnext = fixture.x;
   VectorXs next_dx = VectorXs::LinSpaced(ndx, Scalar(-0.015), Scalar(0.02));
   fixture.state->integrate(fixture.x, next_dx, xnext);
-  ObserverPayloadTpl<Scalar> observer(fixture.state->get_nx(), ndx,
-                                      fixture.state->get_nv(), nu, np);
+  ObserverPayloadTpl<Scalar> observer(fixture.state->get_nx(), ndx, nu, np);
   prepareObserver(fixture, observer, xnext);
 
   Power power(fixture.state, nu, np, Scalar(0.025), "z_inertial",
@@ -673,26 +675,14 @@ void test_power_and_no_allocation() {
     fixture.state->integrate(fixture.x, delta, xpert);
     fixture.state->integrate(base_xnext, observer.Fx * delta, next_pert);
     observer.xnext = next_pert;
-    observer.dissipative_E[0] =
-        base_dissipation +
-        (i >= static_cast<Eigen::Index>(fixture.state->get_nv())
-             ? observer.dE_dv(
-                   0, i - static_cast<Eigen::Index>(fixture.state->get_nv())) *
-                   step
-             : Scalar(0));
+    observer.dissipative_E[0] = base_dissipation + (observer.Ex * delta)[0];
     power.calc(data, xpert, fixture.u);
     const Scalar rp = data->r[0];
     delta[i] = -step;
     fixture.state->integrate(fixture.x, delta, xpert);
     fixture.state->integrate(base_xnext, observer.Fx * delta, next_pert);
     observer.xnext = next_pert;
-    observer.dissipative_E[0] =
-        base_dissipation +
-        (i >= static_cast<Eigen::Index>(fixture.state->get_nv())
-             ? observer.dE_dv(
-                   0, i - static_cast<Eigen::Index>(fixture.state->get_nv())) *
-                   (-step)
-             : Scalar(0));
+    observer.dissipative_E[0] = base_dissipation + (observer.Ex * delta)[0];
     power.calc(data, xpert, fixture.u);
     numerical_x(0, i) = (rp - data->r[0]) / (Scalar(2) * step);
   }
@@ -700,10 +690,12 @@ void test_power_and_no_allocation() {
     VectorXs du = VectorXs::Zero(nu);
     du[i] = step;
     fixture.state->integrate(base_xnext, observer.Fu * du, observer.xnext);
+    observer.dissipative_E[0] = base_dissipation + (observer.Eu * du)[0];
     power.calc(data, fixture.x, fixture.u + du);
     const Scalar rp = data->r[0];
     du[i] = -step;
     fixture.state->integrate(base_xnext, observer.Fu * du, observer.xnext);
+    observer.dissipative_E[0] = base_dissipation + (observer.Eu * du)[0];
     power.calc(data, fixture.x, fixture.u + du);
     numerical_u(0, i) = (rp - data->r[0]) / (Scalar(2) * step);
   }
@@ -712,13 +704,13 @@ void test_power_and_no_allocation() {
     dp[i] = step;
     fixture.manager->update(fixture.manager_data, fixture.p + dp);
     fixture.state->integrate(base_xnext, observer.Fp * dp, observer.xnext);
-    observer.dissipative_E[0] = base_dissipation + (observer.dE_dp * dp)[0];
+    observer.dissipative_E[0] = base_dissipation + (observer.Ep * dp)[0];
     power.calc(data, fixture.x, fixture.u);
     const Scalar rp = data->r[0];
     dp[i] = -step;
     fixture.manager->update(fixture.manager_data, fixture.p + dp);
     fixture.state->integrate(base_xnext, observer.Fp * dp, observer.xnext);
-    observer.dissipative_E[0] = base_dissipation + (observer.dE_dp * dp)[0];
+    observer.dissipative_E[0] = base_dissipation + (observer.Ep * dp)[0];
     power.calc(data, fixture.x, fixture.u);
     numerical_p(0, i) = (rp - data->r[0]) / (Scalar(2) * step);
   }
@@ -742,8 +734,7 @@ void test_power_and_no_allocation() {
   action_manager->update(action_manager_data, action_p);
   ResidualCollectorTpl<Scalar> action_collector(fixture.pinocchio.get(),
                                                 action_manager_data);
-  ObserverPayloadTpl<Scalar> action_observer(fixture.state->get_nx(), ndx,
-                                             fixture.state->get_nv(), nu,
+  ObserverPayloadTpl<Scalar> action_observer(fixture.state->get_nx(), ndx, nu,
                                              action_manager->get_np());
   action_observer.xnext = base_xnext;
   action_observer.Fp.col(0) =

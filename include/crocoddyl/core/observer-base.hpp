@@ -132,12 +132,11 @@ class ObserverModelAbstractTpl : public ActionModelAbstractTpl<_Scalar> {
 /**
  * @brief Action data specialized for observers
  *
- * Observer data reuses the standard action-model fields and adds optional
- * integrated dissipative-energy bookkeeping. The dissipative term is modeled
- * as a scalar quantity stored in a 1-vector, and the current observer
- * implementations only expose derivatives with respect to velocity and
- * parameters because the underlying dissipative-power helpers depend on
- * \f$\mathbf{v}\f$ and \f$\mathbf{p}\f$.
+ * Observer data reuses the standard action-model fields and stores the
+ * dissipative energy integrated over one running time step. Its Jacobians are
+ * expressed with respect to the complete state tangent, observer control, and
+ * parameter vectors. Observer implementations that do not integrate
+ * continuous dynamics leave these fields equal to zero.
  */
 template <typename _Scalar>
 struct ObserverDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
@@ -153,8 +152,9 @@ struct ObserverDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   explicit ObserverDataAbstractTpl(Model<Scalar>* const model)
       : Base(detail::check_observer_data_model(model)),
         dissipative_E(1),
-        dE_dv(1, model->get_state()->get_nv()),
-        dE_dp(1, model->get_np()) {
+        Ex(1, model->get_state()->get_ndx()),
+        Eu(1, model->get_nu()),
+        Ep(1, model->get_np()) {
     setZero();
   }
   virtual ~ObserverDataAbstractTpl() = default;
@@ -163,21 +163,24 @@ struct ObserverDataAbstractTpl : public ActionDataAbstractTpl<_Scalar> {
   void resize(Model* const model, const bool running_node = true) {
     Base::resize(model, running_node);
     dissipative_E.resize(1);
-    dE_dv.resize(1, model->get_state()->get_nv());
-    dE_dp.resize(1, model->get_np());
+    Ex.resize(1, model->get_state()->get_ndx());
+    Eu.resize(1, model->get_nu());
+    Ep.resize(1, model->get_np());
     setZero();
   }
 
   virtual void setZero() override {
     Base::setZero();
     dissipative_E.setZero();
-    dE_dv.setZero();
-    dE_dp.setZero();
+    Ex.setZero();
+    Eu.setZero();
+    Ep.setZero();
   }
 
-  VectorXs dissipative_E;  //!< Time-integrated dissipative energy (size 1)
-  MatrixXs dE_dv;          //!< Jacobian of dissipative_E w.r.t. velocity
-  MatrixXs dE_dp;          //!< Jacobian of dissipative_E w.r.t. parameters
+  VectorXs dissipative_E;  //!< Integrated dissipative energy (size 1)
+  MatrixXs Ex;  //!< Jacobian of dissipative_E w.r.t. the state tangent
+  MatrixXs Eu;  //!< Jacobian of dissipative_E w.r.t. the observer control
+  MatrixXs Ep;  //!< Jacobian of dissipative_E w.r.t. the parameters
 };
 
 }  // namespace crocoddyl

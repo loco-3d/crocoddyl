@@ -225,7 +225,7 @@ struct ObserverDataNumDiffTpl : public ObserverDataAbstractTpl<_Scalar> {
       this->h.conservativeResize(nh_T);
       this->Hx.conservativeResize(nh_T, model->get_state()->get_ndx());
       this->Hp.conservativeResize(nh_T, model->get_np());
-      dE_dp.conservativeResize(1, model->get_np());
+      Ep.conservativeResize(1, model->get_np());
     }
     const std::size_t ndx = model->get_model()->get_state()->get_ndx();
     const std::size_t nu = model->get_model()->get_nu();
@@ -265,9 +265,10 @@ struct ObserverDataNumDiffTpl : public ObserverDataAbstractTpl<_Scalar> {
   }
 
   using Base::cost;
-  using Base::dE_dp;
-  using Base::dE_dv;
   using Base::dissipative_E;
+  using Base::Ep;
+  using Base::Eu;
+  using Base::Ex;
   using Base::Fp;
   using Base::Fu;
   using Base::Fx;
@@ -298,7 +299,6 @@ struct ObserverDataNumDiffTpl : public ObserverDataAbstractTpl<_Scalar> {
   Scalar xph_hess_pow2;
   Scalar wph_hess_pow2;
   std::shared_ptr<ParameterDataManager> params_data;
-
   VectorXs dx;  //!< State disturbance
   VectorXs dw;  //!< Process-noise disturbance
   VectorXs dp;  //!< Parameter disturbance

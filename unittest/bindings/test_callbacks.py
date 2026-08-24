@@ -21,7 +21,7 @@ class SolverProbe:
         self.xs = [np.zeros(2, dtype=dtype), np.ones(2, dtype=dtype)]
         self.us = [np.zeros(1, dtype=dtype)]
         self.fs = [np.zeros(2, dtype=dtype)]
-        self.p = [
+        self.ps = [
             np.array([0.2, -0.3], dtype=dtype),
             np.array([0.4], dtype=dtype),
         ]
@@ -58,7 +58,7 @@ class PlotSolverProbe:
     def __init__(self, log, p_log, precision_log):
         self.xs = [np.zeros(2), np.ones(2)]
         self.us = [np.zeros(1), np.zeros(0)]
-        self.p = [p_log[-1][0], p_log[-1][1]]
+        self.ps = [p_log[-1][0], p_log[-1][1]]
         self.Vpp_phase = [precision_log[-1][0], precision_log[-1][1]]
         self._callbacks = [object(), log]
 
@@ -79,28 +79,28 @@ class CallbackAndPlottingTest(unittest.TestCase):
                 solver = SolverProbe(dtype)
                 logger = crocoddyl.CallbackLogger()
                 logger(solver)
-                first_p = [p.copy() for p in logger.p[0]]
+                first_p = [p.copy() for p in logger.ps[0]]
                 first_Vpp = [Vpp.copy() for Vpp in logger.Vpp_phase[0]]
 
-                solver.p[0][0] = dtype(9)
+                solver.ps[0][0] = dtype(9)
                 solver.Vpp_phase[1][0, 0] = dtype(8)
                 solver.iter = 1
                 logger(solver)
 
-                self.assertEqual(len(logger.p), 2)
-                self.assertEqual(len(logger.p[0]), 2)
+                self.assertEqual(len(logger.ps), 2)
+                self.assertEqual(len(logger.ps[0]), 2)
                 self.assertEqual(len(logger.Vpp_phase[0]), 2)
-                for actual, expected in zip(logger.p[0], first_p):
+                for actual, expected in zip(logger.ps[0], first_p):
                     np.testing.assert_array_equal(actual, expected)
                 for actual, expected in zip(logger.Vpp_phase[0], first_Vpp):
                     np.testing.assert_array_equal(actual, expected)
-                self.assertEqual(logger.p[0][0].dtype, dtype)
+                self.assertEqual(logger.ps[0][0].dtype, dtype)
                 self.assertEqual(logger.Vpp_phase[0][0].dtype, dtype)
 
-                del solver.p
+                del solver.ps
                 del solver.Vpp_phase
                 logger(solver)
-                self.assertEqual(len(logger.p), 2)
+                self.assertEqual(len(logger.ps), 2)
                 self.assertEqual(len(logger.Vpp_phase), 2)
 
     def test_parameter_history_from_scalar_solvers(self):
@@ -129,9 +129,9 @@ class CallbackAndPlottingTest(unittest.TestCase):
                     True,
                 )
 
-                self.assertEqual(len(logger.p), 1)
+                self.assertEqual(len(logger.ps), 1)
                 self.assertEqual(len(logger.Vpp_phase), 1)
-                self.assertEqual(logger.p[0][0].dtype, dtype)
+                self.assertEqual(logger.ps[0][0].dtype, dtype)
                 self.assertEqual(logger.Vpp_phase[0][0].dtype, dtype)
 
     def make_covariance_case(self, dtype):
@@ -149,7 +149,7 @@ class CallbackAndPlottingTest(unittest.TestCase):
             [5 * np.eye(12, dtype=dtype), 6 * np.eye(1, dtype=dtype)],
         ]
         log = crocoddyl.CallbackLogger()
-        log.p = [[p.copy() for p in entry] for entry in p_log]
+        log.ps = [[p.copy() for p in entry] for entry in p_log]
         log.Vpp_phase = [
             [precision.copy() for precision in entry] for entry in precision_log
         ]
@@ -186,7 +186,7 @@ class CallbackAndPlottingTest(unittest.TestCase):
                 self.assertTrue(np.all(np.isfinite(covariance["parameters_std"])))
                 self.assertEqual(len(covariance["diagnostics"]), 2)
 
-                initial = solver.p[0].copy()
+                initial = solver.ps[0].copy()
                 covariance = crocoddyl.computeInertialCovariances(
                     solver,
                     IdentityParametrization(),
@@ -331,7 +331,7 @@ class CallbackAndPlottingTest(unittest.TestCase):
             crocoddyl.saveLogfile(output.name, logger)
             output.seek(0)
             data = pickle.load(output)
-        self.assertEqual(len(data["p"][0]), 2)
+        self.assertEqual(len(data["ps"][0]), 2)
         self.assertEqual(len(data["Vpp_phase"][0]), 2)
 
 

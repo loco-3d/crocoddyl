@@ -9,7 +9,7 @@ iter    cost       merit      stop      |grad|      preg       dreg      step   
    6  5.763e-04  5.763e-04  6.188e-04  2.074e-06  1.000e-06  1.000e-06  1.0000  0.000e+00  0.000e+00  6.188e-04  1.663e-06  1.769e-06  4.019e-06  4.125e-06
    7  5.763e-04  5.763e-04  1.144e-05  5.355e-08  1.000e-05  1.000e-05  1.0000  0.000e+00  0.000e+00  1.144e-05  4.720e-08  5.441e-08  1.134e-07  1.206e-07
    8  5.763e-04  5.763e-04  2.791e-07  2.344e-09  1.000e-04  1.000e-04  1.0000  0.000e+00  0.000e+00  2.791e-07  2.287e-09  2.840e-09  5.474e-09  6.027e-09
-   9  5.763e-04  5.763e-04  4.018e-09  2.083e-10  1.000e-03  1.000e-03  1.0000  0.000e+00  0.000e+00  4.018e-09  2.076e-10  2.626e-10  5.000e-10  5.550e-10
+   9  5.763e-04  5.763e-04  4.019e-09  2.083e-10  1.000e-03  1.000e-03  1.0000  0.000e+00  0.000e+00  4.019e-09  2.076e-10  2.626e-10  5.000e-10  5.550e-10
 
 Estimated vs. ground-truth inertial parameters:
   body 1: mass est=17.4147  gt=16.8435
@@ -40,4 +40,4 @@ Estimated vs. ground-truth friction parameters:
   RH_HFE: coulomb est=0.1136 gt=0.1500, sharpness est=7.0106 gt=10.0000, viscous est=0.2086 gt=0.2000
   RH_KFE: coulomb est=0.1396 gt=0.1500, sharpness est=7.4614 gt=10.0000, viscous est=0.2025 gt=0.2000
 
-Parameter constraint violation: equality=1.975e-12, inequality=0.000e+00
+Parameter constraint violation: equality=2.174e-12, inequality=0.000e+00

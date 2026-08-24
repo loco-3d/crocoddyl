@@ -394,7 +394,7 @@ void test_integrated_observer_base_set_params_resizes_data() {
   BOOST_CHECK_EQUAL(model.get_np(), params->get_np());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Fp.cols()),
                     params->get_np());
-  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->dE_dp.cols()),
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Ep.cols()),
                     params->get_np());
   BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->dynamics->Fp.cols()),
                     params->get_np());

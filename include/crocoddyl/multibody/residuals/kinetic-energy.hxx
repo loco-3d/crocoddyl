@@ -65,8 +65,8 @@ void ResidualModelKineticEnergyTpl<Scalar>::calcDiff(
   }
 
   internal::computeKineticEnergyJacobian<Scalar>(
-      *pin_model_, *d->pinocchio, x.head(nq), x.segment(nq, nv), d->J, d->Jout,
-      d->dV_dqv, d->dT_dqv, d->tmp6);
+      *pin_model_, *d->pinocchio, x.head(nq), x.segment(nq, nv), d->anone, d->J,
+      d->Jout, d->dV_dqv, d->dT_dqv, d->tmp6);
   data->Rx.row(0) = d->dT_dqv.transpose();
 }
 

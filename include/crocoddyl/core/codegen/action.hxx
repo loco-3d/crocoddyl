@@ -1377,13 +1377,12 @@ ObserverModelCodeGenTpl<Scalar>::ObserverModelCodeGenTpl(
         "Invalid argument: observer model cannot be cast to an AD observer");
   }
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   const std::size_t full_Y2 =
       ndx * ndx + ndx * nu_ + ndx * np_ + ndx + nu_ + np_ + ndx * ndx +
       ndx * nu_ + nu_ * nu_ + np_ * np_ + np_ * ndx + np_ * nu_ +
-      ng_ * (ndx + nu_ + np_) + nh_ * (ndx + nu_ + np_) + nv + np_;
+      ng_ * (ndx + nu_ + np_) + nh_ * (ndx + nu_ + np_) + ndx + nu_ + np_;
   const std::size_t full_Y2_T = ndx + np_ + ndx * ndx + np_ * np_ + np_ * ndx +
-                                (ng_T_ + nh_T_) * (ndx + np_) + nv + np_;
+                                (ng_T_ + nh_T_) * (ndx + np_) + ndx + np_;
   if (autodiff_) {
     nY2_ = 1 + ndx + ng_ + nh_ + 1;
     nY2_T_ = 1 + ndx + ng_T_ + nh_T_ + 1;
@@ -1481,13 +1480,12 @@ ObserverModelCodeGenTpl<Scalar>::ObserverModelCodeGenTpl(
   (void)state_observation_cost;
   (void)weight_cost;
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   const std::size_t full_Y2 =
       ndx * ndx + ndx * nu_ + ndx * np_ + ndx + nu_ + np_ + ndx * ndx +
       ndx * nu_ + nu_ * nu_ + np_ * np_ + np_ * ndx + np_ * nu_ +
-      ng_ * (ndx + nu_ + np_) + nh_ * (ndx + nu_ + np_) + nv + np_;
+      ng_ * (ndx + nu_ + np_) + nh_ * (ndx + nu_ + np_) + ndx + nu_ + np_;
   const std::size_t full_Y2_T = ndx + np_ + ndx * ndx + np_ * np_ + np_ * ndx +
-                                (ng_T_ + nh_T_) * (ndx + np_) + nv + np_;
+                                (ng_T_ + nh_T_) * (ndx + np_) + ndx + np_;
   if (autodiff_) {
     nY2_ = 1 + ndx + ng_ + nh_ + 1;
     nY2_T_ = 1 + ndx + ng_T_ + nh_T_ + 1;
@@ -2482,7 +2480,6 @@ void ObserverModelCodeGenTpl<Scalar>::tapeCalcOutput_T() {
 template <typename Scalar>
 void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffOutput() {
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   Eigen::DenseIndex it_Y2 = 0;
   Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, ndx, ndx) = ad_data_->Fx;
   it_Y2 += ndx * ndx;
@@ -2520,15 +2517,16 @@ void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffOutput() {
   it_Y2 += nh_ * nu_;
   Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, nh_, np_) = ad_data_->Hp;
   it_Y2 += nh_ * np_;
-  Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, 1, nv) = ad_data_->dE_dv;
-  it_Y2 += nv;
-  Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, 1, np_) = ad_data_->dE_dp;
+  Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, 1, ndx) = ad_data_->Ex;
+  it_Y2 += ndx;
+  Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, 1, nu_) = ad_data_->Eu;
+  it_Y2 += nu_;
+  Eigen::Map<ADMatrixXs>(ad_Y2_.data() + it_Y2, 1, np_) = ad_data_->Ep;
 }
 
 template <typename Scalar>
 void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffOutput_T() {
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   Eigen::DenseIndex it_Y2 = 0;
   Eigen::Map<ADVectorXs>(ad_Y2_T_.data() + it_Y2, ndx) = ad_data_->Lx;
   it_Y2 += ndx;
@@ -2548,15 +2546,14 @@ void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffOutput_T() {
   it_Y2 += nh_T_ * ndx;
   Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, nh_T_, np_) = ad_data_->Hp;
   it_Y2 += nh_T_ * np_;
-  Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, 1, nv) = ad_data_->dE_dv;
-  it_Y2 += nv;
-  Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, 1, np_) = ad_data_->dE_dp;
+  Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, 1, ndx) = ad_data_->Ex;
+  it_Y2 += ndx;
+  Eigen::Map<ADMatrixXs>(ad_Y2_T_.data() + it_Y2, 1, np_) = ad_data_->Ep;
 }
 
 template <typename Scalar>
 void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffDirectOutput(ADVectorXs& y) {
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   Eigen::DenseIndex it_y = 0;
   Eigen::Map<ADMatrixXs>(y.data() + it_y, ndx, ndx) = ad_data_->Fx;
   it_y += ndx * ndx;
@@ -2630,13 +2627,15 @@ void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffDirectOutput(ADVectorXs& y) {
     Hp_map.setZero();
   }
   it_y += nh_ * np_;
-  Eigen::Map<ADMatrixXs>(y.data() + it_y, 1, nv) = ad_data_->dE_dv;
-  it_y += nv;
-  Eigen::Map<ADMatrixXs> dE_dp_map(y.data() + it_y, 1, np_);
-  if (static_cast<std::size_t>(ad_data_->dE_dp.cols()) == np_) {
-    dE_dp_map = ad_data_->dE_dp;
+  Eigen::Map<ADMatrixXs>(y.data() + it_y, 1, ndx) = ad_data_->Ex;
+  it_y += ndx;
+  Eigen::Map<ADMatrixXs>(y.data() + it_y, 1, nu_) = ad_data_->Eu;
+  it_y += nu_;
+  Eigen::Map<ADMatrixXs> Ep_map(y.data() + it_y, 1, np_);
+  if (static_cast<std::size_t>(ad_data_->Ep.cols()) == np_) {
+    Ep_map = ad_data_->Ep;
   } else {
-    dE_dp_map.setZero();
+    Ep_map.setZero();
   }
 }
 
@@ -2644,7 +2643,6 @@ template <typename Scalar>
 void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffDirectOutput_T(
     ADVectorXs& y) {
   const std::size_t ndx = state_->get_ndx();
-  const std::size_t nv = state_->get_nv();
   Eigen::DenseIndex it_y = 0;
   Eigen::Map<ADVectorXs>(y.data() + it_y, ndx) = ad_data_->Lx;
   it_y += ndx;
@@ -2690,13 +2688,13 @@ void ObserverModelCodeGenTpl<Scalar>::tapeCalcDiffDirectOutput_T(
     Hp_map.setZero();
   }
   it_y += nh_T_ * np_;
-  Eigen::Map<ADMatrixXs>(y.data() + it_y, 1, nv) = ad_data_->dE_dv;
-  it_y += nv;
-  Eigen::Map<ADMatrixXs> dE_dp_map(y.data() + it_y, 1, np_);
-  if (static_cast<std::size_t>(ad_data_->dE_dp.cols()) == np_) {
-    dE_dp_map = ad_data_->dE_dp;
+  Eigen::Map<ADMatrixXs>(y.data() + it_y, 1, ndx) = ad_data_->Ex;
+  it_y += ndx;
+  Eigen::Map<ADMatrixXs> Ep_map(y.data() + it_y, 1, np_);
+  if (static_cast<std::size_t>(ad_data_->Ep.cols()) == np_) {
+    Ep_map = ad_data_->Ep;
   } else {
-    dE_dp_map.setZero();
+    Ep_map.setZero();
   }
 }
 

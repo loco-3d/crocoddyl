@@ -55,6 +55,7 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
     d->ki[i].head(nv) = d->y[i].tail(nv);
     d->ki[i].tail(nv) = d->dynamics_stage[i]->vdot;
     d->integral[i] = d->costs_stage[i]->cost;
+    d->dissipative_integral[i] = d->dynamics_stage[i]->dissipative_P[0];
     d->dx_rk[i + 1].noalias() = d->ki[i] * (rk_c_[i + 1] * time_step_);
     state_->integrate(x, d->dx_rk[i + 1], d->y[i + 1]);
   }
@@ -68,14 +69,19 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
   d->ki[ni1].head(nv) = d->y[ni1].tail(nv);
   d->ki[ni1].tail(nv) = d->dynamics_stage[ni1]->vdot;
   d->integral[ni1] = d->costs_stage[ni1]->cost;
+  d->dissipative_integral[ni1] = d->dynamics_stage[ni1]->dissipative_P[0];
 
   if (ni_ == 2) {
     d->dx = d->ki[1] * time_step_;
     d->cost = d->integral[1] * time_step_;
+    d->dissipative_E[0] = d->dissipative_integral[1] * time_step_;
   } else if (ni_ == 3) {
     d->dx = (d->ki[0] + Scalar(3.) * d->ki[2]) * time_step_ / Scalar(4.);
     d->cost = (d->integral[0] + Scalar(3.) * d->integral[2]) * time_step_ /
               Scalar(4.);
+    d->dissipative_E[0] =
+        (d->dissipative_integral[0] + Scalar(3.) * d->dissipative_integral[2]) *
+        time_step_ / Scalar(4.);
   } else {
     d->dx =
         (d->ki[0] + Scalar(2.) * d->ki[1] + Scalar(2.) * d->ki[2] + d->ki[3]) *
@@ -83,12 +89,14 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
     d->cost = (d->integral[0] + Scalar(2.) * d->integral[1] +
                Scalar(2.) * d->integral[2] + d->integral[3]) *
               time_step_ / Scalar(6.);
+    d->dissipative_E[0] =
+        (d->dissipative_integral[0] + Scalar(2.) * d->dissipative_integral[1] +
+         Scalar(2.) * d->dissipative_integral[2] + d->dissipative_integral[3]) *
+        time_step_ / Scalar(6.);
   }
   d->dx.noalias() += this->compute_projected_noise(d, x, u.head(ndx));
   state_->integrate(x, d->dx, d->xnext);
 
-  // RK observers do not integrate dissipative power, so keep the field zero.
-  d->dissipative_E.setZero();
   d->r.setZero();
   d->g.setZero();
   d->h.setZero();
@@ -135,7 +143,6 @@ void IntegratedObserverModelRKTpl<Scalar>::calc(
 
   d->xnext = x;
   d->dx.setZero();
-  // Terminal nodes also do not carry dissipative-energy accumulation here.
   d->dissipative_E.setZero();
   d->cost = d->costs_stage[0]->cost;
   d->r.setZero();
@@ -314,6 +321,19 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
     }
   }
 
+  // Differentiate the RK quadrature of dissipative power. The dynamics expose
+  // only the explicit velocity and parameter partials; stage sensitivities
+  // propagate their state, control, and parameter dependence.
+  for (std::size_t i = 0; i < ni_; ++i) {
+    d->dEi_dx[i].noalias() =
+        d->dynamics_stage[i]->dP_dv * d->dy_dx[i].bottomRows(nv);
+    d->dEi_du[i].noalias() =
+        d->dynamics_stage[i]->dP_dv * d->dy_du[i].bottomRows(nv);
+    d->dEi_dp[i] = d->dynamics_stage[i]->dP_dp;
+    d->dEi_dp[i].noalias() +=
+        d->dynamics_stage[i]->dP_dv * d->dy_dp[i].bottomRows(nv);
+  }
+
   if (ni_ == 2) {
     d->ddx_dx.noalias() = time_step_ * d->dki_dx[1];
     d->ddx_du.noalias() = time_step_ * d->dki_du[1];
@@ -327,6 +347,9 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
     d->Lpp.noalias() = time_step_ * d->ddli_ddp[1];
     d->Lpx.noalias() = time_step_ * d->ddli_dpdx[1];
     d->Lpu.noalias() = time_step_ * d->ddli_dpdu[1];
+    d->Ex.noalias() = time_step_ * d->dEi_dx[1];
+    d->Eu.noalias() = time_step_ * d->dEi_du[1];
+    d->Ep.noalias() = time_step_ * d->dEi_dp[1];
   } else if (ni_ == 3) {
     d->ddx_dx.noalias() =
         time_step_ / Scalar(4.) * (d->dki_dx[0] + Scalar(3.) * d->dki_dx[2]);
@@ -352,6 +375,12 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
                        (d->ddli_dpdx[0] + Scalar(3.) * d->ddli_dpdx[2]);
     d->Lpu.noalias() = time_step_ / Scalar(4.) *
                        (d->ddli_dpdu[0] + Scalar(3.) * d->ddli_dpdu[2]);
+    d->Ex.noalias() =
+        time_step_ / Scalar(4.) * (d->dEi_dx[0] + Scalar(3.) * d->dEi_dx[2]);
+    d->Eu.noalias() =
+        time_step_ / Scalar(4.) * (d->dEi_du[0] + Scalar(3.) * d->dEi_du[2]);
+    d->Ep.noalias() =
+        time_step_ / Scalar(4.) * (d->dEi_dp[0] + Scalar(3.) * d->dEi_dp[2]);
   } else {
     d->ddx_dx.noalias() = time_step_ / Scalar(6.) *
                           (d->dki_dx[0] + Scalar(2.) * d->dki_dx[1] +
@@ -389,6 +418,15 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
     d->Lpu.noalias() = time_step_ / Scalar(6.) *
                        (d->ddli_dpdu[0] + Scalar(2.) * d->ddli_dpdu[1] +
                         Scalar(2.) * d->ddli_dpdu[2] + d->ddli_dpdu[3]);
+    d->Ex.noalias() = time_step_ / Scalar(6.) *
+                      (d->dEi_dx[0] + Scalar(2.) * d->dEi_dx[1] +
+                       Scalar(2.) * d->dEi_dx[2] + d->dEi_dx[3]);
+    d->Eu.noalias() = time_step_ / Scalar(6.) *
+                      (d->dEi_du[0] + Scalar(2.) * d->dEi_du[1] +
+                       Scalar(2.) * d->dEi_du[2] + d->dEi_du[3]);
+    d->Ep.noalias() = time_step_ / Scalar(6.) *
+                      (d->dEi_dp[0] + Scalar(2.) * d->dEi_dp[1] +
+                       Scalar(2.) * d->dEi_dp[2] + d->dEi_dp[3]);
   }
 
   state_->Jintegrate(x, d->dx, d->Jfirst, d->Jsecond);
@@ -398,9 +436,6 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
   d->Fp.noalias() = d->Jsecond * d->ddx_dp;
   d->Fu.noalias() = d->Jsecond * d->ddx_du;
   d->Fu.leftCols(ndx).noalias() = d->Jsecond * d->noise_projector;
-
-  d->dE_dv.setZero();
-  d->dE_dp.setZero();
 
   d->Gx.setZero();
   d->Gu.setZero();
@@ -460,8 +495,9 @@ void IntegratedObserverModelRKTpl<Scalar>::calcDiff(
 
   d->Fx.setIdentity();
   d->Fp.setZero();
-  d->dE_dv.setZero();
-  d->dE_dp.setZero();
+  d->Ex.setZero();
+  d->Eu.setZero();
+  d->Ep.setZero();
   d->Lx = d->costs_stage[0]->Lx;
   d->Lxx = d->costs_stage[0]->Lxx;
   if (np_ != 0u) {
