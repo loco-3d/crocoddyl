@@ -10,19 +10,11 @@
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/multibody/actuations/floating-base.hpp"
 
-#include <boost/python/make_constructor.hpp>
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
-
-template <typename Model>
-std::shared_ptr<Model> createDeprecatedActuationModelFloatingBase(
-    const std::shared_ptr<typename Model::StateMultibody>& state) {
-  return std::make_shared<Model>(state);
-}
 
 template <typename Model>
 struct ActuationModelFloatingBaseVisitor
@@ -82,12 +74,11 @@ struct ActuationModelFloatingBaseVisitor
       "floating-base joints. Then, this joint (that might have various DoFs) " \
       "is unactuated.",                                                        \
       bp::no_init)                                                             \
-      .def("__init__",                                                         \
-           bp::make_constructor(                                               \
-               &createDeprecatedActuationModelFloatingBase<Model>,             \
-               deprecated<>("Deprecated. Use ActuationModelMultibody(state) "  \
-                             "for the multibody actuation backend."),          \
-               bp::args("state")))                                             \
+      .def(bp::init<std::shared_ptr<typename Model::StateMultibody> >(          \
+          bp::args("self", "state"),                                         \
+          "Initialize the deprecated floating-base actuation model.")[        \
+          deprecated<>("Deprecated. Use ActuationModelMultibody(state) "       \
+                       "for the multibody actuation backend.")])              \
       .def(ActuationModelFloatingBaseVisitor<Model>())                         \
       .def(CastVisitor<Model>())                                               \
       .def(PrintableVisitor<Model>())                                          \

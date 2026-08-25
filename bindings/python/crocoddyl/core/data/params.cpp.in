@@ -8,49 +8,11 @@
 
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/core/data/params.hpp"
-#include "crocoddyl/core/params-base.hpp"
-
-#include <boost/python/make_constructor.hpp>
 
 #include "python/crocoddyl/core/core.hpp"
 
 namespace crocoddyl {
 namespace python {
-
-template <typename Scalar>
-std::shared_ptr<ParamsDataAbstractTpl<Scalar> > createParamsDataAbstract(
-    const std::shared_ptr<ParamsAbstractTpl<Scalar> >& model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: parameter model is null");
-  }
-  typedef ParamsDataAbstractTpl<Scalar> ParamsData;
-  return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_np(), 0);
-}
-
-template <typename Scalar>
-std::shared_ptr<ActionModelParamsDataAbstractTpl<Scalar> >
-createActionModelParamsDataAbstract(
-    const std::shared_ptr<ActionModelParamsAbstractTpl<Scalar> >& model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: action parameter model is null");
-  }
-  typedef ActionModelParamsDataAbstractTpl<Scalar> ParamsData;
-  return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_np());
-}
-
-template <typename Scalar>
-std::shared_ptr<DynamicsParamsDataAbstractTpl<Scalar> >
-createDynamicsParamsDataAbstract(
-    const std::shared_ptr<DynamicsParamsAbstractTpl<Scalar> >& model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: dynamics parameter model is null");
-  }
-  typedef DynamicsParamsDataAbstractTpl<Scalar> ParamsData;
-  return std::allocate_shared<ParamsData>(
-      Eigen::aligned_allocator<ParamsData>(), model->get_np());
-}
 
 template <typename ParamsData>
 struct ParamsDataAbstractVisitor
@@ -101,15 +63,11 @@ struct DataCollectorParamsVisitor
       "Derivative matrices are stored in node-local action and dynamics "      \
       "data. Resizing preserves active status and zeros the parameter "        \
       "vector.\n\n",                                                            \
-      bp::init<std::size_t, std::size_t>(                                      \
+      bp::init<bp::optional<std::size_t, std::size_t> >(                                      \
           bp::args("self", "np_action", "np_dynamics"),                        \
           "Create the parameter data.\n\n"                                      \
           ":param np_action: action-parameter dimension\n"                      \
           ":param np_dynamics: dynamics-parameter dimension"))                  \
-      .def("__init__",                                                          \
-           bp::make_constructor(&createParamsDataAbstract<Scalar>,              \
-                                bp::default_call_policies(),                    \
-                                bp::args("model")))                             \
       .def(ParamsDataAbstractVisitor<ParamsData>())                             \
       .def(CopyableVisitor<ParamsData>());
 
@@ -121,11 +79,10 @@ struct DataCollectorParamsVisitor
       "ActionModelParamsDataAbstract",                                      \
       "Action-model parameter data. Its complete parameter vector "         \
       "occupies the action prefix.\n\n",                                    \
-      bp::no_init)                                                           \
-      .def("__init__",                                                       \
-           bp::make_constructor(                                             \
-               &createActionModelParamsDataAbstract<Scalar>,                 \
-               bp::default_call_policies(), bp::args("model")))             \
+      bp::init<bp::optional<std::size_t> >(                                    \
+          bp::args("self", "np"),                                           \
+          "Create action-model parameter data.\n\n"                          \
+          ":param np: action-parameter dimension (default: 0)"))              \
       .def(CopyableVisitor<ActionParamsData>());
 
 #define CROCODDYL_DYNAMICS_PARAMS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)      \
@@ -137,11 +94,10 @@ struct DataCollectorParamsVisitor
       "Dynamics-parameter data. Its complete parameter vector occupies "    \
       "the dynamics suffix. Regressors are stored in node-local dynamics " \
       "data. Resizing preserves active status.\n\n",                       \
-      bp::no_init)                                                          \
-      .def("__init__",                                                      \
-           bp::make_constructor(&createDynamicsParamsDataAbstract<Scalar>,  \
-                                bp::default_call_policies(),                 \
-                                bp::args("model")))                          \
+      bp::init<bp::optional<std::size_t> >(                                   \
+          bp::args("self", "np"),                                          \
+          "Create dynamics-parameter data.\n\n"                             \
+          ":param np: dynamics-parameter dimension (default: 0)"))           \
       .def(CopyableVisitor<DynamicsParamsData>());
 
 #define CROCODDYL_DATA_COLLECTOR_PARAMS_PYTHON_BINDINGS(Scalar)              \

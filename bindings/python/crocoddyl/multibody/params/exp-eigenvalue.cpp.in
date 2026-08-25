@@ -14,14 +14,6 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Data, typename Model>
-std::shared_ptr<Data> createExpEigenValueParametrizationData(Model* model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: model is null");
-  }
-  return std::dynamic_pointer_cast<Data>(model->createData());
-}
-
 #define CROCODDYL_EXP_EIGENVALUE_PARAMETRIZATION_PYTHON_BINDINGS(Scalar)      \
   {                                                                           \
     typedef ExpEigenValueParametrizationTpl<Scalar> Model;                    \
@@ -56,16 +48,12 @@ std::shared_ptr<Data> createExpEigenValueParametrizationData(Model* model) {
   {                                                                           \
     typedef ExpEigenValueParametrizationDataTpl<Scalar> Data;                 \
     typedef InertialParametrizationDataAbstractTpl<Scalar> DataBase;          \
-    typedef ExpEigenValueParametrizationTpl<Scalar> Model;                    \
     bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
     bp::class_<Data, bp::bases<DataBase> >(                                   \
         "ExpEigenValueParametrizationData",                                   \
         "Data for the exponential-eigenvalue inertial parametrization.",      \
-        bp::no_init)                                                          \
-        .def("__init__",                                                      \
-             bp::make_constructor(                                            \
-                 &createExpEigenValueParametrizationData<Data, Model>,        \
-                 bp::default_call_policies(), bp::args("model")))             \
+        bp::init<>(bp::args("self"),                                          \
+                   "Create exponential-eigenvalue parametrization data."))   \
         .def(CopyableVisitor<Data>());                                        \
   }
 

@@ -14,14 +14,6 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Data, typename Model>
-std::shared_ptr<Data> createLogCholeskyParametrizationData(Model* model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: model is null");
-  }
-  return std::dynamic_pointer_cast<Data>(model->createData());
-}
-
 #define CROCODDYL_LOG_CHOLESKY_PARAMETRIZATION_PYTHON_BINDINGS(Scalar)        \
   {                                                                           \
     typedef LogCholeskyParametrizationTpl<Scalar> Model;                      \
@@ -55,15 +47,12 @@ std::shared_ptr<Data> createLogCholeskyParametrizationData(Model* model) {
   {                                                                           \
     typedef LogCholeskyParametrizationDataTpl<Scalar> Data;                   \
     typedef InertialParametrizationDataAbstractTpl<Scalar> DataBase;          \
-    typedef LogCholeskyParametrizationTpl<Scalar> Model;                      \
     bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
     bp::class_<Data, bp::bases<DataBase> >(                                   \
         "LogCholeskyParametrizationData",                                     \
-        "Data for the log-Cholesky inertial parametrization.", bp::no_init)   \
-        .def("__init__",                                                      \
-             bp::make_constructor(                                            \
-                 &createLogCholeskyParametrizationData<Data, Model>,          \
-                 bp::default_call_policies(), bp::args("model")))             \
+        "Data for the log-Cholesky inertial parametrization.",                \
+        bp::init<>(bp::args("self"),                                          \
+                   "Create log-Cholesky parametrization data."))             \
         .def(CopyableVisitor<Data>());                                        \
   }
 

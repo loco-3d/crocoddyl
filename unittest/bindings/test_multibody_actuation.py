@@ -439,6 +439,10 @@ class MultibodyActuationBindingTest(unittest.TestCase):
 
                 with self.assertRaises(crocoddyl.Exception):
                     module.ActuationMultibodyParams(None)
+                direct_params_data = module.ActuationMultibodyParamsData(params)
+                self.assertIsInstance(
+                    direct_params_data, module.ActuationMultibodyParamsData
+                )
                 with self.assertRaises(crocoddyl.Exception):
                     module.ActuationMultibodyParamsData(None)
                 with self.assertRaises(crocoddyl.Exception):

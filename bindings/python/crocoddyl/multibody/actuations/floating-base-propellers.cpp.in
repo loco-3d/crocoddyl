@@ -9,8 +9,6 @@
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
 
-#include <boost/python/make_constructor.hpp>
-
 #include "python/crocoddyl/multibody/multibody.hpp"
 #include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
@@ -19,13 +17,6 @@
 
 namespace crocoddyl {
 namespace python {
-
-template <typename Model>
-std::shared_ptr<Model> createDeprecatedActuationModelFloatingBaseThrusters(
-    const std::shared_ptr<typename Model::StateMultibody>& state,
-    const std::vector<typename Model::Thruster>& thrusters) {
-  return std::make_shared<Model>(state, thrusters);
-}
 
 template <typename Model>
 struct ThrustersVisitor : public bp::def_visitor<ThrustersVisitor<Model>> {
@@ -148,13 +139,13 @@ struct ActuationModelFloatingBaseThrustersVisitor
       "Actuation models for floating base systems actuated with thrusters " \
       "(e.g. aerial manipulators).",                                        \
       bp::no_init)                                                          \
-      .def("__init__",                                                      \
-           bp::make_constructor(                                            \
-               &createDeprecatedActuationModelFloatingBaseThrusters<Model>, \
-               deprecated<>("Deprecated. Use ActuationModelMultibody with " \
-                             "[JointDynamicsModelThruster(thrusters)] for " \
-                             "the multibody actuation backend."),           \
-               bp::args("state", "thrusters")))                             \
+      .def(bp::init<std::shared_ptr<typename Model::StateMultibody>,          \
+                    std::vector<typename Model::Thruster> >(                \
+          bp::args("self", "state", "thrusters"),                        \
+          "Initialize the deprecated floating-base thruster model.")[      \
+          deprecated<>("Deprecated. Use ActuationModelMultibody with "       \
+                       "[JointDynamicsModelThruster(thrusters)] for "        \
+                       "the multibody actuation backend.")])                 \
       .def(ActuationModelFloatingBaseThrustersVisitor<Model>())             \
       .def(CastVisitor<Model>())                                            \
       .def(PrintableVisitor<Model>())                                       \

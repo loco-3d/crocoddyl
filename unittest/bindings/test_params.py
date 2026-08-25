@@ -44,7 +44,7 @@ class ActionParamsOverride(crocoddyl.ActionModelParamsAbstract):
 
     def createData(self):
         self.create_calls += 1
-        data = crocoddyl.ActionModelParamsDataAbstract(self)
+        data = crocoddyl.ActionModelParamsDataAbstract(self.np)
         data.active = False
         return data
 
@@ -142,8 +142,8 @@ class ParamsTest(unittest.TestCase):
         self.assertEqual(model.sensitivity_calls, 1)
         self.assertTrue(np.allclose(dx_dp, x.sum() + u.sum()))
 
-        action_data_payload = crocoddyl.ActionModelParamsDataAbstract(model)
-        base_data_from_derived = crocoddyl.ParamsDataAbstract(model)
+        action_data_payload = crocoddyl.ActionModelParamsDataAbstract(model.np)
+        base_data_from_derived = crocoddyl.ParamsDataAbstract(model.np)
         for data in (action_data_payload, base_data_from_derived):
             self.assertEqual((data.np, data.np_action, data.np_dynamics), (3, 3, 0))
             data.p = p
@@ -154,12 +154,7 @@ class ParamsTest(unittest.TestCase):
         collector = crocoddyl.DataCollectorParams(action_data_payload)
         self.assertIs(collector.params, action_data_payload)
 
-        with self.assertRaises(TypeError):
-            crocoddyl.ActionModelParamsDataAbstract(3)
-        with self.assertRaises(crocoddyl.Exception):
-            crocoddyl.ParamsDataAbstract(None)
-        with self.assertRaises(crocoddyl.Exception):
-            crocoddyl.ActionModelParamsDataAbstract(None)
+        self.assertEqual(crocoddyl.ActionModelParamsDataAbstract(3).np, 3)
 
         default_model = crocoddyl.ActionModelParamsAbstract(self.state, 3)
         self.assertEqual(default_model.np, 3)
@@ -187,7 +182,7 @@ class ParamsTest(unittest.TestCase):
 
             def createData(self):
                 self.create_calls += 1
-                data = module.DynamicsParamsDataAbstract(self)
+                data = module.DynamicsParamsDataAbstract(np_)
                 data.active = False
                 return data
 
@@ -247,10 +242,7 @@ class ParamsTest(unittest.TestCase):
             model.lb = np.zeros(np_ + 1, dtype=dtype)
         with self.assertRaises(crocoddyl.Exception):
             model.ub = np.zeros(np_ + 1, dtype=dtype)
-        with self.assertRaises(TypeError):
-            module.DynamicsParamsDataAbstract(np_)
-        with self.assertRaises(crocoddyl.Exception):
-            module.DynamicsParamsDataAbstract(None)
+        self.assertEqual(module.DynamicsParamsDataAbstract(np_).np, np_)
 
         bare_model = module.DynamicsParamsAbstract(state, np_)
         bare_data = bare_model.createData()
@@ -280,7 +272,7 @@ class ParamsTest(unittest.TestCase):
 
             def createData(self):
                 self.create_calls += 1
-                data_ = crocoddyl_float32.ActionModelParamsDataAbstract(self)
+                data_ = crocoddyl_float32.ActionModelParamsDataAbstract(self.np)
                 data_.active = False
                 return data_
 
@@ -302,7 +294,7 @@ class ParamsTest(unittest.TestCase):
             fallback_params, crocoddyl_float32.ActionModelParamsDataAbstract
         )
         self.assertTrue(fallback_params.active)
-        converted = crocoddyl_float32.ParamsDataAbstract(action_model)
+        converted = crocoddyl_float32.ParamsDataAbstract(action_model.np, 0)
         p = np.array([0.2, 0.4], dtype=np.float32)
         action_model.update(action_params, p)
         self.assertTrue(action_model.checkData(action_params))

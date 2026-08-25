@@ -131,12 +131,13 @@ struct ActuationMultibodyParamsDataTpl
    * payload owns its action/dynamics partition and transformed parameters.
    *
    * @param[in] model Multibody-actuation parameter model
+   * @throw crocoddyl::Exception if `model` is null
    */
   template <template <typename Scalar> class Model>
   explicit ActuationMultibodyParamsDataTpl(Model<Scalar>* const model)
-      : Base(model->get_np()),
-        gamma(model->get_np()),
-        dgamma_dp(model->get_np(), model->get_np()) {
+      : Base(checkModel(model)->get_np()),
+        gamma(checkModel(model)->get_np()),
+        dgamma_dp(checkModel(model)->get_np(), checkModel(model)->get_np()) {
     setZero();
   }
   virtual ~ActuationMultibodyParamsDataTpl() = default;
@@ -167,6 +168,15 @@ struct ActuationMultibodyParamsDataTpl
 
   VectorXs gamma;      //!< Physical joint-model parameters
   MatrixXs dgamma_dp;  //!< Physical-parameter Jacobian
+
+ private:
+  template <template <typename Scalar> class Model>
+  static Model<Scalar>* checkModel(Model<Scalar>* const model) {
+    if (model == nullptr) {
+      throw_pretty("Invalid argument: model is null");
+    }
+    return model;
+  }
 };
 
 }  // namespace crocoddyl

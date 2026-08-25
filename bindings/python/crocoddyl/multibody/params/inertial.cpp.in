@@ -9,53 +9,12 @@
 // Auto-generated file for @SCALAR_TYPE@
 #include "python/crocoddyl/multibody/multibody.hpp"
 
-#include <boost/python/stl_iterator.hpp>
 #include <eigenpy/std-vector.hpp>
 
 #include "crocoddyl/multibody/params/inertial.hpp"
 
 namespace crocoddyl {
 namespace python {
-
-template <typename Model>
-bp::list multibodyInertialParamsBodyNames(const Model& model) {
-  bp::list body_names;
-  const std::vector<std::string> names = model.get_body_names();
-  for (std::vector<std::string>::const_iterator it = names.begin();
-       it != names.end(); ++it) {
-    body_names.append(*it);
-  }
-  return body_names;
-}
-
-inline std::vector<std::string> multibodyInertialParamsBodyNamesFromPython(
-    const bp::object& iterable) {
-  std::vector<std::string> body_names;
-  const boost::python::stl_input_iterator<std::string> begin(iterable), end;
-  for (boost::python::stl_input_iterator<std::string> it = begin; it != end;
-       ++it) {
-    body_names.push_back(*it);
-  }
-  return body_names;
-}
-
-template <typename Model, typename State, typename Parametrization>
-std::shared_ptr<Model> createMultibodyInertialParamsWithBodyNames(
-    const std::shared_ptr<State>& state,
-    const std::shared_ptr<Parametrization>& parametrization,
-    const bp::object& body_names) {
-  return std::make_shared<Model>(
-      state, parametrization,
-      multibodyInertialParamsBodyNamesFromPython(body_names));
-}
-
-template <typename Data, typename Model>
-std::shared_ptr<Data> createMultibodyInertialParamsData(Model* model) {
-  if (model == nullptr) {
-    throw_pretty("Invalid argument: model is null");
-  }
-  return std::dynamic_pointer_cast<Data>(model->createData());
-}
 
 template <typename Model>
 struct MultibodyInertialParamsVisitor
@@ -67,8 +26,11 @@ struct MultibodyInertialParamsVisitor
           bp::make_function(&Model::get_parametrization,
                             bp::return_value_policy<bp::return_by_value>()),
           "inertial parametrization")
-        .add_property("body_names", &multibodyInertialParamsBodyNames<Model>,
-                      "identified body names");
+        .add_property(
+            "body_names",
+            bp::make_function(&Model::get_body_names,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "identified body names");
   }
 };
 
@@ -84,12 +46,11 @@ struct MultibodyInertialParamsVisitor
         "Dynamics-parameter model for multibody inertial identification.",    \
         bp::init<std::shared_ptr<State>, std::shared_ptr<Parametrization> >(  \
             bp::args("self", "state", "parametrization")))                  \
-        .def("__init__",                                                      \
-             bp::make_constructor(                                            \
-                 &createMultibodyInertialParamsWithBodyNames<                 \
-                     Model, State, Parametrization>,                          \
-                 bp::default_call_policies(),                                 \
-                 bp::args("state", "parametrization", "body_names")))         \
+        .def(bp::init<std::shared_ptr<State>,                                 \
+                      std::shared_ptr<Parametrization>,                      \
+                      std::vector<std::string> >(                             \
+            bp::args("self", "state", "parametrization", "body_names"),    \
+            "Initialize the inertial-parameter model for selected bodies."))   \
         .def("createData", &Model::createData, bp::args("self"),              \
              "Create the inertial-parameter data.\n\n"                        \
              ":return parameter data")                                        \
@@ -123,11 +84,10 @@ struct MultibodyInertialParamsVisitor
     bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
     bp::class_<Data, bp::bases<DataBase> >(                                   \
         "MultibodyInertialParamsData",                                        \
-        "Data for multibody inertial-parameter models.", bp::no_init)         \
-        .def("__init__",                                                      \
-             bp::make_constructor(                                            \
-                 &createMultibodyInertialParamsData<Data, Model>,             \
-                 bp::default_call_policies(), bp::args("model")))             \
+        "Data for multibody inertial-parameter models.",                       \
+        bp::init<Model*>(bp::args("self", "model"),                          \
+                         "Create inertial-parameter data.\n\n"              \
+                         ":param model: multibody inertial-parameter model")) \
         .def_readwrite("psi", &Data::psi,                                    \
                        "physical inertial vectors by selected body")         \
         .def_readwrite("dpsi_dp", &Data::dpsi_dp,                            \

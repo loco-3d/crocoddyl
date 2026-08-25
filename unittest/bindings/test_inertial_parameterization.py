@@ -193,10 +193,14 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                         getattr(target_module, type(model).__name__),
                     )
 
-            with self.assertRaises(crocoddyl.Exception):
-                module.LogCholeskyParametrizationData(None)
-            with self.assertRaises(crocoddyl.Exception):
-                module.ExpEigenValueParametrizationData(None)
+            self.assertIsInstance(
+                module.LogCholeskyParametrizationData(),
+                module.InertialParametrizationDataAbstract,
+            )
+            self.assertIsInstance(
+                module.ExpEigenValueParametrizationData(),
+                module.InertialParametrizationDataAbstract,
+            )
 
     def test_multibody_layout_resolution_update_copy_and_cast(self):
         for module, dtype, state, cast_dtype in self.scalar_cases():
@@ -220,7 +224,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 one_body = toggled.createData()
                 toggled.changeBodyStatus(joint_name, False)
                 self.assertEqual(toggled.np, 0)
-                self.assertEqual(toggled.body_names, [])
+                self.assertEqual(toggled.body_names.tolist(), [])
                 self.assertEqual(toggled.lb.shape, (0,))
                 self.assertEqual(toggled.ub.shape, (0,))
                 self.assertEqual(toggled.zero().shape, (0,))
@@ -232,7 +236,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 toggled.update(no_bodies, np.zeros(0, dtype=dtype))
                 toggled.changeBodyStatus(joint_name, True)
                 self.assertEqual(toggled.np, 10)
-                self.assertEqual(toggled.body_names, [joint_name])
+                self.assertEqual(toggled.body_names.tolist(), [joint_name])
                 self.assertFalse(toggled.checkData(no_bodies))
                 max_value = np.finfo(dtype).max
                 np.testing.assert_array_equal(
@@ -247,7 +251,9 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                     state, parametrization, [joint_name, frame_name]
                 )
                 self.assertEqual(model.np, 20)
-                self.assertEqual(model.body_names, [joint_name, pin_model.names[2]])
+                self.assertEqual(
+                    model.body_names.tolist(), [joint_name, pin_model.names[2]]
+                )
                 np.testing.assert_array_equal(
                     model.lb, np.full(20, -max_value, dtype=dtype)
                 )
@@ -313,7 +319,9 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
 
                 copied_model = copy.copy(model)
                 copied_data = copy.deepcopy(data)
-                self.assertEqual(copied_model.body_names, model.body_names)
+                self.assertEqual(
+                    copied_model.body_names.tolist(), model.body_names.tolist()
+                )
                 self.assertTrue(np.array_equal(copied_data.p, data.p))
                 self.assertIsNot(copied_data.parametrization, data.parametrization)
                 copied_psi = module.StdVec_Vector10()
@@ -349,7 +357,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 model.changeBodyStatus(third_name, True)
                 self.assertEqual(model.np, 30)
                 self.assertEqual(
-                    model.body_names,
+                    model.body_names.tolist(),
                     [joint_name, pin_model.names[2], third_name],
                 )
                 np.testing.assert_array_equal(model.lb[:20], original_lb)
@@ -370,7 +378,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
 
                 model.changeBodyStatus(frame_name, False)
                 self.assertEqual(model.np, 20)
-                self.assertEqual(model.body_names, [joint_name, third_name])
+                self.assertEqual(model.body_names.tolist(), [joint_name, third_name])
                 np.testing.assert_array_equal(model.lb[:10], original_lb[:10])
                 np.testing.assert_array_equal(model.ub[:10], original_ub[:10])
                 np.testing.assert_array_equal(
@@ -387,7 +395,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 model.changeBodyStatus(frame_name, True)
                 self.assertEqual(model.np, 30)
                 self.assertEqual(
-                    model.body_names,
+                    model.body_names.tolist(),
                     [joint_name, third_name, pin_model.names[2]],
                 )
                 self.assertFalse(model.checkData(reduced))
@@ -427,7 +435,7 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                 casted = model.cast(cast_dtype)
                 self.assertIsInstance(casted, target_module.MultibodyInertialParams)
                 self.assertEqual(casted.np, 30)
-                self.assertEqual(casted.body_names, model.body_names)
+                self.assertEqual(casted.body_names.tolist(), model.body_names.tolist())
                 expected_lb = np.empty_like(casted.lb)
                 expected_ub = np.empty_like(casted.ub)
                 cast_max = np.finfo(casted.lb.dtype).max
@@ -458,8 +466,8 @@ class InertialParameterizationBindingsTest(unittest.TestCase):
                     module.MultibodyInertialParams(
                         state, parametrization, ["missing-body"]
                     )
-                with self.assertRaises(crocoddyl.Exception):
-                    module.MultibodyInertialParamsData(None)
+                direct_data = module.MultibodyInertialParamsData(model)
+                self.assertIsInstance(direct_data, module.MultibodyInertialParamsData)
 
     def test_parameter_manager_and_regressor_binding(self):
         for module, dtype, state, _ in self.scalar_cases():

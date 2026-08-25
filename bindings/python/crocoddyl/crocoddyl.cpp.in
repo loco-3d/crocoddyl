@@ -13,12 +13,15 @@
 #include "python/crocoddyl/utils/set-converter.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
+#include <string>
+#include <vector>
+
 #define SCALAR_@SCALAR_NAME@
 
 namespace crocoddyl {
 namespace python {
 
-#define CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(Scalar)                      \
+#define CROCODDYL_STD_VECTOR_BINDINGS(Scalar)                            \
   typedef Eigen::Matrix<Scalar, 2, 1> Vector2;                           \
   typedef Eigen::Matrix<Scalar, 3, 1> Vector3;                           \
   typedef Eigen::Matrix<Scalar, 4, 1> Vector4;                           \
@@ -44,7 +47,9 @@ namespace python {
   StdVectorPythonVisitor<std::vector<MatrixX>, true>::expose(            \
       "StdVec_MatrixX");                                                 \
   StdVectorPythonVisitor<std::vector<RowMatrixX>, true>::expose(         \
-      "StdVec_RowMatrixX");
+      "StdVec_RowMatrixX");                                               \
+  StdVectorPythonVisitor<std::vector<std::string>, true>::expose(         \
+      "StdVec_StdString");
 
 namespace bp = boost::python;
 
@@ -91,7 +96,7 @@ BOOST_PYTHON_MODULE(libcrocoddyl_pywrap_@SCALAR_NAME@) {
 #endif
 
 
-  CROCODDYL_STD_VECTOR_EIGEN_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_STD_VECTOR_BINDINGS(@SCALAR_TYPE@)
 
 #ifdef SCALAR_float64
   // Register converters between std::set and Python set

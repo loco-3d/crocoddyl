@@ -59,9 +59,11 @@ class ParamsDataTest(unittest.TestCase):
     def test_model_construction_and_action_inheritance(self):
         model = crocoddyl.ParamsAbstract(self.state, 2)
         action_model = crocoddyl.ActionModelParamsAbstract(self.state, 3)
-        model_data = crocoddyl.ParamsDataAbstract(model)
-        converted_data = crocoddyl.ParamsDataAbstract(action_model)
-        action = crocoddyl.ActionModelParamsDataAbstract(action_model)
+        model_data = crocoddyl.ParamsDataAbstract(model.np)
+        converted_data = crocoddyl.ParamsDataAbstract(action_model.np)
+        empty_action = crocoddyl.ActionModelParamsDataAbstract()
+        action = crocoddyl.ActionModelParamsDataAbstract(action_model.np)
+        self.assertEqual((empty_action.np, empty_action.np_action), (0, 0))
         self.assertEqual(
             (model_data.np, model_data.np_action, model_data.np_dynamics),
             (2, 2, 0),
@@ -79,12 +81,12 @@ class ParamsDataTest(unittest.TestCase):
         action_copy = copy.copy(action)
         self.assertEqual(action_copy.np_action, 4)
         self.assertEqual(action_copy.np_dynamics, 1)
-        with self.assertRaises(TypeError):
-            crocoddyl.ActionModelParamsDataAbstract(2)
 
     def test_dynamics_model_construction_inheritance_resize_and_copy(self):
         model = crocoddyl.DynamicsParamsAbstract(self.state, 3)
-        dynamics = crocoddyl.DynamicsParamsDataAbstract(model)
+        empty_dynamics = crocoddyl.DynamicsParamsDataAbstract()
+        dynamics = crocoddyl.DynamicsParamsDataAbstract(model.np)
+        self.assertEqual((empty_dynamics.np, empty_dynamics.np_dynamics), (0, 0))
         self.assertEqual(
             (dynamics.np, dynamics.np_action, dynamics.np_dynamics), (3, 0, 3)
         )
@@ -113,10 +115,6 @@ class ParamsDataTest(unittest.TestCase):
         self.assertFalse(dynamics.active)
         dynamics.setZero()
         self.assertTrue(np.allclose(dynamics.p, 0.0))
-        with self.assertRaises(TypeError):
-            crocoddyl.DynamicsParamsDataAbstract(3)
-        with self.assertRaises(crocoddyl.Exception):
-            crocoddyl.DynamicsParamsDataAbstract(None)
 
     def test_core_collector_combinations_and_sharing(self):
         actuation = crocoddyl.ActuationModelMultibody(self.state)
@@ -214,14 +212,14 @@ class ParamsDataTest(unittest.TestCase):
 
         model = crocoddyl_float32.ActionModelParamsAbstract(state, 2)
         self.assertIsInstance(
-            crocoddyl_float32.ActionModelParamsDataAbstract(model),
+            crocoddyl_float32.ActionModelParamsDataAbstract(model.np),
             crocoddyl_float32.ActionModelParamsDataAbstract,
         )
         collector = crocoddyl_float32.DataCollectorParams(params)
         self.assertEqual(collector.params.np, 5)
 
         dynamics_model = crocoddyl_float32.DynamicsParamsAbstract(state, 3)
-        dynamics = crocoddyl_float32.DynamicsParamsDataAbstract(dynamics_model)
+        dynamics = crocoddyl_float32.DynamicsParamsDataAbstract(dynamics_model.np)
         self.assertEqual(
             (dynamics.np, dynamics.np_action, dynamics.np_dynamics), (3, 0, 3)
         )
