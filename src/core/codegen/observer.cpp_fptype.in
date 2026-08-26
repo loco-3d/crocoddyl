@@ -9,14 +9,14 @@
 #ifdef CROCODDYL_WITH_CODEGEN
 
 // Auto-generated file for @SCALAR_TYPE@
-#include "crocoddyl/core/codegen/action.hpp"
+#include "crocoddyl/core/codegen/observer.hpp"
 
 namespace crocoddyl {
 
 template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActionModelCodeGenTpl<@SCALAR_TYPE@>;
+    ObserverModelCodeGenTpl<@SCALAR_TYPE@>;
 template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
-    ActionDataCodeGenTpl<@SCALAR_TYPE@>;
+    ObserverDataCodeGenTpl<@SCALAR_TYPE@>;
 
 }  // namespace crocoddyl
 

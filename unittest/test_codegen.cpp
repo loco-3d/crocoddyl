@@ -22,6 +22,7 @@
 #include "crocoddyl/core/activations/quadratic-barrier.hpp"
 #include "crocoddyl/core/activations/weighted-quadratic-barrier.hpp"
 #include "crocoddyl/core/codegen/action.hpp"
+#include "crocoddyl/core/codegen/observer.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"

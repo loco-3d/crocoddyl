@@ -24,6 +24,7 @@ void exposeObserverAbstract();
 void exposeDynamicsAbstract();
 #ifdef CROCODDYL_WITH_CODEGEN
 void exposeActionCodeGen();
+void exposeObserverCodeGen();
 #endif
 void exposeDifferentialActionAbstract();
 void exposeIntegratorTime();

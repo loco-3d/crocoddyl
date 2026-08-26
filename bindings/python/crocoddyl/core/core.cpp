@@ -22,6 +22,7 @@ void exposeCore() {
   exposeDynamicsAbstract();
 #ifdef CROCODDYL_WITH_CODEGEN
   exposeActionCodeGen();
+  exposeObserverCodeGen();
 #endif
   exposeIntegratorTime();
   exposeIntegratedActionAbstract();
