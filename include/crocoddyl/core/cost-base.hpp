@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -32,12 +32,14 @@ class CostModelBase {
  *
  * A cost model is defined by the scalar activation function \f$a(\cdot)\f$ and
  * by the residual function \f$\mathbf{r}(\cdot)\f$ as follows: \f[
- * \ell(\mathbf{x},\mathbf{u}) = a(\mathbf{r}(\mathbf{x}, \mathbf{u})), \f]
+ * \ell(\mathbf{x},\mathbf{u},\mathbf{p}) =
+ * a(\mathbf{r}(\mathbf{x},\mathbf{u},\mathbf{p})), \f]
  * where the residual function depends on the state point
  * \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold described
  * with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in
  * T_{\mathbf{x}}\mathcal{X}\f$ that belongs to the tangent space with `ndx`
- * dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$. The
+ * dimension, the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$, and the
+ * parameter vector \f$\mathbf{p}\in\mathbb{R}^{np}\f$. The
  * residual vector is defined by \f$\mathbf{r}\in\mathbb{R}^{nr}\f$ where `nr`
  * describes its dimension in the Euclidean space. On the other hand, the
  * activation function builds a cost value based on the definition of the
@@ -52,8 +54,13 @@ class CostModelBase {
  * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and
- * Hessians, respectively. Additionally, it is important to note that
+ * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$,
+ * \f$\mathbf{l_p}\in\mathbb{R}^{np}\f$,
+ * \f$\mathbf{l_{pp}}\in\mathbb{R}^{np\times np}\f$,
+ * \f$\mathbf{l_{px}}\in\mathbb{R}^{np\times ndx}\f$, and
+ * \f$\mathbf{l_{pu}}\in\mathbb{R}^{np\times nu}\f$ are the Jacobians and
+ * Hessians, respectively. Parameters have to be updated before calling
+ * `calc()` and `calcDiff()`. Additionally, it is important to note that
  * `calcDiff()` computes the derivatives using the latest stored values by
  * `calc()`. Thus, we need to first run `calc()`.
  *
@@ -236,6 +243,11 @@ class CostModelAbstractTpl : public CostModelBase {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the parameter vector
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Print information on the cost model
    */
   template <class Scalar>
@@ -276,9 +288,14 @@ class CostModelAbstractTpl : public CostModelBase {
   std::shared_ptr<ActivationModelAbstract> activation_;  //!< Activation model
   std::shared_ptr<ResidualModelAbstract> residual_;      //!< Residual model
   std::size_t nu_;                                       //!< Control dimension
-  VectorXs unone_;                                       //!< No control vector
+  std::size_t np_;  //!< Parameter dimension
+  VectorXs unone_;  //!< No control vector
   CostModelAbstractTpl()
-      : state_(nullptr), activation_(nullptr), residual_(nullptr), nu_(0) {}
+      : state_(nullptr),
+        activation_(nullptr),
+        residual_(nullptr),
+        nu_(0),
+        np_(0) {}
 };
 
 template <typename _Scalar>
@@ -304,12 +321,20 @@ struct CostDataAbstractTpl {
         Lu(model->get_nu()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
-        Luu(model->get_nu(), model->get_nu()) {
+        Luu(model->get_nu(), model->get_nu()),
+        Lp(model->get_np()),
+        Lpp(model->get_np(), model->get_np()),
+        Lpx(model->get_np(), model->get_state()->get_ndx()),
+        Lpu(model->get_np(), model->get_nu()) {
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
+    Lp.setZero();
+    Lpp.setZero();
+    Lpx.setZero();
+    Lpu.setZero();
   }
   virtual ~CostDataAbstractTpl() = default;
 
@@ -339,6 +364,10 @@ struct CostDataAbstractTpl {
   MatrixXs Lxx;
   MatrixXs Lxu;
   MatrixXs Luu;
+  VectorXs Lp;   //!< Jacobian of the cost w.r.t. the parameters
+  MatrixXs Lpp;  //!< Hessian of the cost w.r.t. the parameters
+  MatrixXs Lpx;  //!< Hessian of the cost w.r.t. the parameters and state
+  MatrixXs Lpu;  //!< Hessian of the cost w.r.t. the parameters and control
 };
 
 }  // namespace crocoddyl

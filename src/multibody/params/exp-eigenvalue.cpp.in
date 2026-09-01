@@ -1,0 +1,13 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/params/exp-eigenvalue.hpp"
+
+template struct crocoddyl::ExpEigenValueParametrizationDataTpl<@SCALAR_TYPE@>;
+template class crocoddyl::ExpEigenValueParametrizationTpl<@SCALAR_TYPE@>;

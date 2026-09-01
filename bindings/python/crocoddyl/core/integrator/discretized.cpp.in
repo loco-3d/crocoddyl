@@ -1,0 +1,172 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/integrator/discretized.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DiscretizedActionModelVisitor
+    : public bp::def_visitor<DiscretizedActionModelVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::ActionDataAbstract Data;
+  typedef typename Model::DynamicsModelAbstract DynamicsModelAbstract;
+  typedef typename Model::CostModelSum CostModelSum;
+  typedef typename Model::ConstraintModelManager ConstraintModelManager;
+  typedef typename Model::VectorXs VectorXs;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the next state and cost value.\n\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the discrete-time dynamics and "
+            "cost.\n\n"
+            "It assumes that calc has been run first.\n"
+            ":param data: action data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"), "Create the discretized action data.")
+        .def(
+            "createData",
+            static_cast<std::shared_ptr<Data> (Model::*)(
+                const std::shared_ptr<typename Model::ParameterDataManager>&)>(
+                &Model::createData),
+            bp::args("self", "params_data"),
+            "Create the discretized action data with parameter-manager data.")
+        .add_property(
+            "dynamics",
+            bp::make_function(&Model::get_dynamics,
+                                  bp::return_value_policy<bp::return_by_value>()),
+            "discrete-time dynamics model")
+        .add_property(
+            "costs",
+            bp::make_function(&Model::get_costs,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "cost model stack")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "constraint manager")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager");
+  }
+};
+
+template <typename Data>
+struct DiscretizedActionDataVisitor
+    : public bp::def_visitor<DiscretizedActionDataVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "dynamics",
+          bp::make_getter(&Data::dynamics,
+                          bp::return_value_policy<bp::return_by_value>()),
+          "dynamics data")
+        .add_property(
+            "costs",
+            bp::make_getter(&Data::costs,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "cost data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint-manager data")
+        .add_property(
+            "params",
+            bp::make_getter(&Data::params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "parameter-manager data");
+  }
+};
+
+#define CROCODDYL_DISCRETIZED_ACTION_MODEL_PYTHON_BINDINGS(Scalar)           \
+  {                                                                           \
+    typedef DiscretizedActionModelTpl<Scalar> Model;                          \
+    typedef ActionModelAbstractTpl<Scalar> ModelBase;                         \
+    typedef DynamicsModelAbstractTpl<Scalar> DynamicsBase;                    \
+    bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+    bp::class_<Model, bp::bases<ModelBase>>(                                  \
+        "DiscretizedActionModel",                                             \
+        "Action model for discrete-time dynamics.\n\n"                        \
+        "This model wraps a DiscreteTime DynamicsModel, passing its next-"    \
+        "state map and Jacobians directly to the action interface without "   \
+        "any numerical integration step.",                                    \
+        bp::init<std::shared_ptr<DynamicsBase>,                               \
+                 std::shared_ptr<CostModelSumTpl<Scalar>>,                    \
+                 bp::optional<                                                 \
+                     std::shared_ptr<ConstraintModelManagerTpl<Scalar>>>>(    \
+            bp::args("self", "dynModel", "costModel", "constraints"),         \
+            "Initialize the discretized action model.\n\n"                    \
+            ":param dynModel: discrete-time dynamics model\n"                 \
+            ":param costModel: cost model stack\n"                            \
+            ":param constraints: constraint manager (default None)"))         \
+        .def(DiscretizedActionModelVisitor<Model>())                          \
+        .def(CastVisitor<Model>())                                            \
+        .def(PrintableVisitor<Model>())                                       \
+        .def(CopyableVisitor<Model>());                                       \
+  }
+
+#define CROCODDYL_DISCRETIZED_ACTION_DATA_PYTHON_BINDINGS(Scalar)            \
+  {                                                                           \
+    typedef DiscretizedActionDataTpl<Scalar> Data;                            \
+    typedef ActionDataAbstractTpl<Scalar> DataBase;                           \
+    typedef DiscretizedActionModelTpl<Scalar> Model;                          \
+    bp::register_ptr_to_python<std::shared_ptr<Data>>();                      \
+    bp::class_<Data, bp::bases<DataBase>>(                                    \
+        "DiscretizedActionData",                                              \
+        "Data for discretized action models.",                                \
+        bp::init<Model*>(bp::args("self", "model"),                           \
+                         "Create discretized action data.\n\n"                \
+                         ":param model: discretized action model"))           \
+        .def(DiscretizedActionDataVisitor<Data>())                            \
+        .def(CopyableVisitor<Data>());                                        \
+  }
+
+void exposeDiscretizedAction() {
+  CROCODDYL_DISCRETIZED_ACTION_MODEL_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DISCRETIZED_ACTION_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

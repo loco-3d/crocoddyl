@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -29,11 +29,14 @@ class ActionModelAbstractTpl_wrap
   typedef typename crocoddyl::ActionModelAbstractTpl<Scalar> ActionModel;
   typedef typename crocoddyl::ActionDataAbstractTpl<Scalar> ActionData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
+  typedef typename ActionModel::ParameterManager ParameterManager;
   typedef typename ActionModel::VectorXs VectorXs;
+  using ActionModel::createData;
   using ActionModel::ng_;
   using ActionModel::ng_T_;
   using ActionModel::nh_;
   using ActionModel::nh_T_;
+  using ActionModel::np_;
   using ActionModel::nr_;
   using ActionModel::nu_;
   using ActionModel::state_;
@@ -44,8 +47,9 @@ class ActionModelAbstractTpl_wrap
                               const std::size_t ng = 0,
                               const std::size_t nh = 0,
                               const std::size_t ng_T = 0,
-                              const std::size_t nh_T = 0)
-      : ActionModel(state, nu, nr, ng, nh, ng_T, nh_T),
+                              const std::size_t nh_T = 0,
+                              const std::size_t np = 0)
+      : ActionModel(state, nu, nr, ng, nh, ng_T, nh_T, np),
         bp::wrapper<ActionModel>() {
     unone_ = VectorXs::Constant(nu, Scalar(NAN));
   }
@@ -106,6 +110,27 @@ class ActionModelAbstractTpl_wrap
 
   std::shared_ptr<ActionData> default_createData() {
     return this->ActionModel::createData();
+  }
+
+  void set_params(const std::shared_ptr<ActionData>& data,
+                  std::shared_ptr<ParameterManager> params) override {
+    if (boost::python::override set_params = this->get_override("set_params")) {
+      return bp::call<void>(set_params.ptr(), data, params);
+    }
+    return ActionModel::set_params(data, params);
+  }
+
+  void default_set_params(const std::shared_ptr<ActionData>& data,
+                          std::shared_ptr<ParameterManager> params) {
+    return this->ActionModel::set_params(data, params);
+  }
+
+  void update_p(const std::shared_ptr<ActionData>& data,
+                const Eigen::Ref<const VectorXs>& p) override {
+    if (boost::python::override update_p = this->get_override("update_p")) {
+      return bp::call<void>(update_p.ptr(), data, (VectorXs)p);
+    }
+    return ActionModel::update_p(data, p);
   }
 
   void quasiStatic(const std::shared_ptr<ActionData>& data,
@@ -172,7 +197,7 @@ class ActionModelAbstractTpl_wrap
   ActionModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef ActionModelAbstractTpl_wrap<NewScalar> ReturnType;
     ReturnType ret(state_->template cast<NewScalar>(), nu_, nr_, ng_, nh_,
-                   ng_T_, nh_T_);
+                   ng_T_, nh_T_, np_);
     return ret;
   }
 };

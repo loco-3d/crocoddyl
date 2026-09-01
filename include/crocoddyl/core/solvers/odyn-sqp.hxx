@@ -184,10 +184,8 @@ void SolverOdynSQPTpl<Scalar>::computeCandidate(const Scalar steplength) {
     const std::shared_ptr<ActionDataAbstract>& d = datas[t];
     if (m->get_nu() != 0) {
       us_try_[t] = us_[t] + steplength * dus_[t];
-      m->calc(d, xs_try_[t], us_try_[t]);
-    } else {
-      m->calc(d, xs_try_[t]);
     }
+    m->calc(d, xs_try_[t], us_try_[t]);
     m->get_state()->diff(xs_try_[t + 1], d->xnext, fs_try_[t + 1]);
   }
   cost_try_ = Scalar(0.);
@@ -435,8 +433,15 @@ template <typename NewScalar>
 SolverOdynSQPTpl<NewScalar> SolverOdynSQPTpl<Scalar>::cast() const {
   typedef SolverOdynSQPTpl<NewScalar> ReturnType;
   typedef ShootingProblemTpl<NewScalar> ProblemType;
+  const std::shared_ptr<ShootingProblemTpl<Scalar>> problem =
+      std::dynamic_pointer_cast<ShootingProblemTpl<Scalar>>(problem_);
+  if (problem == nullptr) {
+    throw_pretty(
+        "Invalid operation: parameterized problems cannot be cast by "
+        "SolverOdynSQP.");
+  }
   ReturnType ret(
-      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()));
+      std::make_shared<ProblemType>(problem->template cast<NewScalar>()));
   // Setting the abstract parameters
   ret.setCallbacks(vector_cast<NewScalar>(callbacks_));
   ret.set_th_acceptstep(scalar_cast<NewScalar>(th_acceptstep_));

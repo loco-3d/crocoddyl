@@ -31,18 +31,40 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       test_cost_sum
       test_constraints
       test_constraint_manager
-      test_contacts
+      test_implicit_constraints
+      test_multiple_implicit_constraints
+      test_kinematic_loop
+      test_generic_contact
+      test_multibody_actuation
+      test_multibody_inertial_params
+      test_parameter_energy_residuals
+      test_numdiff
+      test_implicit_constraint_residuals
       test_controls
-      test_impulses
-      test_multiple_contacts
-      test_multiple_impulses
+      test_dynamics
+      test_multibody_dynamics
+      test_impulse_dynamics
+      test_integrator_time
+      test_integrator_timeopt_params
+      test_action_integration
+      test_params
+      test_params_data
+      test_parameter_manager
+      test_observer_base
+      test_integrated_observer_base
+      test_observer_euler
+      test_observer_rk
+      test_observer_discretized
+      test_lqr
       test_contact_costs
       test_impulse_costs
       test_contact_constraints
       test_impulse_constraints
       test_actions
-      test_diff_actions
       test_problem
+      test_problem_abstract
+      test_parameterized_problems
+      test_parameterized_solvers
       test_cop_support
       test_friction_cone
       test_wrench_cone
@@ -61,7 +83,8 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
           "because of a known CppADCodeGen TLS guard redefinition issue in cppad/cg/cg.hpp."
       )
     else()
-      list(APPEND ${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen)
+      list(APPEND ${PROJECT_NAME}_CODEGEN_CPP_TESTS test_codegen
+           test_codegen_float32)
     endif()
     list(APPEND ${PROJECT_NAME}_CPP_TESTS ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
   endif()
@@ -100,9 +123,130 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
       '-DCROCODDYL_SOURCE_DIR=\\\"${${PROJECT_NAME}_SOURCE_DIR}\\\"')
   endforeach(NAME ${${PROJECT_NAME}_CPP_TESTS})
 
+  if(TARGET test_actions)
+    target_compile_definitions(test_actions PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_residuals)
+    target_compile_definitions(test_residuals PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_cost_sum)
+    target_compile_definitions(test_cost_sum PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_constraint_manager)
+    target_compile_definitions(test_constraint_manager
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_params_data)
+    target_compile_definitions(test_params_data PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_parameter_manager)
+    target_compile_definitions(test_parameter_manager
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_integrator_timeopt_params)
+    target_compile_definitions(test_integrator_timeopt_params
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_action_integration)
+    target_compile_definitions(test_action_integration
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_lqr)
+    target_compile_definitions(test_lqr PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_numdiff)
+    target_compile_definitions(test_numdiff PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_observer_euler)
+    target_compile_definitions(test_observer_euler
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_observer_rk)
+    target_compile_definitions(test_observer_rk PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+  if(TARGET test_observer_discretized)
+    target_compile_definitions(test_observer_discretized
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_dynamics)
+    target_compile_definitions(test_dynamics PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multibody_dynamics)
+    target_compile_definitions(test_multibody_dynamics
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_impulse_dynamics)
+    target_compile_definitions(test_impulse_dynamics
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_problem_abstract)
+    target_compile_definitions(test_problem_abstract
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_parameterized_problems)
+    target_compile_definitions(test_parameterized_problems
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_parameterized_solvers)
+    target_compile_definitions(test_parameterized_solvers
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_solvers)
+    target_compile_definitions(test_solvers PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multiple_implicit_constraints)
+    target_compile_definitions(test_multiple_implicit_constraints
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_generic_contact)
+    target_compile_definitions(test_generic_contact
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multibody_actuation)
+    target_compile_definitions(test_multibody_actuation
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_multibody_inertial_params)
+    target_compile_definitions(test_multibody_inertial_params
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_parameter_energy_residuals)
+    target_compile_definitions(test_parameter_energy_residuals
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
+  if(TARGET test_kinematic_loop)
+    target_compile_definitions(test_kinematic_loop
+                               PRIVATE EIGEN_RUNTIME_NO_MALLOC)
+  endif()
+
   if(BUILD_WITH_CODEGEN_SUPPORT)
     foreach(TEST_NAME ${${PROJECT_NAME}_CODEGEN_CPP_TESTS})
       target_link_libraries(${TEST_NAME} ${CMAKE_DL_LIBS} ${cppad_LIBRARY})
+      target_compile_definitions(${TEST_NAME} PRIVATE EIGEN_RUNTIME_NO_MALLOC)
     endforeach()
   endif()
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -13,9 +13,10 @@ template <typename Scalar>
 ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
     std::shared_ptr<StateAbstractTpl<Scalar> > state, const std::size_t nu,
     const std::size_t nr, const std::size_t ng, const std::size_t nh,
-    const std::size_t ng_T, const std::size_t nh_T)
+    const std::size_t ng_T, const std::size_t nh_T, const std::size_t np)
     : nu_(nu),
       nr_(nr),
+      np_(np),
       ng_(ng),
       nh_(nh),
       ng_T_(ng_T),
@@ -37,6 +38,7 @@ ActionModelAbstractTpl<Scalar>::ActionModelAbstractTpl(
     const ActionModelAbstractTpl<Scalar>& other)
     : nu_(other.nu_),
       nr_(other.nr_),
+      np_(other.np_),
       ng_(other.ng_),
       nh_(other.nh_),
       ng_T_(other.ng_T_),
@@ -117,6 +119,27 @@ ActionModelAbstractTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+std::shared_ptr<ActionDataAbstractTpl<Scalar> >
+ActionModelAbstractTpl<Scalar>::createData(
+    const std::shared_ptr<ParameterDataManager>&) {
+  return createData();
+}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::set_params(
+    const std::shared_ptr<ActionDataAbstract>&,
+    std::shared_ptr<ParameterManager>) {}
+
+template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::update_p(
+    const std::shared_ptr<ActionDataAbstract>&,
+    const Eigen::Ref<const VectorXs>&) {
+  throw_pretty(
+      "Invalid call: update_p is not supported for this action "
+      "model");
+}
+
+template <typename Scalar>
 bool ActionModelAbstractTpl<Scalar>::checkData(
     const std::shared_ptr<ActionDataAbstract>&) {
   return false;
@@ -135,6 +158,11 @@ std::size_t ActionModelAbstractTpl<Scalar>::get_nu() const {
 template <typename Scalar>
 std::size_t ActionModelAbstractTpl<Scalar>::get_nr() const {
   return nr_;
+}
+
+template <typename Scalar>
+std::size_t ActionModelAbstractTpl<Scalar>::get_np() const {
+  return np_;
 }
 
 template <typename Scalar>
@@ -250,9 +278,15 @@ void ActionModelAbstractTpl<Scalar>::set_u_ub(const VectorXs& u_ub) {
 
 template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::update_has_control_limits() {
-  has_control_limits_ =
-      isfinite(u_lb_.template cast<ScalarType>().array()).any() &&
-      isfinite(u_ub_.template cast<ScalarType>().array()).any();
+  bool has_lower_limit = false;
+  bool has_upper_limit = false;
+  for (std::size_t i = 0; i < nu_; ++i) {
+    has_lower_limit =
+        has_lower_limit || std::isfinite(scalar_cast<ScalarType>(u_lb_[i]));
+    has_upper_limit =
+        has_upper_limit || std::isfinite(scalar_cast<ScalarType>(u_ub_[i]));
+  }
+  has_control_limits_ = has_lower_limit && has_upper_limit;
 }
 
 template <typename Scalar>

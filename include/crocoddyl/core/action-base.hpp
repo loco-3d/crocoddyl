@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -38,7 +38,8 @@ class ActionModelBase {
  *  - the state rate \f$\mathbf{\dot{x}}\in T_{\mathbf{q}}\mathcal{Q}\f$ is the
  * tangent vector to the state manifold with `ndx` dimension,
  *  - the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$ is an Euclidean
- * vector
+ * vector,
+ *  - the parameter vector \f$\mathbf{p}\in\mathbb{R}^{np}\f$ is Euclidean,
  *  - \f$\mathbf{r}(\cdot)\f$ and \f$a(\cdot)\f$ are the residual and activation
  * functions (see `ResidualModelAbstractTpl` and `ActivationModelAbstractTpl`,
  * respetively),
@@ -56,40 +57,56 @@ class ActionModelBase {
  * short, this method builds a linear-quadratic approximation of the action
  * model, i.e.: \f[ \begin{aligned}
  * &\delta\mathbf{x}_{k+1} =
- * \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k,
+ * \mathbf{f_x}\delta\mathbf{x}_k+\mathbf{f_u}\delta\mathbf{u}_k+
+ * \mathbf{f_p}\delta\mathbf{p}_k,
  * &\textrm{(dynamics)}\\
- * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k) = \begin{bmatrix}1
- * \\ \delta\mathbf{x}_k \\ \delta\mathbf{u}_k\end{bmatrix}^T \begin{bmatrix}0 &
- * \mathbf{\ell_x}^T & \mathbf{\ell_u}^T \\ \mathbf{\ell_x} & \mathbf{\ell_{xx}}
- * &
- * \mathbf{\ell_{ux}}^T \\
- * \mathbf{\ell_u} & \mathbf{\ell_{ux}} & \mathbf{\ell_{uu}}\end{bmatrix}
- * \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\
- * \delta\mathbf{u}_k\end{bmatrix}, &\textrm{(cost)}\\
- * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)<\mathbf{0},
+ * &\ell(\delta\mathbf{x}_k,\delta\mathbf{u}_k,\delta\mathbf{p}_k) =
+ * \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\ \delta\mathbf{u}_k \\
+ * \delta\mathbf{p}_k\end{bmatrix}^T
+ * \begin{bmatrix}0 & \mathbf{\ell_x}^T & \mathbf{\ell_u}^T &
+ * \mathbf{\ell_p}^T \\
+ * \mathbf{\ell_x} & \mathbf{\ell_{xx}} & \mathbf{\ell_{xu}} &
+ * \mathbf{\ell_{px}}^T \\
+ * \mathbf{\ell_u} & \mathbf{\ell_{xu}}^T & \mathbf{\ell_{uu}} &
+ * \mathbf{\ell_{pu}}^T \\
+ * \mathbf{\ell_p} & \mathbf{\ell_{px}} & \mathbf{\ell_{pu}} &
+ * \mathbf{\ell_{pp}}\end{bmatrix}
+ * \begin{bmatrix}1 \\ \delta\mathbf{x}_k \\ \delta\mathbf{u}_k \\
+ * \delta\mathbf{p}_k\end{bmatrix}, &\textrm{(cost)}\\
+ * &\mathbf{g}(\delta\mathbf{x}_k,\delta\mathbf{u}_k,
+ * \delta\mathbf{p}_k)<\mathbf{0},
  * &\textrm{(inequality constraint)}\\
- * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k)=\mathbf{0},
+ * &\mathbf{h}(\delta\mathbf{x}_k,\delta\mathbf{u}_k,
+ * \delta\mathbf{p}_k)=\mathbf{0},
  * &\textrm{(equality constraint)} \end{aligned} \f] where
  *  - \f$\mathbf{f_x}\in\mathbb{R}^{ndx\times ndx}\f$ and
- * \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ are the Jacobians of the
- * dynamics,
+ * \f$\mathbf{f_u}\in\mathbb{R}^{ndx\times nu}\f$ and
+ * \f$\mathbf{f_p}\in\mathbb{R}^{ndx\times np}\f$ (`Fx`, `Fu`, `Fp`) are the
+ * Jacobians of the dynamics,
  *  - \f$\mathbf{\ell_x}\in\mathbb{R}^{ndx}\f$ and
- * \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ are the Jacobians of the cost
- * function,
+ * \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$ and
+ * \f$\mathbf{\ell_p}\in\mathbb{R}^{np}\f$ (`Lx`, `Lu`, `Lp`) are the
+ * Jacobians of the cost function,
  *  - \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$ and
- * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Hessians of the
- * cost function,
+ * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ (`Lxx`, `Lxu`,
+ * `Luu`), together with \f$\mathbf{\ell_{pp}}\in\mathbb{R}^{np\times np}\f$,
+ * \f$\mathbf{\ell_{px}}\in\mathbb{R}^{np\times ndx}\f$ and
+ * \f$\mathbf{\ell_{pu}}\in\mathbb{R}^{np\times nu}\f$ (`Lpp`, `Lpx`,
+ * `Lpu`), are the Hessian blocks of the cost function,
  *  - \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$ and
- * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ are the Jacobians of the
- * inequality constraints, and
+ * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$ and
+ * \f$\mathbf{g_p}\in\mathbb{R}^{ng\times np}\f$ (`Gx`, `Gu`, `Gp`) are the
+ * Jacobians of the inequality constraints, and
  *  - \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$ and
- * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ are the Jacobians of the
- * equality constraints.
+ * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$ and
+ * \f$\mathbf{h_p}\in\mathbb{R}^{nh\times np}\f$ (`Hx`, `Hu`, `Hp`) are the
+ * Jacobians of the equality constraints.
  *
  * Additionally, it is important to note that `calcDiff()` computes the
  * derivatives using the latest stored values by `calc()`. Thus, we need to
- * first run `calc()`.
+ * first update the parameter values through `update_p(data, p)`, then run
+ * `calc()` before `calcDiff()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -102,6 +119,8 @@ class ActionModelAbstractTpl : public ActionModelBase {
   typedef typename ScalarSelector<Scalar>::type ScalarType;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
+  typedef ParameterManagerTpl<Scalar> ParameterManager;
   typedef StateAbstractTpl<Scalar> StateAbstract;
   typedef typename MathBase::VectorXs VectorXs;
 
@@ -115,12 +134,14 @@ class ActionModelAbstractTpl : public ActionModelBase {
    * @param[in] nh     Number of equality constraints (default 0)
    * @param[in] ng_T   Number of inequality terminal constraints (default 0)
    * @param[in] nh_T   Number of equality terminal constraints (default 0)
+   * @param[in] np     Dimension of the parameter vector (default 0)
    */
   ActionModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                          const std::size_t nu, const std::size_t nr = 0,
                          const std::size_t ng = 0, const std::size_t nh = 0,
-                         const std::size_t ng_T = 0,
-                         const std::size_t nh_T = 0);
+                         const std::size_t ng_T = 0, const std::size_t nh_T = 0,
+                         const std::size_t np = 0);
+
   /**
    * @brief Copy constructor
    * @param other  Action model to be copied
@@ -192,6 +213,36 @@ class ActionModelAbstractTpl : public ActionModelBase {
   virtual std::shared_ptr<ActionDataAbstract> createData();
 
   /**
+   * @brief Create action data with optional external parameter data
+   *
+   * Parameterized action models override this overload to attach shared
+   * parameter data to their concrete action data.
+   *
+   * @param[in] params_data  Optional external parameter-manager data
+   * @return the action data
+   */
+  virtual std::shared_ptr<ActionDataAbstract> createData(
+      const std::shared_ptr<ParameterDataManager>& params_data);
+
+  /**
+   * @brief Wire a parameter manager into this action model and its data
+   *
+   * The abstract implementation is a no-op. Parameterized action models
+   * override this hook when they require parameter-manager wiring.
+   */
+  virtual void set_params(const std::shared_ptr<ActionDataAbstract>& data,
+                          std::shared_ptr<ParameterManager> params);
+
+  /**
+   * @brief Update the active parameter vector inside the given action data
+   *
+   * Parameterized action models override this hook when they can evaluate
+   * `calc()` / `calcDiff()` at different parameter values.
+   */
+  virtual void update_p(const std::shared_ptr<ActionDataAbstract>& data,
+                        const Eigen::Ref<const VectorXs>& p);
+
+  /**
    * @brief Checks that a specific data belongs to this model
    */
   virtual bool checkData(const std::shared_ptr<ActionDataAbstract>& data);
@@ -239,6 +290,11 @@ class ActionModelAbstractTpl : public ActionModelBase {
    * @brief Return the dimension of the cost-residual vector
    */
   std::size_t get_nr() const;
+
+  /**
+   * @brief Return the dimension of the parameter vector
+   */
+  virtual std::size_t get_np() const;
 
   /**
    * @brief Return the number of inequality constraints
@@ -327,6 +383,7 @@ class ActionModelAbstractTpl : public ActionModelBase {
  protected:
   std::size_t nu_;    //!< Control dimension
   std::size_t nr_;    //!< Dimension of the cost residual
+  std::size_t np_;    //!< Dimension of the parameters
   std::size_t ng_;    //!< Number of inequality constraints
   std::size_t nh_;    //!< Number of equality constraints
   std::size_t ng_T_;  //!< Number of inequality terminal constraints
@@ -340,7 +397,14 @@ class ActionModelAbstractTpl : public ActionModelBase {
   bool has_control_limits_;  //!< Indicates whether any of the control limits is
                              //!< finite
   ActionModelAbstractTpl()
-      : nu_(0), nr_(0), ng_(0), nh_(0), ng_T_(0), nh_T_(0), state_(nullptr) {}
+      : nu_(0),
+        nr_(0),
+        np_(0),
+        ng_(0),
+        nh_(0),
+        ng_T_(0),
+        nh_T_(0),
+        state_(nullptr) {}
 
   /**
    * @brief Update the status of the control limits (i.e. if there are defined
@@ -367,12 +431,17 @@ struct ActionDataAbstractTpl {
         xnext(model->get_state()->get_nx()),
         Fx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Fu(model->get_state()->get_ndx(), model->get_nu()),
+        Fp(model->get_state()->get_ndx(), model->get_np()),
         r(model->get_nr()),
         Lx(model->get_state()->get_ndx()),
         Lu(model->get_nu()),
+        Lp(model->get_np()),
         Lxx(model->get_state()->get_ndx(), model->get_state()->get_ndx()),
         Lxu(model->get_state()->get_ndx(), model->get_nu()),
         Luu(model->get_nu(), model->get_nu()),
+        Lpp(model->get_np(), model->get_np()),
+        Lpx(model->get_np(), model->get_state()->get_ndx()),
+        Lpu(model->get_np(), model->get_nu()),
         g(model->get_ng() > model->get_ng_T() ? model->get_ng()
                                               : model->get_ng_T()),
         Gx(model->get_ng() > model->get_ng_T() ? model->get_ng()
@@ -381,6 +450,7 @@ struct ActionDataAbstractTpl {
         Gu(model->get_ng() > model->get_ng_T() ? model->get_ng()
                                                : model->get_ng_T(),
            model->get_nu()),
+        Gp(model->get_ng(), model->get_np()),
         h(model->get_nh() > model->get_nh_T() ? model->get_nh()
                                               : model->get_nh_T()),
         Hx(model->get_nh() > model->get_nh_T() ? model->get_nh()
@@ -388,47 +458,108 @@ struct ActionDataAbstractTpl {
            model->get_state()->get_ndx()),
         Hu(model->get_nh() > model->get_nh_T() ? model->get_nh()
                                                : model->get_nh_T(),
-           model->get_nu()) {
+           model->get_nu()),
+        Hp(model->get_nh(), model->get_np()) {
+    setZero();
+  }
+  virtual ~ActionDataAbstractTpl() = default;
+
+  /**
+   * @brief Resize data to match the model and node layout
+   *
+   * Existing coefficients are preserved where dimensions overlap. Call
+   * `setZero()` explicitly when a clean data object is required.
+   */
+  template <class Model>
+  void resize(Model* const model, const bool running_node = true) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t np = model->get_np();
+    const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
+    const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
+
+    xnext.conservativeResize(model->get_state()->get_nx());
+    Fx.conservativeResize(ndx, ndx);
+    Fu.conservativeResize(ndx, nu);
+    Fp.conservativeResize(ndx, np);
+    r.conservativeResize(model->get_nr());
+    Lx.conservativeResize(ndx);
+    Lu.conservativeResize(nu);
+    Lp.conservativeResize(np);
+    Lxx.conservativeResize(ndx, ndx);
+    Lxu.conservativeResize(ndx, nu);
+    Luu.conservativeResize(nu, nu);
+    Lpp.conservativeResize(np, np);
+    Lpx.conservativeResize(np, ndx);
+    Lpu.conservativeResize(np, nu);
+    g.conservativeResize(ng);
+    Gx.conservativeResize(ng, ndx);
+    Gu.conservativeResize(ng, nu);
+    Gp.conservativeResize(ng, np);
+    h.conservativeResize(nh);
+    Hx.conservativeResize(nh, ndx);
+    Hu.conservativeResize(nh, nu);
+    Hp.conservativeResize(nh, np);
+  }
+
+  /**
+   * @brief Set every action-data value and derivative to zero
+   */
+  virtual void setZero() {
+    cost = Scalar(0.);
     xnext.setZero();
     Fx.setZero();
     Fu.setZero();
+    Fp.setZero();
     r.setZero();
     Lx.setZero();
     Lu.setZero();
+    Lp.setZero();
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
+    Lpp.setZero();
+    Lpx.setZero();
+    Lpu.setZero();
     g.setZero();
     Gx.setZero();
     Gu.setZero();
+    Gp.setZero();
     h.setZero();
     Hx.setZero();
     Hu.setZero();
+    Hp.setZero();
   }
-  virtual ~ActionDataAbstractTpl() = default;
 
   Scalar cost;     //!< cost value
   VectorXs xnext;  //!< evolution state
   MatrixXs Fx;  //!< Jacobian of the dynamics w.r.t. the state \f$\mathbf{x}\f$
   MatrixXs
-      Fu;      //!< Jacobian of the dynamics w.r.t. the control \f$\mathbf{u}\f$
-  VectorXs r;  //!< Cost residual
+      Fu;  //!< Jacobian of the dynamics w.r.t. the control \f$\mathbf{u}\f$
+  MatrixXs Fp;   //!< Jacobian of the dynamics w.r.t. the parameters
+  VectorXs r;    //!< Cost residual
   VectorXs Lx;   //!< Jacobian of the cost w.r.t. the state \f$\mathbf{x}\f$
   VectorXs Lu;   //!< Jacobian of the cost w.r.t. the control \f$\mathbf{u}\f$
+  VectorXs Lp;   //!< Jacobian of the cost w.r.t. the parameters
   MatrixXs Lxx;  //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$
   MatrixXs Lxu;  //!< Hessian of the cost w.r.t. the state \f$\mathbf{x}\f$ and
                  //!< control \f$\mathbf{u}\f$
   MatrixXs Luu;  //!< Hessian of the cost w.r.t. the control \f$\mathbf{u}\f$
+  MatrixXs Lpp;  //!< Hessian of the cost w.r.t. the parameters
+  MatrixXs Lpx;  //!< Hessian of the cost w.r.t. parameters and state
+  MatrixXs Lpu;  //!< Hessian of the cost w.r.t. parameters and control
   VectorXs g;    //!< Inequality constraint values
   MatrixXs Gx;   //!< Jacobian of the inequality constraint w.r.t. the state
                  //!< \f$\mathbf{x}\f$
   MatrixXs Gu;   //!< Jacobian of the inequality constraint w.r.t. the control
                  //!< \f$\mathbf{u}\f$
+  MatrixXs Gp;   //!< Jacobian of the inequality constraint w.r.t. parameters
   VectorXs h;    //!< Equality constraint values
   MatrixXs Hx;   //!< Jacobian of the equality constraint w.r.t. the state
                  //!< \f$\mathbf{x}\f$
   MatrixXs Hu;   //!< Jacobian of the equality constraint w.r.t. the control
                  //!< \f$\mathbf{u}\f$
+  MatrixXs Hp;   //!< Jacobian of the equality constraint w.r.t. parameters
 };
 
 }  // namespace crocoddyl

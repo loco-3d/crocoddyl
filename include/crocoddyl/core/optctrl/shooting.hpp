@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
@@ -12,6 +12,8 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/optctrl/problem-abstract.hpp"
+#include "crocoddyl/core/params/parameter-phase.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 
 namespace crocoddyl {
@@ -27,15 +29,24 @@ namespace crocoddyl {
  * updates the derivatives of all action models. Finally, `rollout` integrates
  * the system dynamics. This class is used to decouple problem formulation and
  * resolution.
+ *
+ * A shooting problem can optionally own action parameters shared by one or
+ * more phases. All action data in a parameter phase refer to the same
+ * `ParameterPhaseDataTpl`, and the terminal node uses the final phase.
+ * Parameter layouts are fixed at construction. Structural mutation is
+ * supported only for problems without phase-owned data; parameterized problems
+ * must be reconstructed when their model or phase layout changes.
  */
 template <typename _Scalar>
-class ShootingProblemTpl {
+class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef ParameterPhaseDataTpl<Scalar> ParameterPhaseData;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
 
@@ -66,6 +77,36 @@ class ShootingProblemTpl {
       std::shared_ptr<ActionModelAbstract> terminal_model,
       const std::vector<std::shared_ptr<ActionDataAbstract> >& running_datas,
       std::shared_ptr<ActionDataAbstract> terminal_data);
+
+  /**
+   * @brief Construct a single-phase parameterized shooting problem
+   *
+   * @param[in] x0 Initial state
+   * @param[in] running_models Running action models
+   * @param[in] terminal_model Terminal action model
+   * @param[in] params_model Parameter-phase model shared by all nodes
+   */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      std::shared_ptr<ParameterPhaseModel> params_model);
+
+  /**
+   * @brief Construct a multi-phase parameterized shooting problem
+   *
+   * @param[in] x0 Initial state
+   * @param[in] model_phases Running action models grouped by parameter phase
+   * @param[in] terminal_model Terminal action model
+   * @param[in] params_model One parameter-phase model per phase
+   */
+  ShootingProblemTpl(
+      const VectorXs& x0,
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases,
+      std::shared_ptr<ActionModelAbstract> terminal_model,
+      const std::vector<std::shared_ptr<ParameterPhaseModel> >& params_model);
+
   /**
    * @brief Initialize the shooting problem
    */
@@ -85,7 +126,8 @@ class ShootingProblemTpl {
    * \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calc(const std::vector<VectorXs>& xs, const std::vector<VectorXs>& us);
+  virtual Scalar calc(const std::vector<VectorXs>& xs,
+                      const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Compute the derivatives of the cost and dynamics
@@ -103,8 +145,8 @@ class ShootingProblemTpl {
    * \f$T\f$)
    * @return The total cost value \f$l_{k}\f$
    */
-  Scalar calcDiff(const std::vector<VectorXs>& xs,
-                  const std::vector<VectorXs>& us);
+  virtual Scalar calcDiff(const std::vector<VectorXs>& xs,
+                          const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Integrate the dynamics given a control sequence
@@ -114,7 +156,8 @@ class ShootingProblemTpl {
    * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size
    * \f$T\f$)
    */
-  void rollout(const std::vector<VectorXs>& us, std::vector<VectorXs>& xs);
+  virtual void rollout(const std::vector<VectorXs>& us,
+                       std::vector<VectorXs>& xs) override;
 
   /**
    * @copybrief rollout
@@ -124,7 +167,8 @@ class ShootingProblemTpl {
    * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size
    * \f$T+1\f$)
    */
-  std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+  virtual std::vector<VectorXs> rollout_us(
+      const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Compute the quasic static commands given a state trajectory
@@ -204,34 +248,32 @@ class ShootingProblemTpl {
   /**
    * @brief Return the number of running nodes
    */
-  std::size_t get_T() const;
+  virtual std::size_t get_T() const override;
 
   /**
    * @brief Return the initial state
    */
-  const VectorXs& get_x0() const;
+  virtual const VectorXs& get_x0() const override;
 
-  /**
-   * @brief Return the running models
-   */
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& get_runningModels()
-      const;
+  /** @brief Return all running models flattened in time order */
+  virtual const std::vector<std::shared_ptr<ActionModelAbstract> >&
+  get_runningModels() const override;
 
   /**
    * @brief Return the terminal model
    */
-  const std::shared_ptr<ActionModelAbstract>& get_terminalModel() const;
+  virtual const std::shared_ptr<ActionModelAbstract>& get_terminalModel()
+      const override;
 
-  /**
-   * @brief Return the running datas
-   */
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& get_runningDatas()
-      const;
+  /** @brief Return all running data flattened in time order */
+  virtual const std::vector<std::shared_ptr<ActionDataAbstract> >&
+  get_runningDatas() const override;
 
   /**
    * @brief Return the terminal data
    */
-  const std::shared_ptr<ActionDataAbstract>& get_terminalData() const;
+  virtual const std::shared_ptr<ActionDataAbstract>& get_terminalData()
+      const override;
 
   /**
    * @brief Modify the initial state
@@ -260,28 +302,68 @@ class ShootingProblemTpl {
   /**
    * @brief Modify the is_updated flag
    */
-  void set_is_updated(const bool is_updated);
+  virtual void set_is_updated(const bool is_updated) override;
 
   /**
    * @brief Return the dimension of the state tuple
    */
-  std::size_t get_nx() const;
+  virtual std::size_t get_nx() const override;
 
   /**
    * @brief Return the dimension of the tangent space of the state manifold
    */
-  std::size_t get_ndx() const;
+  virtual std::size_t get_ndx() const override;
 
   /**
    * @brief Return the number of threads
    */
-  std::size_t get_nthreads() const;
+  virtual std::size_t get_nthreads() const override;
 
   /**
    * @brief Return only once true is the shooting problem has been changed,
    * otherwise false
    */
-  bool is_updated();
+  virtual bool is_updated() override;
+
+  /** @brief Update the active parameter vector of one phase exactly once */
+  virtual void update_p(const Eigen::Ref<const VectorXs>& p,
+                        const std::size_t phase_idx = 0) override;
+
+  /** @brief Return the number of parameterized running phases */
+  virtual std::size_t get_n_phases() const override;
+
+  /**
+   * @brief Return the running action models of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ActionModelAbstract> > get_runningPhaseModels(
+      const std::size_t phase_idx) const;
+
+  /**
+   * @brief Return the running action data of a parameter phase
+   *
+   * @param[in] phase_idx Index of the parameter phase
+   */
+  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
+      const std::size_t phase_idx) const;
+
+  /** @brief Return the parameter-phase models, one per phase */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseModel> >&
+  get_paramsModel() const override;
+
+  /** @brief Return the parameter-phase data, one per phase */
+  virtual const std::vector<std::shared_ptr<ParameterPhaseData> >&
+  get_paramsData() const override;
+
+  /** @brief Return the inclusive running-node start of every parameter phase */
+  virtual const std::vector<std::size_t>& get_phase_idxs() const override;
+
+  /** @brief Return the exclusive running-node end of every parameter phase */
+  virtual const std::vector<std::size_t>& get_phase_edxs() const override;
+
+  /** @brief Return true if any phase has active parameter constraints */
+  virtual bool has_parameter_constraints() const override;
 
   /**
    * @brief Print information on the 'ShootingProblem'
@@ -307,14 +389,29 @@ class ShootingProblemTpl {
                           //!< application
   bool is_updated_;
 
+  std::size_t n_phases_;  //!< Number of parameter phases (zero if disabled)
+  std::vector<std::shared_ptr<ParameterPhaseModel> > params_model_;
+  std::vector<std::shared_ptr<ParameterPhaseData> > params_data_;
+  std::vector<std::size_t> phase_start_;
+  std::vector<std::size_t> phase_end_;
+
  private:
   void allocateData();
+
+  static std::shared_ptr<ActionModelAbstract> checkedTerminalModel(
+      std::shared_ptr<ActionModelAbstract> terminal_model);
+
+  static std::vector<std::shared_ptr<ActionModelAbstract> > flattenModelPhases(
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases);
+
+  void initParameterization(
+      const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
+          model_phases);
 };
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/optctrl/shooting.hxx"
 

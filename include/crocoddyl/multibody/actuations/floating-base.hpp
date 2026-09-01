@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -52,6 +52,9 @@ class ActuationModelFloatingBaseTpl
    * @param[in] state  State of a multibody system
    * @param[in] nu     Dimension of joint-torque vector
    */
+  [[deprecated(
+      "Use ActuationModelMultibody(state) for the multibody actuation "
+      "backend.")]]
   explicit ActuationModelFloatingBaseTpl(std::shared_ptr<StateMultibody> state)
       : Base(state,
              state->get_nv() -

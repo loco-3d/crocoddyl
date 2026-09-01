@@ -1,0 +1,129 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/optctrl/observation.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Problem>
+std::vector<std::vector<
+    std::shared_ptr<typename Problem::ObserverModelAbstract> > >
+getObservationRunningPhaseModels(const Problem& problem) {
+  std::vector<std::vector<
+      std::shared_ptr<typename Problem::ObserverModelAbstract> > > phases;
+  phases.reserve(problem.get_n_phases());
+  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
+    phases.push_back(problem.get_runningPhaseModels(i));
+  }
+  return phases;
+}
+
+template <typename Problem>
+std::vector<std::vector<
+    std::shared_ptr<typename Problem::ActionDataAbstract> > >
+getObservationRunningPhaseDatas(const Problem& problem) {
+  std::vector<
+      std::vector<std::shared_ptr<typename Problem::ActionDataAbstract> > >
+      phases;
+  phases.reserve(problem.get_n_phases());
+  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
+    phases.push_back(problem.get_runningPhaseDatas(i));
+  }
+  return phases;
+}
+
+#define CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(Scalar)                 \
+  typedef ObservationProblemTpl<Scalar> Problem;                              \
+  typedef ObserverModelAbstractTpl<Scalar> ObserverModel;                     \
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;                 \
+  typedef typename Problem::VectorXs VectorXs;                                \
+  typedef std::shared_ptr<ObserverModel> ObserverModelPtr;                    \
+  typedef std::shared_ptr<ParameterPhaseModel> ParameterPhaseModelPtr;        \
+  StdVectorPythonVisitor<std::vector<std::vector<ObserverModelPtr> >,         \
+                         true>::expose("StdVec_StdVec_ObserverModel");        \
+  bp::register_ptr_to_python<std::shared_ptr<Problem> >();                    \
+  bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
+      "ObservationProblem",                                                  \
+      "Optimal-estimation problem with measured torques, process noise and " \
+      "optional shared parameters.",                                        \
+      bp::init<VectorXs, std::vector<VectorXs>,                              \
+               std::vector<ObserverModelPtr>, ObserverModelPtr>(             \
+          bp::args("self", "x0", "tauMeas", "runningModels",                \
+                   "terminalModel"),                                         \
+          "Initialize an observation problem without model parameters."))   \
+      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
+               std::vector<ObserverModelPtr>, ObserverModelPtr,              \
+               ParameterPhaseModelPtr>(                                     \
+          bp::args("self", "x0", "tauMeas", "runningModels",                \
+                   "terminalModel", "paramsModel"),                          \
+          "Initialize a single-phase observation problem."))                 \
+      .def(bp::init<VectorXs, std::vector<VectorXs>,                         \
+                    std::vector<std::vector<ObserverModelPtr> >,              \
+                    ObserverModelPtr,                                        \
+                    std::vector<ParameterPhaseModelPtr> >(                    \
+          bp::args("self", "x0", "tauMeas", "modelPhases",                 \
+                   "terminalModel", "paramsModel"),                          \
+          "Initialize a multi-phase observation problem."))                  \
+      .def("calc", &Problem::calc, bp::args("self", "xs", "us"),            \
+           "Compute the total observation cost along a trajectory.")         \
+      .def("calcDiff", &Problem::calcDiff, bp::args("self", "xs", "us"),    \
+           "Compute observation derivatives along a trajectory.")            \
+      .def("rollout", &Problem::rollout_us, bp::args("self", "us"),          \
+           "Roll out the observer models from the initial state.")            \
+      .def("update_p", &Problem::update_p,                                   \
+           (bp::arg("self"), bp::arg("p"), bp::arg("phase_idx") = 0),        \
+           "Update one phase parameter vector.")                             \
+      .def("update_tau", &Problem::update_tau,                               \
+           bp::args("self", "t", "tauMeas"),                                \
+           "Update measured torque at one running node.")                    \
+      .def("update_us", &Problem::update_us,                                 \
+           bp::args("self", "tauMeas"),                                      \
+           "Update measured torques at all running nodes.")                  \
+      .add_property(                                                          \
+          "runningPhaseModels",                                              \
+          bp::make_function(&getObservationRunningPhaseModels<Problem>,       \
+                            bp::return_value_policy<bp::return_by_value>()),  \
+          "running observer models grouped by parameter phase")             \
+      .add_property(                                                          \
+          "runningPhaseDatas",                                               \
+          bp::make_function(&getObservationRunningPhaseDatas<Problem>,        \
+                            bp::return_value_policy<bp::return_by_value>()),  \
+          "running observer data grouped by parameter phase")               \
+      .add_property("n_phases", bp::make_function(&Problem::get_n_phases),   \
+                    "number of phases")                                      \
+      .add_property(                                                          \
+          "phase_idxs",                                                       \
+          bp::make_function(                                                  \
+              &Problem::get_phase_idxs,                                       \
+              bp::return_value_policy<bp::copy_const_reference>()),           \
+          "inclusive phase start indices")                                   \
+      .add_property(                                                          \
+          "phase_edxs",                                                       \
+          bp::make_function(                                                  \
+              &Problem::get_phase_edxs,                                       \
+              bp::return_value_policy<bp::copy_const_reference>()),           \
+          "exclusive phase end indices")                                     \
+      .def(CopyableVisitor<Problem>());
+
+void exposeObservationProblem() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

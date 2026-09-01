@@ -1,0 +1,180 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/observer-base.hpp"
+
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ObserverModelAbstractVisitor
+    : public bp::def_visitor<ObserverModelAbstractVisitor<Model>> {
+  typedef typename Model::ObserverModel ObserverModel;
+  typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::VectorXs VectorXs;
+  BOOST_PYTHON_FUNCTION_OVERLOADS(ObserverModel_quasiStatic_wraps,
+                                  quasiStatic, 3, 5)
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("set_params", &ObserverModel::set_params,
+           &Model::default_set_params,
+           bp::args("self", "data", "params"),
+           "Wire a parameter manager into the observer model and data.")
+        .def("update_p", bp::pure_virtual(&ObserverModel::update_p),
+           bp::args("self", "data", "p"),
+           "Update the observer parameters.\n\n"
+           "This observer-specific entry point updates the model parameters "
+           "used by calc() and calcDiff().\n"
+           ":param data: observer action data\n"
+           ":param p: parameter vector")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ObserverModel::*)()>(
+                 &ObserverModel::createData),
+             &Model::default_createData,
+             bp::args("self"),
+             "Create the observer data.\n\n"
+             "Each observer model has its own data that needs to be "
+             "allocated. This function returns the allocated data for a "
+             "predefined observer model.\n"
+             ":return observer data")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ObserverModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &ObserverModel::createData),
+             bp::args("self", "params_data"),
+             "Create the observer data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
+        .def("quasiStatic", &quasiStatic,
+             ObserverModel_quasiStatic_wraps(
+                 bp::args("self", "data", "x", "maxiter", "tol"),
+                 "Compute the quasi-static observer process noise.\n\n"
+                 ":param data: observer data\n"
+                 ":param x: state vector\n"
+                 ":param maxiter: maximum number of iterations\n"
+                 ":param tol: stopping tolerance (default 1e-9)\n"
+                 ":return u: quasi-static observer control"))
+        .def("quasiStatic", &Model::quasiStatic, &Model::default_quasiStatic,
+             bp::args("self", "data", "u", "x", "maxiter", "tol"))
+        .def("get_ng", &Model::get_ng, &Model::default_get_ng,
+             "Return the number of inequality constraints.")
+        .def("get_nh", &Model::get_nh, &Model::default_get_nh,
+             "Return the number of equality constraints.")
+        .def("get_ng_T", &Model::get_ng_T, &Model::default_get_ng_T,
+             "Return the number of inequality terminal constraints.")
+        .def("get_nh_T", &Model::get_nh_T, &Model::default_get_nh_T,
+             "Return the number of equality terminal constraints.")
+        .def("update_tau", &ObserverModel::update_tau,
+             &Model::default_update_tau,
+             bp::args("self", "tau_meas"),
+             "Update the measured torques.\n\n"
+             ":param tau_meas: measured torque vector")
+        .add_property("ntau", bp::make_function(&ObserverModel::get_ntau),
+                      "dimension of measured torque vector")
+        .add_property(
+            "tau_meas",
+            bp::make_function(&ObserverModel::get_tau_meas,
+                              bp::return_internal_reference<>()),
+            "measured torques");
+  }
+
+  static VectorXs quasiStatic(
+      ObserverModel& self, const std::shared_ptr<ActionData>& data,
+      const VectorXs& x, const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) {
+    return self.quasiStatic_x(data, x, maxiter, tol);
+  }
+};
+
+#define CROCODDYL_OBSERVER_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)            \
+  typedef ObserverModelAbstractTpl<Scalar> Model;                            \
+  typedef ObserverModelAbstractTpl_wrap<Scalar> Model_wrap;                  \
+  typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;                 \
+  typedef StateAbstractTpl<Scalar> State;                                    \
+  typedef std::shared_ptr<Model> ObserverModelPtr;                           \
+  StdVectorPythonVisitor<std::vector<ObserverModelPtr>, true>::expose(       \
+      "StdVec_ObserverModel");                                               \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+  bp::class_<Model_wrap, bp::bases<ActionModelAbstract>, boost::noncopyable>( \
+      "ObserverModelAbstract",                                               \
+      "Abstract class for observer models.\n\n"                              \
+      "An observer model is a specialization of an action model used in "    \
+      "optimal estimation problems. It augments the action-model interface " \
+       "with measured torques and an explicit parameter-update entry point. "  \
+       "The calculations are carried out through calc() and calcDiff(), while "\
+       "update_p() and update_tau() inject observer-specific signals.",       \
+      bp::init<std::shared_ptr<State>, std::size_t, std::size_t,             \
+               bp::optional<std::size_t, std::size_t, std::size_t,           \
+                            std::size_t, std::size_t, std::size_t>>(         \
+          bp::args("self", "state", "ntau", "nu", "nr", "ng", "nh", "ng_T", \
+                   "nh_T", "np"),                                            \
+          "Initialize the observer model.\n\n"                               \
+          ":param state: state description\n"                                \
+          ":param ntau: dimension of measured torque vector\n"               \
+          ":param nu: dimension of control vector\n"                         \
+          ":param nr: dimension of cost-residual vector (default 0)\n"       \
+          ":param ng: number of inequality constraints (default 0)\n"        \
+          ":param nh: number of equality constraints (default 0)\n"          \
+          ":param ng_T: number of terminal inequality constraints "          \
+          "(default 0)\n"                                                    \
+          ":param nh_T: number of terminal equality constraints (default 0)\n" \
+          ":param np: dimension of parameter vector (default 0)"))           \
+      .def(ObserverModelAbstractVisitor<Model_wrap>())                       \
+      .def(PrintableVisitor<Model_wrap>());
+
+#define CROCODDYL_OBSERVER_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)             \
+  typedef ObserverDataAbstractTpl<Scalar> Data;                              \
+  typedef ObserverModelAbstractTpl<Scalar> Model;                            \
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                  \
+  typedef std::shared_ptr<Data> ObserverDataPtr;                             \
+  StdVectorPythonVisitor<std::vector<ObserverDataPtr>, true>::expose(        \
+      "StdVec_ObserverData");                                                \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
+  bp::class_<Data, bp::bases<ActionDataAbstract>, boost::noncopyable>(       \
+      "ObserverDataAbstract",                                                \
+      "Abstract class for observer data.\n\n"                                \
+       "Observer data extends ActionDataAbstract with integrated "            \
+       "dissipative-energy storage.",                                         \
+      bp::init<Model*>(                                                      \
+          bp::args("self", "model"),                                         \
+          "Create common data shared between observer models.\n\n"           \
+          "The observer data uses the model to process observer terms "       \
+          "through a unified action-data interface.\n"                       \
+          ":param model: observer model"))                                   \
+      .add_property(                                                         \
+          "dissipative_E",                                                   \
+          bp::make_getter(&Data::dissipative_E,                              \
+                          bp::return_internal_reference<>()),                 \
+          bp::make_setter(&Data::dissipative_E),                             \
+          "integrated dissipative energy")                                   \
+      .add_property(                                                         \
+          "Ex", bp::make_getter(&Data::Ex, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Ex),                                        \
+          "dissipative-energy Jacobian with respect to state")               \
+      .add_property(                                                         \
+          "Eu", bp::make_getter(&Data::Eu, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Eu),                                        \
+          "dissipative-energy Jacobian with respect to control")             \
+      .add_property(                                                         \
+          "Ep", bp::make_getter(&Data::Ep, bp::return_internal_reference<>()), \
+          bp::make_setter(&Data::Ep),                                        \
+          "dissipative-energy Jacobian with respect to parameters")          \
+      .def(CopyableVisitor<Data>());
+
+void exposeObserverAbstract() {
+  CROCODDYL_OBSERVER_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_OBSERVER_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

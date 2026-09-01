@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -21,6 +21,7 @@ struct ActionModelAbstractVisitor
     : public bp::def_visitor<ActionModelAbstractVisitor<Model>> {
   typedef typename Model::ActionModel ActionModel;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
   typedef typename Model::VectorXs VectorXs;
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ActionModel_quasiStatic_wraps,
                                          ActionModel::quasiStatic_x, 2, 4)
@@ -69,13 +70,29 @@ struct ActionModelAbstractVisitor
              "an optimal control problem.\n"
              ":param data: action data\n"
              ":param x: state point (dim. state.nx)")
-        .def("createData", &Model::createData, &Model::default_createData,
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ActionModel::*)()>(
+                 &ActionModel::createData),
+             &Model::default_createData,
              bp::args("self"),
              "Create the action data.\n\n"
              "Each action model (AM) has its own data that needs to be "
              "allocated.\n"
              "This function returns the allocated data for a predefined AM.\n"
              ":return AM data.")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (ActionModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &ActionModel::createData),
+             bp::args("self", "params_data"),
+             "Create the action data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
+        .def("set_params", &ActionModel::set_params,
+             &Model::default_set_params,
+             bp::args("self", "data", "params"),
+             "Wire a parameter manager into the action model and data.")
+        .def("update_p", &update_p, bp::args("self", "data", "p"),
+             "Update the active parameter vector in the action data.")
         .def("quasiStatic", &Model::quasiStatic_x,
              ActionModel_quasiStatic_wraps(
                  bp::args("self", "data", "x", "maxiter", "tol"),
@@ -95,6 +112,10 @@ struct ActionModelAbstractVisitor
             "dimension of control vector")
         .add_property("nr", bp::make_function(&Model::get_nr),
                       "dimension of cost-residual vector")
+        .add_property(
+            "np", bp::make_function(&Model::get_np),
+            bp::make_setter(&Model::np_, bp::return_internal_reference<>()),
+            "dimension of parameter vector")
         .add_property(
             "ng", bp::make_function(&Model::get_ng),
             bp::make_setter(
@@ -158,6 +179,12 @@ struct ActionModelAbstractVisitor
                       bp::make_function(&Model::get_has_control_limits),
                       "indicates whether problem has finite control limits");
   }
+
+  static void update_p(ActionModel& self,
+                       const std::shared_ptr<ActionData>& data,
+                       const Eigen::Ref<const VectorXs>& p) {
+    self.update_p(data, p);
+  }
 };
 
 template <typename Data>
@@ -186,11 +213,19 @@ struct ActionDataAbstractVisitor
             bp::make_setter(&Data::Fu),
             "Jacobian of the dynamics w.r.t. the control")
         .add_property(
+            "Fp", bp::make_getter(&Data::Fp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fp),
+            "Jacobian of the dynamics w.r.t. the parameters")
+        .add_property(
             "Lx", bp::make_getter(&Data::Lx, bp::return_internal_reference<>()),
             bp::make_setter(&Data::Lx), "Jacobian of the cost w.r.t. the state")
         .add_property(
             "Lu", bp::make_getter(&Data::Lu, bp::return_internal_reference<>()),
             bp::make_setter(&Data::Lu), "Jacobian of the cost")
+        .add_property(
+            "Lp", bp::make_getter(&Data::Lp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lp),
+            "Jacobian of the cost w.r.t. the parameters")
         .add_property(
             "Lxx",
             bp::make_getter(&Data::Lxx, bp::return_internal_reference<>()),
@@ -206,6 +241,21 @@ struct ActionDataAbstractVisitor
             bp::make_setter(&Data::Luu),
             "Hessian of the cost w.r.t. the control")
         .add_property(
+            "Lpp",
+            bp::make_getter(&Data::Lpp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpp),
+            "Hessian of the cost w.r.t. the parameters")
+        .add_property(
+            "Lpx",
+            bp::make_getter(&Data::Lpx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpx),
+            "Hessian of the cost w.r.t. the parameters and state")
+        .add_property(
+            "Lpu",
+            bp::make_getter(&Data::Lpu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpu),
+            "Hessian of the cost w.r.t. the parameters and control")
+        .add_property(
             "g", bp::make_getter(&Data::g, bp::return_internal_reference<>()),
             bp::make_setter(&Data::g), "inequality constraint values")
         .add_property(
@@ -217,6 +267,10 @@ struct ActionDataAbstractVisitor
             bp::make_setter(&Data::Gu),
             "Jacobian of the inequality constraint w.r.t. the control")
         .add_property(
+            "Gp", bp::make_getter(&Data::Gp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gp),
+            "Jacobian of the inequality constraint w.r.t. the parameters")
+        .add_property(
             "h", bp::make_getter(&Data::h, bp::return_internal_reference<>()),
             bp::make_setter(&Data::h), "equality constraint values")
         .add_property(
@@ -226,7 +280,11 @@ struct ActionDataAbstractVisitor
         .add_property(
             "Hu", bp::make_getter(&Data::Hu, bp::return_internal_reference<>()),
             bp::make_setter(&Data::Hu),
-            "Jacobian of the equality constraint w.r.t. the control");
+            "Jacobian of the equality constraint w.r.t. the control")
+        .add_property(
+            "Hp", bp::make_getter(&Data::Hp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hp),
+            "Jacobian of the equality constraint w.r.t. the parameters");
   }
 };
 
@@ -249,8 +307,9 @@ struct ActionDataAbstractVisitor
       "respectively.",                                                         \
       bp::init<std::shared_ptr<State>, std::size_t,                            \
                bp::optional<std::size_t, std::size_t, std::size_t,             \
-                            std::size_t, std::size_t>>(                        \
-          bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T"),   \
+                            std::size_t, std::size_t, std::size_t>>(           \
+          bp::args("self", "state", "nu", "nr", "ng", "nh", "ng_T", "nh_T",   \
+                   "np"),                                                       \
           "Initialize the action model.\n\n"                                   \
           "We can also describe autonomous systems by setting nu = 0.\n"       \
           ":param state: state description,\n"                                 \
@@ -260,7 +319,8 @@ struct ActionDataAbstractVisitor
           ":param nh: number of equality constraints (default 0)\n"            \
           ":param ng_T: number of inequality terminal constraints (default "   \
           "0)\n"                                                               \
-          ":param nh_T: number of equality terminal constraints (default 0)")) \
+          ":param nh_T: number of equality terminal constraints (default 0)\n" \
+          ":param np: dimension of the parameter vector (default 0)"))        \
       .def(ActionModelAbstractVisitor<Model_wrap>())                           \
       .def(PrintableVisitor<Model_wrap>())                                     \
       .def(CopyableVisitor<Model_wrap>());

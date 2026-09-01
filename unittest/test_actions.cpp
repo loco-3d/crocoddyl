@@ -11,9 +11,10 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "factory/action.hpp"
 #include "factory/control.hpp"
-#include "factory/diff_action.hpp"
+#include "factory/dynamics.hpp"
 #include "factory/integrator.hpp"
 #include "unittest_common.hpp"
 
@@ -21,6 +22,349 @@ using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
+
+template <typename _Scalar>
+class ActionModelParameterProbeTpl
+    : public crocoddyl::ActionModelAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ActionModelBase,
+                         ActionModelParameterProbeTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ActionModelAbstractTpl<Scalar> Base;
+  typedef crocoddyl::ActionDataAbstractTpl<Scalar> Data;
+  typedef typename Base::VectorXs VectorXs;
+  using Base::ng_;
+  using Base::ng_T_;
+  using Base::nh_;
+  using Base::nh_T_;
+  using Base::np_;
+
+  ActionModelParameterProbeTpl()
+      : Base(std::make_shared<crocoddyl::StateVectorTpl<Scalar>>(4), 2, 3, 0, 0,
+             0, 0) {}
+
+  ActionModelParameterProbeTpl(const std::size_t np, const std::size_t ng = 0,
+                               const std::size_t nh = 0,
+                               const std::size_t ng_T = 0,
+                               const std::size_t nh_T = 0)
+      : Base(std::make_shared<crocoddyl::StateVectorTpl<Scalar>>(4), 2, 3, ng,
+             nh, ng_T, nh_T, np) {}
+
+  void calc(const std::shared_ptr<Data>& data,
+            const Eigen::Ref<const VectorXs>& x,
+            const Eigen::Ref<const VectorXs>&) override {
+    data->xnext = x;
+    data->cost = Scalar(0.);
+  }
+
+  void calcDiff(const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&) override {}
+
+  void set_dimensions(const std::size_t np, const std::size_t ng,
+                      const std::size_t nh, const std::size_t ng_T,
+                      const std::size_t nh_T) {
+    np_ = np;
+    ng_ = ng;
+    nh_ = nh;
+    ng_T_ = ng_T;
+    nh_T_ = nh_T;
+  }
+
+  template <typename NewScalar>
+  ActionModelParameterProbeTpl<NewScalar> cast() const {
+    return ActionModelParameterProbeTpl<NewScalar>(
+        this->get_np(), this->get_ng(), this->get_nh(), this->get_ng_T(),
+        this->get_nh_T());
+  }
+};
+
+typedef ActionModelParameterProbeTpl<double> ActionModelParameterProbe;
+
+std::shared_ptr<crocoddyl::ActionModelAbstract> create_dynamics_action_model(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
+  const DynamicsModelFactoryResult components =
+      DynamicsModelFactory().create(dynamics_type);
+  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>
+      control =
+          ControlFactory().create(control_type, components.dynamics->get_nu());
+  return IntegratorFactory().create(integrator_type, components.dynamics,
+                                    components.costs, components.constraints,
+                                    control);
+}
+
+template <typename Scalar>
+void check_action_parameter_dimensions(
+    const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<Scalar>>& model,
+    const std::size_t np, const std::size_t ng, const std::size_t nh) {
+  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar>> data =
+      model->createData();
+  const std::size_t ndx = model->get_state()->get_ndx();
+
+  BOOST_CHECK_EQUAL(model->get_np(), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Fp.rows()), ndx);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Fp.cols()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lp.size()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpp.rows()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpp.cols()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpx.rows()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpx.cols()), ndx);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpu.rows()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Lpu.cols()),
+                    model->get_nu());
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Gp.rows()), ng);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Gp.cols()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Hp.rows()), nh);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(data->Hp.cols()), np);
+}
+
+void check_action_data_zero(
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data) {
+  BOOST_CHECK_SMALL(data->cost, 0.);
+  BOOST_CHECK(data->xnext.isZero());
+  BOOST_CHECK(data->Fx.isZero());
+  BOOST_CHECK(data->Fu.isZero());
+  BOOST_CHECK(data->Fp.isZero());
+  BOOST_CHECK(data->r.isZero());
+  BOOST_CHECK(data->Lx.isZero());
+  BOOST_CHECK(data->Lu.isZero());
+  BOOST_CHECK(data->Lp.isZero());
+  BOOST_CHECK(data->Lxx.isZero());
+  BOOST_CHECK(data->Lxu.isZero());
+  BOOST_CHECK(data->Luu.isZero());
+  BOOST_CHECK(data->Lpp.isZero());
+  BOOST_CHECK(data->Lpx.isZero());
+  BOOST_CHECK(data->Lpu.isZero());
+  BOOST_CHECK(data->g.isZero());
+  BOOST_CHECK(data->Gx.isZero());
+  BOOST_CHECK(data->Gu.isZero());
+  BOOST_CHECK(data->Gp.isZero());
+  BOOST_CHECK(data->h.isZero());
+  BOOST_CHECK(data->Hx.isZero());
+  BOOST_CHECK(data->Hu.isZero());
+  BOOST_CHECK(data->Hp.isZero());
+}
+
+void set_action_data_ones(
+    const std::shared_ptr<crocoddyl::ActionDataAbstract>& data) {
+  data->cost = 1.;
+  data->xnext.setOnes();
+  data->Fx.setOnes();
+  data->Fu.setOnes();
+  data->Fp.setOnes();
+  data->r.setOnes();
+  data->Lx.setOnes();
+  data->Lu.setOnes();
+  data->Lp.setOnes();
+  data->Lxx.setOnes();
+  data->Lxu.setOnes();
+  data->Luu.setOnes();
+  data->Lpp.setOnes();
+  data->Lpx.setOnes();
+  data->Lpu.setOnes();
+  data->g.setOnes();
+  data->Gx.setOnes();
+  data->Gu.setOnes();
+  data->Gp.setOnes();
+  data->h.setOnes();
+  data->Hx.setOnes();
+  data->Hu.setOnes();
+  data->Hp.setOnes();
+}
+
+void test_action_base_np_zero_compatibility() {
+  ActionModelParameterProbe model;
+  ActionModelParameterProbeTpl<float> float_model;
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model.createData();
+  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>> float_data =
+      float_model.createData();
+
+  BOOST_CHECK_EQUAL(model.get_np(), std::size_t(0));
+  BOOST_CHECK_EQUAL(data->Fp.rows(), model.get_state()->get_ndx());
+  BOOST_CHECK_EQUAL(data->Fp.cols(), 0);
+  BOOST_CHECK_EQUAL(data->Lp.size(), 0);
+  BOOST_CHECK_EQUAL(data->Lpp.rows(), 0);
+  BOOST_CHECK_EQUAL(data->Lpp.cols(), 0);
+  BOOST_CHECK_EQUAL(data->Lpx.rows(), 0);
+  BOOST_CHECK_EQUAL(data->Lpu.rows(), 0);
+  BOOST_CHECK_EQUAL(data->Gp.rows(), 0);
+  BOOST_CHECK_EQUAL(data->Gp.cols(), 0);
+  BOOST_CHECK_EQUAL(data->Hp.rows(), 0);
+  BOOST_CHECK_EQUAL(data->Hp.cols(), 0);
+  check_action_data_zero(data);
+
+  BOOST_CHECK_EQUAL(float_model.get_np(), std::size_t(0));
+  BOOST_CHECK_EQUAL(float_data->Fp.rows(), float_model.get_state()->get_ndx());
+  BOOST_CHECK_EQUAL(float_data->Fp.cols(), 0);
+  BOOST_CHECK_EQUAL(float_data->Lp.size(), 0);
+  BOOST_CHECK_EQUAL(float_data->Lpp.rows(), 0);
+  BOOST_CHECK_EQUAL(float_data->Lpp.cols(), 0);
+  BOOST_CHECK_EQUAL(float_data->Lpx.rows(), 0);
+  BOOST_CHECK_EQUAL(float_data->Lpu.rows(), 0);
+  BOOST_CHECK_EQUAL(float_data->Gp.rows(), 0);
+  BOOST_CHECK_EQUAL(float_data->Gp.cols(), 0);
+  BOOST_CHECK_EQUAL(float_data->Hp.rows(), 0);
+  BOOST_CHECK_EQUAL(float_data->Hp.cols(), 0);
+}
+
+void test_action_base_parameter_dimensions() {
+  const std::size_t np = 3;
+  const std::size_t ng = 2;
+  const std::size_t nh = 1;
+  const std::size_t ng_T = 5;
+  const std::size_t nh_T = 4;
+  ActionModelParameterProbe model(np, ng, nh, ng_T, nh_T);
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model.createData();
+  const std::size_t ndx = model.get_state()->get_ndx();
+
+  BOOST_CHECK_EQUAL(model.get_np(), np);
+  BOOST_CHECK_EQUAL(data->Fp.rows(), ndx);
+  BOOST_CHECK_EQUAL(data->Fp.cols(), np);
+  BOOST_CHECK_EQUAL(data->Lp.size(), np);
+  BOOST_CHECK_EQUAL(data->Lpp.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpp.cols(), np);
+  BOOST_CHECK_EQUAL(data->Lpx.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpx.cols(), ndx);
+  BOOST_CHECK_EQUAL(data->Lpu.rows(), np);
+  BOOST_CHECK_EQUAL(data->Lpu.cols(), model.get_nu());
+  BOOST_CHECK_EQUAL(data->g.size(), ng_T);
+  BOOST_CHECK_EQUAL(data->Gp.rows(), ng);
+  BOOST_CHECK_EQUAL(data->Gp.cols(), np);
+  BOOST_CHECK_EQUAL(data->h.size(), nh_T);
+  BOOST_CHECK_EQUAL(data->Hp.rows(), nh);
+  BOOST_CHECK_EQUAL(data->Hp.cols(), np);
+  check_action_data_zero(data);
+
+  data->resize(&model, false);
+  BOOST_CHECK_EQUAL(data->g.size(), ng_T);
+  BOOST_CHECK_EQUAL(data->Gp.rows(), ng_T);
+  BOOST_CHECK_EQUAL(data->Gp.cols(), np);
+  BOOST_CHECK_EQUAL(data->h.size(), nh_T);
+  BOOST_CHECK_EQUAL(data->Hp.rows(), nh_T);
+  BOOST_CHECK_EQUAL(data->Hp.cols(), np);
+}
+
+void test_action_base_resize_and_set_zero() {
+  ActionModelParameterProbe model(2, 2, 1, 3, 2);
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model.createData();
+  set_action_data_ones(data);
+
+  model.set_dimensions(4, 3, 2, 5, 4);
+  data->resize(&model);
+  BOOST_CHECK_EQUAL(data->Fp.cols(), 4);
+  BOOST_CHECK_EQUAL(data->Lp.size(), 4);
+  BOOST_CHECK_EQUAL(data->Lpp.rows(), 4);
+  BOOST_CHECK_EQUAL(data->Lpx.rows(), 4);
+  BOOST_CHECK_EQUAL(data->Lpu.rows(), 4);
+  BOOST_CHECK_EQUAL(data->Gp.rows(), 3);
+  BOOST_CHECK_EQUAL(data->Gp.cols(), 4);
+  BOOST_CHECK_EQUAL(data->Hp.rows(), 2);
+  BOOST_CHECK_EQUAL(data->Hp.cols(), 4);
+  BOOST_CHECK(data->Fp.leftCols(2).isOnes());
+  BOOST_CHECK(data->Lp.head(2).isOnes());
+  BOOST_CHECK(data->Lpp.topLeftCorner(2, 2).isOnes());
+  BOOST_CHECK(data->Gp.topLeftCorner(2, 2).isOnes());
+  BOOST_CHECK(data->Hp.topLeftCorner(1, 2).isOnes());
+
+  data->setZero();
+  check_action_data_zero(data);
+  set_action_data_ones(data);
+  data->setZero();
+  data->setZero();
+  check_action_data_zero(data);
+}
+
+void test_action_base_same_size_no_allocation() {
+  ActionModelParameterProbe model(3, 2, 1, 2, 1);
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model.createData();
+  const double* const xnext_ptr = data->xnext.data();
+  const double* const Fx_ptr = data->Fx.data();
+  const double* const Fp_ptr = data->Fp.data();
+  const double* const Lpp_ptr = data->Lpp.data();
+  const double* const Gp_ptr = data->Gp.data();
+  const double* const Hp_ptr = data->Hp.data();
+
+  const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
+  Eigen::internal::set_is_malloc_allowed(false);
+  try {
+    for (std::size_t i = 0; i < 100; ++i) {
+      data->resize(&model);
+      data->setZero();
+    }
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+  } catch (...) {
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+    throw;
+  }
+
+  BOOST_CHECK_EQUAL(data->xnext.data(), xnext_ptr);
+  BOOST_CHECK_EQUAL(data->Fx.data(), Fx_ptr);
+  BOOST_CHECK_EQUAL(data->Fp.data(), Fp_ptr);
+  BOOST_CHECK_EQUAL(data->Lpp.data(), Lpp_ptr);
+  BOOST_CHECK_EQUAL(data->Gp.data(), Gp_ptr);
+  BOOST_CHECK_EQUAL(data->Hp.data(), Hp_ptr);
+}
+
+void test_action_base_hooks_copy_and_create_data() {
+  ActionModelParameterProbe model(3, 2, 1, 0, 0);
+  ActionModelParameterProbe copied(model);
+  BOOST_CHECK_EQUAL(copied.get_np(), model.get_np());
+
+  std::shared_ptr<crocoddyl::ParameterDataManager> params_data;
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model.createData(params_data);
+  BOOST_CHECK(data != nullptr);
+  BOOST_CHECK_EQUAL(data->Fp.cols(), model.get_np());
+  set_action_data_ones(data);
+  crocoddyl::ActionDataAbstract copied_data(*data);
+  BOOST_CHECK(copied_data.Fp.isApprox(data->Fp));
+  BOOST_CHECK(copied_data.Lp.isApprox(data->Lp));
+  BOOST_CHECK(copied_data.Lpp.isApprox(data->Lpp));
+  BOOST_CHECK(copied_data.Lpx.isApprox(data->Lpx));
+  BOOST_CHECK(copied_data.Lpu.isApprox(data->Lpu));
+  BOOST_CHECK(copied_data.Gp.isApprox(data->Gp));
+  BOOST_CHECK(copied_data.Hp.isApprox(data->Hp));
+
+  std::shared_ptr<crocoddyl::ParameterManager> params;
+  BOOST_CHECK_NO_THROW(model.set_params(data, params));
+  BOOST_CHECK_THROW(model.update_p(data, Eigen::VectorXd::Zero(model.get_np())),
+                    crocoddyl::Exception);
+}
+
+void test_action_base_nonzero_np_scalar_casts() {
+  const std::size_t np = 3;
+  const std::size_t ng = 2;
+  const std::size_t nh = 1;
+  const std::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      std::make_shared<ActionModelParameterProbe>(np, ng, nh, 5, 4);
+
+  check_action_parameter_dimensions(model, np, ng, nh);
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>> float_model =
+      model->cast<float>();
+  check_action_parameter_dimensions(float_model, np, ng, nh);
+
+#ifdef CROCODDYL_WITH_CODEGEN
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADFloat64>>
+      ad_double_from_double = model->cast<ADFloat64>();
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADFloat32>>
+      ad_float_from_double = model->cast<ADFloat32>();
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADFloat64>>
+      ad_double_from_float = float_model->cast<ADFloat64>();
+  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<ADFloat32>>
+      ad_float_from_float = float_model->cast<ADFloat32>();
+  check_action_parameter_dimensions(ad_double_from_double, np, ng, nh);
+  check_action_parameter_dimensions(ad_float_from_double, np, ng, nh);
+  check_action_parameter_dimensions(ad_double_from_float, np, ng, nh);
+  check_action_parameter_dimensions(ad_float_from_float, np, ng, nh);
+#endif
+}
 
 void test_check_data(
     const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
@@ -182,22 +526,11 @@ void test_check_action_data(ActionModelTypes::Type action_model_type) {
   test_check_data(model);
 }
 
-void test_check_integrated_action_data(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_check_data(model);
+void test_check_action_data(const DynamicsModelTypes::Type dynamics_type,
+                            const IntegratorTypes::Type integrator_type,
+                            const ControlTypes::Type control_type) {
+  test_check_data(create_dynamics_action_model(dynamics_type, integrator_type,
+                                               control_type));
 }
 
 void test_calc_action_model(ActionModelTypes::Type action_model_type) {
@@ -208,22 +541,11 @@ void test_calc_action_model(ActionModelTypes::Type action_model_type) {
   test_calc(model);
 }
 
-void test_calc_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_calc(model);
+void test_calc_action_model(const DynamicsModelTypes::Type dynamics_type,
+                            const IntegratorTypes::Type integrator_type,
+                            const ControlTypes::Type control_type) {
+  test_calc(create_dynamics_action_model(dynamics_type, integrator_type,
+                                         control_type));
 }
 
 void test_partial_derivatives_action_model(
@@ -235,87 +557,12 @@ void test_partial_derivatives_action_model(
   test_partial_derivatives_against_numdiff(model);
 }
 
-void test_partial_derivatives_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl =
-      factory_ctrl.create(control_type, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model =
-      factory_int.create(integrator_type, dam, ctrl);
-  test_partial_derivatives_against_numdiff(model);
-}
-
-/**
- * Test two action models that should provide the same result when calling calc
- * if the first part of the control input u of model2 is equal to the control
- * input of model1. A typical case would be an integrated action model using an
- * Euler integration scheme, which can be coupled either with a constant control
- * parametrization (model1) or a linear control parametrization (model2), and
- * should thus provide the same result as long as the control input at the
- * beginning of the step has the same value.
- */
-void test_calc_against_calc(
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model1,
-    const std::shared_ptr<crocoddyl::ActionModelAbstract>& model2) {
-  // create the corresponding data object and set the cost to nan
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data1 =
-      model1->createData();
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data2 =
-      model2->createData();
-
-  // Generating random values for the state and control
-  const Eigen::VectorXd x = model1->get_state()->rand();
-  Eigen::VectorXd u1 = Eigen::VectorXd::Random(model1->get_nu());
-  Eigen::VectorXd u2 = Eigen::VectorXd::Random(model2->get_nu());
-  // copy u1 to the first part of u2 (assuming u2 is larger than u1)
-  u2.head(u1.size()) = u1;
-
-  // Computing the action
-  model1->calc(data1, x, u1);
-  model2->calc(data2, x, u2);
-
-  // Checking the state and cost integration
-  BOOST_CHECK(isCloseAbsRel(data1->xnext, data2->xnext, 1e-9, 1e-9));
-  BOOST_CHECK(abs(data1->cost - data2->cost) < 1e-9);
-}
-
-void register_test_calc_integrated_action_model(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type1,
-    ControlTypes::Type control_type2) {
-  // create the differential action model
-  DifferentialActionModelFactory factory_dam;
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& dam =
-      factory_dam.create(dam_type);
-  // create the control discretization
-  ControlFactory factory_ctrl;
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl1 =
-      factory_ctrl.create(control_type1, dam->get_nu());
-  const std::shared_ptr<crocoddyl::ControlParametrizationModelAbstract>& ctrl2 =
-      factory_ctrl.create(control_type2, dam->get_nu());
-  // create the integrator
-  IntegratorFactory factory_int;
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model1 =
-      factory_int.create(integrator_type, dam, ctrl1);
-  const std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>& model2 =
-      factory_int.create(integrator_type, dam, ctrl2);
-
-  boost::test_tools::output_test_stream test_name;
-  test_name << "test_calc_integrated_action_model_" << dam_type << "_"
-            << integrator_type << "_" << control_type1 << "_" << control_type2;
-  std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_against_calc, model1, model2)));
-  framework::master_test_suite().add(ts);
+void test_partial_derivatives_action_model(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
+  test_partial_derivatives_against_numdiff(create_dynamics_action_model(
+      dynamics_type, integrator_type, control_type));
 }
 
 //----------------------------------------------------------------------------//
@@ -326,78 +573,85 @@ void register_action_model_unit_tests(
   test_name << "test_" << action_model_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(ActionModelTypes::Type)>(&test_check_action_data),
+      action_model_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(ActionModelTypes::Type)>(&test_calc_action_model),
+      action_model_type)));
   ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_check_action_data, action_model_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_action_model, action_model_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_action_model, action_model_type)));
+      BOOST_TEST_CASE(boost::bind(static_cast<void (*)(ActionModelTypes::Type)>(
+                                      &test_partial_derivatives_action_model),
+                                  action_model_type)));
   framework::master_test_suite().add(ts);
 }
 
-void register_integrated_action_model_unit_tests(
-    DifferentialActionModelTypes::Type dam_type,
-    IntegratorTypes::Type integrator_type, ControlTypes::Type control_type) {
+void register_action_model_unit_tests(
+    const DynamicsModelTypes::Type dynamics_type,
+    const IntegratorTypes::Type integrator_type,
+    const ControlTypes::Type control_type) {
   boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << dam_type << "_" << integrator_type << "_"
+  test_name << "test_" << dynamics_type << "_" << integrator_type << "_"
             << control_type;
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_check_integrated_action_data, dam_type,
-                                  integrator_type, control_type)));
-  ts->add(
-      BOOST_TEST_CASE(boost::bind(&test_calc_integrated_action_model, dam_type,
-                                  integrator_type, control_type)));
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_integrated_action_model, dam_type,
-                  integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(&test_check_action_data),
+      dynamics_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(&test_calc_action_model),
+      dynamics_type, integrator_type, control_type)));
+  ts->add(BOOST_TEST_CASE(boost::bind(
+      static_cast<void (*)(DynamicsModelTypes::Type, IntegratorTypes::Type,
+                           ControlTypes::Type)>(
+          &test_partial_derivatives_action_model),
+      dynamics_type, integrator_type, control_type)));
+  framework::master_test_suite().add(ts);
+}
+
+void register_action_base_parameter_unit_tests() {
+  test_suite* ts = BOOST_TEST_SUITE("test_action_base_parameters");
+  ts->add(BOOST_TEST_CASE(&test_action_base_np_zero_compatibility));
+  ts->add(BOOST_TEST_CASE(&test_action_base_parameter_dimensions));
+  ts->add(BOOST_TEST_CASE(&test_action_base_resize_and_set_zero));
+  ts->add(BOOST_TEST_CASE(&test_action_base_same_size_no_allocation));
+  ts->add(BOOST_TEST_CASE(&test_action_base_hooks_copy_and_create_data));
+  ts->add(BOOST_TEST_CASE(&test_action_base_nonzero_np_scalar_casts));
   framework::master_test_suite().add(ts);
 }
 
 bool init_function() {
+  register_action_base_parameter_unit_tests();
+
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
   }
 
-  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK2,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK3,
-        ControlTypes::PolyTwoRK3);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyZero);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyOne);
-    register_integrated_action_model_unit_tests(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorRK4,
-        ControlTypes::PolyTwoRK4);
+  for (std::vector<DynamicsModelTypes::Type>::const_iterator it =
+           DynamicsModelTypes::all.begin();
+       it != DynamicsModelTypes::all.end(); ++it) {
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorEuler,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK2,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK2,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK3,
+                                     ControlTypes::PolyTwoRK3);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyZero);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyOne);
+    register_action_model_unit_tests(*it, IntegratorTypes::IntegratorRK4,
+                                     ControlTypes::PolyTwoRK4);
   }
 
-  for (size_t i = 0; i < DifferentialActionModelTypes::all.size(); ++i) {
-    register_test_calc_integrated_action_model(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyZero, ControlTypes::PolyOne);
-    register_test_calc_integrated_action_model(
-        DifferentialActionModelTypes::all[i], IntegratorTypes::IntegratorEuler,
-        ControlTypes::PolyOne, ControlTypes::PolyTwoRK4);
-  }
   return true;
 }
 

@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #ifdef CROCODDYL_WITH_CODEGEN
@@ -24,6 +25,8 @@ typedef float Float32;
 #ifdef CROCODDYL_WITH_CODEGEN
 typedef CppAD::cg::CG<Float64> CGFloat64;
 typedef CppAD::AD<CGFloat64> ADFloat64;
+typedef CppAD::cg::CG<Float32> CGFloat32;
+typedef CppAD::AD<CGFloat32> ADFloat32;
 #endif
 
 #if __cplusplus <= 201103L
@@ -42,7 +45,9 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<float>;                                                    \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
-      class_name<ADFloat64>;
+      class_name<ADFloat64>;                                                \
+  extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<ADFloat32>;
 
 #define CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(class_name)                 \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
@@ -50,7 +55,9 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
       class_name<float>;                                                     \
   extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
-      class_name<ADFloat64>;
+      class_name<ADFloat64>;                                                 \
+  extern template struct CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
+      class_name<ADFloat32>;
 
 #define CROCODDYL_DECLARE_FLOATINGPOINT_EXTERN_TEMPLATE_CLASS(class_name)   \
   extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI \
@@ -102,6 +109,8 @@ std::unique_ptr<T> make_unique(Args&&... args) {
       return cloneAsFloat();                                                \
     } else if (typeid(Scalar) == typeid(ADFloat64)) {                       \
       return cloneAsADDouble();                                             \
+    } else if (typeid(Scalar) == typeid(ADFloat32)) {                       \
+      return cloneAsADFloat();                                              \
     } else {                                                                \
       std::cout << "Unsupported casting: casting to double as default"      \
                 << std::endl;                                               \
@@ -111,7 +120,8 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   /* Pure virtual method that derived classes must implement for casting */ \
   virtual std::shared_ptr<base_class> cloneAsDouble() const = 0;            \
   virtual std::shared_ptr<base_class> cloneAsFloat() const = 0;             \
-  virtual std::shared_ptr<base_class> cloneAsADDouble() const = 0;
+  virtual std::shared_ptr<base_class> cloneAsADDouble() const = 0;          \
+  virtual std::shared_ptr<base_class> cloneAsADFloat() const = 0;
 
 /**
  * @brief Macro to declare the code for casting a Crocoddyl class
@@ -136,7 +146,36 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::make_shared<derived_class<float>>(*this);          \
   }                                                                \
   std::shared_ptr<base_class> cloneAsADDouble() const override {   \
+    return cloneAsADDoubleImpl<Scalar>();                          \
+  }                                                                \
+  std::shared_ptr<base_class> cloneAsADFloat() const override {    \
+    return cloneAsADFloatImpl<Scalar>();                           \
+  }                                                                \
+  template <typename T>                                            \
+  typename std::enable_if<!std::is_same<T, ADFloat32>::value,      \
+                          std::shared_ptr<base_class>>::type       \
+  cloneAsADDoubleImpl() const {                                    \
     return std::make_shared<derived_class<ADFloat64>>(*this);      \
+  }                                                                \
+  template <typename T>                                            \
+  typename std::enable_if<std::is_same<T, ADFloat32>::value,       \
+                          std::shared_ptr<base_class>>::type       \
+  cloneAsADDoubleImpl() const {                                    \
+    const derived_class<double> floating(*this);                   \
+    return std::make_shared<derived_class<ADFloat64>>(floating);   \
+  }                                                                \
+  template <typename T>                                            \
+  typename std::enable_if<!std::is_same<T, ADFloat64>::value,      \
+                          std::shared_ptr<base_class>>::type       \
+  cloneAsADFloatImpl() const {                                     \
+    return std::make_shared<derived_class<ADFloat32>>(*this);      \
+  }                                                                \
+  template <typename T>                                            \
+  typename std::enable_if<std::is_same<T, ADFloat64>::value,       \
+                          std::shared_ptr<base_class>>::type       \
+  cloneAsADFloatImpl() const {                                     \
+    const derived_class<float> floating(*this);                    \
+    return std::make_shared<derived_class<ADFloat32>>(floating);   \
   }
 
 #define CROCODDYL_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
@@ -154,6 +193,11 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     std::cout << "Unsupported casting: retuning to double as default"   \
               << std::endl;                                             \
     return cloneAsDouble();                                             \
+  }                                                                     \
+  std::shared_ptr<base_class> cloneAsADFloat() const override {         \
+    std::cout << "Unsupported casting: retuning to double as default"   \
+              << std::endl;                                             \
+    return cloneAsDouble();                                             \
   }
 
 #define CROCODDYL_BASE_DERIVED_CAST(base_class, derived_class)   \
@@ -166,6 +210,9 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   }                                                              \
   std::shared_ptr<base_class> cloneAsADDouble() const override { \
     return std::shared_ptr<base_class>(nullptr);                 \
+  }                                                              \
+  std::shared_ptr<base_class> cloneAsADFloat() const override {  \
+    return std::shared_ptr<base_class>(nullptr);                 \
   }
 
 #define CROCODDYL_BASE_DERIVED_FLOATINGPOINT_CAST(base_class, derived_class) \
@@ -177,6 +224,9 @@ std::unique_ptr<T> make_unique(Args&&... args) {
     return std::shared_ptr<base_class>(nullptr);                             \
   }                                                                          \
   std::shared_ptr<base_class> cloneAsADDouble() const override {             \
+    return std::shared_ptr<base_class>(nullptr);                             \
+  }                                                                          \
+  std::shared_ptr<base_class> cloneAsADFloat() const override {              \
     return std::shared_ptr<base_class>(nullptr);                             \
   }
 
@@ -197,8 +247,40 @@ std::unique_ptr<T> make_unique(Args&&... args) {
         this->template cast<float>());                                       \
   }                                                                          \
   std::shared_ptr<base_class> cloneAsADDouble() const override {             \
+    return cloneAsADDoubleImpl<Scalar>();                                    \
+  }                                                                          \
+  std::shared_ptr<base_class> cloneAsADFloat() const override {              \
+    return cloneAsADFloatImpl<Scalar>();                                     \
+  }                                                                          \
+  template <typename T>                                                      \
+  typename std::enable_if<!std::is_same<T, ADFloat32>::value,                \
+                          std::shared_ptr<base_class>>::type                 \
+  cloneAsADDoubleImpl() const {                                              \
     return std::make_shared<typename inner_class<ADFloat64>::derived_class>( \
         this->template cast<ADFloat64>());                                   \
+  }                                                                          \
+  template <typename T>                                                      \
+  typename std::enable_if<std::is_same<T, ADFloat32>::value,                 \
+                          std::shared_ptr<base_class>>::type                 \
+  cloneAsADDoubleImpl() const {                                              \
+    const auto floating = this->template cast<double>();                     \
+    return std::make_shared<typename inner_class<ADFloat64>::derived_class>( \
+        floating.template cast<ADFloat64>());                                \
+  }                                                                          \
+  template <typename T>                                                      \
+  typename std::enable_if<!std::is_same<T, ADFloat64>::value,                \
+                          std::shared_ptr<base_class>>::type                 \
+  cloneAsADFloatImpl() const {                                               \
+    return std::make_shared<typename inner_class<ADFloat32>::derived_class>( \
+        this->template cast<ADFloat32>());                                   \
+  }                                                                          \
+  template <typename T>                                                      \
+  typename std::enable_if<std::is_same<T, ADFloat64>::value,                 \
+                          std::shared_ptr<base_class>>::type                 \
+  cloneAsADFloatImpl() const {                                               \
+    const auto floating = this->template cast<float>();                      \
+    return std::make_shared<typename inner_class<ADFloat32>::derived_class>( \
+        floating.template cast<ADFloat32>());                                \
   }
 #else
 #define CROCODDYL_BASE_CAST(base_class, class)                              \

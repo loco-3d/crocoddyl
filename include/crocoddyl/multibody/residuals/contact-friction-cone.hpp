@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,9 +17,11 @@
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/friction-cone.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -241,6 +243,8 @@ struct ResidualDataContactFrictionConeTpl
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
+  typedef ImplicitConstraintModelMultipleTpl<Scalar>
+      ImplicitConstraintModelMultiple;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -250,27 +254,25 @@ struct ResidualDataContactFrictionConeTpl
       : Base(model, data) {
     contact_type = ContactUndefined;
     // Check that proper shared data has been passed
-    bool is_contact = true;
     DataCollectorContactTpl<Scalar>* d1 =
         dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     DataCollectorImpulseTpl<Scalar>* d2 =
         dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d1 == NULL && d2 == NULL) {
+    DataCollectorImplicitConstraintTpl<Scalar>* d3 =
+        dynamic_cast<DataCollectorImplicitConstraintTpl<Scalar>*>(shared);
+    if (d1 == NULL && d2 == NULL && d3 == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "
-          "DataCollectorContact or DataCollectorImpulse");
+          "DataCollectorContact, DataCollectorImpulse, or "
+          "DataCollectorImplicitConstraint");
     }
-    if (d2 != NULL) {
-      is_contact = false;
-    }
-
     // Avoids data casting at runtime
     const pinocchio::FrameIndex id = model->get_id();
     const std::shared_ptr<StateMultibody>& state =
         std::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[id].name;
     bool found_contact = false;
-    if (is_contact) {
+    if (d1 != NULL) {
       for (typename ContactModelMultiple::ContactDataContainer::iterator it =
                d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
@@ -305,7 +307,7 @@ struct ResidualDataContactFrictionConeTpl
           break;
         }
       }
-    } else {
+    } else if (d2 != NULL) {
       for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
            it != d2->impulses->impulses.end(); ++it) {
@@ -333,6 +335,39 @@ struct ResidualDataContactFrictionConeTpl
         }
       }
     }
+    if (d3 != NULL) {
+      for (typename ImplicitConstraintModelMultiple::
+               ImplicitConstraintDataContainer::iterator it =
+                   d3->constraints->constraints.begin();
+           it != d3->constraints->constraints.end(); ++it) {
+        if (it->second->frame == id) {
+          ContactDataTpl<Scalar>* cd =
+              dynamic_cast<ContactDataTpl<Scalar>*>(it->second.get());
+          if (cd != NULL) {
+            const typename ContactDataTpl<Scalar>::MaskArray mask2d = {
+                {true, false, true, false, false, false}};
+            const typename ContactDataTpl<Scalar>::MaskArray mask3d = {
+                {true, true, true, false, false, false}};
+            const typename ContactDataTpl<Scalar>::MaskArray mask6d = {
+                {true, true, true, true, true, true}};
+            if (cd->mask == mask2d) {
+              contact_type = Contact2D;
+            } else if (cd->mask == mask3d) {
+              contact_type = Contact3D;
+            } else if (cd->mask == mask6d) {
+              contact_type = Contact6D;
+            } else {
+              throw_pretty(
+                  "Domain error: unsupported masked contact layout for " +
+                  frame_name);
+            }
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+        }
+      }
+    }
     if (!found_contact) {
       throw_pretty("Domain error: there isn't defined contact data for " +
                    frame_name);
@@ -351,8 +386,6 @@ struct ResidualDataContactFrictionConeTpl
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hxx"
 

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -283,24 +283,14 @@ void register_actuation_model_unit_tests(
 
 bool init_function() {
   for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
-    register_actuation_model_unit_tests(ActuationModelTypes::ActuationModelFull,
-                                        StateModelTypes::all[i]);
-  }
-  for (size_t i = 0; i < StateModelTypes::all.size(); ++i) {
     if (StateModelTypes::all[i] != StateModelTypes::StateVector &&
         StateModelTypes::all[i] != StateModelTypes::StateMultibody_Hector) {
-      register_actuation_model_unit_tests(
-          ActuationModelTypes::ActuationModelFloatingBase,
-          StateModelTypes::all[i]);
       register_actuation_model_unit_tests(
           ActuationModelTypes::ActuationModelSquashingFull,
           StateModelTypes::all[i]);
     }
   }
 
-  register_actuation_model_unit_tests(
-      ActuationModelTypes::ActuationModelFloatingBaseThrusters,
-      StateModelTypes::StateMultibody_Hector);
   return true;
 }
 

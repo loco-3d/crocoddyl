@@ -18,8 +18,10 @@
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/cop-support.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -273,18 +275,17 @@ struct ResidualDataContactCoPPositionTpl
                                     DataCollectorAbstract* const data)
       : Base(model, data) {
     // Check that proper shared data has been passed
-    bool is_contact = true;
     DataCollectorContactTpl<Scalar>* d1 =
         dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     DataCollectorImpulseTpl<Scalar>* d2 =
         dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d1 == NULL && d2 == NULL) {
+    DataCollectorImplicitConstraintTpl<Scalar>* d3 =
+        dynamic_cast<DataCollectorImplicitConstraintTpl<Scalar>*>(shared);
+    if (d1 == NULL && d2 == NULL && d3 == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "
-          "DataCollectorContact or DataCollectorImpulse");
-    }
-    if (d2 != NULL) {
-      is_contact = false;
+          "DataCollectorContact, DataCollectorImpulse, or "
+          "DataCollectorImplicitConstraint");
     }
 
     // Avoids data casting at runtime
@@ -293,7 +294,7 @@ struct ResidualDataContactCoPPositionTpl
         std::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[id].name;
     bool found_contact = false;
-    if (is_contact) {
+    if (d1 != NULL) {
       for (typename ContactModelMultipleTpl<
                Scalar>::ContactDataContainer::iterator it =
                d1->contacts->contacts.begin();
@@ -322,7 +323,7 @@ struct ResidualDataContactCoPPositionTpl
           break;
         }
       }
-    } else {
+    } else if (d2 != NULL) {
       for (typename ImpulseModelMultipleTpl<
                Scalar>::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
@@ -352,6 +353,29 @@ struct ResidualDataContactCoPPositionTpl
         }
       }
     }
+    if (d3 != NULL) {
+      for (typename ImplicitConstraintModelMultipleTpl<
+               Scalar>::ImplicitConstraintDataContainer::iterator it =
+               d3->constraints->constraints.begin();
+           it != d3->constraints->constraints.end(); ++it) {
+        if (it->second->frame == id) {
+          ContactDataTpl<Scalar>* cd =
+              dynamic_cast<ContactDataTpl<Scalar>*>(it->second.get());
+          if (cd != NULL) {
+            const typename ContactDataTpl<Scalar>::MaskArray mask6d = {
+                {true, true, true, true, true, true}};
+            if (cd->mask != mask6d) {
+              throw_pretty(
+                  "Domain error: CoP position requires a 6D contact for " +
+                  frame_name);
+            }
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+        }
+      }
+    }
     if (!found_contact) {
       throw_pretty("Domain error: there isn't defined contact data for " +
                    frame_name);
@@ -369,8 +393,6 @@ struct ResidualDataContactCoPPositionTpl
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-cop-position.hxx"
 

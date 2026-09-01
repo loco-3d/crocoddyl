@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,7 @@
 #define CROCODDYL_MULTIBODY_RESIDUALS_IMPULSE_COM_HPP_
 
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
@@ -49,6 +50,7 @@ class ResidualModelImpulseCoMTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the impulse CoM residual model
@@ -141,19 +143,30 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
     // Check that proper shared data has been passed
     DataCollectorMultibodyInImpulseTpl<Scalar>* d =
         dynamic_cast<DataCollectorMultibodyInImpulseTpl<Scalar>*>(shared);
-    if (d == NULL) {
+    DataCollectorMultibodyInImplicitConstraintTpl<Scalar>* d_implicit =
+        dynamic_cast<DataCollectorMultibodyInImplicitConstraintTpl<Scalar>*>(
+            shared);
+    if (d == NULL && d_implicit == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "
-          "DataCollectorMultibodyInImpulse");
+          "DataCollectorMultibodyInImpulse or "
+          "DataCollectorMultibodyInImplicitConstraint");
     }
-    pinocchio = d->pinocchio;
-    impulses = d->impulses;
+    if (d != NULL) {
+      pinocchio = d->pinocchio;
+      impulses = d->impulses;
+    } else {
+      pinocchio = d_implicit->pinocchio;
+      constraints = d_implicit->constraints;
+    }
   }
   virtual ~ResidualDataImpulseCoMTpl() = default;
 
   pinocchio::DataTpl<Scalar>* pinocchio;  //!< Pinocchio data
   std::shared_ptr<crocoddyl::ImpulseDataMultipleTpl<Scalar> >
-      impulses;      //!< Impulses data
+      impulses;  //!< Impulses data
+  std::shared_ptr<crocoddyl::ImplicitConstraintDataMultipleTpl<Scalar> >
+      constraints;   //!< Generic implicit-constraint data
   Matrix3xs dvc_dq;  //!< Jacobian of the CoM velocity
   MatrixXs ddv_dv;   //!< Jacobian of the CoM velocity
   pinocchio::DataTpl<Scalar>
@@ -166,8 +179,6 @@ struct ResidualDataImpulseCoMTpl : public ResidualDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/impulse-com.hxx"
 

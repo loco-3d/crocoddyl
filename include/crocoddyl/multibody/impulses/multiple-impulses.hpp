@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,7 +16,7 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-struct ImpulseItemTpl {
+struct [[deprecated("Use ImplicitConstraintItem.")]] ImpulseItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -58,7 +58,8 @@ struct ImpulseItemTpl {
  * routines that update the only active impulse.
  */
 template <typename _Scalar>
-class ImpulseModelMultipleTpl {
+class [[deprecated("Use ImplicitConstraintModelMultiple.")]]
+ImpulseModelMultipleTpl {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -270,7 +271,8 @@ class ImpulseModelMultipleTpl {
  * \sa ImpulseModelMultipleTpl
  */
 template <typename _Scalar>
-struct ImpulseDataMultipleTpl {
+struct [[deprecated("Use ImplicitConstraintDataMultiple.")]]
+ImpulseDataMultipleTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

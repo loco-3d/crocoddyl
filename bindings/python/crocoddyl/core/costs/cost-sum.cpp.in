@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -137,6 +137,8 @@ struct CostModelSumVisitor
             "stack of costs")
         .add_property("nu", bp::make_function(&Model::get_nu),
                       "dimension of control vector")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of parameter vector")
         .add_property("nr", bp::make_function(&Model::get_nr),
                       "dimension of the residual vector of active cost")
         .add_property("nr_total", bp::make_function(&Model::get_nr_total),
@@ -225,7 +227,31 @@ struct CostDataSumVisitor : public bp::def_visitor<CostDataSumVisitor<Data>> {
             "Luu",
             bp::make_function(&Data::get_Luu,
                               bp::return_value_policy<bp::return_by_value>()),
-            bp::make_function(&Data::set_Luu), "Hessian of the cost");
+            bp::make_function(&Data::set_Luu), "Hessian of the cost")
+        .add_property(
+            "Lp",
+            bp::make_function(&Data::get_Lp,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Lp),
+            "Jacobian of the cost w.r.t. parameters")
+        .add_property(
+            "Lpp",
+            bp::make_function(&Data::get_Lpp,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Lpp),
+            "Hessian of the cost w.r.t. parameters")
+        .add_property(
+            "Lpx",
+            bp::make_function(&Data::get_Lpx,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Lpx),
+            "Hessian of the cost w.r.t. parameters and state")
+        .add_property(
+            "Lpu",
+            bp::make_function(&Data::get_Lpu,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Lpu),
+            "Hessian of the cost w.r.t. parameters and control");
   }
 };
 
@@ -264,11 +290,13 @@ struct CostDataSumVisitor : public bp::def_visitor<CostDataSumVisitor<Data>> {
   typedef Model::StateAbstract State;                              \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();            \
   bp::class_<Model>("CostModelSum",                                \
-                    bp::init<std::shared_ptr<State>, bp::optional<std::size_t>>( \
-                        bp::args("self", "state", "nu"),           \
+                    bp::init<std::shared_ptr<State>,               \
+                             bp::optional<std::size_t, std::size_t>>( \
+                        bp::args("self", "state", "nu", "np"),     \
                         "Initialize the total cost model.\n\n"     \
                         ":param state: state description\n"        \
-                        ":param nu: dimension of control vector")) \
+                        ":param nu: dimension of control vector\n" \
+                        ":param np: dimension of parameter vector (default 0)")) \
       .def(CostModelSumVisitor<Model>())                           \
       .def(CastVisitor<Model>())                                   \
       .def(PrintableVisitor<Model>())                              \

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,12 +11,40 @@
 #include "crocoddyl/core/optctrl/shooting.hpp"
 
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
 
 #define SCALAR_@SCALAR_NAME@
 #define IS_FP_SCALAR_@FP_TYPE@
 
 namespace crocoddyl {
 namespace python {
+
+template <typename Problem>
+std::vector<std::vector<
+    std::shared_ptr<typename Problem::ActionModelAbstract> > >
+getShootingRunningPhaseModels(const Problem& problem) {
+  std::vector<std::vector<
+      std::shared_ptr<typename Problem::ActionModelAbstract> > > phases;
+  phases.reserve(problem.get_n_phases());
+  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
+    phases.push_back(problem.get_runningPhaseModels(i));
+  }
+  return phases;
+}
+
+template <typename Problem>
+std::vector<std::vector<
+    std::shared_ptr<typename Problem::ActionDataAbstract> > >
+getShootingRunningPhaseDatas(const Problem& problem) {
+  std::vector<
+      std::vector<std::shared_ptr<typename Problem::ActionDataAbstract> > >
+      phases;
+  phases.reserve(problem.get_n_phases());
+  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
+    phases.push_back(problem.get_runningPhaseDatas(i));
+  }
+  return phases;
+}
 
 template <typename Problem>
 struct ShootingProblemVisitor
@@ -67,7 +95,6 @@ struct ShootingProblemVisitor
                                            std::shared_ptr<ActionData>)>(
                  &Problem::circularAppend),
              bp::args("self", "model", "data"),
-             bp::args("self", "model", "data"),
              "Circular append the model and data onto the end running node.\n\n"
              "Once we update the end running node, the first running mode is "
              "removed as in a circular buffer.\n"
@@ -103,7 +130,8 @@ struct ShootingProblemVisitor
             "runningModels",
             bp::make_function(&Problem::get_runningModels,
                               bp::return_value_policy<bp::return_by_value>()),
-            &Problem::set_runningModels, "running models")
+            &Problem::set_runningModels,
+            "running models flattened in time order")
         .add_property(
             "terminalModel",
             bp::make_function(&Problem::get_terminalModel,
@@ -113,7 +141,7 @@ struct ShootingProblemVisitor
             "runningDatas",
             bp::make_function(&Problem::get_runningDatas,
                               bp::return_value_policy<bp::return_by_value>()),
-            "running datas")
+            "running data flattened in time order")
         .add_property(
             "terminalData",
             bp::make_function(&Problem::get_terminalData,
@@ -131,16 +159,34 @@ struct ShootingProblemVisitor
         .add_property("is_updated", bp::make_function(&Problem::is_updated),
                       bp::make_function(&Problem::set_is_updated),
                       "Returns True if the shooting problem has been updated, "
-                      "otherwise False");
+                      "otherwise False")
+        .add_property(
+            "runningPhaseModels",
+            bp::make_function(&getShootingRunningPhaseModels<Problem>,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "running action models grouped by parameter phase")
+        .add_property(
+            "runningPhaseDatas",
+            bp::make_function(&getShootingRunningPhaseDatas<Problem>,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "running action data grouped by parameter phase");
   }
 };
 
 #define CROCODDYL_SHOOTING_PROBLEM_PYTHON_BINDINGS(Scalar)                    \
   typedef ShootingProblemTpl<Scalar> Problem;                                 \
   typedef ActionModelAbstractTpl<Scalar> ActionModel;                         \
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;                 \
   typedef typename Problem::VectorXs VectorXs;                                \
+  typedef std::shared_ptr<ActionModel> ActionModelPtr;                        \
+  typedef std::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionDataPtr;      \
+  typedef std::shared_ptr<ParameterPhaseModel> ParameterPhaseModelPtr;        \
+  StdVectorPythonVisitor<std::vector<std::vector<ActionModelPtr> >,           \
+                         true>::expose("StdVec_StdVec_ActionModel");          \
+  StdVectorPythonVisitor<std::vector<std::vector<ActionDataPtr> >,            \
+                         true>::expose("StdVec_StdVec_ActionData");           \
   bp::register_ptr_to_python<std::shared_ptr<Problem>>();                     \
-  bp::class_<Problem>(                                                        \
+  bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
       "ShootingProblem",                                                      \
       "Declare a shooting problem.\n\n"                                       \
       "A shooting problem declares the initial state, a set of running "      \
@@ -148,7 +194,8 @@ struct ShootingProblemVisitor
       "- calc, calcDiff and rollout. The first computes the set of next "     \
       "states and cost values per each action model. calcDiff updates the "   \
       "derivatives of all action models. The last rollouts the stacks of "    \
-      "actions models.",                                                      \
+      "actions models. Parameters can optionally be shared across one or "   \
+      "more phases.",                                                         \
       bp::init<VectorXs, std::vector<std::shared_ptr<ActionModel>>,           \
                std::shared_ptr<ActionModel>>(                                 \
           bp::args("self", "x0", "runningModels", "terminalModel"),           \
@@ -156,6 +203,17 @@ struct ShootingProblemVisitor
           ":param x0: initial state\n"                                        \
           ":param runningModels: running action models (size T)\n"            \
           ":param terminalModel: terminal action model"))                     \
+      .def(bp::init<VectorXs, std::vector<ActionModelPtr>, ActionModelPtr,    \
+                    ParameterPhaseModelPtr>(                                 \
+          bp::args("self", "x0", "runningModels", "terminalModel",            \
+                   "paramsModel"),                                           \
+          "Initialize a single-phase parameterized shooting problem."))      \
+      .def(bp::init<VectorXs, std::vector<std::vector<ActionModelPtr> >,      \
+                    ActionModelPtr,                                          \
+                    std::vector<ParameterPhaseModelPtr> >(                    \
+          bp::args("self", "x0", "modelPhases", "terminalModel",             \
+                   "paramsModel"),                                           \
+          "Initialize a multi-phase parameterized shooting problem."))       \
       .def(ShootingProblemVisitor<Problem>())                                 \
       .def(PrintableVisitor<Problem>())                                       \
       .def(CopyableVisitor<Problem>());
