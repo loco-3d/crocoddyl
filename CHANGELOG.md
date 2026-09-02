@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+* Fixed solver feasibility propagation so BoxFDDP applies box-QP constraints to feasible warm starts in https://github.com/loco-3d/crocoddyl/pull/1534
 * Introduced task-convergence residuals, guidance models, and multibody task support in https://github.com/loco-3d/crocoddyl/pull/1529
 * :warning: BREAKING: `ActivationModelSmooth1Norm` and `ActivationModelWeightedSmooth1Norm` now use the classical pseudo-Huber form `delta^2 * (sqrt(1 + (r_i / delta)^2) - 1)`. For an old `eps`, use `delta = sqrt(eps)`. To additionally preserve the old derivatives, divide the containing cost weight by `delta` for the unweighted model, or divide the residual weights by `delta` for the weighted model; the resulting activation differs from the old one only by a constant. Fixed `ActivationModelSmooth2Norm` and `ActivationModelWeightedQuadraticBarrier` to compute the activation Hessian diagonal properly. Included a new weighted l1 activation in https://github.com/loco-3d/crocoddyl/pull/1524
 * Fixed OpenMP CMake export in https://github.com/loco-3d/crocoddyl/pull/1523
