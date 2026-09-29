@@ -150,8 +150,7 @@ struct ShootingProblemVisitor
         .add_property(
             "nthreads", bp::make_function(&Problem::get_nthreads),
             bp::make_function(&Problem::set_nthreads),
-            "number of threads launch by the multi-threading support (if you "
-            "set nthreads <= 1, then nthreads=CROCODDYL_WITH_NTHREADS)")
+            "number of threads used for parallel evaluation")
         .add_property("nx", bp::make_function(&Problem::get_nx),
                       "dimension of state tuple")
         .add_property("ndx", bp::make_function(&Problem::get_ndx),

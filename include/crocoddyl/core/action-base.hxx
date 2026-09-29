@@ -65,6 +65,10 @@ void ActionModelAbstractTpl<Scalar>::calcDiff(
 }
 
 template <typename Scalar>
+void ActionModelAbstractTpl<Scalar>::updateWarmstart(
+    const std::shared_ptr<ActionDataAbstract>&) {}
+
+template <typename Scalar>
 void ActionModelAbstractTpl<Scalar>::quasiStatic(
     const std::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
     const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter,

@@ -127,6 +127,18 @@ class ObserverModelAbstractTpl_wrap
     return this->ObserverModel::set_params(data, params);
   }
 
+  void updateWarmstart(const std::shared_ptr<ActionData>& data) override {
+    if (boost::python::override update_warmstart =
+            this->get_override("updateWarmstart")) {
+      return bp::call<void>(update_warmstart.ptr(), data);
+    }
+    return ObserverModel::updateWarmstart(data);
+  }
+
+  void default_updateWarmstart(const std::shared_ptr<ActionData>& data) {
+    return this->ObserverModel::updateWarmstart(data);
+  }
+
   void update_p(const std::shared_ptr<ActionData>& data,
                 const Eigen::Ref<const VectorXs>& p) override {
     return bp::call<void>(this->get_override("update_p").ptr(), data,

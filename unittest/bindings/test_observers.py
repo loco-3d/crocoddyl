@@ -156,6 +156,9 @@ class ObserverBindingsTest(unittest.TestCase):
                         self.calls.append(("set_params", params.np))
                         super().set_params(data, params)
 
+                    def updateWarmstart(self, data):
+                        self.calls.append(("updateWarmstart",))
+
                     def update_tau(self, tau):
                         self.calls.append(("update_tau", tau.copy()))
                         super().update_tau(tau)
@@ -179,6 +182,7 @@ class ObserverBindingsTest(unittest.TestCase):
                 model.update_p(data, np.empty(0, dtype=dtype))
                 manager = module.ParameterManager(state)
                 model.set_params(data, manager)
+                model.updateWarmstart(data)
                 quasi = model.quasiStatic(data, x, 17, 1e-7)
                 tau = np.array([0.2, -0.4], dtype=dtype)
                 model.update_tau(tau)
@@ -191,6 +195,7 @@ class ObserverBindingsTest(unittest.TestCase):
                 self.assertIn(("calcDiff", False), model.calls)
                 self.assertIn(("calcDiff", True), model.calls)
                 self.assertIn(("set_params", 0), model.calls)
+                self.assertIn(("updateWarmstart",), model.calls)
                 self.assertIn(("quasiStatic", 17, 1e-7), model.calls)
                 self.assertIsInstance(data, module.ObserverDataAbstract)
 
@@ -210,6 +215,7 @@ class ObserverBindingsTest(unittest.TestCase):
                 fallback = FallbackObserver()
                 fallback_data = fallback.createData()
                 fallback.set_params(fallback_data, manager)
+                fallback.updateWarmstart(fallback_data)
                 self.assertEqual(fallback.quasiStatic(fallback_data, x).size, 0)
                 with self.assertRaises(crocoddyl.Exception):
                     module.ObserverDataAbstract(None)

@@ -320,6 +320,7 @@ class ParameterManagerTest(unittest.TestCase):
             def __init__(self):
                 super().__init__(state, 2)
                 self.set_calls = 0
+                self.warmstart_calls = 0
                 self.received = []
 
             def calc(self, data, x, u=None):
@@ -334,11 +335,17 @@ class ParameterManagerTest(unittest.TestCase):
                 self.set_calls += 1
                 self.received.append(params)
 
+            def updateWarmstart(self, data):
+                del data
+                self.warmstart_calls += 1
+
         action = ActionProbe()
         action_data = action.createData()
         action.set_params(action_data, manager)
         action.set_params(action_data, None)
+        action.updateWarmstart(action_data)
         self.assertEqual(action.set_calls, 2)
+        self.assertEqual(action.warmstart_calls, 1)
         self.assertIs(action.received[0], manager)
         self.assertIsNone(action.received[1])
 
@@ -357,6 +364,7 @@ class ParameterManagerTest(unittest.TestCase):
         action_fallback_data = action_fallback.createData()
         action_fallback.set_params(action_fallback_data, manager)
         action_fallback.set_params(action_fallback_data, None)
+        action_fallback.updateWarmstart(action_fallback_data)
 
         class DynamicsProbe(module.DynamicsModelAbstract):
             def __init__(self):

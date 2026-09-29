@@ -602,6 +602,13 @@ ActionModelNumDiffTpl<Scalar>::createData() {
 }
 
 template <typename Scalar>
+void ActionModelNumDiffTpl<Scalar>::updateWarmstart(
+    const std::shared_ptr<ActionDataAbstract>& data) {
+  Data* d = static_cast<Data*>(data.get());
+  model_->updateWarmstart(d->data_0);
+}
+
+template <typename Scalar>
 std::shared_ptr<ActionDataAbstractTpl<Scalar> >
 ActionModelNumDiffTpl<Scalar>::createData(
     const std::shared_ptr<ParameterDataManager>& params_data) {

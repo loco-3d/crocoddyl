@@ -206,6 +206,18 @@ class ActionModelAbstractTpl : public ActionModelBase {
                         const Eigen::Ref<const VectorXs>& x);
 
   /**
+   * @brief Commit the current action data as warm-start history
+   *
+   * Solvers call this hook only after the data has been evaluated for the
+   * current candidate. Stateful action models can override it to preserve
+   * numerical history for later evaluations. The default implementation is a
+   * no-op.
+   *
+   * @param[in] data  Action data associated with the committed candidate
+   */
+  virtual void updateWarmstart(const std::shared_ptr<ActionDataAbstract>& data);
+
+  /**
    * @brief Create the action data
    *
    * @return the action data

@@ -91,6 +91,13 @@ struct ActionModelAbstractVisitor
              &Model::default_set_params,
              bp::args("self", "data", "params"),
              "Wire a parameter manager into the action model and data.")
+        .def("updateWarmstart", &ActionModel::updateWarmstart,
+             &Model::default_updateWarmstart, bp::args("self", "data"),
+             "Commit the current action data as warm-start history.\n\n"
+             "The default implementation does nothing. Stateful action "
+             "models can override this hook to retain numerical history for "
+             "later evaluations.\n"
+             ":param data: evaluated action data")
         .def("update_p", &update_p, bp::args("self", "data", "p"),
              "Update the active parameter vector in the action data.")
         .def("quasiStatic", &Model::quasiStatic_x,

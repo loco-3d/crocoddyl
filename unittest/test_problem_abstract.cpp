@@ -66,6 +66,10 @@ class ProblemActionProbeTpl
     ++terminal_calc_diff;
   }
 
+  void updateWarmstart(const std::shared_ptr<Data>&) override {
+    ++warmstart_updates;
+  }
+
   bool checkData(const std::shared_ptr<Data>& data) override {
     return data != nullptr;
   }
@@ -79,6 +83,7 @@ class ProblemActionProbeTpl
   std::size_t terminal_calc;
   std::size_t running_calc_diff;
   std::size_t terminal_calc_diff;
+  std::size_t warmstart_updates = 0;
 };
 
 template <typename _Scalar>
@@ -105,8 +110,13 @@ void test_shooting_problem_polymorphic_interface() {
       models(T, model);
   const VectorXs x0 = VectorXs::LinSpaced(4, Scalar(-0.2), Scalar(0.4));
   ShootingProblem problem(x0, models, model);
-  problem.set_nthreads(1);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  BOOST_CHECK_EQUAL(problem.get_nthreads(), CROCODDYL_WITH_NTHREADS);
+#else
+  BOOST_CHECK_EQUAL(problem.get_nthreads(), 1u);
+#endif
   ProblemAbstract& base = problem;
+  base.set_nthreads(1);
 
   BOOST_CHECK_EQUAL(base.get_T(), T);
   BOOST_CHECK(base.get_x0().isApprox(x0));
@@ -141,14 +151,26 @@ void test_shooting_problem_polymorphic_interface() {
     BOOST_CHECK(default_xs[i].isApprox(x0));
   }
 
+  base.updateWarmstart();
+  BOOST_CHECK_EQUAL(model->warmstart_updates, T + 1);
+
   BOOST_CHECK(!base.is_updated());
   base.set_is_updated(true);
   BOOST_CHECK(base.is_updated());
   BOOST_CHECK(!base.is_updated());
+  base.set_is_updated(true);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  base.set_nthreads(2);
+#endif
+  ShootingProblem copied(problem);
+  BOOST_CHECK(copied.is_updated());
+  BOOST_CHECK_EQUAL(copied.get_nthreads(), base.get_nthreads());
+  BOOST_CHECK(problem.is_updated());
 
   BOOST_CHECK_EQUAL(base.get_n_phases(), 0u);
   BOOST_CHECK(base.get_phase_idxs().empty());
   BOOST_CHECK(base.get_phase_edxs().empty());
+  BOOST_CHECK_THROW(base.get_runningPhaseDatas(0), crocoddyl::Exception);
   BOOST_CHECK(base.get_paramsModel().empty());
   BOOST_CHECK(base.get_paramsData().empty());
   BOOST_CHECK(!base.has_parameter_constraints());
@@ -199,6 +221,7 @@ void test_shooting_problem_structural_mutations() {
   const std::vector<std::shared_ptr<ActionModelAbstract> > models(2, model);
   PhasedShootingProblem phased(VectorXs::Zero(4), models, model);
   ShootingProblem& canonical = phased;
+  BOOST_CHECK_THROW(canonical.get_runningPhaseDatas(0), crocoddyl::Exception);
   const std::vector<std::shared_ptr<ActionModelAbstract> > original_models =
       canonical.get_runningModels();
   const std::vector<std::shared_ptr<ActionDataAbstract> > original_datas =

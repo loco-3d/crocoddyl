@@ -52,6 +52,31 @@ Eigen::VectorXd sampleSolverControl(const std::size_t nu,
   return scale * random_vector<double>(static_cast<Eigen::Index>(nu));
 }
 
+class WarmstartActionModelLQR : public crocoddyl::ActionModelLQR {
+ public:
+  using crocoddyl::ActionModelLQR::ActionModelLQR;
+
+  void updateWarmstart(
+      const std::shared_ptr<crocoddyl::ActionDataAbstract>&) override {
+    ++warmstart_updates;
+  }
+
+  std::size_t warmstart_updates = 0;
+};
+
+class WarmstartSolverFDDP : public crocoddyl::SolverFDDP {
+ public:
+  WarmstartSolverFDDP(
+      const std::shared_ptr<crocoddyl::ShootingProblem>& problem,
+      const bool accept_trials)
+      : crocoddyl::SolverFDDP(problem), accept_trials_(accept_trials) {}
+
+  bool checkAcceptance() override { return accept_trials_; }
+
+ private:
+  bool accept_trials_;
+};
+
 void sampleSolverTrajectoryGuess(
     const std::shared_ptr<crocoddyl::ProblemAbstract>& problem,
     std::vector<Eigen::VectorXd>* xs, std::vector<Eigen::VectorXd>* us,
@@ -485,6 +510,37 @@ void test_fddp_legacy_solve_api() {
   std::vector<Eigen::VectorXd> us;
   sampleSolverTrajectoryGuess(problem, &xs, &us);
   BOOST_CHECK_NO_THROW(solver.solve(xs, us, 0, false, 0.1));
+}
+
+void test_fddp_updates_warmstart_only_for_committed_candidates() {
+  const std::size_t T = 2;
+  const Eigen::VectorXd x0 = Eigen::VectorXd::Zero(4);
+  std::vector<Eigen::VectorXd> xs(T + 1, x0);
+  std::vector<Eigen::VectorXd> us(T, Eigen::VectorXd::Zero(2));
+
+  const auto run = [&](const bool accept_trials) {
+    const std::shared_ptr<WarmstartActionModelLQR> running =
+        std::make_shared<WarmstartActionModelLQR>(4, 2);
+    const std::shared_ptr<WarmstartActionModelLQR> terminal =
+        std::make_shared<WarmstartActionModelLQR>(4, 0);
+    const std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> models(
+        T, running);
+    const std::shared_ptr<crocoddyl::ShootingProblem> problem =
+        std::make_shared<crocoddyl::ShootingProblem>(x0, models, terminal);
+    problem->set_nthreads(1);
+    WarmstartSolverFDDP solver(problem, accept_trials);
+    solver.solve(xs, us, 1, false, 0.1);
+    return std::make_pair(running->warmstart_updates,
+                          terminal->warmstart_updates);
+  };
+
+  const std::pair<std::size_t, std::size_t> rejected = run(false);
+  BOOST_CHECK_EQUAL(rejected.first, T);
+  BOOST_CHECK_EQUAL(rejected.second, 1u);
+
+  const std::pair<std::size_t, std::size_t> accepted = run(true);
+  BOOST_CHECK_EQUAL(accepted.first, 2 * T);
+  BOOST_CHECK_EQUAL(accepted.second, 2u);
 }
 
 void test_fddp_single_shoot_arrival_state_forward_pass() {
@@ -1042,6 +1098,8 @@ void register_fddp_arrival_state_unit_tests() {
   std::cout << "Running test_SolverFDDP_single_shoot_arrival_state"
             << std::endl;
   ts->add(BOOST_TEST_CASE(&test_fddp_legacy_solve_api));
+  ts->add(BOOST_TEST_CASE(
+      &test_fddp_updates_warmstart_only_for_committed_candidates));
   ts->add(BOOST_TEST_CASE(&test_fddp_single_shoot_arrival_state_forward_pass));
   ts->add(BOOST_TEST_CASE(&test_fddp_zero_control_running_dispatch));
   ts->add(BOOST_TEST_CASE(

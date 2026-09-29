@@ -43,6 +43,7 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef ProblemAbstractTpl<Scalar> Base;
   typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
   typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
@@ -158,17 +159,6 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
    */
   virtual void rollout(const std::vector<VectorXs>& us,
                        std::vector<VectorXs>& xs) override;
-
-  /**
-   * @copybrief rollout
-   *
-   * @param[in] us  time-discrete control sequence \f$\mathbf{u_{s}}\f$ (size
-   * \f$T\f$)
-   * @return the time-discrete state trajectory \f$\mathbf{x_{s}}\f$ (size
-   * \f$T+1\f$)
-   */
-  virtual std::vector<VectorXs> rollout_us(
-      const std::vector<VectorXs>& us) override;
 
   /**
    * @brief Compute the quasic static commands given a state trajectory
@@ -292,19 +282,6 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   void set_terminalModel(std::shared_ptr<ActionModelAbstract> model);
 
   /**
-   * @brief Modify the number of threads using with multithreading support
-   *
-   * For values lower than 1, the number of threads is chosen by
-   * CROCODDYL_WITH_NTHREADS macro
-   */
-  void set_nthreads(const int nthreads);
-
-  /**
-   * @brief Modify the is_updated flag
-   */
-  virtual void set_is_updated(const bool is_updated) override;
-
-  /**
    * @brief Return the dimension of the state tuple
    */
   virtual std::size_t get_nx() const override;
@@ -315,37 +292,11 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   virtual std::size_t get_ndx() const override;
 
   /**
-   * @brief Return the number of threads
-   */
-  virtual std::size_t get_nthreads() const override;
-
-  /**
-   * @brief Return only once true is the shooting problem has been changed,
-   * otherwise false
-   */
-  virtual bool is_updated() override;
-
-  /** @brief Update the active parameter vector of one phase exactly once */
-  virtual void update_p(const Eigen::Ref<const VectorXs>& p,
-                        const std::size_t phase_idx = 0) override;
-
-  /** @brief Return the number of parameterized running phases */
-  virtual std::size_t get_n_phases() const override;
-
-  /**
    * @brief Return the running action models of a parameter phase
    *
    * @param[in] phase_idx Index of the parameter phase
    */
   std::vector<std::shared_ptr<ActionModelAbstract> > get_runningPhaseModels(
-      const std::size_t phase_idx) const;
-
-  /**
-   * @brief Return the running action data of a parameter phase
-   *
-   * @param[in] phase_idx Index of the parameter phase
-   */
-  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
       const std::size_t phase_idx) const;
 
   /** @brief Return the parameter-phase models, one per phase */
@@ -361,9 +312,6 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
 
   /** @brief Return the exclusive running-node end of every parameter phase */
   virtual const std::vector<std::size_t>& get_phase_edxs() const override;
-
-  /** @brief Return true if any phase has active parameter constraints */
-  virtual bool has_parameter_constraints() const override;
 
   /**
    * @brief Print information on the 'ShootingProblem'
@@ -385,10 +333,6 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
       running_datas_;     //!< Running action data
   std::size_t nx_;        //!< State dimension
   std::size_t ndx_;       //!< State rate dimension
-  std::size_t nthreads_;  //!< Number of threads launch by the multi-threading
-                          //!< application
-  bool is_updated_;
-
   std::size_t n_phases_;  //!< Number of parameter phases (zero if disabled)
   std::vector<std::shared_ptr<ParameterPhaseModel> > params_model_;
   std::vector<std::shared_ptr<ParameterPhaseData> > params_data_;

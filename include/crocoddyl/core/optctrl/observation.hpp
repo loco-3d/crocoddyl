@@ -95,6 +95,9 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
       std::shared_ptr<ObserverModelAbstract> terminal_model,
       std::shared_ptr<ParameterPhaseModel> params_model);
 
+  /** @brief Copy an observation problem, sharing its models and data */
+  ObservationProblemTpl(const ObservationProblemTpl<Scalar>& problem);
+
   virtual ~ObservationProblemTpl() = default;
 
   /** @brief Evaluate running and terminal observer models and total cost */
@@ -121,9 +124,6 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   /** @brief Return the state tangent dimension */
   virtual std::size_t get_ndx() const override;
 
-  /** @brief Observation problems evaluate serially */
-  virtual std::size_t get_nthreads() const override;
-
   /** @brief Return the flattened running observer models */
   virtual const std::vector<std::shared_ptr<ActionModelAbstract> >&
   get_runningModels() const override;
@@ -140,19 +140,6 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   virtual const std::shared_ptr<ActionDataAbstract>& get_terminalData()
       const override;
 
-  /** @brief Return and clear the structural-update flag */
-  virtual bool is_updated() override;
-
-  /** @brief Set the structural-update flag */
-  virtual void set_is_updated(const bool val) override;
-
-  /** @brief Return the number of parameterized phases */
-  virtual std::size_t get_n_phases() const override;
-
-  /** @brief Update one phase parameter payload exactly once */
-  virtual void update_p(const Eigen::Ref<const VectorXs>& p,
-                        const std::size_t phase_idx = 0) override;
-
   /** @brief Update the measured torque of one running observer model */
   void update_tau(const std::size_t t,
                   const Eigen::Ref<const VectorXs>& tau_meas);
@@ -166,14 +153,6 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
    * @param[in] phase_idx Index of the parameter phase
    */
   std::vector<std::shared_ptr<ObserverModelAbstract> > get_runningPhaseModels(
-      const std::size_t phase_idx) const;
-
-  /**
-   * @brief Return the running observer data of a parameter phase
-   *
-   * @param[in] phase_idx Index of the parameter phase
-   */
-  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
       const std::size_t phase_idx) const;
 
   /** @brief Return the parameter-phase models, one per phase */
@@ -190,9 +169,6 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   /** @brief Return the exclusive running-node end of every phase */
   virtual const std::vector<std::size_t>& get_phase_edxs() const override;
 
-  /** @brief Return true if any phase has active parameter constraints */
-  virtual bool has_parameter_constraints() const override;
-
  private:
   void init(
       const VectorXs& x0, const std::vector<VectorXs>& tau_meas,
@@ -205,7 +181,6 @@ class ObservationProblemTpl : public ProblemAbstractTpl<_Scalar> {
   VectorXs x0_;
   std::size_t nx_;
   std::size_t ndx_;
-  bool is_updated_;
   std::shared_ptr<ActionModelAbstract> terminal_model_;
   std::shared_ptr<ActionDataAbstract> terminal_data_;
   std::vector<std::shared_ptr<ActionModelAbstract> > running_models_;

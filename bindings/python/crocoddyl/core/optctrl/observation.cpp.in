@@ -93,6 +93,9 @@ getObservationRunningPhaseDatas(const Problem& problem) {
       .def("update_us", &Problem::update_us,                                 \
            bp::args("self", "tauMeas"),                                      \
            "Update measured torques at all running nodes.")                  \
+      .add_property("nthreads", bp::make_function(&Problem::get_nthreads),   \
+                    bp::make_function(&Problem::set_nthreads),                \
+                    "number of threads used for parallel evaluation")       \
       .add_property(                                                          \
           "runningPhaseModels",                                              \
           bp::make_function(&getObservationRunningPhaseModels<Problem>,       \

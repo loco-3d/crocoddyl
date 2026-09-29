@@ -32,7 +32,6 @@ ObservationProblemTpl<Scalar>::ObservationProblemTpl(
       x0_(x0),
       nx_(0),
       ndx_(0),
-      is_updated_(false),
       n_phases_(params_model.empty() ? 0 : model_phases.size()),
       params_model_(params_model) {
   if (!params_model_.empty() && params_model_.size() != model_phases.size()) {
@@ -56,6 +55,25 @@ ObservationProblemTpl<Scalar>::ObservationProblemTpl(
               running_models},
           terminal_model,
           std::vector<std::shared_ptr<ParameterPhaseModel> >{params_model}) {}
+
+template <typename Scalar>
+ObservationProblemTpl<Scalar>::ObservationProblemTpl(
+    const ObservationProblemTpl<Scalar>& problem)
+    : Base(problem),
+      cost_(problem.cost_),
+      T_(problem.T_),
+      x0_(problem.x0_),
+      nx_(problem.nx_),
+      ndx_(problem.ndx_),
+      terminal_model_(problem.terminal_model_),
+      terminal_data_(problem.terminal_data_),
+      running_models_(problem.running_models_),
+      running_datas_(problem.running_datas_),
+      n_phases_(problem.n_phases_),
+      params_model_(problem.params_model_),
+      params_data_(problem.params_data_),
+      phase_start_(problem.phase_start_),
+      phase_end_(problem.phase_end_) {}
 
 template <typename Scalar>
 void ObservationProblemTpl<Scalar>::init(
@@ -198,10 +216,16 @@ Scalar ObservationProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
     throw_pretty("Invalid argument: us has wrong dimension (it should be "
                  << T_ << ")");
   }
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(this->nthreads_)
+#endif
   for (std::size_t t = 0; t < T_; ++t) {
     running_models_[t]->calc(running_datas_[t], xs[t], us[t]);
   }
   terminal_model_->calc(terminal_data_, xs.back());
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(this->nthreads_)
+#endif
   for (std::size_t i = 0; i < params_model_.size(); ++i) {
     params_model_[i]->calc(params_data_[i], xs[phase_start_[i]],
                            us[phase_start_[i]]);
@@ -226,10 +250,16 @@ Scalar ObservationProblemTpl<Scalar>::calcDiff(
     throw_pretty("Invalid argument: us has wrong dimension (it should be "
                  << T_ << ")");
   }
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(this->nthreads_)
+#endif
   for (std::size_t t = 0; t < T_; ++t) {
     running_models_[t]->calcDiff(running_datas_[t], xs[t], us[t]);
   }
   terminal_model_->calcDiff(terminal_data_, xs.back());
+#ifdef CROCODDYL_WITH_MULTITHREADING
+#pragma omp parallel for num_threads(this->nthreads_)
+#endif
   for (std::size_t i = 0; i < params_model_.size(); ++i) {
     params_model_[i]->calc(params_data_[i], xs[phase_start_[i]],
                            us[phase_start_[i]]);
@@ -262,16 +292,6 @@ void ObservationProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us,
     xs[t + 1] = running_datas_[t]->xnext;
   }
   terminal_model_->calc(terminal_data_, xs.back());
-}
-
-template <typename Scalar>
-void ObservationProblemTpl<Scalar>::update_p(
-    const Eigen::Ref<const VectorXs>& p, const std::size_t phase_idx) {
-  if (phase_idx >= n_phases_) {
-    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
-                                                << n_phases_);
-  }
-  params_model_[phase_idx]->update(params_data_[phase_idx], p);
 }
 
 template <typename Scalar>
@@ -316,24 +336,6 @@ ObservationProblemTpl<Scalar>::get_runningPhaseModels(
 }
 
 template <typename Scalar>
-std::vector<std::shared_ptr<
-    typename ObservationProblemTpl<Scalar>::ActionDataAbstract> >
-ObservationProblemTpl<Scalar>::get_runningPhaseDatas(
-    const std::size_t phase_idx) const {
-  if (phase_idx >= n_phases_) {
-    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
-                                                << n_phases_);
-  }
-  std::vector<std::shared_ptr<ActionDataAbstract> > phase_datas;
-  phase_datas.reserve(phase_end_[phase_idx] - phase_start_[phase_idx]);
-  for (std::size_t t = phase_start_[phase_idx]; t < phase_end_[phase_idx];
-       ++t) {
-    phase_datas.push_back(running_datas_[t]);
-  }
-  return phase_datas;
-}
-
-template <typename Scalar>
 std::size_t ObservationProblemTpl<Scalar>::get_T() const {
   return T_;
 }
@@ -352,11 +354,6 @@ std::size_t ObservationProblemTpl<Scalar>::get_nx() const {
 template <typename Scalar>
 std::size_t ObservationProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
-}
-
-template <typename Scalar>
-std::size_t ObservationProblemTpl<Scalar>::get_nthreads() const {
-  return 1;
 }
 
 template <typename Scalar>
@@ -388,23 +385,6 @@ ObservationProblemTpl<Scalar>::get_terminalData() const {
 }
 
 template <typename Scalar>
-bool ObservationProblemTpl<Scalar>::is_updated() {
-  const bool value = is_updated_;
-  is_updated_ = false;
-  return value;
-}
-
-template <typename Scalar>
-void ObservationProblemTpl<Scalar>::set_is_updated(const bool val) {
-  is_updated_ = val;
-}
-
-template <typename Scalar>
-std::size_t ObservationProblemTpl<Scalar>::get_n_phases() const {
-  return n_phases_;
-}
-
-template <typename Scalar>
 const std::vector<std::shared_ptr<
     typename ObservationProblemTpl<Scalar>::ParameterPhaseModel> >&
 ObservationProblemTpl<Scalar>::get_paramsModel() const {
@@ -428,16 +408,6 @@ template <typename Scalar>
 const std::vector<std::size_t>& ObservationProblemTpl<Scalar>::get_phase_edxs()
     const {
   return phase_end_;
-}
-
-template <typename Scalar>
-bool ObservationProblemTpl<Scalar>::has_parameter_constraints() const {
-  for (std::size_t i = 0; i < params_model_.size(); ++i) {
-    if (params_model_[i]->has_constraints()) {
-      return true;
-    }
-  }
-  return false;
 }
 
 }  // namespace crocoddyl

@@ -23,8 +23,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nthreads_(1),
-      is_updated_(false),
       n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
@@ -55,12 +53,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
         << "ndx in terminal node is not consistent with the other nodes")
   }
   allocateData();
-
-#ifdef CROCODDYL_WITH_MULTITHREADING
-  if (enableMultithreading()) {
-    nthreads_ = CROCODDYL_WITH_NTHREADS;
-  }
-#endif
 }
 
 template <typename Scalar>
@@ -79,8 +71,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nthreads_(1),
-      is_updated_(false),
       n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
@@ -118,12 +108,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
                  << "terminal action data is not consistent with the terminal "
                     "action model")
   }
-
-#ifdef CROCODDYL_WITH_MULTITHREADING
-  if (enableMultithreading()) {
-    nthreads_ = CROCODDYL_WITH_NTHREADS;
-  }
-#endif
 }
 
 template <typename Scalar>
@@ -156,7 +140,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     const ShootingProblemTpl<Scalar>& problem)
-    : cost_(Scalar(0.)),
+    : Base(problem),
+      cost_(Scalar(0.)),
       T_(problem.get_T()),
       x0_(problem.get_x0()),
       terminal_model_(problem.get_terminalModel()),
@@ -165,8 +150,6 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(problem.get_runningDatas()),
       nx_(problem.get_nx()),
       ndx_(problem.get_ndx()),
-      nthreads_(problem.nthreads_),
-      is_updated_(problem.is_updated_),
       n_phases_(problem.n_phases_),
       params_model_(problem.params_model_),
       params_data_(problem.params_data_),
@@ -297,7 +280,7 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs,
   START_PROFILER("ShootingProblem::calc");
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(nthreads_)
+#pragma omp parallel for num_threads(this->nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     running_models_[i]->calc(running_datas_[i], xs[i], us[i]);
@@ -332,7 +315,7 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs,
   START_PROFILER("ShootingProblem::calcDiff");
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(nthreads_)
+#pragma omp parallel for num_threads(this->nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     running_models_[i]->calcDiff(running_datas_[i], xs[i], us[i]);
@@ -386,15 +369,6 @@ void ShootingProblemTpl<Scalar>::rollout(const std::vector<VectorXs>& us,
 }
 
 template <typename Scalar>
-std::vector<typename MathBaseTpl<Scalar>::VectorXs>
-ShootingProblemTpl<Scalar>::rollout_us(const std::vector<VectorXs>& us) {
-  std::vector<VectorXs> xs;
-  xs.resize(T_ + 1);
-  rollout(us, xs);
-  return xs;
-}
-
-template <typename Scalar>
 void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us,
                                              const std::vector<VectorXs>& xs) {
   if (xs.size() != T_) {
@@ -409,7 +383,7 @@ void ShootingProblemTpl<Scalar>::quasiStatic(std::vector<VectorXs>& us,
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
-#pragma omp parallel for num_threads(nthreads_)
+#pragma omp parallel for num_threads(this->nthreads_)
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     running_models_[i]->quasiStatic(running_datas_[i], us[i], xs[i]);
@@ -447,7 +421,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   for (std::size_t i = 0; i < T_ - 1; ++i) {
     running_models_[i] = running_models_[i + 1];
     running_datas_[i] = running_datas_[i + 1];
@@ -470,7 +444,7 @@ void ShootingProblemTpl<Scalar>::circularAppend(
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   for (std::size_t i = 0; i < T_ - 1; ++i) {
     running_models_[i] = running_models_[i + 1];
     running_datas_[i] = running_datas_[i + 1];
@@ -504,7 +478,7 @@ void ShootingProblemTpl<Scalar>::updateNode(
     throw_pretty("Invalid argument: "
                  << "ndx node is not consistent with the other nodes")
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   if (i == T_) {
     terminal_model_ = model;
     terminal_data_ = data;
@@ -534,7 +508,7 @@ void ShootingProblemTpl<Scalar>::updateModel(
     throw_pretty(
         "Invalid argument: " << "ndx is not consistent with the other nodes")
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   if (i == T_) {
     terminal_model_ = model;
     terminal_data_ = terminal_model_->createData();
@@ -555,7 +529,7 @@ ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
   if (n_phases_ == 0) {
     ReturnType ret(x0_.template cast<NewScalar>(),
                    vector_cast<NewScalar>(running_models_), terminal_model);
-    ret.set_nthreads(static_cast<int>(nthreads_));
+    ret.set_nthreads(static_cast<int>(this->nthreads_));
     return ret;
   }
 
@@ -579,7 +553,7 @@ ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
     ret.update_p(params_data_[i]->params->params->p.template cast<NewScalar>(),
                  i);
   }
-  ret.set_nthreads(static_cast<int>(nthreads_));
+  ret.set_nthreads(static_cast<int>(this->nthreads_));
   return ret;
 }
 
@@ -657,7 +631,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
                    << " node is not consistent with the other nodes")
     }
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   T_ = models.size();
   running_models_.clear();
   running_datas_.clear();
@@ -682,38 +656,9 @@ void ShootingProblemTpl<Scalar>::set_terminalModel(
     throw_pretty(
         "Invalid argument: " << "ndx is not consistent with the other nodes")
   }
-  is_updated_ = true;
+  this->is_updated_ = true;
   terminal_model_ = model;
   terminal_data_ = terminal_model_->createData();
-}
-
-template <typename Scalar>
-void ShootingProblemTpl<Scalar>::set_nthreads(const int nthreads) {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  (void)nthreads;
-  std::cerr << "Warning: the number of threads won't affect the computational "
-               "performance as multithreading "
-               "support is not enabled."
-            << std::endl;
-#else
-  if (nthreads < 1) {
-    nthreads_ = CROCODDYL_WITH_NTHREADS;
-  } else {
-    nthreads_ = static_cast<std::size_t>(nthreads);
-  }
-  if (!enableMultithreading()) {
-    std::cerr << "Warning: the number of threads won't affect the "
-                 "computational performance as multithreading "
-                 "support is not enabled."
-              << std::endl;
-    nthreads_ = 1;
-  }
-#endif
-}
-
-template <typename Scalar>
-void ShootingProblemTpl<Scalar>::set_is_updated(const bool is_updated) {
-  is_updated_ = is_updated;
 }
 
 template <typename Scalar>
@@ -724,42 +669,6 @@ std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
 template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
-}
-
-template <typename Scalar>
-std::size_t ShootingProblemTpl<Scalar>::get_nthreads() const {
-#ifndef CROCODDYL_WITH_MULTITHREADING
-  std::cerr << "Warning: the number of threads won't affect the computational "
-               "performance as multithreading "
-               "support is not enabled."
-            << std::endl;
-#endif
-  return nthreads_;
-}
-
-template <typename Scalar>
-bool ShootingProblemTpl<Scalar>::is_updated() {
-  const bool status = is_updated_;
-  is_updated_ = false;
-  return status;
-}
-
-template <typename Scalar>
-void ShootingProblemTpl<Scalar>::update_p(const Eigen::Ref<const VectorXs>& p,
-                                          const std::size_t phase_idx) {
-  if (n_phases_ == 0) {
-    throw_pretty("Invalid call: shooting problem has no parameter phases");
-  }
-  if (phase_idx >= n_phases_) {
-    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
-                                                << n_phases_);
-  }
-  params_model_[phase_idx]->update(params_data_[phase_idx], p);
-}
-
-template <typename Scalar>
-std::size_t ShootingProblemTpl<Scalar>::get_n_phases() const {
-  return n_phases_;
 }
 
 template <typename Scalar>
@@ -778,24 +687,6 @@ ShootingProblemTpl<Scalar>::get_runningPhaseModels(
     phase_models.push_back(running_models_[t]);
   }
   return phase_models;
-}
-
-template <typename Scalar>
-std::vector<
-    std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionDataAbstract> >
-ShootingProblemTpl<Scalar>::get_runningPhaseDatas(
-    const std::size_t phase_idx) const {
-  if (phase_idx >= n_phases_) {
-    throw_pretty("Invalid argument: phase_idx " << phase_idx << " >= n_phases "
-                                                << n_phases_);
-  }
-  std::vector<std::shared_ptr<ActionDataAbstract> > phase_datas;
-  phase_datas.reserve(phase_end_[phase_idx] - phase_start_[phase_idx]);
-  for (std::size_t t = phase_start_[phase_idx]; t < phase_end_[phase_idx];
-       ++t) {
-    phase_datas.push_back(running_datas_[t]);
-  }
-  return phase_datas;
 }
 
 template <typename Scalar>
@@ -822,16 +713,6 @@ template <typename Scalar>
 const std::vector<std::size_t>& ShootingProblemTpl<Scalar>::get_phase_edxs()
     const {
   return phase_end_;
-}
-
-template <typename Scalar>
-bool ShootingProblemTpl<Scalar>::has_parameter_constraints() const {
-  for (std::size_t i = 0; i < params_model_.size(); ++i) {
-    if (params_model_[i]->has_constraints()) {
-      return true;
-    }
-  }
-  return false;
 }
 
 template <typename Scalar>

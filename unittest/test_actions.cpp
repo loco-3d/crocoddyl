@@ -11,6 +11,7 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/actions/lqr.hpp"
 #include "crocoddyl/core/states/euclidean.hpp"
 #include "factory/action.hpp"
 #include "factory/control.hpp"
@@ -43,14 +44,16 @@ class ActionModelParameterProbeTpl
 
   ActionModelParameterProbeTpl()
       : Base(std::make_shared<crocoddyl::StateVectorTpl<Scalar>>(4), 2, 3, 0, 0,
-             0, 0) {}
+             0, 0),
+        warmstart_updates(0) {}
 
   ActionModelParameterProbeTpl(const std::size_t np, const std::size_t ng = 0,
                                const std::size_t nh = 0,
                                const std::size_t ng_T = 0,
                                const std::size_t nh_T = 0)
       : Base(std::make_shared<crocoddyl::StateVectorTpl<Scalar>>(4), 2, 3, ng,
-             nh, ng_T, nh_T, np) {}
+             nh, ng_T, nh_T, np),
+        warmstart_updates(0) {}
 
   void calc(const std::shared_ptr<Data>& data,
             const Eigen::Ref<const VectorXs>& x,
@@ -61,6 +64,10 @@ class ActionModelParameterProbeTpl
 
   void calcDiff(const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
                 const Eigen::Ref<const VectorXs>&) override {}
+
+  void updateWarmstart(const std::shared_ptr<Data>&) override {
+    ++warmstart_updates;
+  }
 
   void set_dimensions(const std::size_t np, const std::size_t ng,
                       const std::size_t nh, const std::size_t ng_T,
@@ -78,6 +85,8 @@ class ActionModelParameterProbeTpl
         this->get_np(), this->get_ng(), this->get_nh(), this->get_ng_T(),
         this->get_nh_T());
   }
+
+  std::size_t warmstart_updates;
 };
 
 typedef ActionModelParameterProbeTpl<double> ActionModelParameterProbe;
@@ -336,6 +345,26 @@ void test_action_base_hooks_copy_and_create_data() {
   BOOST_CHECK_NO_THROW(model.set_params(data, params));
   BOOST_CHECK_THROW(model.update_p(data, Eigen::VectorXd::Zero(model.get_np())),
                     crocoddyl::Exception);
+}
+
+void test_action_base_warmstart_hook() {
+  const std::shared_ptr<ActionModelParameterProbe> model =
+      std::make_shared<ActionModelParameterProbe>();
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> data =
+      model->createData();
+  std::shared_ptr<crocoddyl::ActionModelAbstract> base = model;
+  base->updateWarmstart(data);
+  BOOST_CHECK_EQUAL(model->warmstart_updates, 1u);
+
+  crocoddyl::ActionModelNumDiff numdiff(model);
+  const std::shared_ptr<crocoddyl::ActionDataAbstract> numdiff_data =
+      numdiff.createData();
+  numdiff.updateWarmstart(numdiff_data);
+  BOOST_CHECK_EQUAL(model->warmstart_updates, 2u);
+
+  crocoddyl::ActionModelLQR default_model(4, 2);
+  BOOST_CHECK_NO_THROW(
+      default_model.updateWarmstart(default_model.createData()));
 }
 
 void test_action_base_nonzero_np_scalar_casts() {
@@ -618,6 +647,7 @@ void register_action_base_parameter_unit_tests() {
   ts->add(BOOST_TEST_CASE(&test_action_base_resize_and_set_zero));
   ts->add(BOOST_TEST_CASE(&test_action_base_same_size_no_allocation));
   ts->add(BOOST_TEST_CASE(&test_action_base_hooks_copy_and_create_data));
+  ts->add(BOOST_TEST_CASE(&test_action_base_warmstart_hook));
   ts->add(BOOST_TEST_CASE(&test_action_base_nonzero_np_scalar_casts));
   framework::master_test_suite().add(ts);
 }

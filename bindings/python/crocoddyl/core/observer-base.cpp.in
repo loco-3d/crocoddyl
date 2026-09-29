@@ -31,6 +31,13 @@ struct ObserverModelAbstractVisitor
            &Model::default_set_params,
            bp::args("self", "data", "params"),
            "Wire a parameter manager into the observer model and data.")
+        .def("updateWarmstart", &ObserverModel::updateWarmstart,
+             &Model::default_updateWarmstart, bp::args("self", "data"),
+             "Commit the current observer data as warm-start history.\n\n"
+             "The default implementation does nothing. Stateful observer "
+             "models can override this hook to retain numerical history for "
+             "later evaluations.\n"
+             ":param data: evaluated observer data")
         .def("update_p", bp::pure_virtual(&ObserverModel::update_p),
            bp::args("self", "data", "p"),
            "Update the observer parameters.\n\n"

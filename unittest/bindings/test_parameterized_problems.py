@@ -240,6 +240,8 @@ class ParameterizedProblemsTest(unittest.TestCase):
 
         shallow = copy.copy(problem)
         deep = copy.deepcopy(problem)
+        self.assertEqual(shallow.nthreads, problem.nthreads)
+        self.assertEqual(deep.nthreads, problem.nthreads)
         shallow.runningDatas[0].cost = 7.0
         self.assertEqual(problem.runningDatas[0].cost, 7.0)
         deep.update_p(p1 / dtype(2), 1)
@@ -362,6 +364,10 @@ class ParameterizedProblemsTest(unittest.TestCase):
             paramsModel=[phase_params0, phase_params1],
         )
 
+        self.assertGreaterEqual(problem.nthreads, 1)
+        problem.nthreads = 1
+        self.assertEqual(problem.nthreads, 1)
+
         self.assertIsInstance(problem, module.ProblemAbstract)
         self.assertNotIsInstance(problem, module.ShootingProblem)
         for name in (
@@ -428,6 +434,8 @@ class ParameterizedProblemsTest(unittest.TestCase):
 
         shallow = copy.copy(problem)
         deep = copy.deepcopy(problem)
+        self.assertEqual(shallow.nthreads, problem.nthreads)
+        self.assertEqual(deep.nthreads, problem.nthreads)
         shallow.runningDatas[0].cost = 7.0
         self.assertEqual(problem.runningDatas[0].cost, 7.0)
         deep.update_p(p1 / dtype(2), 1)

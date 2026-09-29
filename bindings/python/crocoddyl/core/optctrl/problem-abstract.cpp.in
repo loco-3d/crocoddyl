@@ -44,6 +44,9 @@ namespace python {
            "Integrate the dynamics for a control sequence.\n\n"                \
            ":param us: control trajectory (size T)\n"                          \
            ":returns: state trajectory (size T+1)")                            \
+      .def("updateWarmstart", &Problem::updateWarmstart, bp::arg("self"),      \
+           "Commit the currently evaluated trajectory data as warm-start "    \
+           "history.")                                                        \
       .def("update_p", &Problem::update_p,                                     \
            (bp::arg("self"), bp::arg("p"), bp::arg("phase_idx") = 0),          \
            "Update the parameter vector of a phase.")                          \
@@ -59,6 +62,7 @@ namespace python {
       .add_property("ndx", bp::make_function(&Problem::get_ndx),               \
                     "dimension of the state tangent space")                    \
       .add_property("nthreads", bp::make_function(&Problem::get_nthreads),     \
+                    bp::make_function(&Problem::set_nthreads),                 \
                     "number of evaluation threads")                            \
       .add_property(                                                           \
           "runningModels",                                                     \

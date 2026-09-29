@@ -23,9 +23,9 @@ namespace crocoddyl {
  *
  * `ProblemAbstractTpl` defines the common interface used by solvers to
  * evaluate and roll out a trajectory, inspect the problem structure and
- * model/data objects, and track structural updates. Problems without
- * parameterized phases use the default empty phase interface; parameterized
- * problems override those hooks and `update_p()`.
+ * model/data objects, and track structural updates. Concrete problems expose
+ * their models and data through getters; common warm-start and parameter-phase
+ * operations are implemented here.
  */
 template <typename _Scalar>
 class ProblemAbstractTpl {
@@ -40,6 +40,8 @@ class ProblemAbstractTpl {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
 
+  ProblemAbstractTpl();
+  ProblemAbstractTpl(const ProblemAbstractTpl<Scalar>& problem);
   virtual ~ProblemAbstractTpl() = default;
 
   /**
@@ -77,11 +79,15 @@ class ProblemAbstractTpl {
    * The default implementation allocates a trajectory of size T+1 and calls
    * `rollout()`.
    */
-  virtual std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us) {
-    std::vector<VectorXs> xs(get_T() + 1);
-    rollout(us, xs);
-    return xs;
-  }
+  virtual std::vector<VectorXs> rollout_us(const std::vector<VectorXs>& us);
+
+  /**
+   * @brief Commit the currently evaluated trajectory data as warm-start history
+   *
+   * Each running model/data pair is updated independently. The terminal pair
+   * is updated after the running nodes.
+   */
+  void updateWarmstart();
 
   /** @brief Return the number of running nodes */
   virtual std::size_t get_T() const = 0;
@@ -96,7 +102,15 @@ class ProblemAbstractTpl {
   virtual std::size_t get_ndx() const = 0;
 
   /** @brief Return the number of threads used for parallel evaluation */
-  virtual std::size_t get_nthreads() const = 0;
+  virtual std::size_t get_nthreads() const;
+
+  /**
+   * @brief Set the number of threads used for parallel evaluation
+   *
+   * Values below 1 select the CROCODDYL_WITH_NTHREADS default when
+   * multithreading support is enabled.
+   */
+  void set_nthreads(const int nthreads);
 
   /** @brief Return the running action models (size T) */
   virtual const std::vector<std::shared_ptr<ActionModelAbstract> >&
@@ -114,63 +128,58 @@ class ProblemAbstractTpl {
   virtual const std::shared_ptr<ActionDataAbstract>& get_terminalData()
       const = 0;
 
+  /** @brief Return the running data of a parameter phase */
+  std::vector<std::shared_ptr<ActionDataAbstract> > get_runningPhaseDatas(
+      const std::size_t phase_idx) const;
+
   /**
    * @brief Return true once when the problem has been structurally modified
    */
-  virtual bool is_updated() = 0;
+  virtual bool is_updated();
 
   /** @brief Set the structural-update flag */
-  virtual void set_is_updated(const bool is_updated) = 0;
+  virtual void set_is_updated(const bool is_updated);
 
   /**
    * @brief Return the number of phases
    *
-   * Standard shooting problems have no explicit phases.
+   * Problems without parameter models have no parameterized phases.
    */
-  virtual std::size_t get_n_phases() const { return 0; }
+  virtual std::size_t get_n_phases() const;
 
   /**
    * @brief Update the parameter vector of a phase
    *
-   * Parameterized problems override this method. The default implementation
-   * reports that parameter updates are unsupported.
+   * The phase model owns the shared parameter payload for its running nodes.
    */
-  virtual void update_p(const Eigen::Ref<const VectorXs>&,
-                        const std::size_t = 0) {
-    throw_pretty("Invalid call: update_p is not supported for this problem");
-  }
+  virtual void update_p(const Eigen::Ref<const VectorXs>& p,
+                        const std::size_t phase_idx = 0);
 
   /** @brief Return the inclusive start index of each phase */
-  virtual const std::vector<std::size_t>& get_phase_idxs() const {
-    static const std::vector<std::size_t> empty;
-    return empty;
-  }
+  virtual const std::vector<std::size_t>& get_phase_idxs() const;
 
   /** @brief Return the exclusive end index of each phase */
-  virtual const std::vector<std::size_t>& get_phase_edxs() const {
-    static const std::vector<std::size_t> empty;
-    return empty;
-  }
+  virtual const std::vector<std::size_t>& get_phase_edxs() const;
 
   /** @brief Return the phase-level parameter models */
   virtual const std::vector<std::shared_ptr<ParameterPhaseModel> >&
-  get_paramsModel() const {
-    static const std::vector<std::shared_ptr<ParameterPhaseModel> > empty;
-    return empty;
-  }
+  get_paramsModel() const;
 
   /** @brief Return the phase-level parameter data */
   virtual const std::vector<std::shared_ptr<ParameterPhaseData> >&
-  get_paramsData() const {
-    static const std::vector<std::shared_ptr<ParameterPhaseData> > empty;
-    return empty;
-  }
+  get_paramsData() const;
 
   /** @brief Return true when parameter constraints are active */
-  virtual bool has_parameter_constraints() const { return false; }
+  virtual bool has_parameter_constraints() const;
+
+ protected:
+  std::size_t nthreads_;
+  bool is_updated_ = false;
 };
 
 }  // namespace crocoddyl
+
+#include "crocoddyl/core/optctrl/problem-abstract.hxx"
 
 CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ProblemAbstractTpl)
 

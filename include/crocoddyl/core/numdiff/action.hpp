@@ -109,6 +109,10 @@ class ActionModelNumDiffTpl : public ActionModelAbstractTpl<_Scalar> {
   virtual void calcDiff(const std::shared_ptr<ActionDataAbstract>& data,
                         const Eigen::Ref<const VectorXs>& x) override;
 
+  /** @brief Commit the nominal wrapped data as warm-start history. */
+  virtual void updateWarmstart(
+      const std::shared_ptr<ActionDataAbstract>& data) override;
+
   /**
    * @brief @copydoc Base::createData()
    */

@@ -314,14 +314,14 @@ void test_parametrized_shooting_problem() {
   BOOST_CHECK(problem.get_phase_idxs() == std::vector<std::size_t>({0, 2}));
   BOOST_CHECK(problem.get_phase_edxs() == std::vector<std::size_t>({2, 3}));
   BOOST_CHECK_EQUAL(problem.get_runningPhaseModels(0).size(), 2);
-  BOOST_CHECK_EQUAL(problem.get_runningPhaseDatas(1).size(), 1);
+  BOOST_CHECK_EQUAL(base.get_runningPhaseDatas(1).size(), 1);
   BOOST_CHECK(problem.get_runningPhaseModels(0)[0] ==
               problem.get_runningModels()[0]);
   BOOST_CHECK(problem.get_runningPhaseModels(1)[0] ==
               problem.get_runningModels()[2]);
-  BOOST_CHECK(problem.get_runningPhaseDatas(0)[0] ==
+  BOOST_CHECK(base.get_runningPhaseDatas(0)[0] ==
               problem.get_runningDatas()[0]);
-  BOOST_CHECK(problem.get_runningPhaseDatas(1)[0] ==
+  BOOST_CHECK(base.get_runningPhaseDatas(1)[0] ==
               problem.get_runningDatas()[2]);
   BOOST_CHECK(problem.has_parameter_constraints());
   BOOST_CHECK(problem.get_paramsModel()[0] == phase_params0);
@@ -610,13 +610,22 @@ void test_observation_problem() {
 
   BOOST_CHECK_EQUAL(base.get_T(), 3);
   BOOST_CHECK_EQUAL(base.get_n_phases(), 2);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  BOOST_CHECK_EQUAL(base.get_nthreads(), CROCODDYL_WITH_NTHREADS);
+  base.set_nthreads(2);
+  BOOST_CHECK_EQUAL(base.get_nthreads(), 2);
+  base.set_nthreads(0);
+  BOOST_CHECK_EQUAL(base.get_nthreads(), CROCODDYL_WITH_NTHREADS);
+#else
+  base.set_nthreads(2);
   BOOST_CHECK_EQUAL(base.get_nthreads(), 1);
+#endif
   BOOST_CHECK(problem.get_phase_idxs() == std::vector<std::size_t>({0, 2}));
   BOOST_CHECK(problem.get_phase_edxs() == std::vector<std::size_t>({2, 3}));
   BOOST_CHECK_EQUAL(problem.get_runningPhaseModels(0).size(), 2);
-  BOOST_CHECK_EQUAL(problem.get_runningPhaseDatas(1).size(), 1);
+  BOOST_CHECK_EQUAL(base.get_runningPhaseDatas(1).size(), 1);
   BOOST_CHECK(problem.get_runningPhaseModels(1)[0] == observer1);
-  BOOST_CHECK(problem.get_runningPhaseDatas(1)[0] ==
+  BOOST_CHECK(base.get_runningPhaseDatas(1)[0] ==
               problem.get_runningDatas()[2]);
   BOOST_CHECK(problem.has_parameter_constraints());
   BOOST_CHECK(observer0a->get_tau_meas().isApprox(tau_meas[0]));
@@ -666,6 +675,15 @@ void test_observation_problem() {
   const Scalar cost = problem.calc(xs, ws);
   BOOST_CHECK(cost > Scalar(0));
   BOOST_CHECK_EQUAL(problem.calcDiff(xs, ws), cost);
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  problem.set_nthreads(1);
+  BOOST_CHECK_EQUAL(problem.calc(xs, ws), cost);
+  BOOST_CHECK_EQUAL(problem.calcDiff(xs, ws), cost);
+  problem.set_nthreads(2);
+  BOOST_CHECK_EQUAL(problem.calc(xs, ws), cost);
+  BOOST_CHECK_EQUAL(problem.calcDiff(xs, ws), cost);
+  problem.set_nthreads(1);
+#endif
   BOOST_CHECK(problem.get_runningDatas()[0]->Fu.isZero());
   BOOST_CHECK(problem.get_runningDatas()[0]->Fp.col(0).isOnes());
   BOOST_CHECK(problem.get_runningDatas()[2]->Fp.col(0).isOnes());
@@ -686,9 +704,21 @@ void test_observation_problem() {
   BOOST_CHECK(observer0a->get_tau_meas().isApprox(all_tau[0]));
   BOOST_CHECK(observer1->get_tau_meas().isApprox(all_tau[2]));
 
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  base.set_nthreads(2);
+#endif
+  base.set_is_updated(true);
   Problem copied(problem);
+  BOOST_CHECK_EQUAL(copied.get_nthreads(), base.get_nthreads());
+  BOOST_CHECK(copied.is_updated());
+  BOOST_CHECK(problem.is_updated());
   BOOST_CHECK(copied.get_runningDatas()[0] == problem.get_runningDatas()[0]);
   BOOST_CHECK(copied.get_paramsData()[1] == problem.get_paramsData()[1]);
+  BOOST_CHECK(copied.get_phase_idxs() == problem.get_phase_idxs());
+#ifdef CROCODDYL_WITH_MULTITHREADING
+  copied.set_nthreads(1);
+  BOOST_CHECK_EQUAL(base.get_nthreads(), 2);
+#endif
   BOOST_CHECK_EQUAL(copied.calc(xs, ws), problem.calc(xs, ws));
   copied.set_is_updated(true);
   BOOST_CHECK(copied.is_updated());

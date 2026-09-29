@@ -132,6 +132,7 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
       if (acceptstep_) {
         setCandidate(xs_try_, us_try_, false);
         updateCandidate();
+        problem_->updateWarmstart();
         break;
       }
     }
@@ -298,10 +299,14 @@ bool SolverAbstractTpl<Scalar>::checkAcceptance() {
 template <typename Scalar>
 void SolverAbstractTpl<Scalar>::calcDir() {
   START_PROFILER("SolverAbstract::calcDir");
-  if (!acceptstep_) {
+  const bool recalc = !acceptstep_;
+  if (recalc) {
     problem_->calc(xs_, us_);
   }
   cost_ = problem_->calcDiff(xs_, us_);
+  if (recalc) {
+    problem_->updateWarmstart();
+  }
   ffeas_ = computeDynamicFeasibility();
   gfeas_ = computeInequalityFeasibility();
   hfeas_ = computeEqualityFeasibility();
