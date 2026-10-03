@@ -19,10 +19,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     : cost_(Scalar(0.)),
       T_(running_models.size()),
       x0_(x0),
-      terminal_model_(terminal_model),
+      terminal_model_(checkedTerminalModel(terminal_model)),
       running_models_(running_models),
-      nx_(running_models[0]->get_state()->get_nx()),
-      ndx_(running_models[0]->get_state()->get_ndx()),
+      nx_(checkedFirstRunningModel(running_models)->get_state()->get_nx()),
+      ndx_(checkedFirstRunningModel(running_models)->get_state()->get_ndx()),
       n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
@@ -31,6 +31,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
   }
   for (std::size_t i = 1; i < T_; ++i) {
     const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    if (model == nullptr) {
+      throw_pretty("Invalid argument: running model at node " << i
+                                                              << " is null")
+    }
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -65,12 +69,12 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
     : cost_(Scalar(0.)),
       T_(running_models.size()),
       x0_(x0),
-      terminal_model_(terminal_model),
+      terminal_model_(checkedTerminalModel(terminal_model)),
       terminal_data_(terminal_data),
       running_models_(running_models),
       running_datas_(running_datas),
-      nx_(running_models[0]->get_state()->get_nx()),
-      ndx_(running_models[0]->get_state()->get_ndx()),
+      nx_(checkedFirstRunningModel(running_models)->get_state()->get_nx()),
+      ndx_(checkedFirstRunningModel(running_models)->get_state()->get_ndx()),
       n_phases_(0) {
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
@@ -87,6 +91,10 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
   for (std::size_t i = 0; i < T_; ++i) {
     const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
     const std::shared_ptr<ActionDataAbstract>& data = running_datas_[i];
+    if (model == nullptr) {
+      throw_pretty("Invalid argument: running model at node " << i
+                                                              << " is null")
+    }
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -167,6 +175,19 @@ ShootingProblemTpl<Scalar>::checkedTerminalModel(
     throw_pretty("Invalid argument: terminal_model is null");
   }
   return terminal_model;
+}
+
+template <typename Scalar>
+const std::shared_ptr<typename ShootingProblemTpl<Scalar>::ActionModelAbstract>&
+ShootingProblemTpl<Scalar>::checkedFirstRunningModel(
+    const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models) {
+  if (running_models.empty()) {
+    throw_pretty("Invalid argument: running_models is empty");
+  }
+  if (running_models.front() == nullptr) {
+    throw_pretty("Invalid argument: running model at node 0 is null");
+  }
+  return running_models.front();
 }
 
 template <typename Scalar>

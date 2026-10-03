@@ -345,6 +345,9 @@ class ShootingProblemTpl : public ProblemAbstractTpl<_Scalar> {
   static std::shared_ptr<ActionModelAbstract> checkedTerminalModel(
       std::shared_ptr<ActionModelAbstract> terminal_model);
 
+  static const std::shared_ptr<ActionModelAbstract>& checkedFirstRunningModel(
+      const std::vector<std::shared_ptr<ActionModelAbstract> >& running_models);
+
   static std::vector<std::shared_ptr<ActionModelAbstract> > flattenModelPhases(
       const std::vector<std::vector<std::shared_ptr<ActionModelAbstract> > >&
           model_phases);

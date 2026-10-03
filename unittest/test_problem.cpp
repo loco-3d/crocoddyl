@@ -21,6 +21,22 @@ using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
 
+void test_constructor_rejects_empty_horizon() {
+  const std::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(ActionModelTypes::ActionModelLQR);
+  const Eigen::VectorXd x0 = model->get_state()->zero();
+  const std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> models;
+  const std::vector<std::shared_ptr<crocoddyl::ActionDataAbstract>> datas;
+
+  BOOST_CHECK_THROW(crocoddyl::ShootingProblem(x0, models, model),
+                    crocoddyl::Exception);
+  BOOST_CHECK_THROW(
+      crocoddyl::ShootingProblem(x0, models, model, datas, model->createData()),
+      crocoddyl::Exception);
+}
+
+//----------------------------------------------------------------------------//
+
 void test_calc_model(
     const std::shared_ptr<crocoddyl::ActionModelAbstract>& model) {
   // create two shooting problems (with and without data allocation)
@@ -436,6 +452,8 @@ void register_action_model_unit_tests(
 }
 
 bool init_function() {
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_constructor_rejects_empty_horizon));
   for (size_t i = 0; i < ActionModelTypes::all.size(); ++i) {
     register_action_model_unit_tests(ActionModelTypes::all[i]);
   }
