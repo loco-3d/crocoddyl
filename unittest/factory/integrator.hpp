@@ -47,11 +47,9 @@ class IntegratorFactory {
 
   std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
       IntegratorTypes::Type type,
-      std::shared_ptr<DifferentialActionModelAbstract> model) const;
-
-  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> create(
-      IntegratorTypes::Type type,
-      std::shared_ptr<DifferentialActionModelAbstract> model,
+      std::shared_ptr<DynamicsModelAbstract> dynamics,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints,
       std::shared_ptr<ControlParametrizationModelAbstract> control) const;
 };
 

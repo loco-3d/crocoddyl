@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -25,7 +25,8 @@ class ContactModelBase {
 };
 
 template <typename _Scalar>
-class ContactModelAbstractTpl : public ContactModelBase {
+class [[deprecated("Use ImplicitConstraintModelAbstract.")]]
+ContactModelAbstractTpl : public ContactModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -180,7 +181,8 @@ class ContactModelAbstractTpl : public ContactModelBase {
 };
 
 template <typename _Scalar>
-struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
+struct [[deprecated("Use ImplicitConstraintDataAbstract.")]]
+ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

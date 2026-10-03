@@ -29,7 +29,7 @@ def runDDPSolveBenchmark(xs, us, problem):
     duration = []
     for i in range(T):
         c_start = time.time()
-        solver.solve(xs, us, MAXITER)
+        solver.solve(xs, us, maxiter=MAXITER)
         c_end = time.time()
         duration.append(1e3 * (c_end - c_start))
 

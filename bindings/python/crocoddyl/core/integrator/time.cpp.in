@@ -1,0 +1,62 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/integrator/time.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct IntegratorTimeVisitor
+    : public bp::def_visitor<IntegratorTimeVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "timeStep",
+          bp::make_function(&Model::get_time_step,
+                            bp::return_value_policy<bp::return_by_value>()),
+          bp::make_function(&Model::set_time_step), "integration time step")
+        .add_property(
+            "timeStep2",
+            bp::make_function(&Model::get_time_step2,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "squared integration time step")
+        .add_property(
+            "timeopt",
+            bp::make_function(&Model::get_timeopt,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Model::set_timeopt),
+            "time-step optimization flag");
+  }
+};
+
+#define CROCODDYL_INTEGRATOR_TIME_PYTHON_BINDINGS(Scalar)                  \
+  typedef IntegratorTimeTpl<Scalar> Model;                                  \
+  bp::class_<Model, std::shared_ptr<Model> >(                               \
+      "IntegratorTime",                                                     \
+      "Shared integration-time metadata. Its squared step remains "         \
+      "synchronized with the time step.",                                  \
+      bp::init<bp::optional<Scalar, bool> >(                                \
+          bp::args("self", "timeStep", "timeopt"),                        \
+          "Initialize the integration time.\n\n"                           \
+          ":param timeStep: nonnegative integration time (default 1e-3)\n" \
+          ":param timeopt: enable time optimization (default False)"))      \
+      .def(IntegratorTimeVisitor<Model>())                                  \
+      .def(CastVisitor<Model>())                                            \
+      .def(PrintableVisitor<Model>())                                       \
+      .def(CopyableVisitor<Model>());
+
+void exposeIntegratorTime() {
+  CROCODDYL_INTEGRATOR_TIME_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

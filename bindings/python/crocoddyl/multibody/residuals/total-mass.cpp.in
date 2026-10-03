@@ -1,0 +1,132 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/total-mass.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelTotalMassVisitor
+    : public bp::def_visitor<ResidualModelTotalMassVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, Scalar, std::size_t, std::size_t,
+                    std::string>(
+               bp::args("self", "state", "mass_ref", "nu", "np", "param_name"),
+               "Initialize the total-mass residual model.\n\n"
+               ":param state: state description\n"
+               ":param mass_ref: reference total mass\n"
+               ":param nu: dimension of the control vector\n"
+               ":param np: total active parameter dimension of the "
+               "ParameterDataManager (action + dynamics combined)\n"
+               ":param param_name: name of the MultibodyInertialParams entry "
+               "in the ParameterDataManager"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute complete-model total mass minus mass_ref.\n\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobian of the total-mass residual.\n\n"
+             "Places the mass row of each body's dpsi_dp block at the "
+             "corresponding columns of Rp.\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calcDiff",
+             static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                             const Eigen::Ref<const VectorXs>&)>(
+                 &ModelBase::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the total-mass residual data.\n\n"
+             ":param data: shared data (must provide ParameterDataManager)\n"
+             ":return residual data.")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_value_policy<
+                                            bp::return_by_value>()),
+                      &Model::set_reference, "reference total mass")
+        .add_property("param_name",
+                      bp::make_function(&Model::get_param_name,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "name of the MultibodyInertialParams entry");
+  }
+};
+
+template <typename Data>
+struct ResidualDataTotalMassVisitor
+    : public bp::def_visitor<ResidualDataTotalMassVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "np_offset",
+        bp::make_getter(&Data::np_offset,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "column offset of the named param slice in the global parameter "
+        "vector");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_TOTAL_MASS_PYTHON_BINDINGS(Scalar)            \
+  typedef ResidualModelTotalMassTpl<Scalar> Model;                             \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                          \
+  typedef ResidualDataTotalMassTpl<Scalar> Data;                               \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ResidualModelTotalMass",                                                 \
+      "Complete Pinocchio-model total-mass residual.\n\n"                     \
+      "Parameter derivatives cover the bodies selected by the named "          \
+      "MultibodyInertialParamsData entry.",                                     \
+      bp::no_init)                                                              \
+      .def(ResidualModelTotalMassVisitor<Model>())                              \
+      .def(CastVisitor<Model>())                                                \
+      .def(PrintableVisitor<Model>())                                           \
+      .def(CopyableVisitor<Model>());                                           \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ResidualDataTotalMass",                                                  \
+      "Data for ResidualModelTotalMass.",                                       \
+      bp::no_init)                                                              \
+      .def(ResidualDataTotalMassVisitor<Data>())                                \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualTotalMass() {
+  CROCODDYL_RESIDUAL_MODEL_TOTAL_MASS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

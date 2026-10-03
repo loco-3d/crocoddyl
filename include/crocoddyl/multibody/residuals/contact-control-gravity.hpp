@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2020-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
@@ -180,15 +181,24 @@ struct ResidualDataContactControlGravTpl
     // Check that proper shared data has been passed
     DataCollectorActMultibodyInContactTpl<Scalar>* d =
         dynamic_cast<DataCollectorActMultibodyInContactTpl<Scalar>*>(shared);
-    if (d == NULL) {
+    DataCollectorActMultibodyInImplicitConstraintTpl<Scalar>* d_implicit =
+        dynamic_cast<DataCollectorActMultibodyInImplicitConstraintTpl<Scalar>*>(
+            shared);
+    if (d == NULL && d_implicit == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "
-          "DataCollectorActMultibodyInContactTpl");
+          "DataCollectorActMultibodyInContact or "
+          "DataCollectorActMultibodyInImplicitConstraint");
     }
     // Avoids data casting at runtime
     // pinocchio = d->pinocchio;
-    fext = d->contacts->fext;
-    actuation = d->actuation;
+    if (d != NULL) {
+      fext = d->contacts->fext;
+      actuation = d->actuation;
+    } else {
+      fext = d_implicit->constraints->fext;
+      actuation = d_implicit->actuation;
+    }
   }
   virtual ~ResidualDataContactControlGravTpl() = default;
 
@@ -205,8 +215,6 @@ struct ResidualDataContactControlGravTpl
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hxx"
 

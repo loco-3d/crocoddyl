@@ -1,0 +1,204 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/dynamics/impulse-forward.hpp"
+
+#include "python/crocoddyl/core/dynamics-base.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DynamicsModelImpulseForwardVisitor
+    : public bp::def_visitor<DynamicsModelImpulseForwardVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::DynamicsDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::ImplicitConstraintModelMultiple Constraints;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
+  typedef typename Model::ParameterManager ParameterManager;
+  typedef typename Model::VectorXs VectorXs;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(
+           bp::init<std::shared_ptr<State>, std::shared_ptr<Constraints>,
+                    bp::optional<std::size_t, Scalar, Scalar> >(
+               bp::args("self", "state", "constraints", "np", "r_coeff",
+                        "JMinvJt_damping"),
+               "Initialize the impulse forward dynamics model.\n\n"
+               ":param state: multibody state\n"
+               ":param constraints: multiple implicit-constraint model "
+               "(impulse contacts)\n"
+               ":param np: number of dynamics parameters\n"
+               ":param r_coeff: restitution coefficient (default 0)\n"
+               ":param JMinvJt_damping: operational-space inertia damping "
+               "(default 0)"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the post-impulse next state.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: unused (nu = 0)")
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x"),
+             "Compute the impulse forward terminal-node data.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobians of the post-impulse next state.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: unused (nu = 0)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x"),
+             "Compute the state-only derivatives of the impulse forward "
+             "terminal-node data.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff_xu",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_xu),
+             bp::args("self", "data", "x", "u"),
+             "Compute the state-control derivatives of the impulse forward "
+             "dynamics.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: unused (nu = 0)")
+        .def("calcDiff_xu",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_xu),
+             bp::args("self", "data", "x"),
+             "Compute the state-only derivatives of the impulse forward "
+             "dynamics.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff_p",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_p),
+             bp::args("self", "data", "x", "u"),
+             "Compute the parameter sensitivity of the impulse forward "
+             "dynamics.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: unused (nu = 0)")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
+             "Create the impulse forward dynamics data.")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &Model::createData),
+             bp::args("self", "params_data"),
+             "Create impulse forward dynamics data sharing parameter manager "
+             "data.\n\n"
+             ":param params_data: parameter-manager data")
+        .def("set_params", &Model::set_params, bp::args("self", "data", "params"),
+             "Attach a parameter manager to the impulse forward dynamics "
+             "model and data.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param params: parameter manager")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the active parameter vector.\n\n"
+             ":param data: impulse forward dynamics data\n"
+             ":param p: active parameter vector")
+        .add_property("pinocchio",
+                      bp::make_function(&Model::get_pinocchio,
+                                        bp::return_internal_reference<>()),
+                      "multibody model (i.e. pinocchio model)")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "multiple implicit-constraint model")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
+        .add_property("r_coeff", &Model::get_r_coeff,
+                      "restitution coefficient")
+        .add_property("JMinvJt_damping", &Model::get_damping_factor,
+                      "operational-space inertia damping");
+  }
+};
+
+template <typename Data>
+struct DynamicsDataImpulseForwardVisitor
+    : public bp::def_visitor<DynamicsDataImpulseForwardVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+           "pinocchio",
+           bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+           "pinocchio data")
+        .add_property("multibody",
+                      bp::make_getter(&Data::multibody,
+                                      bp::return_internal_reference<>()),
+                      "multibody data");
+  }
+};
+
+#define CROCODDYL_DYNAMICS_MODEL_IMPULSE_FORWARD_PYTHON_BINDINGS(Scalar)       \
+  typedef DynamicsModelImpulseForwardTpl<Scalar> Model;                        \
+  typedef DynamicsModelAbstractTpl<Scalar> ModelBase;                          \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                       \
+  bp::class_<Model, bp::bases<ModelBase> >(                                    \
+      "DynamicsModelImpulseForward",                                           \
+      "Dynamics model for impulse forward dynamics in multibody systems.\n\n"  \
+      "Uses an ImplicitConstraintModelMultiple stack to assemble the contact " \
+      "Jacobian and compute the post-impulse velocity via "                    \
+      "pinocchio::impulseDynamics. The dynamics type is DiscreteTime with "    \
+      "nu = 0.",                                                                \
+      bp::no_init)                                                              \
+      .def(DynamicsModelImpulseForwardVisitor<Model>())                        \
+      .def(CastVisitor<Model>())                                               \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_DYNAMICS_DATA_IMPULSE_FORWARD_PYTHON_BINDINGS(Scalar)        \
+  typedef DynamicsDataImpulseForwardTpl<Scalar> Data;                          \
+  typedef DynamicsDataAbstractTpl<Scalar> DataBase;                            \
+  typedef DynamicsModelImpulseForwardTpl<Scalar> Model;                        \
+  bp::register_ptr_to_python<std::shared_ptr<Data> >();                        \
+  bp::class_<Data, bp::bases<DataBase> >(                                      \
+      "DynamicsDataImpulseForward",                                            \
+      "Data for impulse forward dynamics.",                                     \
+      bp::init<Model*>(bp::args("self", "model"),                              \
+                       "Create impulse forward dynamics data.\n\n"             \
+                       ":param model: impulse forward dynamics model"))         \
+      .def(DynamicsDataImpulseForwardVisitor<Data>())                          \
+      .def(CopyableVisitor<Data>());
+
+void exposeDynamicsImpulseForward() {
+  CROCODDYL_DYNAMICS_MODEL_IMPULSE_FORWARD_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_DATA_IMPULSE_FORWARD_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

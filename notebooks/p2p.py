@@ -1,3 +1,11 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
 import example_robot_data
 import numpy as np
 import pinocchio
@@ -51,7 +59,7 @@ for p in ps:
         ),
     )
 
-    actuation = crocoddyl.ActuationModelFull(state)
+    actuation = crocoddyl.ActuationModelMultibody(state)
 
     # Create the running action model
     runningCostModel = crocoddyl.CostModelSum(state)
@@ -99,7 +107,7 @@ ddp.solve()
 for i in range(4, 6):
     for m in terminalModels:
         m.costs.costs["gripperPose"].weight = 10**i
-    ddp.solve(ddp.xs, ddp.us, 10)
+    ddp.solve(ddp.xs, ddp.us, maxiter=10)
 
 # Visualizing the solution in gepetto-viewer
 display.displayFromSolver(ddp)

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,12 +30,12 @@ class ConstraintModelBase {
  * @brief Abstract class for constraint models
  *
  * A constraint model defines both: inequality \f$\mathbf{g}(\mathbf{x},
- * \mathbf{u})\in\mathbb{R}^{ng}\f$ and equality \f$\mathbf{h}(\mathbf{x},
- * \mathbf{u})\in\mathbb{R}^{nh}\f$ constraints. The constraint function depends
- * on the state point \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state
- * manifold described with a `nx`-tuple, its velocity \f$\dot{\mathbf{x}}\in
- * T_{\mathbf{x}}\mathcal{X}\f$ that belongs to the tangent space with `ndx`
- * dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$.
+ * \mathbf{u},\mathbf{p})\in\mathbb{R}^{ng}\f$ and equality
+ * \f$\mathbf{h}(\mathbf{x},\mathbf{u},\mathbf{p})\in\mathbb{R}^{nh}\f$
+ * constraints. The constraint function depends on the state point
+ * \f$\mathbf{x}\in\mathcal{X}\f$, the control input
+ * \f$\mathbf{u}\in\mathbb{R}^{nu}\f$, and the parameter vector
+ * \f$\mathbf{p}\in\mathbb{R}^{np}\f$.
  *
  * The main computations are carried out in `calc()` and `calcDiff()` routines.
  * `calc()` computes the constraint residual and `calcDiff()` computes the
@@ -43,10 +43,12 @@ class ConstraintModelBase {
  * builds a linear approximation of the constraint function with the form:
  * \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
  * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
- * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
- * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$. Additionally, it is important
- * to note that `calcDiff()` computes the derivatives using the latest stored
- * values by `calc()`. Thus, we need to first run `calc()`.
+ * \f$\mathbf{g_p}\in\mathbb{R}^{ng\times np}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$,
+ * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$, and
+ * \f$\mathbf{h_p}\in\mathbb{R}^{nh\times np}\f$. `calcDiff()` computes the
+ * derivatives using the latest values stored by `calc()`, so `calc()` has to
+ * be called first.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -214,6 +216,11 @@ class ConstraintModelAbstractTpl : public ConstraintModelBase {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the parameter vector
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Return the number of inequality constraints
    */
   std::size_t get_ng() const;
@@ -284,18 +291,22 @@ struct ConstraintDataAbstractTpl {
         g(model->get_ng()),
         Gx(model->get_ng(), model->get_state()->get_ndx()),
         Gu(model->get_ng(), model->get_nu()),
+        Gp(model->get_ng(), model->get_np()),
         h(model->get_nh()),
         Hx(model->get_nh(), model->get_state()->get_ndx()),
-        Hu(model->get_nh(), model->get_nu()) {
+        Hu(model->get_nh(), model->get_nu()),
+        Hp(model->get_nh(), model->get_np()) {
     if (model->get_ng() == 0 && model->get_nh() == 0) {
       throw_pretty("Invalid argument: " << "ng and nh cannot be equals to 0");
     }
     g.setZero();
     Gx.setZero();
     Gu.setZero();
+    Gp.setZero();
     h.setZero();
     Hx.setZero();
     Hu.setZero();
+    Hp.setZero();
   }
   virtual ~ConstraintDataAbstractTpl() = default;
 
@@ -304,9 +315,11 @@ struct ConstraintDataAbstractTpl {
   VectorXs g;   //!< Inequality constraint values
   MatrixXs Gx;  //!< Jacobian of the inequality constraint
   MatrixXs Gu;  //!< Jacobian of the inequality constraint
+  MatrixXs Gp;  //!< Jacobian of the inequality constraint w.r.t. parameters
   VectorXs h;   //!< Equality constraint values
   MatrixXs Hx;  //!< Jacobian of the equality constraint
   MatrixXs Hu;  //!< Jacobian of the equality constraint
+  MatrixXs Hp;  //!< Jacobian of the equality constraint w.r.t. parameters
 };
 
 }  // namespace crocoddyl

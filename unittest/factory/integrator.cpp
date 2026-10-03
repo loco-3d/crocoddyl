@@ -46,58 +46,30 @@ IntegratorFactory::~IntegratorFactory() {}
 
 std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
 IntegratorFactory::create(
-    IntegratorTypes::Type type,
-    std::shared_ptr<DifferentialActionModelAbstract> model) const {
-  std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
-  switch (type) {
-    case IntegratorTypes::IntegratorEuler:
-      action = std::make_shared<crocoddyl::IntegratedActionModelEuler>(model);
-      break;
-    case IntegratorTypes::IntegratorRK2:
-      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, RKType::two);
-      break;
-    case IntegratorTypes::IntegratorRK3:
-      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, RKType::three);
-      break;
-    case IntegratorTypes::IntegratorRK4:
-      action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, RKType::four);
-      break;
-    default:
-      throw_pretty(__FILE__ ": Wrong IntegratorTypes::Type given");
-      break;
-  }
-  return action;
-}
-
-std::shared_ptr<crocoddyl::IntegratedActionModelAbstract>
-IntegratorFactory::create(
-    IntegratorTypes::Type type,
-    std::shared_ptr<DifferentialActionModelAbstract> model,
+    IntegratorTypes::Type type, std::shared_ptr<DynamicsModelAbstract> dynamics,
+    std::shared_ptr<CostModelSum> costs,
+    std::shared_ptr<ConstraintModelManager> constraints,
     std::shared_ptr<ControlParametrizationModelAbstract> control) const {
   std::shared_ptr<crocoddyl::IntegratedActionModelAbstract> action;
   switch (type) {
     case IntegratorTypes::IntegratorEuler:
-      action = std::make_shared<crocoddyl::IntegratedActionModelEuler>(model,
-                                                                       control);
+      action = std::make_shared<crocoddyl::IntegratedActionModelEuler>(
+          dynamics, costs, constraints, control);
       break;
     case IntegratorTypes::IntegratorRK2:
       action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, control, RKType::two);
+          dynamics, costs, constraints, control, nullptr, RKType::two);
       break;
     case IntegratorTypes::IntegratorRK3:
       action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, control, RKType::three);
+          dynamics, costs, constraints, control, nullptr, RKType::three);
       break;
     case IntegratorTypes::IntegratorRK4:
       action = std::make_shared<crocoddyl::IntegratedActionModelRK>(
-          model, control, RKType::four);
+          dynamics, costs, constraints, control, nullptr, RKType::four);
       break;
     default:
       throw_pretty(__FILE__ ": Wrong IntegratorTypes::Type given");
-      break;
   }
   return action;
 }

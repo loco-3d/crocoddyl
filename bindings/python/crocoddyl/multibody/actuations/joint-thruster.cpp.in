@@ -1,0 +1,94 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actuations/joint-thruster.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct JointDynamicsModelThrusterVisitor
+    : public bp::def_visitor<JointDynamicsModelThrusterVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "q", "v", "u"),
+           "Compute the joint thruster dynamics.\n\n"
+           ":param data: joint dynamics data\n"
+           ":param q: joint configuration\n"
+           ":param v: joint velocity\n"
+           ":param u: thruster commands")
+        .def("calcDiff", &Model::calcDiff,
+             bp::args("self", "data", "q", "v", "u"),
+             "Compute the derivatives of the joint thruster dynamics.\n\n"
+             "calc must be called first with the same data and inputs.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: thruster commands")
+        .def("commands", &Model::commands,
+             bp::args("self", "data", "q", "v", "tau"),
+             "Compute the thruster commands from the generalized torque.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param tau: generalized torque")
+        .def("computeJointTorqueRegressor", &Model::computeJointTorqueRegressor,
+             bp::args("self", "joint_dtau_dp", "q", "v", "u"),
+             "Compute the joint torque regressor with respect to the "
+             "thruster torque coefficients.")
+        .def("set_thrusters", &Model::set_thrusters, bp::args("self", "thrusters"),
+             "Set the thruster configuration.")
+        .def("updateParametrizationDerivative",
+             &Model::updateParametrizationDerivative, bp::args("self", "dgamma_dp"),
+             "Update the Jacobian of the internal thruster parameters.\n\n"
+             ":param dgamma_dp: internal-parameter Jacobian")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the thruster joint dynamics data.\n\n"
+             ":return joint dynamics data.")
+        .add_property("thrusters",
+                      bp::make_function(&Model::get_thrusters,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "thruster configuration")
+        .add_property("nthrusters", bp::make_function(&Model::get_nthrusters),
+                      "number of thrusters")
+        .add_property(
+            "Wthrust",
+            bp::make_function(
+                &Model::get_Wthrust,
+                bp::return_value_policy<bp::copy_const_reference>()),
+            "matrix mapping thrust commands to the free-flyer wrench");
+  }
+};
+
+#define CROCODDYL_JOINT_DYNAMICS_THRUSTER_PYTHON_BINDINGS(Scalar)             \
+  typedef JointDynamicsModelThrusterTpl<Scalar> Model;                        \
+  typedef JointDynamicsModelAbstractTpl<Scalar> ModelBase;                    \
+  typedef ThrusterTpl<Scalar> Thruster;                                       \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                      \
+  bp::class_<Model, bp::bases<ModelBase> >(                                   \
+      "JointDynamicsModelThruster",                                           \
+      "Thruster-based free-flyer joint dynamics model.",                      \
+      bp::init<std::vector<Thruster> >(                                       \
+          bp::args("self", "thrusters"),                                      \
+          "Initialize the joint thruster dynamics model.\n\n"                 \
+          ":param thrusters: vector of thrusters"))                           \
+      .def(JointDynamicsModelThrusterVisitor<Model>())                        \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+void exposeJointDynamicsThruster() {
+  CROCODDYL_JOINT_DYNAMICS_THRUSTER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
