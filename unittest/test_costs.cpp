@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2026, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh,
 //                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
@@ -11,6 +11,8 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/cost.hpp"
 #include "unittest_common.hpp"
@@ -19,6 +21,138 @@ using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
+
+template <typename _Scalar>
+class ParameterOnlyResidualTpl
+    : public crocoddyl::ResidualModelAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ResidualModelBase, ParameterOnlyResidualTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ResidualModelAbstractTpl<Scalar> Base;
+  typedef typename Base::ResidualDataAbstract ResidualDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  ParameterOnlyResidualTpl(std::shared_ptr<StateAbstract> state,
+                           const std::size_t nu, const std::size_t np)
+      : Base(state, 2, nu, false, false, false, np),
+        calc_calls(0),
+        calc_diff_calls(0) {}
+
+  void calc(const std::shared_ptr<ResidualDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>&,
+            const Eigen::Ref<const VectorXs>&) override {
+    ++calc_calls;
+    data->r << Scalar(1), Scalar(-2);
+  }
+
+  void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&) override {
+    ++calc_diff_calls;
+    data->Rx.setZero();
+    data->Ru.setZero();
+    if (this->get_np() != 0) {
+      data->Rp << Scalar(1), Scalar(2), Scalar(-1), Scalar(3);
+    }
+  }
+
+  template <typename NewScalar>
+  ParameterOnlyResidualTpl<NewScalar> cast() const {
+    typedef ParameterOnlyResidualTpl<NewScalar> ReturnType;
+    return ReturnType(this->get_state()->template cast<NewScalar>(),
+                      this->get_nu(), this->get_np());
+  }
+
+  std::size_t calc_calls;
+  std::size_t calc_diff_calls;
+};
+
+typedef ParameterOnlyResidualTpl<double> ParameterOnlyResidual;
+
+void test_parameter_only_residual_cost_running_and_terminal() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::size_t nu = 2;
+  const std::size_t np = 2;
+  const std::shared_ptr<ParameterOnlyResidual> residual =
+      std::make_shared<ParameterOnlyResidual>(state, nu, np);
+  crocoddyl::CostModelResidual cost(state, residual);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataAbstract> data =
+      cost.createData(&shared);
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(nu);
+
+  BOOST_CHECK_EQUAL(cost.get_np(), np);
+  cost.calc(data, x, u);
+  cost.calcDiff(data, x, u);
+  BOOST_CHECK_EQUAL(residual->calc_calls, 1);
+  BOOST_CHECK_EQUAL(residual->calc_diff_calls, 1);
+  BOOST_CHECK_CLOSE(data->cost, 2.5, 1e-12);
+  const Eigen::Vector2d expected_Lp =
+      data->residual->Rp.transpose() * data->residual->r;
+  const Eigen::Matrix2d expected_Lpp =
+      data->residual->Rp.transpose() * data->residual->Rp;
+  BOOST_CHECK(data->Lp.isApprox(expected_Lp, 1e-12));
+  BOOST_CHECK(data->Lpp.isApprox(expected_Lpp, 1e-12));
+  BOOST_CHECK(data->Lpx.isZero(0.));
+  BOOST_CHECK(data->Lpu.isZero(0.));
+
+  data->cost = 0.;
+  data->Lp.setZero();
+  data->Lpp.setZero();
+  cost.calc(data, x);
+  cost.calcDiff(data, x);
+  BOOST_CHECK_EQUAL(residual->calc_calls, 2);
+  BOOST_CHECK_EQUAL(residual->calc_diff_calls, 2);
+  BOOST_CHECK_CLOSE(data->cost, 2.5, 1e-12);
+  BOOST_CHECK(data->Lp.isApprox(expected_Lp, 1e-12));
+  BOOST_CHECK(data->Lpp.isApprox(expected_Lpp, 1e-12));
+  BOOST_CHECK(data->Lpx.isZero(0.));
+  BOOST_CHECK(data->Lpu.isZero(0.));
+
+#ifdef NDEBUG  // Run only in release mode
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract> residual_base =
+      residual;
+  const std::shared_ptr<crocoddyl::ResidualModelAbstractTpl<float>>&
+      casted_residual = residual_base->cast<float>();
+  BOOST_REQUIRE(casted_residual != nullptr);
+  BOOST_CHECK_EQUAL(casted_residual->get_np(), np);
+  crocoddyl::CostModelResidualTpl<float> casted_cost = cost.cast<float>();
+  BOOST_CHECK_EQUAL(casted_cost.get_np(), np);
+  crocoddyl::DataCollectorAbstractTpl<float> casted_shared;
+  const std::shared_ptr<crocoddyl::CostDataAbstractTpl<float>> casted_data =
+      casted_cost.createData(&casted_shared);
+  BOOST_CHECK_EQUAL(casted_data->residual->Rp.cols(), np);
+  BOOST_CHECK_EQUAL(casted_data->Lp.size(), np);
+#endif
+}
+
+void test_dependency_free_terminal_cost_preserves_legacy_short_circuit() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::shared_ptr<ParameterOnlyResidual> residual =
+      std::make_shared<ParameterOnlyResidual>(state, 2, 0);
+  crocoddyl::CostModelResidual cost(state, residual);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataAbstract> data =
+      cost.createData(&shared);
+  const Eigen::VectorXd x = state->rand();
+  data->cost = 42.;
+  data->Lx.setConstant(42.);
+  data->Lxx.setConstant(42.);
+
+  cost.calc(data, x);
+  cost.calcDiff(data, x);
+  BOOST_CHECK_EQUAL(residual->calc_calls, 0);
+  BOOST_CHECK_EQUAL(residual->calc_diff_calls, 0);
+  BOOST_CHECK_EQUAL(data->cost, 0.);
+  BOOST_CHECK(data->Lx.isZero(0.));
+  BOOST_CHECK(data->Lxx.isZero(0.));
+}
 
 void test_calc_returns_a_cost(CostModelTypes::Type cost_type,
                               StateModelTypes::Type state_type,
@@ -414,6 +548,15 @@ void register_cost_model_unit_tests(
   framework::master_test_suite().add(ts);
 }
 
+void register_parameter_cost_base_unit_tests() {
+  test_suite* ts = BOOST_TEST_SUITE("test_parameter_cost_base");
+  ts->add(
+      BOOST_TEST_CASE(&test_parameter_only_residual_cost_running_and_terminal));
+  ts->add(BOOST_TEST_CASE(
+      &test_dependency_free_terminal_cost_preserves_legacy_short_circuit));
+  framework::master_test_suite().add(ts);
+}
+
 bool init_function() {
   // Test all costs available with all the activation types with all available
   // states types.
@@ -431,6 +574,7 @@ bool init_function() {
       }
     }
   }
+  register_parameter_cost_base_unit_tests();
   return true;
 }
 

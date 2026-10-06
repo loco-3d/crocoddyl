@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -14,6 +14,7 @@
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -44,6 +45,8 @@ namespace crocoddyl {
  * important to remark that `calcDiff()` computes the derivatives using the
  * latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
+ * @deprecated Use `DynamicsModelConstrainedForwardTpl`.
+ *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`,
  * `createData()`
  */
@@ -68,11 +71,13 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  DifferentialActionModelFreeFwdDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<CostModelSum> costs,
-      std::shared_ptr<ConstraintModelManager> constraints = nullptr);
+  DEPRECATED(
+      "Use DynamicsModelConstrainedForward",
+      DifferentialActionModelFreeFwdDynamicsTpl(
+          std::shared_ptr<StateMultibody> state,
+          std::shared_ptr<ActuationModelAbstract> actuation,
+          std::shared_ptr<CostModelSum> costs,
+          std::shared_ptr<ConstraintModelManager> constraints = nullptr));
   virtual ~DifferentialActionModelFreeFwdDynamicsTpl() = default;
 
   /**
@@ -233,6 +238,10 @@ class DifferentialActionModelFreeFwdDynamicsTpl
   VectorXs armature_;      //!< Armature vector
 };
 
+/**
+ * @brief Data for the deprecated free forward-dynamics action model
+ * @deprecated Use `DynamicsDataConstrainedForwardTpl`.
+ */
 template <typename _Scalar>
 struct DifferentialActionDataFreeFwdDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
@@ -247,7 +256,9 @@ struct DifferentialActionDataFreeFwdDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataFreeFwdDynamicsTpl(Model<Scalar>* const model)
+  DEPRECATED("Use DynamicsDataConstrainedForward",
+             explicit DifferentialActionDataFreeFwdDynamicsTpl(
+                 Model<Scalar>* const model))
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(

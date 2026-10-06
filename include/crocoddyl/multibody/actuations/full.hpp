@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -47,6 +47,9 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    *
    * @param[in] state  State of the dynamical system
    */
+  [[deprecated(
+      "Use ActuationModelMultibody(state) for the multibody actuation "
+      "backend.")]]
   explicit ActuationModelFullTpl(std::shared_ptr<StateAbstract> state)
       : Base(state, state->get_nv()) {
     StateMultibodyTpl<Scalar>* s =

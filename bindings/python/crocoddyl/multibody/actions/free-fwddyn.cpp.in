@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -143,15 +144,14 @@ struct DifferentialActionDataFreeFwdDynamicsVisitor
       "If you want to include the armature, you need to use set_armature(). " \
       "On the other hand, the stack of cost functions are implemented in "    \
       "CostModelSum().",                                                      \
-      bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,            \
+      bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,             \
                std::shared_ptr<Costs>,                                        \
                bp::optional<std::shared_ptr<Constraints>>>(                   \
           bp::args("self", "state", "actuation", "costs", "constraints"),     \
-          "Initialize the free forward-dynamics action model.\n\n"            \
-          ":param state: multibody state\n"                                   \
-          ":param actuation: abstract actuation model\n"                      \
-          ":param costs: stack of cost functions\n"                           \
-          ":param constraints: stack of constraint functions"))               \
+          "Initialize the free forward-dynamics action model.")[deprecated<>( \
+          "Deprecated. Use DynamicsModelConstrainedForward for the dynamics " \
+          "backend. For action-model integration, migrate to the "             \
+          "dynamics-based IntegratedActionModelEuler constructor.")])          \
       .def(DifferentialActionModelFreeFwdDynamicsVisitor<Model>())            \
       .def(CastVisitor<Model>())                                              \
       .def(PrintableVisitor<Model>())                                         \
@@ -167,7 +167,8 @@ struct DifferentialActionDataFreeFwdDynamicsVisitor
       "Action data for the free forward dynamics system.",                  \
       bp::init<Model*>(bp::args("self", "model"),                           \
                        "Create free forward-dynamics action data.\n\n"      \
-                       ":param model: free forward-dynamics action model")) \
+                       ":param model: free forward-dynamics action model")[ \
+          deprecated<>("Deprecated. Use DynamicsDataConstrainedForward.")]) \
       .def(DifferentialActionDataFreeFwdDynamicsVisitor<Data>())            \
       .def(CopyableVisitor<Data>());
 

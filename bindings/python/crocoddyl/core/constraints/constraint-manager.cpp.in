@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,12 +43,14 @@ struct ConstraintModelManagerVisitor
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
-    cl.def(bp::init<std::shared_ptr<State>, std::size_t>(
-               bp::args("self", "state", "nu"),
+    cl.def(bp::init<std::shared_ptr<State>, std::size_t,
+                    bp::optional<std::size_t>>(
+               bp::args("self", "state", "nu", "np"),
                "Initialize the total constraint model.\n\n"
                "For this case the default nu is equals to model.nv.\n"
                ":param state: state description\n"
-               ":param nu: dimension of control vector"))
+               ":param nu: dimension of control vector\n"
+               ":param np: dimension of parameter vector (default 0)"))
         .def(bp::init<std::shared_ptr<State>>(
             bp::args("self", "state"),
             "Initialize the total constraint model.\n\n"
@@ -135,6 +137,8 @@ struct ConstraintModelManagerVisitor
             "stack of constraints")
         .add_property("nu", bp::make_function(&Model::get_nu),
                       "dimension of control vector")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of parameter vector")
         .add_property("ng", bp::make_function(&Model::get_ng),
                       "number of active inequality constraints")
         .add_property("nh", bp::make_function(&Model::get_nh),
@@ -253,6 +257,12 @@ struct ConstraintDataManagerVisitor
             bp::make_function(&Data::set_Gu),
             "Jacobian of the inequality constraint")
         .add_property(
+            "Gp",
+            bp::make_function(&Data::get_Gp,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Gp),
+            "Jacobian of the inequality constraint w.r.t. parameters")
+        .add_property(
             "h",
             bp::make_function(&Data::get_h,
                               bp::return_value_policy<bp::return_by_value>()),
@@ -268,7 +278,13 @@ struct ConstraintDataManagerVisitor
             bp::make_function(&Data::get_Hu,
                               bp::return_value_policy<bp::return_by_value>()),
             bp::make_function(&Data::set_Hu),
-            "Jacobian of the equality constraint");
+            "Jacobian of the equality constraint")
+        .add_property(
+            "Hp",
+            bp::make_function(&Data::get_Hp,
+                              bp::return_value_policy<bp::return_by_value>()),
+            bp::make_function(&Data::set_Hp),
+            "Jacobian of the equality constraint w.r.t. parameters");
   }
 };
 
@@ -306,11 +322,13 @@ struct ConstraintDataManagerVisitor
   typedef Model::StateAbstract State;                                \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();              \
   bp::class_<Model>("ConstraintModelManager",                        \
-                    bp::init<std::shared_ptr<State>, std::size_t>(   \
-                        bp::args("self", "state", "nu"),             \
+                    bp::init<std::shared_ptr<State>, std::size_t,     \
+                             bp::optional<std::size_t>>(              \
+                        bp::args("self", "state", "nu", "np"),       \
                         "Initialize the total constraint model.\n\n" \
                         ":param state: state description\n"          \
-                        ":param nu: dimension of control vector"))   \
+                        ":param nu: dimension of control vector\n"   \
+                        ":param np: dimension of parameter vector")) \
       .def(ConstraintModelManagerVisitor<Model>())                   \
       .def(CastVisitor<Model>())                                     \
       .def(PrintableVisitor<Model>())                                \

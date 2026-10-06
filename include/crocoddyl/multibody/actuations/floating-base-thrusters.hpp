@@ -166,6 +166,9 @@ class ActuationModelFloatingBaseThrustersTpl
    * @param[in] state      State of the dynamical system
    * @param[in] thrusters  Vector of thrusters
    */
+  [[deprecated(
+      "Use ActuationModelMultibody with JointDynamicsModelThruster for the "
+      "multibody actuation backend.")]]
   ActuationModelFloatingBaseThrustersTpl(std::shared_ptr<StateMultibody> state,
                                          const std::vector<Thruster>& thrusters)
       : Base(state,

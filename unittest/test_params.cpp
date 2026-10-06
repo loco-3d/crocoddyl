@@ -1,0 +1,401 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
+#include "crocoddyl/core/actions/lqr.hpp"
+#include "crocoddyl/core/dynamics-base.hpp"
+#include "crocoddyl/core/params-base.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
+#include "unittest_common.hpp"
+
+using namespace boost::unit_test;
+
+namespace {
+
+template <typename _Scalar>
+class ActionParamsProbeTpl
+    : public crocoddyl::ActionModelParamsAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ParamsModelBase, ActionParamsProbeTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ActionModelParamsAbstractTpl<Scalar> Base;
+  typedef typename Base::ActionDataAbstract ActionDataAbstract;
+  typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
+
+  ActionParamsProbeTpl(std::shared_ptr<StateAbstract> state,
+                       const std::size_t np)
+      : Base(state, np), sensitivity_calls(0) {}
+
+  void update(const std::shared_ptr<ParamsDataAbstract>& data,
+              const Eigen::Ref<const VectorXs>& p) override {
+    data->p = p;
+  }
+
+  void computeParamSensitivity(const std::shared_ptr<ActionDataAbstract>&,
+                               const std::shared_ptr<ParamsDataAbstract>&,
+                               Eigen::Ref<MatrixXs> dx_dp,
+                               const Eigen::Ref<const VectorXs>& x,
+                               const Eigen::Ref<const VectorXs>& u) override {
+    dx_dp.setConstant(x.sum() + u.sum());
+    ++sensitivity_calls;
+  }
+
+  template <typename NewScalar>
+  ActionParamsProbeTpl<NewScalar> cast() const {
+    ActionParamsProbeTpl<NewScalar> model(
+        this->get_state()->template cast<NewScalar>(), this->get_np());
+    model.set_lb(this->get_lb().template cast<NewScalar>());
+    model.set_ub(this->get_ub().template cast<NewScalar>());
+    return model;
+  }
+
+  std::size_t sensitivity_calls;
+};
+
+template <typename _Scalar>
+class DynamicsDataModelStubTpl {
+ public:
+  typedef _Scalar Scalar;
+  typedef crocoddyl::StateAbstractTpl<Scalar> StateAbstract;
+
+  DynamicsDataModelStubTpl(std::shared_ptr<StateAbstract> state,
+                           const std::size_t np, const std::size_t nu)
+      : state_(state), np_(np), nu_(nu) {}
+
+  const std::shared_ptr<StateAbstract>& get_state() const { return state_; }
+  std::size_t get_np() const { return np_; }
+  std::size_t get_nu() const { return nu_; }
+  std::size_t get_ng() const { return 0; }
+  std::size_t get_nh() const { return 0; }
+  crocoddyl::DynamicsType get_dyn_type() const {
+    return crocoddyl::DynamicsType::ContinuousControl;
+  }
+
+ private:
+  std::shared_ptr<StateAbstract> state_;
+  std::size_t np_;
+  std::size_t nu_;
+};
+
+template <typename _Scalar>
+class DynamicsParamsProbeTpl
+    : public crocoddyl::DynamicsParamsAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ParamsModelBase, DynamicsParamsProbeTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::DynamicsParamsAbstractTpl<Scalar> Base;
+  typedef typename Base::DynamicsDataAbstract DynamicsDataAbstract;
+  typedef typename Base::ParamsDataAbstract ParamsDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+  typedef typename Base::MatrixXs MatrixXs;
+
+  DynamicsParamsProbeTpl(std::shared_ptr<StateAbstract> state,
+                         const std::size_t np, const Scalar scale = Scalar(1))
+      : Base(state, np), scale(scale), regressor_calls(0) {}
+
+  void update(const std::shared_ptr<ParamsDataAbstract>& data,
+              const Eigen::Ref<const VectorXs>& p) override {
+    if (static_cast<std::size_t>(p.size()) != this->get_np()) {
+      throw_pretty("Invalid argument: parameter vector has wrong dimension");
+    }
+    data->p = p;
+  }
+
+  void updateBase(const std::shared_ptr<ParamsDataAbstract>& data,
+                  const Eigen::Ref<const VectorXs>& p) {
+    Base::update(data, p);
+  }
+
+  void computeJointTorqueRegressor(
+      const std::shared_ptr<DynamicsDataAbstract>& data,
+      const std::shared_ptr<ParamsDataAbstract>& params,
+      Eigen::Ref<MatrixXs> dtau_dp, const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override {
+    if (data == nullptr || params == nullptr) {
+      throw_pretty("Invalid argument: dynamics or parameter data is null");
+    }
+    for (std::size_t j = 0; j < this->get_np(); ++j) {
+      dtau_dp.col(static_cast<Eigen::Index>(j)) =
+          scale * Scalar(j + 1) *
+          (x.head(dtau_dp.rows()).array() + u.sum()).matrix();
+    }
+    data->dP_dp = dtau_dp.colwise().sum();
+    ++regressor_calls;
+  }
+
+  template <typename NewScalar>
+  DynamicsParamsProbeTpl<NewScalar> cast() const {
+    DynamicsParamsProbeTpl<NewScalar> model(
+        this->get_state()->template cast<NewScalar>(), this->get_np(),
+        crocoddyl::scalar_cast<NewScalar>(scale));
+    model.set_lb(this->get_lb().template cast<NewScalar>());
+    model.set_ub(this->get_ub().template cast<NewScalar>());
+    return model;
+  }
+
+  Scalar scale;
+  std::size_t regressor_calls;
+};
+
+template <typename Scalar>
+void test_params_model_defaults_bounds_data_and_copy() {
+  typedef crocoddyl::ParamsAbstractTpl<Scalar> ParamsModel;
+  typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
+  typedef crocoddyl::StateVectorTpl<Scalar> State;
+  typedef typename ParamsModel::VectorXs VectorXs;
+
+  const std::shared_ptr<State> state = std::make_shared<State>(4);
+  ParamsModel empty(state);
+  BOOST_CHECK_EQUAL(empty.get_np(), 0u);
+  BOOST_CHECK_EQUAL(empty.zero().size(), 0);
+
+  const std::size_t np = 3;
+  ParamsModel model(state, np);
+  BOOST_CHECK(model.get_state() == state);
+  BOOST_CHECK_EQUAL(model.get_np(), np);
+  BOOST_CHECK_EQUAL(model.get_lb().size(), static_cast<Eigen::Index>(np));
+  BOOST_CHECK_EQUAL(model.get_ub().size(), static_cast<Eigen::Index>(np));
+  BOOST_CHECK(model.get_lb().isConstant(-std::numeric_limits<Scalar>::max()));
+  BOOST_CHECK(model.get_ub().isConstant(std::numeric_limits<Scalar>::max()));
+  BOOST_CHECK(model.zero().isZero());
+  const VectorXs random = model.rand();
+  BOOST_CHECK_EQUAL(random.size(), static_cast<Eigen::Index>(np));
+  BOOST_CHECK((random.array() >= Scalar(0.)).all());
+  BOOST_CHECK((random.array() <= Scalar(1.)).all());
+
+  const VectorXs lb = VectorXs::LinSpaced(np, Scalar(-3.), Scalar(-1.));
+  const VectorXs ub = VectorXs::LinSpaced(np, Scalar(1.), Scalar(3.));
+  model.set_lb(lb);
+  model.set_ub(ub);
+  BOOST_CHECK(model.get_lb().isApprox(lb));
+  BOOST_CHECK(model.get_ub().isApprox(ub));
+  BOOST_CHECK_THROW(model.set_lb(VectorXs::Zero(np + 1)), std::exception);
+  BOOST_CHECK_THROW(model.set_ub(VectorXs::Zero(np + 1)), std::exception);
+
+  const std::shared_ptr<ParamsData> data = model.createData();
+  BOOST_REQUIRE(data != nullptr);
+  BOOST_CHECK_EQUAL(data->np, np);
+  BOOST_CHECK_EQUAL(data->np_action, np);
+  BOOST_CHECK_EQUAL(data->np_dynamics, 0u);
+  BOOST_CHECK(model.checkData(data));
+  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(np + 1, 0)));
+  BOOST_CHECK(!model.checkData(std::shared_ptr<ParamsData>()));
+
+  data->p.setOnes();
+  model.update(data, VectorXs::Zero(np));
+  BOOST_CHECK(data->p.isOnes());
+
+  ParamsModel copied(model);
+  BOOST_CHECK(copied.get_state() == state);
+  BOOST_CHECK_EQUAL(copied.get_np(), np);
+  BOOST_CHECK(copied.get_lb().isApprox(lb));
+  BOOST_CHECK(copied.get_ub().isApprox(ub));
+  std::ostringstream stream;
+  stream << copied;
+  BOOST_CHECK(!stream.str().empty());
+  BOOST_CHECK_THROW(model.template cast<float>(), std::exception);
+}
+
+template <typename Scalar>
+void test_action_params_model_update_sensitivity_data_and_copy() {
+  typedef ActionParamsProbeTpl<Scalar> ParamsModel;
+  typedef crocoddyl::ActionModelLQRTpl<Scalar> ActionModel;
+  typedef crocoddyl::ActionModelParamsDataAbstractTpl<Scalar> ActionParamsData;
+  typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
+  typedef crocoddyl::StateVectorTpl<Scalar> State;
+  typedef typename ParamsModel::VectorXs VectorXs;
+
+  const std::size_t nx = 4;
+  const std::size_t nu = 2;
+  const std::size_t np = 3;
+  const std::shared_ptr<State> state = std::make_shared<State>(nx);
+  ParamsModel model(state, np);
+  const VectorXs lb = VectorXs::Constant(np, Scalar(-2.));
+  const VectorXs ub = VectorXs::Constant(np, Scalar(2.));
+  model.set_lb(lb);
+  model.set_ub(ub);
+
+  const std::shared_ptr<ParamsData> params = model.createData();
+  BOOST_REQUIRE(params != nullptr);
+  BOOST_CHECK(std::dynamic_pointer_cast<ActionParamsData>(params) != nullptr);
+  BOOST_CHECK_EQUAL(params->np, np);
+  BOOST_CHECK_EQUAL(params->np_action, np);
+  BOOST_CHECK_EQUAL(params->np_dynamics, 0u);
+  const VectorXs p = VectorXs::LinSpaced(np, Scalar(0.2), Scalar(0.6));
+  model.update(params, p);
+  BOOST_CHECK(params->p.isApprox(p));
+
+  ActionModel action(nx, nu);
+  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<Scalar> > action_data =
+      action.createData();
+  const VectorXs x = VectorXs::LinSpaced(nx, Scalar(0.1), Scalar(0.4));
+  const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
+  typename ParamsModel::MatrixXs dx_dp(state->get_ndx(), np);
+  model.computeParamSensitivity(action_data, params, dx_dp, x, u);
+  BOOST_CHECK_EQUAL(model.sensitivity_calls, 1u);
+  BOOST_CHECK(dx_dp.isConstant(x.sum() + u.sum()));
+  const typename ParamsModel::MatrixXs returned_dx_dp =
+      model.computeParamSensitivity_x(action_data, params, x, u);
+  BOOST_CHECK_EQUAL(model.sensitivity_calls, 2u);
+  BOOST_CHECK(returned_dx_dp.isApprox(dx_dp));
+
+  ParamsModel copied(model);
+  BOOST_CHECK_EQUAL(copied.get_np(), np);
+  BOOST_CHECK(copied.get_lb().isApprox(lb));
+  BOOST_CHECK(copied.get_ub().isApprox(ub));
+
+  const crocoddyl::ParamsModelBase& base_model = model;
+  const std::shared_ptr<crocoddyl::ParamsAbstractTpl<float> > casted =
+      base_model.template cast<float>();
+  BOOST_REQUIRE(casted != nullptr);
+  BOOST_CHECK_EQUAL(casted->get_np(), np);
+  BOOST_CHECK(casted->get_lb().isApprox(lb.template cast<float>()));
+  BOOST_CHECK(casted->get_ub().isApprox(ub.template cast<float>()));
+  const std::shared_ptr<crocoddyl::ParamsAbstractTpl<double> > roundtrip =
+      casted->template cast<double>();
+  BOOST_REQUIRE(roundtrip != nullptr);
+  BOOST_CHECK_EQUAL(roundtrip->get_np(), np);
+  BOOST_CHECK(roundtrip->get_lb().isApprox(lb.template cast<double>()));
+  BOOST_CHECK(roundtrip->get_ub().isApprox(ub.template cast<double>()));
+}
+
+template <typename Scalar>
+void test_dynamics_params_model_data_regressor_copy_and_cast() {
+  typedef DynamicsParamsProbeTpl<Scalar> ParamsModel;
+  typedef crocoddyl::DynamicsDataAbstractTpl<Scalar> DynamicsData;
+  typedef crocoddyl::DynamicsParamsDataAbstractTpl<Scalar> DynamicsParamsData;
+  typedef crocoddyl::ParamsDataAbstractTpl<Scalar> ParamsData;
+  typedef crocoddyl::StateVectorTpl<Scalar> State;
+  typedef typename ParamsModel::VectorXs VectorXs;
+  typedef typename std::conditional<std::is_same<Scalar, double>::value, float,
+                                    double>::type OtherScalar;
+
+  const std::size_t nx = 4;
+  const std::size_t np = 3;
+  const std::size_t nu = 2;
+  const std::shared_ptr<State> state = std::make_shared<State>(nx);
+  ParamsModel model(state, np, Scalar(1.5));
+  const VectorXs lb = VectorXs::LinSpaced(np, Scalar(-3), Scalar(-1));
+  const VectorXs ub = VectorXs::LinSpaced(np, Scalar(1), Scalar(3));
+  model.set_lb(lb);
+  model.set_ub(ub);
+
+  const std::shared_ptr<ParamsData> params = model.createData();
+  BOOST_REQUIRE(params != nullptr);
+  const std::shared_ptr<DynamicsParamsData> dynamics_params =
+      std::dynamic_pointer_cast<DynamicsParamsData>(params);
+  BOOST_REQUIRE(dynamics_params != nullptr);
+  BOOST_CHECK_EQUAL(params->np, np);
+  BOOST_CHECK_EQUAL(params->np_action, 0u);
+  BOOST_CHECK_EQUAL(params->np_dynamics, np);
+  BOOST_CHECK(params->p.isZero());
+  BOOST_CHECK(params->active);
+  BOOST_CHECK(model.checkData(params));
+  BOOST_CHECK(!model.checkData(std::make_shared<ParamsData>(0, np + 1)));
+  BOOST_CHECK(!model.checkData(std::shared_ptr<ParamsData>()));
+
+  const VectorXs p = VectorXs::LinSpaced(np, Scalar(0.2), Scalar(0.6));
+  model.update(params, p);
+  BOOST_CHECK(params->p.isApprox(p));
+  model.updateBase(params, VectorXs::Zero(np));
+  BOOST_CHECK(params->p.isApprox(p));
+  BOOST_CHECK_THROW(model.update(params, VectorXs::Zero(np + 1)),
+                    std::exception);
+
+  DynamicsDataModelStubTpl<Scalar> dynamics_model(state, np, nu);
+  const std::shared_ptr<DynamicsData> dynamics_data =
+      std::make_shared<DynamicsData>(&dynamics_model);
+  const VectorXs x = VectorXs::LinSpaced(nx, Scalar(0.1), Scalar(0.4));
+  const VectorXs u = VectorXs::LinSpaced(nu, Scalar(0.5), Scalar(0.6));
+  typename ParamsModel::MatrixXs dtau_dp(state->get_nv(), np);
+  model.computeJointTorqueRegressor(dynamics_data, params, dtau_dp, x, u);
+  BOOST_CHECK_EQUAL(model.regressor_calls, 1u);
+  for (std::size_t j = 0; j < np; ++j) {
+    const VectorXs expected =
+        model.scale * Scalar(j + 1) *
+        (x.head(state->get_nv()).array() + u.sum()).matrix();
+    BOOST_CHECK(dtau_dp.col(static_cast<Eigen::Index>(j)).isApprox(expected));
+  }
+  BOOST_CHECK(dynamics_data->dP_dp.isApprox(dtau_dp.colwise().sum()));
+  const typename ParamsModel::MatrixXs returned_dtau_dp =
+      model.computeJointTorqueRegressor_x(dynamics_data, params, x, u);
+  BOOST_CHECK_EQUAL(model.regressor_calls, 2u);
+  BOOST_CHECK(returned_dtau_dp.isApprox(dtau_dp));
+  BOOST_CHECK_THROW(model.computeJointTorqueRegressor(
+                        std::shared_ptr<DynamicsData>(), params, dtau_dp, x, u),
+                    std::exception);
+
+  params->active = false;
+  DynamicsParamsData copied(*dynamics_params);
+  BOOST_CHECK(copied.p.isApprox(params->p));
+  BOOST_CHECK_EQUAL(copied.active, params->active);
+  params->p.setZero();
+  BOOST_CHECK(copied.p.isApprox(p));
+  dynamics_params->resize(0, np + 1);
+  BOOST_CHECK_EQUAL(dynamics_params->np_action, 0u);
+  BOOST_CHECK_EQUAL(dynamics_params->np_dynamics, np + 1);
+  BOOST_CHECK(!dynamics_params->active);
+  dynamics_params->resize(0, np);
+
+  const crocoddyl::ParamsModelBase& base_model = model;
+  const std::shared_ptr<crocoddyl::ParamsAbstractTpl<OtherScalar> > casted =
+      base_model.template cast<OtherScalar>();
+  const std::shared_ptr<DynamicsParamsProbeTpl<OtherScalar> > casted_probe =
+      std::dynamic_pointer_cast<DynamicsParamsProbeTpl<OtherScalar> >(casted);
+  BOOST_REQUIRE(casted_probe != nullptr);
+  BOOST_CHECK_EQUAL(casted_probe->get_np(), np);
+  BOOST_CHECK_EQUAL(casted_probe->get_state()->get_nx(), state->get_nx());
+  BOOST_CHECK(casted_probe->get_lb().isApprox(lb.template cast<OtherScalar>()));
+  BOOST_CHECK(casted_probe->get_ub().isApprox(ub.template cast<OtherScalar>()));
+  BOOST_CHECK_CLOSE(static_cast<double>(casted_probe->scale),
+                    static_cast<double>(model.scale), 1e-4);
+  const std::shared_ptr<crocoddyl::ParamsAbstractTpl<Scalar> > roundtrip =
+      casted->template cast<Scalar>();
+  const std::shared_ptr<DynamicsParamsProbeTpl<Scalar> > roundtrip_probe =
+      std::dynamic_pointer_cast<DynamicsParamsProbeTpl<Scalar> >(roundtrip);
+  BOOST_REQUIRE(roundtrip_probe != nullptr);
+  BOOST_CHECK_EQUAL(roundtrip_probe->get_np(), np);
+  BOOST_CHECK(roundtrip_probe->get_lb().isApprox(lb));
+  BOOST_CHECK(roundtrip_probe->get_ub().isApprox(ub));
+  BOOST_CHECK_CLOSE(static_cast<double>(roundtrip_probe->scale),
+                    static_cast<double>(model.scale), 1e-4);
+}
+
+}  // namespace
+
+bool init_function() {
+  test_suite* ts = BOOST_TEST_SUITE("test_params");
+  ts->add(BOOST_TEST_CASE(
+      &test_params_model_defaults_bounds_data_and_copy<double>));
+  ts->add(
+      BOOST_TEST_CASE(&test_params_model_defaults_bounds_data_and_copy<float>));
+  ts->add(BOOST_TEST_CASE(
+      &test_action_params_model_update_sensitivity_data_and_copy<double>));
+  ts->add(BOOST_TEST_CASE(
+      &test_action_params_model_update_sensitivity_data_and_copy<float>));
+  ts->add(BOOST_TEST_CASE(
+      &test_dynamics_params_model_data_regressor_copy_and_cast<double>));
+  ts->add(BOOST_TEST_CASE(
+      &test_dynamics_params_model_data_regressor_copy_and_cast<float>));
+  framework::master_test_suite().add(ts);
+  return true;
+}
+
+int main(int argc, char** argv) {
+  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+}

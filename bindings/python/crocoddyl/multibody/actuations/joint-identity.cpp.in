@@ -1,0 +1,69 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actuations/joint-identity.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct JointDynamicsModelIdentityVisitor
+    : public bp::def_visitor<JointDynamicsModelIdentityVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "q", "v", "u"),
+           "Compute the identity joint actuation.\n\n"
+           ":param data: joint dynamics data\n"
+           ":param q: joint configuration\n"
+           ":param v: joint velocity\n"
+           ":param u: joint control input")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "q", "v", "u"),
+             "Compute the derivatives of the identity joint actuation.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: joint control input")
+        .def("commands", &Model::commands, bp::args("self", "data", "q", "v", "tau"),
+             "Compute the identity joint commands.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param tau: joint torque")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the identity joint dynamics data.\n\n"
+             ":return joint dynamics data.");
+  }
+};
+
+#define CROCODDYL_JOINT_DYNAMICS_MODEL_IDENTITY_PYTHON_BINDINGS(Scalar)      \
+  typedef JointDynamicsModelIdentityTpl<Scalar> Model;                        \
+  typedef JointDynamicsModelAbstractTpl<Scalar> ModelBase;                    \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                      \
+  bp::class_<Model, bp::bases<ModelBase> >(                                   \
+      "JointDynamicsModelIdentity",                                           \
+      "Identity joint actuation model.",                                      \
+      bp::init<pinocchio::JointIndex, std::size_t, std::size_t>(              \
+          bp::args("self", "id", "nq", "nv"),                               \
+          "Initialize the identity joint actuation model.\n\n"                \
+          ":param id: joint id\n"                                             \
+          ":param nq: joint configuration dimension\n"                        \
+          ":param nv: joint velocity dimension"))                             \
+      .def(JointDynamicsModelIdentityVisitor<Model>())                        \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+void exposeJointDynamicsIdentity() {
+  CROCODDYL_JOINT_DYNAMICS_MODEL_IDENTITY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

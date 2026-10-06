@@ -1,0 +1,108 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/params/parameter-phase.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ParameterPhaseModelVisitor
+    : public bp::def_visitor<ParameterPhaseModelVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("createData", &Model::createData, bp::args("self"),
+           "Create the parameter and optional constraint data together.")
+        .def("update", &Model::update, bp::args("self", "data", "p"),
+             "Update the active phase parameter vector.")
+        .def("calc", &Model::calc, bp::args("self", "data", "x", "u"),
+             "Evaluate the optional phase constraints.")
+        .def("calcDiff", &Model::calcDiff,
+             bp::args("self", "data", "x", "u"),
+             "Evaluate the optional phase-constraint derivatives.")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "optional phase constraint manager")
+        .add_property(
+            "state",
+            bp::make_function(&Model::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state description")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "active parameter dimension")
+        .add_property("has_constraints",
+                      bp::make_function(&Model::has_constraints),
+                      "whether the phase has active constraints");
+  }
+};
+
+template <typename Data>
+struct ParameterPhaseDataVisitor
+    : public bp::def_visitor<ParameterPhaseDataVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "params",
+          bp::make_getter(&Data::params,
+                          bp::return_value_policy<bp::return_by_value>()),
+          "parameter-manager data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "optional phase-constraint data");
+  }
+};
+
+#define CROCODDYL_PARAMETER_PHASE_PYTHON_BINDINGS(Scalar)                    \
+  typedef ParameterPhaseModelTpl<Scalar> Model;                              \
+  typedef ParameterPhaseDataTpl<Scalar> Data;                                \
+  typedef ParameterManagerTpl<Scalar> ParameterManager;                      \
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;          \
+  typedef std::shared_ptr<Model> ModelPtr;                                   \
+  typedef std::shared_ptr<Data> DataPtr;                                     \
+  StdVectorPythonVisitor<std::vector<ModelPtr>, true>::expose(               \
+      "StdVec_ParameterPhaseModel");                                        \
+  StdVectorPythonVisitor<std::vector<DataPtr>, true>::expose(                \
+      "StdVec_ParameterPhaseData");                                         \
+  bp::register_ptr_to_python<ModelPtr>();                                    \
+  bp::class_<Model>(                                                         \
+      "ParameterPhaseModel",                                                \
+      "Parameter manager and optional constraints associated with one "     \
+      "phase.",                                                             \
+      bp::init<std::shared_ptr<ParameterManager>,                            \
+               bp::optional<std::shared_ptr<ConstraintModelManager> > >(     \
+          bp::args("self", "params", "constraints"),                       \
+          "Initialize a phase parameterization."))                          \
+      .def(ParameterPhaseModelVisitor<Model>())                              \
+      .def(CastVisitor<Model>())                                             \
+      .def(CopyableVisitor<Model>());                                        \
+  bp::register_ptr_to_python<DataPtr>();                                     \
+  bp::class_<Data>("ParameterPhaseData",                                    \
+                   "Data associated with one parameterized phase.",         \
+                   bp::no_init)                                              \
+      .def(ParameterPhaseDataVisitor<Data>())                                \
+      .def(CopyableVisitor<Data>());
+
+void exposeParameterPhase() {
+  CROCODDYL_PARAMETER_PHASE_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

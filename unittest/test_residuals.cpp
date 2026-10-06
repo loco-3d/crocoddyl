@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,9 +9,12 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/activations/quadratic.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
 #include "crocoddyl/core/residuals/control.hpp"
 #include "crocoddyl/core/residuals/joint-acceleration.hpp"
 #include "crocoddyl/core/residuals/joint-effort.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
@@ -516,6 +519,241 @@ void test_reference() {
 #endif
 }
 
+void check_parameter_cost_diff(const bool q_dependent, const bool v_dependent,
+                               const bool u_dependent, const bool update_u) {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::size_t nr = 3;
+  const std::size_t nu = 2;
+  const std::size_t np = 2;
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract> residual =
+      std::make_shared<crocoddyl::ResidualModelAbstract>(
+          state, nr, nu, q_dependent, v_dependent, u_dependent, np);
+  const std::shared_ptr<crocoddyl::ActivationModelQuad> activation =
+      std::make_shared<crocoddyl::ActivationModelQuad>(nr);
+  crocoddyl::CostModelResidual cost(state, activation, residual);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataAbstract> cdata =
+      cost.createData(&shared);
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& rdata =
+      cdata->residual;
+
+  rdata->Rx << 1., 2., 3., 4., 2., -1., 1., 3., -2., 1., 4., -1.;
+  rdata->Ru << 2., -1., 1., 3., -2., 4.;
+  rdata->Rp << 1., -2., 3., 1., -1., 2.;
+  cdata->activation->Ar << 1., -2., 3.;
+  cdata->activation->Arr.diagonal() << 4., 3., 5.;
+
+  const double sentinel = 17.;
+  cdata->Lx.setConstant(sentinel);
+  cdata->Lu.setConstant(sentinel);
+  cdata->Lxx.setConstant(sentinel);
+  cdata->Lxu.setConstant(sentinel);
+  cdata->Luu.setConstant(sentinel);
+  cdata->Lp.setConstant(sentinel);
+  cdata->Lpp.setConstant(sentinel);
+  cdata->Lpx.setConstant(sentinel);
+  cdata->Lpu.setConstant(sentinel);
+  rdata->Arr_Rx.setConstant(sentinel);
+  rdata->Arr_Ru.setConstant(sentinel);
+  rdata->Arr_Rp.setConstant(sentinel);
+
+  Eigen::VectorXd expected_Lx = cdata->Lx;
+  Eigen::VectorXd expected_Lu = cdata->Lu;
+  Eigen::MatrixXd expected_Lxx = cdata->Lxx;
+  Eigen::MatrixXd expected_Lxu = cdata->Lxu;
+  Eigen::MatrixXd expected_Luu = cdata->Luu;
+  Eigen::VectorXd expected_Lp = cdata->Lp;
+  Eigen::MatrixXd expected_Lpp = cdata->Lpp;
+  Eigen::MatrixXd expected_Lpx = cdata->Lpx;
+  Eigen::MatrixXd expected_Lpu = cdata->Lpu;
+  Eigen::MatrixXd expected_Arr_Rx = rdata->Arr_Rx;
+  Eigen::MatrixXd expected_Arr_Ru = rdata->Arr_Ru;
+  const Eigen::MatrixXd expected_Arr_Rp = cdata->activation->Arr * rdata->Rp;
+  const bool is_ru = u_dependent && nu != 0 && update_u;
+  const std::size_t nv = state->get_nv();
+
+  if (is_ru) {
+    expected_Lu.noalias() = rdata->Ru.transpose() * cdata->activation->Ar;
+    expected_Arr_Ru.noalias() = cdata->activation->Arr * rdata->Ru;
+    expected_Luu.noalias() = rdata->Ru.transpose() * expected_Arr_Ru;
+  }
+  if (q_dependent && v_dependent) {
+    expected_Lx.noalias() = rdata->Rx.transpose() * cdata->activation->Ar;
+    expected_Arr_Rx.noalias() = cdata->activation->Arr * rdata->Rx;
+    expected_Lxx.noalias() = rdata->Rx.transpose() * expected_Arr_Rx;
+    if (is_ru) {
+      expected_Lxu.noalias() = rdata->Rx.transpose() * expected_Arr_Ru;
+    }
+  } else if (q_dependent) {
+    expected_Lx.head(nv).noalias() =
+        rdata->Rx.leftCols(nv).transpose() * cdata->activation->Ar;
+    expected_Arr_Rx.leftCols(nv).noalias() =
+        cdata->activation->Arr * rdata->Rx.leftCols(nv);
+    expected_Lxx.topLeftCorner(nv, nv).noalias() =
+        rdata->Rx.leftCols(nv).transpose() * expected_Arr_Rx.leftCols(nv);
+    if (is_ru) {
+      expected_Lxu.topRows(nv).noalias() =
+          rdata->Rx.leftCols(nv).transpose() * expected_Arr_Ru;
+    }
+  } else if (v_dependent) {
+    expected_Lx.tail(nv).noalias() =
+        rdata->Rx.rightCols(nv).transpose() * cdata->activation->Ar;
+    expected_Arr_Rx.rightCols(nv).noalias() =
+        cdata->activation->Arr * rdata->Rx.rightCols(nv);
+    expected_Lxx.bottomRightCorner(nv, nv).noalias() =
+        rdata->Rx.rightCols(nv).transpose() * expected_Arr_Rx.rightCols(nv);
+    if (is_ru) {
+      expected_Lxu.bottomRows(nv).noalias() =
+          rdata->Rx.rightCols(nv).transpose() * expected_Arr_Ru;
+    }
+  }
+  expected_Lp.noalias() = rdata->Rp.transpose() * cdata->activation->Ar;
+  expected_Lpp.noalias() = rdata->Rp.transpose() * expected_Arr_Rp;
+  if (q_dependent && v_dependent) {
+    expected_Lpx.noalias() = rdata->Rp.transpose() * expected_Arr_Rx;
+  } else if (q_dependent) {
+    expected_Lpx.leftCols(nv).noalias() =
+        rdata->Rp.transpose() * expected_Arr_Rx.leftCols(nv);
+  } else if (v_dependent) {
+    expected_Lpx.rightCols(nv).noalias() =
+        rdata->Rp.transpose() * expected_Arr_Rx.rightCols(nv);
+  }
+  if (is_ru) {
+    expected_Lpu.noalias() = rdata->Rp.transpose() * expected_Arr_Ru;
+  }
+
+  residual->calcCostDiff(cdata, rdata, cdata->activation, update_u);
+
+  BOOST_CHECK(cdata->Lx.isApprox(expected_Lx, 1e-12));
+  BOOST_CHECK(cdata->Lu.isApprox(expected_Lu, 1e-12));
+  BOOST_CHECK(cdata->Lxx.isApprox(expected_Lxx, 1e-12));
+  BOOST_CHECK(cdata->Lxu.isApprox(expected_Lxu, 1e-12));
+  BOOST_CHECK(cdata->Luu.isApprox(expected_Luu, 1e-12));
+  BOOST_CHECK(cdata->Lp.isApprox(expected_Lp, 1e-12));
+  BOOST_CHECK(cdata->Lpp.isApprox(expected_Lpp, 1e-12));
+  BOOST_CHECK(cdata->Lpx.isApprox(expected_Lpx, 1e-12));
+  BOOST_CHECK(cdata->Lpu.isApprox(expected_Lpu, 1e-12));
+  BOOST_CHECK(rdata->Arr_Rx.isApprox(expected_Arr_Rx, 1e-12));
+  BOOST_CHECK(rdata->Arr_Ru.isApprox(expected_Arr_Ru, 1e-12));
+  BOOST_CHECK(rdata->Arr_Rp.isApprox(expected_Arr_Rp, 1e-12));
+
+  if (is_ru) {
+    const Eigen::MatrixXd previous_Lpu = cdata->Lpu;
+    rdata->Ru.array() += 1.;
+    rdata->Rp.array() -= 0.5;
+    residual->calcCostDiff(cdata, rdata, cdata->activation, update_u);
+    const Eigen::MatrixXd refreshed_Arr_Ru = cdata->activation->Arr * rdata->Ru;
+    const Eigen::MatrixXd refreshed_Lpu =
+        rdata->Rp.transpose() * refreshed_Arr_Ru;
+    BOOST_CHECK(cdata->Lpu.isApprox(refreshed_Lpu, 1e-12));
+    BOOST_CHECK(!cdata->Lpu.isApprox(previous_Lpu, 1e-12));
+  }
+}
+
+void test_residual_base_parameter_contract() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::size_t nr = 3;
+  const std::size_t nu = 2;
+  const std::size_t np = 2;
+
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract> legacy =
+      std::make_shared<crocoddyl::ResidualModelAbstract>(state, nr, nu);
+  BOOST_CHECK_EQUAL(legacy->get_np(), 0);
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract> legacy_data =
+      legacy->createData(&shared);
+  BOOST_CHECK_EQUAL(legacy_data->Rp.cols(), 0);
+  BOOST_CHECK_EQUAL(legacy_data->Arr_Rp.cols(), 0);
+
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract> residual =
+      std::make_shared<crocoddyl::ResidualModelAbstract>(state, nr, nu, true,
+                                                         true, true, 2);
+  crocoddyl::CostModelResidual cost(state, residual);
+  const std::shared_ptr<crocoddyl::CostDataAbstract> cdata =
+      cost.createData(&shared);
+  const std::shared_ptr<crocoddyl::ResidualDataAbstract>& rdata =
+      cdata->residual;
+  BOOST_CHECK_EQUAL(residual->get_np(), np);
+  BOOST_CHECK_EQUAL(cost.get_np(), np);
+  BOOST_CHECK_EQUAL(rdata->Rp.rows(), nr);
+  BOOST_CHECK_EQUAL(rdata->Rp.cols(), np);
+  BOOST_CHECK_EQUAL(rdata->Arr_Rp.rows(), nr);
+  BOOST_CHECK_EQUAL(rdata->Arr_Rp.cols(), np);
+  BOOST_CHECK_EQUAL(cdata->Lp.size(), np);
+  BOOST_CHECK_EQUAL(cdata->Lpp.rows(), np);
+  BOOST_CHECK_EQUAL(cdata->Lpp.cols(), np);
+  BOOST_CHECK_EQUAL(cdata->Lpx.rows(), np);
+  BOOST_CHECK_EQUAL(cdata->Lpx.cols(), state->get_ndx());
+  BOOST_CHECK_EQUAL(cdata->Lpu.rows(), np);
+  BOOST_CHECK_EQUAL(cdata->Lpu.cols(), nu);
+  BOOST_CHECK(rdata->Rp.isZero(0.));
+  BOOST_CHECK(rdata->Arr_Rp.isZero(0.));
+  BOOST_CHECK(cdata->Lp.isZero(0.));
+  BOOST_CHECK(cdata->Lpp.isZero(0.));
+  BOOST_CHECK(cdata->Lpx.isZero(0.));
+  BOOST_CHECK(cdata->Lpu.isZero(0.));
+  BOOST_CHECK(cdata->shared == &shared);
+  BOOST_CHECK(rdata->shared == &shared);
+
+  rdata->Rp.setRandom();
+  rdata->Arr_Rp.setRandom();
+  cdata->Lp.setRandom();
+  cdata->Lpp.setRandom();
+  cdata->Lpx.setRandom();
+  cdata->Lpu.setRandom();
+  const crocoddyl::ResidualDataAbstract rdata_copy(*rdata);
+  const crocoddyl::CostDataAbstract cdata_copy(*cdata);
+  BOOST_CHECK(rdata_copy.Rp == rdata->Rp);
+  BOOST_CHECK(rdata_copy.Arr_Rp == rdata->Arr_Rp);
+  BOOST_CHECK(cdata_copy.Lp == cdata->Lp);
+  BOOST_CHECK(cdata_copy.Lpp == cdata->Lpp);
+  BOOST_CHECK(cdata_copy.Lpx == cdata->Lpx);
+  BOOST_CHECK(cdata_copy.Lpu == cdata->Lpu);
+
+  for (int q = 0; q < 2; ++q) {
+    for (int v = 0; v < 2; ++v) {
+      for (int u = 0; u < 2; ++u) {
+        check_parameter_cost_diff(q != 0, v != 0, u != 0, true);
+        check_parameter_cost_diff(q != 0, v != 0, u != 0, false);
+      }
+    }
+  }
+}
+
+void test_residual_base_calc_cost_diff_no_malloc() {
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::shared_ptr<crocoddyl::ResidualModelAbstract> residual =
+      std::make_shared<crocoddyl::ResidualModelAbstract>(
+          state, std::size_t(3), std::size_t(2), true, true, true, 2);
+  const std::shared_ptr<crocoddyl::ActivationModelQuad> activation =
+      std::make_shared<crocoddyl::ActivationModelQuad>(3);
+  crocoddyl::CostModelResidual cost(state, activation, residual);
+  crocoddyl::DataCollectorAbstract shared;
+  const std::shared_ptr<crocoddyl::CostDataAbstract> cdata =
+      cost.createData(&shared);
+  cdata->residual->Rx.setRandom();
+  cdata->residual->Ru.setRandom();
+  cdata->residual->Rp.setRandom();
+  cdata->activation->Ar.setRandom();
+  cdata->activation->Arr.diagonal().setRandom();
+  residual->calcCostDiff(cdata, cdata->residual, cdata->activation);
+
+  const bool malloc_was_allowed = Eigen::internal::is_malloc_allowed();
+  Eigen::internal::set_is_malloc_allowed(false);
+  try {
+    for (std::size_t i = 0; i < 100; ++i) {
+      residual->calcCostDiff(cdata, cdata->residual, cdata->activation);
+    }
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+  } catch (...) {
+    Eigen::internal::set_is_malloc_allowed(malloc_was_allowed);
+    throw;
+  }
+}
+
 //----------------------------------------------------------------------------//
 
 void register_residual_model_unit_tests(
@@ -543,6 +781,13 @@ void regiter_residual_reference_unit_tests() {
   std::cout << "Running " << test_name.str() << std::endl;
   test_suite* ts = BOOST_TEST_SUITE(test_name.str());
   ts->add(BOOST_TEST_CASE(boost::bind(&test_reference)));
+  framework::master_test_suite().add(ts);
+}
+
+void register_residual_parameter_base_unit_tests() {
+  test_suite* ts = BOOST_TEST_SUITE("test_residual_parameter_base");
+  ts->add(BOOST_TEST_CASE(&test_residual_base_parameter_contract));
+  ts->add(BOOST_TEST_CASE(&test_residual_base_calc_cost_diff_no_malloc));
   framework::master_test_suite().add(ts);
 }
 
@@ -576,6 +821,7 @@ bool init_function() {
     }
   }
   regiter_residual_reference_unit_tests();
+  register_residual_parameter_base_unit_tests();
   return true;
 }
 

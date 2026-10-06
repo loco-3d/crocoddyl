@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University f_world Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University f_world Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,7 +17,8 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
+class [[deprecated("Use ContactModel with a translation mask.")]]
+ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModel3DTpl)
@@ -170,7 +171,8 @@ class ContactModel3DTpl : public ContactModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ContactData3DTpl : public ContactDataAbstractTpl<_Scalar> {
+struct [[deprecated("Use ContactData.")]] ContactData3DTpl
+    : public ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

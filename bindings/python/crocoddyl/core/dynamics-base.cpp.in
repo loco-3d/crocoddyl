@@ -1,0 +1,326 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/core/dynamics-base.hpp"
+
+#include "crocoddyl/core/data-collector-base.hpp"
+#include "python/crocoddyl/utils/vector-converter.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DynamicsModelAbstractVisitor
+    : public bp::def_visitor<DynamicsModelAbstractVisitor<Model>> {
+  typedef typename Model::DynamicsModel DynamicsModel;
+  typedef typename Model::DynamicsData DynamicsData;
+  typedef typename Model::VectorXs VectorXs;
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(DynamicsModel_quasiStatic_wraps,
+                                         DynamicsModel::quasiStatic_x, 2, 4)
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           bp::pure_virtual(static_cast<void (Model::*)(
+               const std::shared_ptr<DynamicsData>&,
+               const Eigen::Ref<const VectorXs>&,
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc)),
+           bp::args("self", "data", "x", "u"),
+           "Compute the system acceleration.\n\n"
+           "It computes the system acceleration given the state and control "
+           "input. Additionally it evaluates the equality and inequality "
+           "constraint residuals.\n"
+           ":param data: dynamics data\n"
+           ":param x: state point (dim. state.nx)\n"
+           ":param u: control input (dim. nu)")
+        .def("calc",
+             static_cast<void (DynamicsModel::*)(
+                 const std::shared_ptr<DynamicsData>&,
+                 const Eigen::Ref<const VectorXs>&)>(&DynamicsModel::calc),
+             bp::args("self", "data", "x"),
+             "Compute the system acceleration for terminal nodes (no "
+             "control).\n\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("calcDiff",
+             static_cast<void (DynamicsModel::*)(
+                 const std::shared_ptr<DynamicsData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&DynamicsModel::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the dynamics.\n\n"
+             "For running nodes it dispatches to calcDiff_xu() and, when "
+             "np > 0, to calcDiff_p(). It assumes that calc() has been run "
+             "first.\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (DynamicsModel::*)(
+                 const std::shared_ptr<DynamicsData>&,
+                 const Eigen::Ref<const VectorXs>&)>(&DynamicsModel::calcDiff),
+             bp::args("self", "data", "x"),
+             "Compute the derivatives for terminal nodes (no control).\n\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("calcDiff_xu",
+             bp::pure_virtual(static_cast<void (Model::*)(
+                 const std::shared_ptr<DynamicsData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_xu)),
+             bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the dynamics w.r.t. state and "
+             "control.\n\n"
+             "Stores results in data.Fx, data.Fu and the constraint "
+             "Jacobians data.Hx, data.Hu, data.Gx, data.Gu.\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("calcDiff_xu",
+             static_cast<void (DynamicsModel::*)(
+                 const std::shared_ptr<DynamicsData>&,
+                 const Eigen::Ref<const VectorXs>&)>(
+                 &DynamicsModel::calcDiff_xu),
+             bp::args("self", "data", "x"),
+             "Compute the state-only derivatives of the dynamics for "
+             "terminal nodes.\n\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)")
+        .def("calcDiff_p", &Model::calcDiff_p, &Model::default_calcDiff_p,
+             bp::args("self", "data", "x", "u"),
+             "Compute the parameter sensitivity of the dynamics.\n\n"
+             "Stores results in data.Fp, data.Hp, data.Gp. Must be "
+             "implemented by derived classes when np > 0.\n"
+             ":param data: dynamics data\n"
+             ":param x: state point (dim. state.nx)\n"
+             ":param u: control input (dim. nu)")
+        .def("createData",
+             static_cast<std::shared_ptr<DynamicsData> (Model::*)()>(
+                 &Model::createData),
+             &Model::default_createData,
+             bp::args("self"),
+             "Create the dynamics data.\n\n"
+             ":return dynamics data")
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Wire a parameter manager into the dynamics model and data.")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the active parameter vector in the dynamics data.")
+        .def("quasiStatic", &Model::quasiStatic_x,
+             DynamicsModel_quasiStatic_wraps(
+                 bp::args("self", "data", "x", "maxiter", "tol"),
+                 "Compute the quasi-static control given a state.\n\n"
+                 "It runs an iterative Newton step to compute the quasi-static "
+                 "regime given a state configuration.\n"
+                 ":param data: dynamics data\n"
+                 ":param x: state point (velocity must be zero)\n"
+                 ":param maxiter: maximum allowed number of iterations\n"
+                 ":param tol: stopping tolerance (default 1e-9)\n"
+                 ":return u: quasi-static control"))
+        .def("quasiStatic", &Model::quasiStatic,
+             &Model::default_quasiStatic,
+             bp::args("self", "data", "u", "x", "maxiter", "tol"))
+        .def("update_tau", &DynamicsModel::update_tau,
+             bp::args("self", "tau_meas"),
+             "Update the torque measurements.\n\n"
+             ":param tau_meas: measured torques (dim. nu)")
+        .def("set_dyn_type", &DynamicsModel::set_dyn_type,
+             bp::args("self", "dyn_type"),
+             "Set the dynamics type.\n\n"
+             ":param dyn_type: type of dynamics behavior")
+        .add_property("nu", bp::make_function(&DynamicsModel::get_nu),
+                      "dimension of control vector")
+        .add_property("np", bp::make_function(&DynamicsModel::get_np),
+                      "dimension of parameter vector")
+        .add_property("ng", bp::make_function(&DynamicsModel::get_ng),
+                      "number of inequality constraints")
+        .add_property("nh", bp::make_function(&DynamicsModel::get_nh),
+                      "number of equality constraints")
+        .add_property(
+            "state",
+            bp::make_function(&DynamicsModel::get_state,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "state")
+        .add_property("dyn_type",
+                      bp::make_function(&DynamicsModel::get_dyn_type),
+                      "type of dynamics behavior")
+        .add_property(
+            "tau_meas",
+            bp::make_function(&DynamicsModel::get_tau_meas,
+                              bp::return_internal_reference<>()),
+            "measured torques")
+        .add_property(
+            "p_lb",
+            bp::make_function(&DynamicsModel::get_p_lb,
+                              bp::return_internal_reference<>()),
+            &DynamicsModel::set_p_lb, "parameter lower bounds")
+        .add_property(
+            "p_ub",
+            bp::make_function(&DynamicsModel::get_p_ub,
+                              bp::return_internal_reference<>()),
+            &DynamicsModel::set_p_ub, "parameter upper bounds");
+  }
+};
+
+template <typename Data>
+struct DynamicsDataAbstractVisitor
+    : public bp::def_visitor<DynamicsDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "shared",
+          bp::make_getter(&Data::shared, bp::return_internal_reference<>()),
+          "shared data")
+        .add_property(
+            "vdot",
+          bp::make_getter(&Data::vdot, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::vdot),
+          "system acceleration (or next state for DiscreteTime)")
+        .add_property(
+            "Fx",
+            bp::make_getter(&Data::Fx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fx),
+            "Jacobian of the dynamics w.r.t. the state")
+        .add_property(
+            "Fu",
+            bp::make_getter(&Data::Fu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fu),
+            "Jacobian of the dynamics w.r.t. the control")
+        .add_property(
+            "Fp",
+            bp::make_getter(&Data::Fp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Fp),
+            "Jacobian of the dynamics w.r.t. the parameters")
+        .add_property(
+            "dissipative_P",
+            bp::make_getter(&Data::dissipative_P,
+                            bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dissipative_P), "dissipative power")
+        .add_property(
+            "dP_dv",
+            bp::make_getter(&Data::dP_dv, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dP_dv),
+            "Jacobian of dissipative power w.r.t. velocity")
+        .add_property(
+            "dP_dp",
+            bp::make_getter(&Data::dP_dp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::dP_dp),
+            "Jacobian of dissipative power w.r.t. parameters")
+        .add_property(
+            "h",
+            bp::make_getter(&Data::h, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::h), "equality constraint values")
+        .add_property(
+            "Hx",
+            bp::make_getter(&Data::Hx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hx),
+            "Jacobian of equality constraints w.r.t. the state")
+        .add_property(
+            "Hu",
+            bp::make_getter(&Data::Hu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hu),
+            "Jacobian of equality constraints w.r.t. the control")
+        .add_property(
+            "Hp",
+            bp::make_getter(&Data::Hp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hp),
+            "Jacobian of equality constraints w.r.t. the parameters")
+        .add_property(
+            "g",
+            bp::make_getter(&Data::g, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::g), "inequality constraint values")
+        .add_property(
+            "Gx",
+            bp::make_getter(&Data::Gx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gx),
+            "Jacobian of inequality constraints w.r.t. the state")
+        .add_property(
+            "Gu",
+            bp::make_getter(&Data::Gu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gu),
+            "Jacobian of inequality constraints w.r.t. the control")
+        .add_property(
+            "Gp",
+            bp::make_getter(&Data::Gp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gp),
+            "Jacobian of inequality constraints w.r.t. the parameters");
+  }
+};
+
+#define CROCODDYL_DYNAMICS_MODEL_ABSTRACT_PYTHON_BINDINGS(Scalar)             \
+  typedef DynamicsModelAbstractTpl<Scalar> Model;                             \
+  typedef DynamicsModelAbstractTpl_wrap<Scalar> Model_wrap;                   \
+  typedef StateAbstractTpl<Scalar> State;                                     \
+  typedef std::shared_ptr<Model> DynamicsModelPtr;                            \
+  StdVectorPythonVisitor<std::vector<DynamicsModelPtr>, true>::expose(        \
+      "StdVec_DynamicsModel");                                                \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+  bp::class_<Model_wrap, boost::noncopyable>(                                 \
+      "DynamicsModelAbstract",                                                \
+      "Abstract class for dynamics models.\n\n"                               \
+      "A dynamics model defines the continuous-time ODE (or discrete-time "   \
+      "map) of a dynamical system, decoupled from any integration scheme. "   \
+      "It is parametrized by a state, a control, and optionally a parameter " \
+      "vector p. The calc() method computes the system acceleration and "     \
+      "constraint residuals. The running-node calcDiff() method dispatches "  \
+      "to calcDiff_xu() and, when np > 0, to calcDiff_p().",                 \
+      bp::init<std::shared_ptr<State>,                                        \
+               bp::optional<DynamicsType, std::size_t, std::size_t,          \
+                            std::size_t, std::size_t>>(                       \
+          bp::args("self", "state", "dyn_type", "np", "nu", "ng", "nh"),     \
+          "Initialize the dynamics model.\n\n"                                \
+          ":param state: state description\n"                                 \
+          ":param dyn_type: type of dynamics behavior (default "              \
+          "ContinuousControl)\n"                                              \
+          ":param np: dimension of the parameter vector (default 0)\n"        \
+          ":param nu: dimension of control vector (default 0)\n"              \
+          ":param ng: number of inequality constraints (default 0)\n"         \
+          ":param nh: number of equality constraints (default 0)"))           \
+      .def(DynamicsModelAbstractVisitor<Model_wrap>())                        \
+      .def(PrintableVisitor<Model_wrap>());
+
+#define CROCODDYL_DYNAMICS_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)              \
+  typedef DynamicsDataAbstractTpl<Scalar> Data;                               \
+  typedef DynamicsModelAbstractTpl<Scalar> Model;                             \
+  typedef std::shared_ptr<Data> DynamicsDataPtr;                              \
+  StdVectorPythonVisitor<std::vector<DynamicsDataPtr>, true>::expose(         \
+      "StdVec_DynamicsData");                                                 \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+  bp::class_<Data>(                                                            \
+      "DynamicsDataAbstract",                                                 \
+      "Abstract class for dynamics data.\n\n"                                 \
+      "In crocoddyl, dynamics data contains all the computed quantities "     \
+      "for a dynamics model: the system acceleration (vdot) and its "        \
+      "Jacobians w.r.t. state (Fx), control (Fu), and parameters (Fp), "      \
+      "dissipative power and its derivatives, and constraint residuals and "  \
+      "their Jacobians. Continuous data uses nv dynamics rows; discrete "      \
+      "data stores an nx next state with ndx Jacobian rows.",                 \
+      bp::init<Model*>(                                                       \
+          bp::args("self", "model"),                                          \
+          "Create common data shared between dynamics models.\n\n"            \
+          ":param model: dynamics model"))                                     \
+      .def(DynamicsDataAbstractVisitor<Data>())                               \
+      .def(CopyableVisitor<Data>());
+
+void exposeDynamicsAbstract() {
+#ifdef SCALAR_float64
+  bp::enum_<DynamicsType>("DynamicsType")
+      .value("ContinuousControl", DynamicsType::ContinuousControl)
+      .value("ContinuousEstimation", DynamicsType::ContinuousEstimation)
+      .value("DiscreteTime", DynamicsType::DiscreteTime)
+      .export_values();
+#endif
+
+  CROCODDYL_DYNAMICS_MODEL_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_DATA_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -9,7 +9,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/params/parameter-manager.hpp"
+
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -21,8 +24,13 @@ struct IntegratedActionModelAbstractVisitor
   typedef typename Model::IntegratedActionModel IntegratedActionModel;
   typedef typename Model::IntegratedActionData IntegratedActionData;
   typedef typename Model::DifferentialActionModel DifferentialActionModel;
+  typedef typename Model::DynamicsModel DynamicsModel;
+  typedef typename Model::CostModelSum CostModelSum;
+  typedef typename Model::ConstraintModelManager ConstraintModelManager;
   typedef typename Model::ActionData ActionData;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
   typedef typename Model::ControlModel ControlModel;
+  typedef typename Model::IntegratorTime IntegratorTime;
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -37,8 +45,29 @@ struct IntegratedActionModelAbstractVisitor
                ":param control: the control parametrization\n"
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
-               "derivatives (default True)."))
-        .def("calc", pure_virtual(&Model::calc),
+               "derivatives (default True).")[deprecated<>(
+               "Deprecated. Use the constructor taking dynModel, costModel "
+               "and constraints.")])
+        .def(bp::init<std::shared_ptr<DynamicsModel>,
+                      std::shared_ptr<CostModelSum>,
+                      bp::optional<std::shared_ptr<ConstraintModelManager>,
+                                   std::shared_ptr<ControlModel>,
+                                   std::shared_ptr<IntegratorTime> > >(
+                 bp::args("self", "dynModel", "costModel", "constraints",
+                          "control", "integratorTime"),
+                 "Initialize the integrated-action model from dynamics and "
+                 "costs.\n\n"
+                 ":param dynModel: dynamics model\n"
+                 ":param costModel: cost model stack\n"
+                 ":param constraints: constraint manager (default None)\n"
+                 ":param control: control parametrization (default None)\n"
+                 ":param integratorTime: shared integrator time (default "
+                 "None)"))
+        .def("calc",
+             bp::pure_virtual(static_cast<void (Model::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc)),
              bp::args("self", "data", "x", "u"),
              "Compute the next state and cost value.\n\n"
              "It describes the time-discrete evolution of our dynamical system "
@@ -53,7 +82,11 @@ struct IntegratedActionModelAbstractVisitor
                  const Eigen::Ref<const VectorXs>&)>(
                  &IntegratedActionModel::calc),
              bp::args("self", "data", "x"))
-        .def("calcDiff", pure_virtual(&Model::calcDiff),
+        .def("calcDiff",
+             bp::pure_virtual(static_cast<void (Model::*)(
+                 const std::shared_ptr<ActionData>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff)),
              bp::args("self", "data", "x", "u"),
              "Compute the derivatives of the dynamics and cost functions.\n\n"
              "It computes the partial derivatives of the dynamical system and "
@@ -69,28 +102,69 @@ struct IntegratedActionModelAbstractVisitor
                  const Eigen::Ref<const VectorXs>&)>(
                  &IntegratedActionModel::calcDiff),
              bp::args("self", "data", "x"))
-        .def("createData", &Model::createData, &Model::default_createData,
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (
+                 IntegratedActionModel::*)()>(
+                 &IntegratedActionModel::createData),
+             &Model::default_createData,
              bp::args("self"),
              "Create the integrated-action data.\n\n"
              "Each integrated-action model (IAM) has its own data that needs "
              "to be allocated. This function returns the allocated data for a "
              "predefined IAM.\n"
              ":return integrated-action data.")
+        .def("createData",
+             static_cast<std::shared_ptr<ActionData> (
+                 IntegratedActionModel::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &IntegratedActionModel::createData),
+             bp::args("self", "params_data"),
+             "Create the integrated-action data with shared parameter data.\n\n"
+             ":param params_data: parameter data manager")
         .add_property(
             "differential",
-            bp::make_function(&Model::get_differential,
+            bp::make_function(
+                &Model::get_differential,
+                deprecated<bp::return_value_policy<bp::return_by_value>>(
+                    "Deprecated. Integrated action models backed by a "
+                    "differential action model belong to the legacy API; use "
+                    "dynamics, costs and constraints instead.")),
+            "legacy differential action model")
+        .add_property(
+            "dynamics",
+            bp::make_function(&Model::get_dynamics,
                               bp::return_value_policy<bp::return_by_value>()),
-            "differential action model")
+            "dynamics model")
+        .add_property(
+            "costs",
+            bp::make_function(&Model::get_costs,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "cost model stack")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "constraint manager")
+        .add_property(
+            "params",
+            bp::make_function(&IntegratedActionModel::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
         .add_property(
             "control",
             bp::make_function(&Model::get_control,
                               bp::return_value_policy<bp::return_by_value>()),
             "control parametrization model")
         .add_property(
-            "dt",
-            bp::make_function(&IntegratedActionModelAbstract::get_dt,
+            "integrator_time",
+            bp::make_function(&IntegratedActionModel::get_integrator_time,
                               bp::return_value_policy<bp::return_by_value>()),
-            &IntegratedActionModelAbstract::set_dt, "step time");
+            "shared integration-time metadata")
+        .add_property(
+            "dt",
+            bp::make_function(&IntegratedActionModel::get_dt,
+                              bp::return_value_policy<bp::return_by_value>()),
+            &IntegratedActionModel::set_dt, "step time");
   }
 };
 
@@ -113,10 +187,11 @@ struct IntegratedActionModelAbstractVisitor
           ":param diffModel: differential action model\n"                   \
           ":param timestep: integration time step (default 1e-3)\n"         \
           ":param withCostResidual: includes the cost residuals and "       \
-          "derivatives (default True)."))                                   \
+          "derivatives (default True).")[deprecated<>(                      \
+          "Deprecated. Use the constructor taking dynModel, costModel and " \
+          "constraints.")])                                                 \
       .def(IntegratedActionModelAbstractVisitor<Model_wrap>())              \
-      .def(PrintableVisitor<Model_wrap>())                                  \
-      .def(CopyableVisitor<Model_wrap>());
+      .def(PrintableVisitor<Model_wrap>());
 
 #define CROCODDYL_INTACTION_DATA_ABSTRACT_PYTHON_BINDINGS(Scalar)              \
   typedef IntegratedActionDataAbstractTpl<Scalar> Data;                        \

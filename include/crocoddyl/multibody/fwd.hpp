@@ -28,6 +28,46 @@ struct ThrusterTpl;
 template <typename Scalar>
 class ActuationModelFloatingBaseThrustersTpl;
 
+template <typename Scalar>
+class JointDynamicsModelAbstractTpl;
+template <typename Scalar>
+struct JointDynamicsDataAbstractTpl;
+template <typename Scalar>
+class JointDynamicsModelIdentityTpl;
+template <typename Scalar>
+struct JointDynamicsDataFrictionTpl;
+template <typename Scalar>
+class JointDynamicsModelFrictionTpl;
+template <typename Scalar>
+class JointDynamicsModelThrusterTpl;
+template <typename Scalar>
+class ActuationModelMultibodyTpl;
+template <typename Scalar>
+struct ActuationDataMultibodyTpl;
+template <typename Scalar>
+class ActuationMultibodyParamsTpl;
+template <typename Scalar>
+struct ActuationMultibodyParamsDataTpl;
+
+class InertialParametrizationBase;
+
+template <typename Scalar>
+class InertialParametrizationAbstractTpl;
+template <typename Scalar>
+struct InertialParametrizationDataAbstractTpl;
+template <typename Scalar>
+class LogCholeskyParametrizationTpl;
+template <typename Scalar>
+struct LogCholeskyParametrizationDataTpl;
+template <typename Scalar>
+class ExpEigenValueParametrizationTpl;
+template <typename Scalar>
+struct ExpEigenValueParametrizationDataTpl;
+template <typename Scalar>
+class MultibodyInertialParamsTpl;
+template <typename Scalar>
+struct MultibodyInertialParamsDataTpl;
+
 // force
 template <typename Scala>
 struct ForceDataAbstractTpl;
@@ -64,6 +104,22 @@ template <typename Scalar>
 class DifferentialActionModelContactInvDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl;
+
+// dynamics
+template <typename Scalar>
+class DynamicsModelConstrainedForwardTpl;
+template <typename Scalar>
+struct DynamicsDataConstrainedForwardTpl;
+
+template <typename Scalar>
+class DynamicsModelConstrainedInverseTpl;
+template <typename Scalar>
+struct DynamicsDataConstrainedInverseTpl;
+
+template <typename Scalar>
+class DynamicsModelImpulseForwardTpl;
+template <typename Scalar>
+struct DynamicsDataImpulseForwardTpl;
 
 // numdiff
 template <typename Scalar>
@@ -147,6 +203,35 @@ class ResidualModelStateTpl;
 template <typename Scalar>
 struct ResidualDataStateTpl;
 
+template <typename Scalar>
+class ResidualModelActuationParametersTpl;
+template <typename Scalar>
+struct ResidualDataActuationParametersTpl;
+template <typename Scalar>
+class ResidualModelInertialParametersTpl;
+template <typename Scalar>
+struct ResidualDataInertialParametersTpl;
+template <typename Scalar>
+class ResidualModelSymmetryParametersTpl;
+template <typename Scalar>
+struct ResidualDataSymmetryParametersTpl;
+template <typename Scalar>
+class ResidualModelTotalMassTpl;
+template <typename Scalar>
+struct ResidualDataTotalMassTpl;
+template <typename Scalar>
+class ResidualModelPotentialEnergyTpl;
+template <typename Scalar>
+struct ResidualDataPotentialEnergyTpl;
+template <typename Scalar>
+class ResidualModelKineticEnergyTpl;
+template <typename Scalar>
+struct ResidualDataKineticEnergyTpl;
+template <typename Scalar>
+class ResidualModelPowerTpl;
+template <typename Scalar>
+struct ResidualDataPowerTpl;
+
 #ifdef PINOCCHIO_WITH_HPP_FCL
 template <typename Scalar>
 class ResidualModelPairCollisionTpl;
@@ -219,6 +304,26 @@ class ContactModel6DTpl;
 template <typename Scalar>
 struct ContactData6DTpl;
 
+// implicit constraint
+template <typename Scalar>
+class ImplicitConstraintModelAbstractTpl;
+template <typename Scalar>
+struct ImplicitConstraintDataAbstractTpl;
+template <typename Scalar>
+struct ImplicitConstraintItemTpl;
+template <typename Scalar>
+class ImplicitConstraintModelMultipleTpl;
+template <typename Scalar>
+struct ImplicitConstraintDataMultipleTpl;
+template <typename Scalar>
+class KinematicLoopModelTpl;
+template <typename Scalar>
+struct KinematicLoopDataTpl;
+template <typename Scalar>
+class ContactModelTpl;
+template <typename Scalar>
+struct ContactDataTpl;
+
 // friction
 template <typename Scalar>
 class FrictionConeTpl;
@@ -238,10 +343,19 @@ template <typename Scalar>
 struct DataCollectorMultibodyTpl;
 
 template <typename Scalar>
+struct DataCollectorMultibodyParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActMultibodyTpl;
 
 template <typename Scalar>
+struct DataCollectorActMultibodyParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActMultibodyTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorContactTpl;
@@ -250,16 +364,55 @@ template <typename Scalar>
 struct DataCollectorMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorMultibodyInContactParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorActMultibodyInContactParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActMultibodyInContactTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInContactParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorJointMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorJointMultibodyInImplicitConstraintParamsTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInImplicitConstraintTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActMultibodyInImplicitConstraintParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
 template <typename Scalar>
 struct DataCollectorMultibodyInImpulseTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyInImpulseParamsTpl;
 
 // impulse
 template <typename Scalar>
@@ -286,6 +439,28 @@ typedef ActuationModelFullTpl<double> ActuationModelFull;
 typedef ThrusterTpl<double> Thruster;
 typedef ActuationModelFloatingBaseThrustersTpl<double>
     ActuationModelFloatingBaseThrusters;
+typedef JointDynamicsModelAbstractTpl<double> JointDynamicsModelAbstract;
+typedef JointDynamicsDataAbstractTpl<double> JointDynamicsDataAbstract;
+typedef JointDynamicsModelIdentityTpl<double> JointDynamicsModelIdentity;
+typedef JointDynamicsDataFrictionTpl<double> JointDynamicsDataFriction;
+typedef JointDynamicsModelFrictionTpl<double> JointDynamicsModelFriction;
+typedef JointDynamicsModelThrusterTpl<double> JointDynamicsModelThruster;
+typedef ActuationModelMultibodyTpl<double> ActuationModelMultibody;
+typedef ActuationDataMultibodyTpl<double> ActuationDataMultibody;
+typedef ActuationMultibodyParamsTpl<double> ActuationMultibodyParams;
+typedef ActuationMultibodyParamsDataTpl<double> ActuationMultibodyParamsData;
+typedef InertialParametrizationAbstractTpl<double>
+    InertialParametrizationAbstract;
+typedef InertialParametrizationDataAbstractTpl<double>
+    InertialParametrizationDataAbstract;
+typedef LogCholeskyParametrizationTpl<double> LogCholeskyParametrization;
+typedef LogCholeskyParametrizationDataTpl<double>
+    LogCholeskyParametrizationData;
+typedef ExpEigenValueParametrizationTpl<double> ExpEigenValueParametrization;
+typedef ExpEigenValueParametrizationDataTpl<double>
+    ExpEigenValueParametrizationData;
+typedef MultibodyInertialParamsTpl<double> MultibodyInertialParams;
+typedef MultibodyInertialParamsDataTpl<double> MultibodyInertialParamsData;
 
 typedef ForceDataAbstractTpl<double> ForceDataAbstract;
 
@@ -311,6 +486,17 @@ typedef DifferentialActionModelContactInvDynamicsTpl<double>
     DifferentialActionModelContactInvDynamics;
 typedef DifferentialActionDataContactInvDynamicsTpl<double>
     DifferentialActionDataContactInvDynamics;
+
+typedef DynamicsModelConstrainedForwardTpl<double>
+    DynamicsModelConstrainedForward;
+typedef DynamicsDataConstrainedForwardTpl<double>
+    DynamicsDataConstrainedForward;
+typedef DynamicsModelConstrainedInverseTpl<double>
+    DynamicsModelConstrainedInverse;
+typedef DynamicsDataConstrainedInverseTpl<double>
+    DynamicsDataConstrainedInverse;
+typedef DynamicsModelImpulseForwardTpl<double> DynamicsModelImpulseForward;
+typedef DynamicsDataImpulseForwardTpl<double> DynamicsDataImpulseForward;
 
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
@@ -358,6 +544,26 @@ typedef ResidualModelImpulseCoMTpl<double> ResidualModelImpulseCoM;
 typedef ResidualDataImpulseCoMTpl<double> ResidualDataImpulseCoM;
 typedef ResidualModelStateTpl<double> ResidualModelState;
 typedef ResidualDataStateTpl<double> ResidualDataState;
+typedef ResidualModelActuationParametersTpl<double>
+    ResidualModelActuationParameters;
+typedef ResidualDataActuationParametersTpl<double>
+    ResidualDataActuationParameters;
+typedef ResidualModelInertialParametersTpl<double>
+    ResidualModelInertialParameters;
+typedef ResidualDataInertialParametersTpl<double>
+    ResidualDataInertialParameters;
+typedef ResidualModelSymmetryParametersTpl<double>
+    ResidualModelSymmetryParameters;
+typedef ResidualDataSymmetryParametersTpl<double>
+    ResidualDataSymmetryParameters;
+typedef ResidualModelTotalMassTpl<double> ResidualModelTotalMass;
+typedef ResidualDataTotalMassTpl<double> ResidualDataTotalMass;
+typedef ResidualModelPotentialEnergyTpl<double> ResidualModelPotentialEnergy;
+typedef ResidualDataPotentialEnergyTpl<double> ResidualDataPotentialEnergy;
+typedef ResidualModelKineticEnergyTpl<double> ResidualModelKineticEnergy;
+typedef ResidualDataKineticEnergyTpl<double> ResidualDataKineticEnergy;
+typedef ResidualModelPowerTpl<double> ResidualModelPower;
+typedef ResidualDataPowerTpl<double> ResidualDataPower;
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 typedef ResidualModelPairCollisionTpl<double> ResidualModelPairCollision;
@@ -400,23 +606,67 @@ typedef ContactModel3DTpl<double> ContactModel3D;
 typedef ContactData3DTpl<double> ContactData3D;
 typedef ContactModel6DTpl<double> ContactModel6D;
 typedef ContactData6DTpl<double> ContactData6D;
+typedef ImplicitConstraintModelAbstractTpl<double>
+    ImplicitConstraintModelAbstract;
+typedef ImplicitConstraintDataAbstractTpl<double>
+    ImplicitConstraintDataAbstract;
+typedef ImplicitConstraintItemTpl<double> ImplicitConstraintItem;
+typedef ImplicitConstraintModelMultipleTpl<double>
+    ImplicitConstraintModelMultiple;
+typedef ImplicitConstraintDataMultipleTpl<double>
+    ImplicitConstraintDataMultiple;
+typedef KinematicLoopModelTpl<double> KinematicLoopModel;
+typedef KinematicLoopDataTpl<double> KinematicLoopData;
+typedef ContactModelTpl<double> ContactModel;
+typedef ContactDataTpl<double> ContactData;
 
 typedef StateMultibodyTpl<double> StateMultibody;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
+typedef DataCollectorMultibodyParamsTpl<double> DataCollectorMultibodyParams;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
+typedef DataCollectorActMultibodyParamsTpl<double>
+    DataCollectorActMultibodyParams;
 typedef DataCollectorJointActMultibodyTpl<double>
     DataCollectorJointActMultibody;
+typedef DataCollectorJointActMultibodyParamsTpl<double>
+    DataCollectorJointActMultibodyParams;
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double>
     DataCollectorMultibodyInContact;
+typedef DataCollectorMultibodyInContactParamsTpl<double>
+    DataCollectorMultibodyInContactParams;
 typedef DataCollectorActMultibodyInContactTpl<double>
     DataCollectorActMultibodyInContact;
+typedef DataCollectorActMultibodyInContactParamsTpl<double>
+    DataCollectorActMultibodyInContactParams;
 typedef DataCollectorJointActMultibodyInContactTpl<double>
     DataCollectorJointActMultibodyInContact;
+typedef DataCollectorJointActMultibodyInContactParamsTpl<double>
+    DataCollectorJointActMultibodyInContactParams;
+typedef DataCollectorImplicitConstraintTpl<double>
+    DataCollectorImplicitConstraint;
+typedef DataCollectorMultibodyInImplicitConstraintTpl<double>
+    DataCollectorMultibodyInImplicitConstraint;
+typedef DataCollectorMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorMultibodyInImplicitConstraintParams;
+typedef DataCollectorActMultibodyInImplicitConstraintTpl<double>
+    DataCollectorActMultibodyInImplicitConstraint;
+typedef DataCollectorActMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorActMultibodyInImplicitConstraintParams;
+typedef DataCollectorJointMultibodyInImplicitConstraintTpl<double>
+    DataCollectorJointMultibodyInImplicitConstraint;
+typedef DataCollectorJointMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorJointMultibodyInImplicitConstraintParams;
+typedef DataCollectorJointActMultibodyInImplicitConstraintTpl<double>
+    DataCollectorJointActMultibodyInImplicitConstraint;
+typedef DataCollectorJointActMultibodyInImplicitConstraintParamsTpl<double>
+    DataCollectorJointActMultibodyInImplicitConstraintParams;
 typedef DataCollectorImpulseTpl<double> DataCollectorImpulse;
 typedef DataCollectorMultibodyInImpulseTpl<double>
     DataCollectorMultibodyInImpulse;
+typedef DataCollectorMultibodyInImpulseParamsTpl<double>
+    DataCollectorMultibodyInImpulseParams;
 
 typedef ImpulseModel6DTpl<double> ImpulseModel6D;
 typedef ImpulseData6DTpl<double> ImpulseData6D;

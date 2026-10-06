@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -18,6 +18,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       activation_(activation),
       residual_(residual),
       nu_(residual->get_nu()),
+      np_(residual->get_np()),
       unone_(VectorXs::Zero(residual->get_nu())) {
   if (activation_->get_nr() != residual_->get_nr()) {
     throw_pretty("Invalid argument: "
@@ -34,6 +35,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       residual_(std::make_shared<ResidualModelAbstractTpl<Scalar>>(
           state, activation->get_nr(), nu)),
       nu_(nu),
+      np_(0),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
@@ -45,6 +47,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       residual_(std::make_shared<ResidualModelAbstractTpl<Scalar>>(
           state, activation->get_nr())),
       nu_(state->get_nv()),
+      np_(0),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -56,6 +59,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
           std::make_shared<ActivationModelQuadTpl<Scalar>>(residual->get_nr())),
       residual_(residual),
       nu_(residual->get_nu()),
+      np_(residual->get_np()),
       unone_(VectorXs::Zero(residual->get_nu())) {}
 
 template <typename Scalar>
@@ -66,6 +70,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       activation_(std::make_shared<ActivationModelQuadTpl<Scalar>>(nr)),
       residual_(std::make_shared<ResidualModelAbstract>(state, nr, nu)),
       nu_(nu),
+      np_(0),
       unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
@@ -75,6 +80,7 @@ CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(
       activation_(std::make_shared<ActivationModelQuadTpl<Scalar>>(nr)),
       residual_(std::make_shared<ResidualModelAbstract>(state, nr)),
       nu_(state->get_nv()),
+      np_(0),
       unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
@@ -124,6 +130,11 @@ CostModelAbstractTpl<Scalar>::get_residual() const {
 template <typename Scalar>
 std::size_t CostModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+std::size_t CostModelAbstractTpl<Scalar>::get_np() const {
+  return np_;
 }
 
 template <typename Scalar>

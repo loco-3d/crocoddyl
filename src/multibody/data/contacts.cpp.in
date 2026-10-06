@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2025-2025, Heriot-Watt University
+// Copyright (C) 2025-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,8 +16,14 @@ template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
 template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     DataCollectorMultibodyInContactTpl<@SCALAR_TYPE@>;
 template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DataCollectorMultibodyInContactParamsTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     DataCollectorActMultibodyInContactTpl<@SCALAR_TYPE@>;
 template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DataCollectorActMultibodyInContactParamsTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
     DataCollectorJointActMultibodyInContactTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DataCollectorJointActMultibodyInContactParamsTpl<@SCALAR_TYPE@>;
 
 }  // namespace crocoddyl

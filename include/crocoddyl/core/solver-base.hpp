@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,7 +10,9 @@
 #ifndef CROCODDYL_CORE_SOLVER_BASE_HPP_
 #define CROCODDYL_CORE_SOLVER_BASE_HPP_
 
+#include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/optctrl/problem-abstract.hpp"
 #include "crocoddyl/core/optctrl/shooting.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
@@ -78,9 +80,14 @@ class SolverAbstractTpl : public SolverBase {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
+  typedef ProblemAbstractTpl<Scalar> ProblemAbstract;
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
-  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
-  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef ActionModelAbstractTpl<Scalar> ActionModelAbstract;
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;
+  typedef ParameterPhaseDataTpl<Scalar> ParameterPhaseData;
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;
+  typedef ConstraintDataManagerTpl<Scalar> ConstraintDataManager;
   typedef CallbackAbstractTpl<Scalar> CallbackAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
@@ -92,6 +99,13 @@ class SolverAbstractTpl : public SolverBase {
    * @param[in] problem  shooting problem
    */
   explicit SolverAbstractTpl(std::shared_ptr<ShootingProblem> problem);
+
+  /**
+   * @brief Initialize the solver for an abstract optimal-control problem
+   *
+   * @param[in] problem  optimal control / estimation problem
+   */
+  explicit SolverAbstractTpl(std::shared_ptr<ProblemAbstract> problem);
   virtual ~SolverAbstractTpl() = default;
 
   /**
@@ -102,6 +116,9 @@ class SolverAbstractTpl : public SolverBase {
    * over `computeDirection()` and `tryStep()` until `stoppingCriteria()` is
    * below threshold. It also describes the globalization strategy used during
    * the numerical optimization.
+   *
+   * The default implementation forwards to the parameter-aware overload with
+   * an empty parameter trajectory.
    *
    * @param[in] init_xs      initial guess for state trajectory with \f$T+1\f$
    * elements (default [])
@@ -114,10 +131,36 @@ class SolverAbstractTpl : public SolverBase {
    * low values are typical used with very good guess points (default 1e-9).
    * @return A boolean that describes if convergence was reached.
    */
-  virtual bool solve(
+  bool solve(
       const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
       const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
       const std::size_t maxiter = 100, const bool is_feasible = false,
+      const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
+
+  /**
+   * @brief Compute the optimal state, control, and parameter trajectories
+   *
+   * This overload extends the optimal-control interface with an initial
+   * parameter guess. The default implementation accepts only an empty
+   * parameter trajectory and executes the standard solver loop. Solvers that
+   * optimize parameters should override it.
+   *
+   * @param[in] init_xs      initial guess for state trajectory with \f$T+1\f$
+   * elements
+   * @param[in] init_us      initial guess for control trajectory with \f$T\f$
+   * elements
+   * @param[in] init_ps       initial parameter vectors, one per phase
+   * @param[in] maxiter      maximum allowed number of iterations (default 100)
+   * @param[in] is_feasible  true if the \p init_xs are obtained from
+   * integrating the \p init_us (rollout) (default false)
+   * @param[in] init_reg     initial guess for the regularization value
+   * @return A boolean that describes if convergence was reached.
+   */
+  virtual bool solve(
+      const std::vector<VectorXs>& init_xs,
+      const std::vector<VectorXs>& init_us,
+      const std::vector<VectorXs>& init_ps, const std::size_t maxiter = 100,
+      const bool is_feasible = false,
       const Scalar reg_init = std::numeric_limits<Scalar>::quiet_NaN());
 
   /**
@@ -393,9 +436,9 @@ class SolverAbstractTpl : public SolverBase {
   const std::vector<std::shared_ptr<CallbackAbstract>>& getCallbacks() const;
 
   /**
-   * @brief Return the shooting problem
+   * @brief Return the optimal control / estimation problem
    */
-  const std::shared_ptr<ShootingProblem>& get_problem() const;
+  const std::shared_ptr<ProblemAbstract>& get_problem() const;
 
   /**
    * @brief Return the set of step lengths using by the line-search procedure
@@ -695,7 +738,8 @@ class SolverAbstractTpl : public SolverBase {
    */
   virtual void resizeTerminalData();
 
-  std::shared_ptr<ShootingProblem> problem_;  //!< optimal control problem
+  std::shared_ptr<ProblemAbstract>
+      problem_;  //!< optimal control / estimation problem
   std::vector<std::shared_ptr<CallbackAbstract>>
       callbacks_;  //!< Callback functions
   std::vector<Scalar>
@@ -816,8 +860,6 @@ bool raiseIfNaN(const Scalar value);
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solver-base.hxx"
 

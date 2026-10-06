@@ -1,0 +1,139 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/inertial-parameters.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelInertialParametersVisitor
+    : public bp::def_visitor<ResidualModelInertialParametersVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, VectorXs, std::size_t,
+                    std::string>(
+               bp::args("self", "state", "psi_ref", "nu", "param_name"),
+               "Initialize the inertial-parameter residual model.\n\n"
+               ":param state: state description\n"
+               ":param psi_ref: reference inertial-parameter vector "
+               "(size 10*nbodies: m, h, I per body)\n"
+               ":param nu: dimension of the control vector\n"
+               ":param param_name: name of the MultibodyInertialParams entry "
+               "in the ParameterDataManager"))
+        .def(bp::init<std::shared_ptr<State>, VectorXs, std::size_t,
+                      std::size_t, std::string>(
+            bp::args("self", "state", "psi_ref", "nu", "np", "param_name"),
+            "Initialize the inertial-parameter residual model.\n\n"
+            ":param state: state description\n"
+            ":param psi_ref: reference inertial-parameter vector "
+            "(size 10*nbodies: m, h, I per body)\n"
+            ":param nu: dimension of the control vector\n"
+            ":param np: dimension of the full parameter vector\n"
+            ":param param_name: name of the MultibodyInertialParams entry "
+            "in the ParameterDataManager"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the inertial-parameter residual r = psi - psi_ref.\n\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobians of the inertial-parameter residual.\n\n"
+             "Sets Rp to the block-diagonal matrix of per-body "
+             "parametrization Jacobians dpsi_i/dp_i.\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calcDiff",
+             static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                             const Eigen::Ref<const VectorXs>&)>(
+                 &ModelBase::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the inertial-parameter residual data.\n\n"
+             ":param data: shared data (must provide ParameterDataManager)\n"
+             ":return residual data.")
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_reference, "reference inertial-parameter vector")
+        .add_property("param_name",
+                      bp::make_function(&Model::get_param_name,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "name of the MultibodyInertialParams entry");
+  }
+};
+
+template <typename Data>
+struct ResidualDataInertialParametersVisitor
+    : public bp::def_visitor<ResidualDataInertialParametersVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "np_offset",
+        bp::make_getter(&Data::np_offset,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "D075 active offset of the named parameter");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_INERTIAL_PARAMETERS_PYTHON_BINDINGS(Scalar)   \
+  typedef ResidualModelInertialParametersTpl<Scalar> Model;                    \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                          \
+  typedef ResidualDataInertialParametersTpl<Scalar> Data;                     \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ResidualModelInertialParameters",                                        \
+      "Inertial-parameter residual r = psi - psi_ref.\n\n"                     \
+      "Reads the decoded per-body inertial parameters psi and their\n"         \
+      "Jacobians dpsi/dp from a named MultibodyInertialParamsData entry\n"     \
+      "in the shared ParameterDataManager.",                                    \
+      bp::no_init)                                                              \
+      .def(ResidualModelInertialParametersVisitor<Model>())                    \
+      .def(CastVisitor<Model>())                                                \
+      .def(PrintableVisitor<Model>())                                           \
+      .def(CopyableVisitor<Model>());                                           \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ResidualDataInertialParameters",                                       \
+      "Data for ResidualModelInertialParameters.", bp::no_init)               \
+      .def(ResidualDataInertialParametersVisitor<Data>())                     \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualInertialParameters() {
+  CROCODDYL_RESIDUAL_MODEL_INERTIAL_PARAMETERS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
