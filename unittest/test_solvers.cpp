@@ -360,6 +360,46 @@ void test_solver_convergence(SolverTypes::Type solver_type,
 
 //____________________________________________________________________________//
 
+void test_solver_feasibility_updates() {
+  const std::size_t T = 10;
+  std::shared_ptr<crocoddyl::ActionModelAbstract> model =
+      ActionModelFactory().create(ActionModelTypes::ActionModelLQRDriftFree);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> model2 =
+      ActionModelFactory().create(ActionModelTypes::ActionModelLQRDriftFree,
+                                  ActionModelFactory::Second);
+  std::shared_ptr<crocoddyl::ActionModelAbstract> modelT =
+      ActionModelFactory().create(ActionModelTypes::ActionModelLQRDriftFree,
+                                  ActionModelFactory::Terminal);
+
+  SolverFactory solver_factory;
+  std::shared_ptr<crocoddyl::SolverAbstract> solver = solver_factory.create(
+      SolverTypes::SolverBoxFDDP_FeasShoot, model, model2, modelT, T);
+  const std::shared_ptr<crocoddyl::ShootingProblem>& problem =
+      solver->get_problem();
+
+  std::vector<Eigen::VectorXd> us;
+  us.reserve(T);
+  for (const std::shared_ptr<crocoddyl::ActionModelAbstract>& running_model :
+       problem->get_runningModels()) {
+    us.push_back(Eigen::VectorXd::Zero(running_model->get_nu()));
+  }
+  std::vector<Eigen::VectorXd> xs = problem->rollout_us(us);
+
+  // BoxFDDP needs the feasibility label during its first backward pass to
+  // enforce the control limits through the box-QP.
+  solver->solve(xs, us, 0, true);
+  BOOST_CHECK(solver->get_is_feasible());
+
+  // A full forward pass closes all dynamics gaps, even when the initial
+  // candidate was labelled infeasible.
+  perturbSolverTrajectoryGuess(problem, &xs, &us);
+  solver->solve(xs, us, 1, false);
+  BOOST_REQUIRE_EQUAL(solver->get_steplength(), 1.);
+  BOOST_CHECK(solver->get_is_feasible());
+}
+
+//____________________________________________________________________________//
+
 void test_casted_solver(SolverTypes::Type solver_type,
                         ActionModelTypes::Type action_type, size_t T) {
   // Create action models
@@ -629,6 +669,9 @@ bool init_function() {
   setenv("KMP_ALL_THREADS", "1", 1);
 
   std::size_t T = 10;
+
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_solver_feasibility_updates));
 
   for (size_t s = 1; s < SolverTypes::all.size(); ++s) {
     for (size_t i = ActionModelTypes::ActionModelLQRDriftFree;
