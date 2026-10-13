@@ -32,15 +32,17 @@ class SolverKKTTpl : public SolverAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Vector3s Vector3s;
   using SolverAbstract::setCandidate;
+  using SolverAbstract::solve;
 
   explicit SolverKKTTpl(std::shared_ptr<ShootingProblem> problem);
   virtual ~SolverKKTTpl() = default;
 
-  virtual bool solve(
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar regInit = 1e-9) override;
+  virtual bool solve(const std::vector<VectorXs>& init_xs,
+                     const std::vector<VectorXs>& init_us,
+                     const std::vector<VectorXs>& init_p,
+                     const std::size_t maxiter = 100,
+                     const bool is_feasible = false,
+                     const Scalar regInit = 1e-9) override;
   virtual void computeDirection(const bool recalc = true) override;
   virtual Scalar tryStep(const Scalar steplength = Scalar(1.)) override;
   virtual Scalar stoppingCriteria() override;

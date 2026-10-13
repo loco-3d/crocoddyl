@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,6 +187,11 @@ ConstraintModelAbstractTpl<Scalar>::get_ub() const {
 template <typename Scalar>
 std::size_t ConstraintModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+std::size_t ConstraintModelAbstractTpl<Scalar>::get_np() const {
+  return residual_ != nullptr ? residual_->get_np() : 0;
 }
 
 template <typename Scalar>

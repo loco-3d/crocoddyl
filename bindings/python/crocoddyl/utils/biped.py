@@ -21,6 +21,8 @@ class SimpleBipedGaitProblem:
         integrator="euler",
         control="zero",
         fwddyn=True,
+        friction_type=None,
+        friction_parameters=None,
     ):
         """Construct biped-gait problem.
 
@@ -33,11 +35,21 @@ class SimpleBipedGaitProblem:
             ``"rk4"``); see Crocoddyl control parametrizations for details.
         :param fwddyn: True for forward-dynamics, False for inverse-dynamics
             formulations.
+        :param friction_type: per-joint friction model used in the actuation
+            model. By default, use identity joint actuation.
+        :param friction_parameters: log-parameters for the selected friction
+            model. When omitted, use nominal Coulomb-viscous parameters.
         """
         self.rmodel = rmodel
         self.rdata = rmodel.createData()
         self.state = crocoddyl.StateMultibody(self.rmodel)
-        self.actuation = crocoddyl.ActuationModelFloatingBase(self.state)
+        self.friction_type = friction_type
+        self.friction_parameters = (
+            np.array([np.log(0.15), np.log(10.0), np.log(0.2)])
+            if friction_parameters is None
+            else np.asarray(friction_parameters, dtype=float)
+        )
+        self.actuation = self._createActuationModel()
         self.rightFoot = rightFoot
         self.leftFoot = leftFoot
         # Getting the frame id for all the legs
@@ -53,6 +65,33 @@ class SimpleBipedGaitProblem:
         # Defining the friction coefficient and normal
         self.mu = 0.7
         self.Rsurf = np.eye(3)
+
+    def _createActuationModel(self):
+        if self.friction_type is None:
+            return crocoddyl.ActuationModelMultibody(self.state)
+
+        first_actuated_joint = (
+            self.rmodel.getJointId("root_joint") + 1
+            if self.rmodel.existJointName("root_joint")
+            else 1
+        )
+        joint_dynamics = []
+        for jid in range(first_actuated_joint, self.rmodel.njoints):
+            joint = self.rmodel.joints[jid]
+            if joint.nv == 1:
+                joint_dynamics.append(
+                    crocoddyl.JointDynamicsModelFriction(
+                        jid,
+                        joint.nq,
+                        self.friction_parameters,
+                        self.friction_type,
+                    )
+                )
+            else:
+                joint_dynamics.append(
+                    crocoddyl.JointDynamicsModelIdentity(jid, joint.nq, joint.nv)
+                )
+        return crocoddyl.ActuationModelMultibody(self.state, joint_dynamics)
 
     def createWalkingProblem(
         self,
@@ -328,10 +367,10 @@ class SimpleBipedGaitProblem:
             nu = self.actuation.nu
         else:
             nu = self.state.nv + 6 * len(footContacts)
-        contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
+        contactConstraints = crocoddyl.ImplicitConstraintModelMultiple(self.state, nu)
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
-            supportContactModel = crocoddyl.ContactModel6D(
+            supportContactModel = crocoddyl.ContactModel(
                 self.state,
                 frame_id,
                 pinocchio.SE3.Identity(),
@@ -339,7 +378,7 @@ class SimpleBipedGaitProblem:
                 nu,
                 np.array([0.0, 30.0]),
             )
-            contactModel.addContact(name + "_contact", supportContactModel)
+            contactConstraints.addConstraint(name + "_contact", supportContactModel)
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
@@ -411,18 +450,12 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
-            dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                self.state,
-                self.actuation,
-                contactModel,
-                costModel,
-                constraintModel,
-                0.0,
-                True,
+            dynamics = crocoddyl.DynamicsModelConstrainedForward(
+                self.state, self.actuation, contactConstraints
             )
         else:
-            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                self.state, self.actuation, contactModel, costModel, constraintModel
+            dynamics = crocoddyl.DynamicsModelConstrainedInverse(
+                self.state, self.actuation, contactConstraints
             )
         if self._control == "one":
             control = crocoddyl.ControlParametrizationModelPolyOne(nu)
@@ -437,21 +470,54 @@ class SimpleBipedGaitProblem:
         else:
             control = crocoddyl.ControlParametrizationModelPolyZero(nu)
         if self._integrator == "euler":
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
+            model = crocoddyl.IntegratedActionModelEuler(
+                dynamics,
+                costModel,
+                constraintModel,
+                control,
+                crocoddyl.IntegratorTime(timeStep, False),
+            )
         elif self._integrator == "rk4":
             model = crocoddyl.IntegratedActionModelRK(
-                dmodel, control, crocoddyl.RKType.four, timeStep
+                dynamics,
+                costModel,
+                constraintModel,
+                control,
+                crocoddyl.IntegratorTime(timeStep, False),
+                crocoddyl.RKType.four,
             )
         elif self._integrator == "rk3":
             model = crocoddyl.IntegratedActionModelRK(
-                dmodel, control, crocoddyl.RKType.three, timeStep
+                dynamics,
+                costModel,
+                constraintModel,
+                control,
+                crocoddyl.IntegratorTime(timeStep, False),
+                crocoddyl.RKType.three,
             )
         elif self._integrator == "rk2":
             model = crocoddyl.IntegratedActionModelRK(
-                dmodel, control, crocoddyl.RKType.two, timeStep
+                dynamics,
+                costModel,
+                constraintModel,
+                control,
+                crocoddyl.IntegratorTime(timeStep, False),
+                crocoddyl.RKType.two,
             )
         else:
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, control, timeStep)
+            model = crocoddyl.IntegratedActionModelEuler(
+                dynamics,
+                costModel,
+                constraintModel,
+                control,
+                crocoddyl.IntegratorTime(timeStep, False),
+            )
+        if self._fwddyn:
+            u_lb = np.empty(model.nu)
+            u_ub = np.empty(model.nu)
+            control.convertBounds(self.actuation.u_lb, self.actuation.u_ub, u_lb, u_ub)
+            model.u_lb = u_lb
+            model.u_ub = u_ub
         return model
 
     def createSwitch(
@@ -490,10 +556,10 @@ class SimpleBipedGaitProblem:
             nu = self.actuation.nu
         else:
             nu = self.state.nv + 6 * len(footContacts)
-        contactModel = crocoddyl.ContactModelMultiple(self.state, nu)
+        contactConstraints = crocoddyl.ImplicitConstraintModelMultiple(self.state, nu)
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
-            supportContactModel = crocoddyl.ContactModel6D(
+            supportContactModel = crocoddyl.ContactModel(
                 self.state,
                 frame_id,
                 pinocchio.SE3.Identity(),
@@ -501,7 +567,7 @@ class SimpleBipedGaitProblem:
                 nu,
                 np.array([0.0, 50.0]),
             )
-            contactModel.addContact(name + "_contact", supportContactModel)
+            contactConstraints.addConstraint(name + "_contact", supportContactModel)
         # Creating the cost/constraint model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, nu)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, nu)
@@ -585,33 +651,59 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         if self._fwddyn:
-            dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                self.state,
-                self.actuation,
-                contactModel,
-                costModel,
-                constraintModel,
-                0.0,
-                True,
+            dynamics = crocoddyl.DynamicsModelConstrainedForward(
+                self.state, self.actuation, contactConstraints
             )
         else:
-            dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                self.state, self.actuation, contactModel, costModel, constraintModel
+            dynamics = crocoddyl.DynamicsModelConstrainedInverse(
+                self.state, self.actuation, contactConstraints
             )
         if self._integrator == "euler":
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
+            model = crocoddyl.IntegratedActionModelEuler(
+                dynamics,
+                costModel,
+                constraintModel,
+                None,
+                crocoddyl.IntegratorTime(0.0, False),
+            )
         elif self._integrator == "rk4":
             model = crocoddyl.IntegratedActionModelRK(
-                dmodel, crocoddyl.RKType.four, 0.0
+                dynamics,
+                costModel,
+                constraintModel,
+                None,
+                crocoddyl.IntegratorTime(0.0, False),
+                crocoddyl.RKType.four,
             )
         elif self._integrator == "rk3":
             model = crocoddyl.IntegratedActionModelRK(
-                dmodel, crocoddyl.RKType.three, 0.0
+                dynamics,
+                costModel,
+                constraintModel,
+                None,
+                crocoddyl.IntegratorTime(0.0, False),
+                crocoddyl.RKType.three,
             )
         elif self._integrator == "rk2":
-            model = crocoddyl.IntegratedActionModelRK(dmodel, crocoddyl.RKType.two, 0.0)
+            model = crocoddyl.IntegratedActionModelRK(
+                dynamics,
+                costModel,
+                constraintModel,
+                None,
+                crocoddyl.IntegratorTime(0.0, False),
+                crocoddyl.RKType.two,
+            )
         else:
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.0)
+            model = crocoddyl.IntegratedActionModelEuler(
+                dynamics,
+                costModel,
+                constraintModel,
+                None,
+                crocoddyl.IntegratorTime(0.0, False),
+            )
+        if self._fwddyn:
+            model.u_lb = self.actuation.u_lb
+            model.u_ub = self.actuation.u_ub
         return model
 
     def createImpulseModel(
@@ -633,14 +725,19 @@ class SimpleBipedGaitProblem:
         :param constraint: if True, treat swing tasks as constraints.
         :return impulse action model
         """
-        # Creating a 6D multi-contact model, and then including the supporting foot
-        impulseModel = crocoddyl.ImpulseModelMultiple(self.state)
+        # Creating 6D impulse constraints for the supporting feet
+        contactConstraints = crocoddyl.ImplicitConstraintModelMultiple(self.state, 0)
         for name in footContacts:
             frame_id = self.rmodel.getFrameId(name)
-            supportContactModel = crocoddyl.ImpulseModel6D(
-                self.state, frame_id, pinocchio.LOCAL_WORLD_ALIGNED
+            supportContactModel = crocoddyl.ContactModel(
+                self.state,
+                frame_id,
+                pinocchio.SE3.Identity(),
+                pinocchio.LOCAL_WORLD_ALIGNED,
+                0,
+                np.zeros(2),
             )
-            impulseModel.addImpulse(name + "_impulse", supportContactModel)
+            contactConstraints.addConstraint(name + "_impulse", supportContactModel)
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, 0)
         constraintModel = crocoddyl.ConstraintModelManager(self.state, 0)
@@ -675,14 +772,10 @@ class SimpleBipedGaitProblem:
             self.state, stateActivation, stateResidual
         )
         costModel.addCost("stateReg", stateReg, 1e1)
-        # Creating the action model for the KKT dynamics with simpletic Euler
-        # integration scheme
-        model = crocoddyl.ActionModelImpulseFwdDynamics(
-            self.state, impulseModel, costModel, constraintModel
+        dynamics = crocoddyl.DynamicsModelImpulseForward(
+            self.state, contactConstraints, 0, r_coeff, JMinvJt_damping
         )
-        model.JMinvJt_damping = JMinvJt_damping
-        model.r_coeff = r_coeff
-        return model
+        return crocoddyl.DiscretizedActionModel(dynamics, costModel, constraintModel)
 
 
 def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
@@ -696,11 +789,11 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
     def updateTrajectories(solver):
         xs.extend(solver.xs[:-1])
         for m, d in zip(solver.problem.runningModels, solver.problem.runningDatas):
-            if hasattr(m, "differential"):
-                cs.append(d.differential.multibody.pinocchio.com[0])
-                us.append(d.differential.multibody.joint.tau)
+            if hasattr(m, "dynamics"):
+                cs.append(d.dynamics.multibody.pinocchio.com[0])
+                us.append(d.dynamics.multibody.joint.tau)
                 if bounds and isinstance(
-                    m.differential, crocoddyl.DifferentialActionModelContactFwdDynamics
+                    m.dynamics, crocoddyl.DynamicsModelConstrainedForward
                 ):
                     us_lb.extend([m.u_lb])
                     us_ub.extend([m.u_ub])
@@ -720,7 +813,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
             nq, nv, nu = (
                 rmodel.nq,
                 rmodel.nv,
-                solver[0].problem.runningModels[0].differential.actuation.nu,
+                solver[0].problem.runningModels[0].dynamics.actuation.nu,
             )
             updateTrajectories(s)
     else:
@@ -728,7 +821,7 @@ def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
         nq, nv, nu = (
             rmodel.nq,
             rmodel.nv,
-            solver.problem.runningModels[0].differential.actuation.nu,
+            solver.problem.runningModels[0].dynamics.actuation.nu,
         )
         updateTrajectories(solver)
 

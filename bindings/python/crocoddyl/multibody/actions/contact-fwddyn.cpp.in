@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 
 #include "python/crocoddyl/core/diff-action-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -49,7 +50,8 @@ struct DifferentialActionModelContactFwdDynamicsVisitor
             ":param inv_damping: Damping factor for cholesky decomposition of "
             "JMinvJt (default 0.)\n"
             ":param enable_force: Enable the computation of force Jacobians "
-            "(default False)"))
+            "(default False)")[deprecated<>(
+            "Deprecated. Use DynamicsModelConstrainedForward.")])
         .def(
             "calc",
             static_cast<void (Model::*)(
@@ -202,7 +204,8 @@ struct DifferentialActionDataContactFwdDynamicsVisitor
           ":param inv_damping: Damping factor for cholesky decomposition of "  \
           "JMinvJt (default 0.)\n"                                             \
           ":param enable_force: Enable the computation of force Jacobians "    \
-          "(default False)"))                                                  \
+          "(default False)")[deprecated<>(                                     \
+          "Deprecated. Use DynamicsModelConstrainedForward.")])                \
       .def(DifferentialActionModelContactFwdDynamicsVisitor<Model>())          \
       .def(CastVisitor<Model>())                                               \
       .def(PrintableVisitor<Model>())                                          \
@@ -218,7 +221,8 @@ struct DifferentialActionDataContactFwdDynamicsVisitor
       "Action data for the contact forward dynamics system.",                  \
       bp::init<Model*>(bp::args("self", "model"),                              \
                        "Create contact forward-dynamics action data.\n\n"      \
-                       ":param model: contact forward-dynamics action model")) \
+                       ":param model: contact forward-dynamics action model")[ \
+          deprecated<>("Deprecated. Use DynamicsDataConstrainedForward.")])   \
       .def(DifferentialActionDataContactFwdDynamicsVisitor<Data>())            \
       .def(CopyableVisitor<Data>());
 

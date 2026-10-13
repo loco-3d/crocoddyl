@@ -1,0 +1,181 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/numdiff/dynamics.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DynamicsModelNumDiffVisitor
+    : public bp::def_visitor<DynamicsModelNumDiffVisitor<Model>> {
+  typedef typename Model::DynamicsDataAbstract Data;
+  typedef typename Model::VectorXs VectorXs;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc",
+           static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                       const Eigen::Ref<const VectorXs>&)>(
+               &Model::calc),
+           bp::args("self", "data", "x"))
+        .def(
+            "calc",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+            bp::args("self", "data", "x", "u"),
+            "Compute the dynamics value.\n\n"
+            ":param data: NumDiff dynamics data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def(
+            "calcDiff",
+            static_cast<void (Model::*)(
+                const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+            bp::args("self", "data", "x", "u"),
+            "Compute the derivatives of the dynamics and constraint "
+            "residuals.\n\n"
+            "It computes the Jacobians using numerical differentiation. It "
+            "assumes that calc has been run first.\n"
+            ":param data: NumDiff dynamics data\n"
+            ":param x: state point (dim. state.nx)\n"
+            ":param u: control input (dim. nu)")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
+             "Create the dynamics data.\n\n"
+             ":return dynamics data.")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)(
+                 const std::shared_ptr<typename Model::ParameterDataManager>&)>(
+                 &Model::createData),
+             bp::args("self", "parameter_data"),
+             "Create the dynamics data using an existing parameter-manager "
+             "data object.")
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Set the parameter manager used by numerical differentiation.")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the parameter vector used by numerical differentiation.")
+        .add_property(
+            "model",
+            bp::make_function(&Model::get_model,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "dynamics model")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
+        .add_property(
+            "disturbance", bp::make_function(&Model::get_disturbance),
+            &Model::set_disturbance,
+            "disturbance constant used in the numerical differentiation");
+  }
+};
+
+template <typename Data>
+struct DynamicsDataNumDiffVisitor
+    : public bp::def_visitor<DynamicsDataNumDiffVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
+          "state disturbance.")
+        .add_property(
+            "du", bp::make_getter(&Data::du, bp::return_internal_reference<>()),
+            "control disturbance.")
+        .add_property(
+            "dp", bp::make_getter(&Data::dp, bp::return_internal_reference<>()),
+            "parameter disturbance.")
+        .add_property(
+            "p", bp::make_getter(&Data::p, bp::return_internal_reference<>()),
+            "nominal parameter vector.")
+        .add_property(
+            "params_data",
+            bp::make_getter(&Data::params_data,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "parameter-manager data")
+        .add_property(
+            "data_0",
+            bp::make_getter(&Data::data_0,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "data that contains the final results")
+        .add_property(
+            "data_x",
+            bp::make_getter(&Data::data_x,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "temporary data associated with the state variation")
+        .add_property(
+            "data_u",
+            bp::make_getter(&Data::data_u,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "temporary data associated with the control variation")
+        .add_property(
+            "data_p",
+            bp::make_getter(&Data::data_p,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "temporary data associated with the parameter variation");
+  }
+};
+
+#define CROCODDYL_DYNAMICS_MODEL_NUMDIFF_PYTHON_BINDINGS(Scalar)            \
+  typedef DynamicsModelNumDiffTpl<Scalar> Model;                            \
+  typedef DynamicsModelAbstractTpl<Scalar> ModelBase;                       \
+  typedef ParameterManagerTpl<Scalar> ParameterManager;                    \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
+  bp::class_<Model, bp::bases<ModelBase>>(                                  \
+      "DynamicsModelNumDiff",                                               \
+      "Class for computing dynamics derivatives by using numerical "        \
+      "differentiation.\n\n",                                               \
+      bp::init<std::shared_ptr<ModelBase>>(                                 \
+          bp::args("self", "model"),                                        \
+          "Initialize the dynamics model NumDiff.\n\n"                      \
+          ":param model: dynamics model where we compute the derivatives "   \
+          "through NumDiff"))                                               \
+      .def(DynamicsModelNumDiffVisitor<Model>())                            \
+      .def(bp::init<std::shared_ptr<ModelBase>,                            \
+                    std::shared_ptr<ParameterManager>>(                    \
+          bp::args("self", "model", "params")))                          \
+      .def(CastVisitor<Model>())                                            \
+      .def(PrintableVisitor<Model>())                                       \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_DYNAMICS_DATA_NUMDIFF_PYTHON_BINDINGS(Scalar)           \
+  typedef DynamicsDataNumDiffTpl<Scalar> Data;                            \
+  typedef DynamicsDataAbstractTpl<Scalar> DataBase;                       \
+  typedef DynamicsModelNumDiffTpl<Scalar> Model;                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                    \
+  bp::class_<Data, bp::bases<DataBase>>(                                  \
+      "DynamicsDataNumDiff", "Numerical differentiation dynamics data.",  \
+      bp::init<Model*>(bp::args("self", "model"),                         \
+                       "Create numerical differentiation dynamics data.\n" \
+                       "\n"                                                \
+                       ":param model: numdiff dynamics model"))            \
+      .def(DynamicsDataNumDiffVisitor<Data>())                            \
+      .def(CopyableVisitor<Data>());
+
+void exposeDynamicsNumDiff() {
+  CROCODDYL_DYNAMICS_MODEL_NUMDIFF_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_DATA_NUMDIFF_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

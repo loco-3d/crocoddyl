@@ -1,0 +1,258 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Data>
+struct DataCollectorImplicitConstraintVisitor
+    : public bp::def_visitor<DataCollectorImplicitConstraintVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "constraints",
+        bp::make_getter(&Data::constraints,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "implicit-constraint data");
+  }
+};
+
+#define CROCODDYL_DATA_COLLECTOR_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(Scalar) \
+  typedef DataCollectorImplicitConstraintTpl<Scalar> Data;                    \
+  typedef DataCollectorAbstractTpl<Scalar> DataBase;                          \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;           \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+  bp::class_<Data, bp::bases<DataBase>>(                                      \
+      "DataCollectorImplicitConstraint",                                      \
+      "Implicit-constraint data collector.\n\n",                              \
+      bp::init<std::shared_ptr<ConstraintData>>(                              \
+          bp::args("self", "constraints"),                                    \
+          "Create implicit-constraint data collection.\n\n"                   \
+          ":param constraints: implicit-constraint data"))                    \
+      .def(DataCollectorImplicitConstraintVisitor<Data>())                    \
+      .def(CopyableVisitor<Data>());
+
+#define CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorMultibodyInImplicitConstraintTpl<Scalar> MData;         \
+  typedef DataCollectorMultibodyTpl<Scalar> MDataBase1;                        \
+  typedef DataCollectorImplicitConstraintTpl<Scalar> MDataBase2;               \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  bp::register_ptr_to_python<std::shared_ptr<MData>>();                        \
+  bp::class_<MData, bp::bases<MDataBase1, MDataBase2>>(                        \
+      "DataCollectorMultibodyInImplicitConstraint",                            \
+      "Data collector for multibody systems with implicit constraints.\n\n",   \
+      bp::init<PinocchioData*, std::shared_ptr<ConstraintData>>(               \
+          bp::args("self", "pinocchio", "constraints"),                        \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param constraints: implicit-constraint data")                      \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<MData>());
+
+#define CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorMultibodyInImplicitConstraintParamsTpl<Scalar> PMData;  \
+  typedef DataCollectorMultibodyInImplicitConstraintTpl<Scalar> PMDataBase1;   \
+  typedef DataCollectorParamsTpl<Scalar> PMDataBase2;                          \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PMData>>();                       \
+  bp::class_<PMData, bp::bases<PMDataBase1, PMDataBase2>>(                     \
+      "DataCollectorMultibodyInImplicitConstraintParams",                      \
+      "Data collector for multibody systems with implicit constraints and "    \
+      "parameter payload.\n\n",                                                \
+      bp::init<PinocchioData*, std::shared_ptr<ConstraintData>,                \
+               std::shared_ptr<ParamsData>>(                                   \
+          bp::args("self", "pinocchio", "constraints", "params"),              \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param constraints: implicit-constraint data\n"                     \
+          ":param params: parameter payload")                                  \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<PMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorActMultibodyInImplicitConstraintTpl<Scalar> AMData;     \
+  typedef DataCollectorMultibodyInImplicitConstraintTpl<Scalar> AMDataBase1;   \
+  typedef DataCollectorActuationTpl<Scalar> AMDataBase2;                       \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  bp::register_ptr_to_python<std::shared_ptr<AMData>>();                       \
+  bp::class_<AMData, bp::bases<AMDataBase1, AMDataBase2>>(                     \
+      "DataCollectorActMultibodyInImplicitConstraint",                         \
+      "Data collector for actuated multibody systems with implicit "           \
+      "constraints.\n\n",                                                      \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<ConstraintData>>(                               \
+          bp::args("self", "pinocchio", "actuation", "constraints"),           \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param constraints: implicit-constraint data")                      \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<AMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorActMultibodyInImplicitConstraintParamsTpl<Scalar> PAMData; \
+  typedef DataCollectorActMultibodyInImplicitConstraintTpl<Scalar> PAMDataBase1; \
+  typedef DataCollectorParamsTpl<Scalar> PAMDataBase2;                         \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PAMData>>();                      \
+  bp::class_<PAMData, bp::bases<PAMDataBase1, PAMDataBase2>>(                  \
+      "DataCollectorActMultibodyInImplicitConstraintParams",                   \
+      "Data collector for actuated multibody systems with implicit "           \
+      "constraints and parameter payload.\n\n",                                \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<ConstraintData>, std::shared_ptr<ParamsData>>(  \
+          bp::args("self", "pinocchio", "actuation", "constraints", "params"), \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param constraints: implicit-constraint data\n"                     \
+          ":param params: parameter payload")                                  \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<PAMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_MULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorJointMultibodyInImplicitConstraintTpl<Scalar> JMData;   \
+  typedef DataCollectorMultibodyInImplicitConstraintTpl<Scalar> JMDataBase1;   \
+  typedef DataCollectorJointTpl<Scalar> JMDataBase2;                           \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  bp::register_ptr_to_python<std::shared_ptr<JMData>>();                       \
+  bp::class_<JMData, bp::bases<JMDataBase1, JMDataBase2>>(                     \
+      "DataCollectorJointMultibodyInImplicitConstraint",                       \
+      "Data collector for joint multibody systems with implicit "              \
+      "constraints.\n\n",                                                      \
+      bp::init<PinocchioData*, std::shared_ptr<JointData>,                     \
+               std::shared_ptr<ConstraintData>>(                               \
+          bp::args("self", "pinocchio", "joint", "constraints"),               \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param joint: joint data\n"                                         \
+          ":param constraints: implicit-constraint data")                      \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<JMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_MULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorJointMultibodyInImplicitConstraintParamsTpl<Scalar> PJMData; \
+  typedef DataCollectorJointMultibodyInImplicitConstraintTpl<Scalar> PJMDataBase1; \
+  typedef DataCollectorParamsTpl<Scalar> PJMDataBase2;                         \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PJMData>>();                      \
+  bp::class_<PJMData, bp::bases<PJMDataBase1, PJMDataBase2>>(                  \
+      "DataCollectorJointMultibodyInImplicitConstraintParams",                 \
+      "Data collector for joint multibody systems with implicit constraints "  \
+      "and parameter payload.\n\n",                                            \
+      bp::init<PinocchioData*, std::shared_ptr<JointData>,                     \
+               std::shared_ptr<ConstraintData>, std::shared_ptr<ParamsData>>(  \
+          bp::args("self", "pinocchio", "joint", "constraints", "params"),     \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param joint: joint data\n"                                         \
+          ":param constraints: implicit-constraint data\n"                     \
+          ":param params: parameter payload")                                  \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<PJMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorJointActMultibodyInImplicitConstraintTpl<Scalar> JAMData; \
+  typedef DataCollectorActMultibodyInImplicitConstraintTpl<Scalar> JAMDataBase1; \
+  typedef DataCollectorJointTpl<Scalar> JAMDataBase2;                          \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  bp::register_ptr_to_python<std::shared_ptr<JAMData>>();                      \
+  bp::class_<JAMData, bp::bases<JAMDataBase1, JAMDataBase2>>(                  \
+      "DataCollectorJointActMultibodyInImplicitConstraint",                    \
+      "Data collector for actuated-joint multibody systems with implicit "     \
+      "constraints.\n\n",                                                      \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<JointData>, std::shared_ptr<ConstraintData>>(   \
+          bp::args("self", "pinocchio", "actuation", "joint", "constraints"), \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param joint: joint data\n"                                         \
+          ":param constraints: implicit-constraint data")                      \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<JAMData>());
+
+#define CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS( \
+    Scalar)                                                                    \
+  typedef DataCollectorJointActMultibodyInImplicitConstraintParamsTpl<Scalar> PJAMData; \
+  typedef DataCollectorJointActMultibodyInImplicitConstraintTpl<Scalar> PJAMDataBase1; \
+  typedef DataCollectorParamsTpl<Scalar> PJAMDataBase2;                        \
+  typedef pinocchio::DataTpl<Scalar> PinocchioData;                            \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                      \
+  typedef JointDataAbstractTpl<Scalar> JointData;                              \
+  typedef ImplicitConstraintDataMultipleTpl<Scalar> ConstraintData;            \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                            \
+  bp::register_ptr_to_python<std::shared_ptr<PJAMData>>();                     \
+  bp::class_<PJAMData, bp::bases<PJAMDataBase1, PJAMDataBase2>>(               \
+      "DataCollectorJointActMultibodyInImplicitConstraintParams",              \
+      "Data collector for actuated-joint multibody systems with implicit "     \
+      "constraints and parameter payload.\n\n",                                \
+      bp::init<PinocchioData*, std::shared_ptr<ActuationData>,                 \
+               std::shared_ptr<JointData>, std::shared_ptr<ConstraintData>,    \
+               std::shared_ptr<ParamsData>>(                                   \
+          bp::args("self", "pinocchio", "actuation", "joint", "constraints",   \
+                   "params"),                                                  \
+          "Create multibody data collection.\n\n"                              \
+          ":param pinocchio: Pinocchio data\n"                                 \
+          ":param actuation: actuation data\n"                                 \
+          ":param joint: joint data\n"                                         \
+          ":param constraints: implicit-constraint data\n"                     \
+          ":param params: parameter payload")                                  \
+          [bp::with_custodian_and_ward<1, 2>()])                               \
+      .def(CopyableVisitor<PJAMData>());
+
+void exposeDataCollectorImplicitConstraints() {
+  CROCODDYL_DATA_COLLECTOR_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_MULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_MULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_MULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_JOINT_ACTMULTIBODY_IMPLICIT_CONSTRAINT_PARAMS_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

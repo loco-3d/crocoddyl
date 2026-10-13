@@ -221,7 +221,8 @@ if(BUILD_WITH_CODEGEN_SUPPORT)
         "${PACKAGE_EXTRA_MACROS}\nADD_DEFINITIONS(-DPINOCCHIO_CPPAD_REQUIRES_MATRIX_BASE_PLUGIN)"
     )
   endif()
-  list(APPEND SCALAR_TYPES CppAD::AD<CppAD::cg::CG<double>>)
+  list(APPEND SCALAR_TYPES CppAD::AD<CppAD::cg::CG<double>>
+       CppAD::AD<CppAD::cg::CG<float>>)
 endif()
 
 # Add OpenMP

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,17 +28,21 @@ class ResidualModelBase {
  * @brief Abstract class for residual models
  *
  * A residual model defines a vector function \f$\mathbf{r}(\mathbf{x},
- * \mathbf{u})\mathbb{R}^{nr}\f$ where `nr` describes its dimension in the
- * Euclidean space. This function depends on the state point
+ * \mathbf{u},\mathbf{p})\in\mathbb{R}^{nr}\f$ where `nr` describes its
+ * dimension in the Euclidean space. This function depends on the state point
  * \f$\mathbf{x}\in\mathcal{X}\f$, which lies in the state manifold described
  * with a `nq`-tuple, its velocity \f$\dot{\mathbf{x}}\in
  * T_{\mathbf{x}}\mathcal{X}\f$ that belongs to the tangent space with `nv`
- * dimension, and the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$. The
- * residual function can used across cost and constraint models.
+ * dimension, the control input \f$\mathbf{u}\in\mathbb{R}^{nu}\f$, and the
+ * parameter vector \f$\mathbf{p}\in\mathbb{R}^{np}\f$. The residual function
+ * can be used across cost and constraint models.
  *
  * The main computations are carring out in `calc` and `calcDiff` routines.
  * `calc` computes the residual vector and `calcDiff` computes the Jacobians of
- * the residual function. Additionally, it is important to note that
+ * the residual function, including
+ * \f$\mathbf{R_p}=\partial\mathbf{r}/\partial\mathbf{p}
+ * \in\mathbb{R}^{nr\times np}\f$. The parameters have to be updated before
+ * calling `calc()` and `calcDiff()`. Additionally, it is important to note that
  * `calcDiff()` computes the Jacobians using the latest stored values by
  * `calc()`. Thus, we need to first run `calc()`.
  *
@@ -79,6 +83,24 @@ class ResidualModelAbstractTpl : public ResidualModelBase {
                            const bool q_dependent = true,
                            const bool v_dependent = true,
                            const bool u_dependent = true);
+
+  /**
+   * @copybrief ResidualModelAbstractTpl()
+   *
+   * This overload explicitly sets the parameter-vector dimension.
+   *
+   * @param[in] state        State of the system
+   * @param[in] nr           Dimension of residual vector
+   * @param[in] nu           Dimension of control vector
+   * @param[in] q_dependent  Define if the residual function depends on q
+   * @param[in] v_dependent  Define if the residual function depends on v
+   * @param[in] u_dependent  Define if the residual function depends on u
+   * @param[in] np           Dimension of parameter vector
+   */
+  ResidualModelAbstractTpl(std::shared_ptr<StateAbstract> state,
+                           const std::size_t nr, const std::size_t nu,
+                           const bool q_dependent, const bool v_dependent,
+                           const bool u_dependent, const std::size_t np);
 
   /**
    * @copybrief ResidualModelAbstractTpl()
@@ -198,6 +220,11 @@ class ResidualModelAbstractTpl : public ResidualModelBase {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the parameter vector
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Return true if the residual function depends on q
    */
   bool get_q_dependent() const;
@@ -230,6 +257,7 @@ class ResidualModelAbstractTpl : public ResidualModelBase {
   std::shared_ptr<StateAbstract> state_;  //!< State description
   std::size_t nr_;                        //!< Residual vector dimension
   std::size_t nu_;                        //!< Control dimension
+  std::size_t np_;                        //!< Parameter vector dimension
   VectorXs unone_;                        //!< No control vector
   bool q_dependent_;  //!< Label that indicates if the residual function depends
                       //!< on q
@@ -241,6 +269,7 @@ class ResidualModelAbstractTpl : public ResidualModelBase {
       : state_(nullptr),
         nr_(0),
         nu_(0),
+        np_(0),
         q_dependent_(false),
         v_dependent_(false),
         u_dependent_(false) {};
@@ -263,13 +292,17 @@ struct ResidualDataAbstractTpl {
         r(model->get_nr()),
         Rx(model->get_nr(), model->get_state()->get_ndx()),
         Ru(model->get_nr(), model->get_nu()),
+        Rp(model->get_nr(), model->get_np()),
         Arr_Rx(model->get_nr(), model->get_state()->get_ndx()),
-        Arr_Ru(model->get_nr(), model->get_nu()) {
+        Arr_Ru(model->get_nr(), model->get_nu()),
+        Arr_Rp(model->get_nr(), model->get_np()) {
     r.setZero();
     Rx.setZero();
     Ru.setZero();
+    Rp.setZero();
     Arr_Rx.setZero();
     Arr_Ru.setZero();
+    Arr_Rp.setZero();
   }
   virtual ~ResidualDataAbstractTpl() = default;
 
@@ -277,8 +310,10 @@ struct ResidualDataAbstractTpl {
   VectorXs r;                     //!< Residual vector
   MatrixXs Rx;  //!< Jacobian of the residual vector with respect the state
   MatrixXs Ru;  //!< Jacobian of the residual vector with respect the control
+  MatrixXs Rp;  //!< Jacobian of the residual vector with respect the parameters
   MatrixXs Arr_Rx;
   MatrixXs Arr_Ru;
+  MatrixXs Arr_Rp;
 };
 
 }  // namespace crocoddyl

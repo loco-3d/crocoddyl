@@ -18,8 +18,10 @@
 #include "crocoddyl/multibody/contacts/contact-6d.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
+#include "crocoddyl/multibody/data/implicit-constraints.hpp"
 #include "crocoddyl/multibody/data/impulses.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 #include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 #include "crocoddyl/multibody/impulses/impulse-6d.hpp"
@@ -254,6 +256,8 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ContactModelMultipleTpl<Scalar> ContactModelMultiple;
   typedef ImpulseModelMultipleTpl<Scalar> ImpulseModelMultiple;
+  typedef ImplicitConstraintModelMultipleTpl<Scalar>
+      ImplicitConstraintModelMultiple;
   typedef pinocchio::ForceTpl<Scalar> Force;
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -265,18 +269,17 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
     contact_type = ContactUndefined;
 
     // Check that proper shared data has been passed
-    bool is_contact = true;
     DataCollectorContactTpl<Scalar>* d1 =
         dynamic_cast<DataCollectorContactTpl<Scalar>*>(shared);
     DataCollectorImpulseTpl<Scalar>* d2 =
         dynamic_cast<DataCollectorImpulseTpl<Scalar>*>(shared);
-    if (d1 == NULL && d2 == NULL) {
+    DataCollectorImplicitConstraintTpl<Scalar>* d3 =
+        dynamic_cast<DataCollectorImplicitConstraintTpl<Scalar>*>(shared);
+    if (d1 == NULL && d2 == NULL && d3 == NULL) {
       throw_pretty(
           "Invalid argument: the shared data should be derived from "
-          "DataCollectorContact or DataCollectorImpulse");
-    }
-    if (d2 != NULL) {
-      is_contact = false;
+          "DataCollectorContact, DataCollectorImpulse, or "
+          "DataCollectorImplicitConstraint");
     }
 
     // Avoids data casting at runtime
@@ -285,7 +288,7 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
         std::static_pointer_cast<StateMultibody>(model->get_state());
     std::string frame_name = state->get_pinocchio()->frames[id].name;
     bool found_contact = false;
-    if (is_contact) {
+    if (d1 != NULL) {
       for (typename ContactModelMultiple::ContactDataContainer::iterator it =
                d1->contacts->contacts.begin();
            it != d1->contacts->contacts.end(); ++it) {
@@ -320,7 +323,7 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
           break;
         }
       }
-    } else {
+    } else if (d2 != NULL) {
       for (typename ImpulseModelMultiple::ImpulseDataContainer::iterator it =
                d2->impulses->impulses.begin();
            it != d2->impulses->impulses.end(); ++it) {
@@ -348,6 +351,49 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
         }
       }
     }
+    if (d3 != NULL) {
+      for (typename ImplicitConstraintModelMultiple::
+               ImplicitConstraintDataContainer::iterator it =
+                   d3->constraints->constraints.begin();
+           it != d3->constraints->constraints.end(); ++it) {
+        if (it->second->frame == id) {
+          ContactDataTpl<Scalar>* cd =
+              dynamic_cast<ContactDataTpl<Scalar>*>(it->second.get());
+          if (cd != NULL) {
+            const typename ContactDataTpl<Scalar>::MaskArray mask1d = {
+                {false, false, true, false, false, false}};
+            const typename ContactDataTpl<Scalar>::MaskArray mask3d = {
+                {true, true, true, false, false, false}};
+            const typename ContactDataTpl<Scalar>::MaskArray mask6d = {
+                {true, true, true, true, true, true}};
+            std::size_t nc = 0;
+            if (cd->mask == mask1d) {
+              contact_type = Contact1D;
+              nc = 1;
+            } else if (cd->mask == mask3d) {
+              contact_type = Contact3D;
+              nc = 3;
+            } else if (cd->mask == mask6d) {
+              contact_type = Contact6D;
+              nc = 6;
+            } else {
+              throw_pretty(
+                  "Domain error: unsupported masked contact layout for " +
+                  frame_name);
+            }
+            if (model->get_nr() != nc) {
+              throw_pretty(
+                  "Domain error: contact force residual dimension does not "
+                  "match the masked contact layout for " +
+                  frame_name);
+            }
+            found_contact = true;
+            contact = it->second;
+            break;
+          }
+        }
+      }
+    }
     if (!found_contact) {
       throw_pretty(
           "Domain error: there isn't defined contact/impulse data for " +
@@ -367,8 +413,6 @@ struct ResidualDataContactForceTpl : public ResidualDataAbstractTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/residuals/contact-force.hxx"
 

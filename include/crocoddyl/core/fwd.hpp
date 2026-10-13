@@ -27,7 +27,13 @@ inline bool is_a_AssignmentOp(AssignmentOp op) {
 
 // solver and problem
 template <typename Scalar>
+class ProblemAbstractTpl;
+
+template <typename Scalar>
 class ShootingProblemTpl;
+
+template <typename Scalar>
+class ObservationProblemTpl;
 
 template <typename Scalar>
 class SolverAbstractTpl;
@@ -78,6 +84,12 @@ class ActionModelAbstractTpl;
 template <typename Scalar>
 struct ActionDataAbstractTpl;
 
+// observer
+template <typename Scalar>
+class ObserverModelAbstractTpl;
+template <typename Scalar>
+struct ObserverDataAbstractTpl;
+
 template <typename Scalar>
 class ActionModelUnicycleTpl;
 template <typename Scalar>
@@ -87,6 +99,14 @@ template <typename Scalar>
 class ActionModelLQRTpl;
 template <typename Scalar>
 struct ActionDataLQRTpl;
+template <typename Scalar>
+class LQRParamsTpl;
+
+// dynamics
+template <typename Scalar>
+class DynamicsModelAbstractTpl;
+template <typename Scalar>
+struct DynamicsDataAbstractTpl;
 
 // differential action
 template <typename Scalar>
@@ -101,9 +121,30 @@ struct DifferentialActionDataLQRTpl;
 
 // integrated action
 template <typename Scalar>
+class IntegratorTimeTpl;
+
+template <typename Scalar>
 class IntegratedActionModelAbstractTpl;
 template <typename Scalar>
 struct IntegratedActionDataAbstractTpl;
+
+// integrated observer
+template <typename Scalar>
+class IntegratedObserverModelAbstractTpl;
+template <typename Scalar>
+struct IntegratedObserverDataAbstractTpl;
+template <typename Scalar>
+class IntegratedObserverModelEulerTpl;
+template <typename Scalar>
+struct IntegratedObserverDataEulerTpl;
+template <typename Scalar>
+class IntegratedObserverModelRKTpl;
+template <typename Scalar>
+struct IntegratedObserverDataRKTpl;
+template <typename Scalar>
+class DiscretizedObserverModelTpl;
+template <typename Scalar>
+struct DiscretizedObserverDataTpl;
 
 template <typename Scalar>
 class IntegratedActionModelEulerTpl;
@@ -114,6 +155,12 @@ template <typename Scalar>
 class IntegratedActionModelRKTpl;
 template <typename Scalar>
 struct IntegratedActionDataRKTpl;
+
+template <typename Scalar>
+class DiscretizedActionModelTpl;
+
+template <typename Scalar>
+struct DiscretizedActionDataTpl;
 
 // residual
 template <typename Scalar>
@@ -251,13 +298,70 @@ template <typename Scalar>
 struct DataCollectorAbstractTpl;
 
 template <typename Scalar>
+struct DataCollectorObserverTpl;
+
+// parameters
+class ParamsModelBase;
+
+template <typename Scalar>
+class ParamsAbstractTpl;
+
+template <typename Scalar>
+class ActionModelParamsAbstractTpl;
+
+template <typename Scalar>
+class DynamicsParamsAbstractTpl;
+
+template <typename Scalar>
+struct ParameterItemTpl;
+
+template <typename Scalar>
+class ParameterManagerTpl;
+
+template <typename Scalar>
+struct ParameterDataManagerTpl;
+
+template <typename Scalar>
+class ParameterPhaseModelTpl;
+
+template <typename Scalar>
+struct ParameterPhaseDataTpl;
+
+template <typename Scalar>
+struct ParamsDataAbstractTpl;
+
+template <typename Scalar>
+struct ActionModelParamsDataAbstractTpl;
+
+template <typename Scalar>
+struct DynamicsParamsDataAbstractTpl;
+
+template <typename Scalar>
+class IntegratorTimeoptParamsTpl;
+
+template <typename Scalar>
+struct IntegratorTimeoptParamsDataTpl;
+
+template <typename Scalar>
+struct DataCollectorParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorActuationTpl;
+
+template <typename Scalar>
+struct DataCollectorActuationParamsTpl;
 
 template <typename Scalar>
 struct DataCollectorJointTpl;
 
 template <typename Scalar>
+struct DataCollectorJointParamsTpl;
+
+template <typename Scalar>
 struct DataCollectorJointActuationTpl;
+
+template <typename Scalar>
+struct DataCollectorJointActuationParamsTpl;
 
 // residual
 template <typename Scalar>
@@ -284,6 +388,9 @@ template <typename Scalar>
 class ResidualModelTaskSecondOrderTpl;
 template <typename Scalar>
 struct ResidualDataTaskSecondOrderTpl;
+
+template <typename Scalar>
+class ResidualModelParametersTpl;
 
 // cost
 template <typename Scalar>
@@ -328,6 +435,11 @@ template <typename Scalar>
 struct ActionDataNumDiffTpl;
 
 template <typename Scalar>
+class DynamicsModelNumDiffTpl;
+template <typename Scalar>
+struct DynamicsDataNumDiffTpl;
+
+template <typename Scalar>
 class DifferentialActionModelNumDiffTpl;
 template <typename Scalar>
 struct DifferentialActionDataNumDiffTpl;
@@ -336,6 +448,11 @@ template <typename Scalar>
 class ActuationModelNumDiffTpl;
 template <typename Scalar>
 struct ActuationDataNumDiffTpl;
+
+template <typename Scalar>
+class ObserverModelNumDiffTpl;
+template <typename Scalar>
+struct ObserverDataNumDiffTpl;
 
 template <typename Scalar>
 class ActivationModelNumDiffTpl;
@@ -361,18 +478,21 @@ template <typename Scalar>
 struct ControlParametrizationDataNumDiffTpl;
 
 template <typename Scalar>
-class ActuationModelNumDiffTpl;
-template <typename Scalar>
-struct ActuationDataNumDiffTpl;
-
-template <typename Scalar>
 class ActionModelCodeGenTpl;
 
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
 
+template <typename Scalar>
+class ObserverModelCodeGenTpl;
+
+template <typename Scalar>
+struct ObserverDataCodeGenTpl;
+
 /********************Template Instantiation*************/
+typedef ProblemAbstractTpl<double> ProblemAbstract;
 typedef ShootingProblemTpl<double> ShootingProblem;
+typedef ObservationProblemTpl<double> ObservationProblem;
 typedef SolverAbstractTpl<double> SolverAbstract;
 typedef SolverFDDPTpl<double> SolverFDDP;
 typedef SolverIntroTpl<double> SolverIntro;
@@ -393,10 +513,16 @@ typedef IpoptInterfaceDataTpl<double> IpoptInterfaceData;
 
 typedef ActionModelAbstractTpl<double> ActionModelAbstract;
 typedef ActionDataAbstractTpl<double> ActionDataAbstract;
+typedef ObserverModelAbstractTpl<double> ObserverModelAbstract;
+typedef ObserverDataAbstractTpl<double> ObserverDataAbstract;
 typedef ActionModelUnicycleTpl<double> ActionModelUnicycle;
 typedef ActionDataUnicycleTpl<double> ActionDataUnicycle;
 typedef ActionModelLQRTpl<double> ActionModelLQR;
 typedef ActionDataLQRTpl<double> ActionDataLQR;
+typedef LQRParamsTpl<double> LQRParams;
+
+typedef DynamicsModelAbstractTpl<double> DynamicsModelAbstract;
+typedef DynamicsDataAbstractTpl<double> DynamicsDataAbstract;
 
 typedef DifferentialActionModelAbstractTpl<double>
     DifferentialActionModelAbstract;
@@ -405,12 +531,25 @@ typedef DifferentialActionDataAbstractTpl<double>
 typedef DifferentialActionModelLQRTpl<double> DifferentialActionModelLQR;
 typedef DifferentialActionDataLQRTpl<double> DifferentialActionDataLQR;
 
+typedef IntegratorTimeTpl<double> IntegratorTime;
 typedef IntegratedActionModelAbstractTpl<double> IntegratedActionModelAbstract;
 typedef IntegratedActionDataAbstractTpl<double> IntegratedActionDataAbstract;
+typedef IntegratedObserverModelAbstractTpl<double>
+    IntegratedObserverModelAbstract;
+typedef IntegratedObserverDataAbstractTpl<double>
+    IntegratedObserverDataAbstract;
+typedef IntegratedObserverModelEulerTpl<double> IntegratedObserverModelEuler;
+typedef IntegratedObserverDataEulerTpl<double> IntegratedObserverDataEuler;
+typedef IntegratedObserverModelRKTpl<double> IntegratedObserverModelRK;
+typedef IntegratedObserverDataRKTpl<double> IntegratedObserverDataRK;
+typedef DiscretizedObserverModelTpl<double> DiscretizedObserverModel;
+typedef DiscretizedObserverDataTpl<double> DiscretizedObserverData;
 typedef IntegratedActionModelEulerTpl<double> IntegratedActionModelEuler;
 typedef IntegratedActionDataEulerTpl<double> IntegratedActionDataEuler;
 typedef IntegratedActionModelRKTpl<double> IntegratedActionModelRK;
 typedef IntegratedActionDataRKTpl<double> IntegratedActionDataRK;
+typedef DiscretizedActionModelTpl<double> DiscretizedActionModel;
+typedef DiscretizedActionDataTpl<double> DiscretizedActionData;
 
 typedef ResidualModelAbstractTpl<double> ResidualModelAbstract;
 typedef ResidualDataAbstractTpl<double> ResidualDataAbstract;
@@ -420,6 +559,7 @@ typedef ResidualModelJointEffortTpl<double> ResidualModelJointEffort;
 typedef ResidualDataJointEffortTpl<double> ResidualDataJointEffort;
 typedef ResidualModelJointAccelerationTpl<double>
     ResidualModelJointAcceleration;
+typedef ResidualModelParametersTpl<double> ResidualModelParameters;
 typedef ResidualDataJointAccelerationTpl<double> ResidualDataJointAcceleration;
 typedef ResidualModelTaskFirstOrderTpl<double> ResidualModelTaskFirstOrder;
 typedef ResidualDataTaskFirstOrderTpl<double> ResidualDataTaskFirstOrder;
@@ -502,9 +642,28 @@ typedef SquashingModelSmoothSatTpl<double> SquashingModelSmoothSat;
 typedef JointDataAbstractTpl<double> JointDataAbstract;
 
 typedef DataCollectorAbstractTpl<double> DataCollectorAbstract;
+typedef DataCollectorObserverTpl<double> DataCollectorObserver;
+typedef ParamsAbstractTpl<double> ParamsAbstract;
+typedef ActionModelParamsAbstractTpl<double> ActionModelParamsAbstract;
+typedef DynamicsParamsAbstractTpl<double> DynamicsParamsAbstract;
+typedef ParameterItemTpl<double> ParameterItem;
+typedef ParameterManagerTpl<double> ParameterManager;
+typedef ParameterDataManagerTpl<double> ParameterDataManager;
+typedef ParameterPhaseModelTpl<double> ParameterPhaseModel;
+typedef ParameterPhaseDataTpl<double> ParameterPhaseData;
+typedef ParamsDataAbstractTpl<double> ParamsDataAbstract;
+typedef ActionModelParamsDataAbstractTpl<double> ActionModelParamsDataAbstract;
+typedef DynamicsParamsDataAbstractTpl<double> DynamicsParamsDataAbstract;
+typedef IntegratorTimeoptParamsTpl<double> IntegratorTimeoptParams;
+typedef IntegratorTimeoptParamsDataTpl<double> IntegratorTimeoptParamsData;
+typedef DataCollectorParamsTpl<double> DataCollectorParams;
 typedef DataCollectorActuationTpl<double> DataCollectorActuation;
+typedef DataCollectorActuationParamsTpl<double> DataCollectorActuationParams;
 typedef DataCollectorJointTpl<double> DataCollectorJoint;
+typedef DataCollectorJointParamsTpl<double> DataCollectorJointParams;
 typedef DataCollectorJointActuationTpl<double> DataCollectorJointActuation;
+typedef DataCollectorJointActuationParamsTpl<double>
+    DataCollectorJointActuationParams;
 
 typedef CostModelAbstractTpl<double> CostModelAbstract;
 typedef CostDataAbstractTpl<double> CostDataAbstract;
@@ -524,6 +683,8 @@ typedef ConstraintDataResidualTpl<double> ConstraintDataResidual;
 
 typedef ActionModelNumDiffTpl<double> ActionModelNumDiff;
 typedef ActionDataNumDiffTpl<double> ActionDataNumDiff;
+typedef DynamicsModelNumDiffTpl<double> DynamicsModelNumDiff;
+typedef DynamicsDataNumDiffTpl<double> DynamicsDataNumDiff;
 typedef ControlParametrizationModelNumDiffTpl<double>
     ControlParametrizationModelNumDiff;
 typedef ControlParametrizationDataNumDiffTpl<double>
@@ -532,6 +693,8 @@ typedef DifferentialActionModelNumDiffTpl<double>
     DifferentialActionModelNumDiff;
 typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
 typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;
+typedef ObserverModelNumDiffTpl<double> ObserverModelNumDiff;
+typedef ObserverDataNumDiffTpl<double> ObserverDataNumDiff;
 typedef DifferentialActionDataNumDiffTpl<double> DifferentialActionDataNumDiff;
 typedef ActivationModelNumDiffTpl<double> ActivationModelNumDiff;
 typedef ActivationDataNumDiffTpl<double> ActivationDataNumDiff;
@@ -540,11 +703,10 @@ typedef ResidualDataNumDiffTpl<double> ResidualDataNumDiff;
 typedef ConstraintModelNumDiffTpl<double> ConstraintModelNumDiff;
 typedef ConstraintDataNumDiffTpl<double> ConstraintDataNumDiff;
 typedef StateNumDiffTpl<double> StateNumDiff;
-typedef ActuationModelNumDiffTpl<double> ActuationModelNumDiff;
-typedef ActuationDataNumDiffTpl<double> ActuationDataNumDiff;
-
 typedef ActionModelCodeGenTpl<double> ActionModelCodeGen;
 typedef ActionDataCodeGenTpl<double> ActionDataCodeGen;
+typedef ObserverModelCodeGenTpl<double> ObserverModelCodeGen;
+typedef ObserverDataCodeGenTpl<double> ObserverDataCodeGen;
 
 }  // namespace crocoddyl
 

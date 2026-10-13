@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -36,6 +37,8 @@ namespace crocoddyl {
  * Additionally, it is important to note that `calcDiff()` computes the
  * derivatives using the latest stored values by `calc()`. Thus, we need to
  * first run `calc()`.
+ *
+ * @deprecated Use `DynamicsModelConstrainedInverseTpl`.
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`,
  * `createData()`
@@ -75,11 +78,12 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] contacts   Multiple contacts
    * @param[in] costs      Cost model
    */
-  DifferentialActionModelContactInvDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<ContactModelMultiple> contacts,
-      std::shared_ptr<CostModelSum> costs);
+  DEPRECATED("Use DynamicsModelConstrainedInverse",
+             DifferentialActionModelContactInvDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<ContactModelMultiple> contacts,
+                 std::shared_ptr<CostModelSum> costs));
 
   /**
    * @brief Initialize the contact inverse-dynamics action model
@@ -90,12 +94,13 @@ class DifferentialActionModelContactInvDynamicsTpl
    * @param[in] costs        Cost model
    * @param[in] constraints  Constraints model
    */
-  DifferentialActionModelContactInvDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<ContactModelMultiple> contacts,
-      std::shared_ptr<CostModelSum> costs,
-      std::shared_ptr<ConstraintModelManager> constraints);
+  DEPRECATED("Use DynamicsModelConstrainedInverse",
+             DifferentialActionModelContactInvDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<ContactModelMultiple> contacts,
+                 std::shared_ptr<CostModelSum> costs,
+                 std::shared_ptr<ConstraintModelManager> constraints));
   virtual ~DifferentialActionModelContactInvDynamicsTpl() = default;
 
   /**
@@ -599,6 +604,11 @@ class DifferentialActionModelContactInvDynamicsTpl
     std::size_t nc_;            //!< Dimension of all contacts
   };
 };
+
+/**
+ * @brief Data for the deprecated contact inverse-dynamics action model
+ * @deprecated Use `DynamicsDataConstrainedInverseTpl`.
+ */
 template <typename _Scalar>
 struct DifferentialActionDataContactInvDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
@@ -617,8 +627,9 @@ struct DifferentialActionDataContactInvDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataContactInvDynamicsTpl(
-      Model<Scalar>* const model)
+  DEPRECATED("Use DynamicsDataConstrainedInverse",
+             explicit DifferentialActionDataContactInvDynamicsTpl(
+                 Model<Scalar>* const model))
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(

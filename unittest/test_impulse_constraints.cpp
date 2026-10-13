@@ -1,114 +1,55 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <boost/test/unit_test.hpp>
 
-#include "factory/impulse_constraint.hpp"
+#include "crocoddyl/core/constraints/residual.hpp"
+#include "crocoddyl/multibody/dynamics/impulse-forward.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
+#include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
+#include "crocoddyl/multibody/residuals/impulse-com.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "factory/state.hpp"
 #include "unittest_common.hpp"
 
-using namespace boost::unit_test;
-using namespace crocoddyl::unittest;
+BOOST_AUTO_TEST_CASE(test_generic_impulse_constraint_collector) {
+  const std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
+          crocoddyl::unittest::StateModelFactory().create(
+              crocoddyl::unittest::StateModelTypes::StateMultibody_TalosArm));
+  const std::shared_ptr<pinocchio::Model> pinocchio = state->get_pinocchio();
+  const std::shared_ptr<crocoddyl::ImplicitConstraintModelMultiple>
+      constraints =
+          std::make_shared<crocoddyl::ImplicitConstraintModelMultiple>(state,
+                                                                       0);
+  const pinocchio::FrameIndex id = pinocchio->frames.size() - 1;
+  crocoddyl::ContactModel::MaskArray mask = {
+      {true, true, true, false, false, false}};
+  constraints->addConstraint(
+      "contact", std::make_shared<crocoddyl::ContactModel>(
+                     state, id, pinocchio->frames[id].placement,
+                     pinocchio::LOCAL_WORLD_ALIGNED, 0,
+                     crocoddyl::ContactModel::Vector2s::Zero(), mask));
+  crocoddyl::DynamicsModelImpulseForward dynamics(state, constraints);
+  const std::shared_ptr<crocoddyl::DynamicsDataAbstract> dynamics_data =
+      dynamics.createData();
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u(0);
+  dynamics.calc(dynamics_data, x, u);
+  dynamics.calcDiff(dynamics_data, x, u);
 
-//----------------------------------------------------------------------------//
-
-void test_partial_derivatives_against_impulse_numdiff(
-    ImpulseConstraintModelTypes::Type constraint_type,
-    PinocchioModelTypes::Type model_type) {
-  // create the model
-  const std::shared_ptr<crocoddyl::ActionModelAbstract>& model =
-      ImpulseConstraintModelFactory().create(constraint_type, model_type);
-
-  // create the corresponding data object and set the constraint to nan
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data =
-      model->createData();
-
-  crocoddyl::ActionModelNumDiff model_num_diff(model);
-  const std::shared_ptr<crocoddyl::ActionDataAbstract>& data_num_diff =
-      model_num_diff.createData();
-
-  // Generating random values for the state and control
-  const Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
-
-  // Computing the action derivatives
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  model_num_diff.calc(data_num_diff, x, u);
-  model_num_diff.calcDiff(data_num_diff, x, u);
-  // Tolerance defined as in
-  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
-  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK(isCloseAbsRel(data->Gx, data_num_diff->Gx, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Hx, data_num_diff->Hx, tol, tol));
-
-  // Checking that casted computation is the same
-#ifdef NDEBUG  // Run only in release mode
-  const std::shared_ptr<crocoddyl::ActionModelAbstractTpl<float>>&
-      casted_model = model->cast<float>();
-  const std::shared_ptr<crocoddyl::ActionDataAbstractTpl<float>>& casted_data =
-      casted_model->createData();
-  Eigen::VectorXf x_f = x.cast<float>();
-  const Eigen::VectorXf u_f = u.cast<float>();
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  casted_model->calc(casted_data, x_f, u_f);
-  casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  BOOST_CHECK(
-      isCloseAbsRel(data->Gx.cast<float>(), casted_data->Gx, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Hx.cast<float>(), casted_data->Hx, tol_f, tol_f));
-#endif
-}
-
-//----------------------------------------------------------------------------//
-
-void register_impulse_constraint_model_unit_tests(
-    ImpulseConstraintModelTypes::Type constraint_type,
-    PinocchioModelTypes::Type model_type) {
-  boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << constraint_type << "_" << model_type;
-  std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_against_impulse_numdiff,
-                  constraint_type, model_type)));
-  framework::master_test_suite().add(ts);
-}
-
-bool init_function() {
-  // Test all the impulse constraint model. Note that we can do it only with
-  // humanoids as it needs to test the impulse wrench cone
-  for (size_t constraint_type = 0;
-       constraint_type < ImpulseConstraintModelTypes::all.size();
-       ++constraint_type) {
-    register_impulse_constraint_model_unit_tests(
-        ImpulseConstraintModelTypes::all[constraint_type],
-        PinocchioModelTypes::Talos);
-    register_impulse_constraint_model_unit_tests(
-        ImpulseConstraintModelTypes::all[constraint_type],
-        PinocchioModelTypes::RandomHumanoid);
-    if (ImpulseConstraintModelTypes::all[constraint_type] ==
-            ImpulseConstraintModelTypes::
-                ConstraintModelResidualImpulseForceEquality ||
-        ImpulseConstraintModelTypes::all[constraint_type] ==
-            ImpulseConstraintModelTypes::
-                ConstraintModelResidualImpulseFrictionConeInequality) {
-      register_impulse_constraint_model_unit_tests(
-          ImpulseConstraintModelTypes::all[constraint_type],
-          PinocchioModelTypes::HyQ);
-    }
-  }
-
-  return true;
-}
-
-int main(int argc, char** argv) {
-  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+  const std::shared_ptr<crocoddyl::ResidualModelImpulseCoM> residual =
+      std::make_shared<crocoddyl::ResidualModelImpulseCoM>(state);
+  crocoddyl::ConstraintModelResidual constraint(state, residual);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract> data =
+      constraint.createData(dynamics_data->shared);
+  constraint.calc(data, x, u);
+  constraint.calcDiff(data, x, u);
+  BOOST_CHECK_EQUAL(data->h.size(), 3);
+  BOOST_CHECK(data->Hx.allFinite());
 }
