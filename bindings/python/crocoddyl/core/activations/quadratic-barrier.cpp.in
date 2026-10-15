@@ -28,7 +28,7 @@ struct ActivationBoundsVisitor
           "lower bounds")
         .add_property(
             "ub", bp::make_getter(&Bounds::ub),
-            bp::make_setter(&Bounds::lb, bp::return_internal_reference<>()),
+            bp::make_setter(&Bounds::ub, bp::return_internal_reference<>()),
             "upper bounds")
         .add_property("beta", &Bounds::beta, "beta");
   }
