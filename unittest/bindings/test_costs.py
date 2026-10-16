@@ -17,6 +17,20 @@ from factory import (
 import crocoddyl
 
 
+class ActivationBoundsTest(unittest.TestCase):
+    def test_set_ub(self):
+        bounds = crocoddyl.ActivationBounds(np.array([-2.0]), np.array([2.0]))
+        bounds.ub = np.array([3.0])
+
+        self.assertTrue(np.allclose(bounds.lb, [-2.0]), "Wrong lower bounds.")
+        self.assertTrue(np.allclose(bounds.ub, [3.0]), "Wrong upper bounds.")
+
+        model = crocoddyl.ActivationModelQuadraticBarrier(bounds)
+        data = model.createData()
+        model.calc(data, np.array([0.0]))
+        self.assertEqual(data.a_value, 0.0)
+
+
 class CostModelAbstractTestCase(unittest.TestCase):
     ROBOT_MODEL = None
     ROBOT_STATE = None
@@ -406,6 +420,7 @@ class FrameVelocityCostSumTest(CostModelSumTestCase):
 if __name__ == "__main__":
     # test to be run
     test_classes_to_run = [
+        ActivationBoundsTest,
         StateCostTest,
         StateCostSumTest,
         ControlCostTest,
