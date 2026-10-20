@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,21 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
       lb_(0),
       ub_(0),
       nu_(nu),
+      np_(0),
+      ng_(0),
+      nh_(0),
+      ng_T_(0),
+      nh_T_(0) {}
+
+template <typename Scalar>
+ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
+    std::shared_ptr<StateAbstract> state, const std::size_t nu,
+    const std::size_t np)
+    : state_(state),
+      lb_(0),
+      ub_(0),
+      nu_(nu),
+      np_(np),
       ng_(0),
       nh_(0),
       ng_T_(0),
@@ -27,6 +42,7 @@ ConstraintModelManagerTpl<Scalar>::ConstraintModelManagerTpl(
       lb_(0),
       ub_(0),
       nu_(state->get_nv()),
+      np_(0),
       ng_(0),
       nh_(0),
       ng_T_(0),
@@ -44,12 +60,29 @@ void ConstraintModelManagerTpl<Scalar>::addConstraint(
                          "dimension (it should be " +
                              std::to_string(nu_) + ")");
   }
+  if (constraints_.find(name) != constraints_.end()) {
+    std::cout << "Warning: we couldn't add the " << name
+              << " constraint item, it already existed." << std::endl;
+    return;
+  }
+  const std::size_t constraint_np = constraint->get_np();
+  if (constraint_np != 0) {
+    if (np_ == 0) {
+      np_ = constraint_np;
+    } else if (np_ != constraint_np) {
+      throw_pretty("Invalid argument: "
+                   << "constraint parameter dimension (" << constraint_np
+                   << ") does not match manager parameter dimension (" << np_
+                   << ")");
+    }
+  }
   std::pair<typename ConstraintModelContainer::iterator, bool> ret =
       constraints_.insert(std::make_pair(
           name, std::make_shared<ConstraintItem>(name, constraint, active)));
   if (ret.second == false) {
     std::cout << "Warning: we couldn't add the " << name
               << " constraint item, it already existed." << std::endl;
+    return;
   } else if (active) {
     ng_ += constraint->get_ng();
     nh_ += constraint->get_nh();
@@ -248,12 +281,22 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
                 "the dimension of data.Gx doesn't correspond with ng=" << ng_);
   assert_pretty(static_cast<std::size_t>(data->Gu.rows()) == ng_,
                 "the dimension of data.Gu doesn't correspond with ng=" << ng_);
+  assert_pretty(static_cast<std::size_t>(data->Gp.rows()) == ng_,
+                "the dimension of data.Gp doesn't correspond with ng=" << ng_);
+  assert_pretty(static_cast<std::size_t>(data->Gp.cols()) == np_,
+                "the dimension of data.Gp doesn't correspond with np=" << np_);
   assert_pretty(
       static_cast<std::size_t>(data->Hx.rows()) == nh_,
       "the dimension of data.Hx,u doesn't correspond with nh=" << nh_);
+  assert_pretty(static_cast<std::size_t>(data->Hp.rows()) == nh_,
+                "the dimension of data.Hp doesn't correspond with nh=" << nh_);
+  assert_pretty(static_cast<std::size_t>(data->Hp.cols()) == np_,
+                "the dimension of data.Hp doesn't correspond with np=" << np_);
   const std::size_t ndx = state_->get_ndx();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
+  data->Gp.setZero();
+  data->Hp.setZero();
 
   typename ConstraintModelContainer::iterator it_m, end_m;
   typename ConstraintDataContainer::iterator it_d, end_d;
@@ -275,6 +318,10 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
       data->Gu.block(ng_i, 0, ng, nu_) = d_i->Gu;
       data->Hx.block(nh_i, 0, nh, ndx) = d_i->Hx;
       data->Hu.block(nh_i, 0, nh, nu_) = d_i->Hu;
+      if (m_i->constraint->get_np() != 0) {
+        data->Gp.block(ng_i, 0, ng, np_) = d_i->Gp;
+        data->Hp.block(nh_i, 0, nh, np_) = d_i->Hp;
+      }
       ng_i += ng;
       nh_i += nh;
     }
@@ -299,11 +346,23 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
       static_cast<std::size_t>(data->Gx.rows()) == ng_T_,
       "the dimension of data.Gx,u doesn't correspond with ng=" << ng_T_);
   assert_pretty(
+      static_cast<std::size_t>(data->Gp.rows()) == ng_T_,
+      "the dimension of data.Gp doesn't correspond with ng=" << ng_T_);
+  assert_pretty(static_cast<std::size_t>(data->Gp.cols()) == np_,
+                "the dimension of data.Gp doesn't correspond with np=" << np_);
+  assert_pretty(
       static_cast<std::size_t>(data->Hx.rows()) == nh_T_,
       "the dimension of data.Hx,u doesn't correspond with nh=" << nh_T_);
+  assert_pretty(
+      static_cast<std::size_t>(data->Hp.rows()) == nh_T_,
+      "the dimension of data.Hp doesn't correspond with nh=" << nh_T_);
+  assert_pretty(static_cast<std::size_t>(data->Hp.cols()) == np_,
+                "the dimension of data.Hp doesn't correspond with np=" << np_);
   const std::size_t ndx = state_->get_ndx();
   std::size_t ng_i = 0;
   std::size_t nh_i = 0;
+  data->Gp.setZero();
+  data->Hp.setZero();
 
   typename ConstraintModelContainer::iterator it_m, end_m;
   typename ConstraintDataContainer::iterator it_d, end_d;
@@ -323,6 +382,10 @@ void ConstraintModelManagerTpl<Scalar>::calcDiff(
       const std::size_t nh = m_i->constraint->get_nh();
       data->Gx.block(ng_i, 0, ng, ndx) = d_i->Gx;
       data->Hx.block(nh_i, 0, nh, ndx) = d_i->Hx;
+      if (m_i->constraint->get_np() != 0) {
+        data->Gp.block(ng_i, 0, ng, np_) = d_i->Gp;
+        data->Hp.block(nh_i, 0, nh, np_) = d_i->Hp;
+      }
       ng_i += ng;
       nh_i += nh;
     }
@@ -343,7 +406,7 @@ ConstraintModelManagerTpl<NewScalar> ConstraintModelManagerTpl<Scalar>::cast()
     const {
   typedef ConstraintModelManagerTpl<NewScalar> ReturnType;
   typedef ConstraintItemTpl<NewScalar> ConstraintType;
-  ReturnType ret(state_->template cast<NewScalar>(), nu_);
+  ReturnType ret(state_->template cast<NewScalar>(), nu_, np_);
   typename ConstraintModelContainer::const_iterator it_m, end_m;
   for (it_m = constraints_.begin(), end_m = constraints_.end(); it_m != end_m;
        ++it_m) {
@@ -369,6 +432,11 @@ ConstraintModelManagerTpl<Scalar>::get_constraints() const {
 template <typename Scalar>
 std::size_t ConstraintModelManagerTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+std::size_t ConstraintModelManagerTpl<Scalar>::get_np() const {
+  return np_;
 }
 
 template <typename Scalar>

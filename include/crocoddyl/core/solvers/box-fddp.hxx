@@ -33,7 +33,7 @@ void SolverBoxFDDPTpl<Scalar>::resizeRunningData() {
   START_PROFILER("SolverBoxFDDP::resizeRunningData");
   SolverFDDP::resizeRunningData();
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -51,7 +51,7 @@ void SolverBoxFDDPTpl<Scalar>::allocateData() {
   Quu_inv_.resize(T);
   du_lb_.resize(T);
   du_ub_.resize(T);
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
   for (std::size_t t = 0; t < T; ++t) {
     const std::shared_ptr<ActionModelAbstract>& model = models[t];
@@ -105,9 +105,9 @@ void SolverBoxFDDPTpl<Scalar>::forwardPass(const Scalar steplength) {
   cost_try_ = Scalar(0.);
   xnext_ = problem_->get_x0();
   const std::size_t T = problem_->get_T();
-  const std::vector<std::shared_ptr<ActionModelAbstract> >& models =
+  const std::vector<std::shared_ptr<ActionModelAbstract>>& models =
       problem_->get_runningModels();
-  const std::vector<std::shared_ptr<ActionDataAbstract> >& datas =
+  const std::vector<std::shared_ptr<ActionDataAbstract>>& datas =
       problem_->get_runningDatas();
   if ((is_feasible_) || (steplength == 1)) {
     for (std::size_t t = 0; t < T; ++t) {
@@ -122,10 +122,8 @@ void SolverBoxFDDPTpl<Scalar>::forwardPass(const Scalar steplength) {
           us_try_[t] =
               us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
         }
-        m->calc(d, xs_try_[t], us_try_[t]);
-      } else {
-        m->calc(d, xs_try_[t]);
       }
+      m->calc(d, xs_try_[t], us_try_[t]);
       xnext_ = d->xnext;
       cost_try_ += d->cost;
       if (raiseIfNaN(cost_try_)) {
@@ -157,10 +155,8 @@ void SolverBoxFDDPTpl<Scalar>::forwardPass(const Scalar steplength) {
           us_try_[t] =
               us_try_[t].cwiseMax(m->get_u_lb()).cwiseMin(m->get_u_ub());
         }
-        m->calc(d, xs_try_[t], us_try_[t]);
-      } else {
-        m->calc(d, xs_try_[t]);
       }
+      m->calc(d, xs_try_[t], us_try_[t]);
       xnext_ = d->xnext;
       cost_try_ += d->cost;
       if (raiseIfNaN(cost_try_)) {
@@ -188,8 +184,15 @@ template <typename NewScalar>
 SolverBoxFDDPTpl<NewScalar> SolverBoxFDDPTpl<Scalar>::cast() const {
   typedef SolverBoxFDDPTpl<NewScalar> ReturnType;
   typedef ShootingProblemTpl<NewScalar> ProblemType;
+  const std::shared_ptr<ShootingProblemTpl<Scalar>> problem =
+      std::dynamic_pointer_cast<ShootingProblemTpl<Scalar>>(problem_);
+  if (problem == nullptr) {
+    throw_pretty(
+        "Invalid operation: parameterized problems cannot be cast by "
+        "SolverBoxFDDP.");
+  }
   ReturnType ret(
-      std::make_shared<ProblemType>(problem_->template cast<NewScalar>()),
+      std::make_shared<ProblemType>(problem->template cast<NewScalar>()),
       dyn_solver_, term_solver_);
   if (dyn_solver_ == HybridShoot && this->Ts_.size() > 1) {
     ret.set_dynamics_solver(dyn_solver_, this->Ts_[1] - this->Ts_[0]);

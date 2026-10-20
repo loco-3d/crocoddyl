@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -16,7 +16,7 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-struct ContactItemTpl {
+struct [[deprecated("Use ImplicitConstraintItem.")]] ContactItemTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;
@@ -58,7 +58,8 @@ struct ContactItemTpl {
  * routines that update the only active contacts.
  */
 template <typename _Scalar>
-class ContactModelMultipleTpl {
+class [[deprecated("Use ImplicitConstraintModelMultiple.")]]
+ContactModelMultipleTpl {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -305,7 +306,8 @@ class ContactModelMultipleTpl {
  * \sa ContactModelMultipleTpl
  */
 template <typename _Scalar>
-struct ContactDataMultipleTpl {
+struct [[deprecated("Use ImplicitConstraintDataMultiple.")]]
+ContactDataMultipleTpl {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,6 +9,8 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "crocoddyl/core/constraints/residual.hpp"
+#include "crocoddyl/core/states/euclidean.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "factory/constraint.hpp"
 #include "unittest_common.hpp"
@@ -17,6 +19,55 @@ using namespace boost::unit_test;
 using namespace crocoddyl::unittest;
 
 //----------------------------------------------------------------------------//
+
+template <typename _Scalar>
+class ConstraintParameterResidualTpl
+    : public crocoddyl::ResidualModelAbstractTpl<_Scalar> {
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(crocoddyl::ResidualModelBase,
+                         ConstraintParameterResidualTpl)
+
+  typedef _Scalar Scalar;
+  typedef crocoddyl::ResidualModelAbstractTpl<Scalar> Base;
+  typedef typename Base::ResidualDataAbstract ResidualDataAbstract;
+  typedef typename Base::StateAbstract StateAbstract;
+  typedef typename Base::VectorXs VectorXs;
+
+  ConstraintParameterResidualTpl(std::shared_ptr<StateAbstract> state,
+                                 const std::size_t nr, const std::size_t nu,
+                                 const std::size_t np)
+      : Base(state, nr, nu, false, false, false, np) {}
+
+  void calc(const std::shared_ptr<ResidualDataAbstract>& data,
+            const Eigen::Ref<const VectorXs>&,
+            const Eigen::Ref<const VectorXs>&) override {
+    for (Eigen::Index i = 0; i < data->r.size(); ++i) {
+      data->r[i] = Scalar(i + 1);
+    }
+  }
+
+  void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>&,
+                const Eigen::Ref<const VectorXs>&) override {
+    data->Rx.setZero();
+    data->Ru.setZero();
+    for (Eigen::Index i = 0; i < data->Rp.rows(); ++i) {
+      for (Eigen::Index j = 0; j < data->Rp.cols(); ++j) {
+        data->Rp(i, j) = Scalar((i + 1) * (j + 1));
+      }
+    }
+  }
+
+  template <typename NewScalar>
+  ConstraintParameterResidualTpl<NewScalar> cast() const {
+    return ConstraintParameterResidualTpl<NewScalar>(
+        this->get_state()->template cast<NewScalar>(), this->get_nr(),
+        this->get_nu(), this->get_np());
+  }
+};
+
+typedef ConstraintParameterResidualTpl<double> ConstraintParameterResidual;
 
 void test_calc_returns_a_residual(ConstraintModelTypes::Type constraint_type,
                                   StateModelTypes::Type state_type) {
@@ -402,6 +453,82 @@ void test_partial_derivatives_in_constraint_manager(
 #endif
 }
 
+void test_parameter_residual_constraint_derivatives() {
+  const std::size_t nu = 2;
+  const std::size_t nr = 2;
+  const std::size_t np = 3;
+  const std::shared_ptr<crocoddyl::StateVector> state =
+      std::make_shared<crocoddyl::StateVector>(4);
+  const std::shared_ptr<ConstraintParameterResidual> residual =
+      std::make_shared<ConstraintParameterResidual>(state, nr, nu, np);
+  crocoddyl::DataCollectorAbstract shared_data;
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(nu);
+
+  const std::shared_ptr<crocoddyl::ConstraintModelResidual> equality =
+      std::make_shared<crocoddyl::ConstraintModelResidual>(state, residual);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract> equality_data =
+      equality->createData(&shared_data);
+  BOOST_CHECK(equality_data->Gp.isZero());
+  BOOST_CHECK(equality_data->Hp.isZero());
+  equality->calc(equality_data, x, u);
+  equality->calcDiff(equality_data, x, u);
+
+  BOOST_CHECK_EQUAL(equality->get_np(), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(equality_data->Hp.rows()), nr);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(equality_data->Hp.cols()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(equality_data->Gp.rows()), 0u);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(equality_data->Gp.cols()), np);
+  BOOST_CHECK(equality_data->h.isApprox(equality_data->residual->r, 1e-12));
+  BOOST_CHECK(equality_data->Hp.isApprox(equality_data->residual->Rp, 1e-12));
+
+  crocoddyl::ConstraintDataAbstract equality_copy(*equality_data);
+  BOOST_CHECK(equality_copy.Gp.isApprox(equality_data->Gp));
+  BOOST_CHECK(equality_copy.Hp.isApprox(equality_data->Hp));
+
+  equality_data->Hp.setZero();
+  equality->calc(equality_data, x);
+  equality->calcDiff(equality_data, x);
+  BOOST_CHECK(equality_data->Hp.isApprox(equality_data->residual->Rp, 1e-12));
+
+  const Eigen::VectorXd lower = -Eigen::VectorXd::Ones(nr);
+  const Eigen::VectorXd upper = Eigen::VectorXd::Ones(nr);
+  const std::shared_ptr<crocoddyl::ConstraintModelResidual> inequality =
+      std::make_shared<crocoddyl::ConstraintModelResidual>(state, residual,
+                                                           lower, upper);
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstract> inequality_data =
+      inequality->createData(&shared_data);
+  inequality->calc(inequality_data, x, u);
+  inequality->calcDiff(inequality_data, x, u);
+
+  BOOST_CHECK_EQUAL(inequality->get_np(), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(inequality_data->Gp.rows()), nr);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(inequality_data->Gp.cols()), np);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(inequality_data->Hp.rows()), 0u);
+  BOOST_CHECK_EQUAL(static_cast<std::size_t>(inequality_data->Hp.cols()), np);
+  BOOST_CHECK(inequality_data->g.isApprox(inequality_data->residual->r, 1e-12));
+  BOOST_CHECK(
+      inequality_data->Gp.isApprox(inequality_data->residual->Rp, 1e-12));
+
+#ifdef NDEBUG
+  const std::shared_ptr<crocoddyl::ConstraintModelAbstractTpl<float>>&
+      casted_equality =
+          std::make_shared<crocoddyl::ConstraintModelResidualTpl<float>>(
+              equality->cast<float>());
+  crocoddyl::DataCollectorAbstractTpl<float> casted_shared;
+  const std::shared_ptr<crocoddyl::ConstraintDataAbstractTpl<float>>&
+      casted_data = casted_equality->createData(&casted_shared);
+  const Eigen::VectorXf x_f = x.cast<float>();
+  const Eigen::VectorXf u_f = u.cast<float>();
+  casted_equality->calc(casted_data, x_f, u_f);
+  casted_equality->calcDiff(casted_data, x_f, u_f);
+  BOOST_CHECK_EQUAL(casted_equality->get_np(), np);
+  BOOST_CHECK_EQUAL(casted_data->Hp.rows(), nr);
+  BOOST_CHECK_EQUAL(casted_data->Hp.cols(), np);
+  BOOST_CHECK(casted_data->Hp.isApprox(equality_data->Hp.cast<float>(), 1e-6f));
+#endif
+}
+
 //----------------------------------------------------------------------------//
 
 void register_constraint_model_unit_tests(
@@ -437,6 +564,8 @@ bool init_function() {
           StateModelTypes::all[state_type]);
     }
   }
+  framework::master_test_suite().add(
+      BOOST_TEST_CASE(&test_parameter_residual_constraint_derivatives));
   return true;
 }
 

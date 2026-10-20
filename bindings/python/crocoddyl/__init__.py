@@ -992,11 +992,11 @@ class CallbackDisplay(CallbackAbstract):
         self.visualization.displayFromSolver(solver)
 
 
-class CallbackLogger(CallbackAbstract):
+class _CallbackLoggerMixin:
     def __init__(self):
-        CallbackAbstract.__init__(self)
         self.xs = []
         self.us = []
+        self.ps = []
         self.fs = []
         self.iters = []
         self.costs = []
@@ -1007,6 +1007,7 @@ class CallbackLogger(CallbackAbstract):
         self.steps = []
         self.ffeass = []
         self.hfeass = []
+        self.Vpp_phase = []
 
     def __call__(self, solver):
         import copy
@@ -1014,6 +1015,12 @@ class CallbackLogger(CallbackAbstract):
         self.xs = copy.copy(solver.xs)
         self.us = copy.copy(solver.us)
         self.fs.append(copy.copy(solver.fs))
+        if hasattr(solver, "ps") and len(solver.ps) > 0:
+            self.ps.append([np.array(p, copy=True) for p in solver.ps])
+        if hasattr(solver, "Vpp_phase") and len(solver.Vpp_phase) > 0:
+            self.Vpp_phase.append(
+                [np.array(Vpp, copy=True) for Vpp in solver.Vpp_phase]
+            )
         self.iters.append(solver.iter)
         self.costs.append(solver.cost)
         self.stops.append(solver.stoppingCriteria())
@@ -1023,6 +1030,12 @@ class CallbackLogger(CallbackAbstract):
         self.steps.append(solver.stepLength)
         self.ffeass.append(solver.ffeas)
         self.hfeass.append(solver.hfeas)
+
+
+class CallbackLogger(_CallbackLoggerMixin, CallbackAbstract):
+    def __init__(self):
+        CallbackAbstract.__init__(self)
+        _CallbackLoggerMixin.__init__(self)
 
 
 def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
@@ -1040,10 +1053,10 @@ def plotOCSolution(xs=None, us=None, figIndex=1, show=True, figTitle=""):
             X[i] = [x[i] for x in xs]
     if us is not None:
         usPlotIdx = 111
-        nu = us[0].shape[0]
+        nu = max((u.shape[0] for u in us), default=0)
         U = [0.0] * nu
         for i in range(nu):
-            U[i] = [u[i] if u.shape[0] != 0 else 0 for u in us]
+            U[i] = [u[i] if i < u.shape[0] else 0 for u in us]
     if xs is not None and us is not None:
         xsPlotIdx = 211
         usPlotIdx = 212
@@ -1127,6 +1140,524 @@ def plotConvergence(
         plt.show()
 
 
+def _physicalInertialParameters(parametrization, data, p, nbodies):
+    p = np.asarray(p, dtype=float)
+    if p.shape != (nbodies * 10,):
+        raise ValueError("The inertial parameter vector has the wrong dimension.")
+
+    values = np.zeros(nbodies * 10)
+    jacobian = np.zeros((nbodies * 10, nbodies * 10))
+    for body in range(nbodies):
+        body_slice = slice(body * 10, (body + 1) * 10)
+        p_body = p[body_slice]
+        dynamic = np.zeros(10)
+        parametrization.fromParametrization(data, dynamic, p_body)
+        dynamic_jacobian = np.zeros((10, 10))
+        parametrization.updateParametrizationDerivative(
+            data, dynamic_jacobian, p_body, dynamic
+        )
+
+        mass = dynamic[0]
+        values[body_slice] = dynamic
+        physical_jacobian = np.eye(10)
+        if abs(mass) <= np.finfo(float).eps:
+            values[body_slice][1:4] = np.nan
+            physical_jacobian[1:4, :] = np.nan
+        else:
+            values[body_slice][1:4] /= mass
+            physical_jacobian[1:4, :] = 0.0
+            physical_jacobian[1:4, 0] = -dynamic[1:4] / mass**2
+            physical_jacobian[1:4, 1:4] = np.eye(3) / mass
+        jacobian[body_slice, body_slice] = physical_jacobian @ dynamic_jacobian
+    return values, jacobian
+
+
+def _initialParameterPrecision(solver, initial_p):
+    problem = model = data = x = u = None
+    accepted_p = []
+    try:
+        problem = solver.problem
+        if len(problem.runningModels) == 0:
+            return None
+        accepted_p = [np.array(p, dtype=float, copy=True) for p in solver.ps]
+        model = problem.runningModels[0]
+        data = problem.runningDatas[0]
+        x = np.asarray(solver.xs[0], dtype=float)
+        u = np.asarray(solver.us[0], dtype=float)
+        problem.update_p(np.asarray(initial_p, dtype=float), phase_idx=0)
+        model.calc(data, x, u)
+        model.calcDiff(data, x, u)
+        return np.array(data.Lpp, dtype=float, copy=True)
+    except (AttributeError, IndexError, RuntimeError, ValueError):
+        return None
+    finally:
+        if accepted_p:
+            for phase, p in enumerate(accepted_p):
+                problem.update_p(p, phase_idx=phase)
+            model.calc(data, x, u)
+            model.calcDiff(data, x, u)
+
+
+def _parameterCovariance(precision, regularization, eigenvalue_floor):
+    precision = np.asarray(precision, dtype=float)
+    if precision.ndim != 2 or precision.shape[0] != precision.shape[1]:
+        raise ValueError("The parameter precision must be a square matrix.")
+
+    precision = 0.5 * (precision + precision.T)
+    regularization = 0.0 if regularization is None else float(regularization)
+    if regularization > 0.0:
+        precision -= regularization * np.eye(precision.shape[0])
+    try:
+        eigenvalues, eigenvectors = np.linalg.eigh(precision)
+    except np.linalg.LinAlgError:
+        return (
+            None,
+            None,
+            {
+                "preg_subtracted": regularization,
+                "failure": True,
+            },
+        )
+
+    identified = eigenvalues > eigenvalue_floor
+    inverse_eigenvalues = np.zeros_like(eigenvalues)
+    inverse_eigenvalues[identified] = 1.0 / eigenvalues[identified]
+    covariance = (eigenvectors * inverse_eigenvalues) @ eigenvectors.T
+    nullspace = eigenvectors[:, ~identified]
+    info = {
+        "preg_subtracted": regularization,
+        "min_eig": float(eigenvalues.min()),
+        "max_eig": float(eigenvalues.max()),
+        "condition": (
+            float(eigenvalues.max() / eigenvalues[identified].min())
+            if identified.any()
+            else np.inf
+        ),
+        "rank_deficient": bool((~identified).any()),
+        "failure": False,
+    }
+    return covariance, nullspace, info
+
+
+def computeInertialCovariances(
+    solver,
+    parametrization,
+    parametrization_data,
+    nbodies,
+    initial_p=None,
+    parameter_slice=None,
+    eig_floor=1e-12,
+    verbose=False,
+):
+    """Compute physical inertial estimates and standard deviations by iteration."""
+    callbacks = solver.getCallbacks()
+    if len(callbacks) == 0 or not hasattr(callbacks[-1], "ps"):
+        raise ValueError("The solver must use CallbackLogger to plot its parameters.")
+
+    log = callbacks[-1]
+    p_entries = log.ps if len(log.ps) > 0 else [solver.ps]
+    p_log = [np.asarray(entry[0], dtype=float) for entry in p_entries]
+    precision_log = [
+        np.asarray(entry[0], dtype=float) if len(entry) > 0 else None
+        for entry in log.Vpp_phase
+    ]
+    if len(precision_log) < len(p_log):
+        precision_log = [None] * (len(p_log) - len(precision_log)) + precision_log
+    else:
+        precision_log = precision_log[-len(p_log) :]
+    regularization_log = list(log.pregs[-len(p_log) :])
+    if len(regularization_log) < len(p_log):
+        regularization_log = [None] * (
+            len(p_log) - len(regularization_log)
+        ) + regularization_log
+    x0 = 0
+
+    if initial_p is not None:
+        p_log.insert(0, np.asarray(initial_p, dtype=float))
+        precision_log.insert(0, _initialParameterPrecision(solver, initial_p))
+        regularization_log.insert(0, None)
+        x0 = -1
+
+    parameters_log = []
+    standard_deviation_log = []
+    diagnostics = []
+    for iteration, (p, precision, regularization) in enumerate(
+        zip(p_log, precision_log, regularization_log)
+    ):
+        if parameter_slice is not None:
+            indices = np.arange(p.size)[parameter_slice]
+            p = p[indices]
+            if precision is not None:
+                precision = precision[np.ix_(indices, indices)]
+
+        parameters, dparameters_dp = _physicalInertialParameters(
+            parametrization, parametrization_data, p, nbodies
+        )
+        standard_deviation = np.full(nbodies * 10, np.nan)
+        info = {"failure": True}
+        if precision is not None:
+            covariance, nullspace, info = _parameterCovariance(
+                precision, regularization, eig_floor
+            )
+            if covariance is not None:
+                variances = np.diag(dparameters_dp @ covariance @ dparameters_dp.T)
+                standard_deviation = np.sqrt(np.maximum(variances, 0.0))
+                if nullspace.shape[1] > 0:
+                    unidentified = np.any(
+                        np.abs(dparameters_dp @ nullspace) > eig_floor, axis=1
+                    )
+                    standard_deviation[unidentified] = np.nan
+
+        if verbose:
+            print(
+                f"[iter {iteration}] preg={info.get('preg_subtracted', 0.0):.2e} "
+                f"rank_def={info.get('rank_deficient', True)} "
+                f"failure={info['failure']}"
+            )
+        parameters_log.append(parameters)
+        standard_deviation_log.append(standard_deviation)
+        diagnostics.append(info)
+
+    return {
+        "parameters_re": np.asarray(parameters_log).T,
+        "parameters_std": np.asarray(standard_deviation_log).T,
+        "diagnostics": diagnostics,
+        "x0": x0,
+    }
+
+
+def _plotParameterGrid(
+    figure_index, values, standard_deviations, nominal, titles, columns, ylabel, x0
+):
+    import math
+
+    import matplotlib.pyplot as plt
+
+    rows = math.ceil(len(values) / columns)
+    figure, axes = plt.subplots(
+        rows,
+        columns,
+        num=figure_index,
+        figsize=(5 * columns, 3.5 * rows),
+        squeeze=False,
+    )
+    for index, (value, standard_deviation, reference, title) in enumerate(
+        zip(values, standard_deviations, nominal, titles)
+    ):
+        axis = axes.flat[index]
+        steps = np.arange(value.size) + x0
+        axis.plot(steps, value, "b--", label="Estimation")
+        axis.axhline(reference, color="r", label="True value")
+        finite = np.isfinite(standard_deviation)
+        if np.any(finite):
+            width = 2.0 * standard_deviation[finite]
+            axis.fill_between(
+                steps[finite],
+                value[finite] - width,
+                value[finite] + width,
+                color="tab:orange",
+                alpha=0.2,
+                label="+/- 2 std",
+            )
+        axis.set_title(title)
+        axis.grid(True)
+        axis.legend()
+    for axis in axes.flat[len(values) :]:
+        axis.set_visible(False)
+    figure.supxlabel("Estimation iterations")
+    figure.supylabel(ylabel)
+    figure.tight_layout()
+
+
+def plotInertialEstimationWithCovariance(
+    solver,
+    control_solver,
+    state,
+    parametrization,
+    parametrization_data,
+    groundtruth_p,
+    nbodies,
+    covariance_data,
+    show=True,
+):
+    """Plot trajectories and physical inertial estimates with uncertainty."""
+    import matplotlib.pyplot as plt
+
+    log = solver.getCallbacks()[-1]
+    plotOCSolution(solver.xs, solver.us, figIndex=1, show=False)
+
+    errors = [state.diff(x, x_ref) for x, x_ref in zip(log.xs, control_solver.xs)]
+    _, axis = plt.subplots(num=2)
+    axis.plot(np.asarray(errors))
+    axis.set_title("Estimation error")
+    axis.set_xlabel("Knots")
+    axis.grid(True)
+
+    plotConvergence(
+        log.costs,
+        log.pregs,
+        log.dregs,
+        log.grads,
+        log.stops,
+        log.steps,
+        figIndex=3,
+        show=False,
+    )
+
+    parameters = covariance_data["parameters_re"]
+    standard_deviations = covariance_data["parameters_std"]
+    groundtruth = np.zeros(nbodies * 10)
+    for body in range(nbodies):
+        body_slice = slice(body * 10, (body + 1) * 10)
+        parametrization.fromParametrization(
+            parametrization_data, groundtruth[body_slice], groundtruth_p[body_slice]
+        )
+        groundtruth[body_slice][1:4] /= groundtruth[body_slice][0]
+
+    mass_indices = np.arange(0, nbodies * 10, 10)
+    _plotParameterGrid(
+        4,
+        parameters[mass_indices],
+        standard_deviations[mass_indices],
+        groundtruth[mass_indices],
+        [f"Body {body + 1}" for body in range(nbodies)],
+        min(3, nbodies),
+        "Mass",
+        covariance_data["x0"],
+    )
+
+    com_indices = np.concatenate(
+        [np.arange(body * 10 + 1, body * 10 + 4) for body in range(nbodies)]
+    )
+    _plotParameterGrid(
+        5,
+        parameters[com_indices],
+        standard_deviations[com_indices],
+        groundtruth[com_indices],
+        [f"Body {body + 1} - COM({axis})" for body in range(nbodies) for axis in "xyz"],
+        3,
+        "Center of mass",
+        covariance_data["x0"],
+    )
+
+    inertia_names = ("Ixx", "Ixy", "Iyy", "Ixz", "Iyz", "Izz")
+    for body in range(nbodies):
+        indices = np.arange(body * 10 + 4, body * 10 + 10)
+        _plotParameterGrid(
+            6 + body,
+            parameters[indices],
+            standard_deviations[indices],
+            groundtruth[indices],
+            inertia_names,
+            3,
+            f"Body {body + 1} inertia",
+            covariance_data["x0"],
+        )
+
+    if show:
+        plt.show()
+
+
+def _frictionTypeKey(friction_type):
+    enum_map = {
+        JointFrictionType.COULOMB: "coulomb",
+        JointFrictionType.VISCOUS: "viscous",
+        JointFrictionType.STRIBECK: "stribeck",
+        JointFrictionType.COULOMB_VISCOUS: "coulomb_viscous",
+        JointFrictionType.COULOMB_STRIBECK: "coulomb_stribeck",
+        JointFrictionType.VISCOUS_STRIBECK: "viscous_stribeck",
+        JointFrictionType.FULL: "full",
+        JointFrictionType.COULOMB_FIXED_SMOOTHING: "coulomb_fixed_smoothing",
+        JointFrictionType.STRIBECK_FIXED_SMOOTHING: "stribeck_fixed_smoothing",
+        JointFrictionType.COULOMB_VISCOUS_FIXED_SMOOTHING: "coulomb_viscous_fixed_smoothing",
+        JointFrictionType.COULOMB_STRIBECK_FIXED_SMOOTHING: "coulomb_stribeck_fixed_smoothing",
+        JointFrictionType.VISCOUS_STRIBECK_FIXED_SMOOTHING: "viscous_stribeck_fixed_smoothing",
+        JointFrictionType.FULL_FIXED_SMOOTHING: "full_fixed_smoothing",
+    }
+    if friction_type in enum_map:
+        return enum_map[friction_type]
+    return str(friction_type).split(".")[-1].lower().replace("-", "_").replace(" ", "_")
+
+
+def _frictionGamma(mu, friction_type, fixed_smoothing):
+    key = _frictionTypeKey(friction_type)
+    mu = np.asarray(mu, dtype=float)
+    fixed = (
+        None if fixed_smoothing is None else np.asarray(fixed_smoothing, dtype=float)
+    )
+    fixed_sizes = {
+        "coulomb_fixed_smoothing": 1,
+        "stribeck_fixed_smoothing": 2,
+        "coulomb_viscous_fixed_smoothing": 1,
+        "coulomb_stribeck_fixed_smoothing": 3,
+        "viscous_stribeck_fixed_smoothing": 2,
+        "full_fixed_smoothing": 3,
+    }
+    if key in fixed_sizes and (fixed is None or fixed.shape != (fixed_sizes[key],)):
+        raise ValueError(
+            f"fixed_smoothing must have shape ({fixed_sizes[key]},) for {key}."
+        )
+    if key == "coulomb_fixed_smoothing":
+        return np.array([np.exp(mu[0]), np.exp(fixed[0])])
+    if key == "stribeck_fixed_smoothing":
+        return fixed.copy()
+    if key == "coulomb_viscous_fixed_smoothing":
+        return np.array([np.exp(mu[0]), np.exp(fixed[0]), np.exp(mu[1])])
+    if key == "coulomb_stribeck_fixed_smoothing":
+        return np.array([fixed[0], fixed[1], mu[0], fixed[2]])
+    if key == "viscous_stribeck_fixed_smoothing":
+        return np.array([fixed[0], fixed[1], np.exp(mu[0])])
+    if key == "full_fixed_smoothing":
+        return np.array([mu[0], fixed[0], fixed[1], mu[1], fixed[2], np.exp(mu[2])])
+    if key in ("coulomb", "viscous", "coulomb_viscous"):
+        return np.exp(mu)
+    if key == "viscous_stribeck":
+        return np.array([mu[0], mu[1], np.exp(mu[2])])
+    if key == "full":
+        gamma = mu.copy()
+        gamma[5] = np.exp(mu[5])
+        return gamma
+    return mu.copy()
+
+
+def _frictionTorque(velocity, gamma, friction_type):
+    key = _frictionTypeKey(friction_type).removesuffix("_fixed_smoothing")
+    if key == "coulomb":
+        return gamma[0] * np.tanh(gamma[1] * velocity)
+    if key == "viscous":
+        return gamma[0] * velocity
+    if key == "stribeck":
+        return np.tanh(gamma[0] * velocity) - np.tanh(gamma[1] * velocity)
+    if key == "coulomb_viscous":
+        return gamma[0] * np.tanh(gamma[1] * velocity) + gamma[2] * velocity
+    if key == "coulomb_stribeck":
+        return (
+            np.tanh(gamma[0] * velocity)
+            - np.tanh(gamma[1] * velocity)
+            + gamma[2] * np.tanh(gamma[3] * velocity)
+        )
+    if key == "viscous_stribeck":
+        return (
+            np.tanh(gamma[0] * velocity)
+            - np.tanh(gamma[1] * velocity)
+            + gamma[2] * velocity
+        )
+    if key == "full":
+        return (
+            gamma[0] * (np.tanh(gamma[1] * velocity) - np.tanh(gamma[2] * velocity))
+            + gamma[3] * np.tanh(gamma[4] * velocity)
+            + gamma[5] * velocity
+        )
+    raise ValueError("Unsupported friction model.")
+
+
+def plotFrictionParam(
+    params,
+    friction_type="full",
+    nominal=None,
+    figIndex=1,
+    show=True,
+    figTitle="",
+    joint_name=None,
+    velocity_range=(-2.0, 2.0),
+    num_points=400,
+    parametrized=False,
+    fixed_smoothing=None,
+):
+    """Plot estimated and nominal friction torque curves."""
+    import math
+
+    import matplotlib.pyplot as plt
+
+    params = np.atleast_2d(np.asarray(params, dtype=float))
+    nominal = (
+        None if nominal is None else np.atleast_2d(np.asarray(nominal, dtype=float))
+    )
+    fixed_smoothing = (
+        None
+        if fixed_smoothing is None
+        else np.atleast_2d(np.asarray(fixed_smoothing, dtype=float))
+    )
+    if nominal is not None and nominal.shape[0] == 1 and params.shape[0] > 1:
+        nominal = np.repeat(nominal, params.shape[0], axis=0)
+    if nominal is not None and nominal.shape != params.shape:
+        raise ValueError("nominal must have the same shape as params.")
+    if fixed_smoothing is not None and fixed_smoothing.shape[0] not in (
+        1,
+        params.shape[0],
+    ):
+        raise ValueError("fixed_smoothing must have one row or match params rows.")
+    if fixed_smoothing is not None and fixed_smoothing.shape[0] == 1:
+        fixed_smoothing = np.repeat(fixed_smoothing, params.shape[0], axis=0)
+
+    if parametrized or (
+        fixed_smoothing is not None
+        and _frictionTypeKey(friction_type).endswith("_fixed_smoothing")
+    ):
+        params = np.vstack(
+            [
+                _frictionGamma(
+                    value,
+                    friction_type,
+                    None if fixed_smoothing is None else fixed_smoothing[index],
+                )
+                for index, value in enumerate(params)
+            ]
+        )
+        if nominal is not None:
+            nominal = np.vstack(
+                [
+                    _frictionGamma(
+                        value,
+                        friction_type,
+                        None if fixed_smoothing is None else fixed_smoothing[index],
+                    )
+                    for index, value in enumerate(nominal)
+                ]
+            )
+
+    columns = max(1, int(math.sqrt(params.shape[0])))
+    rows = math.ceil(params.shape[0] / columns)
+    figure, axes = plt.subplots(
+        rows,
+        columns,
+        num=figIndex,
+        figsize=(5 * columns, 3.5 * rows),
+        squeeze=False,
+    )
+    velocity = np.linspace(velocity_range[0], velocity_range[1], num_points)
+    names = [joint_name] if isinstance(joint_name, str) else joint_name
+    if names is not None and len(names) != params.shape[0]:
+        raise ValueError("joint_name must contain one name per parameter row.")
+    for index, parameter in enumerate(params):
+        axis = axes.flat[index]
+        if nominal is not None:
+            axis.plot(
+                velocity,
+                _frictionTorque(velocity, nominal[index], friction_type),
+                "r-",
+                label="True value",
+            )
+        axis.plot(
+            velocity,
+            _frictionTorque(velocity, parameter, friction_type),
+            "b--",
+            label="Estimation",
+        )
+        axis.set_title(names[index] if names else f"Joint {index + 1}")
+        axis.set_xlabel("Velocity [rad/s]")
+        axis.set_ylabel("Friction torque [Nm]")
+        axis.grid(True)
+        axis.legend()
+    for axis in axes.flat[params.shape[0] :]:
+        axis.set_visible(False)
+    if figTitle:
+        figure.suptitle(figTitle)
+    figure.tight_layout()
+    if show:
+        plt.show()
+
+
 def saveOCSolution(filename, xs, us, ks=None, Ks=None):
     import pickle
 
@@ -1156,6 +1687,7 @@ def saveLogfile(filename, log):
     data = {
         "xs": log.xs,
         "us": log.us,
+        "ps": log.ps,
         "fs": log.fs,
         "steps": log.steps,
         "iters": log.iters,
@@ -1164,6 +1696,7 @@ def saveLogfile(filename, log):
         "dual-reg": log.dregs,
         "stops": log.stops,
         "grads": log.grads,
+        "Vpp_phase": log.Vpp_phase,
     }
     with open(filename, "wb") as f:
         pickle.dump(data, f)

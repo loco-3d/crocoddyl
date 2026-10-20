@@ -1,0 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#include "crocoddyl/core/numdiff/dynamics.hpp"
+
+namespace crocoddyl {
+
+template class CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DynamicsModelNumDiffTpl<@SCALAR_TYPE@>;
+template struct CROCODDYL_EXPLICIT_INSTANTIATION_DEFINITION_DLLAPI
+    DynamicsDataNumDiffTpl<@SCALAR_TYPE@>;
+
+}  // namespace crocoddyl

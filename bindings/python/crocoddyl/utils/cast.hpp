@@ -41,11 +41,38 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model, FTypesOnly>> {
     return bp::object(self);
   }
 
+#ifdef CROCODDYL_WITH_CODEGEN
   template <typename ScalarType>
   static bp::object cast_instance_impl(const Model& self, std::false_type) {
     // Otherwise, perform the cast to the requested type
+    return cast_instance_impl_ad<ScalarType>(
+        self,
+        std::integral_constant<
+            bool, (std::is_same<typename Model::Scalar, ADFloat64>::value &&
+                   std::is_same<ScalarType, ADFloat32>::value) ||
+                      (std::is_same<typename Model::Scalar, ADFloat32>::value &&
+                       std::is_same<ScalarType, ADFloat64>::value)>());
+  }
+
+  template <typename ScalarType>
+  static bp::object cast_instance_impl_ad(const Model& self, std::false_type) {
     return bp::object(self.template cast<ScalarType>());
   }
+
+  template <typename ScalarType>
+  static bp::object cast_instance_impl_ad(const Model& self, std::true_type) {
+    typedef
+        typename std::conditional<std::is_same<ScalarType, ADFloat64>::value,
+                                  Float64, Float32>::type IntermediateScalar;
+    const auto floating = self.template cast<IntermediateScalar>();
+    return bp::object(floating.template cast<ScalarType>());
+  }
+#else
+  template <typename ScalarType>
+  static bp::object cast_instance_impl(const Model& self, std::false_type) {
+    return bp::object(self.template cast<ScalarType>());
+  }
+#endif
 
   // Main cast instance function that uses SFINAE
   template <bool IsFTypesOnly = FTypesOnly>
@@ -62,6 +89,9 @@ struct CastVisitor : public bp::def_visitor<CastVisitor<Model, FTypesOnly>> {
       case DType::ADFloat64:
         return cast_instance_impl<ADFloat64>(
             self, std::is_same<typename Model::Scalar, ADFloat64>());
+      case DType::ADFloat32:
+        return cast_instance_impl<ADFloat32>(
+            self, std::is_same<typename Model::Scalar, ADFloat32>());
 #endif
       default:
         PyErr_SetString(PyExc_TypeError, "Unsupported dtype.");

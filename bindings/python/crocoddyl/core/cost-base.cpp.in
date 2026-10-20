@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -125,7 +125,9 @@ struct CostModelAbstractVisitor
                               bp::return_value_policy<bp::return_by_value>()),
             "residual model")
         .add_property("nu", bp::make_function(&Model::get_nu),
-                      "dimension of control vector");
+                      "dimension of control vector")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of parameter vector");
   }
 };
 
@@ -172,6 +174,24 @@ struct CostDataAbstractVisitor
             bp::make_getter(&Data::Luu, bp::return_internal_reference<>()),
             bp::make_setter(&Data::Luu), "Hessian of the cost")
         .add_property(
+            "Lp", bp::make_getter(&Data::Lp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lp), "Jacobian of the cost w.r.t. parameters")
+        .add_property(
+            "Lpp",
+            bp::make_getter(&Data::Lpp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpp),
+            "Hessian of the cost w.r.t. parameters")
+        .add_property(
+            "Lpx",
+            bp::make_getter(&Data::Lpx, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpx),
+            "Hessian of the cost w.r.t. parameters and state")
+        .add_property(
+            "Lpu",
+            bp::make_getter(&Data::Lpu, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Lpu),
+            "Hessian of the cost w.r.t. parameters and control")
+        .add_property(
             "r",
             bp::make_function(&Data::get_r,
                               deprecated<bp::return_internal_reference<>>(
@@ -210,7 +230,7 @@ struct CostDataAbstractVisitor
       "Abstract multibody cost models.\n\n"                                    \
       "In Crocoddyl, a cost model is defined by the scalar activation "        \
       "function a(.) and by the residual function r(.) as follows:\n"          \
-      "    cost = a(r(x, u)),\n"                                               \
+      "    cost = a(r(x, u, p)),\n"                                            \
       "where the residual function depends on the state point x, which lies "  \
       "in the state manifold described with a nq-tuple, its velocity xd that " \
       "belongs to the tangent space with nv dimension, and the control input " \

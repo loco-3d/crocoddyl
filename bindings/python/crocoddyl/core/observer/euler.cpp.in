@@ -1,0 +1,89 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/observer/euler.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_INTEG_OBSERVER_EULER_PYTHON_BINDINGS(Scalar)                  \
+  typedef IntegratedObserverModelEulerTpl<Scalar> Model;                        \
+  typedef IntegratedObserverModelAbstractTpl<Scalar> ModelBase;                 \
+  typedef IntegratedObserverDataEulerTpl<Scalar> Data;                          \
+  typedef IntegratedObserverDataAbstractTpl<Scalar> DataBase;                   \
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                     \
+  typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                       \
+  typedef CostModelSumTpl<Scalar> CostModelSum;                                 \
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;             \
+  typedef typename Model::VectorXs VectorXs;                                    \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                         \
+  bp::class_<Model, bp::bases<ModelBase>>(                                      \
+      "IntegratedObserverModelEuler",                                           \
+      "Euler integrated observer model.\n\n"                                    \
+      "Discretises a continuous-time constrained dynamics model for optimal "   \
+      "estimation. The observer control w = [eta, u] where eta is process "     \
+      "noise in tangent space and u is the dynamics control.",                  \
+      bp::init<std::shared_ptr<DynamicsModel>, std::shared_ptr<CostModelSum>,   \
+               bp::optional<std::shared_ptr<ConstraintModelManager>, Scalar>>(  \
+          bp::args("self", "dynamics", "costs", "constraints", "dt"),           \
+          "Construct the integrated observer model with Euler integration.\n\n" \
+          ":param dynamics: continuous-time dynamics model\n"                   \
+          ":param costs: cost model\n"                                          \
+          ":param constraints: constraint model (optional)\n"                   \
+          ":param dt: time step (default 1e-3)"))                               \
+      .def("calc",                                                               \
+           static_cast<void (Model::*)(                                          \
+               const std::shared_ptr<ActionDataAbstract>&,                      \
+               const Eigen::Ref<const VectorXs>&,                               \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),               \
+           bp::args("self", "data", "x", "u"),                                  \
+           "Compute the next state and cost (running node).")                   \
+      .def("calc",                                                               \
+           static_cast<void (Model::*)(                                          \
+               const std::shared_ptr<ActionDataAbstract>&,                      \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),               \
+           bp::args("self", "data", "x"),                                       \
+           "Compute cost only (terminal node).")                                \
+      .def("calcDiff",                                                           \
+           static_cast<void (Model::*)(                                          \
+               const std::shared_ptr<ActionDataAbstract>&,                      \
+               const Eigen::Ref<const VectorXs>&,                               \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),           \
+           bp::args("self", "data", "x", "u"),                                  \
+           "Compute the derivatives (running node).")                           \
+      .def("calcDiff",                                                           \
+           static_cast<void (Model::*)(                                          \
+               const std::shared_ptr<ActionDataAbstract>&,                      \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),           \
+           bp::args("self", "data", "x"),                                       \
+           "Compute the derivatives (terminal node).")                          \
+      .def(PrintableVisitor<Model>())                                            \
+      .def(CastVisitor<Model>())                                                 \
+      .def(CopyableVisitor<Model>());                                            \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                          \
+  bp::class_<Data, bp::bases<DataBase>>(                                        \
+      "IntegratedObserverDataEuler",                                            \
+      "Data for the Euler integrated observer model.",                          \
+      bp::no_init);
+
+void exposeIntegratedObserverEuler() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_INTEG_OBSERVER_EULER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

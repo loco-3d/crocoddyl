@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, University of Trento,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
@@ -13,6 +13,7 @@
 
 #include "python/crocoddyl/core/core.hpp"
 #include "python/crocoddyl/core/integ-action-base.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -24,8 +25,12 @@ struct IntegratedActionModelEulerVisitor
   typedef typename Model::ActionDataAbstract Data;
   typedef
       typename Model::DifferentialActionModelAbstract DifferentialActionModel;
+  typedef typename Model::DynamicsModelAbstract DynamicsModelAbstract;
+  typedef typename Model::CostModelSum CostModelSum;
+  typedef typename Model::ConstraintModelManager ConstraintModelManager;
   typedef typename Model::ControlParametrizationModelAbstract
       ControlParametrizationModel;
+  typedef typename Model::IntegratorTime IntegratorTime;
   typedef typename Model::VectorXs VectorXs;
   template <class PyClass>
   void visit(PyClass& cl) const {
@@ -39,7 +44,22 @@ struct IntegratedActionModelEulerVisitor
                ":param control: the control parametrization\n"
                ":param stepTime: step time (default 1e-3)\n"
                ":param withCostResidual: includes the cost residuals and "
-               "derivatives (default True)."))
+               "derivatives (default True).")[deprecated<>(
+               "Deprecated. Use the constructor taking dynModel, costModel "
+               "and constraints.")])
+        .def(bp::init<std::shared_ptr<DynamicsModelAbstract>,
+                      std::shared_ptr<CostModelSum>,
+                      bp::optional<std::shared_ptr<ConstraintModelManager>,
+                                   std::shared_ptr<ControlParametrizationModel>,
+                                   std::shared_ptr<IntegratorTime> > >(
+                 bp::args("self", "dynModel", "costModel", "constraints",
+                          "control", "integratorTime"),
+                 "Initialize the Euler integrator from dynamics and costs.\n\n"
+                 ":param dynModel: dynamics model\n"
+                 ":param costModel: cost model stack\n"
+                 ":param constraints: constraint manager (default None)\n"
+                 ":param control: control parametrization (default None)\n"
+                 ":param integratorTime: shared integrator time (default None)"))
         .def(
             "calc",
             static_cast<void (Model::*)(
@@ -75,17 +95,7 @@ struct IntegratedActionModelEulerVisitor
              static_cast<void (Model::*)(const std::shared_ptr<Data>&,
                                          const Eigen::Ref<const VectorXs>&)>(
                  &Model::calcDiff),
-             bp::args("self", "data", "x"))
-        .def("createData", &Model::createData, bp::args("self"),
-             "Create the Euler integrator data.")
-        .add_property(
-            "ng", bp::make_function(&Model::get_ng), "number of equality constraints")
-        .add_property(
-            "nh", bp::make_function(&Model::get_nh), "number of inequality constraints")
-        .add_property(
-            "ng_T", bp::make_function(&Model::get_ng_T), "number of equality terminal constraints")
-        .add_property(
-            "nh_T", bp::make_function(&Model::get_nh_T), "number of inequality terminal constraints");
+             bp::args("self", "data", "x"));
   }
 };
 
@@ -95,19 +105,6 @@ struct IntegratedActionDataEulerVisitor
   template <class PyClass>
   void visit(PyClass& cl) const {
     cl.add_property(
-          "differential",
-          bp::make_getter(&Data::differential,
-                          bp::return_value_policy<bp::return_by_value>()),
-          "differential action data")
-        .add_property(
-            "control",
-            bp::make_getter(&Data::control,
-                            bp::return_value_policy<bp::return_by_value>()),
-            "control parametrization data")
-        .add_property(
-            "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
-            "state rate.")
-        .add_property(
             "Lwu",
             bp::make_getter(&Data::Lwu, bp::return_internal_reference<>()),
             "Hessian of the cost wrt the differential control (w) and "
@@ -118,14 +115,13 @@ struct IntegratedActionDataEulerVisitor
 #define CROCODDYL_INTACTION_MODEL_EULER_PYTHON_BINDINGS(Scalar)              \
   typedef IntegratedActionModelEulerTpl<Scalar> Model;                       \
   typedef IntegratedActionModelAbstractTpl<Scalar> ModelBase;                \
-  typedef ActionModelAbstractTpl<Scalar> ActionBase;                         \
   typedef DifferentialActionModelAbstractTpl<Scalar> DiffActionBase;         \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
-  bp::class_<Model, bp::bases<ModelBase, ActionBase>>(                       \
+  bp::class_<Model, bp::bases<ModelBase>>(                                   \
       "IntegratedActionModelEuler",                                          \
-      "Sympletic Euler integrator for differential action models.\n\n"       \
+      "Sympletic Euler integrator for differential or dynamics backends.\n\n"\
       "This class implements a sympletic Euler integrator (a.k.a "           \
-      "semi-implicit integrator) give a differential action model, i.e.:\n"  \
+      "semi-implicit integrator), i.e.:\n"                                   \
       "  [q+, v+] = State.integrate([q, v], [v + a * dt, a * dt] * dt).",    \
       bp::init<std::shared_ptr<DiffActionBase>, bp::optional<Scalar, bool>>( \
           bp::args("self", "diffModel", "stepTime", "withCostResidual"),     \
@@ -133,7 +129,9 @@ struct IntegratedActionDataEulerVisitor
           ":param diffModel: differential action model\n"                    \
           ":param stepTime: step time (default 1e-3)\n"                      \
           ":param withCostResidual: includes the cost residuals and "        \
-          "derivatives (default True)."))                                    \
+          "derivatives (default True).")[deprecated<>(                       \
+          "Deprecated. Use the constructor taking dynModel, costModel and "  \
+          "constraints.")])                                                  \
       .def(IntegratedActionModelEulerVisitor<Model>())                       \
       .def(CastVisitor<Model>())                                             \
       .def(PrintableVisitor<Model>())                                        \
@@ -149,6 +147,7 @@ struct IntegratedActionDataEulerVisitor
       bp::init<Model*>(bp::args("self", "model"),                         \
                        "Create sympletic Euler integrator data.\n\n"      \
                        ":param model: sympletic Euler integrator model")) \
+      .def(IntegratedActionDataAbstractVisitor<Data>())                   \
       .def(IntegratedActionDataEulerVisitor<Data>())                      \
       .def(CopyableVisitor<Data>());
 

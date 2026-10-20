@@ -1,0 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+#include "crocoddyl/core/observer/euler.hpp"
+
+template class crocoddyl::IntegratedObserverModelEulerTpl<@SCALAR_TYPE@>;
+template struct crocoddyl::IntegratedObserverDataEulerTpl<@SCALAR_TYPE@>;

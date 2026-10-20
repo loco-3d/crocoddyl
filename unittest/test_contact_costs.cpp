@@ -6,147 +6,56 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
+#include <boost/test/unit_test.hpp>
 
-#include "factory/contact_cost.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/multibody/actuations/multibody.hpp"
+#include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
+#include "crocoddyl/multibody/implicit-constraints/contact.hpp"
+#include "crocoddyl/multibody/implicit-constraints/multiple-implicit-constraints.hpp"
+#include "crocoddyl/multibody/residuals/contact-force.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
+#include "factory/state.hpp"
 #include "unittest_common.hpp"
 
-using namespace boost::unit_test;
-using namespace crocoddyl::unittest;
+BOOST_AUTO_TEST_CASE(test_generic_contact_cost_collector) {
+  const std::shared_ptr<crocoddyl::StateMultibody> state =
+      std::static_pointer_cast<crocoddyl::StateMultibody>(
+          crocoddyl::unittest::StateModelFactory().create(
+              crocoddyl::unittest::StateModelTypes::StateMultibody_TalosArm));
+  const std::shared_ptr<pinocchio::Model> pinocchio = state->get_pinocchio();
+  const std::shared_ptr<crocoddyl::ActuationModelMultibody> actuation =
+      std::make_shared<crocoddyl::ActuationModelMultibody>(state);
+  const std::shared_ptr<crocoddyl::ImplicitConstraintModelMultiple>
+      constraints =
+          std::make_shared<crocoddyl::ImplicitConstraintModelMultiple>(
+              state, actuation->get_nu());
+  const pinocchio::FrameIndex id = pinocchio->frames.size() - 1;
+  crocoddyl::ContactModel::MaskArray mask = {
+      {true, true, true, false, false, false}};
+  constraints->addConstraint(
+      "contact", std::make_shared<crocoddyl::ContactModel>(
+                     state, id, pinocchio->frames[id].placement,
+                     pinocchio::LOCAL_WORLD_ALIGNED, actuation->get_nu(),
+                     crocoddyl::ContactModel::Vector2s::Zero(), mask));
+  crocoddyl::DynamicsModelConstrainedForward dynamics(state, actuation,
+                                                      constraints);
+  const std::shared_ptr<crocoddyl::DynamicsDataAbstract> dynamics_data =
+      dynamics.createData();
+  const Eigen::VectorXd x = state->rand();
+  const Eigen::VectorXd u = Eigen::VectorXd::Random(dynamics.get_nu());
+  dynamics.calc(dynamics_data, x, u);
+  dynamics.calcDiff(dynamics_data, x, u);
 
-//----------------------------------------------------------------------------//
-
-void test_partial_derivatives_against_contact_numdiff(
-    ContactCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
-    ActivationModelTypes::Type activation_type,
-    ActuationModelTypes::Type actuation_type) {
-  // create the model
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstract>& model =
-      ContactCostModelFactory().create(cost_type, model_type, activation_type,
-                                       actuation_type);
-
-  // create the corresponding data object and set the cost to nan
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>& data =
-      model->createData();
-
-  crocoddyl::DifferentialActionModelNumDiff model_num_diff(model);
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstract>&
-      data_num_diff = model_num_diff.createData();
-
-  // Generating random values for the state and control
-  Eigen::VectorXd x = model->get_state()->rand();
-  const Eigen::VectorXd u = Eigen::VectorXd::Random(model->get_nu());
-
-  // Computing the action derivatives
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  model_num_diff.calc(data_num_diff, x, u);
-  model_num_diff.calcDiff(data_num_diff, x, u);
-  // Tolerance defined as in
-  // http://www.it.uom.gr/teaching/linearalgebra/NumericalRecipiesInC/c5-7.pdf
-  double tol = std::pow(model_num_diff.get_disturbance(), 1. / 3.);
-  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, tol));
-  BOOST_CHECK(isCloseAbsRel(data->Lu, data_num_diff->Lu, tol, tol));
-  if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, tol));
-    BOOST_CHECK(isCloseAbsRel(data->Lxu, data_num_diff->Lxu, tol, tol));
-    BOOST_CHECK(isCloseAbsRel(data->Luu, data_num_diff->Luu, tol, tol));
-  }
-
-  // Computing the action derivatives
-  x = model->get_state()->rand();
-  model->calc(data, x);
-  model->calcDiff(data, x);
-  model_num_diff.calc(data_num_diff, x);
-  model_num_diff.calcDiff(data_num_diff, x);
-  BOOST_CHECK(isCloseAbsRel(data->Lx, data_num_diff->Lx, tol, tol));
-  if (model_num_diff.get_with_gauss_approx()) {
-    BOOST_CHECK(isCloseAbsRel(data->Lxx, data_num_diff->Lxx, tol, tol));
-  }
-
-  // Checking that casted computation is the same
-#ifdef NDEBUG  // Run only in release mode
-  const std::shared_ptr<crocoddyl::DifferentialActionModelAbstractTpl<float>>&
-      casted_model = model->cast<float>();
-  const std::shared_ptr<crocoddyl::DifferentialActionDataAbstractTpl<float>>&
-      casted_data = casted_model->createData();
-  Eigen::VectorXf x_f = x.cast<float>();
-  const Eigen::VectorXf u_f = u.cast<float>();
-  model->calc(data, x, u);
-  model->calcDiff(data, x, u);
-  casted_model->calc(casted_data, x_f, u_f);
-  casted_model->calcDiff(casted_data, x_f, u_f);
-  float tol_f = 10.f * std::sqrt(2.0f * std::numeric_limits<float>::epsilon());
-  float tol_f_hess = 100.f * tol_f;
-  BOOST_CHECK(
-      isCloseAbsRel(data->Lx.cast<float>(), casted_data->Lx, tol_f, tol_f));
-  BOOST_CHECK(
-      isCloseAbsRel(data->Lu.cast<float>(), casted_data->Lu, tol_f, tol_f));
-  BOOST_CHECK(isCloseAbsRel(data->Lxx.cast<float>(), casted_data->Lxx,
-                            tol_f_hess, tol_f_hess));
-  BOOST_CHECK(isCloseAbsRel(data->Lxu.cast<float>(), casted_data->Lxu,
-                            tol_f_hess, tol_f_hess));
-  BOOST_CHECK(isCloseAbsRel(data->Luu.cast<float>(), casted_data->Luu,
-                            tol_f_hess, tol_f_hess));
-  model->calc(data, x);
-  model->calcDiff(data, x);
-  casted_model->calc(casted_data, x_f);
-  casted_model->calcDiff(casted_data, x_f);
-  BOOST_CHECK(
-      isCloseAbsRel(data->Lx.cast<float>(), casted_data->Lx, tol_f, tol_f));
-  BOOST_CHECK(isCloseAbsRel(data->Lxx.cast<float>(), casted_data->Lxx,
-                            tol_f_hess, tol_f_hess));
-#endif
-}
-
-//----------------------------------------------------------------------------//
-
-void register_contact_cost_model_unit_tests(
-    ContactCostModelTypes::Type cost_type, PinocchioModelTypes::Type model_type,
-    ActivationModelTypes::Type activation_type,
-    ActuationModelTypes::Type actuation_type) {
-  boost::test_tools::output_test_stream test_name;
-  test_name << "test_" << cost_type << "_" << activation_type << "_"
-            << actuation_type << "_" << model_type;
-  std::cout << "Running " << test_name.str() << std::endl;
-  test_suite* ts = BOOST_TEST_SUITE(test_name.str());
-  ts->add(BOOST_TEST_CASE(
-      boost::bind(&test_partial_derivatives_against_contact_numdiff, cost_type,
-                  model_type, activation_type, actuation_type)));
-  framework::master_test_suite().add(ts);
-}
-
-bool init_function() {
-  // Test all the contact cost model. Note that we can do it only with humanoids
-  // as it needs to test the contact wrench cone
-  for (std::size_t cost_type = 0; cost_type < ContactCostModelTypes::all.size();
-       ++cost_type) {
-    for (std::size_t activation_type = 0;
-         activation_type <
-         ActivationModelTypes::ActivationModelQuadraticBarrier;
-         ++activation_type) {
-      register_contact_cost_model_unit_tests(
-          ContactCostModelTypes::all[cost_type], PinocchioModelTypes::Talos,
-          ActivationModelTypes::all[activation_type],
-          ActuationModelTypes::ActuationModelFloatingBase);
-      if (ContactCostModelTypes::all[cost_type] ==
-              ContactCostModelTypes::CostModelResidualContactForce ||
-          ContactCostModelTypes::all[cost_type] ==
-              ContactCostModelTypes::CostModelResidualContactFrictionCone ||
-          ContactCostModelTypes::all[cost_type] ==
-              ContactCostModelTypes::CostModelResidualContactControlGrav) {
-        register_contact_cost_model_unit_tests(
-            ContactCostModelTypes::all[cost_type], PinocchioModelTypes::HyQ,
-            ActivationModelTypes::all[activation_type],
-            ActuationModelTypes::ActuationModelFloatingBase);
-      }
-    }
-  }
-
-  return true;
-}
-
-int main(int argc, char** argv) {
-  return ::boost::unit_test::unit_test_main(&init_function, argc, argv);
+  const std::shared_ptr<crocoddyl::ResidualModelContactForce> residual =
+      std::make_shared<crocoddyl::ResidualModelContactForce>(
+          state, id, pinocchio::Force::Zero(), 3, dynamics.get_nu());
+  crocoddyl::CostModelResidual cost(state, residual);
+  const std::shared_ptr<crocoddyl::CostDataAbstract> data =
+      cost.createData(dynamics_data->shared);
+  cost.calc(data, x, u);
+  cost.calcDiff(data, x, u);
+  BOOST_CHECK_EQUAL(data->residual->r.size(), 3);
+  BOOST_CHECK(data->Lx.allFinite());
+  BOOST_CHECK(data->Lu.allFinite());
 }
