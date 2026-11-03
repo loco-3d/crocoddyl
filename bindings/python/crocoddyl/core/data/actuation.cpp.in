@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2019-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,8 +41,26 @@ struct DataCollectorActuationVisitor
       .def(DataCollectorActuationVisitor<Data>())                \
       .def(CopyableVisitor<Data>());
 
+#define CROCODDYL_DATA_COLLECTOR_ACTUATION_PARAMS_PYTHON_BINDINGS(Scalar) \
+  typedef DataCollectorActuationParamsTpl<Scalar> PData;                   \
+  typedef DataCollectorActuationTpl<Scalar> PDataBase1;                    \
+  typedef DataCollectorParamsTpl<Scalar> PDataBase2;                       \
+  typedef ActuationDataAbstractTpl<Scalar> ActuationData;                  \
+  typedef ParamsDataAbstractTpl<Scalar> ParamsData;                        \
+  bp::register_ptr_to_python<std::shared_ptr<PData>>();                    \
+  bp::class_<PData, bp::bases<PDataBase1, PDataBase2>>(                    \
+      "DataCollectorActuationParams",                                      \
+      "Actuation data collector with parameter payload.\n\n",              \
+      bp::init<std::shared_ptr<ActuationData>, std::shared_ptr<ParamsData>>( \
+          bp::args("self", "actuation", "params"),                         \
+          "Create actuation data collection.\n\n"                          \
+          ":param actuation: actuation data\n"                             \
+          ":param params: parameter payload"))                             \
+      .def(CopyableVisitor<PData>());
+
 void exposeDataCollectorActuation() {
   CROCODDYL_DATA_COLLECTOR_JOINT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DATA_COLLECTOR_ACTUATION_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
 }
 
 }  // namespace python

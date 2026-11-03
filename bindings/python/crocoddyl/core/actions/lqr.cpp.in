@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -23,6 +23,8 @@ struct ActionModelLQRVisitor
   typedef typename Model::ActionDataAbstract Data;
   typedef typename Model::Base ModelBase;
   typedef typename Model::MatrixXs MatrixXs;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
+  typedef typename Model::ParameterManager ParameterManager;
   typedef typename Model::VectorXs VectorXs;
   BOOST_PYTHON_FUNCTION_OVERLOADS(ActionModelLQR_Random_wrap, Model::Random, 2,
                                   4)
@@ -65,6 +67,17 @@ struct ActionModelLQRVisitor
             ":param nu: dimension of the control vector\n"
             ":param driftFree: enable/disable the bias term of the linear "
             "dynamics (default True)"))
+        .def(bp::init<std::size_t, std::size_t, std::size_t, std::size_t,
+                      std::size_t, bp::optional<bool>>(
+            bp::args("self", "nx", "nu", "np", "ng", "nh", "driftFree"),
+            "Initialize a parameterized LQR action model.\n\n"
+            ":param nx: dimension of the state vector\n"
+            ":param nu: dimension of the control vector\n"
+            ":param np: dimension of the parameter vector\n"
+            ":param ng: number of inequality constraints\n"
+            ":param nh: number of equality constraints\n"
+            ":param driftFree: enable/disable the bias term of the linear "
+            "dynamics (default True)"))
         .def(
             "calc",
             static_cast<void (Model::*)(
@@ -103,8 +116,22 @@ struct ActionModelLQRVisitor
                                          const Eigen::Ref<const VectorXs>&)>(
                  &Model::calcDiff),
              bp::args("self", "data", "x"))
-        .def("createData", &Model::createData, bp::args("self"),
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
              "Create the LQR action data.")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &Model::createData),
+             bp::args("self", "params_data"),
+             "Create the LQR action data with shared parameter data.")
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Set the action parameter manager.")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the active action parameter vector.")
         .def("Random", &Model::Random,
              ActionModelLQR_Random_wrap(
                  bp::args("nx", "nu", "ng", "nh"),
@@ -114,7 +141,13 @@ struct ActionModelLQRVisitor
                  ":param ng: inequality constraint dimension (default 0)\n"
                  ":param nh: equality constraint dimension (default 0)"))
         .staticmethod("Random")
-        .def("setLQR", &Model::set_LQR,
+        .def("setLQR",
+             static_cast<void (Model::*)(
+                 const MatrixXs&, const MatrixXs&, const MatrixXs&,
+                 const MatrixXs&, const MatrixXs&, const MatrixXs&,
+                 const MatrixXs&, const VectorXs&, const VectorXs&,
+                 const VectorXs&, const VectorXs&, const VectorXs&)>(
+                 &Model::set_LQR),
              bp::args("self", "A", "B", "Q", "R", "N", "G", "H", "f", "q", "r",
                       "g", "h"),
              "Modify the LQR action model.\n\n"
@@ -133,50 +166,87 @@ struct ActionModelLQRVisitor
         .add_property(
             "A",
             bp::make_function(&Model::get_A, bp::return_internal_reference<>()),
+            &Model::set_A,
             "state matrix")
         .add_property(
             "B",
             bp::make_function(&Model::get_B, bp::return_internal_reference<>()),
+            &Model::set_B,
             "input matrix")
+        .add_property(
+            "P",
+            bp::make_function(&Model::get_P, bp::return_internal_reference<>()),
+            &Model::set_P,
+            "parameter dynamics matrix")
         .add_property(
             "f",
             bp::make_function(&Model::get_f, bp::return_internal_reference<>()),
+            &Model::set_f,
             "dynamics drift")
         .add_property(
             "Q",
             bp::make_function(&Model::get_Q, bp::return_internal_reference<>()),
+            &Model::set_Q,
             "state weight matrix")
         .add_property(
             "R",
             bp::make_function(&Model::get_R, bp::return_internal_reference<>()),
+            &Model::set_R,
             "input weight matrix")
         .add_property(
             "N",
             bp::make_function(&Model::get_N, bp::return_internal_reference<>()),
+            &Model::set_N,
             "state-input weight matrix")
+        .add_property(
+            "W",
+            bp::make_function(&Model::get_W, bp::return_internal_reference<>()),
+            &Model::set_W,
+            "parameter weight matrix")
+        .add_property(
+            "Y",
+            bp::make_function(&Model::get_Y, bp::return_internal_reference<>()),
+            &Model::set_Y,
+            "state-parameter weight matrix")
+        .add_property(
+            "V",
+            bp::make_function(&Model::get_V, bp::return_internal_reference<>()),
+            &Model::set_V,
+            "input-parameter weight matrix")
         .add_property(
             "G",
             bp::make_function(&Model::get_G, bp::return_internal_reference<>()),
+            &Model::set_G,
             "state-input inequality constraint matrix")
         .add_property(
             "H",
             bp::make_function(&Model::get_H, bp::return_internal_reference<>()),
+            &Model::set_H,
             "state-input equality constraint matrix")
         .add_property(
             "q",
             bp::make_function(&Model::get_q, bp::return_internal_reference<>()),
+            &Model::set_q,
             "state weight vector")
         .add_property(
             "r",
             bp::make_function(&Model::get_r, bp::return_internal_reference<>()),
+            &Model::set_r,
             "input weight vector")
+        .add_property(
+            "m",
+            bp::make_function(&Model::get_m, bp::return_internal_reference<>()),
+            &Model::set_m,
+            "parameter weight vector")
         .add_property(
             "g",
             bp::make_function(&Model::get_g, bp::return_internal_reference<>()),
+            &Model::set_g,
             "state-input inequality constraint bias")
         .add_property(
             "h",
             bp::make_function(&Model::get_h, bp::return_internal_reference<>()),
+            &Model::set_h,
             "state-input equality constraint bias")
         .add_property(
             "ng", bp::make_function(&Model::get_ng), "number of equality constraints")
@@ -252,22 +322,51 @@ struct ActionModelLQRVisitor
   }
 };
 
+#define CROCODDYL_LQR_PARAMS_PYTHON_BINDINGS(Scalar)                         \
+  {                                                                           \
+    typedef LQRParamsTpl<Scalar> Model;                                       \
+    typedef ActionModelParamsAbstractTpl<Scalar> ModelBase;                   \
+    typedef typename Model::StateAbstract State;                              \
+    bp::register_ptr_to_python<std::shared_ptr<Model>>();                    \
+    bp::class_<Model, bp::bases<ModelBase>>(                                  \
+        "LQRParams", "Action-parameter model for parameterized LQR.",        \
+        bp::init<std::shared_ptr<State>, std::size_t>(                        \
+            bp::args("self", "state", "np"),                                \
+            "Initialize the LQR parameter model.\n\n"                        \
+            ":param state: state description\n"                              \
+            ":param np: dimension of the parameter vector"))                 \
+        .def(bp::init<std::size_t, std::size_t>(                              \
+            bp::args("self", "nx", "np"),                                   \
+            "Initialize the LQR parameter model.\n\n"                        \
+            ":param nx: dimension of the state vector\n"                     \
+            ":param np: dimension of the parameter vector"))                 \
+        .def("update", &Model::update, bp::args("self", "data", "p"),        \
+             "Update the LQR parameter vector.")                             \
+        .def("computeParamSensitivity",                                     \
+             &Model::computeParamSensitivity_x,                              \
+             bp::args("self", "data", "params", "x", "u"),                 \
+             "Return the zero direct LQR state sensitivity.")                \
+        .def("createData", &Model::createData, bp::args("self"),             \
+             "Create the parameter data.\n\n"                                \
+             ":return parameter data")                                       \
+        .def(CastVisitor<Model>())                                             \
+        .def(PrintableVisitor<Model>())                                       \
+        .def(CopyableVisitor<Model>());                                       \
+  }
+
 #define CROCODDYL_ACTION_MODEL_LQR_PYTHON_BINDINGS(Scalar)                   \
   typedef ActionModelLQRTpl<Scalar> Model;                                   \
   typedef ActionModelAbstractTpl<Scalar> ModelBase;                          \
-  typedef typename ModelBase::VectorXs MatrixXs;                             \
+  typedef typename Model::MatrixXs MatrixXs;                                  \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
   bp::class_<Model, bp::bases<ModelBase>>(                                   \
       "ActionModelLQR",                                                      \
       "LQR action model.\n\n"                                                \
-      "A linear-quadratic regulator (LQR) action has a transition model of " \
-      "the form\n"                                                           \
-      "  xnext(x,u) = A x + B u + f.\n"                                      \
-      "Its cost function is quadratic of the form:\n"                        \
-      "  1/2 [x,u].T [Q N; N.T R] [x,u] + [q,r].T [x,u],\n"                  \
-      "and the linear equality and inequality constraints has the form:\n"   \
-      "  g(x,u) = G [x,u] + g<=0\n"                                          \
-      "  h(x,u) = H [x,u] + h.",                                             \
+      "With z=[x,u,p], the running dynamics are "                            \
+      "xnext=A x+B u+P p+f. The quadratic cost uses blocks "                 \
+      "[Q N Y; N.T R V; Y.T V.T W] and linear term [q,r,m]. "               \
+      "The constraints are g(x,u,p)=G z+g<=0 and "                          \
+      "h(x,u,p)=H z+h; terminal evaluation omits control terms.",           \
       bp::init<MatrixXs, MatrixXs, MatrixXs, MatrixXs, MatrixXs>(            \
           bp::args("self", "A", "B", "Q", "R", "N"),                         \
           "Initialize the LQR action model.\n\n"                             \
@@ -298,6 +397,7 @@ void exposeActionLQR() {
   // release
   CROCODDYL_DISABLE_WARNING_DEPRECATED
 
+  CROCODDYL_LQR_PARAMS_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_ACTION_MODEL_LQR_PYTHON_BINDINGS(@SCALAR_TYPE@)
   CROCODDYL_ACTION_DATA_LQR_PYTHON_BINDINGS(@SCALAR_TYPE@)
 

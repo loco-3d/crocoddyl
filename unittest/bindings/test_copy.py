@@ -1,3 +1,11 @@
+###############################################################################
+# BSD 3-Clause License
+#
+# Copyright (C) 2026, Heriot-Watt University
+# Copyright note valid unless otherwise stated in individual files.
+# All rights reserved.
+###############################################################################
+
 import copy
 import sys
 import unittest
@@ -54,50 +62,38 @@ class ActionsTest(CopyModelTestCase):
     # core actions
     MODEL.append(crocoddyl.ActionModelUnicycle())
     MODEL.append(crocoddyl.ActionModelLQR(2, 2))
-    MODEL.append(crocoddyl.DifferentialActionModelLQR(2, 2))
-    # multibody actions
-    state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
-    actuation = crocoddyl.ActuationModelFloatingBase(state)
-    cost_fwd = crocoddyl.CostModelSum(state, actuation.nu)
-    impulse = crocoddyl.ImpulseModelMultiple(state)
-    contact_fwd = crocoddyl.ContactModelMultiple(state, actuation.nu)
-    MODEL.append(crocoddyl.ActionModelImpulseFwdDynamics(state, impulse, cost_fwd))
-    MODEL.append(
-        crocoddyl.DifferentialActionModelContactFwdDynamics(
-            state, actuation, contact_fwd, cost_fwd
-        )
-    )
-    MODEL.append(
-        crocoddyl.DifferentialActionModelFreeFwdDynamics(state, actuation, cost_fwd)
-    )
-    cost_inv = crocoddyl.CostModelSum(state, state.nv)
-    contact_inv = crocoddyl.ContactModelMultiple(state, state.nv)
-    MODEL.append(
-        crocoddyl.DifferentialActionModelContactInvDynamics(
-            state, actuation, contact_inv, cost_inv
-        )
-    )
-    MODEL.append(
-        crocoddyl.DifferentialActionModelFreeInvDynamics(state, actuation, cost_inv)
-    )
     # integrated actions
-    MODEL.append(
-        crocoddyl.IntegratedActionModelEuler(
-            crocoddyl.DifferentialActionModelLQR(2, 2), 0.1
-        )
-    )
+    state = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
+    actuation = crocoddyl.ActuationModelMultibody(state)
+    implicit = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+    dynamics = crocoddyl.DynamicsModelConstrainedForward(state, actuation, implicit)
+    costs = crocoddyl.CostModelSum(state, actuation.nu)
+    constraints = crocoddyl.ConstraintModelManager(state, actuation.nu)
+    MODEL.append(crocoddyl.IntegratedActionModelEuler(dynamics, costs, constraints))
     MODEL.append(
         crocoddyl.IntegratedActionModelRK(
-            crocoddyl.DifferentialActionModelLQR(2, 2), crocoddyl.RKType.two, 0.1
+            dynamics, costs, constraints, None, None, crocoddyl.RKType.two
         )
     )
     # numdiff actions
     MODEL.append(crocoddyl.ActionModelNumDiff(crocoddyl.ActionModelLQR(2, 2)))
+
+
+class DynamicsModelsTest(CopyModelTestCase):
+    MODEL = []
+    DATA = True
+    state = crocoddyl.StateMultibody(pinocchio.buildSampleModelManipulator())
+    actuation = crocoddyl.ActuationModelMultibody(state)
+    forward_constraints = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+    inverse_constraints = crocoddyl.ImplicitConstraintModelMultiple(state, state.nv)
+    impulse_constraints = crocoddyl.ImplicitConstraintModelMultiple(state, 0)
     MODEL.append(
-        crocoddyl.DifferentialActionModelNumDiff(
-            crocoddyl.DifferentialActionModelLQR(2, 2)
-        )
+        crocoddyl.DynamicsModelConstrainedForward(state, actuation, forward_constraints)
     )
+    MODEL.append(
+        crocoddyl.DynamicsModelConstrainedInverse(state, actuation, inverse_constraints)
+    )
+    MODEL.append(crocoddyl.DynamicsModelImpulseForward(state, impulse_constraints))
 
 
 class StatesTest(CopyModelTestCase):
@@ -126,21 +122,20 @@ class ResidualsTest(CopyModelTestCase):
     # multibody residuals
     # TODO(cmastalli): add pair-collision residual
     frame_id = state.pinocchio.getFrameId("rleg6_joint")
-    contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
-    contact.addContact(
-        "rleg6_contact",
-        crocoddyl.ContactModel6D(
-            state,
-            frame_id,
-            pinocchio.SE3.Random(),
-            pinocchio.LOCAL,
-            actuation.nu,
-            np.zeros(2),
-        ),
+    contact = crocoddyl.ContactModel(
+        state,
+        frame_id,
+        pinocchio.SE3.Random(),
+        pinocchio.LOCAL,
+        actuation.nu,
+        np.zeros(2),
+        [True] * 6,
     )
+    constraints = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
+    constraints.addConstraint("rleg6_contact", contact)
     pdata = state.pinocchio.createData()
     adata = actuation.createData()
-    cdata = contact.createData(pdata)
+    cdata = constraints.createData(pdata)
     MODEL.append(crocoddyl.ResidualModelCentroidalMomentum(state, np.zeros(6)))
     COLLECTOR.append(crocoddyl.DataCollectorMultibody(pdata))
     MODEL.append(crocoddyl.ResidualModelCoMPosition(state, np.zeros(3)))
@@ -172,31 +167,41 @@ class ResidualsTest(CopyModelTestCase):
     MODEL.append(crocoddyl.ResidualModelState(state))
     COLLECTOR.append(crocoddyl.DataCollectorAbstract())
     MODEL.append(crocoddyl.ResidualModelContactControlGrav(state))
-    COLLECTOR.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
+    COLLECTOR.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
     MODEL.append(
         crocoddyl.ResidualModelContactCoPPosition(
             state, frame_id, crocoddyl.CoPSupport()
         )
     )
-    COLLECTOR.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
+    COLLECTOR.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
     MODEL.append(
         crocoddyl.ResidualModelContactForce(
             state, frame_id, pinocchio.Force.Random(), 6
         )
     )
-    COLLECTOR.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
+    COLLECTOR.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
     MODEL.append(
         crocoddyl.ResidualModelContactFrictionCone(
             state, frame_id, crocoddyl.FrictionCone()
         )
     )
-    COLLECTOR.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
+    COLLECTOR.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
     MODEL.append(
         crocoddyl.ResidualModelContactWrenchCone(
             state, frame_id, crocoddyl.WrenchCone()
         )
     )
-    COLLECTOR.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
+    COLLECTOR.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
 
 
 class ActivationsTest(CopyModelTestCase):
@@ -252,6 +257,34 @@ class ControlsTest(CopyModelTestCase):
     )
 
 
+class JointDynamicsTest(CopyModelTestCase):
+    MODEL = []
+    DATA = True
+    if hasattr(crocoddyl, "JointDynamicsModelIdentity"):
+        MODEL.append(crocoddyl.JointDynamicsModelIdentity(2, 1, 1))
+    if hasattr(crocoddyl, "JointDynamicsModelFriction"):
+        MODEL.append(
+            crocoddyl.JointDynamicsModelFriction(
+                3,
+                1,
+                np.array([np.log(0.2), np.log(4.0), np.log(0.1)]),
+                crocoddyl.JointFrictionType.COULOMB_VISCOUS,
+            )
+        )
+    if hasattr(crocoddyl, "JointDynamicsModelThruster"):
+        MODEL.append(
+            crocoddyl.JointDynamicsModelThruster(
+                [
+                    crocoddyl.Thruster(
+                        pinocchio.SE3.Identity(),
+                        0.1,
+                        crocoddyl.ThrusterType.CW,
+                    )
+                ]
+            )
+        )
+
+
 class DataCollectorsTest(CopyModelTestCase):
     MODEL = []
     DATA = False
@@ -259,30 +292,56 @@ class DataCollectorsTest(CopyModelTestCase):
     state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
     actuation = crocoddyl.ActuationModelFloatingBase(state)
     jdata = crocoddyl.JointDataAbstract(state, actuation, actuation.nu)
+    params = crocoddyl.ParamsDataAbstract(2, 3)
+    MODEL.append(params)
     MODEL.append(crocoddyl.DataCollectorAbstract())
+    MODEL.append(crocoddyl.DataCollectorParams(params))
     MODEL.append(crocoddyl.DataCollectorActuation(actuation.createData()))
+    MODEL.append(crocoddyl.DataCollectorActuationParams(actuation.createData(), params))
     MODEL.append(jdata)
     MODEL.append(crocoddyl.DataCollectorJoint(jdata))
+    MODEL.append(crocoddyl.DataCollectorJointParams(jdata, params))
+    MODEL.append(
+        crocoddyl.DataCollectorJointActuationParams(
+            actuation.createData(), jdata, params
+        )
+    )
     # multibody collectors
-    impulse = crocoddyl.ImpulseModelMultiple(state)
-    contact = crocoddyl.ContactModelMultiple(state, actuation.nu)
+    constraints = crocoddyl.ImplicitConstraintModelMultiple(state, actuation.nu)
     pdata = state.pinocchio.createData()
     adata = actuation.createData()
-    cdata = contact.createData(pdata)
-    idata = impulse.createData(pdata)
+    cdata = constraints.createData(pdata)
     MODEL.append(crocoddyl.DataCollectorMultibody(pdata))
+    MODEL.append(crocoddyl.DataCollectorMultibodyParams(pdata, params))
     MODEL.append(crocoddyl.DataCollectorActMultibody(pdata, adata))
+    MODEL.append(crocoddyl.DataCollectorActMultibodyParams(pdata, adata, params))
     MODEL.append(crocoddyl.DataCollectorJointActMultibody(pdata, adata, jdata))
-    MODEL.append(crocoddyl.DataCollectorImpulse(idata))
-    MODEL.append(crocoddyl.DataCollectorContact(cdata))
-    MODEL.append(crocoddyl.DataCollectorMultibodyInImpulse(pdata, idata))
-    MODEL.append(crocoddyl.DataCollectorMultibodyInContact(pdata, cdata))
-    MODEL.append(crocoddyl.DataCollectorActMultibodyInContact(pdata, adata, cdata))
     MODEL.append(
-        crocoddyl.DataCollectorJointActMultibodyInContact(pdata, adata, jdata, cdata)
+        crocoddyl.DataCollectorJointActMultibodyParams(pdata, adata, jdata, params)
     )
-    cmodel = crocoddyl.ContactModelAbstract(state, pinocchio.LOCAL, 3, actuation.nu)
-    MODEL.append(crocoddyl.ForceDataAbstract(cmodel, pdata))
+    MODEL.append(crocoddyl.DataCollectorImplicitConstraint(cdata))
+    MODEL.append(crocoddyl.DataCollectorMultibodyInImplicitConstraint(pdata, cdata))
+    MODEL.append(
+        crocoddyl.DataCollectorMultibodyInImplicitConstraintParams(pdata, cdata, params)
+    )
+    MODEL.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraint(pdata, adata, cdata)
+    )
+    MODEL.append(
+        crocoddyl.DataCollectorActMultibodyInImplicitConstraintParams(
+            pdata, adata, cdata, params
+        )
+    )
+    MODEL.append(
+        crocoddyl.DataCollectorJointActMultibodyInImplicitConstraint(
+            pdata, adata, jdata, cdata
+        )
+    )
+    MODEL.append(
+        crocoddyl.DataCollectorJointActMultibodyInImplicitConstraintParams(
+            pdata, adata, jdata, cdata, params
+        )
+    )
 
 
 class ActuationsTest(CopyModelTestCase):
@@ -300,8 +359,8 @@ class ActuationsTest(CopyModelTestCase):
         )
     )
     # multibody actuations
-    MODEL.append(crocoddyl.ActuationModelFloatingBase(state))
-    MODEL.append(crocoddyl.ActuationModelFull(state))
+    if hasattr(crocoddyl, "ActuationModelMultibody"):
+        MODEL.append(crocoddyl.ActuationModelMultibody(state))
     d_cog, cf, cm, u_lim, l_lim = 0.1525, 6.6e-5, 1e-6, 5.0, 0.1
     ps = [
         crocoddyl.Thruster(
@@ -325,54 +384,14 @@ class ActuationsTest(CopyModelTestCase):
             crocoddyl.ThrusterType.CW,
         ),
     ]
-    MODEL.append(crocoddyl.ActuationModelFloatingBaseThrusters(state, ps))
-
-
-class ContactsTest(CopyModelTestCase):
-    MODEL = []
-    DATA = True
-    COLLECTOR = []
-    state = crocoddyl.StateMultibody(pinocchio.buildSampleModelHumanoidRandom())
-    actuation = crocoddyl.ActuationModelFloatingBase(state)
-    frame_id = state.pinocchio.getFrameId("rleg6_joint")
-    pdata = state.pinocchio.createData()
-    # contact models
-    MODEL.append(crocoddyl.ContactModelMultiple(state, actuation.nu))
-    COLLECTOR.append(pdata)
-    MODEL.append(
-        crocoddyl.ContactModel1D(
-            state, frame_id, 0.0, pinocchio.LOCAL, np.eye(3), actuation.nu, np.zeros(2)
+    if hasattr(crocoddyl, "ActuationModelMultibody") and hasattr(
+        crocoddyl, "JointDynamicsModelThruster"
+    ):
+        MODEL.append(
+            crocoddyl.ActuationModelMultibody(
+                state, [crocoddyl.JointDynamicsModelThruster(ps)]
+            )
         )
-    )
-    COLLECTOR.append(pdata)
-    MODEL.append(
-        crocoddyl.ContactModel2D(state, frame_id, np.ones(2), actuation.nu, np.zeros(2))
-    )
-    COLLECTOR.append(pdata)
-    MODEL.append(
-        crocoddyl.ContactModel3D(
-            state, frame_id, np.ones(3), pinocchio.LOCAL, actuation.nu, np.zeros(2)
-        )
-    )
-    COLLECTOR.append(pdata)
-    MODEL.append(
-        crocoddyl.ContactModel6D(
-            state,
-            frame_id,
-            pinocchio.SE3.Random(),
-            pinocchio.LOCAL,
-            actuation.nu,
-            np.zeros(2),
-        )
-    )
-    COLLECTOR.append(pdata)
-    # impulse models
-    MODEL.append(crocoddyl.ImpulseModelMultiple(state))
-    COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModel3D(state, frame_id, pinocchio.LOCAL))
-    COLLECTOR.append(pdata)
-    MODEL.append(crocoddyl.ImpulseModel6D(state, frame_id))
-    COLLECTOR.append(pdata)
 
 
 class ConesTest(CopyModelTestCase):
@@ -406,9 +425,9 @@ if __name__ == "__main__":
         CostsTest,
         ConstraintsTest,
         ControlsTest,
+        JointDynamicsTest,
         DataCollectorsTest,
         ActuationsTest,
-        ContactsTest,
         ConesTest,
         ProblemAndSolversTest,
     ]

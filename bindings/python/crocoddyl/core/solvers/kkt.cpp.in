@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, LAAS-CNRS, Heriot-Watt University
+// Copyright (C) 2020-2026, LAAS-CNRS, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_solves, SolverKKT::solve, 0, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_computeDirections,
                                        SolverKKT::computeDirection, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverKKT_trySteps, SolverKKT::tryStep,
@@ -37,10 +36,15 @@ void exposeSolverKKT() {
           bp::args("self", "problem"),
           "Initialize the vector dimension.\n\n"
           ":param problem: shooting problem."))
-      .def("solve", &SolverKKT::solve,
-           SolverKKT_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "isFeasible",
-                        "regInit"),
+      .def("solve",
+           static_cast<bool (SolverKKT::*)(
+               const std::vector<SolverKKT::VectorXs>&,
+               const std::vector<SolverKKT::VectorXs>&, const std::size_t,
+               const bool, const SolverKKT::Scalar)>(&SolverKKT::solve),
+           (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+            bp::arg("init_us") = bp::list(), bp::arg("maxiter") = 100,
+            bp::arg("isFeasible") = false,
+            bp::arg("regInit") = SolverKKT::Scalar(1e-9)),
                "Compute the optimal primal(xopt, uopt) and dual(Vx) terms.\n\n"
                ":param init_xs: initial guess for state trajectory with T+1 "
                "elements (default []).\n"
@@ -56,7 +60,7 @@ void exposeSolverKKT() {
                "                used with very good guess points (init_xs, "
                "init_us) (default None).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that "
-               "describes if convergence was reached."))
+               "describes if convergence was reached.")
       .def("computeDirection", &SolverKKT::computeDirection,
            SolverKKT_computeDirections(
                bp::args("self", "recalc"),

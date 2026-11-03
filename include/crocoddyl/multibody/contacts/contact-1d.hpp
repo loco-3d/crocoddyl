@@ -17,7 +17,8 @@
 namespace crocoddyl {
 
 template <typename _Scalar>
-class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
+class [[deprecated("Use ContactModel with a one-axis mask.")]] ContactModel1DTpl
+    : public ContactModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CROCODDYL_DERIVED_CAST(ContactModelBase, ContactModel1DTpl)
@@ -183,7 +184,8 @@ class ContactModel1DTpl : public ContactModelAbstractTpl<_Scalar> {
 };
 
 template <typename _Scalar>
-struct ContactData1DTpl : public ContactDataAbstractTpl<_Scalar> {
+struct [[deprecated("Use ContactData.")]] ContactData1DTpl
+    : public ContactDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

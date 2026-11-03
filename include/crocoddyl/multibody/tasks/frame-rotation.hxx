@@ -9,6 +9,61 @@
 
 namespace crocoddyl {
 
+namespace internal {
+
+#ifdef CROCODDYL_WITH_CODEGEN
+template <typename Scalar, typename Vector3Like>
+void hlog3CodegenFloat32(const Eigen::Matrix<Scalar, 3, 3>& R,
+                         const Eigen::MatrixBase<Vector3Like>& v,
+                         Eigen::Matrix<Scalar, 3, 3>& vt_Hlog) {
+  typedef Eigen::Matrix<Scalar, 3, 1> Vector3s;
+
+  Scalar theta;
+  const Vector3s log = pinocchio::log3(R, theta);
+  Scalar stheta;
+  Scalar ctheta;
+  pinocchio::SINCOS(theta, &stheta, &ctheta);
+
+  const Scalar one(1.);
+  const Scalar two(2.);
+  const Scalar half(0.5);
+  const Scalar denom = half / (one - ctheta);
+  const Scalar a = theta * stheta * denom;
+  const Scalar da_dt = (stheta - theta) * denom;
+  const Scalar b = (one - a) / (theta * theta);
+  const Scalar db_dt =
+      -(two / theta - (theta + stheta) * denom) / (theta * theta);
+
+  const Vector3s dl_dv_v = a * v + half * log.cross(v) + b * log * log.dot(v);
+  const Scalar dt_dv_v = log.dot(dl_dv_v) / theta;
+
+  vt_Hlog.noalias() = db_dt * dt_dv_v * log * log.transpose();
+  vt_Hlog.noalias() += b * dl_dv_v * log.transpose();
+  vt_Hlog.noalias() += b * log * dl_dv_v.transpose();
+  pinocchio::addSkew(half * dl_dv_v, vt_Hlog);
+  vt_Hlog.diagonal().array() += da_dt * dt_dv_v;
+}
+#endif  // CROCODDYL_WITH_CODEGEN
+
+template <typename Scalar, typename Vector3Like>
+void hlog3(const Eigen::Matrix<Scalar, 3, 3>& R,
+           const Eigen::MatrixBase<Vector3Like>& v,
+           Eigen::Matrix<Scalar, 3, 3>& vt_Hlog) {
+#ifdef CROCODDYL_WITH_CODEGEN
+  // Pinocchio 3.8's Hlog3 mixes a double literal with an Eigen matrix, which is
+  // not supported for AD<CG<float>>.
+  if constexpr (std::is_same<Scalar, CppAD::AD<CppAD::cg::CG<float>>>::value) {
+    hlog3CodegenFloat32(R, v, vt_Hlog);
+  } else {
+    pinocchio::Hlog3(R, v, vt_Hlog);
+  }
+#else
+  pinocchio::Hlog3(R, v, vt_Hlog);
+#endif  // CROCODDYL_WITH_CODEGEN
+}
+
+}  // namespace internal
+
 template <typename Scalar>
 TaskModelFrameRotationTpl<Scalar>::TaskModelFrameRotationTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
@@ -103,13 +158,17 @@ void TaskModelFrameRotationTpl<Scalar>::calcDiff(
                                                   : pinocchio::WORLD;
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      pinocchio::Hlog3(d->rRf, d->vf.angular(), d->Hlogf);
+      internal::hlog3(d->rRf, d->vf.angular(),
+                      d->Hlogf);  // TODO: Use pinocchio::hlog3() when fixed the
+                                  // codegen support.
       d->dJ_v.noalias() = d->Hlogf.transpose() * d->rRf;
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       const Matrix3s rRf_inv = d->rRf.transpose().eval();
-      pinocchio::Hlog3(rRf_inv, -d->vf.angular(), d->Hlogf);
+      internal::hlog3(rRf_inv, -d->vf.angular(),
+                      d->Hlogf);  // TODO: Use pinocchio::hlog3() when fixed the
+                                  // codegen support.
       d->dJ_v.noalias() = d->Hlogf.transpose() * rRf_inv;
       break;
   }
@@ -133,13 +192,17 @@ void TaskModelFrameRotationTpl<Scalar>::calcDiff(
                                              d->fAdv, d->fVdv);
   switch (type_) {
     case pinocchio::ReferenceFrame::LOCAL:
-      pinocchio::Hlog3(d->rRf, d->af.angular(), d->Hlogf);
+      internal::hlog3(d->rRf, d->af.angular(),
+                      d->Hlogf);  // TODO: Use pinocchio::hlog3() when fixed the
+                                  // codegen support.
       d->dJ_a.noalias() = d->Hlogf.transpose() * d->rRf;
       break;
     case pinocchio::ReferenceFrame::WORLD:
     case pinocchio::ReferenceFrame::LOCAL_WORLD_ALIGNED:
       const Matrix3s rRf_inv = d->rRf.transpose().eval();
-      pinocchio::Hlog3(rRf_inv, -d->af.angular(), d->Hlogf);
+      internal::hlog3(rRf_inv, -d->af.angular(),
+                      d->Hlogf);  // TODO: Use pinocchio::hlog3() when fixed the
+                                  // codegen support.
       d->dJ_a.noalias() = d->Hlogf.transpose() * rRf_inv;
       break;
   }

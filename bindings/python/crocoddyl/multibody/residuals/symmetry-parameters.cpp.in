@@ -1,0 +1,141 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/symmetry-parameters.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelSymmetryParametersVisitor
+    : public bp::def_visitor<ResidualModelSymmetryParametersVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::Base ModelBase;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::VectorXs VectorXs;
+  typedef typename Model::MatrixXs MatrixXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, MatrixXs, std::size_t, std::size_t>(
+               bp::args("self", "state", "S", "nu", "np"),
+               "Initialize generic symmetry over the complete active "
+               "parameter vector."))
+        .def(bp::init<std::shared_ptr<State>, MatrixXs, std::size_t,
+                      std::size_t, std::string>(
+               bp::args("self", "state", "S", "nu", "np", "param_name"),
+               "Initialize named decoded-parameter symmetry.\n\n"
+               "The named dynamics parameter must be either an\n"
+               "ActuationMultibodyParams or a MultibodyInertialParams entry.\n"
+               ":param state: state description\n"
+               ":param S: square symmetry matrix (nr x nr)\n"
+               ":param nu: dimension of the control vector\n"
+               ":param np: total active parameter dimension of the "
+               "ParameterDataManager (action + dynamics combined)\n"
+               ":param param_name: name of the dynamics parameter entry in "
+               "the ParameterDataManager"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the parameter symmetry residual r = S * theta.\n\n"
+             "theta is p in generic mode, or gamma/stacked psi in named "
+             "mode.\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the Jacobians of the parameter symmetry residual.\n\n"
+             "Generic Rp = S is constant and initialized by createData; "
+             "named mode places S * dtheta/dp at the D075 offset.\n"
+             ":param data: residual data\n"
+             ":param x: state point (unused)\n"
+             ":param u: control input (unused)")
+        .def("calcDiff",
+             static_cast<void (ModelBase::*)(const std::shared_ptr<Data>&,
+                                             const Eigen::Ref<const VectorXs>&)>(
+                 &ModelBase::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"),
+             "Create the parameter symmetry residual data.\n\n"
+             ":param data: shared data (generic mode requires "
+             "DataCollectorParams; named mode requires ParameterDataManager)\n"
+             ":return residual data.")
+        .add_property("S",
+                      bp::make_function(&Model::get_S,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_S, "symmetry matrix")
+        .add_property("param_name",
+                      bp::make_function(&Model::get_param_name,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "name of the dynamics parameter entry");
+  }
+};
+
+template <typename Data>
+struct ResidualDataSymmetryParametersVisitor
+    : public bp::def_visitor<ResidualDataSymmetryParametersVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+        "np_offset",
+        bp::make_getter(&Data::np_offset,
+                        bp::return_value_policy<bp::return_by_value>()),
+        "column offset of the named param slice in the global parameter "
+        "vector");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_SYMMETRY_PARAMETERS_PYTHON_BINDINGS(Scalar)   \
+  typedef ResidualModelSymmetryParametersTpl<Scalar> Model;                    \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                          \
+  typedef ResidualDataSymmetryParametersTpl<Scalar> Data;                      \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                            \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "ResidualModelSymmetryParameters",                                        \
+      "Parameter symmetry residual r = S * theta.\n\n"                         \
+      "Generic mode uses theta = p. Named mode supports "                       \
+      "ActuationMultibodyParams\n(theta = gamma) and MultibodyInertialParams "  \
+      "(theta = stacked psi).",                                                  \
+      bp::no_init)                                                              \
+      .def(ResidualModelSymmetryParametersVisitor<Model>())                    \
+      .def(CastVisitor<Model>())                                                \
+      .def(PrintableVisitor<Model>())                                           \
+      .def(CopyableVisitor<Model>());                                           \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "ResidualDataSymmetryParameters",                                         \
+      "Data for ResidualModelSymmetryParameters.",                              \
+      bp::no_init)                                                              \
+      .def(ResidualDataSymmetryParametersVisitor<Data>())                      \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualSymmetryParameters() {
+  CROCODDYL_RESIDUAL_MODEL_SYMMETRY_PARAMETERS_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

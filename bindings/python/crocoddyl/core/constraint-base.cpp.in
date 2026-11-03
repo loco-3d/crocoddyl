@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,6 +130,8 @@ struct ConstraintModelAbstractVisitor
                       "upper bound of constraint")
         .add_property("nu", bp::make_function(&Model::get_nu),
                       "dimension of control vector")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of parameter vector")
         .add_property("ng", bp::make_function(&Model::get_ng),
                       "number of inequality constraints")
         .add_property("nh", bp::make_function(&Model::get_nh),
@@ -164,6 +166,10 @@ struct ConstraintDataAbstractVisitor
             "Gu", bp::make_getter(&Data::Gu, bp::return_internal_reference<>()),
             bp::make_setter(&Data::Gu), "Jacobian of the inequality constraint")
         .add_property(
+            "Gp", bp::make_getter(&Data::Gp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Gp),
+            "Jacobian of the inequality constraint w.r.t. parameters")
+        .add_property(
             "h", bp::make_getter(&Data::h, bp::return_internal_reference<>()),
             bp::make_setter(&Data::h), "equality constraint residual")
         .add_property(
@@ -171,7 +177,11 @@ struct ConstraintDataAbstractVisitor
             bp::make_setter(&Data::Hx), "Jacobian of the equality constraint")
         .add_property(
             "Hu", bp::make_getter(&Data::Hu, bp::return_internal_reference<>()),
-            bp::make_setter(&Data::Hu), "Jacobian of the equality constraint");
+            bp::make_setter(&Data::Hu), "Jacobian of the equality constraint")
+        .add_property(
+            "Hp", bp::make_getter(&Data::Hp, bp::return_internal_reference<>()),
+            bp::make_setter(&Data::Hp),
+            "Jacobian of the equality constraint w.r.t. parameters");
   }
 };
 
@@ -184,11 +194,12 @@ struct ConstraintDataAbstractVisitor
   bp::class_<Model_wrap, boost::noncopyable>(                                  \
       "ConstraintModelAbstract",                                               \
       "Abstract multibody constraint models.\n\n"                              \
-      "A constraint model defines both: inequality g(x,u) and equality h(x, "  \
-      "u) constraints. The constraint function depends on the state point x, " \
+      "A constraint model defines both: inequality g(x,u,p) and equality "     \
+      "h(x,u,p) constraints. The constraint function depends on the state "    \
+      "point x, "                                                              \
       "which lies in the state manifold described with a nx-tuple, its "       \
       "velocity xd that belongs to the tangent space with ndx dimension, and " \
-      "the control input u.",                                                  \
+      "the control input u and parameter vector p.",                           \
       bp::init<std::shared_ptr<State>, std::shared_ptr<ResidualModel>,         \
                std::size_t, std::size_t>(                                      \
           bp::args("self", "state", "residual", "ng", "nh"),                   \

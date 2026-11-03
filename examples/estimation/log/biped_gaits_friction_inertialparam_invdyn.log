@@ -1,0 +1,44 @@
+*** biped gait friction and inertial parameter estimation (invdyn) ***
+iter    cost       merit      stop      |grad|      preg       dreg      step   ||ffeas||  ||gfeas||  ||hfeas||   dV-exp       dV      dPhi-exp     dPhi
+   0  8.911e-03  8.911e-03  7.793e+01  0.000e+00  1.000e-09  1.000e-09  1.0000  0.000e+00  0.000e+00  7.793e+01 -5.613e-03 -8.911e-03 -5.613e-03 -8.911e-03
+   1  1.623e-03  3.551e-03  1.334e+01  1.714e-02  1.000e-08  1.000e-08  1.0000  0.000e+00  0.000e+00  1.334e+01  7.884e-03  7.288e-03  1.722e-02  1.662e-02
+   2  2.450e-04  1.121e-03  5.880e+00  2.675e-03  2.000e-09  2.000e-09  1.0000  0.000e+00  0.000e+00  5.880e+00  1.391e-03  1.378e-03  2.502e-03  2.489e-03
+   3  1.789e-04  2.782e-04  1.333e+00  1.174e-04  2.000e-08  2.000e-08  1.0000  0.000e+00  0.000e+00  1.333e+00  6.796e-05  6.616e-05  4.066e-04  4.048e-04
+   4  1.656e-04  1.754e-04  2.632e-01  2.653e-05  2.000e-07  2.000e-07  1.0000  0.000e+00  0.000e+00  2.632e-01  1.376e-05  1.330e-05  5.361e-05  5.316e-05
+   5  1.648e-04  1.659e-04  5.722e-02  5.213e-06  2.000e-06  2.000e-06  1.0000  0.000e+00  0.000e+00  5.722e-02  7.918e-07  7.235e-07  4.626e-06  4.558e-06
+   6  1.629e-04  1.648e-04  3.759e-02  4.154e-06  2.000e-05  2.000e-05  1.0000  0.000e+00  0.000e+00  3.759e-02  1.996e-06  1.933e-06  2.974e-06  2.911e-06
+   7  1.665e-04  1.666e-04  3.573e-03  1.325e-06  2.000e-04  2.000e-04  1.0000  0.000e+00  0.000e+00  3.573e-03 -3.520e-06 -3.600e-06 -2.672e-06 -2.753e-06
+   8  1.670e-04  1.670e-04  2.818e-05  3.878e-07  2.000e-03  2.000e-03  1.0000  0.000e+00  0.000e+00  2.818e-05 -4.567e-07 -4.608e-07 -4.126e-07 -4.166e-07
+   9  1.669e-04  1.669e-04  1.095e-06  4.755e-08  2.000e-02  2.000e-02  1.0000  0.000e+00  0.000e+00  1.095e-06  2.606e-08  2.641e-08  6.183e-08  6.218e-08
+iter    cost       merit      stop      |grad|      preg       dreg      step   ||ffeas||  ||gfeas||  ||hfeas||   dV-exp       dV      dPhi-exp     dPhi
+  10  1.670e-04  1.670e-04  6.563e-08  9.768e-09  2.000e-01  2.000e-01  1.0000  0.000e+00  0.000e+00  6.563e-08 -1.362e-08 -1.370e-08 -1.294e-08 -1.302e-08
+  11  1.670e-04  1.670e-04  1.778e-09  1.306e-09  2.000e+00  2.000e+00  1.0000  0.000e+00  0.000e+00  1.778e-09 -1.465e-09 -1.488e-09 -1.443e-09 -1.467e-09
+
+Estimated vs. ground-truth inertial parameters:
+  body 1: mass est=13.7970  gt=13.5381
+  body 2: mass est=1.7794  gt=1.8857
+  body 3: mass est=2.2722  gt=2.3761
+  body 4: mass est=6.6982  gt=6.8273
+  body 5: mass est=3.7975  gt=3.6367
+  body 6: mass est=1.2265  gt=1.2443
+  body 7: mass est=1.6613  gt=1.6146
+  body 8: mass est=1.7835  gt=1.8857
+  body 9: mass est=2.2769  gt=2.3761
+  body 10: mass est=6.7061  gt=6.8273
+  body 11: mass est=3.8349  gt=3.6367
+  body 12: mass est=1.2297  gt=1.2443
+  body 13: mass est=1.6416  gt=1.6146
+
+Estimated vs. ground-truth friction parameters:
+  leg_left_1_joint: coulomb est=0.1155 gt=0.1500, sharpness est=7.4834 gt=10.0000, viscous est=0.1431 gt=0.2000
+  leg_left_2_joint: coulomb est=0.1097 gt=0.1500, sharpness est=7.1485 gt=10.0000, viscous est=0.1416 gt=0.2000
+  leg_left_3_joint: coulomb est=0.1087 gt=0.1500, sharpness est=7.0352 gt=10.0000, viscous est=0.1507 gt=0.2000
+  leg_left_4_joint: coulomb est=0.1286 gt=0.1500, sharpness est=7.1172 gt=10.0000, viscous est=0.1554 gt=0.2000
+  leg_left_5_joint: coulomb est=0.1144 gt=0.1500, sharpness est=6.9963 gt=10.0000, viscous est=0.1762 gt=0.2000
+  leg_left_6_joint: coulomb est=0.1641 gt=0.1500, sharpness est=8.4575 gt=10.0000, viscous est=0.1524 gt=0.2000
+  leg_right_1_joint: coulomb est=0.1119 gt=0.1500, sharpness est=7.3020 gt=10.0000, viscous est=0.1423 gt=0.2000
+  leg_right_2_joint: coulomb est=0.1111 gt=0.1500, sharpness est=7.2557 gt=10.0000, viscous est=0.1419 gt=0.2000
+  leg_right_3_joint: coulomb est=0.1108 gt=0.1500, sharpness est=6.9802 gt=10.0000, viscous est=0.1524 gt=0.2000
+  leg_right_4_joint: coulomb est=0.1362 gt=0.1500, sharpness est=7.1716 gt=10.0000, viscous est=0.1597 gt=0.2000
+  leg_right_5_joint: coulomb est=0.1200 gt=0.1500, sharpness est=7.0579 gt=10.0000, viscous est=0.1600 gt=0.2000
+  leg_right_6_joint: coulomb est=0.1634 gt=0.1500, sharpness est=8.8565 gt=10.0000, viscous est=0.1501 gt=0.2000

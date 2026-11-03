@@ -14,69 +14,12 @@
 #ifdef CROCODDYL_WITH_CODEGEN
 
 #include "crocoddyl/core/action-base.hpp"
+#include "crocoddyl/core/codegen/common.hpp"
+#include "crocoddyl/core/costs/residual.hpp"
+#include "crocoddyl/core/params/parameter-manager.hpp"
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
-
-template <typename Scalar>
-std::unique_ptr<CppAD::ADFun<CppAD::cg::CG<Scalar>>> clone_adfun(
-    const CppAD::ADFun<CppAD::cg::CG<Scalar>>& original) {
-  auto cloned = std::make_unique<CppAD::ADFun<CppAD::cg::CG<Scalar>>>();
-  *cloned = original;  // Use assignment operator to copy the function
-  return cloned;
-}
-
-template <typename FromScalar, typename ToScalar>
-std::function<
-    void(std::shared_ptr<ActionModelAbstractTpl<ToScalar>>,
-         const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&)>
-cast_function(
-    const std::function<void(
-        std::shared_ptr<ActionModelAbstractTpl<FromScalar>>,
-        const Eigen::Ref<const typename MathBaseTpl<FromScalar>::VectorXs>&)>&
-        fn) {
-  return [fn](std::shared_ptr<ActionModelAbstractTpl<ToScalar>> to_base,
-              const Eigen::Ref<const typename MathBaseTpl<ToScalar>::VectorXs>&
-                  to_vector) {
-    // Convert arguments
-    const std::shared_ptr<ActionModelAbstractTpl<FromScalar>>& from_base =
-        to_base->template cast<FromScalar>();
-    const typename MathBaseTpl<FromScalar>::VectorXs from_vector =
-        to_vector.template cast<FromScalar>();
-    // Call the original function with converted arguments
-    fn(from_base, from_vector);
-  };
-}
-
-enum CompilerType { GCC = 0, CLANG };
-
-inline constexpr CompilerType defaultCompilerType() {
-#if defined(__clang__)
-  return CLANG;
-#elif defined(__GNUC__)
-  return GCC;
-#else
-  return CLANG;
-#endif
-}
-
-inline const char* compilerExecutable(CompilerType compiler) {
-  switch (compiler) {
-    case GCC:
-#ifdef CROCODDYL_CODEGEN_GCC_COMPILER_PATH
-      return CROCODDYL_CODEGEN_GCC_COMPILER_PATH;
-#else
-      return "/usr/bin/gcc";
-#endif
-    case CLANG:
-#ifdef CROCODDYL_CODEGEN_CLANG_COMPILER_PATH
-      return CROCODDYL_CODEGEN_CLANG_COMPILER_PATH;
-#else
-      return "/usr/bib/clang";
-#endif
-  }
-  return "cc";
-}
 
 template <typename Scalar>
 struct ActionDataCodeGenTpl;
@@ -92,6 +35,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   typedef ActionModelAbstractTpl<Scalar> Base;
   typedef ActionDataCodeGenTpl<Scalar> Data;
   typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;
+  typedef ParameterManagerTpl<Scalar> ParameterManager;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
@@ -119,8 +63,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param[in] model         Action model which we want to code generate
    * @param[in] lib_fname     Name of the code generated library
-   * @param[in] autodiff      Generate autodiff Jacobians and Hessians (default
-   * false)
+   * @param[in] autodiff      Generate autodiff Jacobians and use calcDiff
+   * Gauss-Newton Hessian blocks (default false)
    * @param[in] np            Dimension of the parameter variables in the calc
    * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
@@ -142,8 +86,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    *
    * @param[in] ad_model      Action model used to code generate
    * @param[in] lib_fname     Name of the code generated library
-   * @param[in] autodiff      Generate autodiff Jacobians and Hessians (default
-   * false)
+   * @param[in] autodiff      Generate autodiff Jacobians and use calcDiff
+   * Gauss-Newton Hessian blocks (default false)
    * @param[in] np            Dimension of the parameter variables in the calc
    * and calcDiff functions
    * @param[in] updateParams  Function used to update the calc and calcDiff's
@@ -220,7 +164,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @param p     Parameters vector (dimension np)
    */
   void update_p(const std::shared_ptr<ActionDataAbstract>& data,
-                const Eigen::Ref<const VectorXs>& p) const;
+                const Eigen::Ref<const VectorXs>& p) override;
+
+  void set_params(const std::shared_ptr<ActionDataAbstract>& data,
+                  std::shared_ptr<ParameterManager> params) override;
 
   /**
    * @brief Compute the next state and cost value using a code-generated library
@@ -270,6 +217,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    * @return the action data
    */
   virtual std::shared_ptr<ActionDataAbstract> createData() override;
+  virtual std::shared_ptr<ActionDataAbstract> createData(
+      const std::shared_ptr<ParameterDataManagerTpl<Scalar>>& params_data)
+      override;
 
   /**
    * @brief Checks that a specific data belongs to this model
@@ -313,7 +263,7 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
    */
   const std::shared_ptr<Base>& get_model() const;
 
-  std::size_t get_np() const;
+  std::size_t get_np() const override;
 
   /**
    * @brief Return the number of inequality constraints
@@ -358,6 +308,18 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::size_t get_nX_T() const;
 
   /**
+   * @brief Return the dimension of the independent vector used by the
+   * autodiff calcDiff function
+   */
+  std::size_t get_nX2() const;
+
+  /**
+   * @brief Return the dimension of the independent vector used by the
+   * autodiff calcDiff function in terminal nodes
+   */
+  std::size_t get_nX2_T() const;
+
+  /**
    * @brief Return the dimension of the dependent vector used by the quasiStatic
    * function
    */
@@ -388,6 +350,16 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::size_t get_nY2_T() const;
 
   /**
+   * @brief Return the dimension of the local cost-Hessian block vector
+   */
+  std::size_t get_nYh() const;
+
+  /**
+   * @brief Return the dimension of the terminal local cost-Hessian block vector
+   */
+  std::size_t get_nYh_T() const;
+
+  /**
    * @brief Return the dimension of the independent vector used by the
    * quasiStatic function
    */
@@ -414,7 +386,9 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::shared_ptr<ADBase>
       ad_model_;  //!< Action model needed for code generation
   std::shared_ptr<ADActionDataAbstract>
-      ad_data_;    //! Action data needed for code generation
+      ad_data_;  //! Action data needed for code generation
+  std::shared_ptr<ADActionDataAbstract>
+      ad_data_pert_;  //! Perturbed action data used by autodiff tapes
   bool autodiff_;  //! True if we are genering the automatic derivatives of calc
                    //! funnctions
 
@@ -422,10 +396,14 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
                     //!< calcDiff functions
   std::size_t nX_;  //!< Dimension of the independent variables used by the calc
                     //!< and calcDiff functions
-  std::size_t nX_T_;  //!< Dimension of the independent variables used by the
-                      //!< calc and calcDiff functions in terminal nodes
-  std::size_t nX3_;   //!< Dimension of the independent variables used by the
-                      //!< quasiStatic function
+  std::size_t nX_T_;   //!< Dimension of the independent variables used by the
+                       //!< calc and calcDiff functions in terminal nodes
+  std::size_t nX2_;    //!< Dimension of the independent variables used by the
+                       //!< autodiff calcDiff function
+  std::size_t nX2_T_;  //!< Dimension of the independent variables used by the
+                       //!< autodiff calcDiff function in terminal nodes
+  std::size_t nX3_;    //!< Dimension of the independent variables used by the
+                       //!< quasiStatic function
   std::size_t
       nY1_;  //!< Dimension of the dependent variables used by the calc function
   std::size_t nY1_T_;   //!< Dimension of the dependent variables used by the
@@ -434,12 +412,18 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
                         //!< calcDiff function
   std::size_t nY2_T_;   //!< Dimension of the dependent variables used by the
                         //!< calcDiff function in terminal nodes
+  std::size_t nYh_;     //!< Dimension of the local cost-Hessian block output
+  std::size_t nYh_T_;   //!< Dimension of the terminal local cost-Hessian blocks
   std::size_t nY3_;     //!< Dimension of the dependent variables used by the
                         //!< quasiStatic function
   ADVectorXs ad_X_;     //!< Independent variables used to tape the calc and
                         //!< calcDiff functions
   ADVectorXs ad_X_T_;   //!< Independent variables used to tape the calc and
                         //!< calcDiff functions in terminal nodes
+  ADVectorXs ad_X2_;    //!< Independent variables used to tape the autodiff
+                        //!< calcDiff function
+  ADVectorXs ad_X2_T_;  //!< Independent variables used to tape the autodiff
+                        //!< calcDiff function in terminal nodes
   ADVectorXs ad_X3_;    //!< Independent variables used to tape quasiStatic
                         //!< function
   ADVectorXs ad_Y1_;    //!< Dependent variables used to tape the calc function
@@ -458,6 +442,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   const std::string Y2fun_name_;  //!< Name of the calcDiff function
   const std::string
       Y2Tfun_name_;  //!< Name of the calcDiff function used in terminal nodes
+  const std::string
+      Y2Costfun_name_;  //!< Name of the local cost Hessian block function
+  const std::string
+      Y2CostTfun_name_;  //!< Name of the terminal local cost Hessian function
   const std::string Y3fun_name_;       //!< Name of the quasiStatic function
   const std::string lib_fname_;        //!< Name of the code generated library
   CompilerType compiler_type_;         //!< Type of compiler
@@ -465,6 +453,8 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
 
   ParamsEnvironment updateParams_;  // Lambda function that updates parameter
                                     // variables before starting record.
+  std::shared_ptr<ParameterManager>
+      params_;  //!< Parameter manager used to initialize generated data
 
   std::unique_ptr<ADFun> ad_calc_;  //! < Function used to code generate calc
   std::unique_ptr<ADFun>
@@ -473,6 +463,10 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
       ad_calcDiff_;  //!< Function used to code generate calcDiff
   std::unique_ptr<ADFun> ad_calcDiff_T_;  //!< Function used to code generate
                                           //!< the calcDiff in terminal nodes
+  std::unique_ptr<ADFun>
+      ad_calcDiffCost_;  //!< Local cost Hessian block function
+  std::unique_ptr<ADFun>
+      ad_calcDiffCost_T_;  //!< Terminal local cost Hessian block function
   std::unique_ptr<ADFun>
       ad_quasiStatic_;  //! < Function used to code generate quasiStatic
   std::unique_ptr<CSourceGen>
@@ -485,6 +479,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::unique_ptr<CSourceGen>
       calcDiffCG_T_;  //!< Code generated source code of the calcDiff function
                       //!< in terminal nodes
+  std::unique_ptr<CSourceGen>
+      calcDiffCostCG_;  //!< Code generated local cost Hessian block function
+  std::unique_ptr<CSourceGen>
+      calcDiffCostCG_T_;  //!< Code generated terminal local cost Hessian
+                          //!< block function
   std::unique_ptr<CSourceGen> quasiStaticCG_;  //!< Code generated source code
                                                //!< of the quasiStatic function
   std::unique_ptr<LibraryCSourceGen>
@@ -500,6 +499,11 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   std::unique_ptr<GenericModel>
       calcDiffFun_T_;  //!< Code generated calcDiff function in terminal nodes
   std::unique_ptr<GenericModel>
+      calcDiffCostFun_;  //!< Code generated local cost Hessian block function
+  std::unique_ptr<GenericModel> calcDiffCostFun_T_;  //!< Code generated
+                                                     //!< terminal local cost
+                                                     //!< Hessian block function
+  std::unique_ptr<GenericModel>
       quasiStaticFun_;  //!< Code generated quasiStatic function
 
  private:
@@ -507,15 +511,25 @@ class ActionModelCodeGenTpl : public ActionModelAbstractTpl<_Scalar> {
   void recordCalc_T();
   void recordCalcDiff();
   void recordCalcDiff_T();
+  void recordCalcDiffCost();
+  void recordCalcDiffCost_T();
   void recordQuasiStatic();
+  void recordParams(const Eigen::Ref<const ADVectorXs>& p);
+  void recordParams(const std::shared_ptr<ADActionDataAbstract>& data,
+                    const Eigen::Ref<const ADVectorXs>& p);
+  void syncDataParameters(Data* const data) const;
 
   void tapeCalcOutput();
   void tapeCalcOutput_T();
   void tapeCalcDiffOutput();
   void tapeCalcDiffOutput_T();
+  void tapeCalcDiffHessianOutput(ADVectorXs& y);
+  void tapeCalcDiffHessianOutput_T(ADVectorXs& y);
 
   VectorXs wCostHess_;
   VectorXs wCostHess_T_;
+  VectorXs wCostHessScalar_;
+  VectorXs wCostHessScalar_T_;
 
   static void EmptyParamsEnv(std::shared_ptr<ADBase>,
                              const Eigen::Ref<const ADVectorXs>&);
@@ -537,6 +551,8 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
         static_cast<ActionModelCodeGenTpl<Scalar>*>(model);
     X.resize(m->get_nX());
     X_T.resize(m->get_nX_T());
+    X2.resize(m->get_nX2());
+    X2_T.resize(m->get_nX2_T());
     X3.resize(m->get_nX3());
     Y1.resize(m->get_nY1());
     J1.resize(m->get_nY1() * m->get_nX());
@@ -544,11 +560,19 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Y1_T.resize(m->get_nY1_T());
     J1_T.resize(m->get_nY1_T() * m->get_nX_T());
     H1_T.resize(m->get_nX_T() * m->get_nX_T());
+    J2.resize(m->get_nY2() * m->get_nX2());
+    H2.resize(m->get_nX2() * m->get_nX2());
+    J2_T.resize(m->get_nY2_T() * m->get_nX2_T());
+    H2_T.resize(m->get_nX2_T() * m->get_nX2_T());
     Y2.resize(m->get_nY2());
     Y2_T.resize(m->get_nY2_T());
+    Yh.resize(m->get_nYh());
+    Yh_T.resize(m->get_nYh_T());
     Y3.resize(m->get_nY3());
     X.setZero();
     X_T.setZero();
+    X2.setZero();
+    X2_T.setZero();
     X3.setZero();
     Y1.setZero();
     J1.setZero();
@@ -556,20 +580,33 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Y1_T.setZero();
     J1_T.setZero();
     H1_T.setZero();
+    J2.setZero();
+    H2.setZero();
+    J2_T.setZero();
+    H2_T.setZero();
     Y2.setZero();
     Y2_T.setZero();
+    Yh.setZero();
+    Yh_T.setZero();
     Y3.setZero();
   }
 
   using Base::cost;
+  using Base::Fp;
   using Base::Fu;
   using Base::Fx;
   using Base::g;
+  using Base::Gp;
   using Base::Gu;
   using Base::Gx;
   using Base::h;
+  using Base::Hp;
   using Base::Hu;
   using Base::Hx;
+  using Base::Lp;
+  using Base::Lpp;
+  using Base::Lpu;
+  using Base::Lpx;
   using Base::Lu;
   using Base::Luu;
   using Base::Lx;
@@ -582,6 +619,10 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
       X;  //!< Independent variables used by the calc and calcDiff functions
   VectorXs X_T;   //!< Independent variables used by the calc and calcDiff
                   //!< functions in terminal nodes
+  VectorXs X2;    //!< Independent variables used by the autodiff calcDiff
+                  //!< function
+  VectorXs X2_T;  //!< Independent variables used by the autodiff calcDiff
+                  //!< function in terminal nodes
   VectorXs X3;    //!< Independent variables used by the quasiStatic function
   VectorXs Y1;    //!< Dependent variables used by the calc function
   VectorXs J1;    //!< Autodiff Jacobian of the calc function
@@ -590,10 +631,18 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
   VectorXs J1_T;  //!< Autodiff Jacobian of the calc function in terminal nodes
   VectorXs H1_T;  //!< Autodiff Hessianb of the calc function in terminal nodes
                   //!< nodes
+  VectorXs J2;    //!< Autodiff Jacobian of the tangent calcDiff function
+  VectorXs H2;    //!< Legacy tangent calcDiff Hessian buffer
+  VectorXs J2_T;  //!< Autodiff Jacobian of the terminal tangent calcDiff
+                  //!< function
+  VectorXs H2_T;  //!< Legacy terminal tangent calcDiff Hessian buffer
   VectorXs Y2;    //!< Dependent variables used by the calcDiff function
   VectorXs Y2_T;  //!< Dependent variables used by the calcDiff function in
                   //!< terminal nodes
+  VectorXs Yh;    //!< Local cost-Hessian blocks used by autodiff calcDiff
+  VectorXs Yh_T;  //!< Terminal local cost-Hessian blocks used by autodiff
   VectorXs Y3;    //!< Dependent variables used by the quasiStatic function
+  std::shared_ptr<ParameterDataManagerTpl<Scalar>> params_data;
 
   template <template <typename Scalar> class Model>
   void set_Y1(Model<Scalar>* const model) {
@@ -622,22 +671,30 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Lx = Eigen::Map<VectorXs>(J1.data() + it_J1, ndx);
     it_J1 += ndx;
     Lu = Eigen::Map<VectorXs>(J1.data() + it_J1, nu);
-    it_J1 += nu + np;
+    it_J1 += nu;
+    Lp = Eigen::Map<VectorXs>(J1.data() + it_J1, np);
+    it_J1 += np;
     Eigen::Map<MatrixXs> J1_map(J1.data() + it_J1, nxu, ndx);
     Fx = J1_map.topRows(ndx).transpose();
     Fu = J1_map.middleRows(ndx, nu).transpose();
+    Fp = J1_map.bottomRows(np).transpose();
     it_J1 += ndx * nxu;
     Eigen::Map<MatrixXs> G_map(J1.data() + it_J1, nxu, ng);
     Gx = G_map.topRows(ndx).transpose();
     Gu = G_map.middleRows(ndx, nu).transpose();
+    Gp = G_map.bottomRows(np).transpose();
     it_J1 += ng * nxu;
     Eigen::Map<MatrixXs> H_map(J1.data() + it_J1, nxu, nh);
     Hx = H_map.topRows(ndx).transpose();
     Hu = H_map.middleRows(ndx, nu).transpose();
+    Hp = H_map.bottomRows(np).transpose();
     Eigen::Map<MatrixXs> H1_map(H1.data(), nxu, nxu);
     Lxx = H1_map.topLeftCorner(ndx, ndx);
     Luu = H1_map.middleCols(ndx, nu).middleRows(ndx, nu);
     Lxu = H1_map.middleCols(ndx, nu).topRows(ndx);
+    Lpp = H1_map.bottomRightCorner(np, np);
+    Lpx = H1_map.bottomRows(np).leftCols(ndx);
+    Lpu = H1_map.bottomRows(np).middleCols(ndx, nu);
   }
 
   template <template <typename Scalar> class Model>
@@ -647,28 +704,152 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     Eigen::DenseIndex it_Y1 = 0;
     cost = Y1_T[it_Y1];
     it_Y1 += 1;
-    g = Y1_T.segment(it_Y1, ng);
+    g.setZero();
+    if (ng != 0u) {
+      g.head(ng) = Y1_T.segment(it_Y1, ng);
+    }
     it_Y1 += ng;
-    h = Y1_T.segment(it_Y1, nh);
+    h.setZero();
+    if (nh != 0u) {
+      h.head(nh) = Y1_T.segment(it_Y1, nh);
+    }
   }
 
   template <template <typename Scalar> class Model>
   void set_D1_T(Model<Scalar>* const model) {
     const std::size_t ndx = model->get_state()->get_ndx();
-    const std::size_t ng = model->get_ng();
+    const std::size_t ng = model->get_ng_T();
+    const std::size_t nh = model->get_nh_T();
     const std::size_t np = model->get_np();
     const std::size_t nxp = ndx + np;
     Eigen::DenseIndex it_J1 = 0;
     Lx = Eigen::Map<VectorXs>(J1_T.data() + it_J1, ndx);
-    it_J1 += nxp;
-    Gx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, nxp, ng)
-             .topRows(ndx)
-             .transpose();
+    it_J1 += ndx;
+    Lp = Eigen::Map<VectorXs>(J1_T.data() + it_J1, np);
+    it_J1 += np;
+    Gx.setZero();
+    Gp.setZero();
+    if (ng != 0u) {
+      Eigen::Map<MatrixXs> G_map(J1_T.data() + it_J1, nxp, ng);
+      Gx.topRows(ng) = G_map.topRows(ndx).transpose();
+      Gp.topRows(ng) = G_map.bottomRows(np).transpose();
+    }
     it_J1 += ng * nxp;
-    Hx = Eigen::Map<MatrixXs>(J1_T.data() + it_J1, nxp, ng)
-             .topRows(ndx)
-             .transpose();
+    Hx.setZero();
+    Hp.setZero();
+    if (nh != 0u) {
+      Eigen::Map<MatrixXs> H_map(J1_T.data() + it_J1, nxp, nh);
+      Hx.topRows(nh) = H_map.topRows(ndx).transpose();
+      Hp.topRows(nh) = H_map.bottomRows(np).transpose();
+    }
     Lxx = Eigen::Map<MatrixXs>(H1_T.data(), nxp, nxp).topLeftCorner(ndx, ndx);
+    Lpp = Eigen::Map<MatrixXs>(H1_T.data(), nxp, nxp).bottomRightCorner(np, np);
+    Lpx = Eigen::Map<MatrixXs>(H1_T.data(), nxp, nxp)
+              .bottomRows(np)
+              .leftCols(ndx);
+  }
+
+  template <template <typename Scalar> class Model>
+  void set_D2(Model<Scalar>* const model) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t ng = model->get_ng();
+    const std::size_t nh = model->get_nh();
+    const std::size_t np = model->get_np();
+    const std::size_t nbase = model->get_nX();
+    const std::size_t ninput = model->get_nX2();
+    const std::size_t npert = ndx + nu + np;
+    Eigen::Map<MatrixXs> J_map(J2.data(), ninput, model->get_nY2());
+    const auto J_pert = J_map.middleRows(nbase, npert);
+    Lx = J_pert.col(0).head(ndx);
+    Lu = J_pert.col(0).segment(ndx, nu);
+    Lp = J_pert.col(0).tail(np);
+    Eigen::Map<MatrixXs> F_map(J2.data() + ninput, ninput, ndx);
+    Fx = F_map.middleRows(nbase, npert).topRows(ndx).transpose();
+    Fu = F_map.middleRows(nbase + ndx, nu).transpose();
+    Fp = F_map.middleRows(nbase + ndx + nu, np).transpose();
+    Eigen::Map<MatrixXs> G_map(J2.data() + ninput * (1 + ndx), ninput, ng);
+    Gx = G_map.middleRows(nbase, npert).topRows(ndx).transpose();
+    Gu = G_map.middleRows(nbase + ndx, nu).transpose();
+    Gp = G_map.middleRows(nbase + ndx + nu, np).transpose();
+    Eigen::Map<MatrixXs> H_map(J2.data() + ninput * (1 + ndx + ng), ninput, nh);
+    Hx = H_map.middleRows(nbase, npert).topRows(ndx).transpose();
+    Hu = H_map.middleRows(nbase + ndx, nu).transpose();
+    Hp = H_map.middleRows(nbase + ndx + nu, np).transpose();
+    Eigen::Map<MatrixXs> H2_map(H2.data(), ninput, ninput);
+    Lxx = H2_map.block(nbase, nbase, ndx, ndx);
+    Lxu = H2_map.block(nbase, nbase + ndx, ndx, nu);
+    Luu = H2_map.block(nbase + ndx, nbase + ndx, nu, nu);
+    Lpp = H2_map.block(nbase + ndx + nu, nbase + ndx + nu, np, np);
+    Lpx = H2_map.block(nbase + ndx + nu, nbase, np, ndx);
+    Lpu = H2_map.block(nbase + ndx + nu, nbase + ndx, np, nu);
+  }
+
+  template <template <typename Scalar> class Model>
+  void set_D2_T(Model<Scalar>* const model) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t ng = model->get_ng_T();
+    const std::size_t nh = model->get_nh_T();
+    const std::size_t np = model->get_np();
+    const std::size_t nbase = model->get_nX_T();
+    const std::size_t ninput = model->get_nX2_T();
+    const std::size_t npert = ndx + np;
+    Eigen::Map<MatrixXs> J_map(J2_T.data(), ninput, model->get_nY2_T());
+    const auto J_pert = J_map.middleRows(nbase, npert);
+    Lx = J_pert.col(0).head(ndx);
+    Lp = J_pert.col(0).tail(np);
+    Eigen::Map<MatrixXs> F_map(J2_T.data() + ninput, ninput, ndx);
+    Fx = F_map.middleRows(nbase, ndx).transpose();
+    Gx.setZero();
+    Gp.setZero();
+    if (ng != 0u) {
+      Eigen::Map<MatrixXs> G_map(J2_T.data() + ninput * (1 + ndx), ninput, ng);
+      Gx.topRows(ng) = G_map.middleRows(nbase, ndx).transpose();
+      Gp.topRows(ng) = G_map.middleRows(nbase + ndx, np).transpose();
+    }
+    Hx.setZero();
+    Hp.setZero();
+    if (nh != 0u) {
+      Eigen::Map<MatrixXs> H_map(J2_T.data() + ninput * (1 + ndx + ng), ninput,
+                                 nh);
+      Hx.topRows(nh) = H_map.middleRows(nbase, ndx).transpose();
+      Hp.topRows(nh) = H_map.middleRows(nbase + ndx, np).transpose();
+    }
+    Eigen::Map<MatrixXs> H2_map(H2_T.data(), ninput, ninput);
+    Lxx = H2_map.block(nbase, nbase, ndx, ndx);
+    Lpp = H2_map.block(nbase + ndx, nbase + ndx, np, np);
+    Lpx = H2_map.block(nbase + ndx, nbase, np, ndx);
+  }
+
+  template <template <typename Scalar> class Model>
+  void set_Yh_hessian(Model<Scalar>* const model) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t nu = model->get_nu();
+    const std::size_t np = model->get_np();
+    Eigen::DenseIndex it_Yh = 0;
+    Lxx = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, ndx, ndx);
+    it_Yh += ndx * ndx;
+    Lxu = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, ndx, nu);
+    it_Yh += ndx * nu;
+    Luu = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, nu, nu);
+    it_Yh += nu * nu;
+    Lpp = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, np, np);
+    it_Yh += np * np;
+    Lpx = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, np, ndx);
+    it_Yh += np * ndx;
+    Lpu = Eigen::Map<MatrixXs>(Yh.data() + it_Yh, np, nu);
+  }
+
+  template <template <typename Scalar> class Model>
+  void set_Yh_hessian_T(Model<Scalar>* const model) {
+    const std::size_t ndx = model->get_state()->get_ndx();
+    const std::size_t np = model->get_np();
+    Eigen::DenseIndex it_Yh = 0;
+    Lxx = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, ndx, ndx);
+    it_Yh += ndx * ndx;
+    Lpp = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, np, np);
+    it_Yh += np * np;
+    Lpx = Eigen::Map<MatrixXs>(Yh_T.data() + it_Yh, np, ndx);
   }
 
   template <template <typename Scalar> class Model>
@@ -677,28 +858,43 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t nu = model->get_nu();
     const std::size_t ng = model->get_ng();
     const std::size_t nh = model->get_nh();
+    const std::size_t np = model->get_np();
     Eigen::DenseIndex it_Y2 = 0;
     Fx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, ndx);
     it_Y2 += ndx * ndx;
     Fu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, nu);
     it_Y2 += ndx * nu;
+    Fp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, np);
+    it_Y2 += ndx * np;
     Lx = Eigen::Map<VectorXs>(Y2.data() + it_Y2, ndx);
     it_Y2 += ndx;
     Lu = Eigen::Map<VectorXs>(Y2.data() + it_Y2, nu);
     it_Y2 += nu;
+    Lp = Eigen::Map<VectorXs>(Y2.data() + it_Y2, np);
+    it_Y2 += np;
     Lxx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, ndx);
     it_Y2 += ndx * ndx;
     Lxu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ndx, nu);
     it_Y2 += ndx * nu;
     Luu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nu, nu);
     it_Y2 += nu * nu;
+    Lpp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, np, np);
+    it_Y2 += np * np;
+    Lpx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, np, ndx);
+    it_Y2 += np * ndx;
+    Lpu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, np, nu);
+    it_Y2 += np * nu;
     Gx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ng, ndx);
     it_Y2 += ng * ndx;
     Gu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ng, nu);
     it_Y2 += ng * nu;
+    Gp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, ng, np);
+    it_Y2 += ng * np;
     Hx = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, ndx);
     it_Y2 += nh * ndx;
     Hu = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, nu);
+    it_Y2 += nh * nu;
+    Hp = Eigen::Map<MatrixXs>(Y2.data() + it_Y2, nh, np);
   }
 
   template <template <typename Scalar> class Model>
@@ -706,14 +902,37 @@ struct ActionDataCodeGenTpl : public ActionDataAbstractTpl<_Scalar> {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t ng = model->get_ng_T();
     const std::size_t nh = model->get_nh_T();
+    const std::size_t np = model->get_np();
     Eigen::DenseIndex it_Y2 = 0;
     Lx = Eigen::Map<VectorXs>(Y2_T.data() + it_Y2, ndx);
     it_Y2 += ndx;
+    Lp = Eigen::Map<VectorXs>(Y2_T.data() + it_Y2, np);
+    it_Y2 += np;
     Lxx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ndx, ndx);
     it_Y2 += ndx * ndx;
-    Gx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ng, ndx);
+    Lpp = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, np, np);
+    it_Y2 += np * np;
+    Lpx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, np, ndx);
+    it_Y2 += np * ndx;
+    Gx.setZero();
+    if (ng != 0u) {
+      Gx.topRows(ng) = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ng, ndx);
+    }
     it_Y2 += ng * ndx;
-    Hx = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, nh, ndx);
+    Gp.setZero();
+    if (ng != 0u) {
+      Gp.topRows(ng) = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, ng, np);
+    }
+    it_Y2 += ng * np;
+    Hx.setZero();
+    if (nh != 0u) {
+      Hx.topRows(nh) = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, nh, ndx);
+    }
+    it_Y2 += nh * ndx;
+    Hp.setZero();
+    if (nh != 0u) {
+      Hp.topRows(nh) = Eigen::Map<MatrixXs>(Y2_T.data() + it_Y2, nh, np);
+    }
   }
 };
 

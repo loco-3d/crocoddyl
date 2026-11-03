@@ -10,9 +10,6 @@
 namespace crocoddyl {
 namespace python {
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolverIpopt_solves, SolverIpopt::solve,
-                                       0, 5)
-
 void exposeSolverIpopt() {
 #ifdef SCALAR_float64
   bp::register_ptr_to_python<std::shared_ptr<SolverIpopt>>();
@@ -20,10 +17,15 @@ void exposeSolverIpopt() {
       "SolverIpopt",
       bp::init<const std::shared_ptr<crocoddyl::ShootingProblem>&>(
           bp::args("self", "problem"), "Initialize solver"))
-      .def("solve", &SolverIpopt::solve,
-           SolverIpopt_solves(
-               bp::args("self", "init_xs", "init_us", "maxiter", "is_feasible",
-                        "init_reg"),
+      .def("solve",
+           static_cast<bool (SolverIpopt::*)(
+               const std::vector<SolverIpopt::VectorXs>&,
+               const std::vector<SolverIpopt::VectorXs>&, const std::size_t,
+               const bool, const SolverIpopt::Scalar)>(&SolverIpopt::solve),
+           (bp::arg("self"), bp::arg("init_xs") = bp::list(),
+            bp::arg("init_us") = bp::list(), bp::arg("maxiter") = 100,
+            bp::arg("is_feasible") = false,
+            bp::arg("init_reg") = SolverIpopt::Scalar(1e-9)),
                "Compute the optimal trajectory xopt, uopt as lists of T+1 and "
                "T terms.\n\n"
                "From an initial guess init_xs,init_us (feasible or not), "
@@ -46,7 +48,7 @@ void exposeSolverIpopt() {
                "                used with very good guess points (init_xs, "
                "init_us) (default None).\n"
                ":returns the optimal trajectory xopt, uopt and a boolean that "
-               "describes if convergence was reached."))
+               "describes if convergence was reached.")
       .def("setStringIpoptOption", &SolverIpopt::setStringIpoptOption,
            bp::args("self", "param_name", "param_value"),
            "Sets a string option for IPOPT\n\n")

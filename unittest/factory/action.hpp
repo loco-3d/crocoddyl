@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -14,8 +14,6 @@
 
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/numdiff/action.hpp"
-#include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
-#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -27,8 +25,6 @@ struct ActionModelTypes {
     ActionModelLQR,
     ActionModelRandomLQR,
     ActionModelRandomLQRwithTerminalConstraint,
-    ActionModelImpulseFwdDynamics_HyQ,
-    ActionModelImpulseFwdDynamics_Talos,
     NbActionModelTypes
   };
   static std::vector<Type> init_all() {
@@ -42,14 +38,7 @@ struct ActionModelTypes {
   static const std::vector<Type> all;
 
   static bool hasTerminalConstraints(Type type) {
-    switch (type) {
-      case ActionModelRandomLQRwithTerminalConstraint:
-        return true;
-        break;
-      default:
-        return false;
-        break;
-    }
+    return type == ActionModelRandomLQRwithTerminalConstraint;
   }
 };
 
@@ -66,9 +55,6 @@ class ActionModelFactory {
 
   std::shared_ptr<crocoddyl::ActionModelAbstract> create(
       ActionModelTypes::Type type, Instance instance = Instance::First) const;
-
-  std::shared_ptr<crocoddyl::ActionModelImpulseFwdDynamics>
-  create_impulseFwdDynamics(StateModelTypes::Type state_type) const;
 };
 
 }  // namespace unittest

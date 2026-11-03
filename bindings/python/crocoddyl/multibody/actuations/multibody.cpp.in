@@ -1,0 +1,181 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actuations/multibody.hpp"
+
+#include <boost/python/make_constructor.hpp>
+#include <boost/python/stl_iterator.hpp>
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+std::shared_ptr<Model> createActuationModelMultibody(
+    const std::shared_ptr<typename Model::StateMultibody>& state,
+    const bp::object& joints) {
+  typedef typename Model::JointDynamicsModelAbstract JointDynamicsModelAbstract;
+  std::vector<std::shared_ptr<JointDynamicsModelAbstract> > converted_joints;
+  bp::stl_input_iterator<std::shared_ptr<JointDynamicsModelAbstract> > begin(
+      joints),
+      end;
+  for (; begin != end; ++begin) {
+    converted_joints.push_back(*begin);
+  }
+  return std::make_shared<Model>(state, converted_joints);
+}
+
+template <typename Data>
+bp::list getActuationJointData(const Data& data) {
+  bp::list joint_data;
+  for (std::size_t jid = 0; jid < data.joint.size(); ++jid) {
+    bp::list group;
+    for (std::size_t i = 0; i < data.joint[jid].size(); ++i) {
+      group.append(data.joint[jid][i]);
+    }
+    joint_data.append(group);
+  }
+  return joint_data;
+}
+
+template <typename Data, typename Model>
+std::shared_ptr<Data> createActuationDataMultibody(Model* model) {
+  if (model == nullptr) {
+    throw_pretty("Invalid argument: model is null");
+  }
+  return std::dynamic_pointer_cast<Data>(model->createData());
+}
+
+template <typename Model>
+void computeJointTorqueRegressor(
+    Model& model, const bp::object& dtau_dp,
+    const Eigen::Ref<const typename Model::VectorXs>& x,
+    const Eigen::Ref<const typename Model::VectorXs>& u) {
+  typename Model::MatrixXs value =
+      bp::extract<typename Model::MatrixXs>(dtau_dp)();
+  model.computeJointTorqueRegressor(value, x, u);
+  bp::object result(value);
+  dtau_dp.attr("__setitem__")(
+      bp::make_tuple(bp::slice(), bp::slice()),
+      result.attr("reshape")(value.rows(), value.cols()));
+}
+
+template <typename Model>
+struct ActuationModelMultibodyVisitor
+    : public bp::def_visitor<ActuationModelMultibodyVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "x", "u"),
+           "Compute the multibody actuation signal.\n\n"
+           ":param data: actuation data\n"
+           ":param x: state point\n"
+           ":param u: control input")
+        .def("calcDiff", &Model::calcDiff, bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the multibody actuation model.\n\n"
+             "calc must be called first with the same data and inputs.\n\n"
+             ":param data: actuation data\n"
+             ":param x: state point\n"
+             ":param u: control input")
+        .def("commands", &Model::commands, bp::args("self", "data", "x", "tau"),
+             "Compute the control commands from the generalized torques.\n\n"
+             ":param data: actuation data\n"
+             ":param x: state point\n"
+             ":param tau: generalized torques")
+        .def("torqueTransform", &Model::torqueTransform,
+             bp::args("self", "data", "x", "u"),
+             "Compute the torque transform from generalized torques to control.\n\n"
+             ":param data: actuation data\n"
+             ":param x: state point\n"
+             ":param u: control input")
+        .def("update_p", &Model::update_p, bp::args("self", "p", "gamma"),
+             "Update the actuation parameters.\n\n"
+             ":param p: parameter vector\n"
+             ":param gamma: parameter vector in internal coordinates")
+        .def("updateParametrizationDerivative",
+             &Model::updateParametrizationDerivative,
+             bp::args("self", "dgamma_dp"),
+             "Update the Jacobian of the internal actuation parameters.\n\n"
+             ":param dgamma_dp: internal-parameter Jacobian")
+        .def("computeJointTorqueRegressor",
+             &computeJointTorqueRegressor<Model>,
+             bp::args("self", "dtau_dp", "x", "u"),
+             "Compute the actuation torque regressor with respect to the "
+             "actuation parameters.\n\n"
+             ":param dtau_dp: actuation torque regressor\n"
+             ":param x: state point\n"
+             ":param u: control input")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the multibody actuation data.\n\n"
+             ":return actuation data")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "actuation parameter dimension");
+  }
+};
+
+template <typename Data>
+struct ActuationDataMultibodyVisitor
+    : public bp::def_visitor<ActuationDataMultibodyVisitor<Data> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "friction",
+          bp::make_getter(&Data::friction, bp::return_internal_reference<>()),
+          bp::make_setter(&Data::friction), "generalized friction torque")
+        .add_property("joint", bp::make_function(&getActuationJointData<Data>),
+                      "joint dynamics data grouped by Pinocchio joint id");
+  }
+};
+
+#define CROCODDYL_ACTUATION_MODEL_MULTIBODY_PYTHON_BINDINGS(Scalar)          \
+  typedef ActuationModelMultibodyTpl<Scalar> Model;                          \
+  typedef ActuationModelAbstractTpl<Scalar> ModelBase;                       \
+  typedef Model::StateMultibody StateMultibody;                              \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                     \
+  bp::class_<Model, bp::bases<ModelBase> >(                                  \
+      "ActuationModelMultibody",                                             \
+      "Multibody actuation model assembled from per-joint actuation models.",\
+      bp::init<std::shared_ptr<StateMultibody> >(                            \
+          bp::args("self", "state"),                                         \
+          "Initialize the multibody actuation model with identity joint "    \
+          "actuation on every actuated joint."))                             \
+      .def("__init__",                                                       \
+           bp::make_constructor(                                             \
+               &createActuationModelMultibody<Model>,                        \
+               bp::default_call_policies(),                                  \
+               bp::args("state", "joints")))                                \
+      .def(ActuationModelMultibodyVisitor<Model>())                          \
+      .def(CastVisitor<Model>())                                             \
+      .def(PrintableVisitor<Model>())                                        \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_ACTUATION_DATA_MULTIBODY_PYTHON_BINDINGS(Scalar)           \
+  typedef ActuationDataMultibodyTpl<Scalar> Data;                            \
+  typedef ActuationDataAbstractTpl<Scalar> DataBase;                         \
+  typedef ActuationModelMultibodyTpl<Scalar> Model;                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data> >();                      \
+  bp::class_<Data, bp::bases<DataBase> >(                                    \
+      "ActuationDataMultibody",                                              \
+      "Data for multibody actuation models.",                                \
+      bp::no_init)                                                           \
+      .def("__init__",                                                       \
+           bp::make_constructor(                                             \
+               &createActuationDataMultibody<Data, Model>,                   \
+               bp::default_call_policies(),                                  \
+               bp::args("model")))                                           \
+      .def(ActuationDataMultibodyVisitor<Data>())                            \
+      .def(CopyableVisitor<Data>());
+
+void exposeActuationMultibody() {
+  CROCODDYL_ACTUATION_MODEL_MULTIBODY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_ACTUATION_DATA_MULTIBODY_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

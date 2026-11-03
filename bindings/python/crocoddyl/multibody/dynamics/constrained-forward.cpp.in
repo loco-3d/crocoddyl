@@ -1,0 +1,210 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/dynamics/constrained-forward.hpp"
+
+#include "python/crocoddyl/core/dynamics-base.hpp"
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct DynamicsModelConstrainedForwardVisitor
+    : public bp::def_visitor<DynamicsModelConstrainedForwardVisitor<Model>> {
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::DynamicsDataAbstract Data;
+  typedef typename Model::StateMultibody State;
+  typedef typename Model::ActuationModelAbstract Actuation;
+  typedef typename Model::ImplicitConstraintModelMultiple Constraints;
+  typedef typename Model::ParameterDataManager ParameterDataManager;
+  typedef typename Model::ParameterManager ParameterManager;
+  typedef typename Model::VectorXs VectorXs;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, std::shared_ptr<Actuation>,
+                    std::shared_ptr<Constraints>,
+                    bp::optional<std::size_t, DynamicsType> >(
+               bp::args("self", "state", "actuation", "constraints", "np",
+                        "dyn_type"),
+               "Initialize the constrained forward dynamics model.\n\n"
+               "This model evaluates multibody forward dynamics under active "
+               "implicit constraints.\n"
+               ":param state: multibody state\n"
+               ":param actuation: actuation model\n"
+               ":param constraints: multiple implicit-constraint model\n"
+               ":param np: number of dynamics parameters\n"
+               ":param dyn_type: type of dynamics behavior"))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"),
+             "Compute the constrained forward dynamics.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: control input")
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x"),
+             "Compute the constrained forward terminal-node data.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"),
+             "Compute the derivatives of the constrained forward dynamics.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: control input")
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x"),
+             "Compute the state-only derivatives of the constrained forward "
+             "terminal-node data.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff_xu",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_xu),
+             bp::args("self", "data", "x", "u"),
+             "Compute the state-control derivatives of the constrained forward "
+             "dynamics.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: control input")
+        .def("calcDiff_xu",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_xu),
+             bp::args("self", "data", "x"),
+             "Compute the state-only derivatives of the constrained forward "
+             "dynamics.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector")
+        .def("calcDiff_p",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&, const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff_p),
+             bp::args("self", "data", "x", "u"),
+             "Compute the parameter sensitivity of the constrained forward "
+             "dynamics.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param x: state vector\n"
+             ":param u: control input")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
+             "Create the constrained forward dynamics data.")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)(
+                 const std::shared_ptr<ParameterDataManager>&)>(
+                 &Model::createData),
+             bp::args("self", "params_data"),
+             "Create constrained forward dynamics data sharing parameter "
+             "manager data.\n\n"
+             ":param params_data: parameter-manager data")
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Attach a parameter manager to the constrained forward dynamics "
+             "model and data.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param params: parameter manager")
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
+             "Update the active parameter vector.\n\n"
+             ":param data: constrained forward dynamics data\n"
+             ":param p: active parameter vector")
+        .add_property("pinocchio",
+                      bp::make_function(&Model::get_pinocchio,
+                                        bp::return_internal_reference<>()),
+                      "multibody model (i.e. pinocchio model)")
+        .add_property(
+            "actuation",
+            bp::make_function(&Model::get_actuation,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "actuation model")
+        .add_property(
+            "constraints",
+            bp::make_function(&Model::get_constraints,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "multiple implicit-constraint model")
+        .add_property(
+            "params",
+            bp::make_function(&Model::get_params,
+                              bp::return_value_policy<bp::return_by_value>()),
+            "parameter manager")
+        .add_property(
+            "armature",
+            bp::make_function(&Model::get_armature,
+                              bp::return_internal_reference<>()),
+            bp::make_function(&Model::set_armature),
+            "set an armature mechanism in the joints");
+  }
+};
+
+template <typename Data>
+struct DynamicsDataConstrainedForwardVisitor
+    : public bp::def_visitor<DynamicsDataConstrainedForwardVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "pinocchio",
+          bp::make_getter(&Data::pinocchio, bp::return_internal_reference<>()),
+          "pinocchio data")
+        .add_property("multibody",
+                      bp::make_getter(&Data::multibody,
+                                      bp::return_internal_reference<>()),
+                      "multibody data");
+  }
+};
+
+#define CROCODDYL_DYNAMICS_MODEL_CONSTRAINED_FORWARD_PYTHON_BINDINGS(Scalar) \
+  typedef DynamicsModelConstrainedForwardTpl<Scalar> Model;                   \
+  typedef DynamicsModelAbstractTpl<Scalar> ModelBase;                         \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                      \
+  bp::class_<Model, bp::bases<ModelBase> >(                                   \
+      "DynamicsModelConstrainedForward",                                      \
+      "Dynamics model for constrained forward dynamics in multibody "         \
+      "systems under active implicit constraints.",                           \
+      bp::no_init)                                                            \
+      .def(DynamicsModelConstrainedForwardVisitor<Model>())                   \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+#define CROCODDYL_DYNAMICS_DATA_CONSTRAINED_FORWARD_PYTHON_BINDINGS(Scalar) \
+  typedef DynamicsDataConstrainedForwardTpl<Scalar> Data;                    \
+  typedef DynamicsDataAbstractTpl<Scalar> DataBase;                          \
+  typedef DynamicsModelConstrainedForwardTpl<Scalar> Model;                  \
+  bp::register_ptr_to_python<std::shared_ptr<Data> >();                      \
+  bp::class_<Data, bp::bases<DataBase> >(                                    \
+      "DynamicsDataConstrainedForward",                                      \
+      "Data for constrained forward dynamics.",                              \
+      bp::init<Model*>(bp::args("self", "model"),                            \
+                       "Create constrained forward dynamics data.\n\n"        \
+                       ":param model: constrained forward dynamics model"))   \
+      .def(DynamicsDataConstrainedForwardVisitor<Data>())                    \
+      .def(CopyableVisitor<Data>());
+
+void exposeDynamicsConstrainedForward() {
+  CROCODDYL_DYNAMICS_MODEL_CONSTRAINED_FORWARD_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DYNAMICS_DATA_CONSTRAINED_FORWARD_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl
