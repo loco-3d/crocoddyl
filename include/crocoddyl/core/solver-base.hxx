@@ -37,7 +37,8 @@ SolverAbstractTpl<Scalar>::SolverAbstractTpl(
 template <typename Scalar>
 bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
                                       const std::vector<VectorXs>& init_us,
-                                      const std::size_t maxiter, const bool,
+                                      const std::size_t maxiter,
+                                      const bool is_feasible,
                                       const Scalar init_reg) {
   START_PROFILER("SolverAbstract::solve");
   const std::size_t nh_T = problem_->get_terminalModel()->get_nh_T();
@@ -50,8 +51,7 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
     nh_T_ = nh_T;
     ng_T_ = ng_T;
   }
-  // TODO: Deprecate isfeasible_. Update setCandidate API.
-  setCandidate(init_xs, init_us, false);
+  setCandidate(init_xs, init_us, is_feasible);
   // Initialize the value used for primal and dual regularization
   if (isnan(init_reg)) {
     preg_ = reg_min_;
@@ -103,7 +103,9 @@ bool SolverAbstractTpl<Scalar>::solve(const std::vector<VectorXs>& init_xs,
       acceptstep_ = checkAcceptance();
       // Set candidate guess, cost and feasibilities if we accept the step
       if (acceptstep_) {
-        setCandidate(xs_try_, us_try_, false);
+        was_feasible_ = is_feasible_;
+        setCandidate(xs_try_, us_try_,
+                     was_feasible_ || steplength_ == Scalar(1.));
         updateCandidate();
         break;
       }
