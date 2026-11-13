@@ -1,14 +1,35 @@
 set(${PROJECT_NAME}_PYTHON_BINDINGS_TESTS
     states
-    actuations
     actions
     shooting
+    problem_abstract
+    parameterized_problems
+    parameterized_solvers
+    callbacks
     solvers
     costs
-    contacts
-    impulses
+    cost_sum
+    constraint_manager
+    dynamics
+    multibody_dynamics
+    params
+    params_data
+    parameter_manager
+    time_parameterization
+    action_integration
+    lqr
+    implicit_constraints
+    multibody_actuation
+    inertial_parameterization
+    parameter_energy_residuals
+    numdiff
+    observers
     squashing
     copy)
+
+if(BUILD_WITH_CODEGEN_SUPPORT)
+  list(APPEND ${PROJECT_NAME}_PYTHON_BINDINGS_TESTS codegen_float32)
+endif()
 
 foreach(TEST ${${PROJECT_NAME}_PYTHON_BINDINGS_TESTS})
   python_build(. "test_${TEST}.py")

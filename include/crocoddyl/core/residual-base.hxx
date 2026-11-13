@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,21 @@ ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
     : state_(state),
       nr_(nr),
       nu_(nu),
+      np_(0),
+      unone_(VectorXs::Zero(nu)),
+      q_dependent_(q_dependent),
+      v_dependent_(v_dependent),
+      u_dependent_(u_dependent) {}
+
+template <typename Scalar>
+ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
+    std::shared_ptr<StateAbstract> state, const std::size_t nr,
+    const std::size_t nu, const bool q_dependent, const bool v_dependent,
+    const bool u_dependent, const std::size_t np)
+    : state_(state),
+      nr_(nr),
+      nu_(nu),
+      np_(np),
       unone_(VectorXs::Zero(nu)),
       q_dependent_(q_dependent),
       v_dependent_(v_dependent),
@@ -28,6 +43,7 @@ ResidualModelAbstractTpl<Scalar>::ResidualModelAbstractTpl(
     : state_(state),
       nr_(nr),
       nu_(state->get_nv()),
+      np_(0),
       unone_(VectorXs::Zero(state->get_nv())),
       q_dependent_(q_dependent),
       v_dependent_(v_dependent),
@@ -109,6 +125,23 @@ void ResidualModelAbstractTpl<Scalar>::calcCostDiff(
       cdata->Lxu.bottomRows(nv).noalias() = Rv.transpose() * rdata->Arr_Ru;
     }
   }
+  if (np_ != 0) {
+    rdata->Arr_Rp.noalias() = adata->Arr.diagonal().asDiagonal() * rdata->Rp;
+    cdata->Lp.noalias() = rdata->Rp.transpose() * adata->Ar;
+    cdata->Lpp.noalias() = rdata->Rp.transpose() * rdata->Arr_Rp;
+    if (q_dependent_ && v_dependent_) {
+      cdata->Lpx.noalias() = rdata->Rp.transpose() * rdata->Arr_Rx;
+    } else if (q_dependent_) {
+      cdata->Lpx.leftCols(nv).noalias() =
+          rdata->Rp.transpose() * rdata->Arr_Rx.leftCols(nv);
+    } else if (v_dependent_) {
+      cdata->Lpx.rightCols(nv).noalias() =
+          rdata->Rp.transpose() * rdata->Arr_Rx.rightCols(nv);
+    }
+    if (is_ru) {
+      cdata->Lpu.noalias() = rdata->Rp.transpose() * rdata->Arr_Ru;
+    }
+  }
 }
 
 template <typename Scalar>
@@ -130,6 +163,11 @@ std::size_t ResidualModelAbstractTpl<Scalar>::get_nr() const {
 template <typename Scalar>
 std::size_t ResidualModelAbstractTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+std::size_t ResidualModelAbstractTpl<Scalar>::get_np() const {
+  return np_;
 }
 
 template <typename Scalar>

@@ -22,9 +22,10 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   typedef _Scalar Scalar;
   typedef SolverAbstractTpl<Scalar> SolverAbstract;
   typedef SolverFDDPTpl<Scalar> SolverFDDP;
+  typedef ProblemAbstractTpl<Scalar> ProblemAbstract;
   typedef ShootingProblemTpl<Scalar> ShootingProblem;
-  typedef typename ShootingProblem::ActionModelAbstract ActionModelAbstract;
-  typedef typename ShootingProblem::ActionDataAbstract ActionDataAbstract;
+  typedef typename ProblemAbstract::ActionModelAbstract ActionModelAbstract;
+  typedef typename ProblemAbstract::ActionDataAbstract ActionDataAbstract;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
@@ -41,6 +42,22 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
                           const DynamicsSolverType dyn_solver = FeasShoot,
                           const EqualitySolverType eq_solver = LuNull,
                           const EqualitySolverType term_solver = LuNull);
+
+  /**
+   * @brief Initialize the INTRO solver for an abstract optimal-control problem
+   *
+   * @param[in] problem        Optimal control / estimation problem
+   * @param[in] dyn_solver     Type of dynamic solver
+   * @param[in] eq_solver      Type of equality solver
+   * @param[in] term_solver    Type of terminal solver
+   * @param[in] astate_solver  Type of arrival-state solver
+   */
+  explicit SolverIntroTpl(
+      std::shared_ptr<ProblemAbstract> problem,
+      const DynamicsSolverType dyn_solver = FeasShoot,
+      const EqualitySolverType eq_solver = LuNull,
+      const EqualitySolverType term_solver = LuNull,
+      const ArrivalStateSolverType astate_solver = AStateNone);
   virtual ~SolverIntroTpl() = default;
 
   /**
@@ -82,6 +99,24 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   virtual void computeBatchValueFunction(const std::size_t t) override;
 
   /**
+   * @copybrief SolverFDDP::parametrizedPolicy
+   *
+   * For LuNull/QrNull equality solvers the control lives in the null-space of
+   * \f$\mathbf{H_u}\f$, so the parameter-coupling gain must include the
+   * particular solution induced by \f$\mathbf{H_p}\f$ and the null-space
+   * correction. For Schur equality solvers the base parameter policy is
+   * corrected with the Schur-complement equality response.
+   */
+  virtual void parametrizedPolicy(const std::size_t t) override;
+
+  /**
+   * @copybrief SolverFDDP::parametrizedValueFunction
+   */
+  virtual void parametrizedValueFunction(
+      const std::size_t t,
+      const std::shared_ptr<ActionModelAbstract>& model) override;
+
+  /**
    * @brief Cast the Intro solver to a different scalar type.
    *
    * It is useful for operations requiring different precision or scalar types.
@@ -98,7 +133,8 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   EqualitySolverType get_equality_solver() const;
 
   /**
-   * @brief Return the rank of control-equality constraints \f$\mathbf{H_u}\f
+   * @brief Return the rank of control-equality constraints
+   * \f$\mathbf{H_u}\f$
    */
   const std::vector<std::size_t>& get_Hu_rank() const;
 
@@ -194,7 +230,12 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   using SolverFDDP::K_;
   using SolverFDDP::k_;
   using SolverFDDP::Kc_;
+  using SolverFDDP::P_;
   using SolverFDDP::problem_;
+  using SolverFDDP::Qp_;
+  using SolverFDDP::Qpp_;
+  using SolverFDDP::Qpu_;
+  using SolverFDDP::Qpx_;
   using SolverFDDP::Qu_;
   using SolverFDDP::Quc_;
   using SolverFDDP::Quu_;
@@ -221,6 +262,11 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
   using SolverFDDP::th_stop_;
   using SolverFDDP::Ts_;
   using SolverFDDP::upsilon_decfactor_;
+  using SolverFDDP::Vp_;
+  using SolverFDDP::Vpp_;
+  using SolverFDDP::Vpp_sym_;
+  using SolverFDDP::Vpx_;
+  using SolverFDDP::Vpx_f_;
   using SolverFDDP::Vx_;
   using SolverFDDP::Vxc_;
   using SolverFDDP::Vxx_;
@@ -256,6 +302,11 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
       Qxz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{xz}}\f$
   std::vector<MatrixXs>
       Quz_;  //!< Hessian of the reduced Hamiltonian \f$\mathbf{Q_{uz}}\f$
+  std::vector<MatrixXs> QzzinvQzu_;
+  std::vector<MatrixXs> Qpz_;
+  std::vector<MatrixXs> Qzx_;
+  std::vector<MatrixXs> Pn_;
+  std::vector<MatrixXs> QuuP_2Qpu_;
   std::vector<VectorXs>
       kz_;  //!< Feedforward term in the nullspace of \f$\mathbf{H_u}\f$
   std::vector<MatrixXs>
@@ -264,6 +315,8 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
       ks_;  //!< Feedforward term related to the equality constraints
   std::vector<MatrixXs>
       Ks_;  //!< Feedback gain related to the equality constraints
+  std::vector<MatrixXs> Ps_;
+  std::vector<MatrixXs> Pz_;
   std::vector<MatrixXs> QuuinvHuT_;
   std::vector<Eigen::LLT<MatrixXs> > Qzz_llt_;  //!< Cholesky LLT solver
   std::vector<Eigen::FullPivLU<MatrixXs> >
@@ -284,8 +337,6 @@ class SolverIntroTpl : public SolverFDDPTpl<_Scalar> {
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/solvers/intro.hxx"
 

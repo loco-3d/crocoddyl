@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -11,6 +11,7 @@
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/map-converter.hpp"
 #include "python/crocoddyl/utils/set-converter.hpp"
 
@@ -213,7 +214,8 @@ struct ContactDataMultipleVisitor
           "Initialize the contact item.\n\n"                                 \
           ":param name: contact name\n"                                      \
           ":param contact: contact model\n"                                  \
-          ":param active: True if the contact is activated (default true)")) \
+          ":param active: True if the contact is activated (default true)")[ \
+          deprecated<>("Deprecated. Use ImplicitConstraintItem.")])         \
       .def(ContactItemVisitor<Item>())                                      \
       .def(CastVisitor<Item>())                                             \
       .def(PrintableVisitor<Item>())                                        \
@@ -229,7 +231,9 @@ struct ContactDataMultipleVisitor
           bp::args("self", "state", "nu"),                         \
           "Initialize the multiple contact model.\n\n"             \
           ":param state: state of the multibody system\n"          \
-          ":param nu: dimension of control vector"))               \
+          ":param nu: dimension of control vector")[               \
+          deprecated<>("Deprecated. Use "                           \
+                       "ImplicitConstraintModelMultiple.")])        \
       .def(ContactModelMultipleVisitor<Model>())                   \
       .def(CastVisitor<Model>())                                   \
       .def(PrintableVisitor<Model>())                              \
@@ -246,8 +250,10 @@ struct ContactDataMultipleVisitor
           bp::args("self", "model", "data"),                          \
           "Create multicontact data.\n\n"                             \
           ":param model: multicontact model\n"                        \
-          ":param data: Pinocchio data")[bp::with_custodian_and_ward< \
-          1, 2, bp::with_custodian_and_ward<1, 3>>()])                \
+          ":param data: Pinocchio data")[                            \
+          deprecated<bp::with_custodian_and_ward<                     \
+              1, 2, bp::with_custodian_and_ward<1, 3>>>(              \
+              "Deprecated. Use ImplicitConstraintDataMultiple.")])   \
       .def(ContactDataMultipleVisitor<Data>())                        \
       .def(CopyableVisitor<Data>());
 

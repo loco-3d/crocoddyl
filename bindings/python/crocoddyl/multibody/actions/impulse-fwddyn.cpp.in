@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,6 +12,7 @@
 
 #include "python/crocoddyl/core/action-base.hpp"
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
@@ -47,7 +48,8 @@ struct ActionModelImpulseFwdDynamicsVisitor
                ":param inv_damping: Damping factor for cholesky decomposition "
                "of JMinvJt (default 0.)\n"
                ":param enable_force: Enable the computation of force Jacobians "
-               "(default False)"))
+               "(default False)")[deprecated<>(
+               "Deprecated. Use DynamicsModelImpulseForward.")])
         .def(
             "calc",
             static_cast<void (Model::*)(
@@ -199,7 +201,8 @@ struct ActionDataImpulseFwdDynamicsVisitor
           ":param inv_damping: Damping factor for cholesky decomposition of "  \
           "JMinvJt (default 0.)\n"                                             \
           ":param enable_force: Enable the computation of force Jacobians "    \
-          "(default False)"))                                                  \
+          "(default False)")[deprecated<>(                                    \
+          "Deprecated. Use DynamicsModelImpulseForward.")])                   \
       .def(ActionModelImpulseFwdDynamicsVisitor<Model>())                      \
       .def(CastVisitor<Model>())                                               \
       .def(PrintableVisitor<Model>())                                          \
@@ -215,7 +218,8 @@ struct ActionDataImpulseFwdDynamicsVisitor
       "Action data for the impulse forward dynamics system.",                  \
       bp::init<Model*>(bp::args("self", "model"),                              \
                        "Create impulse forward-dynamics action data.\n\n"      \
-                       ":param model: impulse forward-dynamics action model")) \
+                       ":param model: impulse forward-dynamics action model")[ \
+          deprecated<>("Deprecated. Use DynamicsDataImpulseForward.")])       \
       .def(ActionDataImpulseFwdDynamicsVisitor<Data>())                        \
       .def(CopyableVisitor<Data>());
 

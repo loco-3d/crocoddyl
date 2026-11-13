@@ -41,6 +41,7 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
   typedef typename MathBase::Vector3s Vector3s;
   using SolverAbstract::resizeData;
   using SolverAbstract::setCandidate;
+  using SolverAbstract::solve;
 
   /**
    * @brief Initialize the Ipopt solver
@@ -50,11 +51,11 @@ class SolverIpopt : public SolverAbstractTpl<Ipopt::Number> {
   SolverIpopt(std::shared_ptr<ShootingProblem> problem);
   ~SolverIpopt() = default;
 
-  bool solve(
-      const std::vector<VectorXs>& init_xs = DefaultVector<Scalar>::value,
-      const std::vector<VectorXs>& init_us = DefaultVector<Scalar>::value,
-      const std::size_t maxiter = 100, const bool is_feasible = false,
-      const Scalar reg_init = Scalar(1e-9)) override;
+  bool solve(const std::vector<VectorXs>& init_xs,
+             const std::vector<VectorXs>& init_us,
+             const std::vector<VectorXs>& init_p,
+             const std::size_t maxiter = 100, const bool is_feasible = false,
+             const Scalar reg_init = Scalar(1e-9)) override;
   virtual void resizeData() override;
 
   /**

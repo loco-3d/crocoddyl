@@ -1,0 +1,128 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/observer/rk.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_INTEG_OBSERVER_RK_PYTHON_BINDINGS(Scalar)                    \
+  typedef IntegratedObserverModelRKTpl<Scalar> Model;                          \
+  typedef IntegratedObserverModelAbstractTpl<Scalar> ModelBase;                \
+  typedef IntegratedObserverDataRKTpl<Scalar> Data;                            \
+  typedef IntegratedObserverDataAbstractTpl<Scalar> DataBase;                  \
+  typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                    \
+  typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                      \
+  typedef CostModelSumTpl<Scalar> CostModelSum;                                \
+  typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;            \
+  typedef typename Model::VectorXs VectorXs;                                   \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                        \
+  bp::class_<Model, bp::bases<ModelBase>>(                                     \
+      "IntegratedObserverModelRK",                                             \
+      "Runge-Kutta integrated observer model.",                                \
+      bp::init<std::shared_ptr<DynamicsModel>, std::shared_ptr<CostModelSum>,  \
+               bp::optional<std::shared_ptr<ConstraintModelManager>, Scalar,   \
+                            RKType>>(                                          \
+          bp::args("self", "dynamics", "costs", "constraints", "dt",          \
+                   "rktype"),                                                  \
+          "Construct the RK integrated observer model.\n\n"                    \
+          ":param dynamics: continuous-time dynamics model\n"                  \
+          ":param costs: cost model\n"                                         \
+          ":param constraints: constraint model (optional)\n"                  \
+          ":param dt: time step (default 1e-3)\n"                              \
+          ":param rktype: RKType.two, RKType.three, or RKType.four "           \
+          "(default RKType.four)"))                                            \
+      .def("calc",                                                             \
+           static_cast<void (Model::*)(                                        \
+               const std::shared_ptr<ActionDataAbstract>&,                     \
+               const Eigen::Ref<const VectorXs>&,                              \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),              \
+           bp::args("self", "data", "x", "u"),                               \
+           "Compute the next state and cost (running node).")                 \
+      .def("calc",                                                             \
+           static_cast<void (Model::*)(                                        \
+               const std::shared_ptr<ActionDataAbstract>&,                     \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calc),              \
+           bp::args("self", "data", "x"),                                     \
+           "Compute cost only (terminal node).")                              \
+      .def("calcDiff",                                                         \
+           static_cast<void (Model::*)(                                        \
+               const std::shared_ptr<ActionDataAbstract>&,                     \
+               const Eigen::Ref<const VectorXs>&,                              \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),          \
+           bp::args("self", "data", "x", "u"),                               \
+           "Compute the derivatives (running node).")                         \
+      .def("calcDiff",                                                         \
+           static_cast<void (Model::*)(                                        \
+               const std::shared_ptr<ActionDataAbstract>&,                     \
+               const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),          \
+           bp::args("self", "data", "x"),                                     \
+           "Compute the derivatives (terminal node).")                        \
+      .add_property("rktype", bp::make_function(&Model::get_rk_type),         \
+                    "Runge-Kutta scheme")                                     \
+      .add_property("ni", bp::make_function(&Model::get_ni),                 \
+                    "number of Runge-Kutta stages")                           \
+      .def(PrintableVisitor<Model>())                                          \
+      .def(CastVisitor<Model>())                                               \
+      .def(CopyableVisitor<Model>());                                          \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                         \
+  bp::class_<Data, bp::bases<DataBase>>(                                       \
+      "IntegratedObserverDataRK", "Data for the RK integrated observer model.", \
+      bp::no_init)                                                              \
+      .add_property(                                                             \
+          "dynamics_stage",                                                      \
+          bp::make_getter(&Data::dynamics_stage,                                \
+                          bp::return_value_policy<bp::return_by_value>()),      \
+          "Runge-Kutta stage dynamics data")                                    \
+      .add_property(                                                             \
+          "costs_stage",                                                         \
+          bp::make_getter(&Data::costs_stage,                                   \
+                          bp::return_value_policy<                               \
+                              bp::return_by_value,                               \
+                              bp::with_custodian_and_ward_postcall<0, 1>>()),    \
+          "Runge-Kutta stage cost data")                                        \
+      .add_property(                                                             \
+          "integral",                                                            \
+          bp::make_getter(&Data::integral,                                      \
+                          bp::return_value_policy<bp::return_by_value>()),      \
+          "Runge-Kutta stage costs")                                             \
+      .add_property(                                                             \
+          "ki", bp::make_getter(&Data::ki, bp::return_internal_reference<>()), \
+          "Runge-Kutta dynamics rates")                                         \
+      .add_property(                                                             \
+          "y", bp::make_getter(&Data::y, bp::return_internal_reference<>()),   \
+          "Runge-Kutta stage states")                                           \
+      .add_property(                                                             \
+          "dki_dx",                                                             \
+          bp::make_getter(&Data::dki_dx, bp::return_internal_reference<>()),   \
+          "stage-rate state derivatives")                                       \
+      .add_property(                                                             \
+          "dki_du",                                                             \
+          bp::make_getter(&Data::dki_du, bp::return_internal_reference<>()),   \
+          "stage-rate process-noise derivatives")                               \
+      .add_property(                                                             \
+          "dki_dp",                                                             \
+          bp::make_getter(&Data::dki_dp, bp::return_internal_reference<>()),   \
+          "stage-rate parameter derivatives");
+
+void exposeIntegratedObserverRK() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_INTEG_OBSERVER_RK_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

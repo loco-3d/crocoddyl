@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -25,7 +25,8 @@ class ImpulseModelBase {
 };
 
 template <typename _Scalar>
-class ImpulseModelAbstractTpl : public ImpulseModelBase {
+class [[deprecated("Use ImplicitConstraintModelAbstract.")]]
+ImpulseModelAbstractTpl : public ImpulseModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -110,7 +111,8 @@ class ImpulseModelAbstractTpl : public ImpulseModelBase {
 };
 
 template <typename _Scalar>
-struct ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
+struct [[deprecated("Use ImplicitConstraintDataAbstract.")]]
+ImpulseDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef _Scalar Scalar;

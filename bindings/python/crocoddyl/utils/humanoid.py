@@ -19,7 +19,7 @@ class HumanoidLocoManipulation:
         self.LH_name = left_hand
         self._fwddyn = fwddyn
         self.state = crocoddyl.StateMultibody(self.robot_model)
-        self.actuation = crocoddyl.ActuationModelFloatingBase(self.state)
+        self.actuation = crocoddyl.ActuationModelMultibody(self.state)
         self.q0 = q0
         self.x0 = np.concatenate([self.q0, np.zeros(self.state.nv)])
         self.qref = copy.deepcopy(
@@ -81,10 +81,7 @@ class HumanoidLocoManipulation:
             )
         costs = crocoddyl.CostModelSum(self.state, nu)
         constraints = crocoddyl.ConstraintModelManager(self.state, nu)
-        if not switch:
-            contacts = crocoddyl.ContactModelMultiple(self.state, nu)
-        else:
-            impulses = crocoddyl.ImpulseModelMultiple(self.state)
+        contactConstraints = crocoddyl.ImplicitConstraintModelMultiple(self.state, nu)
         # Cost for body target
         for name, Mref in bodiesTarget.items():
             frame_id = self.robot_model.getFrameId(name)
@@ -112,21 +109,15 @@ class HumanoidLocoManipulation:
         for name in footContacts:
             frame_id = self.robot_model.getFrameId(name)
             Mref = pinocchio.SE3.Identity()
-            if switch is False:
-                contact = crocoddyl.ContactModel6D(
-                    self.state,
-                    frame_id,
-                    Mref,
-                    pinocchio.LOCAL_WORLD_ALIGNED,
-                    nu,
-                    np.array([0.0, 40.0]),
-                )
-                contacts.addContact(name + "_contact", contact)
-            else:
-                impulse = crocoddyl.ImpulseModel6D(
-                    self.state, frame_id, pinocchio.LOCAL_WORLD_ALIGNED
-                )
-                impulses.addImpulse(name + "_contact", impulse)
+            contact = crocoddyl.ContactModel(
+                self.state,
+                frame_id,
+                Mref,
+                pinocchio.LOCAL_WORLD_ALIGNED,
+                nu,
+                np.array([0.0, 40.0]) if not switch else np.zeros(2),
+            )
+            contactConstraints.addConstraint(name + "_contact", contact)
             # Cost for wrench cone
             costs.addCost(
                 name + "_frictionCone",
@@ -140,21 +131,15 @@ class HumanoidLocoManipulation:
         for name in handContacts:
             frame_id = self.robot_model.getFrameId(name)
             Mref = pinocchio.SE3.Identity()
-            if not switch:
-                contact = crocoddyl.ContactModel6D(
-                    self.state,
-                    frame_id,
-                    Mref,
-                    pinocchio.LOCAL_WORLD_ALIGNED,
-                    nu,
-                    np.array([0.0, 40.0]),
-                )
-                contacts.addContact(name + "_contact", contact)
-            else:
-                impulse = crocoddyl.ImpulseModel6D(
-                    self.state, frame_id, pinocchio.LOCAL_WORLD_ALIGNED
-                )
-                impulses.addImpulse(name + "_contact", impulse)
+            contact = crocoddyl.ContactModel(
+                self.state,
+                frame_id,
+                Mref,
+                pinocchio.LOCAL_WORLD_ALIGNED,
+                nu,
+                np.array([0.0, 40.0]) if not switch else np.zeros(2),
+            )
+            contactConstraints.addConstraint(name + "_contact", contact)
             # Cost for friction cone
             costs.addCost(
                 name + "_frictionCone",
@@ -202,18 +187,25 @@ class HumanoidLocoManipulation:
         # Create the differential action model
         if switch is False:
             if self._fwddyn:
-                dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(
-                    self.state, self.actuation, contacts, costs, constraints, 0.0, True
+                dynamics = crocoddyl.DynamicsModelConstrainedForward(
+                    self.state, self.actuation, contactConstraints
                 )
             else:
-                dmodel = crocoddyl.DifferentialActionModelContactInvDynamics(
-                    self.state, self.actuation, contacts, costs, constraints
+                dynamics = crocoddyl.DynamicsModelConstrainedInverse(
+                    self.state, self.actuation, contactConstraints
                 )
-            model = crocoddyl.IntegratedActionModelEuler(dmodel, self.dt)
-        else:
-            model = crocoddyl.ActionModelImpulseFwdDynamics(
-                self.state, impulses, costs, constraints, 0.0, 0.0, True
+            model = crocoddyl.IntegratedActionModelEuler(
+                dynamics,
+                costs,
+                constraints,
+                None,
+                crocoddyl.IntegratorTime(self.dt, False),
             )
+        else:
+            dynamics = crocoddyl.DynamicsModelImpulseForward(
+                self.state, contactConstraints
+            )
+            model = crocoddyl.DiscretizedActionModel(dynamics, costs, constraints)
         return model
 
     def createMonkeyBarProblem(self, RH_pose, LH_pose, RF_pose, LF_pose):
@@ -580,7 +572,11 @@ class HumanoidLocoManipulation:
 
     def _createEffortRegCost(self, nu):
         residual = crocoddyl.ResidualModelJointEffort(
-            self.state, self.actuation, np.zeros(self.actuation.nu), nu, self._fwddyn
+            self.state,
+            self.actuation,
+            np.zeros(self.actuation.nu),
+            nu,
+            self._fwddyn,
         )
         return crocoddyl.CostModelResidual(self.state, residual)
 

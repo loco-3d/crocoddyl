@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, INRIA,
+// Copyright (C) 2021-2026, University of Edinburgh, INRIA,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -39,7 +39,7 @@ void CostModelResidualTpl<Scalar>::calc(
     const Eigen::Ref<const VectorXs>& x) {
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
-  if (!is_rq && !is_rv) {
+  if (!is_rq && !is_rv && residual_->get_np() == 0) {
     data->activation->a_value = 0.;
     data->cost = 0.;
     return;  // do nothing
@@ -75,7 +75,7 @@ void CostModelResidualTpl<Scalar>::calcDiff(
   // models
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
-  if (!is_rq && !is_rv) {
+  if (!is_rq && !is_rv && residual_->get_np() == 0) {
     data->Lx.setZero();
     data->Lxx.setZero();
     return;  // do nothing
