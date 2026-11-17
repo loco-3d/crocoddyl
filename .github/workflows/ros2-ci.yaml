@@ -15,7 +15,6 @@ on:
       - 'LICENSE'
       - 'pyproject.toml'
       - 'package.xml'
-      - 'dependencies.rosintall'
   pull_request:
     branches:
       - devel
@@ -29,7 +28,6 @@ on:
       - 'LICENSE'
       - 'pyproject.toml'
       - 'package.xml'
-      - 'dependencies.rosintall'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -44,15 +42,11 @@ jobs:
           - {name: "(humble, Release)", ROS_DISTRO: humble}
           - {name: "(jazzy, Release)", ROS_DISTRO: jazzy}
           - {name: "(kilted, Release)", ROS_DISTRO: kilted}
+          - {name: "(kilted, Release)", ROS_DISTRO: lyrical}
           - {name: "(rolling, Release)", ROS_DISTRO: rolling}
-          # - {name: "(humble, clang, multi-threading, Release)", ROS_DISTRO: humble, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
-          # - {name: "(rolling, clang, multi-threading, Release)", ROS_DISTRO: rolling, ADDITIONAL_DEBS: "clang libomp-dev", CC: clang, CXX: clang++, CMAKE_ARGS: "-DBUILD_WITH_MULTITHREADS=ON -DBUILD_WITH_NTHREADS=2"}
-          # - {name: "(humble, Debug)", ROS_DISTRO: noetic, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
-          # - {name: "(rolling, Debug)", ROS_DISTRO: rolling, CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug"}
     name: ${{ matrix.env.name }}
     env:
       CCACHE_DIR: /github/home/.ccache             # Enable ccache
-      UPSTREAM_WORKSPACE: github:gepetto/example-robot-data#devel
       CTEST_OUTPUT_ON_FAILURE: 1
       BUILDER: colcon
     runs-on: ubuntu-latest
