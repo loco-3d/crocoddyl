@@ -382,6 +382,9 @@ endif()
 # Build the Python interface
 if(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
+  include("${JRL_CMAKE_MODULES}/python.cmake")
+  set(PYTHON_COMPONENTS Interpreter Development.Module NumPy)
+  findpython(REQUIRED)
   include_directories(bindings)
   add_subdirectory(bindings)
 endif()
