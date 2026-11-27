@@ -109,6 +109,31 @@ class ActionIntegrationBindingsTest(unittest.TestCase):
 
                 x = self.state_point(state, dtype)
                 u = np.linspace(-0.15, 0.2, euler.nu, dtype=dtype)
+                problem = module.ShootingProblem(x, [euler], euler)
+                expected_dimensions = (
+                    constraints.ng,
+                    constraints.nh,
+                    constraints.ng_T,
+                    constraints.nh_T,
+                )
+                for model in (
+                    euler,
+                    problem.runningModels[0],
+                    problem.terminalModel,
+                ):
+                    self.assertEqual(
+                        (model.ng, model.nh, model.ng_T, model.nh_T),
+                        expected_dimensions,
+                    )
+                    self.assertEqual(
+                        (
+                            model.get_ng(),
+                            model.get_nh(),
+                            model.get_ng_T(),
+                            model.get_nh_T(),
+                        ),
+                        expected_dimensions,
+                    )
                 data = euler.createData()
                 self.assertIsInstance(data, module.IntegratedActionDataEuler)
                 self.assertIsInstance(data.dynamics, module.DynamicsDataAbstract)
