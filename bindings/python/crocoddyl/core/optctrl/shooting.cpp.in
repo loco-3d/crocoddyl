@@ -20,33 +20,6 @@ namespace crocoddyl {
 namespace python {
 
 template <typename Problem>
-std::vector<std::vector<
-    std::shared_ptr<typename Problem::ActionModelAbstract> > >
-getShootingRunningPhaseModels(const Problem& problem) {
-  std::vector<std::vector<
-      std::shared_ptr<typename Problem::ActionModelAbstract> > > phases;
-  phases.reserve(problem.get_n_phases());
-  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
-    phases.push_back(problem.get_runningPhaseModels(i));
-  }
-  return phases;
-}
-
-template <typename Problem>
-std::vector<std::vector<
-    std::shared_ptr<typename Problem::ActionDataAbstract> > >
-getShootingRunningPhaseDatas(const Problem& problem) {
-  std::vector<
-      std::vector<std::shared_ptr<typename Problem::ActionDataAbstract> > >
-      phases;
-  phases.reserve(problem.get_n_phases());
-  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
-    phases.push_back(problem.get_runningPhaseDatas(i));
-  }
-  return phases;
-}
-
-template <typename Problem>
 struct ShootingProblemVisitor
     : public bp::def_visitor<ShootingProblemVisitor<Problem>> {
   typedef typename Problem::ActionModelAbstract ActionModel;
@@ -159,16 +132,9 @@ struct ShootingProblemVisitor
                       bp::make_function(&Problem::set_is_updated),
                       "Returns True if the shooting problem has been updated, "
                       "otherwise False")
-        .add_property(
-            "runningPhaseModels",
-            bp::make_function(&getShootingRunningPhaseModels<Problem>,
-                              bp::return_value_policy<bp::return_by_value>()),
-            "running action models grouped by parameter phase")
-        .add_property(
-            "runningPhaseDatas",
-            bp::make_function(&getShootingRunningPhaseDatas<Problem>,
-                              bp::return_value_policy<bp::return_by_value>()),
-            "running action data grouped by parameter phase");
+        .def("getRunningPhaseModels", &Problem::get_runningPhaseModels,
+             bp::args("self", "phase_idx"),
+             "Return the running action models for a parameter phase.");
   }
 };
 
@@ -178,12 +144,9 @@ struct ShootingProblemVisitor
   typedef ParameterPhaseModelTpl<Scalar> ParameterPhaseModel;                 \
   typedef typename Problem::VectorXs VectorXs;                                \
   typedef std::shared_ptr<ActionModel> ActionModelPtr;                        \
-  typedef std::shared_ptr<ActionDataAbstractTpl<Scalar> > ActionDataPtr;      \
   typedef std::shared_ptr<ParameterPhaseModel> ParameterPhaseModelPtr;        \
   StdVectorPythonVisitor<std::vector<std::vector<ActionModelPtr> >,           \
                          true>::expose("StdVec_StdVec_ActionModel");          \
-  StdVectorPythonVisitor<std::vector<std::vector<ActionDataPtr> >,            \
-                         true>::expose("StdVec_StdVec_ActionData");           \
   bp::register_ptr_to_python<std::shared_ptr<Problem>>();                     \
   bp::class_<Problem, bp::bases<ProblemAbstractTpl<Scalar> > >(              \
       "ShootingProblem",                                                      \

@@ -120,12 +120,12 @@ class ParameterizedProblemsTest(unittest.TestCase):
         self.assertEqual((problem.T, problem.n_phases), (3, 2))
         self.assertEqual(list(problem.phase_idxs), [0, 2])
         self.assertEqual(list(problem.phase_edxs), [2, 3])
-        self.assertEqual(len(problem.runningPhaseModels[0]), 2)
-        self.assertEqual(len(problem.runningPhaseDatas[1]), 1)
-        self.assertIs(problem.runningPhaseModels[0][0], problem.runningModels[0])
-        self.assertIs(problem.runningPhaseModels[1][0], problem.runningModels[2])
-        problem.runningPhaseDatas[0][0].cost = 1.0
-        problem.runningPhaseDatas[1][0].cost = 2.0
+        self.assertEqual(len(problem.getRunningPhaseModels(0)), 2)
+        self.assertEqual(len(problem.getRunningPhaseDatas(1)), 1)
+        self.assertIs(problem.getRunningPhaseModels(0)[0], problem.runningModels[0])
+        self.assertIs(problem.getRunningPhaseModels(1)[0], problem.runningModels[2])
+        problem.getRunningPhaseDatas(0)[0].cost = 1.0
+        problem.getRunningPhaseDatas(1)[0].cost = 2.0
         self.assertEqual(problem.runningDatas[0].cost, 1.0)
         self.assertEqual(problem.runningDatas[2].cost, 2.0)
         self.assertTrue(problem.hasParamsConstraints)
@@ -253,8 +253,10 @@ class ParameterizedProblemsTest(unittest.TestCase):
 
         with self.assertRaises(crocoddyl.Exception):
             problem.update_p(p0, 2)
-        with self.assertRaises(IndexError):
-            problem.runningPhaseModels[2]
+        with self.assertRaises(crocoddyl.Exception):
+            problem.getRunningPhaseModels(2)
+        with self.assertRaises(crocoddyl.Exception):
+            problem.getRunningPhaseDatas(2)
         with self.assertRaises(crocoddyl.Exception):
             problem.calc(xs.tolist()[:-1], us)
         with self.assertRaises(crocoddyl.Exception):
@@ -385,10 +387,10 @@ class ParameterizedProblemsTest(unittest.TestCase):
         self.assertEqual((problem.T, problem.n_phases), (3, 2))
         self.assertEqual(list(problem.phase_idxs), [0, 2])
         self.assertEqual(list(problem.phase_edxs), [2, 3])
-        self.assertEqual(len(problem.runningPhaseModels[0]), 2)
-        self.assertEqual(len(problem.runningPhaseDatas[1]), 1)
-        self.assertIs(problem.runningPhaseModels[1][0], observer1)
-        problem.runningPhaseDatas[1][0].cost = 1.0
+        self.assertEqual(len(problem.getRunningPhaseModels(0)), 2)
+        self.assertEqual(len(problem.getRunningPhaseDatas(1)), 1)
+        self.assertIs(problem.getRunningPhaseModels(1)[0], observer1)
+        problem.getRunningPhaseDatas(1)[0].cost = 1.0
         self.assertEqual(problem.runningDatas[2].cost, 1.0)
         self.assertTrue(np.array_equal(observer0a.tau_meas, tau[0]))
         self.assertTrue(np.array_equal(observer0b.tau_meas, tau[1]))

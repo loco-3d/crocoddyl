@@ -50,6 +50,9 @@ namespace python {
       .def("update_p", &Problem::update_p,                                     \
            (bp::arg("self"), bp::arg("p"), bp::arg("phase_idx") = 0),          \
            "Update the parameter vector of a phase.")                          \
+      .def("getRunningPhaseDatas", &Problem::get_runningPhaseDatas,             \
+           bp::args("self", "phase_idx"),                                      \
+           "Return the running data for a parameter phase.")                  \
       .add_property("T", bp::make_function(&Problem::get_T),                   \
                     "number of running nodes")                                 \
       .add_property("x0",                                                      \

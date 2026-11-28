@@ -19,33 +19,6 @@
 namespace crocoddyl {
 namespace python {
 
-template <typename Problem>
-std::vector<std::vector<
-    std::shared_ptr<typename Problem::ObserverModelAbstract> > >
-getObservationRunningPhaseModels(const Problem& problem) {
-  std::vector<std::vector<
-      std::shared_ptr<typename Problem::ObserverModelAbstract> > > phases;
-  phases.reserve(problem.get_n_phases());
-  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
-    phases.push_back(problem.get_runningPhaseModels(i));
-  }
-  return phases;
-}
-
-template <typename Problem>
-std::vector<std::vector<
-    std::shared_ptr<typename Problem::ActionDataAbstract> > >
-getObservationRunningPhaseDatas(const Problem& problem) {
-  std::vector<
-      std::vector<std::shared_ptr<typename Problem::ActionDataAbstract> > >
-      phases;
-  phases.reserve(problem.get_n_phases());
-  for (std::size_t i = 0; i < problem.get_n_phases(); ++i) {
-    phases.push_back(problem.get_runningPhaseDatas(i));
-  }
-  return phases;
-}
-
 #define CROCODDYL_OBSERVATION_PROBLEM_PYTHON_BINDINGS(Scalar)                 \
   typedef ObservationProblemTpl<Scalar> Problem;                              \
   typedef ObserverModelAbstractTpl<Scalar> ObserverModel;                     \
@@ -96,16 +69,9 @@ getObservationRunningPhaseDatas(const Problem& problem) {
       .add_property("nthreads", bp::make_function(&Problem::get_nthreads),   \
                     bp::make_function(&Problem::set_nthreads),                \
                     "number of threads used for parallel evaluation")       \
-      .add_property(                                                          \
-          "runningPhaseModels",                                              \
-          bp::make_function(&getObservationRunningPhaseModels<Problem>,       \
-                            bp::return_value_policy<bp::return_by_value>()),  \
-          "running observer models grouped by parameter phase")             \
-      .add_property(                                                          \
-          "runningPhaseDatas",                                               \
-          bp::make_function(&getObservationRunningPhaseDatas<Problem>,        \
-                            bp::return_value_policy<bp::return_by_value>()),  \
-          "running observer data grouped by parameter phase")               \
+      .def("getRunningPhaseModels", &Problem::get_runningPhaseModels,         \
+           bp::args("self", "phase_idx"),                                      \
+           "Return the running observer models for a parameter phase.")      \
       .add_property("n_phases", bp::make_function(&Problem::get_n_phases),   \
                     "number of phases")                                      \
       .add_property(                                                          \
