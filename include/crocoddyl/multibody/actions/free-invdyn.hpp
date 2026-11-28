@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -31,6 +32,7 @@ namespace crocoddyl {
  * variables defined as the control inputs, and the under-actuation constraint
  * is under the name `tau`, thus the user is not allowed to use it.
  *
+ * @deprecated Use `DynamicsModelConstrainedInverseTpl`.
  *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`,
  * `createData()`
@@ -66,10 +68,11 @@ class DifferentialActionModelFreeInvDynamicsTpl
    * @param[in] actuation  Actuation model
    * @param[in] costs      Cost model
    */
-  DifferentialActionModelFreeInvDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<CostModelSum> costs);
+  DEPRECATED("Use DynamicsModelConstrainedInverse",
+             DifferentialActionModelFreeInvDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<CostModelSum> costs));
 
   /**
    * @brief Initialize the free inverse-dynamics action model
@@ -79,11 +82,12 @@ class DifferentialActionModelFreeInvDynamicsTpl
    * @param[in] costs        Cost model
    * @param[in] constraints  Constraints model
    */
-  DifferentialActionModelFreeInvDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<CostModelSum> costs,
-      std::shared_ptr<ConstraintModelManager> constraints);
+  DEPRECATED("Use DynamicsModelConstrainedInverse",
+             DifferentialActionModelFreeInvDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<CostModelSum> costs,
+                 std::shared_ptr<ConstraintModelManager> constraints));
   virtual ~DifferentialActionModelFreeInvDynamicsTpl() = default;
 
   /**
@@ -418,6 +422,10 @@ class DifferentialActionModelFreeInvDynamicsTpl
   };
 };
 
+/**
+ * @brief Data for the deprecated free inverse-dynamics action model
+ * @deprecated Use `DynamicsDataConstrainedInverseTpl`.
+ */
 template <typename _Scalar>
 struct DifferentialActionDataFreeInvDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
@@ -433,7 +441,9 @@ struct DifferentialActionDataFreeInvDynamicsTpl
   typedef typename MathBase::VectorXs VectorXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataFreeInvDynamicsTpl(Model<Scalar>* const model)
+  DEPRECATED("Use DynamicsDataConstrainedInverse",
+             explicit DifferentialActionDataFreeInvDynamicsTpl(
+                 Model<Scalar>* const model))
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -12,11 +12,17 @@ namespace crocoddyl {
 template <typename Scalar>
 CostModelSumTpl<Scalar>::CostModelSumTpl(std::shared_ptr<StateAbstract> state,
                                          const std::size_t nu)
-    : state_(state), nu_(nu), nr_(0), nr_total_(0) {}
+    : state_(state), nu_(nu), np_(0), nr_(0), nr_total_(0) {}
+
+template <typename Scalar>
+CostModelSumTpl<Scalar>::CostModelSumTpl(std::shared_ptr<StateAbstract> state,
+                                         const std::size_t nu,
+                                         const std::size_t np)
+    : state_(state), nu_(nu), np_(np), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::CostModelSumTpl(std::shared_ptr<StateAbstract> state)
-    : state_(state), nu_(state->get_nv()), nr_(0), nr_total_(0) {}
+    : state_(state), nu_(state->get_nv()), np_(0), nr_(0), nr_total_(0) {}
 
 template <typename Scalar>
 CostModelSumTpl<Scalar>::~CostModelSumTpl() {}
@@ -30,6 +36,13 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name,
         name
         << " cost item doesn't have the same control dimension (it should be " +
                std::to_string(nu_) + ")");
+  }
+  if (cost->get_np() != 0 && cost->get_np() != np_) {
+    throw_pretty(
+        name
+        << " cost item doesn't have the same parameter dimension (it should "
+           "be " +
+               std::to_string(np_) + ")");
   }
   std::pair<typename CostModelContainer::iterator, bool> ret =
       costs_.insert(std::make_pair(
@@ -55,6 +68,13 @@ void CostModelSumTpl<Scalar>::addCost(
         cost_item->name
         << " cost item doesn't have the same control dimension (it should be " +
                std::to_string(nu_) + ")");
+  }
+  if (cost_item->cost->get_np() != 0 && cost_item->cost->get_np() != np_) {
+    throw_pretty(
+        cost_item->name
+        << " cost item doesn't have the same parameter dimension (it should "
+           "be " +
+               std::to_string(np_) + ")");
   }
   costs_.insert(std::make_pair(cost_item->name, cost_item));
   if (cost_item->active) {
@@ -197,6 +217,12 @@ void CostModelSumTpl<Scalar>::calcDiff(const std::shared_ptr<CostDataSum>& data,
   data->Lxx.setZero();
   data->Lxu.setZero();
   data->Luu.setZero();
+  if (np_ != 0) {
+    data->Lp.setZero();
+    data->Lpp.setZero();
+    data->Lpx.setZero();
+    data->Lpu.setZero();
+  }
 
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
@@ -216,6 +242,12 @@ void CostModelSumTpl<Scalar>::calcDiff(const std::shared_ptr<CostDataSum>& data,
       data->Lxx += m_i->weight * d_i->Lxx;
       data->Lxu += m_i->weight * d_i->Lxu;
       data->Luu += m_i->weight * d_i->Luu;
+      if (m_i->cost->get_np() != 0) {
+        data->Lp += m_i->weight * d_i->Lp;
+        data->Lpp += m_i->weight * d_i->Lpp;
+        data->Lpx += m_i->weight * d_i->Lpx;
+        data->Lpu += m_i->weight * d_i->Lpu;
+      }
     }
   }
 }
@@ -234,6 +266,11 @@ void CostModelSumTpl<Scalar>::calcDiff(const std::shared_ptr<CostDataSum>& data,
   }
   data->Lx.setZero();
   data->Lxx.setZero();
+  if (np_ != 0) {
+    data->Lp.setZero();
+    data->Lpp.setZero();
+    data->Lpx.setZero();
+  }
 
   typename CostModelContainer::iterator it_m, end_m;
   typename CostDataContainer::iterator it_d, end_d;
@@ -250,6 +287,11 @@ void CostModelSumTpl<Scalar>::calcDiff(const std::shared_ptr<CostDataSum>& data,
       m_i->cost->calcDiff(d_i, x);
       data->Lx += m_i->weight * d_i->Lx;
       data->Lxx += m_i->weight * d_i->Lxx;
+      if (m_i->cost->get_np() != 0) {
+        data->Lp += m_i->weight * d_i->Lp;
+        data->Lpp += m_i->weight * d_i->Lpp;
+        data->Lpx += m_i->weight * d_i->Lpx;
+      }
     }
   }
 }
@@ -266,7 +308,7 @@ template <typename NewScalar>
 CostModelSumTpl<NewScalar> CostModelSumTpl<Scalar>::cast() const {
   typedef CostModelSumTpl<NewScalar> ReturnType;
   typedef CostItemTpl<NewScalar> CostType;
-  ReturnType ret(state_->template cast<NewScalar>(), nu_);
+  ReturnType ret(state_->template cast<NewScalar>(), nu_, np_);
   typename CostModelContainer::const_iterator it_m, end_m;
   for (it_m = costs_.begin(), end_m = costs_.end(); it_m != end_m; ++it_m) {
     const std::string name = it_m->first;
@@ -291,6 +333,11 @@ CostModelSumTpl<Scalar>::get_costs() const {
 template <typename Scalar>
 std::size_t CostModelSumTpl<Scalar>::get_nu() const {
   return nu_;
+}
+
+template <typename Scalar>
+std::size_t CostModelSumTpl<Scalar>::get_np() const {
+  return np_;
 }
 
 template <typename Scalar>

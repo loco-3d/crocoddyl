@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,6 +125,7 @@ void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
   const bool is_rq = residual_->get_q_dependent();
   const bool is_rv = residual_->get_v_dependent();
   const bool is_ru = residual_->get_u_dependent() || nu_ == 0;
+  const bool is_rp = residual_->get_np() != 0;
   switch (type_) {
     case ConstraintType::Inequality:
       if (is_rq && is_rv) {
@@ -141,6 +142,9 @@ void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
       if (is_ru) {
         data->Gu = data->residual->Ru;
       }
+      if (is_rp) {
+        data->Gp = data->residual->Rp;
+      }
       break;
     case ConstraintType::Equality:
       if (is_rq && is_rv) {
@@ -156,6 +160,9 @@ void ConstraintModelResidualTpl<Scalar>::updateCalcDiff(
       }
       if (is_ru) {
         data->Hu = data->residual->Ru;
+      }
+      if (is_rp) {
+        data->Hp = data->residual->Rp;
       }
       break;
     case ConstraintType::Both:  // this condition is not supported and possible

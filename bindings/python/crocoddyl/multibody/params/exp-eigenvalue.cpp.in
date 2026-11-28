@@ -1,0 +1,66 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/params/exp-eigenvalue.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_EXP_EIGENVALUE_PARAMETRIZATION_PYTHON_BINDINGS(Scalar)      \
+  {                                                                           \
+    typedef ExpEigenValueParametrizationTpl<Scalar> Model;                    \
+    typedef InertialParametrizationAbstractTpl<Scalar> ModelBase;             \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model, bp::bases<ModelBase> >(                                 \
+        "ExpEigenValueParametrization",                                       \
+        "Smooth inertial parametrization using exponential eigenvalues and "  \
+        "rotation-vector principal axes.",                                    \
+        bp::init<>(bp::args("self")))                                         \
+        .def("fromParametrization", &Model::fromParametrization,              \
+             bp::args("self", "data", "psi", "p"),                            \
+             "Convert the smooth inertial parameters into dynamic "           \
+             "parameters.")                                                   \
+        .def("toParametrization", &Model::toParametrization,                  \
+             bp::args("self", "p", "psi"),                                    \
+             "Convert dynamic parameters into the exponential-eigenvalue "    \
+             "parametrization.")                                              \
+        .def("updateParametrizationDerivative",                               \
+             &Model::updateParametrizationDerivative,                         \
+             bp::args("self", "data", "dpsi_dp", "p", "psi"),                \
+             "Update the Jacobian of the exponential-eigenvalue "             \
+             "parametrization.")                                              \
+        .def("createData", &Model::createData, bp::args("self"),              \
+             "Create the parametrization data.")                              \
+        .def(CastVisitor<Model>())                                             \
+        .def(PrintableVisitor<Model>())                                       \
+        .def(CopyableVisitor<Model>());                                       \
+  }
+
+#define CROCODDYL_EXP_EIGENVALUE_PARAMETRIZATION_DATA_PYTHON_BINDINGS(Scalar) \
+  {                                                                           \
+    typedef ExpEigenValueParametrizationDataTpl<Scalar> Data;                 \
+    typedef InertialParametrizationDataAbstractTpl<Scalar> DataBase;          \
+    bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
+    bp::class_<Data, bp::bases<DataBase> >(                                   \
+        "ExpEigenValueParametrizationData",                                   \
+        "Data for the exponential-eigenvalue inertial parametrization.",      \
+        bp::init<>(bp::args("self"),                                          \
+                   "Create exponential-eigenvalue parametrization data."))   \
+        .def(CopyableVisitor<Data>());                                        \
+  }
+
+void exposeExpEigenValueParametrization() {
+  CROCODDYL_EXP_EIGENVALUE_PARAMETRIZATION_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_EXP_EIGENVALUE_PARAMETRIZATION_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

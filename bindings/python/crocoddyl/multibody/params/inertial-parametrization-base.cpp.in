@@ -1,0 +1,83 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "python/crocoddyl/multibody/params/inertial-parametrization-base.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct InertialParametrizationAbstractVisitor
+    : public bp::def_visitor<InertialParametrizationAbstractVisitor<Model> > {
+  typedef typename Model::InertialParametrizationDataAbstract Data;
+
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("fromParametrization", pure_virtual(&Model::fromParametrization),
+           bp::args("self", "data", "psi", "p"),
+           "Convert the smooth inertial parameters into dynamic parameters.\n\n"
+           ":param data: parametrization data\n"
+           ":param psi: dynamic-parameter vector\n"
+           ":param p: smooth inertial-parameter vector")
+        .def("toParametrization", pure_virtual(&Model::toParametrization),
+             bp::args("self", "p", "psi"),
+             "Convert dynamic parameters into the smooth inertial "
+             "parametrization.\n\n"
+             ":param p: smooth inertial-parameter vector\n"
+             ":param psi: dynamic-parameter vector")
+        .def("updateParametrizationDerivative",
+             pure_virtual(&Model::updateParametrizationDerivative),
+             bp::args("self", "data", "dpsi_dp", "p", "psi"),
+             "Update the Jacobian of the inertial parametrization.\n\n"
+             ":param data: parametrization data\n"
+             ":param dpsi_dp: Jacobian of the dynamic parameters wrt p\n"
+             ":param p: smooth inertial-parameter vector\n"
+             ":param psi: dynamic-parameter vector")
+        .def("createData", &Model::default_createData, bp::args("self"),
+             "Create the parametrization data.\n\n"
+             ":return parametrization data")
+        .add_property("np", bp::make_function(&Model::get_np),
+                      "dimension of the inertial parametrization");
+  }
+};
+
+#define CROCODDYL_INERTIAL_PARAMETRIZATION_ABSTRACT_PYTHON_BINDINGS(Scalar)   \
+  {                                                                           \
+    typedef InertialParametrizationAbstractTpl<Scalar> Model;                 \
+    typedef InertialParametrizationAbstractTpl_wrap<Scalar> Model_wrap;       \
+    bp::register_ptr_to_python<std::shared_ptr<Model> >();                    \
+    bp::class_<Model_wrap, boost::noncopyable>(                               \
+        "InertialParametrizationAbstract",                                    \
+        "Abstract inertial-parametrization model.\n\n"                        \
+        "It maps a 10D smooth inertial parameter vector to the standard "     \
+        "dynamic-parameter representation and its Jacobian.",                 \
+        bp::init<>(bp::args("self")))                                         \
+        .def(InertialParametrizationAbstractVisitor<Model_wrap>())            \
+        .def(PrintableVisitor<Model_wrap>());                                 \
+  }
+
+#define CROCODDYL_INERTIAL_PARAMETRIZATION_DATA_ABSTRACT_PYTHON_BINDINGS(     \
+    Scalar)                                                                   \
+  {                                                                           \
+    typedef InertialParametrizationDataAbstractTpl<Scalar> Data;              \
+    bp::register_ptr_to_python<std::shared_ptr<Data> >();                     \
+    bp::class_<Data>(                                                         \
+        "InertialParametrizationDataAbstract",                                \
+        "Abstract inertial-parametrization data.", bp::no_init)               \
+        .def(CopyableVisitor<Data>());                                        \
+  }
+
+void exposeInertialParametrizationAbstract() {
+  CROCODDYL_INERTIAL_PARAMETRIZATION_ABSTRACT_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_INERTIAL_PARAMETRIZATION_DATA_ABSTRACT_PYTHON_BINDINGS(
+      @SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

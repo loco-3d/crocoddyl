@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -14,6 +14,7 @@
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
+#include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/contacts.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -65,6 +66,8 @@ namespace crocoddyl {
  * important to remark that `calcDiff()` computes the derivatives using the
  * latest stored values by `calc()`. Thus, we need to run `calc()` first.
  *
+ * @deprecated Use `DynamicsModelConstrainedForwardTpl`.
+ *
  * \sa `DifferentialActionModelAbstractTpl`, `calc()`, `calcDiff()`,
  * `createData()`
  */
@@ -106,13 +109,14 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] enable_force     Enable the computation of the contact force
    * derivatives (default false)
    */
-  DifferentialActionModelContactFwdDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<ContactModelMultiple> contacts,
-      std::shared_ptr<CostModelSum> costs,
-      const Scalar JMinvJt_damping = Scalar(0.),
-      const bool enable_force = false);
+  DEPRECATED("Use DynamicsModelConstrainedForward",
+             DifferentialActionModelContactFwdDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<ContactModelMultiple> contacts,
+                 std::shared_ptr<CostModelSum> costs,
+                 const Scalar JMinvJt_damping = Scalar(0.),
+                 const bool enable_force = false));
 
   /**
    * @brief Initialize the contact forward-dynamics action model
@@ -131,14 +135,15 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] enable_force     Enable the computation of the contact force
    * derivatives (default false)
    */
-  DifferentialActionModelContactFwdDynamicsTpl(
-      std::shared_ptr<StateMultibody> state,
-      std::shared_ptr<ActuationModelAbstract> actuation,
-      std::shared_ptr<ContactModelMultiple> contacts,
-      std::shared_ptr<CostModelSum> costs,
-      std::shared_ptr<ConstraintModelManager> constraints,
-      const Scalar JMinvJt_damping = Scalar(0.),
-      const bool enable_force = false);
+  DEPRECATED("Use DynamicsModelConstrainedForward",
+             DifferentialActionModelContactFwdDynamicsTpl(
+                 std::shared_ptr<StateMultibody> state,
+                 std::shared_ptr<ActuationModelAbstract> actuation,
+                 std::shared_ptr<ContactModelMultiple> contacts,
+                 std::shared_ptr<CostModelSum> costs,
+                 std::shared_ptr<ConstraintModelManager> constraints,
+                 const Scalar JMinvJt_damping = Scalar(0.),
+                 const bool enable_force = false));
   virtual ~DifferentialActionModelContactFwdDynamicsTpl() = default;
 
   /**
@@ -334,6 +339,10 @@ class DifferentialActionModelContactFwdDynamicsTpl
                        //!< contact-forces derivatives
 };
 
+/**
+ * @brief Data for the deprecated contact forward-dynamics action model
+ * @deprecated Use `DynamicsDataConstrainedForwardTpl`.
+ */
 template <typename _Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl
     : public DifferentialActionDataAbstractTpl<_Scalar> {
@@ -348,8 +357,9 @@ struct DifferentialActionDataContactFwdDynamicsTpl
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit DifferentialActionDataContactFwdDynamicsTpl(
-      Model<Scalar>* const model)
+  DEPRECATED("Use DynamicsDataConstrainedForward",
+             explicit DifferentialActionDataContactFwdDynamicsTpl(
+                 Model<Scalar>* const model))
       : Base(model),
         pinocchio(pinocchio::DataTpl<Scalar>(model->get_pinocchio())),
         multibody(

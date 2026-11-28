@@ -1,0 +1,202 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/numdiff/observer.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_OBSERVER_MODEL_NUMDIFF_PYTHON_BINDINGS(Scalar)               \
+  {                                                                             \
+    typedef ObserverModelNumDiffTpl<Scalar> Model;                             \
+    typedef ObserverModelAbstractTpl<Scalar> ModelBase;                        \
+    typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                  \
+    typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;              \
+    typedef ParameterManagerTpl<Scalar> ParameterManager;                      \
+    typedef typename Model::VectorXs VectorXs;                                 \
+    bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
+    bp::class_<Model, bp::bases<ModelBase>>(                                   \
+        "ObserverModelNumDiff",                                                \
+        "Numerical differentiation wrapper for observer models.\n\n"           \
+        "Computes all first-order (and optionally second-order) derivatives "  \
+        "via finite differences, including parameter derivatives when an "    \
+        "active parameter manager is supplied.",                              \
+        bp::init<std::shared_ptr<ModelBase>, bp::optional<bool>>(              \
+            bp::args("self", "model", "gaussApprox"),                          \
+            "Initialize the observer numdiff model.\n\n"                       \
+            ":param model: observer model to differentiate\n"                  \
+            ":param gaussApprox: use Gauss-Newton Hessian approximation "      \
+            "(default False)"))                                                 \
+        .def(bp::init<std::shared_ptr<ModelBase>,                              \
+                      std::shared_ptr<ParameterManager>, bp::optional<bool>>(  \
+            bp::args("self", "model", "params", "gaussApprox"),              \
+            "Initialize with an active parameter manager.\n\n"                \
+            ":param model: observer model to differentiate\n"                  \
+            ":param params: active parameter manager\n"                        \
+            ":param gaussApprox: use Gauss-Newton Hessian approximation "      \
+            "(default False)"))                                                \
+        .def("calc",                                                            \
+             static_cast<void (Model::*)(                                       \
+                 const std::shared_ptr<ActionDataAbstract>&,                   \
+                 const Eigen::Ref<const VectorXs>&,                            \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),            \
+             bp::args("self", "data", "x", "w"),                               \
+             "Compute next state and cost (running node).")                    \
+        .def("calc",                                                            \
+             static_cast<void (Model::*)(                                       \
+                 const std::shared_ptr<ActionDataAbstract>&,                   \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),            \
+             bp::args("self", "data", "x"),                                    \
+             "Compute cost only (terminal node).")                             \
+        .def("calcDiff",                                                        \
+             static_cast<void (Model::*)(                                       \
+                 const std::shared_ptr<ActionDataAbstract>&,                   \
+                 const Eigen::Ref<const VectorXs>&,                            \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),        \
+             bp::args("self", "data", "x", "w"),                               \
+             "Compute derivatives via FD (running node).")                     \
+        .def("calcDiff",                                                        \
+             static_cast<void (Model::*)(                                       \
+                 const std::shared_ptr<ActionDataAbstract>&,                   \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),        \
+             bp::args("self", "data", "x"),                                    \
+             "Compute derivatives via FD (terminal node).")                    \
+        .def("createData", static_cast<std::shared_ptr<ActionDataAbstract>     \
+                                           (Model::*)()>(&Model::createData),  \
+             bp::args("self"),                                                 \
+             "Create observer numdiff data.")                                  \
+        .def("createData",                                                     \
+             static_cast<std::shared_ptr<ActionDataAbstract> (Model::*)(       \
+                 const std::shared_ptr<ParameterDataManager>&)>(               \
+                 &Model::createData),                                          \
+             bp::args("self", "params_data"),                                 \
+             "Create observer numdiff data with external parameter data.")    \
+        .def("update_tau", &Model::update_tau, bp::args("self", "tau_meas"),   \
+             "Forward measured torques to the wrapped model.")                 \
+        .def("set_params", &Model::set_params,                                \
+             bp::args("self", "data", "params"),                              \
+             "Set the parameter manager used by numerical differentiation.")  \
+        .def("update_p", &Model::update_p, bp::args("self", "data", "p"),      \
+             "Forward parameter update to the wrapped model.")                 \
+        .add_property(                                                          \
+            "model",                                                            \
+            bp::make_function(&Model::get_model,                               \
+                              bp::return_value_policy<bp::return_by_value>()), \
+            "wrapped observer model")                                          \
+        .add_property(                                                         \
+            "params",                                                          \
+            bp::make_function(&Model::get_params,                              \
+                              bp::return_value_policy<bp::return_by_value>()), \
+            "parameter manager")                                               \
+        .add_property("disturbance",                                            \
+                      bp::make_function(&Model::get_disturbance),              \
+                      &Model::set_disturbance,                                 \
+                      "finite-difference step for Jacobian computation")       \
+        .add_property(                                                          \
+            "withGaussApprox",                                                  \
+            bp::make_function(&Model::get_with_gauss_approx,                   \
+                              bp::return_value_policy<bp::return_by_value>()), \
+            "Gauss-Newton Hessian approximation flag")                         \
+        .add_property("ng", bp::make_function(&Model::get_ng),                 \
+                      "live number of running inequality constraints")          \
+        .def("get_ng", &Model::get_ng)                                          \
+        .add_property("nh", bp::make_function(&Model::get_nh),                 \
+                      "live number of running equality constraints")            \
+        .def("get_nh", &Model::get_nh)                                          \
+        .add_property("ng_T", bp::make_function(&Model::get_ng_T),             \
+                      "live number of terminal inequality constraints")         \
+        .def("get_ng_T", &Model::get_ng_T)                                      \
+        .add_property("nh_T", bp::make_function(&Model::get_nh_T),             \
+                      "live number of terminal equality constraints")           \
+        .def("get_nh_T", &Model::get_nh_T)                                      \
+        .add_property(                                                          \
+            "g_lb",                                                             \
+            bp::make_function(&Model::get_g_lb,                                 \
+                              bp::return_internal_reference<>()),               \
+            "live inequality lower bounds")                                    \
+        .add_property(                                                          \
+            "g_ub",                                                             \
+            bp::make_function(&Model::get_g_ub,                                 \
+                              bp::return_internal_reference<>()),               \
+            "live inequality upper bounds")                                    \
+        .def(PrintableVisitor<Model>())                                         \
+        .def(CastVisitor<Model>())                                              \
+        .def(CopyableVisitor<Model>());                                         \
+  }
+
+#define CROCODDYL_OBSERVER_DATA_NUMDIFF_PYTHON_BINDINGS(Scalar)                \
+  {                                                                             \
+    typedef ObserverDataNumDiffTpl<Scalar> Data;                               \
+    typedef ObserverDataAbstractTpl<Scalar> DataBase;                          \
+    typedef ObserverModelNumDiffTpl<Scalar> Model;                             \
+    bp::register_ptr_to_python<std::shared_ptr<Data>>();                       \
+    bp::class_<Data, bp::bases<DataBase>>(                                     \
+        "ObserverDataNumDiff", "Data for observer numdiff models.",            \
+        bp::init<Model*>(bp::args("self", "model"),                            \
+                         "Create observer numdiff data.\n\n"                   \
+                         ":param model: observer numdiff model"))              \
+        .add_property(                                                          \
+            "dx",                                                               \
+            bp::make_getter(&Data::dx, bp::return_internal_reference<>()),     \
+            "state disturbance vector")                                        \
+        .add_property(                                                          \
+            "dw",                                                               \
+            bp::make_getter(&Data::dw, bp::return_internal_reference<>()),     \
+            "process-noise disturbance vector")                                \
+        .add_property(                                                          \
+            "data_0",                                                           \
+            bp::make_getter(&Data::data_0,                                     \
+                            bp::return_value_policy<                            \
+                                bp::return_by_value,                            \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()), \
+            "baseline observer data")                                          \
+        .add_property(                                                          \
+            "data_x",                                                           \
+            bp::make_getter(&Data::data_x,                                     \
+                            bp::return_value_policy<                            \
+                                bp::return_by_value,                            \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()), \
+            "data for state perturbations")                                    \
+        .add_property(                                                          \
+            "data_w",                                                           \
+            bp::make_getter(&Data::data_w,                                     \
+                            bp::return_value_policy<                            \
+                                bp::return_by_value,                            \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()), \
+            "data for process-noise perturbations")                            \
+        .add_property(                                                          \
+            "data_p",                                                           \
+            bp::make_getter(&Data::data_p,                                     \
+                            bp::return_value_policy<                            \
+                                bp::return_by_value,                            \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()), \
+            "data for parameter perturbations")                                \
+        .add_property(                                                          \
+            "params_data",                                                      \
+            bp::make_getter(&Data::params_data,                                \
+                            bp::return_value_policy<bp::return_by_value>()),   \
+            "shared parameter-data manager");                                 \
+  }
+
+void exposeObserverNumDiff() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_OBSERVER_MODEL_NUMDIFF_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_OBSERVER_DATA_NUMDIFF_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

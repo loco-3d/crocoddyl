@@ -1,14 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2024-2025, Heriot-Watt University
+// Copyright (C) 2024-2026, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 // Auto-generated file for @SCALAR_TYPE@
 #include "crocoddyl/multibody/actuations/floating-base-thrusters.hpp"
+
 #include "python/crocoddyl/multibody/multibody.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 #include "python/crocoddyl/utils/vector-converter.hpp"
 
 #define SCALAR_@SCALAR_NAME@
@@ -36,7 +38,7 @@ struct ThrustersVisitor : public bp::def_visitor<ThrustersVisitor<Model>> {
         .def_readwrite("type", &Model::type,
                        "type of thruster (clockwise or counterclockwise)")
         .def_readwrite("min_thrust", &Model::min_thrust, "minimum thrust")
-        .def_readwrite("max_thrust", &Model::min_thrust, "maximum thrust");
+        .def_readwrite("max_thrust", &Model::max_thrust, "maximum thrust");
   }
 };
 
@@ -131,19 +133,19 @@ struct ActuationModelFloatingBaseThrustersVisitor
     Scalar)                                                                 \
   typedef ActuationModelFloatingBaseThrustersTpl<Scalar> Model;             \
   typedef ActuationModelAbstractTpl<Scalar> ModelBase;                      \
-  typedef ThrusterTpl<Scalar> Thruster;                                    \
-  typedef StateMultibodyTpl<Scalar> StateMultibody;                         \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                     \
   bp::class_<Model, bp::bases<ModelBase>>(                                  \
       "ActuationModelFloatingBaseThrusters",                                \
       "Actuation models for floating base systems actuated with thrusters " \
       "(e.g. aerial manipulators).",                                        \
-      bp::init<std::shared_ptr<StateMultibody>, std::vector<Thruster>>(    \
-          bp::args("self", "state", "thrusters"),                           \
-          "Initialize the floating base actuation model equipped with "     \
-          "thrusters.\n\n"                                                  \
-          ":param state: state of multibody system\n"                       \
-          ":param thrusters: vector of thrusters"))                         \
+      bp::no_init)                                                          \
+      .def(bp::init<std::shared_ptr<typename Model::StateMultibody>,          \
+                    std::vector<typename Model::Thruster> >(                \
+          bp::args("self", "state", "thrusters"),                        \
+          "Initialize the deprecated floating-base thruster model.")[      \
+          deprecated<>("Deprecated. Use ActuationModelMultibody with "       \
+                       "[JointDynamicsModelThruster(thrusters)] for "        \
+                       "the multibody actuation backend.")])                 \
       .def(ActuationModelFloatingBaseThrustersVisitor<Model>())             \
       .def(CastVisitor<Model>())                                            \
       .def(PrintableVisitor<Model>())                                       \

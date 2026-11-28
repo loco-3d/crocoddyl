@@ -1,0 +1,162 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/core/observer/discretized.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/copyable.hpp"
+#include "python/crocoddyl/utils/printable.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+#define IS_FP_SCALAR_@FP_TYPE@
+
+namespace crocoddyl {
+namespace python {
+
+#define CROCODDYL_DISCRETIZED_OBSERVER_PYTHON_BINDINGS(Scalar)                  \
+  {                                                                              \
+    typedef DiscretizedObserverModelTpl<Scalar> Model;                          \
+    typedef ObserverModelAbstractTpl<Scalar> ModelBase;                         \
+    typedef ActionDataAbstractTpl<Scalar> ActionDataAbstract;                   \
+    typedef DynamicsModelAbstractTpl<Scalar> DynamicsModel;                     \
+    typedef CostModelSumTpl<Scalar> CostModelSum;                               \
+    typedef ConstraintModelManagerTpl<Scalar> ConstraintModelManager;           \
+    typedef typename Model::VectorXs VectorXs;                                  \
+    bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+    bp::class_<Model, bp::bases<ModelBase>>(                                    \
+        "DiscretizedObserverModel",                                             \
+        "Action model for a discretized observer.\n\n"                          \
+        "Wraps a DiscreteTime DynamicsModel for optimal estimation. The "       \
+        "observer control w (process noise in tangent space) does not enter "   \
+        "the mean dynamics — the transition is driven solely by the measured "  \
+        "torques set via update_tau.",                                           \
+        bp::init<std::shared_ptr<DynamicsModel>, std::shared_ptr<CostModelSum>, \
+                 std::size_t,                                                    \
+                 bp::optional<std::shared_ptr<ConstraintModelManager>>>(        \
+            bp::args("self", "dynamics", "costs", "ntau", "constraints"),       \
+            "Initialize the discretized observer model.\n\n"                    \
+            ":param dynamics: discrete-time dynamics model\n"                   \
+            ":param costs: cost model stack (nu must equal state.ndx)\n"        \
+            ":param ntau: dimension of the measured torque vector\n"            \
+            ":param constraints: constraint manager (default None)"))           \
+        .def("calc",                                                             \
+             static_cast<void (Model::*)(                                        \
+                 const std::shared_ptr<ActionDataAbstract>&,                    \
+                 const Eigen::Ref<const VectorXs>&,                             \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),             \
+             bp::args("self", "data", "x", "w"),                                \
+             "Compute the next state and cost (running node).\n\n"              \
+             ":param data: observer data\n"                                     \
+             ":param x: state point (dim. state.nx)\n"                          \
+             ":param w: process noise (dim. state.ndx)")                        \
+        .def("calc",                                                             \
+             static_cast<void (Model::*)(                                        \
+                 const std::shared_ptr<ActionDataAbstract>&,                    \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),             \
+             bp::args("self", "data", "x"),                                     \
+             "Compute cost only (terminal node).")                              \
+        .def("calcDiff",                                                         \
+             static_cast<void (Model::*)(                                        \
+                 const std::shared_ptr<ActionDataAbstract>&,                    \
+                 const Eigen::Ref<const VectorXs>&,                             \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),         \
+             bp::args("self", "data", "x", "w"),                                \
+             "Compute the derivatives (running node).\n\n"                      \
+             "Assumes calc has been run first.")                                 \
+        .def("calcDiff",                                                         \
+             static_cast<void (Model::*)(                                        \
+                 const std::shared_ptr<ActionDataAbstract>&,                    \
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),         \
+             bp::args("self", "data", "x"),                                     \
+             "Compute the derivatives (terminal node).")                        \
+        .add_property(                                                           \
+            "dynamics",                                                          \
+            bp::make_function(&Model::get_dynamics,                             \
+                              bp::return_value_policy<bp::return_by_value>()),  \
+            "discrete-time dynamics model")                                     \
+        .add_property(                                                           \
+            "costs",                                                             \
+            bp::make_function(&Model::get_costs,                                \
+                              bp::return_value_policy<bp::return_by_value>()),  \
+            "cost model stack")                                                 \
+        .add_property(                                                           \
+            "constraints",                                                       \
+            bp::make_function(&Model::get_constraints,                          \
+                              bp::return_value_policy<bp::return_by_value>()),  \
+            "constraint manager")                                               \
+        .add_property(                                                           \
+            "params",                                                            \
+            bp::make_function(&Model::get_params,                               \
+                              bp::return_value_policy<bp::return_by_value>()),  \
+            "parameter manager")                                                \
+        .add_property("ng", bp::make_function(&Model::get_ng),                  \
+                      "number of running inequality constraints")               \
+        .add_property("nh", bp::make_function(&Model::get_nh),                  \
+                      "number of running equality constraints")                 \
+        .add_property("ng_T", bp::make_function(&Model::get_ng_T),              \
+                      "number of terminal inequality constraints")              \
+        .add_property("nh_T", bp::make_function(&Model::get_nh_T),              \
+                      "number of terminal equality constraints")                \
+        .add_property(                                                           \
+            "g_lb",                                                              \
+            bp::make_function(&Model::get_g_lb,                                 \
+                              bp::return_internal_reference<>()),               \
+            "live inequality lower bounds")                                    \
+        .add_property(                                                           \
+            "g_ub",                                                              \
+            bp::make_function(&Model::get_g_ub,                                 \
+                              bp::return_internal_reference<>()),               \
+            "live inequality upper bounds")                                    \
+        .def(PrintableVisitor<Model>())                                          \
+        .def(CastVisitor<Model>())                                               \
+        .def(CopyableVisitor<Model>());                                          \
+  }
+
+#define CROCODDYL_DISCRETIZED_OBSERVER_DATA_PYTHON_BINDINGS(Scalar)             \
+  {                                                                              \
+    typedef DiscretizedObserverDataTpl<Scalar> Data;                            \
+    typedef ObserverDataAbstractTpl<Scalar> DataBase;                           \
+    typedef DiscretizedObserverModelTpl<Scalar> Model;                          \
+    bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+    bp::class_<Data, bp::bases<DataBase>>(                                      \
+        "DiscretizedObserverData",                                              \
+        "Data for discretized observer models.",                                \
+        bp::init<Model*>(bp::args("self", "model"),                             \
+                         "Create discretized observer data.\n\n"                \
+                         ":param model: discretized observer model"))           \
+        .add_property(                                                           \
+            "dynamics",                                                          \
+            bp::make_getter(&Data::dynamics,                                    \
+                            bp::return_value_policy<bp::return_by_value>()),    \
+            "dynamics data")                                                    \
+        .add_property(                                                           \
+            "costs",                                                             \
+            bp::make_getter(&Data::costs,                                       \
+                            bp::return_value_policy<                             \
+                                bp::return_by_value,                             \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()),  \
+            "cost data")                                                        \
+        .add_property(                                                           \
+            "constraints",                                                       \
+            bp::make_getter(&Data::constraints,                                 \
+                            bp::return_value_policy<                             \
+                                bp::return_by_value,                             \
+                                bp::with_custodian_and_ward_postcall<0, 1>>()),  \
+            "constraint-manager data");                                         \
+  }
+
+void exposeDiscretizedObserver() {
+#ifdef IS_FP_SCALAR_TRUE
+  CROCODDYL_DISCRETIZED_OBSERVER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+  CROCODDYL_DISCRETIZED_OBSERVER_DATA_PYTHON_BINDINGS(@SCALAR_TYPE@)
+#endif
+}
+
+}  // namespace python
+}  // namespace crocoddyl

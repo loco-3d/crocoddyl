@@ -39,8 +39,8 @@ struct ActionModelCodeGenVisitor
             "Initialize the action codegen action model.\n\n"
             ":param ad_model: action model used to code generate\n"
             ":param lib_fname: name of the code generated library\n"
-            ":param autodiff: Generate autodiff Jacobians and Hessians "
-            "(default False)\n"
+            ":param autodiff: Generate autodiff Jacobians and use calcDiff "
+            "Gauss-Newton Hessian blocks (default False)\n"
             ":param np: Dimension of the parameter variables in the calc and "
             "calcDiff functions\n"
             ":param updateParams: function used to update the calc and "
@@ -48,12 +48,12 @@ struct ActionModelCodeGenVisitor
             ":param compiler: type of compiler GCC or CLANG (default: CLANG)\n"
             ":param compile_options: Compilation flags (default: '-O3 "
             "-ffast-math -march=native')"))
-        .def(bp::init<std::string, std::shared_ptr<Model>>(
+        .def(bp::init<std::string, std::shared_ptr<ModelBase>>(
             bp::args("self", "lib_fname", "model"),
             "Initialize the code generated action model from an pre-compiled "
             "library.\n\n"
             ":param lib_fname: name of the code generated library\n"
-            ":param model: action model model which we want to code generate"))
+            ":param model: action model which we want to code generate"))
         .def(bp::init<std::string, std::shared_ptr<ADModel>>(
             bp::args("self", "lib_fname", "ad_model"),
             "Initialize the code generated action model from an pre-compiled "
@@ -98,7 +98,13 @@ struct ActionModelCodeGenVisitor
              bp::args("self", "data", "x"))
         .def("update_p", &Model::update_p, bp::args("self", "data", "p"),
              "Update the action parameters")
-        .def("createData", &Model::createData, bp::args("self"),
+        .def("set_params", &Model::set_params,
+             bp::args("self", "data", "params"),
+             "Set the action parameter manager")
+        .def("createData",
+             static_cast<std::shared_ptr<Data> (Model::*)()>(
+                 &Model::createData),
+             bp::args("self"),
              "Create the action codegen data.")
         .def("initLib", &Model::initLib, bp::args("self"),
              "initialize the code-generated library")
@@ -121,24 +127,23 @@ struct ActionModelCodeGenVisitor
         .add_property(
             "nY1", bp::make_function(&Model::get_nY1),
             "dimension of the independent vector used by the calc function")
-        .add_property("nY1_T", bp::make_function(&Model::get_nY1),
+        .add_property("nY1_T", bp::make_function(&Model::get_nY1_T),
                       "dimension of the independent vector used by the calc "
                       "function in terminal nodes")
         .add_property(
             "nY2", bp::make_function(&Model::get_nY2),
             "dimension of the independent vector used by the calcDiff function")
-        .add_property("nY2_T", bp::make_function(&Model::get_nY2),
+        .add_property("nY2_T", bp::make_function(&Model::get_nY2_T),
                       "dimension of the independent vector used by the "
                       "calcDiff function in terminal nodes")
-        .add_property("nY3", bp::make_function(&Model::get_nY2),
+        .add_property("nY3", bp::make_function(&Model::get_nY3),
                       "dimension of the independent vector used by the "
-                      "quasiStati function")
-        .add_property("nY3_T", bp::make_function(&Model::get_nY2),
+                      "quasiStatic function")
+        .add_property("nY3_T", bp::make_function(&Model::get_nY3),
                       "dimension of the independent vector used by the "
-                      "quasiStati function in terminal nodes");
+                      "quasiStatic function in terminal nodes");
   }
 };
-
 template <typename Data>
 struct ActionDataCodeGeneVisitor
     : public bp::def_visitor<ActionDataCodeGeneVisitor<Data>> {
@@ -158,7 +163,7 @@ struct ActionDataCodeGeneVisitor
             "autodiff Jacobian of the the calc function")
         .add_property(
             "H1", bp::make_getter(&Data::H1, bp::return_internal_reference<>()),
-            "autodiff Hessian of the the calc function")
+            "legacy autodiff Hessian buffer of the calc function")
         .add_property(
             "Y1_T",
             bp::make_getter(&Data::Y1_T, bp::return_internal_reference<>()),
@@ -170,7 +175,8 @@ struct ActionDataCodeGeneVisitor
         .add_property(
             "H1_T",
             bp::make_getter(&Data::H1_T, bp::return_internal_reference<>()),
-            "autodiff Hessian of the the calc function in terminal nodes")
+            "legacy autodiff Hessian buffer of the calc function in terminal "
+            "nodes")
         .add_property(
             "Y2", bp::make_getter(&Data::Y2, bp::return_internal_reference<>()),
             "dependent variables used by the calcDiff function")
@@ -184,7 +190,6 @@ struct ActionDataCodeGeneVisitor
             "dependent variables used by the quasiStatic function");
   }
 };
-
 #define CROCODDYL_ACTION_MODEL_CODEGEN_PYTHON_BINDINGS(Scalar)                 \
   typedef ActionModelCodeGenTpl<Scalar> Model;                                 \
   typedef ActionModelAbstractTpl<Scalar> ModelBase;                            \
@@ -202,10 +207,10 @@ struct ActionDataCodeGeneVisitor
           bp::args("self", "model", "lib_fname", "autodiff", "np",             \
                    "updateParams", "compiler", "compile_options"),             \
           "Initialize the action codegen action model.\n\n"                    \
-          ":param model: action model model which we want to code generate\n"  \
+          ":param model: action model which we want to code generate\n"        \
           ":param lib_fname: name of the code generated library\n"             \
-          ":param autodiff: Generate autodiff Jacobians and Hessians "         \
-          "(default False)\n"                                                  \
+          ":param autodiff: Generate autodiff Jacobians and use calcDiff "     \
+          "Gauss-Newton Hessian blocks (default False)\n"                     \
           ":param np: Dimension of the parameter variables in the calc and "   \
           "calcDiff functions\n"                                               \
           ":param updateParams: function used to update the calc and "         \
@@ -230,7 +235,6 @@ struct ActionDataCodeGeneVisitor
                        ":param model: codegen action model"))           \
       .def(ActionDataCodeGeneVisitor<Data>())                           \
       .def(CopyableVisitor<Data>());
-
 void exposeActionCodeGen() {
 #ifdef SCALAR_float64
   bp::enum_<CompilerType>("CompilerType")

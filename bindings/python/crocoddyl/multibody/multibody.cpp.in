@@ -16,17 +16,35 @@ void exposeMultibody() {
   exposeWrenchCone();
   exposeCoPSupport();
   exposeStateMultibody();
+  exposeActuationFloatingBaseThruster();
+  exposeJointDynamicsAbstract();
+  exposeJointDynamicsIdentity();
+  exposeJointDynamicsFriction();
+  exposeJointDynamicsThruster();
+  exposeActuationMultibody();
+  exposeActuationMultibodyParams();
+  exposeInertialParametrizationAbstract();
+  exposeLogCholeskyParametrization();
+  exposeExpEigenValueParametrization();
+  exposeMultibodyInertialParams();
   exposeActuationFloatingBase();
   exposeActuationFull();
-  exposeActuationFloatingBaseThruster();
   exposeForceAbstract();
   exposeContactAbstract();
   exposeImpulseAbstract();
+  exposeImplicitConstraintAbstract();
+  exposeContact();
+  exposeKinematicLoop();
+  exposeImplicitConstraintMultiple();
   exposeContactMultiple();
   exposeImpulseMultiple();
   exposeDataCollectorMultibody();
   exposeDataCollectorContacts();
+  exposeDataCollectorImplicitConstraints();
   exposeDataCollectorImpulses();
+  exposeDynamicsConstrainedForward();
+  exposeDynamicsConstrainedInverse();
+  exposeDynamicsImpulseForward();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionFreeInvDynamics();
   exposeDifferentialActionContactFwdDynamics();
@@ -52,6 +70,13 @@ void exposeMultibody() {
   exposeTaskFramePlacement();
   exposeTaskCoMPosition();
   exposeTaskJointPosition();
+  exposeResidualActuationParameters();
+  exposeResidualInertialParameters();
+  exposeResidualSymmetryParameters();
+  exposeResidualTotalMass();
+  exposeResidualPotentialEnergy();
+  exposeResidualKineticEnergy();
+  exposeResidualPower();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
 #ifdef CROCODDYL_WITH_PAIR_COLLISION

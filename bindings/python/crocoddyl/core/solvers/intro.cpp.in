@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2026, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,17 +122,22 @@ struct SolverIntroVisitor : public bp::def_visitor<SolverIntroVisitor<Model>> {
 #define CROCODDYL_SOLVER_INTRO_PYTHON_BINDINGS(Scalar)                       \
   typedef SolverIntroTpl<Scalar> Model;                                      \
   typedef SolverFDDPTpl<Scalar> ModelBase;                                   \
-  typedef typename ModelBase::ShootingProblem ShootingProblem;               \
+  typedef typename ModelBase::ProblemAbstract ProblemAbstract;               \
   bp::register_ptr_to_python<std::shared_ptr<Model>>();                      \
   bp::class_<Model, bp::bases<ModelBase>>(                                   \
       "SolverIntro",                                                         \
-      bp::init<std::shared_ptr<ShootingProblem>,                             \
-               bp::optional<DynamicsSolverType, EqualitySolverType>>(        \
-          bp::args("self", "problem", "dyn_solver", "eq_solver"),            \
-          "Initialize the vector dimension.\n\n"                             \
-          ":param problem: shooting problem.\n"                              \
-          ":param dyn_solver: type of dynamic solver (default FeasShoot).\n" \
-          ":param eq_solver: type of dynamic solver (default LuNull)."))     \
+      bp::init<std::shared_ptr<ProblemAbstract>,                             \
+               bp::optional<DynamicsSolverType, EqualitySolverType,         \
+                            EqualitySolverType, ArrivalStateSolverType>>(   \
+          bp::args("self", "problem", "dyn_solver", "eq_solver",            \
+                   "term_solver", "astate_solver"),                          \
+          "Initialize the Intro solver.\n\n"                                \
+          ":param problem: shooting/estimation problem.\n"                  \
+          ":param dyn_solver: type of dynamic solver (default FeasShoot).\n"\
+          ":param eq_solver: type of equality solver (default LuNull).\n"   \
+          ":param term_solver: type of terminal solver (default LuNull).\n" \
+          ":param astate_solver: type of arrival-state solver for parameter "\
+          "estimation (default AStateNone)."))                               \
       .def(SolverIntroVisitor<Model>())                                      \
       .def(CastVisitor<Model, true>())                                       \
       .def(CopyableVisitor<Model>());

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -66,8 +66,14 @@ struct CostItemTpl {
  * \f$\mathbf{\ell_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{\ell_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{\ell_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
- * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and
- * Hessians, respectively.
+ * \f$\mathbf{\ell_{uu}}\in\mathbb{R}^{nu\times nu}\f$,
+ * \f$\mathbf{\ell_p}\in\mathbb{R}^{np}\f$,
+ * \f$\mathbf{\ell_{pp}}\in\mathbb{R}^{np\times np}\f$,
+ * \f$\mathbf{\ell_{px}}\in\mathbb{R}^{np\times ndx}\f$, and
+ * \f$\mathbf{\ell_{pu}}\in\mathbb{R}^{np\times nu}\f$ are the Jacobians,
+ * Hessians, and cross derivatives, respectively.
+ * Parameters of the added cost models have to be updated before calling
+ * `calc()` and `calcDiff()`.
  *
  * \sa `CostModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -98,6 +104,16 @@ class CostModelSumTpl {
    * @param[in] nu     Dimension of control vector
    */
   CostModelSumTpl(std::shared_ptr<StateAbstract> state, const std::size_t nu);
+
+  /**
+   * @brief Initialize the parameterized cost-sum model
+   *
+   * @param[in] state  State description
+   * @param[in] nu     Dimension of control vector
+   * @param[in] np     Dimension of parameter vector
+   */
+  CostModelSumTpl(std::shared_ptr<StateAbstract> state, const std::size_t nu,
+                  const std::size_t np);
 
   /**
    * @brief Initialize the cost-sum model
@@ -233,6 +249,11 @@ class CostModelSumTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the parameter vector
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Return the dimension of the active residual vector
    */
   std::size_t get_nr() const;
@@ -293,6 +314,7 @@ class CostModelSumTpl {
   std::shared_ptr<StateAbstract> state_;  //!< State description
   CostModelContainer costs_;              //!< Stack of cost items
   std::size_t nu_;                        //!< Dimension of the control input
+  std::size_t np_;                        //!< Dimension of the parameter vector
   std::size_t nr_;        //!< Dimension of the active residual vector
   std::size_t nr_total_;  //!< Dimension of the total residual vector
   std::set<std::string> active_set_;  //!< Names of the active set of cost items
@@ -325,6 +347,10 @@ struct CostDataSumTpl {
                      model->get_state()->get_ndx()),
         Lxu_internal(model->get_state()->get_ndx(), model->get_nu()),
         Luu_internal(model->get_nu(), model->get_nu()),
+        Lp_internal(model->get_np()),
+        Lpp_internal(model->get_np(), model->get_np()),
+        Lpx_internal(model->get_np(), model->get_state()->get_ndx()),
+        Lpu_internal(model->get_np(), model->get_nu()),
         shared(data),
         cost(Scalar(0.)),
         Lx(Lx_internal.data(), model->get_state()->get_ndx()),
@@ -333,12 +359,21 @@ struct CostDataSumTpl {
             model->get_state()->get_ndx()),
         Lxu(Lxu_internal.data(), model->get_state()->get_ndx(),
             model->get_nu()),
-        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()) {
+        Luu(Luu_internal.data(), model->get_nu(), model->get_nu()),
+        Lp(Lp_internal.data(), model->get_np()),
+        Lpp(Lpp_internal.data(), model->get_np(), model->get_np()),
+        Lpx(Lpx_internal.data(), model->get_np(),
+            model->get_state()->get_ndx()),
+        Lpu(Lpu_internal.data(), model->get_np(), model->get_nu()) {
     Lx.setZero();
     Lu.setZero();
     Lxx.setZero();
     Lxu.setZero();
     Luu.setZero();
+    Lp.setZero();
+    Lpp.setZero();
+    Lpx.setZero();
+    Lpu.setZero();
     for (typename CostModelSumTpl<Scalar>::CostModelContainer::const_iterator
              it = model->get_costs().begin();
          it != model->get_costs().end(); ++it) {
@@ -347,15 +382,61 @@ struct CostDataSumTpl {
     }
   }
 
+  template <class T, class = void>
+  struct has_Lp_field : std::false_type {};
+  template <class T>
+  struct has_Lp_field<T, decltype((void)std::declval<T&>().Lp, void())>
+      : std::true_type {};
+
   template <class ActionData>
-  void shareMemory(ActionData* const data) {
+  typename std::enable_if<has_Lp_field<ActionData>::value>::type shareMemory(
+      ActionData* const data) {
+    const Eigen::Index np = Lp.size();
+    const Eigen::Index ndx = Lpx.cols();
+    const Eigen::Index nu = Lpu.cols();
+    if (np != 0 && (data->Lp.size() != np || data->Lpp.rows() != np ||
+                    data->Lpp.cols() != np || data->Lpx.rows() != np ||
+                    data->Lpx.cols() != ndx || data->Lpu.rows() != np ||
+                    data->Lpu.cols() != nu)) {
+      throw_pretty(
+          "Invalid argument: parameter cost derivatives have wrong "
+          "dimensions");
+    }
     // Save memory by setting the internal variables with null dimension
     Lx_internal.resize(0);
     Lu_internal.resize(0);
     Lxx_internal.resize(0, 0);
     Lxu_internal.resize(0, 0);
     Luu_internal.resize(0, 0);
-    // Share memory with the differential action data
+    Lp_internal.resize(0);
+    Lpp_internal.resize(0, 0);
+    Lpx_internal.resize(0, 0);
+    Lpu_internal.resize(0, 0);
+    // Share memory with the action data
+    new (&Lx) Eigen::Map<VectorXs>(data->Lx.data(), data->Lx.size());
+    new (&Lu) Eigen::Map<VectorXs>(data->Lu.data(), data->Lu.size());
+    new (&Lxx) Eigen::Map<MatrixXs>(data->Lxx.data(), data->Lxx.rows(),
+                                    data->Lxx.cols());
+    new (&Lxu) Eigen::Map<MatrixXs>(data->Lxu.data(), data->Lxu.rows(),
+                                    data->Lxu.cols());
+    new (&Luu) Eigen::Map<MatrixXs>(data->Luu.data(), data->Luu.rows(),
+                                    data->Luu.cols());
+    new (&Lp) Eigen::Map<VectorXs>(data->Lp.data(), np);
+    new (&Lpp) Eigen::Map<MatrixXs>(data->Lpp.data(), np, np);
+    new (&Lpx) Eigen::Map<MatrixXs>(data->Lpx.data(), np, ndx);
+    new (&Lpu) Eigen::Map<MatrixXs>(data->Lpu.data(), np, nu);
+  }
+
+  template <class ActionData>
+  typename std::enable_if<!has_Lp_field<ActionData>::value>::type shareMemory(
+      ActionData* const data) {
+    // Save memory by setting the internal variables with null dimension
+    Lx_internal.resize(0);
+    Lu_internal.resize(0);
+    Lxx_internal.resize(0, 0);
+    Lxu_internal.resize(0, 0);
+    Luu_internal.resize(0, 0);
+    // Share legacy memory; parameter maps keep their internal storage
     new (&Lx) Eigen::Map<VectorXs>(data->Lx.data(), data->Lx.size());
     new (&Lu) Eigen::Map<VectorXs>(data->Lu.data(), data->Lu.size());
     new (&Lxx) Eigen::Map<MatrixXs>(data->Lxx.data(), data->Lxx.rows(),
@@ -371,6 +452,10 @@ struct CostDataSumTpl {
   MatrixXs get_Lxx() const { return Lxx; }
   MatrixXs get_Lxu() const { return Lxu; }
   MatrixXs get_Luu() const { return Luu; }
+  VectorXs get_Lp() const { return Lp; }
+  MatrixXs get_Lpp() const { return Lpp; }
+  MatrixXs get_Lpx() const { return Lpx; }
+  MatrixXs get_Lpu() const { return Lpu; }
 
   void set_Lx(const VectorXs& _Lx) {
     if (Lx.size() != _Lx.size()) {
@@ -415,6 +500,41 @@ struct CostDataSumTpl {
     }
     Luu = _Luu;
   }
+  void set_Lp(const VectorXs& _Lp) {
+    if (Lp.size() != _Lp.size()) {
+      throw_pretty(
+          "Invalid argument: " << "Lp has wrong dimension (it should be " +
+                                      std::to_string(Lp.size()) + ")");
+    }
+    Lp = _Lp;
+  }
+  void set_Lpp(const MatrixXs& _Lpp) {
+    if (Lpp.rows() != _Lpp.rows() || Lpp.cols() != _Lpp.cols()) {
+      throw_pretty(
+          "Invalid argument: " << "Lpp has wrong dimension (it should be " +
+                                      std::to_string(Lpp.rows()) + ", " +
+                                      std::to_string(Lpp.cols()) + ")");
+    }
+    Lpp = _Lpp;
+  }
+  void set_Lpx(const MatrixXs& _Lpx) {
+    if (Lpx.rows() != _Lpx.rows() || Lpx.cols() != _Lpx.cols()) {
+      throw_pretty(
+          "Invalid argument: " << "Lpx has wrong dimension (it should be " +
+                                      std::to_string(Lpx.rows()) + ", " +
+                                      std::to_string(Lpx.cols()) + ")");
+    }
+    Lpx = _Lpx;
+  }
+  void set_Lpu(const MatrixXs& _Lpu) {
+    if (Lpu.rows() != _Lpu.rows() || Lpu.cols() != _Lpu.cols()) {
+      throw_pretty(
+          "Invalid argument: " << "Lpu has wrong dimension (it should be " +
+                                      std::to_string(Lpu.rows()) + ", " +
+                                      std::to_string(Lpu.cols()) + ")");
+    }
+    Lpu = _Lpu;
+  }
 
   // Creates internal data in case we don't share it externally
   VectorXs Lx_internal;
@@ -422,6 +542,10 @@ struct CostDataSumTpl {
   MatrixXs Lxx_internal;
   MatrixXs Lxu_internal;
   MatrixXs Luu_internal;
+  VectorXs Lp_internal;
+  MatrixXs Lpp_internal;
+  MatrixXs Lpx_internal;
+  MatrixXs Lpu_internal;
 
   typename CostModelSumTpl<Scalar>::CostDataContainer costs;
   DataCollectorAbstract* shared;
@@ -431,6 +555,10 @@ struct CostDataSumTpl {
   Eigen::Map<MatrixXs> Lxx;
   Eigen::Map<MatrixXs> Lxu;
   Eigen::Map<MatrixXs> Luu;
+  Eigen::Map<VectorXs> Lp;   //!< Jacobian of the total cost w.r.t. parameters
+  Eigen::Map<MatrixXs> Lpp;  //!< Hessian of the total cost w.r.t. parameters
+  Eigen::Map<MatrixXs> Lpx;  //!< Hessian w.r.t. parameters and state
+  Eigen::Map<MatrixXs> Lpu;  //!< Hessian w.r.t. parameters and control
 };
 
 }  // namespace crocoddyl

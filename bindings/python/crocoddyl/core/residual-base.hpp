@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +32,7 @@ class ResidualModelAbstractTpl_wrap
   typedef typename ResidualModel::ActivationDataAbstract ActivationData;
   typedef typename ResidualModel::DataCollectorAbstract DataCollectorAbstract;
   typedef typename ResidualModel::VectorXs VectorXs;
+  using ResidualModel::np_;
   using ResidualModel::nr_;
   using ResidualModel::nu_;
   using ResidualModel::q_dependent_;
@@ -46,6 +47,15 @@ class ResidualModelAbstractTpl_wrap
                                 const bool v_dependent = true,
                                 const bool u_dependent = true)
       : ResidualModel(state, nr, nu, q_dependent, v_dependent, u_dependent),
+        bp::wrapper<ResidualModel>() {
+    unone_ = VectorXs::Constant(nu_, Scalar(NAN));
+  }
+
+  ResidualModelAbstractTpl_wrap(std::shared_ptr<State> state,
+                                const std::size_t nr, const std::size_t nu,
+                                const bool q_dependent, const bool v_dependent,
+                                const bool u_dependent, const std::size_t np)
+      : ResidualModel(state, nr, nu, q_dependent, v_dependent, u_dependent, np),
         bp::wrapper<ResidualModel>() {
     unone_ = VectorXs::Constant(nu_, Scalar(NAN));
   }
@@ -151,7 +161,7 @@ class ResidualModelAbstractTpl_wrap
   ResidualModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef ResidualModelAbstractTpl_wrap<NewScalar> ReturnType;
     ReturnType ret(state_->template cast<NewScalar>(), nr_, nu_, q_dependent_,
-                   v_dependent_, u_dependent_);
+                   v_dependent_, u_dependent_, np_);
     return ret;
   }
 };

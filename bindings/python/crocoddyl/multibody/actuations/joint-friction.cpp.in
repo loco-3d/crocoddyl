@@ -1,0 +1,167 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026-2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/actuations/joint-friction.hpp"
+
+#include "python/crocoddyl/multibody/multibody.hpp"
+
+#define SCALAR_@SCALAR_NAME@
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+void computeJointTorqueRegressor(
+    Model& model, const bp::object& joint_dtau_dp,
+    const Eigen::Ref<const typename Model::VectorXs>& q,
+    const Eigen::Ref<const typename Model::VectorXs>& v,
+    const Eigen::Ref<const typename Model::VectorXs>& u) {
+  typename Model::MatrixXs value =
+      bp::extract<typename Model::MatrixXs>(joint_dtau_dp)();
+  model.computeJointTorqueRegressor(value, q, v, u);
+  bp::object result(value);
+  joint_dtau_dp.attr("__setitem__")(
+      bp::make_tuple(bp::slice(), bp::slice()),
+      result.attr("reshape")(value.rows(), value.cols()));
+}
+
+template <typename Model>
+struct JointDynamicsModelFrictionVisitor
+    : public bp::def_visitor<JointDynamicsModelFrictionVisitor<Model> > {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def("calc", &Model::calc, bp::args("self", "data", "q", "v", "u"),
+           "Compute the joint friction dynamics.\n\n"
+           ":param data: joint dynamics data\n"
+           ":param q: joint configuration\n"
+           ":param v: joint velocity\n"
+           ":param u: joint control input")
+        .def("calcDiff", &Model::calcDiff,
+             bp::args("self", "data", "q", "v", "u"),
+             "Compute the derivatives of the joint friction dynamics.\n\n"
+             "calc must be called first with the same data and inputs.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: joint control input")
+        .def("commands", &Model::commands,
+             bp::args("self", "data", "q", "v", "tau"),
+             "Compute the commands from the joint torque.\n\n"
+             ":param data: joint dynamics data\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param tau: joint torque")
+        .def("computeJointTorqueRegressor",
+             &computeJointTorqueRegressor<Model>,
+             bp::args("self", "joint_dtau_dp", "q", "v", "u"),
+             "Compute the joint torque regressor with respect to the friction "
+             "parametrization.\n\n"
+             ":param joint_dtau_dp: torque regressor\n"
+             ":param q: joint configuration\n"
+             ":param v: joint velocity\n"
+             ":param u: joint control input")
+        .def("updateParametrizationDerivative",
+             &Model::updateParametrizationDerivative, bp::args("self", "dgamma_dp"),
+             "Update the Jacobian of the internal friction parameters.\n\n"
+             ":param dgamma_dp: internal-parameter Jacobian")
+        .def("from_parametrization", &Model::from_parametrization,
+             bp::args("self", "mu"),
+             "Convert the mu parametrization into gamma parameters.")
+        .def("to_parametrization", &Model::to_parametrization,
+             bp::args("self", "gamma"),
+             "Convert gamma parameters into the mu parametrization.")
+        .def("createData", &Model::createData, bp::args("self"),
+             "Create the friction joint dynamics data.\n\n"
+             ":return joint dynamics data.")
+        .add_property("friction_type",
+                      bp::make_function(&Model::get_friction_type),
+                      "friction model type")
+        .add_property("fixed_smoothing",
+                      bp::make_function(
+                          &Model::get_fixed_smoothing_parametrization),
+                      "fixed smoothing/sharpness parametrization")
+        .add_property("passive", bp::make_function(&Model::get_passive),
+                      "true if the joint is passive");
+  }
+};
+
+#define CROCODDYL_JOINT_DYNAMICS_FRICTION_PYTHON_BINDINGS(Scalar)            \
+  typedef JointDynamicsModelFrictionTpl<Scalar> Model;                        \
+  typedef JointDynamicsModelAbstractTpl<Scalar> ModelBase;                    \
+  typedef typename Model::VectorXs VectorXs;                                  \
+  typedef JointFrictionType FrictionType;                                     \
+  bp::register_ptr_to_python<std::shared_ptr<Model> >();                      \
+  bp::class_<Model, bp::bases<ModelBase> >(                                   \
+      "JointDynamicsModelFriction",                                           \
+      "Differentiable friction joint dynamics model.",                        \
+      bp::init<pinocchio::JointIndex, std::size_t, VectorXs,                  \
+               bp::optional<FrictionType, bool> >(                            \
+          bp::args("self", "id", "nq", "mu", "friction_type", "passive"),  \
+          "Initialize the friction joint dynamics model.\n\n"                 \
+          ":param id: joint id\n"                                             \
+          ":param nq: joint configuration dimension\n"                        \
+          ":param mu: friction parametrization\n"                             \
+          ":param friction_type: friction model type\n"                       \
+          ":param passive: passive friction joint"))                          \
+      .def(bp::init<pinocchio::JointIndex, std::size_t, VectorXs,             \
+                    FrictionType, VectorXs>(                                  \
+          bp::args("self", "id", "nq", "mu", "friction_type",              \
+                   "fixed_smoothing"),                                        \
+          "Initialize a fixed-smoothing friction joint dynamics model.\n\n"    \
+          ":param id: joint id\n"                                             \
+          ":param nq: joint configuration dimension\n"                        \
+          ":param mu: optimized friction parametrization\n"                   \
+          ":param friction_type: fixed-smoothing friction model type\n"        \
+          ":param fixed_smoothing: fixed smoothing/sharpness values in the "   \
+          "same parametrization used by the base friction type"))             \
+      .def(bp::init<pinocchio::JointIndex, std::size_t, VectorXs,             \
+                    FrictionType, bool, VectorXs>(                            \
+          bp::args("self", "id", "nq", "mu", "friction_type", "passive",   \
+                   "fixed_smoothing"),                                        \
+          "Initialize a fixed-smoothing friction joint dynamics model.\n\n"    \
+          ":param id: joint id\n"                                             \
+          ":param nq: joint configuration dimension\n"                        \
+          ":param mu: optimized friction parametrization\n"                   \
+          ":param friction_type: fixed-smoothing friction model type\n"        \
+          ":param passive: passive friction joint\n"                          \
+          ":param fixed_smoothing: fixed smoothing/sharpness values in the "   \
+          "same parametrization used by the base friction type"))             \
+      .def(JointDynamicsModelFrictionVisitor<Model>())                        \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());
+
+void exposeJointDynamicsFriction() {
+#ifdef SCALAR_float64
+  bp::enum_<JointFrictionType>("JointFrictionType")
+      .value("COULOMB", JointFrictionType::Coulomb)
+      .value("VISCOUS", JointFrictionType::Viscous)
+      .value("STRIBECK", JointFrictionType::Stribeck)
+      .value("COULOMB_VISCOUS", JointFrictionType::CoulombViscous)
+      .value("COULOMB_STRIBECK", JointFrictionType::CoulombStribeck)
+      .value("VISCOUS_STRIBECK", JointFrictionType::ViscousStribeck)
+      .value("FULL", JointFrictionType::Full)
+      .value("COULOMB_FIXED_SMOOTHING",
+             JointFrictionType::CoulombFixedSmoothing)
+      .value("STRIBECK_FIXED_SMOOTHING",
+             JointFrictionType::StribeckFixedSmoothing)
+      .value("COULOMB_VISCOUS_FIXED_SMOOTHING",
+             JointFrictionType::CoulombViscousFixedSmoothing)
+      .value("COULOMB_STRIBECK_FIXED_SMOOTHING",
+             JointFrictionType::CoulombStribeckFixedSmoothing)
+      .value("VISCOUS_STRIBECK_FIXED_SMOOTHING",
+             JointFrictionType::ViscousStribeckFixedSmoothing)
+      .value("FULL_FIXED_SMOOTHING",
+             JointFrictionType::FullFixedSmoothing);
+#endif
+  CROCODDYL_JOINT_DYNAMICS_FRICTION_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

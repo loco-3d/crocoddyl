@@ -1,0 +1,99 @@
+///////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (C) 2026, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files.
+// All rights reserved.
+///////////////////////////////////////////////////////////////////////////////
+
+// Auto-generated file for @SCALAR_TYPE@
+#include "crocoddyl/multibody/residuals/power.hpp"
+
+#include "python/crocoddyl/core/core.hpp"
+
+namespace crocoddyl {
+namespace python {
+
+template <typename Model>
+struct ResidualModelPowerVisitor
+    : public bp::def_visitor<ResidualModelPowerVisitor<Model>> {
+  typedef typename Model::ResidualDataAbstract Data;
+  typedef typename Model::StateAbstract State;
+  typedef typename Model::Scalar Scalar;
+  typedef typename Model::VectorXs VectorXs;
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.def(bp::init<std::shared_ptr<State>, std::size_t, std::size_t,
+                    bp::optional<Scalar, std::string, std::string> >(
+               (bp::arg("state"), bp::arg("nu"), bp::arg("np"),
+                bp::arg("P_ref") = Scalar(0),
+                bp::arg("inertial_param_name") = std::string(),
+                bp::arg("actuation_param_name") = std::string()),
+               "Initialize the power residual."))
+        .def("calc",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calc),
+             bp::args("self", "data", "x", "u"))
+        .def("calc",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calc),
+             bp::args("self", "data", "x"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(
+                 const std::shared_ptr<Data>&,
+                 const Eigen::Ref<const VectorXs>&,
+                 const Eigen::Ref<const VectorXs>&)>(&Model::calcDiff),
+             bp::args("self", "data", "x", "u"))
+        .def("calcDiff",
+             static_cast<void (Model::*)(const std::shared_ptr<Data>&,
+                                         const Eigen::Ref<const VectorXs>&)>(
+                 &Model::calcDiff),
+             bp::args("self", "data", "x"))
+        .def("createData", &Model::createData,
+             bp::with_custodian_and_ward_postcall<0, 2>(),
+             bp::args("self", "data"))
+        .add_property("reference",
+                      bp::make_function(&Model::get_reference,
+                                        bp::return_value_policy<
+                                            bp::return_by_value>()),
+                      &Model::set_reference, "reference power residual")
+        .add_property("inertial_param_name",
+                      bp::make_function(&Model::get_inertial_param_name,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "name of the MultibodyInertialParams entry")
+        .add_property("actuation_param_name",
+                      bp::make_function(&Model::get_actuation_param_name,
+                                        bp::return_value_policy<
+                                            bp::copy_const_reference>()),
+                      "name of the ActuationMultibodyParams entry");
+  }
+};
+
+#define CROCODDYL_RESIDUAL_MODEL_POWER_PYTHON_BINDINGS(Scalar)                \
+  typedef ResidualModelPowerTpl<Scalar> Model;                                \
+  typedef ResidualModelAbstractTpl<Scalar> ModelBase;                         \
+  typedef ResidualDataPowerTpl<Scalar> Data;                                  \
+  typedef ResidualDataAbstractTpl<Scalar> DataBase;                           \
+  bp::register_ptr_to_python<std::shared_ptr<Model>>();                       \
+  bp::class_<Model, bp::bases<ModelBase>>(                                    \
+      "ResidualModelPower",                                                   \
+      "Power residual using integrated observer data.", bp::no_init)          \
+      .def(ResidualModelPowerVisitor<Model>())                                \
+      .def(CastVisitor<Model>())                                              \
+      .def(PrintableVisitor<Model>())                                         \
+      .def(CopyableVisitor<Model>());                                         \
+  bp::register_ptr_to_python<std::shared_ptr<Data>>();                        \
+  bp::class_<Data, bp::bases<DataBase>>(                                      \
+      "ResidualDataPower", "Data for ResidualModelPower.", bp::no_init)       \
+      .def(CopyableVisitor<Data>());
+
+void exposeResidualPower() {
+  CROCODDYL_RESIDUAL_MODEL_POWER_PYTHON_BINDINGS(@SCALAR_TYPE@)
+}
+
+}  // namespace python
+}  // namespace crocoddyl

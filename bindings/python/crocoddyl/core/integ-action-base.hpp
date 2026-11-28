@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          University of Trento, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
@@ -12,9 +12,65 @@
 
 #include "crocoddyl/core/integ-action-base.hpp"
 #include "python/crocoddyl/core/core.hpp"
+#include "python/crocoddyl/utils/deprecate.hpp"
 
 namespace crocoddyl {
 namespace python {
+
+/**
+ * @brief Expose the data shared by all integrated-action implementations
+ *
+ * The concrete Euler and Runge--Kutta data use different storage types for
+ * some of these members (a single object versus a vector of stage objects).
+ * Keeping this as a templated binding visitor centralizes their common Python
+ * API without forcing those incompatible types into the C++ data base class.
+ */
+template <typename Data>
+struct IntegratedActionDataAbstractVisitor
+    : public bp::def_visitor<IntegratedActionDataAbstractVisitor<Data>> {
+  template <class PyClass>
+  void visit(PyClass& cl) const {
+    cl.add_property(
+          "differential",
+          bp::make_getter(
+              &Data::differential,
+              deprecated<bp::return_value_policy<bp::return_by_value>>(
+                  "Deprecated. Differential action data belongs to the "
+                  "legacy integrator API; use dynamics, costs and constraints "
+                  "data instead.")),
+          "legacy differential action data")
+        .add_property(
+            "dynamics",
+            bp::make_getter(&Data::dynamics,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "dynamics data")
+        .add_property(
+            "costs",
+            bp::make_getter(&Data::costs,
+                            bp::return_value_policy<
+                                bp::return_by_value,
+                                bp::with_custodian_and_ward_postcall<0, 1>>()),
+            "cost data")
+        .add_property(
+            "constraints",
+            bp::make_getter(&Data::constraints,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "constraint-manager data")
+        .add_property(
+            "params",
+            bp::make_getter(&Data::params,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "parameter-manager data")
+        .add_property(
+            "control",
+            bp::make_getter(&Data::control,
+                            bp::return_value_policy<bp::return_by_value>()),
+            "control-parametrization data")
+        .add_property(
+            "dx", bp::make_getter(&Data::dx, bp::return_internal_reference<>()),
+            "integrated state increment");
+  }
+};
 
 template <typename Scalar>
 class IntegratedActionModelAbstractTpl_wrap
@@ -30,13 +86,22 @@ class IntegratedActionModelAbstractTpl_wrap
       IntegratedActionData;
   typedef typename crocoddyl::DifferentialActionModelAbstractTpl<Scalar>
       DifferentialActionModel;
+  typedef typename IntegratedActionModel::DynamicsModelAbstract DynamicsModel;
+  typedef typename IntegratedActionModel::CostModelSum CostModelSum;
+  typedef typename IntegratedActionModel::ConstraintModelManager
+      ConstraintModelManager;
   typedef typename crocoddyl::ActionDataAbstractTpl<Scalar> ActionData;
   typedef typename crocoddyl::StateAbstractTpl<Scalar> State;
   typedef typename IntegratedActionModel::ControlParametrizationModelAbstract
       ControlModel;
+  typedef typename IntegratedActionModel::IntegratorTime IntegratorTime;
   typedef typename IntegratedActionModel::VectorXs VectorXs;
+  using IntegratedActionModel::constraints_;
   using IntegratedActionModel::control_;
+  using IntegratedActionModel::costs_;
   using IntegratedActionModel::differential_;
+  using IntegratedActionModel::dynamics_;
+  using IntegratedActionModel::integrator_time_;
   using IntegratedActionModel::nu_;
   using IntegratedActionModel::state_;
   using IntegratedActionModel::time_step_;
@@ -57,6 +122,16 @@ class IntegratedActionModelAbstractTpl_wrap
       : IntegratedActionModel(model, control, timestep, with_cost_residual),
         bp::wrapper<IntegratedActionModel>() {}
 
+  IntegratedActionModelAbstractTpl_wrap(
+      std::shared_ptr<DynamicsModel> dynamics,
+      std::shared_ptr<CostModelSum> costs,
+      std::shared_ptr<ConstraintModelManager> constraints = nullptr,
+      std::shared_ptr<ControlModel> control = nullptr,
+      std::shared_ptr<IntegratorTime> integrator_time = nullptr)
+      : IntegratedActionModel(dynamics, costs, constraints, control,
+                              integrator_time),
+        bp::wrapper<IntegratedActionModel>() {}
+
   void calc(const std::shared_ptr<ActionData>& data,
             const Eigen::Ref<const VectorXs>& x,
             const Eigen::Ref<const VectorXs>& u) override {
@@ -72,6 +147,16 @@ class IntegratedActionModelAbstractTpl_wrap
     }
     return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x,
                           (VectorXs)u);
+  }
+
+  void calc(const std::shared_ptr<ActionData>& data,
+            const Eigen::Ref<const VectorXs>& x) override {
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty(
+          "Invalid argument: " << "x has wrong dimension (it should be " +
+                                      std::to_string(state_->get_nx()) + ")");
+    }
+    return bp::call<void>(this->get_override("calc").ptr(), data, (VectorXs)x);
   }
 
   void calcDiff(const std::shared_ptr<ActionData>& data,
@@ -91,6 +176,17 @@ class IntegratedActionModelAbstractTpl_wrap
                           (VectorXs)x, (VectorXs)u);
   }
 
+  void calcDiff(const std::shared_ptr<ActionData>& data,
+                const Eigen::Ref<const VectorXs>& x) override {
+    if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
+      throw_pretty(
+          "Invalid argument: " << "x has wrong dimension (it should be " +
+                                      std::to_string(state_->get_nx()) + ")");
+    }
+    return bp::call<void>(this->get_override("calcDiff").ptr(), data,
+                          (VectorXs)x);
+  }
+
   std::shared_ptr<ActionData> createData() override {
     enableMultithreading() = false;
     if (boost::python::override createData = this->get_override("createData")) {
@@ -106,14 +202,32 @@ class IntegratedActionModelAbstractTpl_wrap
   template <typename NewScalar>
   IntegratedActionModelAbstractTpl_wrap<NewScalar> cast() const {
     typedef IntegratedActionModelAbstractTpl_wrap<NewScalar> ReturnType;
-    if (control_) {
-      ReturnType ret(differential_->template cast<NewScalar>(),
-                     control_->template cast<NewScalar>(),
-                     scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+    if (dynamics_ != nullptr) {
+      typedef CostModelSumTpl<NewScalar> CostModelSumNew;
+      typedef ConstraintModelManagerTpl<NewScalar> ConstraintModelManagerNew;
+      ReturnType ret(
+          dynamics_->template cast<NewScalar>(),
+          std::make_shared<CostModelSumNew>(costs_->template cast<NewScalar>()),
+          constraints_ != nullptr
+              ? std::make_shared<ConstraintModelManagerNew>(
+                    constraints_->template cast<NewScalar>())
+              : nullptr,
+          control_->template cast<NewScalar>(),
+          std::make_shared<IntegratorTimeTpl<NewScalar>>(
+              integrator_time_->template cast<NewScalar>()));
+      return ret;
+    } else if (control_) {
+      ReturnType ret(
+          differential_->template cast<NewScalar>(),
+          control_->template cast<NewScalar>(),
+          scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+          with_cost_residual_);
       return ret;
     } else {
-      ReturnType ret(differential_->template cast<NewScalar>(),
-                     scalar_cast<NewScalar>(time_step_), with_cost_residual_);
+      ReturnType ret(
+          differential_->template cast<NewScalar>(),
+          scalar_cast<NewScalar>(this->get_integrator_time()->get_time_step()),
+          with_cost_residual_);
       return ret;
     }
   }

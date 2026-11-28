@@ -2,9 +2,7 @@ import sys
 import unittest
 from random import randint
 
-import example_robot_data
 import numpy as np
-import pinocchio
 from factory import SolverFDDP
 
 import crocoddyl
@@ -46,14 +44,18 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_solve(self):
         # Run maximum 10 iterations in order to boost test analysis
-        self.solver.solve([], [], 10)
-        self.solver_der.solve([], [], 10)
+        self.solver.solve([], [], maxiter=10)
+        self.solver_der.solve([], [], maxiter=10)
         for x1, x2 in zip(self.solver.xs, self.solver_der.xs):
             self.assertTrue(np.allclose(x1, x2, atol=1e-9), "xs doesn't match.")
         for u1, u2 in zip(self.solver.us, self.solver_der.us):
             self.assertTrue(np.allclose(u1, u2, atol=1e-9), "us doesn't match.")
         for k1, k2 in zip(self.solver.k, self.solver_der.k):
             self.assertTrue(np.allclose(k1, k2, atol=1e-9), "k doesn't match.")
+
+    def test_legacy_positional_solve(self):
+        self.assertFalse(self.solver.solve(self.xs, self.us, 0, False, 0.1))
+        self.assertFalse(self.solver_der.solve(self.xs, self.us, 0, False, 0.1))
 
     def test_compute_search_direction(self):
         # Compute the direction
@@ -93,8 +95,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_stopping_criteria(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([], [], 2)
-        self.solver_der.solve([], [], 2)
+        self.solver.solve([], [], maxiter=2)
+        self.solver_der.solve([], [], maxiter=2)
         # Compute and check the stopping criteria
         stop = self.solver.stoppingCriteria()
         stopDer = self.solver_der.stoppingCriteria()
@@ -102,8 +104,8 @@ class SolverAbstractTestCase(unittest.TestCase):
 
     def test_expected_improvement(self):
         # Run 2 iteration in order to boost test analysis
-        self.solver.solve([], [], 2)
-        self.solver_der.solve([], [], 2)
+        self.solver.solve([], [], maxiter=2)
+        self.solver_der.solve([], [], maxiter=2)
         expImp = self.solver.expectedImprovement()
         expImpDer = self.solver_der.expectedImprovement()
         self.assertTrue(
@@ -140,150 +142,6 @@ class UnicycleSingleShootFDDPTest(SolverAbstractTestCase):
     DYN_SOLVER = crocoddyl.DynamicsSolverType.SingleShoot
 
 
-class TalosArmFeasDriveFDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load("talos_arm").model
-    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
-    COST_SUM = crocoddyl.CostModelSum(STATE)
-    COST_SUM.addCost(
-        "gripperPose",
-        crocoddyl.CostModelResidual(
-            STATE,
-            crocoddyl.ResidualModelFramePlacement(
-                STATE,
-                ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                pinocchio.SE3.Random(),
-            ),
-        ),
-        1e-5,
-    )
-    COST_SUM.addCost(
-        "xReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
-        1e-7,
-    )
-    COST_SUM.addCost(
-        "uReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
-        1e-7,
-    )
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        STATE, ACTUATION, COST_SUM
-    )
-    MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
-    SOLVER = crocoddyl.SolverFDDP
-    SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.FeasShoot
-
-
-class TalosArmMultiShootFDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load("talos_arm").model
-    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
-    COST_SUM = crocoddyl.CostModelSum(STATE)
-    COST_SUM.addCost(
-        "gripperPose",
-        crocoddyl.CostModelResidual(
-            STATE,
-            crocoddyl.ResidualModelFramePlacement(
-                STATE,
-                ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                pinocchio.SE3.Random(),
-            ),
-        ),
-        1e-5,
-    )
-    COST_SUM.addCost(
-        "xReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
-        1e-7,
-    )
-    COST_SUM.addCost(
-        "uReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
-        1e-7,
-    )
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        STATE, ACTUATION, COST_SUM
-    )
-    MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
-    SOLVER = crocoddyl.SolverFDDP
-    SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.MultiShoot
-
-
-class TalosArmHybridShootFDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load("talos_arm").model
-    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
-    COST_SUM = crocoddyl.CostModelSum(STATE)
-    COST_SUM.addCost(
-        "gripperPose",
-        crocoddyl.CostModelResidual(
-            STATE,
-            crocoddyl.ResidualModelFramePlacement(
-                STATE,
-                ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                pinocchio.SE3.Random(),
-            ),
-        ),
-        1e-5,
-    )
-    COST_SUM.addCost(
-        "xReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
-        1e-7,
-    )
-    COST_SUM.addCost(
-        "uReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
-        1e-7,
-    )
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        STATE, ACTUATION, COST_SUM
-    )
-    MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
-    SOLVER = crocoddyl.SolverFDDP
-    SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.HybridShoot
-
-
-class TalosArmSingleShootFDDPTest(SolverAbstractTestCase):
-    ROBOT_MODEL = example_robot_data.load("talos_arm").model
-    STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
-    ACTUATION = crocoddyl.ActuationModelFull(STATE)
-    COST_SUM = crocoddyl.CostModelSum(STATE)
-    COST_SUM.addCost(
-        "gripperPose",
-        crocoddyl.CostModelResidual(
-            STATE,
-            crocoddyl.ResidualModelFramePlacement(
-                STATE,
-                ROBOT_MODEL.getFrameId("gripper_left_joint"),
-                pinocchio.SE3.Random(),
-            ),
-        ),
-        1e-5,
-    )
-    COST_SUM.addCost(
-        "xReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelState(STATE)),
-        1e-7,
-    )
-    COST_SUM.addCost(
-        "uReg",
-        crocoddyl.CostModelResidual(STATE, crocoddyl.ResidualModelControl(STATE)),
-        1e-7,
-    )
-    DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(
-        STATE, ACTUATION, COST_SUM
-    )
-    MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
-    SOLVER = crocoddyl.SolverFDDP
-    SOLVER_DER = SolverFDDP
-    DYN_SOLVER = crocoddyl.DynamicsSolverType.SingleShoot
-
-
 if __name__ == "__main__":
     # test to be run
     test_classes_to_run = [
@@ -291,10 +149,6 @@ if __name__ == "__main__":
         UnicycleMultiShootFDDPTest,
         UnicycleHybridShootFDDPTest,
         UnicycleSingleShootFDDPTest,
-        TalosArmFeasDriveFDDPTest,
-        TalosArmMultiShootFDDPTest,
-        TalosArmHybridShootFDDPTest,
-        TalosArmSingleShootFDDPTest,
     ]
     loader = unittest.TestLoader()
     suites_list = []

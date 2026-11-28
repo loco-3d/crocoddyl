@@ -1,3 +1,4 @@
+import copy
 import sys
 import unittest
 
@@ -15,6 +16,115 @@ from factory import (
 )
 
 import crocoddyl
+
+
+class ParameterResidualDerived(crocoddyl.ResidualModelAbstract):
+    def __init__(self, np_=2):
+        super().__init__(crocoddyl.StateVector(4), 2, 2, np_, False, False, False)
+        self.calc_calls = 0
+        self.calc_diff_calls = 0
+        self.cost_diff_calls = 0
+
+    def calc(self, data, x, u=None):
+        self.calc_calls += 1
+        data.r[:] = np.array([1.0, -2.0])
+
+    def calcDiff(self, data, x, u=None):
+        self.calc_diff_calls += 1
+        data.Rx[:] = 0.0
+        data.Ru[:] = 0.0
+        if self.np:
+            data.Rp[:] = np.array([[1.0, 2.0], [-1.0, 3.0]])
+
+    def calcCostDiff(self, cdata, rdata, adata, update_u=True):
+        self.cost_diff_calls += 1
+        return super().calcCostDiff(cdata, rdata, adata, update_u)
+
+
+class ParameterResidualCostBindingsTest(unittest.TestCase):
+    def test_constructor_data_copy_and_properties(self):
+        residual = ParameterResidualDerived()
+        collector = crocoddyl.DataCollectorAbstract()
+        rdata = residual.createData(collector)
+
+        self.assertEqual(residual.np, 2)
+        self.assertEqual(residual.nu, 2)
+        self.assertEqual(rdata.Rp.shape, (2, 2))
+        self.assertEqual(rdata.Arr_Rp.shape, (2, 2))
+        self.assertTrue(np.allclose(rdata.Rp, 0.0))
+        self.assertTrue(np.allclose(rdata.Arr_Rp, 0.0))
+        rdata.Rp = np.arange(4.0).reshape(2, 2)
+        rdata.Arr_Rp[:] = 3.0
+        rdata_copy = copy.copy(rdata)
+        self.assertTrue(np.array_equal(rdata_copy.Rp, rdata.Rp))
+        self.assertTrue(np.array_equal(rdata_copy.Arr_Rp, rdata.Arr_Rp))
+
+        cost = crocoddyl.CostModelResidual(residual.state, residual)
+        cdata = cost.createData(collector)
+        self.assertEqual(cost.np, residual.np)
+        self.assertEqual(cdata.Lp.shape, (2,))
+        self.assertEqual(cdata.Lpp.shape, (2, 2))
+        self.assertEqual(cdata.Lpx.shape, (2, residual.state.ndx))
+        self.assertEqual(cdata.Lpu.shape, (2, residual.nu))
+        cdata.Lp = np.array([1.0, 2.0])
+        cdata.Lpp = np.full((2, 2), 3.0)
+        cdata.Lpx = np.full((2, residual.state.ndx), 4.0)
+        cdata.Lpu = np.full((2, residual.nu), 5.0)
+        cdata_copy = copy.copy(cdata)
+        self.assertTrue(np.array_equal(cdata_copy.Lp, cdata.Lp))
+        self.assertTrue(np.array_equal(cdata_copy.Lpp, cdata.Lpp))
+        self.assertTrue(np.array_equal(cdata_copy.Lpx, cdata.Lpx))
+        self.assertTrue(np.array_equal(cdata_copy.Lpu, cdata.Lpu))
+
+    def test_legacy_constructor_positions(self):
+        state = crocoddyl.StateVector(4)
+        residual = crocoddyl.ResidualModelAbstract(state, 2, 2, False, True, False)
+        self.assertEqual(residual.np, 0)
+        self.assertFalse(residual.q_dependent)
+        self.assertTrue(residual.v_dependent)
+        self.assertFalse(residual.u_dependent)
+
+        default_nu_residual = crocoddyl.ResidualModelAbstract(
+            state, 2, False, True, False
+        )
+        self.assertEqual(default_nu_residual.nu, state.nv)
+        self.assertEqual(default_nu_residual.np, 0)
+        self.assertFalse(default_nu_residual.q_dependent)
+        self.assertTrue(default_nu_residual.v_dependent)
+        self.assertFalse(default_nu_residual.u_dependent)
+
+        parameter_residual = crocoddyl.ResidualModelAbstract(state, 2, None, 3)
+        self.assertEqual(parameter_residual.nu, state.nv)
+        self.assertEqual(parameter_residual.np, 3)
+
+        parameter_residual = crocoddyl.ResidualModelAbstract(state, 2, np=3)
+        self.assertEqual(parameter_residual.nu, state.nv)
+        self.assertEqual(parameter_residual.np, 3)
+
+    def test_parameter_only_running_terminal_and_wrapper_dispatch(self):
+        residual = ParameterResidualDerived()
+        cost = crocoddyl.CostModelResidual(residual.state, residual)
+        data = cost.createData(crocoddyl.DataCollectorAbstract())
+        x = residual.state.rand()
+        u = np.array([0.2, -0.3])
+
+        cost.calc(data, x, u)
+        cost.calcDiff(data, x, u)
+        expected_lp = data.residual.Rp.T @ data.residual.r
+        expected_lpp = data.residual.Rp.T @ data.residual.Rp
+        self.assertAlmostEqual(data.cost, 2.5)
+        self.assertTrue(np.allclose(data.Lp, expected_lp))
+        self.assertTrue(np.allclose(data.Lpp, expected_lpp))
+        self.assertTrue(np.allclose(data.Lpx, 0.0))
+        self.assertTrue(np.allclose(data.Lpu, 0.0))
+
+        cost.calc(data, x)
+        cost.calcDiff(data, x)
+        self.assertEqual(residual.calc_calls, 2)
+        self.assertEqual(residual.calc_diff_calls, 2)
+        self.assertEqual(residual.cost_diff_calls, 2)
+        self.assertTrue(np.allclose(data.Lp, expected_lp))
+        self.assertTrue(np.allclose(data.Lpp, expected_lpp))
 
 
 class CostModelAbstractTestCase(unittest.TestCase):

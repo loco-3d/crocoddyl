@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2021-2026, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -28,8 +28,10 @@ void ResidualModelImpulseCoMTpl<Scalar>::calc(
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
       x.tail(nv);
 
+  const VectorXs& vnext =
+      d->impulses != nullptr ? d->impulses->vnext : d->constraints->vnext;
   pinocchio::centerOfMass(*pin_model_.get(), d->pinocchio_internal, q,
-                          d->impulses->vnext - v);
+                          vnext - v);
   data->r = d->pinocchio_internal.vcom[0];
 }
 
@@ -46,11 +48,14 @@ void ResidualModelImpulseCoMTpl<Scalar>::calcDiff(
       *pin_model_.get(), d->pinocchio_internal, d->dvc_dq);
   pinocchio::jacobianCenterOfMass(*pin_model_.get(), d->pinocchio_internal,
                                   false);
-  d->ddv_dv = d->impulses->dvnext_dx.rightCols(ndx - nv);
+  const MatrixXs& dvnext_dx = d->impulses != nullptr
+                                  ? d->impulses->dvnext_dx
+                                  : d->constraints->dvnext_dx;
+  d->ddv_dv = dvnext_dx.rightCols(ndx - nv);
   d->ddv_dv.diagonal().array() -= Scalar(1);
   data->Rx.leftCols(nv) = d->dvc_dq;
   data->Rx.leftCols(nv).noalias() +=
-      d->pinocchio_internal.Jcom * d->impulses->dvnext_dx.leftCols(nv);
+      d->pinocchio_internal.Jcom * dvnext_dx.leftCols(nv);
   data->Rx.rightCols(ndx - nv).noalias() =
       d->pinocchio_internal.Jcom * d->ddv_dv;
 }

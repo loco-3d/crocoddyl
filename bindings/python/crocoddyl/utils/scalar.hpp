@@ -22,7 +22,8 @@ enum class DType {
   Float32
 #ifdef CROCODDYL_WITH_CODEGEN
   ,
-  ADFloat64
+  ADFloat64,
+  ADFloat32
 #endif
 };
 

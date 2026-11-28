@@ -57,23 +57,12 @@ void print_benchmark(RobotEENames robot) {
   std::shared_ptr<crocoddyl::IntegratedActionModelEuler> rm =
       std::static_pointer_cast<crocoddyl::IntegratedActionModelEuler>(
           runningModel);
-  if (robot.robot_name == "Talos_arm" || robot.robot_name == "Kinova_arm") {
-    std::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamics> dm =
-        std::static_pointer_cast<
-            crocoddyl::DifferentialActionModelFreeFwdDynamics>(
-            rm->get_differential());
-    default_state
-        << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
-        Eigen::VectorXd::Zero(state->get_nv());
-  } else {
-    std::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamics> dm =
-        std::static_pointer_cast<
-            crocoddyl::DifferentialActionModelContactFwdDynamics>(
-            rm->get_differential());
-    default_state
-        << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
-        Eigen::VectorXd::Zero(state->get_nv());
-  }
+  std::shared_ptr<crocoddyl::DynamicsModelConstrainedForward> dynamics =
+      std::static_pointer_cast<crocoddyl::DynamicsModelConstrainedForward>(
+          rm->get_dynamics());
+  default_state << dynamics->get_pinocchio()
+                       .referenceConfigurations[robot.reference_conf],
+      Eigen::VectorXd::Zero(state->get_nv());
   Eigen::VectorXd x0(default_state);
   std::vector<std::shared_ptr<crocoddyl::ActionModelAbstract>> runningModels(
       N, runningModel);

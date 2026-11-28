@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2021-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,8 @@
 
 #include <boost/function.hpp>
 
+#include "crocoddyl/core/numdiff/restoration.hpp"
+#include "crocoddyl/core/params/parameter-manager.hpp"
 #include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 
@@ -20,8 +22,11 @@ namespace crocoddyl {
  * @brief This class computes the numerical differentiation of a residual model.
  *
  * It computes the Jacobian of the residual model via numerical differentiation,
- * i.e., \f$\mathbf{R_x}\f$ and \f$\mathbf{R_u}\f$ which denote the Jacobians of
- * the residual function \f$\mathbf{r}(\mathbf{x},\mathbf{u})\f$.
+ * i.e., \f$\mathbf{R_x}\f$, \f$\mathbf{R_u}\f$ and \f$\mathbf{R_p}\f$ for
+ * \f$\mathbf{r}(\mathbf{x},\mathbf{u},\mathbf{p})\f$. The parameter manager
+ * supplies the active D075 layout, while registered reevaluation callbacks
+ * refresh shared collectors before each state or control perturbation. All
+ * nominal parameters and callback state are restored after success or failure.
  *
  * \sa `ResidualModelAbstractTpl()`, `calcDiff()`
  */
@@ -36,6 +41,8 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
   typedef ResidualModelAbstractTpl<Scalar> Base;
   typedef ResidualDataNumDiffTpl<Scalar> Data;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
+  typedef ParameterManagerTpl<Scalar> ParameterManager;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
   typedef typename MathBaseTpl<Scalar>::MatrixXs MatrixXs;
@@ -49,6 +56,8 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * differentiation
    */
   explicit ResidualModelNumDiffTpl(const std::shared_ptr<Base>& model);
+  ResidualModelNumDiffTpl(const std::shared_ptr<Base>& model,
+                          std::shared_ptr<ParameterManager> params);
 
   /**
    * @brief Initialize the numdiff residual model
@@ -89,7 +98,20 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    */
   virtual std::shared_ptr<ResidualDataAbstract> createData(
       DataCollectorAbstract* const data) override;
+  /** @brief Create data sharing an existing parameter-manager data object. */
+  std::shared_ptr<ResidualDataAbstract> createData(
+      DataCollectorAbstract* const data,
+      const std::shared_ptr<ParameterDataManager>& parameter_data);
 
+  /** @brief Set the active parameter manager and initialize its data. */
+  void set_params(const std::shared_ptr<ResidualDataAbstract>& data,
+                  std::shared_ptr<ParameterManager> params);
+
+  /** @brief Update the nominal active parameter vector. */
+  void update_p(const std::shared_ptr<ResidualDataAbstract>& data,
+                const Eigen::Ref<const VectorXs>& p);
+
+  /** @brief Cast the wrapped residual and manager to another scalar. */
   template <typename NewScalar>
   ResidualModelNumDiffTpl<NewScalar> cast() const;
 
@@ -97,6 +119,9 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @brief Return the original residual model
    */
   const std::shared_ptr<Base>& get_model() const;
+
+  /** @brief Return the active parameter manager. */
+  const std::shared_ptr<ParameterManager>& get_params() const;
 
   /**
    * @brief Return the disturbance constant used by the numerical
@@ -137,15 +162,26 @@ class ResidualModelNumDiffTpl : public ResidualModelAbstractTpl<_Scalar> {
    * @param x is the state at which the check is performed.
    */
   void assertStableStateFD(const Eigen::Ref<const VectorXs>& /*x*/);
+  void assertParameterData(
+      const Data* const data,
+      const std::shared_ptr<ParameterManager>& params) const;
 
-  std::shared_ptr<Base> model_;  //!< Residual model hat we want to apply the
-                                 //!< numerical differentiation
+  std::shared_ptr<Base> model_;  //!< Residual model being differentiated
+  std::shared_ptr<ParameterManager> params_;
   Scalar e_jac_;  //!< Constant used for computing disturbances in Jacobian
                   //!< calculation
   std::vector<ReevaluationFunction>
       reevals_;  //!< Functions that needs execution before calc or calcDiff
 };
 
+/**
+ * @brief Data and preallocated scratch for ResidualModelNumDiffTpl.
+ *
+ * The data owns independent residual data at the nominal and perturbed points.
+ * An explicitly supplied parameter_data retains shared ownership. When it is
+ * inferred from shared, it follows that collector's non-owning manager link;
+ * shared and its manager data must then outlive this object.
+ */
 template <typename _Scalar>
 struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -155,6 +191,7 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   typedef ResidualDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ParameterDataManagerTpl<Scalar> ParameterDataManager;
   typedef typename MathBaseTpl<Scalar>::VectorXs VectorXs;
 
   /**
@@ -164,26 +201,79 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
    * @param model is the object to compute the numerical differentiation from.
    */
   template <template <typename Scalar> class Model>
-  explicit ResidualDataNumDiffTpl(Model<Scalar>* const model,
-                                  DataCollectorAbstract* const shared_data)
-      : Base(model, shared_data),
+  explicit ResidualDataNumDiffTpl(
+      Model<Scalar>* const model, DataCollectorAbstract* const shared_data,
+      const std::shared_ptr<ParameterDataManager>& parameter_data =
+          std::shared_ptr<ParameterDataManager>())
+      : Base(internal::checkNumDiffModel(model), shared_data),
+        parameter_data(parameter_data),
         dx(model->get_state()->get_ndx()),
         xp(model->get_state()->get_nx()),
         du(model->get_nu()),
-        up(model->get_nu()) {
+        up(model->get_nu()),
+        dp(model->get_np()),
+        p(model->get_np()),
+        pp(model->get_np()) {
     dx.setZero();
     xp.setZero();
     du.setZero();
     up.setZero();
+    dp.setZero();
+    p.setZero();
+    pp.setZero();
+    DataCollectorParamsTpl<Scalar>* collector =
+        dynamic_cast<DataCollectorParamsTpl<Scalar>*>(shared_data);
+    if (collector != nullptr) {
+      if (collector->params == nullptr) {
+        throw_pretty("Invalid argument: collector parameter payload is null");
+      }
+      if (collector->parameter_data == nullptr) {
+        throw_pretty("Invalid argument: collector parameter data is null");
+      }
+      if (collector->parameter_data->parameter_data !=
+              collector->parameter_data ||
+          collector->parameter_data->params != collector->params) {
+        throw_pretty(
+            "Invalid argument: collector parameter data is inconsistent");
+      }
+      if (this->parameter_data == nullptr) {
+        this->parameter_data = std::shared_ptr<ParameterDataManager>(
+            collector->parameter_data, [](ParameterDataManager*) {});
+      } else if (this->parameter_data.get() != collector->parameter_data ||
+                 this->parameter_data->params != collector->params) {
+        throw_pretty(
+            "Invalid argument: parameter data does not match the collector");
+      }
+    } else if (model->get_np() != 0) {
+      throw_pretty("Invalid argument: shared data must provide parameter data");
+    } else if (this->parameter_data == nullptr) {
+      this->parameter_data = model->get_params()->createData();
+    }
+
+    if (this->parameter_data == nullptr ||
+        this->parameter_data->parameter_data != this->parameter_data.get() ||
+        this->parameter_data->params == nullptr ||
+        this->parameter_data->params->np != model->get_np()) {
+      throw_pretty(
+          "Invalid argument: parameter data has an incompatible "
+          "dimension");
+    }
 
     const std::size_t& ndx = model->get_model()->get_state()->get_ndx();
     const std::size_t& nu = model->get_model()->get_nu();
+    const std::size_t& np = model->get_np();
     data_0 = model->get_model()->createData(shared_data);
+    data_x.reserve(ndx);
+    data_u.reserve(nu);
+    data_p.reserve(np);
     for (std::size_t i = 0; i < ndx; ++i) {
       data_x.push_back(model->get_model()->createData(shared_data));
     }
     for (std::size_t i = 0; i < nu; ++i) {
       data_u.push_back(model->get_model()->createData(shared_data));
+    }
+    for (std::size_t i = 0; i < np; ++i) {
+      data_p.push_back(model->get_model()->createData(shared_data));
     }
   }
 
@@ -194,28 +284,34 @@ struct ResidualDataNumDiffTpl : public ResidualDataAbstractTpl<_Scalar> {
   using Base::Rx;
   using Base::shared;
 
-  Scalar x_norm;  //!< Norm of the state vector
+  std::shared_ptr<ParameterDataManager>
+      parameter_data;  //!< Parameter-manager data.
+  Scalar x_norm;       //!< Norm of the state vector
   Scalar
       xh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{x} \f$
   Scalar
       uh_jac;  //!< Disturbance value used for computing \f$ \ell_\mathbf{u} \f$
-  VectorXs dx;  //!< State disturbance.
-  VectorXs xp;  //!< The integrated state from the disturbance on one DoF "\f$
-                //!< \int x dx_i \f$".
-  VectorXs du;  //!< Control disturbance.
+  Scalar ph_jac;  //!< Disturbance value used for computing \f$ r_\mathbf{p} \f$
+  VectorXs dx;    //!< State disturbance.
+  VectorXs xp;    //!< The integrated state from the disturbance on one DoF "\f$
+                  //!< \int x dx_i \f$".
+  VectorXs du;    //!< Control disturbance.
   VectorXs up;  //!< The integrated control from the disturbance on one DoF "\f$
                 //!< \int u du_i = u + du \f$".
+  VectorXs dp;  //!< Parameter disturbance.
+  VectorXs p;   //!< Nominal parameter vector.
+  VectorXs pp;  //!< Perturbed parameter vector.
   std::shared_ptr<Base> data_0;  //!< The data at the approximation point.
   std::vector<std::shared_ptr<Base> >
       data_x;  //!< The temporary data associated with the state variation.
   std::vector<std::shared_ptr<Base> >
       data_u;  //!< The temporary data associated with the control variation.
+  std::vector<std::shared_ptr<Base> >
+      data_p;  //!< The temporary data associated with the parameter variation.
 };
 
 }  // namespace crocoddyl
 
-/* --- Details -------------------------------------------------------------- */
-/* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/residual.hxx"
 

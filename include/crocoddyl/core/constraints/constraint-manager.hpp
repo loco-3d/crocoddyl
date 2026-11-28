@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2026, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,9 +9,31 @@
 #ifndef CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_
 #define CROCODDYL_CORE_CONSTRAINTS_CONSTRAINT_MANAGER_HPP_
 
+#include <algorithm>
+#include <type_traits>
+
 #include "crocoddyl/core/constraint-base.hpp"
 
 namespace crocoddyl {
+
+namespace detail {
+
+template <typename T, typename = void>
+struct has_parameter_constraint_blocks : std::false_type {};
+
+template <typename T>
+struct has_parameter_constraint_blocks<
+    T, std::void_t<decltype(std::declval<T&>().Gp),
+                   decltype(std::declval<T&>().Hp)>> : std::true_type {};
+
+template <typename T, typename = void>
+struct has_get_np : std::false_type {};
+
+template <typename T>
+struct has_get_np<T, std::void_t<decltype(std::declval<T&>().get_np())>>
+    : std::true_type {};
+
+}  // namespace detail
 
 template <typename _Scalar>
 struct ConstraintItemTpl {
@@ -59,9 +81,12 @@ struct ConstraintItemTpl {
  * `calc` computes the constraint residuals and `calcDiff` computes the
  * Jacobians of the constraint functions. Concretely speaking, `calcDiff` builds
  * a linear approximation of the total constraint function (both inequality and
- * equality) with the form: \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
- * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$
- * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$.
+ * equality) with the form: \f$\mathbf{g_x}\in\mathbb{R}^{ng\times ndx}\f$,
+ * \f$\mathbf{g_u}\in\mathbb{R}^{ng\times nu}\f$,
+ * \f$\mathbf{g_p}\in\mathbb{R}^{ng\times np}\f$,
+ * \f$\mathbf{h_x}\in\mathbb{R}^{nh\times ndx}\f$,
+ * \f$\mathbf{h_u}\in\mathbb{R}^{nh\times nu}\f$, and
+ * \f$\mathbf{h_p}\in\mathbb{R}^{nh\times np}\f$.
  *
  * \sa `StateAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -81,9 +106,9 @@ class ConstraintModelManagerTpl {
   typedef typename MathBase::VectorXs VectorXs;
   typedef typename MathBase::MatrixXs MatrixXs;
 
-  typedef std::map<std::string, std::shared_ptr<ConstraintItem> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintItem>>
       ConstraintModelContainer;
-  typedef std::map<std::string, std::shared_ptr<ConstraintDataAbstract> >
+  typedef std::map<std::string, std::shared_ptr<ConstraintDataAbstract>>
       ConstraintDataContainer;
 
   /**
@@ -94,6 +119,16 @@ class ConstraintModelManagerTpl {
    */
   ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state,
                             const std::size_t nu);
+
+  /**
+   * @brief Initialize the parameterized constraint-manager model
+   *
+   * @param[in] state  State of the multibody system
+   * @param[in] nu     Dimension of control vector
+   * @param[in] np     Dimension of parameter vector
+   */
+  ConstraintModelManagerTpl(std::shared_ptr<StateAbstract> state,
+                            const std::size_t nu, const std::size_t np);
 
   /**
    * @brief Initialize the constraint-manager model
@@ -224,6 +259,11 @@ class ConstraintModelManagerTpl {
   std::size_t get_nu() const;
 
   /**
+   * @brief Return the dimension of the parameter vector
+   */
+  std::size_t get_np() const;
+
+  /**
    * @brief Return the number of active inequality constraints
    */
   std::size_t get_ng() const;
@@ -283,6 +323,7 @@ class ConstraintModelManagerTpl {
   VectorXs lb_;                           //!< Lower bound of the constraint
   VectorXs ub_;                           //!< Upper bound of the constraint
   std::size_t nu_;                        //!< Dimension of the control input
+  std::size_t np_;                        //!< Dimension of the parameter vector
   std::size_t ng_;    //!< Number of the active inequality constraints
   std::size_t nh_;    //!< Number of the active equality constraints
   std::size_t ng_T_;  //!< Number of the active inequality terminal constraints
@@ -309,22 +350,28 @@ struct ConstraintDataManagerTpl {
       : g_internal(model->get_ng()),
         Gx_internal(model->get_ng(), model->get_state()->get_ndx()),
         Gu_internal(model->get_ng(), model->get_nu()),
+        Gp_internal(model->get_ng(), model->get_np()),
         h_internal(model->get_nh()),
         Hx_internal(model->get_nh(), model->get_state()->get_ndx()),
         Hu_internal(model->get_nh(), model->get_nu()),
+        Hp_internal(model->get_nh(), model->get_np()),
         shared(data),
         g(g_internal.data(), model->get_ng()),
         Gx(Gx_internal.data(), model->get_ng(), model->get_state()->get_ndx()),
         Gu(Gu_internal.data(), model->get_ng(), model->get_nu()),
+        Gp(Gp_internal.data(), model->get_ng(), model->get_np()),
         h(h_internal.data(), model->get_nh()),
         Hx(Hx_internal.data(), model->get_nh(), model->get_state()->get_ndx()),
-        Hu(Hu_internal.data(), model->get_nh(), model->get_nu()) {
+        Hu(Hu_internal.data(), model->get_nh(), model->get_nu()),
+        Hp(Hp_internal.data(), model->get_nh(), model->get_np()) {
     g.setZero();
     Gx.setZero();
     Gu.setZero();
+    Gp.setZero();
     h.setZero();
     Hx.setZero();
     Hu.setZero();
+    Hp.setZero();
     for (typename ConstraintModelManagerTpl<
              Scalar>::ConstraintModelContainer::const_iterator it =
              model->get_constraints().begin();
@@ -337,6 +384,14 @@ struct ConstraintDataManagerTpl {
 
   template <class ActionData>
   void shareMemory(ActionData* const data) {
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      if (data->Gp.rows() != data->g.size() || data->Gp.cols() != Gp.cols() ||
+          data->Hp.rows() != data->h.size() || data->Hp.cols() != Hp.cols()) {
+        throw_pretty(
+            "Invalid argument: parameter constraint derivatives have wrong "
+            "dimensions");
+      }
+    }
     // Save memory by setting the internal variables with null dimension
     g_internal.resize(0);
     Gx_internal.resize(0, 0);
@@ -344,31 +399,88 @@ struct ConstraintDataManagerTpl {
     h_internal.resize(0);
     Hx_internal.resize(0, 0);
     Hu_internal.resize(0, 0);
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      Gp_internal.resize(0, 0);
+      Hp_internal.resize(0, 0);
+    }
     // Share memory with the differential action data
     new (&g) Eigen::Map<VectorXs>(data->g.data(), data->g.size());
     new (&Gx)
         Eigen::Map<MatrixXs>(data->Gx.data(), data->Gx.rows(), data->Gx.cols());
     new (&Gu)
         Eigen::Map<MatrixXs>(data->Gu.data(), data->Gu.rows(), data->Gu.cols());
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      new (&Gp) Eigen::Map<MatrixXs>(data->Gp.data(), data->Gp.rows(),
+                                     data->Gp.cols());
+    } else {
+      new (&Gp) Eigen::Map<MatrixXs>(Gp_internal.data(), Gp_internal.rows(),
+                                     Gp_internal.cols());
+    }
     new (&h) Eigen::Map<VectorXs>(data->h.data(), data->h.size());
     new (&Hx)
         Eigen::Map<MatrixXs>(data->Hx.data(), data->Hx.rows(), data->Hx.cols());
     new (&Hu)
         Eigen::Map<MatrixXs>(data->Hu.data(), data->Hu.rows(), data->Hu.cols());
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      new (&Hp) Eigen::Map<MatrixXs>(data->Hp.data(), data->Hp.rows(),
+                                     data->Hp.cols());
+    } else {
+      new (&Hp) Eigen::Map<MatrixXs>(Hp_internal.data(), Hp_internal.rows(),
+                                     Hp_internal.cols());
+    }
   }
 
   template <class Model>
   void resize(Model* const model, const bool running_node = true) {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nu = model->get_nu();
+    const std::size_t np = model->get_np();
     const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
     const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
+    if (static_cast<std::size_t>(g_internal.size()) < ng) {
+      g_internal.conservativeResize(ng);
+    }
+    if (static_cast<std::size_t>(Gx_internal.rows()) < ng ||
+        static_cast<std::size_t>(Gx_internal.cols()) != ndx) {
+      Gx_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Gx_internal.rows()), ng), ndx);
+    }
+    if (static_cast<std::size_t>(Gu_internal.rows()) < ng ||
+        static_cast<std::size_t>(Gu_internal.cols()) != nu) {
+      Gu_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Gu_internal.rows()), ng), nu);
+    }
+    if (static_cast<std::size_t>(Gp_internal.rows()) < ng ||
+        static_cast<std::size_t>(Gp_internal.cols()) != np) {
+      Gp_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Gp_internal.rows()), ng), np);
+    }
+    if (static_cast<std::size_t>(h_internal.size()) < nh) {
+      h_internal.conservativeResize(nh);
+    }
+    if (static_cast<std::size_t>(Hx_internal.rows()) < nh ||
+        static_cast<std::size_t>(Hx_internal.cols()) != ndx) {
+      Hx_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Hx_internal.rows()), nh), ndx);
+    }
+    if (static_cast<std::size_t>(Hu_internal.rows()) < nh ||
+        static_cast<std::size_t>(Hu_internal.cols()) != nu) {
+      Hu_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Hu_internal.rows()), nh), nu);
+    }
+    if (static_cast<std::size_t>(Hp_internal.rows()) < nh ||
+        static_cast<std::size_t>(Hp_internal.cols()) != np) {
+      Hp_internal.conservativeResize(
+          std::max(static_cast<std::size_t>(Hp_internal.rows()), nh), np);
+    }
     new (&g) Eigen::Map<VectorXs>(g_internal.data(), ng);
     new (&Gx) Eigen::Map<MatrixXs>(Gx_internal.data(), ng, ndx);
     new (&Gu) Eigen::Map<MatrixXs>(Gu_internal.data(), ng, nu);
+    new (&Gp) Eigen::Map<MatrixXs>(Gp_internal.data(), ng, np);
     new (&h) Eigen::Map<VectorXs>(h_internal.data(), nh);
     new (&Hx) Eigen::Map<MatrixXs>(Hx_internal.data(), nh, ndx);
     new (&Hu) Eigen::Map<MatrixXs>(Hu_internal.data(), nh, nu);
+    new (&Hp) Eigen::Map<MatrixXs>(Hp_internal.data(), nh, np);
   }
 
   template <class ActionModel, class ActionData>
@@ -376,6 +488,10 @@ struct ConstraintDataManagerTpl {
               const bool running_node = true) {
     const std::size_t ndx = model->get_state()->get_ndx();
     const std::size_t nu = model->get_nu();
+    std::size_t np = static_cast<std::size_t>(Gp.cols());
+    if constexpr (detail::has_get_np<ActionModel>::value) {
+      np = model->get_np();
+    }
     const std::size_t ng = running_node ? model->get_ng() : model->get_ng_T();
     const std::size_t nh = running_node ? model->get_nh() : model->get_nh_T();
     data->g.conservativeResize(ng);
@@ -384,20 +500,39 @@ struct ConstraintDataManagerTpl {
     data->h.conservativeResize(nh);
     data->Hx.conservativeResize(nh, ndx);
     data->Hu.conservativeResize(nh, nu);
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      data->Gp.conservativeResize(ng, np);
+      data->Hp.conservativeResize(nh, np);
+    } else {
+      Gp_internal.conservativeResize(ng, np);
+      Hp_internal.conservativeResize(nh, np);
+    }
     new (&g) Eigen::Map<VectorXs>(data->g.data(), ng);
     new (&Gx) Eigen::Map<MatrixXs>(data->Gx.data(), ng, ndx);
     new (&Gu) Eigen::Map<MatrixXs>(data->Gu.data(), ng, nu);
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      new (&Gp) Eigen::Map<MatrixXs>(data->Gp.data(), ng, np);
+    } else {
+      new (&Gp) Eigen::Map<MatrixXs>(Gp_internal.data(), ng, np);
+    }
     new (&h) Eigen::Map<VectorXs>(data->h.data(), nh);
     new (&Hx) Eigen::Map<MatrixXs>(data->Hx.data(), nh, ndx);
     new (&Hu) Eigen::Map<MatrixXs>(data->Hu.data(), nh, nu);
+    if constexpr (detail::has_parameter_constraint_blocks<ActionData>::value) {
+      new (&Hp) Eigen::Map<MatrixXs>(data->Hp.data(), nh, np);
+    } else {
+      new (&Hp) Eigen::Map<MatrixXs>(Hp_internal.data(), nh, np);
+    }
   }
 
   VectorXs get_g() const { return g; }
   MatrixXs get_Gx() const { return Gx; }
   MatrixXs get_Gu() const { return Gu; }
+  MatrixXs get_Gp() const { return Gp; }
   VectorXs get_h() const { return h; }
   MatrixXs get_Hx() const { return Hx; }
   MatrixXs get_Hu() const { return Hu; }
+  MatrixXs get_Hp() const { return Hp; }
 
   void set_g(const VectorXs& _g) {
     if (g.size() != _g.size()) {
@@ -425,6 +560,15 @@ struct ConstraintDataManagerTpl {
     }
     Gu = _Gu;
   }
+  void set_Gp(const MatrixXs& _Gp) {
+    if (Gp.rows() != _Gp.rows() || Gp.cols() != _Gp.cols()) {
+      throw_pretty(
+          "Invalid argument: " << "Gp has wrong dimension (it should be " +
+                                      std::to_string(Gp.rows()) + ", " +
+                                      std::to_string(Gp.cols()) + ")");
+    }
+    Gp = _Gp;
+  }
   void set_h(const VectorXs& _h) {
     if (h.size() != _h.size()) {
       throw_pretty(
@@ -451,14 +595,25 @@ struct ConstraintDataManagerTpl {
     }
     Hu = _Hu;
   }
+  void set_Hp(const MatrixXs& _Hp) {
+    if (Hp.rows() != _Hp.rows() || Hp.cols() != _Hp.cols()) {
+      throw_pretty(
+          "Invalid argument: " << "Hp has wrong dimension (it should be " +
+                                      std::to_string(Hp.rows()) + ", " +
+                                      std::to_string(Hp.cols()) + ")");
+    }
+    Hp = _Hp;
+  }
 
   // Creates internal data in case we don't share it externally
   VectorXs g_internal;
   MatrixXs Gx_internal;
   MatrixXs Gu_internal;
+  MatrixXs Gp_internal;
   VectorXs h_internal;
   MatrixXs Hx_internal;
   MatrixXs Hu_internal;
+  MatrixXs Hp_internal;
 
   typename ConstraintModelManagerTpl<Scalar>::ConstraintDataContainer
       constraints;
@@ -466,9 +621,11 @@ struct ConstraintDataManagerTpl {
   Eigen::Map<VectorXs> g;
   Eigen::Map<MatrixXs> Gx;
   Eigen::Map<MatrixXs> Gu;
+  Eigen::Map<MatrixXs> Gp;
   Eigen::Map<VectorXs> h;
   Eigen::Map<MatrixXs> Hx;
   Eigen::Map<MatrixXs> Hu;
+  Eigen::Map<MatrixXs> Hp;
 };
 
 }  // namespace crocoddyl
